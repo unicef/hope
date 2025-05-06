@@ -4,19 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('registration_data', '0006_migration'),
+        ("registration_data", "0006_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='registrationdataimport',
-            name='allow_delivery_mechanisms_validation_errors',
+            model_name="registrationdataimport",
+            name="allow_delivery_mechanisms_validation_errors",
         ),
         migrations.AlterField(
-            model_name='importdata',
-            name='status',
-            field=models.CharField(choices=[('PENDING', 'Pending'), ('RUNNING', 'Running'), ('FINISHED', 'Finished'), ('ERROR', 'Error'), ('VALIDATION_ERROR', 'Validation Error')], default='FINISHED', max_length=40),
+            model_name="importdata",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PENDING", "Pending"),
+                    ("RUNNING", "Running"),
+                    ("FINISHED", "Finished"),
+                    ("ERROR", "Error"),
+                    ("VALIDATION_ERROR", "Validation Error"),
+                ],
+                default="FINISHED",
+                max_length=40,
+            ),
         ),
     ]

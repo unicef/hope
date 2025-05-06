@@ -9,20 +9,20 @@ class ArrayFieldWidgetTests(TestCase):
         self.widget = ArrayFieldWidget()
 
     def test_format_value_none(self) -> None:
-        self.assertEqual(self.widget.format_value(None), "")
+        assert self.widget.format_value(None) == ""
 
     def test_format_value_list(self) -> None:
-        self.assertEqual(self.widget.format_value(["apple", "banana", "cherry"]), "apple\nbanana\ncherry")
+        assert self.widget.format_value(["apple", "banana", "cherry"]) == "apple\nbanana\ncherry"
 
     def test_format_value_string(self) -> None:
-        self.assertEqual(self.widget.format_value("test"), "test")
+        assert self.widget.format_value("test") == "test"
 
     def test_value_from_datadict_empty(self) -> None:
-        self.assertEqual(self.widget.value_from_datadict({}, {}, "field_name"), [])
+        assert self.widget.value_from_datadict({}, {}, "field_name") == []
 
     def test_value_from_datadict_list(self) -> None:
         data = {"field_name": "apple\n  banana  \ncherry"}
-        self.assertEqual(self.widget.value_from_datadict(data, {}, "field_name"), ["apple", "banana", "cherry"])
+        assert self.widget.value_from_datadict(data, {}, "field_name") == ["apple", "banana", "cherry"]
 
 
 class CommaSeparatedArrayFieldTests(TestCase):
@@ -30,19 +30,19 @@ class CommaSeparatedArrayFieldTests(TestCase):
         self.field = CommaSeparatedArrayField()
 
     def test_prepare_value_none(self) -> None:
-        self.assertEqual(self.field.prepare_value(None), "")
+        assert self.field.prepare_value(None) == ""
 
     def test_prepare_value_list(self) -> None:
-        self.assertEqual(self.field.prepare_value(["apple", "banana", "cherry"]), "apple\nbanana\ncherry")
+        assert self.field.prepare_value(["apple", "banana", "cherry"]) == "apple\nbanana\ncherry"
 
     def test_to_python_empty(self) -> None:
-        self.assertEqual(self.field.to_python(""), [])
+        assert self.field.to_python("") == []
 
     def test_to_python_list(self) -> None:
-        self.assertEqual(self.field.to_python(["apple", "banana"]), ["apple", "banana"])
+        assert self.field.to_python(["apple", "banana"]) == ["apple", "banana"]
 
     def test_to_python_string(self) -> None:
-        self.assertEqual(self.field.to_python("apple\nbanana\ncherry"), ["apple", "banana", "cherry"])
+        assert self.field.to_python("apple\nbanana\ncherry") == ["apple", "banana", "cherry"]
 
     def test_validate_valid(self) -> None:
         try:

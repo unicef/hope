@@ -40,45 +40,48 @@ class TestBasicRule(TestCase):
 
     def test_rule(self) -> None:
         r = Rule(definition="result.value=1.0")
-        self.assertEqual(
-            r.as_dict(),
-            {"definition": "result.value=1.0", "deprecated": False, "enabled": False, "language": "python", "name": ""},
-        )
+        assert r.as_dict() == {
+            "definition": "result.value=1.0",
+            "deprecated": False,
+            "enabled": False,
+            "language": "python",
+            "name": "",
+        }
 
     def test_execution(self) -> None:
         rule = Rule(definition="result.value=101")
         result = rule.execute({"hh": self.household})
-        self.assertEqual(result.value, 101)
+        assert result.value == 101
 
     def test_history(self) -> None:
         rule = Rule(definition="result.value=1", enabled=True, name="Rule1")
         rule.save()
         # history on first save
         # self.assertTrue(rule.history.first())
-        self.assertEqual(rule.history.count(), 1)
-        self.assertTrue(rule.latest_commit)
-        self.assertEqual(rule.latest_commit.before, {})
-        self.assertEqual(rule.latest_commit.after, rule.as_dict())
-        self.assertEqual(rule.version, rule.latest_commit.version)
+        assert rule.history.count() == 1
+        assert rule.latest_commit
+        assert rule.latest_commit.before == {}
+        assert rule.latest_commit.after == rule.as_dict()
+        assert rule.version == rule.latest_commit.version
 
         # no history if no changes
         rule.save()
-        self.assertEqual(rule.history.count(), 1, rule.last_changes)
-        self.assertTrue(rule.latest_commit.version, rule.version)
-        self.assertNotEqual(rule.version, rule.latest_commit.version)
+        assert rule.history.count() == 1, rule.last_changes
+        assert rule.latest_commit.version, rule.version
+        assert rule.version != rule.latest_commit.version
 
         rule.definition = "result.value=2"
         rule.save()
         history = rule.history.all()
-        self.assertEqual(len(history), 2)
-        self.assertEqual(rule.version, rule.latest_commit.version)
-        self.assertEqual(history[0].version, 3)  # because version 2 did not produced changes
-        self.assertEqual(history[0].after, rule.as_dict())
-        self.assertEqual(history[0].before["definition"], "result.value=1")
-        self.assertEqual(history[0].affected_fields, ["definition"])
-        self.assertEqual(history[1].version, 1)
-        self.assertEqual(history[1].before, {})
-        self.assertEqual(history[1].after["definition"], "result.value=1")
+        assert len(history) == 2
+        assert rule.version == rule.latest_commit.version
+        assert history[0].version == 3  # because version 2 did not produced changes
+        assert history[0].after == rule.as_dict()
+        assert history[0].before["definition"] == "result.value=1"
+        assert history[0].affected_fields == ["definition"]
+        assert history[1].version == 1
+        assert history[1].before == {}
+        assert history[1].after["definition"] == "result.value=1"
         self.assertListEqual(
             sorted(history[1].affected_fields), ["definition", "deprecated", "enabled", "language", "name"]
         )
@@ -98,24 +101,24 @@ class TestBasicRule(TestCase):
         first_commit.revert()
 
         rule.refresh_from_db()
-        self.assertEqual(first_commit.version, original_version)
-        self.assertEqual(rule.definition, "result.value=1")
-        self.assertGreater(rule.version, original_version)
-        self.assertEqual(rule.version, rule.latest_commit.version)
+        assert first_commit.version == original_version
+        assert rule.definition == "result.value=1"
+        assert rule.version > original_version
+        assert rule.version == rule.latest_commit.version
 
     def test_release(self) -> None:
         rule = Rule(definition="result.value=1", enabled=True)
         rule.save()
         release1 = rule.release()
-        self.assertEqual(release1.version, 1)
-        self.assertEqual(rule.history.count(), 1)
-        self.assertEqual(rule.latest, rule.history.latest())
+        assert release1.version == 1
+        assert rule.history.count() == 1
+        assert rule.latest == rule.history.latest()
         rule.save()
         release2 = rule.release()
         release1.refresh_from_db()
-        self.assertEqual(release2.version, 2)
-        self.assertNotEqual(release1, release2)
-        self.assertNotEqual(release1, release2)
+        assert release2.version == 2
+        assert release1 != release2
+        assert release1 != release2
 
     def test_nested_rule(self) -> None:
         rule1 = Rule.objects.create(name="Rule1", definition="result.value=101", enabled=True)
@@ -126,77 +129,66 @@ class TestBasicRule(TestCase):
         rule2.release()
 
         result = rule2.execute({"hh": self.household})
-        self.assertEqual(result.value, 101)
+        assert result.value == 101
 
     def test_modules(self) -> None:
         rule = Rule.objects.create(
             name="Rule1", definition="age1=dateutil.relativedelta.relativedelta(years=17)", enabled=True
         )
         is_valid = rule.interpreter.validate()
-        self.assertTrue(is_valid)
+        assert is_valid
 
         rule = Rule.objects.create(name="Rule2", definition="age1=datetime.date.today()", enabled=True)
         is_valid = rule.execute({}, only_release=False)
-        self.assertTrue(is_valid)
+        assert is_valid
 
     def test_root_user_can_edit_version_and_rule(self) -> None:
-        self.assertEqual(
-            RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(
-                Mock(user=self.user, headers={"x-root-token": settings.ROOT_TOKEN})
-            ),
-            ["updated_by"],
-        )
+        assert RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(
+            Mock(user=self.user, headers={"x-root-token": settings.ROOT_TOKEN})
+        ) == ["updated_by"]
 
     def test_regular_user_cannot_edit_version_and_rule(self) -> None:
-        self.assertEqual(
-            RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))),
-            ["updated_by", "version", "rule"],
-        )
+        assert RuleCommitAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))) == [
+            "updated_by",
+            "version",
+            "rule",
+        ]
 
     def test_get_readonly_fields(self) -> None:
         # is_root
-        self.assertEqual(
-            RuleAdmin(Mock(), Mock()).get_readonly_fields(
-                Mock(user=self.user, headers={"x-root-token": settings.ROOT_TOKEN})
-            ),
-            ["created_by", "created_at", "updated_by", "updated_at", "version"],
-        )
+        assert RuleAdmin(Mock(), Mock()).get_readonly_fields(
+            Mock(user=self.user, headers={"x-root-token": settings.ROOT_TOKEN})
+        ) == ["created_by", "created_at", "updated_by", "updated_at", "version"]
         # is_superuser
-        self.assertEqual(
-            RuleAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=True))),
-            [
-                "created_by",
-                "created_at",
-                "updated_by",
-                "updated_at",
-                "version",
-                "name",
-                "type",
-                "enabled",
-                "deprecated",
-                "language",
-                "definition",
-                "description",
-                "flags",
-            ],
-        )
+        assert RuleAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=True))) == [
+            "created_by",
+            "created_at",
+            "updated_by",
+            "updated_at",
+            "version",
+            "name",
+            "type",
+            "enabled",
+            "deprecated",
+            "language",
+            "definition",
+            "description",
+            "flags",
+        ]
         # just regular staff user
-        self.assertEqual(
-            RuleAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))),
-            [
-                "created_by",
-                "created_at",
-                "updated_by",
-                "updated_at",
-                "version",
-                "name",
-                "type",
-                "enabled",
-                "deprecated",
-                "language",
-                "definition",
-                "description",
-                "flags",
-                "allowed_business_areas",
-            ],
-        )
+        assert RuleAdmin(Mock(), Mock()).get_readonly_fields(Mock(user=UserFactory(is_superuser=False))) == [
+            "created_by",
+            "created_at",
+            "updated_by",
+            "updated_at",
+            "version",
+            "name",
+            "type",
+            "enabled",
+            "deprecated",
+            "language",
+            "definition",
+            "description",
+            "flags",
+            "allowed_business_areas",
+        ]

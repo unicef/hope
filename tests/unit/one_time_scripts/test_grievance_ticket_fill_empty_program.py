@@ -108,23 +108,23 @@ class TestAssignProgramToGrievanceTickets(TestCase):
     def test_fill_empty_programs(self) -> None:
         assign_program_to_grievance_tickets()
 
-        self.assertEqual(self.ticket_complaint_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_complaint_details_household_only.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_complaint_details_individual_only.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_sensitive_details_individual_only.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_sensitive_details_household_only.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_household_data_update_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_add_individual_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_delete_household_ticket_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_individual_data_update_ticket_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_delete_individual_ticket_details.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_referral_details_household.ticket.programs.first(), self.program)
-        self.assertEqual(self.ticket_referral_details_individual.ticket.programs.first(), self.program)
+        assert self.ticket_complaint_details.ticket.programs.first() == self.program
+        assert self.ticket_complaint_details_household_only.ticket.programs.first() == self.program
+        assert self.ticket_complaint_details_individual_only.ticket.programs.first() == self.program
+        assert self.ticket_sensitive_details_individual_only.ticket.programs.first() == self.program
+        assert self.ticket_sensitive_details_household_only.ticket.programs.first() == self.program
+        assert self.ticket_household_data_update_details.ticket.programs.first() == self.program
+        assert self.ticket_add_individual_details.ticket.programs.first() == self.program
+        assert self.ticket_delete_household_ticket_details.ticket.programs.first() == self.program
+        assert self.ticket_individual_data_update_ticket_details.ticket.programs.first() == self.program
+        assert self.ticket_delete_individual_ticket_details.ticket.programs.first() == self.program
+        assert self.ticket_referral_details_household.ticket.programs.first() == self.program
+        assert self.ticket_referral_details_individual.ticket.programs.first() == self.program
 
-        self.assertEqual(self.ticket_complaint_details_no_program.ticket.programs.count(), 0)
+        assert self.ticket_complaint_details_no_program.ticket.programs.count() == 0
 
-        self.assertEqual(self.ticket_complaint_details_with_program.ticket.programs.first(), self.program2)
-        self.assertEqual(self.ticket_complaint_details_with_program.ticket.programs.count(), 1)
+        assert self.ticket_complaint_details_with_program.ticket.programs.first() == self.program2
+        assert self.ticket_complaint_details_with_program.ticket.programs.count() == 1
 
 
 class TestAssignProgramToFeedback(TestCase):
@@ -170,8 +170,8 @@ class TestAssignProgramToFeedback(TestCase):
         self.feedback_no_program.refresh_from_db()
         self.feedback_with_program.refresh_from_db()
 
-        self.assertEqual(self.feedback.program, self.program)
-        self.assertEqual(self.feedback_individual_only.program, self.program)
-        self.assertEqual(self.feedback_household_only.program, self.program)
-        self.assertEqual(self.feedback_no_program.program, None)
-        self.assertEqual(self.feedback_with_program.program, self.program2)
+        assert self.feedback.program == self.program
+        assert self.feedback_individual_only.program == self.program
+        assert self.feedback_household_only.program == self.program
+        assert self.feedback_no_program.program is None
+        assert self.feedback_with_program.program == self.program2

@@ -72,20 +72,20 @@ class FlexibleAttribute:
 
 class TestGrievanceUtils(TestCase):
     def test_convert_to_empty_string_if_null(self) -> None:
-        self.assertEqual(convert_to_empty_string_if_null(None), "")
-        self.assertTrue(convert_to_empty_string_if_null(True))
-        self.assertFalse(convert_to_empty_string_if_null(False))
-        self.assertEqual(convert_to_empty_string_if_null("test"), "test")
-        self.assertEqual(convert_to_empty_string_if_null(123), 123)
+        assert convert_to_empty_string_if_null(None) == ""
+        assert convert_to_empty_string_if_null(True)
+        assert not convert_to_empty_string_if_null(False)
+        assert convert_to_empty_string_if_null("test") == "test"
+        assert convert_to_empty_string_if_null(123) == 123
 
     def test_to_phone_number_str(self) -> None:
         data = {"phone_number": 123456789}
         to_phone_number_str(data, "phone_number")
-        self.assertEqual(data["phone_number"], "123456789")
+        assert data["phone_number"] == "123456789"
 
         data = {"phone_number": 123456789}
         to_phone_number_str(data, "other_field_name")
-        self.assertEqual(data["phone_number"], 123456789)
+        assert data["phone_number"] == 123456789
 
     @patch("hct_mis_api.apps.core.models.FlexibleAttribute.objects.filter")
     def test_cast_flex_fields(self, mock_filter: Any) -> None:
@@ -101,9 +101,9 @@ class TestGrievanceUtils(TestCase):
         }
         cast_flex_fields(flex_fields)
 
-        self.assertEqual(flex_fields["string_field"], "some_string")
-        self.assertEqual(flex_fields["integer_field"], 123)
-        self.assertEqual(flex_fields["decimal_field"], 321.11)
+        assert flex_fields["string_field"] == "some_string"
+        assert flex_fields["integer_field"] == 123
+        assert flex_fields["decimal_field"] == 321.11
 
     def test_handle_add_payment_channel(self) -> None:
         business_area = BusinessAreaFactory(name="Afghanistan")
@@ -115,11 +115,11 @@ class TestGrievanceUtils(TestCase):
         individual = IndividualFactory(household=None, business_area=business_area)
         obj = handle_add_payment_channel(payment_channel, individual)
 
-        self.assertIsInstance(obj, BankAccountInfo)
+        assert isinstance(obj, BankAccountInfo)
 
         payment_channel["type"] = "OTHER"
         resp_none = handle_add_payment_channel(payment_channel, individual)
-        self.assertIsNone(resp_none)
+        assert resp_none is None
 
     def test_handle_update_payment_channel(self) -> None:
         business_area = BusinessAreaFactory(name="Afghanistan")
@@ -135,10 +135,10 @@ class TestGrievanceUtils(TestCase):
         }
 
         obj = handle_update_payment_channel(payment_channel_dict)
-        self.assertIsInstance(obj, BankAccountInfo)
+        assert isinstance(obj, BankAccountInfo)
         payment_channel_dict["type"] = "OTHER"
         resp_none = handle_update_payment_channel(payment_channel_dict)
-        self.assertIsNone(resp_none)
+        assert resp_none is None
 
     def test_verify_flex_fields(self) -> None:
         with pytest.raises(ValueError) as e:
@@ -172,7 +172,7 @@ class TestGrievanceUtils(TestCase):
             individuals_data=[{}],
         )
 
-        self.assertEqual(IndividualRoleInHousehold.objects.all().count(), 0)
+        assert IndividualRoleInHousehold.objects.all().count() == 0
         with pytest.raises(ValidationError) as e:
             IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
             handle_role(ROLE_PRIMARY, household, individuals[0])
@@ -181,13 +181,13 @@ class TestGrievanceUtils(TestCase):
         # just remove exists roles
         IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
         handle_role("OTHER_ROLE_XD", household, individuals[0])
-        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=household).count(), 0)
+        assert IndividualRoleInHousehold.objects.filter(household=household).count() == 0
 
         # create new role
         handle_role(ROLE_ALTERNATE, household, individuals[0])
         role = IndividualRoleInHousehold.objects.filter(household=household).first()
-        self.assertEqual(role.role, ROLE_ALTERNATE)
-        self.assertEqual(role.rdi_merge_status, MergeStatusModel.MERGED)
+        assert role.role == ROLE_ALTERNATE
+        assert role.rdi_merge_status == MergeStatusModel.MERGED
 
     def test_handle_add_document(self) -> None:
         create_afghanistan()
@@ -225,11 +225,11 @@ class TestGrievanceUtils(TestCase):
             assert str(e.value) == "Document of type tax already exists for this individual"
 
         Document.objects.all().delete()
-        self.assertEqual(Document.objects.all().count(), 0)
+        assert Document.objects.all().count() == 0
 
         document = handle_add_document(document_data, individual)
-        self.assertIsInstance(document, Document)
-        self.assertEqual(document.rdi_merge_status, MergeStatusModel.MERGED)
+        assert isinstance(document, Document)
+        assert document.rdi_merge_status == MergeStatusModel.MERGED
 
     def test_validate_individual_for_need_adjudication(self) -> None:
         area_type_level_1 = AreaTypeFactory(name="Province", area_level=1)
@@ -475,9 +475,9 @@ class TestGrievanceUtils(TestCase):
         ind_2.refresh_from_db()
         document.refresh_from_db()
 
-        self.assertEqual(ind_1.duplicate, False)
-        self.assertEqual(ind_2.duplicate, False)
-        self.assertEqual(document.status, Document.STATUS_VALID)
+        assert ind_1.duplicate is False
+        assert ind_2.duplicate is False
+        assert document.status == Document.STATUS_VALID
 
     def test_close_needs_adjudication_ticket_service_when_just_duplicates(self) -> None:
         user = UserFactory()

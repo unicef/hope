@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from typing import List
 
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
@@ -31,7 +30,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 
 
 class HouseholdDataUpdateService(DataChangeService):
-    def save(self) -> List[GrievanceTicket]:
+    def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
         household_encoded_id = household_data_update_issue_type_extras.get("household")
@@ -45,9 +44,9 @@ class HouseholdDataUpdateService(DataChangeService):
         household_data_with_approve_status = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
         }
-        for field in household_data_with_approve_status.keys():
+        for field in household_data_with_approve_status:
             current_value = getattr(household, field, None)
-            if isinstance(current_value, (datetime, date)):
+            if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             if isinstance(current_value, Country):
                 current_value = current_value.alpha3
@@ -55,7 +54,7 @@ class HouseholdDataUpdateService(DataChangeService):
                 current_value = current_value.iso_code3
             household_data_with_approve_status[field]["previous_value"] = current_value
 
-        if admin_area_title := household_data_with_approve_status.get("admin_area_title", None):
+        if admin_area_title := household_data_with_approve_status.get("admin_area_title"):
             area = getattr(household, "admin_area", None)
             current_value = getattr(area, "p_code", None)
 
@@ -93,9 +92,9 @@ class HouseholdDataUpdateService(DataChangeService):
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_household_data.items()
         }
-        for field in household_data_with_approve_status.keys():
+        for field in household_data_with_approve_status:
             current_value = getattr(household, field, None)
-            if isinstance(current_value, (datetime, date)):
+            if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             if isinstance(current_value, Country):
                 current_value = current_value.alpha3
@@ -103,7 +102,7 @@ class HouseholdDataUpdateService(DataChangeService):
                 current_value = current_value.iso_code3
             household_data_with_approve_status[field]["previous_value"] = current_value
 
-        if admin_area_title := household_data_with_approve_status.get("admin_area_title", None):
+        if admin_area_title := household_data_with_approve_status.get("admin_area_title"):
             area = getattr(household, "admin_area", None)
             current_value = getattr(area, "p_code", None)
 

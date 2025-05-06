@@ -4,26 +4,25 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('grievance', '0005_migration'),
+        ("grievance", "0005_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='ticketcomplaintdetails',
-            name='payment_content_type',
+            model_name="ticketcomplaintdetails",
+            name="payment_content_type",
         ),
         migrations.RemoveField(
-            model_name='ticketcomplaintdetails',
-            name='payment_object_id',
+            model_name="ticketcomplaintdetails",
+            name="payment_object_id",
         ),
         migrations.RemoveField(
-            model_name='ticketsensitivedetails',
-            name='payment_content_type',
+            model_name="ticketsensitivedetails",
+            name="payment_content_type",
         ),
         migrations.RemoveField(
-            model_name='ticketsensitivedetails',
-            name='payment_object_id',
+            model_name="ticketsensitivedetails",
+            name="payment_object_id",
         ),
     ]

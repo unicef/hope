@@ -1,5 +1,5 @@
 import base64
-from typing import Any, Dict, Generator, Optional, Type
+from typing import Any, Generator
 from uuid import UUID
 
 from django import forms
@@ -90,8 +90,8 @@ class ProjectAdmin(AdminFiltersMixin, admin.ModelAdmin):
     raw_id_fields = ("programme",)
 
     def get_form(
-        self, request: HttpRequest, obj: Optional[models.Project] = None, change: bool = False, **kwargs: Any
-    ) -> Type[forms.ModelForm]:
+        self, request: HttpRequest, obj: models.Project | None = None, change: bool = False, **kwargs: Any
+    ) -> type[forms.ModelForm]:
         form = super().get_form(request, obj, **kwargs)
         form.base_fields["programme"].queryset = Program.objects.filter(
             business_area=obj.organization.business_area,
@@ -142,9 +142,8 @@ class BaseRDIForm(forms.Form):
     status = forms.ChoiceField(label="Record status", required=True, choices=STATUSES_CHOICES)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        if request := kwargs.pop("request", None):
-            if is_root(request):
-                self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
+        if (request := kwargs.pop("request", None)) and is_root(request):
+            self.base_fields["status"].choices = self.STATUSES_CHOICES + self.STATUSES_ROOT_CHOICES
         super().__init__(*args, **kwargs)
 
     def clean_filters(self) -> QueryStringFilter:
@@ -236,13 +235,12 @@ class RecordAdmin(HOPEModelAdminBase):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return is_root(request)
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return is_root(request)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = super().get_queryset(request)
-        qs = qs.defer("storage", "data", "files")
-        return qs
+        return qs.defer("storage", "data", "files")
 
     @admin.action(description="Async extract")
     def async_extract(self, request: HttpRequest, queryset: QuerySet) -> None:
@@ -399,10 +397,10 @@ class RemeberDataForm(forms.Form):
         return signer.sign_object(self.cleaned_data)
 
     @classmethod
-    def get_saved_config(cls, request: HttpRequest) -> Dict:
+    def get_saved_config(cls, request: HttpRequest) -> dict:
         try:
             signer = Signer(str(request.user.password))
-            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, ""))
+            obj: dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, ""))
             return obj
         except BadSignature:
             return {}
@@ -418,5 +416,5 @@ class FetchForm(RemeberDataForm):
     start = forms.IntegerField()
     end = forms.IntegerField()
 
-    def clean(self) -> Optional[Dict[str, Any]]:
+    def clean(self) -> dict[str, Any] | None:
         return super().clean()

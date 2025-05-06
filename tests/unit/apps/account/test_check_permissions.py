@@ -31,12 +31,12 @@ class TestCheckPermissions(TestCase):
 
     def test_user_is_not_authenticated(self) -> None:
         user = AnonymousUser()
-        self.assertFalse(check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS]))
+        assert not check_permissions(user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS])
 
     def test_business_area_is_invalid(self) -> None:
         arguments = {"business_area": "invalid"}
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        self.assertFalse(result)
+        assert not result
 
     def test_user_is_unicef_and_has_access_to_business_area(self) -> None:
         partner = PartnerFactory(name="UNICEF")
@@ -49,7 +49,7 @@ class TestCheckPermissions(TestCase):
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        self.assertTrue(result)
+        assert result
 
     def test_user_is_unicef_and_does_not_have_access_to_business_area(self) -> None:
         partner = PartnerFactory(name="UNICEF")
@@ -60,7 +60,7 @@ class TestCheckPermissions(TestCase):
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        self.assertFalse(result)
+        assert not result
 
     def test_user_is_not_unicef_and_has_access_to_business_area_without_access_to_program(self) -> None:
         partner = PartnerFactory(name="Partner")
@@ -74,7 +74,7 @@ class TestCheckPermissions(TestCase):
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        self.assertFalse(result)
+        assert not result
 
     def test_user_is_not_unicef_and_has_access_to_business_area_and_program(self) -> None:
         partner = PartnerFactory(name="Partner")
@@ -90,7 +90,7 @@ class TestCheckPermissions(TestCase):
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        self.assertTrue(result)
+        assert result
 
     def test_user_is_not_unicef_and_dont_have_access_to_business_area_but_has_access_to_business_area_via_partner(
         self,
@@ -110,7 +110,7 @@ class TestCheckPermissions(TestCase):
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        self.assertTrue(result)
+        assert result
 
     def test_user_is_not_unicef_and_dont_have_access_to_business_area_at_all(self) -> None:
         partner = PartnerFactory(name="Partner")
@@ -124,4 +124,4 @@ class TestCheckPermissions(TestCase):
             "Program": encode_id_base64_required(self.program.id, "Program"),
         }
         result = check_permissions(self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], **arguments)
-        self.assertFalse(result)
+        assert not result

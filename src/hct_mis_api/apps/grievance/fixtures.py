@@ -82,14 +82,14 @@ class SensitiveGrievanceTicketFactory(DjangoModelFactory):
     payment = None
 
     @factory.post_generation
-    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def create_extras(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         household, individuals = create_household(
-            household_args={"size": 2, "business_area": obj.ticket.business_area},
+            household_args={"size": 2, "business_area": self.ticket.business_area},
         )
-        obj.household = household
-        obj.individual = individuals[0]
-        obj.payment = PaymentFactory(household=household, currency="EUR")
-        obj.save()
+        self.household = household
+        self.individual = individuals[0]
+        self.payment = PaymentFactory(household=household, currency="EUR")
+        self.save()
 
 
 class GrievanceComplaintTicketFactory(DjangoModelFactory):
@@ -108,15 +108,15 @@ class GrievanceComplaintTicketFactory(DjangoModelFactory):
     payment = None
 
     @factory.post_generation
-    def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def create_extras(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         household, individuals = create_household(
-            household_args={"size": 2, "business_area": obj.ticket.business_area},
+            household_args={"size": 2, "business_area": self.ticket.business_area},
         )
-        obj.household = household
-        obj.individual = individuals[0]
-        obj.payment = PaymentFactory(household=household, currency="EUR")
+        self.household = household
+        self.individual = individuals[0]
+        self.payment = PaymentFactory(household=household, currency="EUR")
 
-        obj.save()
+        self.save()
 
 
 class SensitiveGrievanceTicketWithoutExtrasFactory(DjangoModelFactory):

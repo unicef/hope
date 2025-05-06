@@ -1,7 +1,7 @@
 import dataclasses
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from django.utils.timezone import now
 
@@ -31,13 +31,13 @@ logger = logging.getLogger(__name__)
 
 class FlexibleArgumentsDataclassMixin:
     @classmethod
-    def create_from_dict(cls, _dict: Dict) -> Any:
+    def create_from_dict(cls, _dict: dict) -> Any:
         class_fields = {f.name for f in dataclasses.fields(cls)}
         return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
 
 class ReadOnlyModelSerializer(serializers.ModelSerializer):
-    def get_fields(self, *args: List, **kwargs: Dict) -> Dict:
+    def get_fields(self, *args: list, **kwargs: dict) -> dict:
         fields = super().get_fields(*args, **kwargs)
         for field in fields:
             fields[field].read_only = True
@@ -64,14 +64,14 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     def get_fsp(self, obj: Any) -> str:
         return obj.financial_service_provider.payment_gateway_id
 
-    def get_extra(self, obj: Any) -> Dict:
+    def get_extra(self, obj: Any) -> dict:
         return {
             "user": self.context["user_email"],
             "config_key": obj.payment_plan.business_area.code,
             "delivery_mechanism": obj.delivery_mechanism.code,
         }
 
-    def get_payload(self, obj: Any) -> Dict:
+    def get_payload(self, obj: Any) -> dict:
         return {
             "destination_currency": obj.payment_plan.currency,
         }
@@ -108,16 +108,16 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
 
-    def get_extra_data(self, obj: Payment) -> Dict:
+    def get_extra_data(self, obj: Payment) -> dict:
         return {}
 
-    def get_payload(self, obj: Payment) -> Dict:
+    def get_payload(self, obj: Payment) -> dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
             raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Not found snapshot for Payment {obj.unicef_id}")
 
         snapshot_data = snapshot.snapshot_data
-        collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
+        collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or {}
         delivery_mech_data = collector_data.get("accounts_data", {}).get(obj.delivery_type.account_type.key, {})
 
         base_data = {
@@ -169,8 +169,8 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     status: str
     auth_code: str
     fsp_code: str
-    payout_amount: Optional[float] = None
-    message: Optional[str] = None
+    payout_amount: float | None = None
+    message: str | None = None
 
     def get_hope_status(self, entitlement_quantity: Decimal) -> str:
         def get_transferred_status_based_on_delivery_amount() -> str:
@@ -210,7 +210,7 @@ class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
     system: int
     payload: dict
     extra: dict
-    id: Optional[int] = None
+    id: int | None = None
 
 
 @dataclasses.dataclass()
@@ -219,9 +219,9 @@ class FspConfig(FlexibleArgumentsDataclassMixin):
     key: str
     delivery_mechanism: int
     delivery_mechanism_name: str
-    country: Optional[str] = None
-    label: Optional[str] = None
-    required_fields: Optional[List[str]] = None
+    country: str | None = None
+    label: str | None = None
+    required_fields: list[str] | None = None
 
 
 @dataclasses.dataclass()
@@ -230,7 +230,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     name: str
     vendor_number: str
-    configs: List[Union[FspConfig, Dict]]
+    configs: list[FspConfig | dict]
 
     def __post_init__(self) -> None:
         if self.configs and isinstance(self.configs[0], dict):
@@ -242,7 +242,7 @@ class AccountTypeData(FlexibleArgumentsDataclassMixin):
     id: str
     key: str
     label: str
-    unique_fields: List[str]
+    unique_fields: list[str]
 
 
 # Based on this response fsp.names_mappings table is created and FspConfig table is populated with required fields
@@ -258,8 +258,8 @@ class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
 @dataclasses.dataclass()
 class AddRecordsResponseData(FlexibleArgumentsDataclassMixin):
     remote_id: str  # payment instruction id
-    records: Optional[dict] = None  # {"record_code": "remote_id"}
-    errors: Optional[dict] = None  # {"index": "error_message"}
+    records: dict | None = None  # {"record_code": "remote_id"}
+    errors: dict | None = None  # {"index": "error_message"}
 
 
 class PaymentGatewayAPI(BaseAPI):
@@ -289,15 +289,15 @@ class PaymentGatewayAPI(BaseAPI):
         GET_DELIVERY_MECHANISMS = "delivery_mechanisms/"
         GET_ACCOUNT_TYPES = "account_types/"
 
-    def get_fsps(self) -> List[FspData]:
+    def get_fsps(self) -> list[FspData]:
         response_data, _ = self._get(self.Endpoints.GET_FSPS)
         return [FspData.create_from_dict(fsp_data) for fsp_data in response_data]
 
-    def get_delivery_mechanisms(self) -> List[DeliveryMechanismData]:
+    def get_delivery_mechanisms(self) -> list[DeliveryMechanismData]:
         response_data, _ = self._get(self.Endpoints.GET_DELIVERY_MECHANISMS)
         return [DeliveryMechanismData.create_from_dict(d) for d in response_data]
 
-    def get_account_types(self) -> List[AccountTypeData]:
+    def get_account_types(self) -> list[AccountTypeData]:
         response_data, _ = self._get(self.Endpoints.GET_ACCOUNT_TYPES)
         return [AccountTypeData.create_from_dict(fsp_data) for fsp_data in response_data]
 
@@ -322,7 +322,7 @@ class PaymentGatewayAPI(BaseAPI):
         return response_data["status"]
 
     def add_records_to_payment_instruction(
-        self, payment_records: List[Payment], remote_id: str, validate_response: bool = True
+        self, payment_records: list[Payment], remote_id: str, validate_response: bool = True
     ) -> AddRecordsResponseData:
         serializer = PaymentSerializer(payment_records, many=True)
         response_data, _ = self._post(
@@ -332,7 +332,7 @@ class PaymentGatewayAPI(BaseAPI):
         )
         return AddRecordsResponseData.create_from_dict(response_data)
 
-    def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> List[PaymentRecordData]:
+    def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> list[PaymentRecordData]:
         response_data, _ = self._get(
             f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}"
         )
@@ -365,7 +365,7 @@ class PaymentGatewayService:
 
     def change_payment_instruction_status(
         self, new_status: PaymentInstructionStatus, obj: PaymentPlanSplit
-    ) -> Optional[str]:
+    ) -> str | None:
         if obj.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(new_status, obj.id)
             assert new_status.value == response_status, f"{new_status.value} != {response_status}"
@@ -373,18 +373,18 @@ class PaymentGatewayService:
         return None
 
     def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
-        def _handle_errors(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
+        def _handle_errors(_response: AddRecordsResponseData, _payments: list[Payment]) -> None:
             for _idx, _payment in enumerate(_payments):
                 _payment.status = Payment.STATUS_ERROR
                 _payment.reason_for_unsuccessful_payment = _response.errors.get(str(_idx), "")
             Payment.objects.bulk_update(_payments, ["status", "reason_for_unsuccessful_payment"])
 
-        def _handle_success(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
+        def _handle_success(_response: AddRecordsResponseData, _payments: list[Payment]) -> None:
             for _payment in _payments:
                 _payment.status = Payment.STATUS_SENT_TO_PG
             Payment.objects.bulk_update(_payments, ["status"])
 
-        def _add_records(_payments: List[Payment], _container: PaymentPlanSplit) -> None:
+        def _add_records(_payments: list[Payment], _container: PaymentPlanSplit) -> None:
             add_records_error = False
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
                 response = self.api.add_records_to_payment_instruction(
@@ -422,7 +422,7 @@ class PaymentGatewayService:
 
             if not created:
                 fsp.delivery_mechanisms.clear()
-            delivery_mechanisms_pg_ids = set([config.delivery_mechanism for config in fsp_data.configs])
+            delivery_mechanisms_pg_ids = {config.delivery_mechanism for config in fsp_data.configs}
             if delivery_mechanisms_pg_ids:
                 delivery_mechanisms = DeliveryMechanism.objects.filter(
                     payment_gateway_id__in=delivery_mechanisms_pg_ids
@@ -440,14 +440,14 @@ class PaymentGatewayService:
                     delivery_mechanism=DeliveryMechanism.objects.get(payment_gateway_id=dm_id),
                     fsp=fsp,
                     country=None,  # TODO create config for each country in configs data?
-                    defaults=dict(required_fields=required_fields),
+                    defaults={"required_fields": required_fields},
                 )
 
                 for required_field in required_fields:
                     FspNameMapping.objects.get_or_create(
                         external_name=required_field,
                         fsp=fsp,
-                        defaults=dict(hope_name=required_field, source=FspNameMapping.SourceModel.ACCOUNT),
+                        defaults={"hope_name": required_field, "source": FspNameMapping.SourceModel.ACCOUNT},
                     )
 
     def sync_account_types(self) -> None:
@@ -465,7 +465,7 @@ class PaymentGatewayService:
     @staticmethod
     def update_payment(
         payment: Payment,
-        pg_payment_records: List[PaymentRecordData],
+        pg_payment_records: list[PaymentRecordData],
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
         exchange_rate: Decimal,
@@ -544,7 +544,7 @@ class PaymentGatewayService:
                     payment_plan.save()
 
     def sync_delivery_mechanisms(self) -> None:
-        delivery_mechanisms: List[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
+        delivery_mechanisms: list[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
         for dm in delivery_mechanisms:
             DeliveryMechanism.objects.update_or_create(
                 code=dm.code,

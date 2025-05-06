@@ -1,6 +1,6 @@
 import abc
 from datetime import date, datetime
-from typing import Any, List, Optional, Union
+from typing import Any, Optional
 
 from dateutil.parser import parse
 
@@ -63,7 +63,7 @@ class SelectManyValueCaster(BaseValueCaster):
     def can_process(self, field: Any) -> bool:
         return field["type"] == TYPE_SELECT_MANY
 
-    def process(self, field: Any, value: Any) -> List:
+    def process(self, field: Any, value: Any) -> list:
         if custom_cast_method := field.get("custom_cast_value"):
             return custom_cast_method(input_value=value)
 
@@ -75,7 +75,7 @@ class SelectManyValueCaster(BaseValueCaster):
             values = value.split(";")
         else:
             values = value.split(" ")
-        valid_choices: List = []
+        valid_choices: list = []
         for single_choice in values:
             if isinstance(single_choice, str):
                 without_trailing_whitespace = single_choice.strip()
@@ -99,7 +99,7 @@ class SelectOneValueCaster(BaseValueCaster):
     def can_process(self, field: Any) -> bool:
         return field["type"] == TYPE_SELECT_ONE
 
-    def process(self, field: Any, value: Any) -> Optional[Union[int, str]]:
+    def process(self, field: Any, value: Any) -> int | str | None:
         if custom_cast_method := field.get("custom_cast_value"):
             return custom_cast_method(input_value=value)
 
@@ -131,27 +131,28 @@ class DateValueCaster(BaseValueCaster):
     def can_process(self, field: Any) -> bool:
         return field["type"] == TYPE_DATE
 
-    def process(self, field: Any, value: Union[date, datetime, str]) -> Union[date, datetime]:
-        if isinstance(value, (date, datetime)):
+    def process(self, field: Any, value: date | datetime | str) -> date | datetime:
+        if isinstance(value, date | datetime):
             return value
 
         if isinstance(value, str):
             return parse(value)
+        return None
 
 
 class BooleanValueCaster(BaseValueCaster):
     def can_process(self, field: Any) -> bool:
         return field["type"] == TYPE_BOOL
 
-    def process(self, field: Any, value: Union[bool, str]) -> Union[bool, str]:
+    def process(self, field: Any, value: bool | str) -> bool | str:
         if isinstance(value, str):
             if value.lower() == "false":
                 return False
-            elif value.lower() == "true":
+            if value.lower() == "true":
                 return True
-            elif value == "0":
+            if value == "0":
                 return False
-            elif value == "1":
+            if value == "1":
                 return True
         return value
 

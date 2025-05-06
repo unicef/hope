@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django import forms
 from django.conf import settings
@@ -21,7 +21,7 @@ class StorageFileForm(forms.Form):
     def get_business_area_queryset(self) -> QuerySet[BusinessArea]:
         return BusinessArea.objects.filter(id__in=self.user.user_roles.all().values_list("business_area_id", flat=True))
 
-    def clean(self, *args: Any, **kwargs: Any) -> Optional[Dict[str, Any]]:
+    def clean(self, *args: Any, **kwargs: Any) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         limit = settings.MAX_STORAGE_FILE_SIZE * 1024 * 1024
         if self.cleaned_data["file"].size > limit:

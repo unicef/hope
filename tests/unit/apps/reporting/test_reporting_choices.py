@@ -61,8 +61,8 @@ class TestProgramChoices(APITestCase):
         cache.clear()
         Payment.objects.all().delete()
         GrievanceTicket.objects.all().delete()
-        self.assertEqual(Payment.objects.count(), 0)
-        self.assertEqual(GrievanceTicket.objects.count(), 0)
+        assert Payment.objects.count() == 0
+        assert GrievanceTicket.objects.count() == 0
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_DASHBOARD_YEARS_CHOICES,
@@ -91,7 +91,7 @@ class TestProgramChoices(APITestCase):
             household=household,
             currency="PLN",
         )
-        self.assertEqual(Payment.objects.count(), 2)
+        assert Payment.objects.count() == 2
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_DASHBOARD_YEARS_CHOICES,

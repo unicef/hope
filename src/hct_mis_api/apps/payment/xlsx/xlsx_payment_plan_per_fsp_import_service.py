@@ -2,9 +2,8 @@ import datetime
 import io
 import logging
 from decimal import Decimal
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING
 
-from django.db.models import QuerySet
 from django.utils import timezone
 
 import openpyxl
@@ -26,6 +25,7 @@ from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBas
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 
 if TYPE_CHECKING:
+    from django.db.models import QuerySet
     from hct_mis_api.apps.payment.models import PaymentPlan
 
 
@@ -39,12 +39,12 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.payment_plan = payment_plan
         self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments
         self.file = file
-        self.errors: List[XlsxError] = []
-        self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
-        self.payment_ids: List = list(self.payments_dict.keys())
-        self.payments_to_save: List = []
-        self.payment_verifications_to_save: List = []
-        self.required_columns: List[str] = ["payment_id", "delivered_quantity"]
+        self.errors: list[XlsxError] = []
+        self.payments_dict: dict = {str(x.unicef_id): x for x in self.payment_list}
+        self.payment_ids: list = list(self.payments_dict.keys())
+        self.payments_to_save: list = []
+        self.payment_verifications_to_save: list = []
+        self.required_columns: list[str] = ["payment_id", "delivered_quantity"]
         self.xlsx_headers = []
         self.is_updated: bool = False
 
@@ -85,8 +85,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             )
 
     def _validate_delivered_quantity(self, row: Row) -> None:
-        """
-        It should be possible for a user to upload a file when:
+        """It should be possible for a user to upload a file when:
 
         * Fully Delivered (entitled quantity = delivered quantity) [float]
         * Partially Delivered (entitled quantity > delivered quantity > 0) [float]
@@ -98,7 +97,6 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
         * delivered quantity > entitled quantity
         """
-
         payment_id = row[self.xlsx_headers.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
@@ -181,7 +179,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def _validate_rows(self) -> None:
         for row in self.ws_payments.iter_rows(min_row=2):
-            if not any([cell.value for cell in row]):
+            if not any(cell.value for cell in row):
                 continue
 
             self._validate_payment_id(row)
@@ -243,8 +241,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.logger.info("Finished import payment list")
 
     def _get_delivered_quantity_status_and_value(
-        self, delivered_quantity: Union[int, float, str], entitlement_quantity: Decimal, payment_id: str
-    ) -> Tuple[str, Optional[Decimal]]:
+        self, delivered_quantity: int | float | str, entitlement_quantity: Decimal, payment_id: str
+    ) -> tuple[str, Decimal | None]:
         try:
             status, quantity = get_payment_delivered_quantity_status_and_value(delivered_quantity, entitlement_quantity)
         except Exception:

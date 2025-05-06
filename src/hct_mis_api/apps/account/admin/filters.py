@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable, List, Optional, Tuple
+from typing import Any, Iterable
 
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.contrib.admin.options import IncorrectLookupParameters
@@ -18,13 +18,13 @@ class HasKoboAccount(SimpleListFilter):
     parameter_name = "kobo_account"
     title = "Has Kobo Access"
 
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> Tuple:
+    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> tuple:
         return (1, "Yes"), (0, "No")
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
         if self.value() == "0":
             return queryset.filter(Q(custom_fields__kobo_pk__isnull=True) | Q(custom_fields__kobo_pk=None))
-        elif self.value() == "1":
+        if self.value() == "1":
             return queryset.filter(custom_fields__kobo_pk__isnull=False).exclude(custom_fields__kobo_pk=None)
         return queryset
 
@@ -34,7 +34,7 @@ class BusinessAreaFilter(SimpleListFilter):
     title = "Business Area"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> List:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> list:
         return BusinessArea.objects.filter(user_roles__isnull=False).values_list("id", "name").distinct()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -46,7 +46,7 @@ class PermissionFilter(SimpleListFilter):
     parameter_name = "perm"
     template = "adminfilters/combobox.html"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> Optional[Iterable[Tuple[Any, str]]]:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> Iterable[tuple[Any, str]] | None:
         return Permissions.choices()
 
     def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
@@ -60,7 +60,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
     title = "Role"
     parameter_name = "role"
 
-    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> List:
+    def lookups(self, request: HttpRequest, model_admin: "ModelAdmin[Any]") -> list:
         types = account_models.Role.objects.values_list("id", "name")
         return list(types.order_by("name").distinct())
 

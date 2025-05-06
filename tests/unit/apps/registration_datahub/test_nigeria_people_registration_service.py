@@ -111,58 +111,50 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         records_ids = [x.id for x in self.records]
         service.process_records(rdi.id, records_ids)
 
-        self.assertEqual(
-            Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 1
-        )
-        self.assertEqual(PendingHousehold.objects.count(), 1)
-        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
+        assert Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count() == 1
+        assert PendingHousehold.objects.count() == 1
+        assert PendingHousehold.objects.filter(program=rdi.program).count() == 1
 
         household = PendingHousehold.objects.first()
-        self.assertEqual(household.consent, True)
-        self.assertEqual(household.country, geo_models.Country.objects.get(iso_code2="NG"))
-        self.assertEqual(household.country_origin, geo_models.Country.objects.get(iso_code2="NG"))
-        self.assertEqual(household.head_of_household, PendingIndividual.objects.get(given_name="Giulio"))
-        self.assertEqual(household.rdi_merge_status, "PENDING")
-        self.assertEqual(household.flex_fields, {"enumerator_code": "SHEAbi5350", "who_to_register": "myself"})
+        assert household.consent is True
+        assert household.country == geo_models.Country.objects.get(iso_code2="NG")
+        assert household.country_origin == geo_models.Country.objects.get(iso_code2="NG")
+        assert household.head_of_household == PendingIndividual.objects.get(given_name="Giulio")
+        assert household.rdi_merge_status == "PENDING"
+        assert household.flex_fields == {"enumerator_code": "SHEAbi5350", "who_to_register": "myself"}
 
         registration_data_import = household.registration_data_import
-        self.assertEqual(registration_data_import.program, self.program)
+        assert registration_data_import.program == self.program
 
         primary_collector = PendingIndividual.objects.get(id=household.head_of_household_id)
-        self.assertIsNotNone(primary_collector.phone_no)
-        self.assertEqual(primary_collector.sex, MALE)
-        self.assertEqual(primary_collector.email, "gfranco@unicef.org")
-        self.assertEqual(primary_collector.full_name, "Giulio D Franco")
-        self.assertEqual(primary_collector.relationship, HEAD)
-        self.assertIsNotNone(primary_collector.phone_no_alternative)
-        self.assertEqual(
-            primary_collector.flex_fields,
-            {
-                "frontline_worker_designation_i_f": "H2HCL",
-                "national_id_no": "01234567891",
-            },
-        )
-        self.assertEqual(primary_collector.rdi_merge_status, "PENDING")
-        self.assertIsNotNone(primary_collector.photo.url)
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
+        assert primary_collector.phone_no is not None
+        assert primary_collector.sex == MALE
+        assert primary_collector.email == "gfranco@unicef.org"
+        assert primary_collector.full_name == "Giulio D Franco"
+        assert primary_collector.relationship == HEAD
+        assert primary_collector.phone_no_alternative is not None
+        assert primary_collector.flex_fields == {
+            "frontline_worker_designation_i_f": "H2HCL",
+            "national_id_no": "01234567891",
+        }
+        assert primary_collector.rdi_merge_status == "PENDING"
+        assert primary_collector.photo.url is not None
+        assert PendingIndividualRoleInHousehold.objects.count() == 1
 
         primary_role = PendingIndividualRoleInHousehold.objects.first()
-        self.assertEqual(primary_role.individual, primary_collector)
-        self.assertEqual(primary_role.household, household)
+        assert primary_role.individual == primary_collector
+        assert primary_role.household == household
 
         account = PendingAccount.objects.first()
-        self.assertEqual(
-            account.data,
-            {
-                "number": "2087008012",
-                "name": "United Bank for Africa",
-                "uba_code": "000004",
-                "holder_name": "xxxx",
-            },
-        )
-        self.assertEqual(account.account_type.key, "bank")
+        assert account.data == {
+            "number": "2087008012",
+            "name": "United Bank for Africa",
+            "uba_code": "000004",
+            "holder_name": "xxxx",
+        }
+        assert account.account_type.key == "bank"
 
         national_id = PendingDocument.objects.filter(document_number="01234567891").first()
-        self.assertEqual(national_id.individual, primary_collector)
-        self.assertEqual(national_id.rdi_merge_status, "PENDING")
-        self.assertIsNotNone(national_id.photo.url)
+        assert national_id.individual == primary_collector
+        assert national_id.rdi_merge_status == "PENDING"
+        assert national_id.photo.url is not None

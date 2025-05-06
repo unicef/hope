@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.payment.models import PaymentPlan  # pragma: no cover
 
 
-def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Optional[Any]) -> QuerySet:
+def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Any | None) -> QuerySet:
     if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
         return payment_plan.available_payment_records(extra_validation=does_payment_record_have_right_hoh_phone_number)
     return payment_plan.available_payment_records()
@@ -29,7 +29,7 @@ def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Optio
 
 class VerificationPlanCrudServices:
     @classmethod
-    def create(cls, payment_plan: "PaymentPlan", input_data: Dict) -> PaymentVerificationPlan:
+    def create(cls, payment_plan: "PaymentPlan", input_data: dict) -> PaymentVerificationPlan:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")
@@ -50,7 +50,7 @@ class VerificationPlanCrudServices:
         return payment_verification_plan
 
     @classmethod
-    def update(cls, payment_verification_plan: PaymentVerificationPlan, input_data: Dict) -> PaymentVerificationPlan:
+    def update(cls, payment_verification_plan: PaymentVerificationPlan, input_data: dict) -> PaymentVerificationPlan:
         verifier = PaymentVerificationArgumentVerifier(input_data)
         verifier.verify("sampling")
         verifier.verify("verification_channel")

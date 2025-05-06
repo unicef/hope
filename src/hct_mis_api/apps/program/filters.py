@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.db.models import Count, DecimalField, Q, QuerySet
 from django.db.models.aggregates import Sum
@@ -59,7 +59,7 @@ class ProgramFilter(FilterSet):
         fields=(Lower("name"), "status", "start_date", "end_date", "sector", "number_of_households", "budget")
     )
 
-    def filter_number_of_households(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
+    def filter_number_of_households(self, queryset: QuerySet, name: str, value: dict) -> QuerySet:
         queryset = queryset.annotate(hh_count=Count("household"))
         if min_value := value.get("min"):
             queryset = queryset.filter(hh_count__gte=min_value)
@@ -68,7 +68,7 @@ class ProgramFilter(FilterSet):
 
         return queryset
 
-    def filter_number_of_households_with_tp_in_program(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
+    def filter_number_of_households_with_tp_in_program(self, queryset: QuerySet, name: str, value: dict) -> QuerySet:
         queryset = queryset.annotate(
             total_hh_count=Count(
                 "household_count",

@@ -7,6 +7,7 @@
         <td><a href="{% url "admin:account_user_change" user.pk %}">{{ user }}</a></td>
     {% endfor %}
 {% endblock content %}
+
 {% block footer %}
     <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
@@ -35,10 +36,10 @@
                     } else {
                         $(el).hide();
                     }
-                    {# $('table').each(function (i, t) {#}
-                    {#    if ($(t).find('tr:visible').length === 0) {#}
-                    {#        $(t).hide()#}
-                    {#    }#}
+                    {# $('table').each(function (i, t) { #}
+                    {# if ($(t).find('tr:visible').length === 0) { #}
+                    {# $(t).hide() #}
+                    {# } #}
                     {# }); #}
                 });
             }, 300)).trigger('keyup').focus();
@@ -46,4 +47,4 @@
         })(django.jQuery)
 
     </script>
-    <div id="footer"></div>{% endblock %}
+    <div id="footer"></div>{% endblock footer %}

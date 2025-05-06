@@ -118,65 +118,26 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         )
 
     def _imported_objects_count_before(self) -> None:
-        self.assertEqual(
-            Household.pending_objects.filter().count(),
-            0,
-        )
-        self.assertEqual(
-            Individual.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            Document.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            BankAccountInfo.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.count(),
-            0,
-        )
+        assert Household.pending_objects.filter().count() == 0
+        assert Individual.pending_objects.count() == 0
+        assert IndividualIdentity.pending_objects.count() == 0
+        assert Document.pending_objects.count() == 0
+        assert BankAccountInfo.pending_objects.count() == 0
+        assert IndividualRoleInHousehold.pending_objects.count() == 0
 
     def _imported_objects_count_after(self, multiplier: int = 1) -> None:
-        self.assertEqual(
-            Household.pending_objects.count(),
-            1 * multiplier,
-        )
-        self.assertEqual(
-            Individual.pending_objects.count(),
-            2 * multiplier,
-        )
-        self.assertEqual(
-            IndividualIdentity.pending_objects.count(),
-            1 * multiplier,
-        )
-        self.assertEqual(
-            Document.pending_objects.count(),
-            1 * multiplier,
-        )
-        self.assertEqual(
-            BankAccountInfo.pending_objects.count(),
-            1 * multiplier,
-        )
-        self.assertEqual(
-            IndividualRoleInHousehold.pending_objects.count(),
-            1 * multiplier,
-        )
+        assert Household.pending_objects.count() == 1 * multiplier
+        assert Individual.pending_objects.count() == 2 * multiplier
+        assert IndividualIdentity.pending_objects.count() == 1 * multiplier
+        assert Document.pending_objects.count() == 1 * multiplier
+        assert BankAccountInfo.pending_objects.count() == 1 * multiplier
+        assert IndividualRoleInHousehold.pending_objects.count() == 1 * multiplier
 
     def test_registration_program_population_import_task_wrong_status(self) -> None:
         rdi_status = self.registration_data_import.status
         self._run_task()
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(
-            rdi_status,
-            self.registration_data_import.status,
-        )
+        assert rdi_status == self.registration_data_import.status
 
     def test_registration_program_population_import_task(self) -> None:
         self.registration_data_import.status = RegistrationDataImport.IMPORT_SCHEDULED
@@ -187,10 +148,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         self._run_task()
 
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(
-            self.registration_data_import.status,
-            RegistrationDataImport.IN_REVIEW,
-        )
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
         self._imported_objects_count_after()
 
@@ -212,7 +170,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
     def test_registration_program_population_import_task_error(self) -> None:
         rdi_id = self.registration_data_import.id
         self.registration_data_import.delete()
-        with self.assertRaises(RegistrationDataImport.DoesNotExist):
+        with pytest.raises(RegistrationDataImport.DoesNotExist):
             self._run_task(str(rdi_id))
 
     def test_registration_program_population_import_ba_postpone_deduplication(self) -> None:
@@ -224,10 +182,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         self._run_task()
 
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(
-            self.registration_data_import.status,
-            RegistrationDataImport.IN_REVIEW,
-        )
+        assert self.registration_data_import.status == RegistrationDataImport.IN_REVIEW
 
     @patch("hct_mis_api.apps.registration_datahub.celery_tasks.locked_cache")
     def test_registration_program_population_import_locked_cache(self, mocked_locked_cache: Any) -> None:
@@ -238,7 +193,4 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
         self._run_task()
 
         self.registration_data_import.refresh_from_db()
-        self.assertEqual(
-            self.registration_data_import.status,
-            RegistrationDataImport.IMPORT_SCHEDULED,
-        )
+        assert self.registration_data_import.status == RegistrationDataImport.IMPORT_SCHEDULED

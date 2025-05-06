@@ -69,14 +69,14 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def sw_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Test Programm", dct_type=DataCollectingType.Type.SOCIAL, status=Program.ACTIVE, beneficiary_group_name="People"
     )
 
 
 @pytest.fixture
 def non_sw_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Test Programm", dct_type=DataCollectingType.Type.STANDARD, status=Program.ACTIVE
     )
 
@@ -208,17 +208,17 @@ def create_custom_household(
 
 @pytest.fixture
 def household_with_disability() -> Household:
-    yield create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
+    return create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
 
 
 @pytest.fixture
 def household_without_disabilities() -> Household:
-    yield create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
+    return create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
 
 
 @pytest.fixture
 def household_refugee() -> Household:
-    yield create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
+    return create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
 
 
 def get_program_with_dct_type_and_name(
@@ -229,7 +229,7 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
@@ -240,7 +240,6 @@ def get_program_with_dct_type_and_name(
         cycle__end_date=datetime.now() + relativedelta(months=5),
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 @pytest.fixture
@@ -380,7 +379,7 @@ def create_targeting() -> PaymentPlan:
     PaymentPlanService.create_payments(pp)
     pp.update_population_count_fields()
     pp.refresh_from_db()
-    yield pp
+    return pp
 
 
 @pytest.fixture
@@ -421,7 +420,7 @@ class TestSmokeTargeting:
             "Created by",
         ]
         assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
-        assert 2 == len(pageTargeting.getTargetPopulationsRows())
+        assert len(pageTargeting.getTargetPopulationsRows()) == 2
         pageTargeting.getButtonCreateNew().click()
 
     def test_smoke_targeting_create_use_filters(
@@ -1139,7 +1138,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         old_list = pageTargeting.getTargetPopulationsRows()
-        assert 2 == len(old_list)
+        assert len(old_list) == 2
         assert "Copy TP" in old_list[0].text
 
         pageTargeting.chooseTargetPopulations(0).click()
@@ -1149,7 +1148,7 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         new_list = pageTargeting.getTargetPopulationsRows()
-        assert 1 == len(new_list)
+        assert len(new_list) == 1
         assert create_targeting.name in new_list[0].text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")

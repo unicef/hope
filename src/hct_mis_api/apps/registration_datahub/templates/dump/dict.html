@@ -9,7 +9,7 @@
                      style="position:relative; display: none; max-height: 300px"
                      src="data:image/jpeg;base64, {{ v }}">
                 {% url "admin:registration_datahub_record_validate_document" original.pk key k as validate %}
-                <a href="{{ validate  }}">validate</a>
+                <a href="{{ validate }}">validate</a>
             </div>
             {% elif v|is_base64 %}
                 <div class="base64">
@@ -21,8 +21,8 @@
                 </div>
             {% elif v|islist %}
                 {% dump v key|concat:k original %}
-{#            {% elif v|isstring %}#}
-{#                {{ v|truncatechars:"150" }}#}
+{# {% elif v|isstring %} #}
+{# {{ v|truncatechars:"150" }} #}
             {% else %}
                 {% dump v key|concat:k original %}
             {% endif %}

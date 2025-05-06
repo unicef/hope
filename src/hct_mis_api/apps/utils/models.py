@@ -10,13 +10,9 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Iterable,
-    List,
-    Optional,
     Sequence,
     T,
-    Tuple,
 )
 
 from django.conf import settings
@@ -87,8 +83,7 @@ class PendingManager(models.Manager):
 
 
 class SoftDeletableIsOriginalManagerMixin:
-    """
-    Manager that limits the queryset by default to show only not removed
+    """Manager that limits the queryset by default to show only not removed
     instances of model.
     """
 
@@ -99,19 +94,16 @@ class SoftDeletableIsOriginalManagerMixin:
         super().__init__(*args, **kwargs)
 
     def get_queryset(self) -> "QuerySet":
-        """
-        Return queryset limited to not removed entries.
-        """
-
+        """Return queryset limited to not removed entries."""
         if self.emit_deprecation_warnings:
             warning_message = (
-                "{0}.objects model manager will include soft-deleted objects in an "
-                "upcoming release; please use {0}.available_objects to continue "
+                f"{self.model.__class__.__name__}.objects model manager will include soft-deleted objects in an "
+                f"upcoming release; please use {self.model.__class__.__name__}.available_objects to continue "
                 "excluding soft-deleted objects. See "
                 "https://django-model-utils.readthedocs.io/en/stable/models.html"
                 "#softdeletablemodel for more information."
-            ).format(self.model.__class__.__name__)
-            warnings.warn(warning_message, DeprecationWarning)
+            )
+            warnings.warn(warning_message, DeprecationWarning, stacklevel=2)
 
         kwargs = {"model": self.model, "using": self._db}
         if hasattr(self, "_hints"):
@@ -139,8 +131,7 @@ class MergeStatusModel(models.Model):
 
 
 class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
-    """
-    An abstract base class model with a ``is_removed`` field that
+    """An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
     kept in db for any reason.
     Default manager returns only not-removed entries.
@@ -160,15 +151,14 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
     pending_objects = SoftDeletableRepresentationPendingManager()
 
     def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Any:  # type: ignore
-        """
-        Soft delete object (set its ``is_removed`` field to True).
+        """Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
             self.is_removed = True
             self.save(using=using)  # type: ignore
-        else:
-            return super().delete(using=using, *args, **kwargs)
+            return None
+        return super().delete(using=using, *args, **kwargs)
 
 
 class AdminUrlMixin:
@@ -194,8 +184,7 @@ class TimeStampedUUIDModel(UUIDModel):
 
 
 class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresentationMergeStatusModel):
-    """
-    An abstract base class model with a ``is_removed`` field that
+    """An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
     kept in db for any reason.
     Default manager returns only not-removed entries.
@@ -209,9 +198,8 @@ class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresent
 
     def delete(  # type: ignore
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Tuple[int, Dict[str, int]]:
-        """
-        Soft delete object (set its ``is_removed`` field to True).
+    ) -> tuple[int, dict[str, int]]:
+        """Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
@@ -225,9 +213,7 @@ class SoftDeletableRepresentationMergeStatusModelWithDate(SoftDeletableRepresent
 
 class SoftDeletionTreeManager(TreeManager):
     def get_queryset(self, *args: Any, **kwargs: Any) -> "QuerySet":
-        """
-        Return queryset limited to not removed entries.
-        """
+        """Return queryset limited to not removed entries."""
         return (
             super(TreeManager, self)
             .get_queryset(*args, **kwargs)
@@ -246,10 +232,9 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     all_objects = models.Manager()
 
     def delete(
-        self, using: Optional[Any] = None, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Optional[Tuple[int, dict[str, int]]]:
-        """
-        Soft delete object (set its ``is_removed`` field to True).
+        self, using: Any | None = None, soft: bool = True, *args: Any, **kwargs: Any
+    ) -> tuple[int, dict[str, int]] | None:
+        """Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
@@ -311,7 +296,7 @@ class AbstractSession(models.Model):
     class Meta:
         abstract = True
 
-    def process_exception(self, exc: BaseException, request: Optional[HttpRequest] = None) -> Optional[int]:
+    def process_exception(self, exc: BaseException, request: HttpRequest | None = None) -> int | None:
         try:
             from sentry_sdk import capture_exception
 
@@ -345,8 +330,7 @@ class AbstractSyncable(models.Model):
 
 
 class SoftDeletableDefaultManagerModel(models.Model):
-    """
-    An abstract base class model with a ``is_removed`` field that
+    """An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
     kept in db for any reason.
     Default manager returns only not-removed entries.
@@ -362,9 +346,8 @@ class SoftDeletableDefaultManagerModel(models.Model):
 
     def delete(
         self, using: Any = None, keep_parents: bool = False, soft: bool = True, *args: Any, **kwargs: Any
-    ) -> Tuple[int, dict[str, int]]:
-        """
-        Soft delete object (set its ``is_removed`` field to True).
+    ) -> tuple[int, dict[str, int]]:
+        """Soft delete object (set its ``is_removed`` field to True).
         Actually delete object if setting ``soft`` to False.
         """
         if soft:
@@ -396,7 +379,7 @@ class UnicefIdentifiedModel(models.Model):
 
 
 class SignatureManager(models.Manager):
-    def bulk_create_with_signature(self, objs: Iterable[T], *args: Any, **kwargs: Any) -> List[T]:
+    def bulk_create_with_signature(self, objs: Iterable[T], *args: Any, **kwargs: Any) -> list[T]:
         from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
             bulk_create_payment_snapshot_data,
         )
@@ -438,7 +421,7 @@ class SignatureMixin(models.Model):
         return value
 
     def update_signature_hash(self) -> None:
-        if hasattr(self, "signature_fields") and isinstance(self.signature_fields, (list, tuple)):
+        if hasattr(self, "signature_fields") and isinstance(self.signature_fields, list | tuple):
             sha1 = hashlib.sha1()
             salt = settings.SECRET_KEY
             sha1.update(salt.encode("utf-8"))
@@ -492,7 +475,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
                 return i
         return 0
 
-    def celery_queue_status(self) -> "Dict[str, int]":
+    def celery_queue_status(self) -> "dict[str, int]":
         with app.pool.acquire(block=True) as conn:
             tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, 1)
             revoked = list(conn.default_channel.client.smembers(settings.CELERY_TASK_REVOKED_QUEUE))
@@ -513,11 +496,10 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
     def async_result(self) -> "AbortableAsyncResult|None":
         if self.curr_async_result_id:
             return AbortableAsyncResult(self.curr_async_result_id, app=celery.current_app)
-        else:
-            return None
+        return None
 
     @property
-    def queue_info(self) -> "Dict[str, Any]":
+    def queue_info(self) -> "dict[str, Any]":
         with app.pool.acquire(block=True) as conn:
             tasks = conn.default_channel.client.lrange(settings.CELERY_TASK_DEFAULT_QUEUE, 0, -1)
 
@@ -529,7 +511,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         return {"id": "NotFound"}
 
     @property
-    def task_info(self) -> Optional[Dict[str, Any]]:
+    def task_info(self) -> dict[str, Any] | None:
         if self.async_result:
             info = self.async_result._get_task_meta()
             result, task_status = info["result"], info["status"]
@@ -561,13 +543,12 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         return None
 
     @classproperty
-    def task_handler(cls) -> Callable[[Any], Any]:
+    def task_handler(self) -> Callable[[Any], Any]:
         import importlib
 
-        module_path, func_name = cls.celery_task_name.rsplit(".", 1)
+        module_path, func_name = self.celery_task_name.rsplit(".", 1)
         module = importlib.import_module(module_path)
-        func = getattr(module, func_name)
-        return func
+        return getattr(module, func_name)
 
     def is_queued(self) -> bool:
         from hct_mis_api.apps.core.celery import app
@@ -603,7 +584,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         except Exception as e:
             return str(e)
 
-    def queue(self, task_handler: Optional[Callable[[Any], Any]] = None) -> Optional[str]:
+    def queue(self, task_handler: Callable[[Any], Any] | None = None) -> str | None:
         if self.celery_status not in self.CELERY_STATUS_SCHEDULED:
             if not task_handler:
                 res = self.task_handler.delay(self.pk)

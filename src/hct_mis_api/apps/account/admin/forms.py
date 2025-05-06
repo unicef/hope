@@ -1,6 +1,5 @@
 import csv
 import logging
-from typing import Dict, Optional
 
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -54,7 +53,7 @@ class UserRoleAdminForm(forms.ModelForm):
 class UserRoleInlineFormSet(forms.BaseInlineFormSet):
     model = account_models.UserRole
 
-    def add_fields(self, form: "forms.Form", index: Optional[int]) -> None:
+    def add_fields(self, form: "forms.Form", index: int | None) -> None:
         super().add_fields(form, index)
         form.fields["business_area"].choices = [
             (str(x.id), str(x)) for x in BusinessArea.objects.filter(is_split=False)
@@ -113,7 +112,7 @@ class KoboLoginForm(forms.Form):
 class KoboImportUsersForm(forms.Form):
     emails = forms.CharField(required=False, widget=forms.Textarea)
 
-    def clean_emails(self) -> Dict:
+    def clean_emails(self) -> dict:
         errors = []
         for e in self.cleaned_data["emails"].split():
             try:
@@ -128,8 +127,10 @@ class KoboImportUsersForm(forms.Form):
 
 class ImportCSVForm(forms.Form):
     file = forms.FileField()
-    delimiter = forms.ChoiceField(label=_("Delimiter"), choices=list(zip(delimiters, delimiters)), initial=",")
-    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes)), initial="'")
+    delimiter = forms.ChoiceField(
+        label=_("Delimiter"), choices=list(zip(delimiters, delimiters, strict=False)), initial=","
+    )
+    quotechar = forms.ChoiceField(label=_("Quotechar"), choices=list(zip(quotes, quotes, strict=False)), initial="'")
     quoting = forms.ChoiceField(
         label=_("Quoting"),
         choices=(

@@ -1,5 +1,4 @@
 import logging
-from typing import Dict
 
 from django.db.transaction import atomic
 from django.utils import timezone
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 @app.task()
 @log_start_and_end
 @sentry_tags
-def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str) -> None:
+def create_tp_from_list(form_data: dict[str, str], user_id: str, program_pk: str) -> None:
     program = Program.objects.get(pk=program_pk)
     form = CreateTargetPopulationTextForm(form_data, program=program)
     if form.is_valid():

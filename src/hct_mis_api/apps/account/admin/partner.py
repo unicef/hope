@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Optional, Sequence, Type, Union
+from typing import TYPE_CHECKING, Any, Sequence
 
 from django import forms
 from django.contrib import admin, messages
@@ -59,7 +59,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     )
     filter_horizontal = ("allowed_business_areas",)
 
-    def sub_partners(self, obj: Any) -> Optional[str]:
+    def sub_partners(self, obj: Any) -> str | None:
         return self.links_to_objects(obj.get_children()) if obj else None
 
     sub_partners.short_description = "Sub-Partners"
@@ -73,7 +73,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         rel_list += "</ul>"
         return format_html(rel_list)
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Optional[account_models.Partner] = None) -> Sequence[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: account_models.Partner | None = None) -> Sequence[str]:
         additional_fields = []
         if obj and obj.is_unicef:
             additional_fields.append("name")
@@ -82,8 +82,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
-        self, request: HttpRequest, obj: Optional[account_models.Partner] = None, change: bool = False, **kwargs: Any
-    ) -> Type[ModelForm]:
+        self, request: HttpRequest, obj: account_models.Partner | None = None, change: bool = False, **kwargs: Any
+    ) -> type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 
         queryset = account_models.Partner.objects.filter(level=0)
@@ -97,7 +97,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         return form
 
     @button(enabled=lambda obj: obj.original.is_editable, permission="auth.view_permission")
-    def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
+    def permissions(self, request: HttpRequest, pk: int) -> TemplateResponse | HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Partner permissions")
         partner: account_models.Partner = context["original"]
         user_can_add_ba_to_partner = request.user.can_add_business_area_to_partner()
@@ -130,7 +130,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                 for form in business_area_role_form_set.cleaned_data:
                     if form and not form["DELETE"]:
                         business_area_id = str(form["business_area"].id)
-                        role_ids = list(map(lambda role: str(role.id), form["roles"]))
+                        role_ids = [str(role.id) for role in form["roles"]]
 
                         if incompatible_role := IncompatibleRoles.objects.filter(
                             role_one__in=role_ids, role_two__in=role_ids

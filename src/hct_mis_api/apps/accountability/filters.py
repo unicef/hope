@@ -102,11 +102,10 @@ class FeedbackFilter(FilterSet):
         if value in ["true", "True"]:
             filter_q |= Q(program__status=Program.ACTIVE)
             return qs.filter(filter_q)
-        elif value in ["false", "False"]:
+        if value in ["false", "False"]:
             filter_q |= Q(program__status=Program.FINISHED)
             return qs.filter(filter_q)
-        else:
-            return qs
+        return qs
 
     def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> QuerySet[Feedback]:
         return qs.filter(program_id=decode_id_string_required(value))

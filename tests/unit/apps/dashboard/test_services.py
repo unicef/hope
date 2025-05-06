@@ -29,14 +29,14 @@ TEST_COUNTRY_SLUG = "afghanistan"
 TEST_DATE = timezone.datetime(CURRENT_YEAR, 7, 15, tzinfo=timezone.utc)
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that get_cache_key returns the expected key."""
     expected_key: str = f"dashboard_data_{slug}"
     assert cache_class.get_cache_key(slug) == expected_key
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is found in the cache."""
@@ -49,7 +49,7 @@ def test_get_data_cache_hit(cache_name: str, cache_class: Any, slug: str) -> Non
     assert data == {"test": f"{cache_name}_data"}
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test get_data when data is not found in the cache."""
@@ -58,7 +58,7 @@ def test_get_data_cache_miss(cache_name: str, cache_class: Any, slug: str) -> No
     assert data is None
 
 
-@pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.parametrize(("cache_name", "cache_class", "slug"), CACHE_CONFIG)
 @pytest.mark.django_db(databases=["default", "read_only"])
 def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that store_data correctly stores data in the cache."""
@@ -70,7 +70,7 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "cache_name, cache_class, slug, expected_optional_fields",
+    ("cache_name", "cache_class", "slug", "expected_optional_fields"),
     [
         (
             "DashboardDataCache",
@@ -110,9 +110,9 @@ def test_refresh_data(
 
     for item in refreshed_data:
         assert item.keys() >= required_fields, f"Missing required fields in {cache_name}: {item.keys()}"
-        assert (
-            item.keys() & expected_optional_fields == expected_optional_fields
-        ), f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        assert item.keys() & expected_optional_fields == expected_optional_fields, (
+            f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        )
     cached_data = cache.get(cache_key)
     assert cached_data is not None, "Data not cached"
 
@@ -152,7 +152,7 @@ TEST_CASES = [
 
 
 @pytest.mark.parametrize(
-    "test_name, payment_updates, expected_total, cache_service",
+    ("test_name", "payment_updates", "expected_total", "cache_service"),
     TEST_CASES,
     ids=[case[0] for case in TEST_CASES],
 )

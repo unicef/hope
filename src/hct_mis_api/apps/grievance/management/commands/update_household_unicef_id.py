@@ -43,6 +43,4 @@ class Command(BaseCommand):
     help = "Update household unicef id"
 
     def handle(self, *args: Any, **options: Any) -> None:
-        print("Updating household unicef id")
-        updated = update_household_unicef_id()
-        print(f"Done - updated {updated}")
+        update_household_unicef_id()

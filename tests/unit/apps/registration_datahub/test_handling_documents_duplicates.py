@@ -242,20 +242,20 @@ class TestGoldenRecordDeduplication(TestCase):
             self.get_documents_query([self.document2, self.document3, self.document4]), self.registration_data_import
         )
         self.refresh_all_documents()
-        self.assertEqual(self.document1.status, Document.STATUS_VALID)
-        self.assertEqual(self.document2.status, Document.STATUS_NEED_INVESTIGATION)
-        self.assertEqual(self.document3.status, Document.STATUS_VALID)
-        self.assertEqual(self.document4.status, Document.STATUS_NEED_INVESTIGATION)
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        assert self.document1.status == Document.STATUS_VALID
+        assert self.document2.status == Document.STATUS_NEED_INVESTIGATION
+        assert self.document3.status == Document.STATUS_VALID
+        assert self.document4.status == Document.STATUS_NEED_INVESTIGATION
+        assert GrievanceTicket.objects.count() == 1
         grievance_ticket = GrievanceTicket.objects.first()
-        self.assertEqual(grievance_ticket.programs.count(), 1)
-        self.assertEqual(grievance_ticket.programs.first().id, self.program.id)
+        assert grievance_ticket.programs.count() == 1
+        assert grievance_ticket.programs.first().id == self.program.id
         ticket_details = GrievanceTicket.objects.first().needs_adjudication_ticket_details
-        self.assertEqual(ticket_details.possible_duplicates.count(), 2)
-        self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
+        assert ticket_details.possible_duplicates.count() == 2
+        assert ticket_details.is_multiple_duplicates_version is True
 
         self.household.refresh_from_db()
-        self.assertEqual(GrievanceTicket.objects.first().household_unicef_id, self.household.unicef_id)
+        assert GrievanceTicket.objects.first().household_unicef_id == self.household.unicef_id
 
     def test_hard_documents_deduplication_for_initially_valid(self) -> None:
         HardDocumentDeduplication().deduplicate(
@@ -267,8 +267,8 @@ class TestGoldenRecordDeduplication(TestCase):
             self.registration_data_import,
         )
         self.refresh_all_documents()
-        self.assertEqual(self.document5.status, Document.STATUS_VALID)
-        self.assertEqual(GrievanceTicket.objects.count(), 0)
+        assert self.document5.status == Document.STATUS_VALID
+        assert GrievanceTicket.objects.count() == 0
 
     def test_should_create_one_ticket(self) -> None:
         HardDocumentDeduplication().deduplicate(
@@ -277,7 +277,7 @@ class TestGoldenRecordDeduplication(TestCase):
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([self.document2, self.document3, self.document4]), self.registration_data_import
         )
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        assert GrievanceTicket.objects.count() == 1
 
     def test_hard_documents_deduplication_number_of_queries(self) -> None:
         documents1 = self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
@@ -290,9 +290,7 @@ class TestGoldenRecordDeduplication(TestCase):
             first_dedup_query_count = len(context.captured_queries)
             HardDocumentDeduplication().deduplicate(documents2, self.registration_data_import)
             second_dedup_query_count = len(context.captured_queries) - first_dedup_query_count
-            self.assertEqual(
-                first_dedup_query_count, second_dedup_query_count, "Both queries should use same amount of queries"
-            )
+            assert first_dedup_query_count == second_dedup_query_count, "Both queries should use same amount of queries"
 
             # Queries:
             # 1. Transaction savepoint
@@ -306,7 +304,7 @@ class TestGoldenRecordDeduplication(TestCase):
             # 9. Bulk Create PossibleDuplicateThrough
             # 10. Transaction savepoint release
             # 11 - 13. Queries for `is_cross_area` update
-            self.assertEqual(first_dedup_query_count, 13, "Should only use 14 queries")
+            assert first_dedup_query_count == 13, "Should only use 14 queries"
 
     def test_ticket_created_correctly(self) -> None:
         HardDocumentDeduplication().deduplicate(
@@ -315,7 +313,7 @@ class TestGoldenRecordDeduplication(TestCase):
         )
         self.refresh_all_documents()
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
 
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
@@ -326,10 +324,10 @@ class TestGoldenRecordDeduplication(TestCase):
             self.registration_data_import,
         )
         # failed probably because of all_matching_number_documents qs ordering
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
         grievance_ticket = GrievanceTicket.objects.first()
-        self.assertEqual(grievance_ticket.programs.count(), 1)
-        self.assertEqual(grievance_ticket.programs.first().id, self.program.id)
+        assert grievance_ticket.programs.count() == 1
+        assert grievance_ticket.programs.first().id == self.program.id
 
     def test_valid_for_deduplication_doc_type(self) -> None:
         dt_tax_id = DocumentType.objects.get(key="tax_id")
@@ -364,7 +362,7 @@ class TestGoldenRecordDeduplication(TestCase):
             self.get_documents_query([doc_national_id_1]), self.registration_data_import
         )
         doc_national_id_1.refresh_from_db()
-        self.assertEqual(doc_national_id_1.status, Document.STATUS_NEED_INVESTIGATION)
+        assert doc_national_id_1.status == Document.STATUS_NEED_INVESTIGATION
 
         dt_national_id.valid_for_deduplication = True
         dt_national_id.save()
@@ -373,12 +371,12 @@ class TestGoldenRecordDeduplication(TestCase):
             self.get_documents_query([doc_national_id_2]), self.registration_data_import
         )
         doc_national_id_2.refresh_from_db()
-        self.assertEqual(doc_national_id_2.status, Document.STATUS_VALID)
+        assert doc_national_id_2.status == Document.STATUS_VALID
 
     def test_hard_documents_deduplication_for_invalid_document(self) -> None:
         self.individuals[5].withdraw()
         self.document9.refresh_from_db()
-        self.assertEqual(self.document9.status, Document.STATUS_INVALID)
+        assert self.document9.status == Document.STATUS_INVALID
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
                 [
@@ -388,7 +386,7 @@ class TestGoldenRecordDeduplication(TestCase):
             self.registration_data_import,
         )
         self.document9.refresh_from_db()
-        self.assertEqual(self.document9.status, Document.STATUS_INVALID)
+        assert self.document9.status == Document.STATUS_INVALID
 
     def test_hard_documents_deduplication_for_the_diff_program(self) -> None:
         program_2 = ProgramFactory(business_area=self.business_area)
@@ -426,15 +424,15 @@ class TestGoldenRecordDeduplication(TestCase):
             # program=program_2,
         )
         individual.refresh_from_db()
-        self.assertEqual(str(individual.program_id), str(program_2.pk))
+        assert str(individual.program_id) == str(program_2.pk)
         new_document_from_other_program.refresh_from_db()
-        self.assertEqual(new_document_from_other_program.status, Document.STATUS_PENDING)
+        assert new_document_from_other_program.status == Document.STATUS_PENDING
 
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([new_document_from_other_program]), self.registration_data_import
         )
         new_document_from_other_program.refresh_from_db()
-        self.assertEqual(new_document_from_other_program.status, Document.STATUS_VALID)
+        assert new_document_from_other_program.status == Document.STATUS_VALID
 
     def test_ticket_creation_for_the_same_ind_doc_numbers(self) -> None:
         passport = Document.objects.create(
@@ -512,19 +510,19 @@ class TestGoldenRecordDeduplication(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([passport, tax_id, d1, d2, d3, d4, d5, d6]),
             self.registration_data_import,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 3)
+        assert GrievanceTicket.objects.all().count() == 3
 
         passport.refresh_from_db()
-        self.assertEqual(passport.status, Document.STATUS_VALID)
+        assert passport.status == Document.STATUS_VALID
 
         tax_id.refresh_from_db()
-        self.assertEqual(tax_id.status, Document.STATUS_VALID)
+        assert tax_id.status == Document.STATUS_VALID
 
     def test_ticket_creation_for_the_same_ind_and_across_other_inds_doc_numbers(self) -> None:
         passport = Document.objects.create(
@@ -559,24 +557,24 @@ class TestGoldenRecordDeduplication(TestCase):
             program=self.program,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([passport, tax_id, d1, d2]),
             self.registration_data_import,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
         ticket_details = TicketNeedsAdjudicationDetails.objects.first()
-        self.assertIsNotNone(ticket_details.golden_records_individual)
-        self.assertEqual(ticket_details.possible_duplicates.all().count(), 1)
-        self.assertNotEqual(ticket_details.golden_records_individual, ticket_details.possible_duplicates.first())
+        assert ticket_details.golden_records_individual is not None
+        assert ticket_details.possible_duplicates.all().count() == 1
+        assert ticket_details.golden_records_individual != ticket_details.possible_duplicates.first()
 
         passport.refresh_from_db()
-        self.assertEqual(passport.status, Document.STATUS_VALID)
+        assert passport.status == Document.STATUS_VALID
         tax_id.refresh_from_db()
-        self.assertEqual(tax_id.status, Document.STATUS_VALID)
+        assert tax_id.status == Document.STATUS_VALID
         d2.refresh_from_db()
-        self.assertEqual(d2.status, Document.STATUS_NEED_INVESTIGATION)
+        assert d2.status == Document.STATUS_NEED_INVESTIGATION
 
     def test_ticket_creation_for_the_same_ind_doc_numbers_same_doc_type(self) -> None:
         Document.objects.all().delete()
@@ -605,20 +603,20 @@ class TestGoldenRecordDeduplication(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([passport, passport2, d1]),
             self.registration_data_import,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
 
         passport.refresh_from_db()
-        self.assertEqual(passport.status, Document.STATUS_INVALID)
+        assert passport.status == Document.STATUS_INVALID
 
         passport2.refresh_from_db()
-        self.assertEqual(passport2.status, Document.STATUS_VALID)
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert passport2.status == Document.STATUS_VALID
+        assert GrievanceTicket.objects.all().count() == 0
 
     def test_ticket_creation_for_the_same_ind_doc_numbers_different_doc_type(self) -> None:
         Document.objects.all().delete()
@@ -647,17 +645,17 @@ class TestGoldenRecordDeduplication(TestCase):
             rdi_merge_status=MergeStatusModel.MERGED,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([passport, passport2, d1]),
             self.registration_data_import,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
 
         passport.refresh_from_db()
-        self.assertEqual(passport.status, Document.STATUS_VALID)
+        assert passport.status == Document.STATUS_VALID
 
         passport2.refresh_from_db()
-        self.assertEqual(passport2.status, Document.STATUS_VALID)
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        assert passport2.status == Document.STATUS_VALID
+        assert GrievanceTicket.objects.all().count() == 0

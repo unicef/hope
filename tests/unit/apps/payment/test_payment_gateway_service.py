@@ -355,15 +355,15 @@ class TestPaymentGatewayService(APITestCase):
             payout_amount=float(self.payments[0].entitlement_quantity),
             fsp_code="1",
         )
-        self.assertEqual(p.get_hope_status(self.payments[0].entitlement_quantity), Payment.STATUS_DISTRIBUTION_SUCCESS)
-        self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_DISTRIBUTION_PARTIAL)
+        assert p.get_hope_status(self.payments[0].entitlement_quantity) == Payment.STATUS_DISTRIBUTION_SUCCESS
+        assert p.get_hope_status(Decimal(1000000.0)) == Payment.STATUS_DISTRIBUTION_PARTIAL
 
         p.payout_amount = None
-        self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_ERROR)
+        assert p.get_hope_status(Decimal(1000000.0)) == Payment.STATUS_ERROR
 
         p.payout_amount = float(self.payments[0].entitlement_quantity)
         p.status = "NOT EXISTING STATUS"
-        self.assertEqual(p.get_hope_status(Decimal(1000000.00)), Payment.STATUS_ERROR)
+        assert p.get_hope_status(Decimal(1000000.0)) == Payment.STATUS_ERROR
 
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
@@ -400,11 +400,11 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         self.payments[1].refresh_from_db()
 
-        self.assertEqual(self.pp_split_1.sent_to_payment_gateway, True)
-        self.assertEqual(self.pp_split_2.sent_to_payment_gateway, True)
-        self.assertEqual(change_payment_instruction_status_mock.call_count, 4)
-        self.assertEqual(self.payments[0].status, Payment.STATUS_SENT_TO_PG)
-        self.assertEqual(self.payments[1].status, Payment.STATUS_SENT_TO_PG)
+        assert self.pp_split_1.sent_to_payment_gateway is True
+        assert self.pp_split_2.sent_to_payment_gateway is True
+        assert change_payment_instruction_status_mock.call_count == 4
+        assert self.payments[0].status == Payment.STATUS_SENT_TO_PG
+        assert self.payments[1].status == Payment.STATUS_SENT_TO_PG
 
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.add_records_to_payment_instruction"
@@ -439,22 +439,25 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
         self.payments[1].refresh_from_db()
 
-        self.assertEqual(self.pp_split_1.sent_to_payment_gateway, False)
-        self.assertEqual(self.pp_split_2.sent_to_payment_gateway, False)
-        self.assertEqual(self.payments[0].status, Payment.STATUS_ERROR)
-        self.assertEqual(self.payments[1].status, Payment.STATUS_ERROR)
-        self.assertEqual(self.payments[0].reason_for_unsuccessful_payment, "Error")
-        self.assertEqual(self.payments[1].reason_for_unsuccessful_payment, "Error")
+        assert self.pp_split_1.sent_to_payment_gateway is False
+        assert self.pp_split_2.sent_to_payment_gateway is False
+        assert self.payments[0].status == Payment.STATUS_ERROR
+        assert self.payments[1].status == Payment.STATUS_ERROR
+        assert self.payments[0].reason_for_unsuccessful_payment == "Error"
+        assert self.payments[1].reason_for_unsuccessful_payment == "Error"
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         self.pp.delivery_mechanism = self.dm_cash_over_the_counter
         self.pp.save()
@@ -510,13 +513,16 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_wallet_integration(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         primary_collector = self.payments[0].collector
         AccountFactory(
@@ -533,11 +539,11 @@ class TestPaymentGatewayService(APITestCase):
 
         # remove old and create new snapshot
         PaymentHouseholdSnapshot.objects.all().delete()
-        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 0)
-        self.assertEqual(Payment.objects.count(), 2)
+        assert PaymentHouseholdSnapshot.objects.count() == 0
+        assert Payment.objects.count() == 2
 
         create_payment_plan_snapshot_data(self.payments[0].parent)
-        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
+        assert PaymentHouseholdSnapshot.objects.count() == 2
         self.payments[0].refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
@@ -585,13 +591,16 @@ class TestPaymentGatewayService(APITestCase):
         payment.household_snapshot.delete()
         payment.refresh_from_db()
 
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": payment.id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": payment.id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         with self.assertRaisesMessage(
             PaymentGatewayAPI.PaymentGatewayAPIException,
@@ -601,53 +610,62 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
     def test_api_get_fsps(self, get_mock: Any) -> None:
-        get_mock.return_value = [
-            {
-                "id": "123",
-                "remote_id": "123",
-                "name": "123",
-                "vendor_number": "123",
-                "configs": [
-                    {
-                        "id": "123",
-                        "key": "123",
-                        "delivery_mechanism": "123",
-                        "delivery_mechanism_name": "123",
-                        "label": "123",
-                        "required_fields": ["123", "123"],
-                    }
-                ],
-            }
-        ], 200
+        get_mock.return_value = (
+            [
+                {
+                    "id": "123",
+                    "remote_id": "123",
+                    "name": "123",
+                    "vendor_number": "123",
+                    "configs": [
+                        {
+                            "id": "123",
+                            "key": "123",
+                            "delivery_mechanism": "123",
+                            "delivery_mechanism_name": "123",
+                            "label": "123",
+                            "required_fields": ["123", "123"],
+                        }
+                    ],
+                }
+            ],
+            200,
+        )
 
         response_data = PaymentGatewayAPI().get_fsps()
         assert isinstance(response_data[0], FspData)
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
     def test_api_get_account_types(self, get_mock: Any) -> None:
-        get_mock.return_value = [
-            {
-                "id": "123",
-                "key": "123",
-                "label": "123",
-                "unique_fields": ["123"],
-            }
-        ], 200
+        get_mock.return_value = (
+            [
+                {
+                    "id": "123",
+                    "key": "123",
+                    "label": "123",
+                    "unique_fields": ["123"],
+                }
+            ],
+            200,
+        )
 
         response_data = PaymentGatewayAPI().get_account_types()
         assert isinstance(response_data[0], AccountTypeData)
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_create_payment_instruction(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "external_code": "123",
-            "status": "123",
-            "fsp": "123",
-            "system": "123",
-            "payload": "123",
-            "extra": "123",
-        }, 200
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "external_code": "123",
+                "status": "123",
+                "fsp": "123",
+                "system": "123",
+                "payload": "123",
+                "extra": "123",
+            },
+            200,
+        )
 
         response_data = PaymentGatewayAPI().create_payment_instruction({})
         assert isinstance(response_data, PaymentInstructionData)

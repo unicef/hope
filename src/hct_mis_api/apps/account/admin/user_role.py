@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.contrib import admin
 from django.db.models import QuerySet
@@ -55,13 +55,13 @@ class UserRoleAdmin(HOPEModelAdminBase):
             )
         )
 
-    def get_actions(self, request: HttpRequest) -> Dict:
+    def get_actions(self, request: HttpRequest) -> dict:
         return admin.ModelAdmin.get_actions(self, request)  # unoverride
 
-    def check_sync_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.is_staff
 
-    def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
 
     def _get_data(self, record: Any) -> str:

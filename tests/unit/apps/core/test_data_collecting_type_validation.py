@@ -4,6 +4,7 @@ from django.test import TestCase
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
+import pytest
 
 
 class TestDCTValidation(TestCase):
@@ -29,11 +30,10 @@ class TestDCTValidation(TestCase):
 
         dct_full.type = DataCollectingType.Type.SOCIAL
 
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             dct_full.save()
-        self.assertEqual(
-            str(error.exception.messages[0]),
-            "Type of DCT cannot be changed if it has compatible DCTs of different type.",
+        assert (
+            str(error.value.messages[0]) == "Type of DCT cannot be changed if it has compatible DCTs of different type."
         )
 
     def test_add_compatible_type_with_different_type(self) -> None:
@@ -47,8 +47,6 @@ class TestDCTValidation(TestCase):
 
         dct_full.compatible_types.add(dct_full)
 
-        with self.assertRaises(ValidationError) as error:
+        with pytest.raises(ValidationError) as error:
             dct_full.compatible_types.add(dct_social)
-        self.assertEqual(
-            str(error.exception.messages[0]), "DCTs of different types cannot be compatible with each other."
-        )
+        assert str(error.value.messages[0]) == "DCTs of different types cannot be compatible with each other."

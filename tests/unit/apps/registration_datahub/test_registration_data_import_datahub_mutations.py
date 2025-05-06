@@ -181,10 +181,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
 
         if should_have_import_data and file_valid:
             import_data_obj = ImportData.objects.first()
-            self.assertIn(
-                "new_reg_data_import",
-                import_data_obj.file.name,
-            )
+            assert "new_reg_data_import" in import_data_obj.file.name
 
     @parameterized.expand(
         [

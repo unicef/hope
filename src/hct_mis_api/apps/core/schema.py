@@ -4,12 +4,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Generator,
-    List,
-    Optional,
-    Type,
-    Union,
 )
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -98,8 +93,8 @@ class FlexibleAttributeChoiceNode(DjangoObjectType):
     class Meta:
         model = FlexibleAttributeChoice
         interfaces = (relay.Node,)
-        connection_class: Type = ExtendedConnection
-        exclude: List = []
+        connection_class: type = ExtendedConnection
+        exclude: list = []
 
 
 class FlexibleAttributeNode(DjangoObjectType):
@@ -132,7 +127,7 @@ class LabelNode(graphene.ObjectType):
     label = graphene.String()
 
 
-def resolve_label(parent: Dict) -> List[Dict[str, Any]]:
+def resolve_label(parent: dict) -> list[dict[str, Any]]:
     return [{"language": k, "label": v} for k, v in parent.items()]
 
 
@@ -143,32 +138,32 @@ class CoreFieldChoiceObject(graphene.ObjectType):
     admin = String()
     list_name = String()
 
-    def resolve_label_en(parent, info: Any) -> Callable:
-        return dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
+    def resolve_label_en(self, info: Any) -> Callable:
+        return dict_or_attr_resolver("label", None, self, info)["English(EN)"]
 
-    def resolve_value(parent, info: Any) -> Union[str, Callable]:
-        if isinstance(parent, FlexibleAttributeChoice):
-            return parent.name
-        return dict_or_attr_resolver("value", None, parent, info)
+    def resolve_value(self, info: Any) -> str | Callable:
+        if isinstance(self, FlexibleAttributeChoice):
+            return self.name
+        return dict_or_attr_resolver("value", None, self, info)
 
-    def resolve_labels(parent, info: Any) -> List[Dict[str, Any]]:
-        return resolve_label(dict_or_attr_resolver("label", None, parent, info))
+    def resolve_labels(self, info: Any) -> list[dict[str, Any]]:
+        return resolve_label(dict_or_attr_resolver("label", None, self, info))
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any) -> Any:
+def _custom_dict_or_attr_resolver(attname: str, default_value: str | None, root: Any, info: Any, **args: Any) -> Any:
     resolver = attr_resolver
     if isinstance(root, dict):
         resolver = dict_resolver
     return resolver(attname, default_value, root, info, **args)
 
 
-def sort_by_attr(options: Iterable, attrs: str) -> List:
+def sort_by_attr(options: Iterable, attrs: str) -> list:
     def key_extractor(el: Any) -> Any:
         for attr in attrs.split("."):
             el = _custom_dict_or_attr_resolver(attr, None, el, None)
         return el
 
-    return list(sorted(options, key=key_extractor))
+    return sorted(options, key=key_extractor)
 
 
 class PeriodicFieldDataNode(DjangoObjectType):
@@ -199,13 +194,13 @@ class FieldAttributeNode(graphene.ObjectType):
     pdu_data = graphene.Field(PeriodicFieldDataNode, required=False)
 
     @staticmethod
-    def resolve_pdu_data(parent: Union[Dict, FlexibleAttribute], info: Any) -> Optional[PeriodicFieldData]:
+    def resolve_pdu_data(parent: dict | FlexibleAttribute, info: Any) -> PeriodicFieldData | None:
         if isinstance(parent, FlexibleAttribute):
             return parent.pdu_data
         return None
 
-    def resolve_choices(parent, info: Any) -> List:
-        choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
+    def resolve_choices(self, info: Any) -> list:
+        choices = _custom_dict_or_attr_resolver("choices", None, self, info)
 
         if callable(choices) and not isinstance(choices, models.Manager):
             choices = choices()
@@ -219,20 +214,19 @@ class FieldAttributeNode(graphene.ObjectType):
     def resolve_is_flex_field(self, info: Any) -> bool:
         return isinstance(self, FlexibleAttribute)
 
-    def resolve_labels(parent, info: Any) -> List[Dict[str, Any]]:
-        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
+    def resolve_labels(self, info: Any) -> list[dict[str, Any]]:
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, self, info))
 
-    def resolve_label_en(parent, info: Any) -> Any:
-        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
+    def resolve_label_en(self, info: Any) -> Any:
+        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]
 
     def resolve_associated_with(self, info: Any) -> Any:
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
         if resolved == 0:
             return "Household"
-        elif resolved == 1:
+        if resolved == 1:
             return "Individual"
-        else:
-            return resolved
+        return resolved
 
 
 class GroupAttributeNode(DjangoObjectType):
@@ -294,7 +288,7 @@ class LanguageObjectConnection(ObjectConnection):
 
 
 def get_fields_attr_generators(
-    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
+    flex_field: bool | None = None, business_area_slug: str | None = None, program_id: str | None = None
 ) -> Generator:
     if flex_field is not False:
         yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
@@ -302,16 +296,20 @@ def get_fields_attr_generators(
         )
     if flex_field is not True:
         if program_id and Program.objects.get(id=program_id).is_social_worker_program:
-            yield from FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING]).filtered_by_types(
-                FILTERABLE_TYPES
-            ).apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
+            yield from (
+                FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING])
+                .filtered_by_types(FILTERABLE_TYPES)
+                .apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
+            )
         else:
-            yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
-                business_area_slug=business_area_slug, program_id=program_id
+            yield from (
+                FieldFactory.from_scope(Scope.TARGETING)
+                .filtered_by_types(FILTERABLE_TYPES)
+                .apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
             )
 
 
-def resolve_asset(business_area_slug: str, uid: str) -> Dict:
+def resolve_asset(business_area_slug: str, uid: str) -> dict:
     try:
         assets = KoboAPI(business_area_slug).get_single_project_data(uid)
     except ObjectDoesNotExist as e:
@@ -324,7 +322,7 @@ def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     return reduce_asset(assets)
 
 
-def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> List:
+def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> list:
     try:
         assets = KoboAPI(business_area_slug).get_all_projects_data()
     except ObjectDoesNotExist as e:
@@ -397,13 +395,13 @@ class Query(graphene.ObjectType):
     data_collection_type_choices = graphene.List(DataCollectingTypeChoiceObject)
     pdu_subtype_choices = graphene.List(PDUSubtypeChoiceObject)
 
-    def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
+    def resolve_business_area(self, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
 
-    def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
+    def resolve_cash_assist_url_prefix(self, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX
 
-    def resolve_all_pdu_fields(parent, info: Any, business_area_slug: str, program_id: str) -> Dict:
+    def resolve_all_pdu_fields(self, info: Any, business_area_slug: str, program_id: str) -> dict:
         return FlexibleAttribute.objects.filter(
             program__business_area__slug=business_area_slug,
             program_id=decode_id_string(program_id),
@@ -411,12 +409,12 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_all_fields_attributes(
-        parent,
+        self,
         info: Any,
-        flex_field: Optional[bool] = None,
-        business_area_slug: Optional[str] = None,
-        program_id: Optional[str] = None,
-    ) -> List[Any]:
+        flex_field: bool | None = None,
+        business_area_slug: str | None = None,
+        program_id: str | None = None,
+    ) -> list[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
                 name = field.name
@@ -452,9 +450,9 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_all_collector_fields_attributes(
-        parent,
+        self,
         info: Any,
-    ) -> List[Any]:
+    ) -> list[Any]:
         from hct_mis_api.apps.payment.models.payment import AccountType
 
         account_types = AccountType.objects.all()
@@ -477,10 +475,10 @@ class Query(graphene.ObjectType):
             "label.English(EN)",
         )
 
-    def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Dict:
+    def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> dict:
         return resolve_asset(business_area_slug=business_area_slug, uid=uid)
 
-    def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> List:
+    def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> list:
         return resolve_assets_list(
             business_area_slug=business_area_slug,
             only_deployed=kwargs.get("only_deployed", False),
@@ -489,10 +487,10 @@ class Query(graphene.ObjectType):
     def resolve_all_groups_with_fields(self, info: Any, **kwargs: Any) -> "QuerySet[FlexibleAttributeGroup]":
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)
 
-    def resolve_all_languages(self, info: Any, code: str, **kwargs: Any) -> List[Language]:
+    def resolve_all_languages(self, info: Any, code: str, **kwargs: Any) -> list[Language]:
         return Languages.filter_by_code(code)
 
-    def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         data_collecting_types = (
             DataCollectingType.objects.filter(
                 Q(Q(limit_to__slug=info.context.headers.get("Business-Area").lower()) | Q(limit_to__isnull=True)),
@@ -515,7 +513,7 @@ class Query(graphene.ObjectType):
             )
         return result
 
-    def resolve_pdu_subtype_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_pdu_subtype_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"value": choice[0], "display_name": choice[1]} for choice in PeriodicFieldData.TYPE_CHOICES]
 
 

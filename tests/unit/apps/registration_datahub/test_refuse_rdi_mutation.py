@@ -86,8 +86,8 @@ class TestRefuseRdiMutation(APITestCase):
         IndividualFactory(household=household)
         IndividualFactory(household=household)
 
-        self.assertEqual(Household.objects.all().count(), 1)
-        self.assertEqual(Individual.objects.all().count(), 3)
+        assert Household.objects.all().count() == 1
+        assert Individual.objects.all().count() == 3
 
         self.graphql_request(
             request_string=self.REFUSE_IMPORT_QUERY,
@@ -95,8 +95,8 @@ class TestRefuseRdiMutation(APITestCase):
             variables={"id": self.id_to_base64(rdi.id, "RegistrationDataImportNode")},
         )
 
-        self.assertEqual(Household.objects.all().count(), 0)
-        self.assertEqual(Individual.objects.all().count(), 0)
+        assert Household.objects.all().count() == 0
+        assert Individual.objects.all().count() == 0
 
     def test_refuse_registration_data_import_with_reason(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)

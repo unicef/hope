@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Individual
 
 
-def get_household_status(household: Household) -> Tuple[str, datetime]:
+def get_household_status(household: Household) -> tuple[str, datetime]:
     if household.rdi_merge_status == MergeStatusModel.PENDING:
         return "imported", household.updated_at
     if household.rdi_merge_status == MergeStatusModel.MERGED:
@@ -26,7 +26,7 @@ def get_household_status(household: Household) -> Tuple[str, datetime]:
     return "merged to population", household.created_at
 
 
-def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict:
+def get_individual_info(individual: "Individual", tax_id: str | None) -> dict:
     return {
         "role": individual.role,
         "relationship": individual.relationship,
@@ -35,8 +35,8 @@ def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict
 
 
 def get_household_info(
-    household: Household, individual: Optional["Individual"] = None, tax_id: Optional[str] = None
-) -> Dict:
+    household: Household, individual: Optional["Individual"] = None, tax_id: str | None = None
+) -> dict:
     status, date = get_household_status(household)
     output = {"status": status, "date": date}
     if individual:
@@ -44,9 +44,9 @@ def get_household_info(
     return {"info": output}
 
 
-def serialize_by_individual(individual: "Individual", tax_id: str) -> Dict:
+def serialize_by_individual(individual: "Individual", tax_id: str) -> dict:
     return get_household_info(individual.household, individual, tax_id)
 
 
-def serialize_by_household(household: Household) -> Dict:
+def serialize_by_household(household: Household) -> dict:
     return get_household_info(household)

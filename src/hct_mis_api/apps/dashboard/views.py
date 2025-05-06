@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Type
+from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
@@ -30,8 +30,7 @@ CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 
 
 class DashboardDataView(APIView):
-    """
-    API View to retrieve a DashReport for a specific business area.
+    """API View to retrieve a DashReport for a specific business area.
     Only authenticated users with the appropriate permissions can access this view.
     """
 
@@ -39,13 +38,12 @@ class DashboardDataView(APIView):
 
     @sentry_tags
     def get(self, request: Any, business_area_slug: str) -> Response:
-        """
-        Retrieve dashboard data for a given business area from Redis cache.
+        """Retrieve dashboard data for a given business area from Redis cache.
         If data is not cached or needs updating, refresh it.
         """
         is_global = business_area_slug.lower() == "global"
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        data_cache: Type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
+        data_cache: type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
 
         if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
             return Response(
@@ -67,8 +65,7 @@ class DashboardDataView(APIView):
 
 
 class CreateOrUpdateDashReportView(APIView):
-    """
-    API to trigger the creation or update of a DashReport for a given business area.
+    """API to trigger the creation or update of a DashReport for a given business area.
     Restricted to superusers and users with the required permissions.
     """
 
@@ -102,13 +99,11 @@ class CreateOrUpdateDashReportView(APIView):
 
 
 class DashboardReportView(LoginRequiredMixin, TemplateView):
-    """
-    View to render the dashboard template for a specific business area.
-    """
+    """View to render the dashboard template for a specific business area."""
 
     template_name = "dashboard/dashboard.html"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)

@@ -4,65 +4,64 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0015_migration'),
-        ('targeting', '0003_migration'),
+        ("payment", "0015_migration"),
+        ("targeting", "0003_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='business_area',
+            model_name="targetpopulation",
+            name="business_area",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='changed_by',
+            model_name="targetpopulation",
+            name="changed_by",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='created_by',
+            model_name="targetpopulation",
+            name="created_by",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='finalized_by',
+            model_name="targetpopulation",
+            name="finalized_by",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='households',
+            model_name="targetpopulation",
+            name="households",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='program',
+            model_name="targetpopulation",
+            name="program",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='program_cycle',
+            model_name="targetpopulation",
+            name="program_cycle",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='steficon_rule',
+            model_name="targetpopulation",
+            name="steficon_rule",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='storage_file',
+            model_name="targetpopulation",
+            name="storage_file",
         ),
         migrations.RemoveField(
-            model_name='targetpopulation',
-            name='targeting_criteria',
+            model_name="targetpopulation",
+            name="targeting_criteria",
         ),
         migrations.RemoveField(
-            model_name='targetingcriteria',
-            name='household_ids',
+            model_name="targetingcriteria",
+            name="household_ids",
         ),
         migrations.RemoveField(
-            model_name='targetingcriteria',
-            name='individual_ids',
+            model_name="targetingcriteria",
+            name="individual_ids",
         ),
         migrations.DeleteModel(
-            name='HouseholdSelection',
+            name="HouseholdSelection",
         ),
         migrations.DeleteModel(
-            name='TargetPopulation',
+            name="TargetPopulation",
         ),
     ]

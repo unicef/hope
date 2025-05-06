@@ -57,18 +57,17 @@ def find_file(file_name: str, search_in_dir: str = settings.DOWNLOAD_DIRECTORY, 
             if file_name in file:
                 return file
         sleep(1)
-    else:
-        raise Exception(f"{file_name} file did not found in {search_in_dir}")
+    raise Exception(f"{file_name} file did not found in {search_in_dir}")
 
 
 @pytest.fixture
 def create_test_program() -> Program:
-    yield create_program()
+    return create_program()
 
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
+    return create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
 
 
 def create_program(
@@ -175,17 +174,17 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         financial_service_provider=fsp,
         delivery_mechanism=dm_cash,
     )
-    yield payment_plan
+    return payment_plan
 
 
 @pytest.fixture
 def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
-    yield payment_plan_create(create_test_program)
+    return payment_plan_create(create_test_program)
 
 
 @pytest.fixture
 def create_payment_plan_lock_social_worker(social_worker_program: Program) -> PaymentPlan:
-    yield payment_plan_create(social_worker_program)
+    return payment_plan_create(social_worker_program)
 
 
 @pytest.fixture
@@ -241,7 +240,7 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
         delivery_mechanism=dm_cash,
     )
 
-    yield payment_plan
+    return payment_plan
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:

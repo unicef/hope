@@ -346,10 +346,10 @@ class TestPaymentPlanMutation(APITestCase):
                 },
             )
 
-            self.assertEqual(TargetingCollectorRuleFilterBlock.objects.all().count(), 1)
-            self.assertEqual(TargetingCollectorBlockRuleFilter.objects.all().count(), 1)
-            self.assertEqual(TargetingCriteriaRule.objects.all().count(), 1)
-            self.assertEqual(PaymentPlan.objects.all().count(), 1)
+            assert TargetingCollectorRuleFilterBlock.objects.all().count() == 1
+            assert TargetingCollectorBlockRuleFilter.objects.all().count() == 1
+            assert TargetingCriteriaRule.objects.all().count() == 1
+            assert PaymentPlan.objects.all().count() == 1
 
             self.snapshot_graphql_request(
                 request_string=COPY_TARGETING_CRITERIA,
@@ -361,10 +361,10 @@ class TestPaymentPlanMutation(APITestCase):
                 },
             )
 
-            self.assertEqual(TargetingCollectorRuleFilterBlock.objects.all().count(), 2)
-            self.assertEqual(TargetingCollectorBlockRuleFilter.objects.all().count(), 2)
-            self.assertEqual(TargetingCriteriaRule.objects.all().count(), 2)
-            self.assertEqual(PaymentPlan.objects.all().count(), 2)
+            assert TargetingCollectorRuleFilterBlock.objects.all().count() == 2
+            assert TargetingCollectorBlockRuleFilter.objects.all().count() == 2
+            assert TargetingCriteriaRule.objects.all().count() == 2
+            assert PaymentPlan.objects.all().count() == 2
 
     def test_assign_funds_commitments_mutation(self) -> None:
         ukr_ba = BusinessAreaFactory(name="Ukraine")
@@ -469,5 +469,5 @@ class TestPaymentPlanMutation(APITestCase):
             },
         )
         payment_plan.refresh_from_db()
-        self.assertEqual(payment_plan.funds_commitments.count(), 1)
-        self.assertEqual(payment_plan.funds_commitments.first(), fc4)
+        assert payment_plan.funds_commitments.count() == 1
+        assert payment_plan.funds_commitments.first() == fc4

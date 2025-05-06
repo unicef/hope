@@ -3,10 +3,10 @@
     height: 100%;
 }
 .dc-chart .deselected { opacity: 0.3; }
-.dc-chart text { 
-    fill: black !important; 
+.dc-chart text {
+    fill: black !important;
     font-weight: bold !important;
-    overflow-x: auto; 
+    overflow-x: auto;
 }
 .dc-chart .row text {
     white-space: pre-wrap;
@@ -16,7 +16,7 @@
 }
 .max-w-7xl { width: 100%; margin: 0 auto; }
 .main-content { padding: 20px; transition: margin-left 0.3s ease-in-out; }
-.icon-blue { color: #1CABE2; } 
+.icon-blue { color: #1CABE2; }
 .spinner-overlay {
     position: absolute;
     top: 0;

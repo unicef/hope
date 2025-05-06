@@ -1,4 +1,4 @@
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Sequence
 
 from django.contrib import admin
 from django.db.models import QuerySet
@@ -15,7 +15,7 @@ class MessageRecipientMapInline(admin.TabularInline):
     model = Message.households.through
     extra = 0
     list_prefetch_related = ("household__head_of_household",)
-    fields: Optional[Sequence[str]] = ("get_hoh_name",)
+    fields: Sequence[str] | None = ("get_hoh_name",)
     readonly_fields: Sequence[str] = ("get_hoh_name",)
 
     def has_add_permission(self, request: HttpRequest, obj: Any = None) -> bool:
@@ -50,8 +50,8 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
         "households",
     )
     inlines = [MessageRecipientMapInline, MessageCopiedToInline]
-    list_select_related: Union[bool, Sequence[str]] = ("created_by",)
-    list_prefetch_related: Union[bool, Sequence[str]] = ("recipients",)
+    list_select_related: bool | Sequence[str] = ("created_by",)
+    list_prefetch_related: bool | Sequence[str] = ("recipients",)
     readonly_fields: Sequence[str] = (
         "title",
         "body",

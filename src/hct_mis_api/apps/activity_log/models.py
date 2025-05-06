@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 from uuid import UUID
 
 from django.conf import settings
@@ -67,12 +67,12 @@ class LogEntry(models.Model):
 
 
 def log_create(
-    mapping: Dict,
+    mapping: dict,
     business_area_field: Any,
-    user: Optional[Union["AbstractUser", "User"]] = None,
-    programs: Union[UUID, QuerySet["Program"], str, None] = None,
-    old_object: Optional[Any] = None,
-    new_object: Optional[Any] = None,
+    user: Union["AbstractUser", "User"] | None = None,
+    programs: UUID | QuerySet["Program"] | str | None = None,
+    old_object: Any | None = None,
+    new_object: Any | None = None,
 ) -> LogEntry:
     if new_object:
         instance = new_object
@@ -102,7 +102,7 @@ def log_create(
         ),
     )
     # if only one program
-    if programs and isinstance(programs, (UUID, str)):
+    if programs and isinstance(programs, UUID | str):
         log.programs.add(programs)
     # if queryset
     if programs and isinstance(programs, QuerySet):

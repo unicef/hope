@@ -232,10 +232,7 @@ class TestActionPaymentPlanMutation(APITestCase):
                     }
                 },
             )
-        self.assertEqual(
-            mock_init.call_count,
-            4,
-        )
+        assert mock_init.call_count == 4
         mock_init.assert_any_call(
             self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.value, self.user, f"{timezone.now():%-d %B %Y}"
         )
@@ -271,4 +268,4 @@ class TestActionPaymentPlanMutation(APITestCase):
             },
         )
         self.payment_plan.refresh_from_db()
-        self.assertIsNone(self.payment_plan.background_action_status)
+        assert self.payment_plan.background_action_status is None

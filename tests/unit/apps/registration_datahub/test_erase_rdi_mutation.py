@@ -44,8 +44,8 @@ class TestEraseRdiMutation(APITestCase):
         imported_household = HouseholdFactory(registration_data_import=self.rdi_1)
         IndividualFactory(household=imported_household)
 
-        self.assertEqual(Household.objects.count(), 1)
-        self.assertEqual(Individual.objects.count(), 1)
+        assert Household.objects.count() == 1
+        assert Individual.objects.count() == 1
 
         self.graphql_request(
             request_string=self.ERASE_IMPORT_QUERY,
@@ -53,10 +53,10 @@ class TestEraseRdiMutation(APITestCase):
             variables={"id": self.id_to_base64(self.rdi_1.id, "RegistrationDataImportNode")},
         )
 
-        self.assertEqual(RegistrationDataImport.objects.filter(erased=True).count(), 1)
+        assert RegistrationDataImport.objects.filter(erased=True).count() == 1
 
-        self.assertEqual(Household.objects.count(), 0)
-        self.assertEqual(Individual.objects.count(), 0)
+        assert Household.objects.count() == 0
+        assert Individual.objects.count() == 0
 
     def test_erase_registration_data_import_raises_error_when_wrong_status(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_REFUSE_IMPORT], self.business_area)
@@ -64,8 +64,8 @@ class TestEraseRdiMutation(APITestCase):
         imported_household = HouseholdFactory(registration_data_import=self.rdi_2)
         IndividualFactory(household=imported_household)
 
-        self.assertEqual(Household.objects.count(), 1)
-        self.assertEqual(Individual.objects.count(), 1)
+        assert Household.objects.count() == 1
+        assert Individual.objects.count() == 1
 
         abort_mutation_response = self.graphql_request(
             request_string=self.ERASE_IMPORT_QUERY,
@@ -74,15 +74,13 @@ class TestEraseRdiMutation(APITestCase):
         )
 
         assert "errors" in abort_mutation_response
-        self.assertEqual(
-            abort_mutation_response["errors"][0]["message"],
-            "RDI can be erased only when status is: IMPORT_ERROR, MERGE_ERROR, DEDUPLICATION_FAILED",
+        assert (
+            abort_mutation_response["errors"][0]["message"]
+            == "RDI can be erased only when status is: IMPORT_ERROR, MERGE_ERROR, DEDUPLICATION_FAILED"
         )
 
-        self.assertEqual(RegistrationDataImport.objects.filter(erased=True).count(), 0)
-        self.assertEqual(
-            RegistrationDataImport.objects.filter(erased=False).count(), RegistrationDataImport.objects.count()
-        )
+        assert RegistrationDataImport.objects.filter(erased=True).count() == 0
+        assert RegistrationDataImport.objects.filter(erased=False).count() == RegistrationDataImport.objects.count()
 
-        self.assertEqual(Household.objects.count(), 1)
-        self.assertEqual(Individual.objects.count(), 1)
+        assert Household.objects.count() == 1
+        assert Individual.objects.count() == 1

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from rest_framework import serializers
 
@@ -13,7 +13,7 @@ class Base64ModelField(serializers.Field):
     def to_representation(self, value: str) -> str:
         return encode_id_base64_required(value, self.model_name)
 
-    def to_internal_value(self, data: str) -> Optional[str]:
+    def to_internal_value(self, data: str) -> str | None:
         try:
             return decode_id_string(data)
         except Exception:

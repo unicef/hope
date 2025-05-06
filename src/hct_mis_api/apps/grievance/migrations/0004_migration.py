@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("grievance", "0003_migration"),
         ("payment", "0003_migration"),

@@ -8,6 +8,7 @@ from hct_mis_api.apps.household.fixtures import DocumentTypeFactory, create_hous
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
+import pytest
 
 
 class TestDocumentConstraint(TestCase):
@@ -43,6 +44,6 @@ class TestDocumentConstraint(TestCase):
             self.fail("Shouldn't raise any errors!")
 
     def test_disallow_create_the_same_document_for_the_same_program(self) -> None:
-        with self.assertRaises(IntegrityError):
+        with pytest.raises(IntegrityError):
             Document.objects.create(program=self.programs[0], **self.document_data)
             Document.objects.create(program=self.programs[0], **self.document_data)

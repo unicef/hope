@@ -173,8 +173,8 @@ class TestCrossAreaFilter(APITestCase):
 
         self.needs_adjudication_ticket_cross_area.refresh_from_db()
         self.needs_adjudication_ticket_same_area.refresh_from_db()
-        self.assertEqual(self.needs_adjudication_ticket_cross_area.is_cross_area, True)
-        self.assertEqual(self.needs_adjudication_ticket_same_area.is_cross_area, False)
+        assert self.needs_adjudication_ticket_cross_area.is_cross_area is True
+        assert self.needs_adjudication_ticket_same_area.is_cross_area is False
 
         self.snapshot_graphql_request(
             request_string=FILTER_GRIEVANCE_BY_CROSS_AREA,

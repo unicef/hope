@@ -23,7 +23,7 @@
           {% if user.is_authenticated %}
           <ul class="nav navbar-nav">
             <li><a href="/">Home</a></li>
-            <li class="active"><a href="{% url 'changelog_changelog_list'  %}">Changelog</a></li>
+            <li class="active"><a href="{% url 'changelog_changelog_list' %}">Changelog</a></li>
           </ul>
           {% endif %}
         </div><!--/.nav-collapse -->
@@ -33,6 +33,6 @@
     <div id="content" class="container">
       {% block content %}{% endblock %}
     </div>
-  
+
   </body>
 </html>

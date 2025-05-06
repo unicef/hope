@@ -1,4 +1,4 @@
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 
 from django.db import transaction
 
@@ -12,7 +12,7 @@ class HouseholdWithdraw:
         self.individuals = None
 
     @transaction.atomic
-    def withdraw(self, tag: Optional[Any] = None) -> None:
+    def withdraw(self, tag: Any | None = None) -> None:
         self.household.withdraw(tag)
 
         self.individuals = self.household.individuals.select_for_update().filter(duplicate=False).order_by("pk")

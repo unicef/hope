@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, List, Optional, Sequence
+from typing import Any, Callable, Sequence
 
 from django.conf import settings
 from django.db.models import Model, QuerySet
@@ -21,10 +21,10 @@ INDEX = f"{settings.ELASTICSEARCH_INDEX_PREFIX}grievance_tickets"
 
 
 def es_autosync() -> Callable:
-    """This decorator checks if auto-synchronization with Elasticsearch is turned on"""
+    """This decorator checks if auto-synchronization with Elasticsearch is turned on."""
 
     def wrapper(func: Callable) -> Callable:
-        def inner(*args: Any, **kwargs: Any) -> Optional[Callable]:
+        def inner(*args: Any, **kwargs: Any) -> Callable | None:
             if settings.ELASTICSEARCH_DSL_AUTOSYNC:
                 return func(*args, **kwargs)
             return None
@@ -34,7 +34,7 @@ def es_autosync() -> Callable:
     return wrapper
 
 
-def bulk_update_assigned_to(grievance_tickets_ids: Sequence[str], assigned_to_id: Optional[str]) -> None:
+def bulk_update_assigned_to(grievance_tickets_ids: Sequence[str], assigned_to_id: str | None) -> None:
     bulk_update_grievance_ticket_es(grievance_tickets_ids, {"assigned_to": {"id": str(assigned_to_id)}})
 
 
@@ -131,5 +131,5 @@ class GrievanceTicketDocument(Document):
             return related_instance.tickets.all()
         return GrievanceTicket.objects.none()
 
-    def prepare_programs(self, instance: GrievanceTicket) -> List[str]:
+    def prepare_programs(self, instance: GrievanceTicket) -> list[str]:
         return list(instance.programs.values_list("id", flat=True))

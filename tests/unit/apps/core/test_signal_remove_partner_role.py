@@ -39,31 +39,31 @@ class TestSignalRemovePartnerRole(TestCase):
         )
 
     def test_signal_remove_partner_role(self) -> None:
-        self.assertEqual(
-            self.program_afg.partners.count(), 2
+        assert (
+            self.program_afg.partners.count() == 2
         )  # ALL_PARTNERS_ACCESS - UNICEF and Partner that has access to AFG (signal on program)
-        self.assertEqual(self.program_ukr.partners.count(), 1)  # SELECTED_PARTNERS_ACCESS - only UNICEF
-        self.assertEqual(self.partner.programs.count(), 1)
+        assert self.program_ukr.partners.count() == 1  # SELECTED_PARTNERS_ACCESS - only UNICEF
+        assert self.partner.programs.count() == 1
 
         # grant access to program in ukr
         ProgramPartnerThrough.objects.create(
             program=self.program_ukr,
             partner=self.partner,
         )
-        self.assertEqual(self.program_ukr.partners.count(), 2)
-        self.assertEqual(self.partner.programs.count(), 2)
+        assert self.program_ukr.partners.count() == 2
+        assert self.partner.programs.count() == 2
 
         # remove role in afg
         BusinessAreaPartnerThrough.objects.filter(business_area=self.business_area_afg, partner=self.partner).delete()
         # removing the role -> removing access to the program
-        self.assertIsNone(self.partner.program_partner_through.filter(program=self.program_afg).first())
-        self.assertEqual(self.program_afg.partners.count(), 1)  # only UNICEF left
-        self.assertEqual(self.partner.programs.count(), 1)
+        assert self.partner.program_partner_through.filter(program=self.program_afg).first() is None
+        assert self.program_afg.partners.count() == 1  # only UNICEF left
+        assert self.partner.programs.count() == 1
 
         # remove role in ukr
         BusinessAreaPartnerThrough.objects.filter(business_area=self.business_area_ukr, partner=self.partner).delete()
         # removing the role -> removing access to the program
-        self.assertIsNone(self.partner.program_partner_through.filter(program=self.program_ukr).first())
-        self.assertEqual(self.program_ukr.partners.count(), 1)  # only UNICEF left
+        assert self.partner.program_partner_through.filter(program=self.program_ukr).first() is None
+        assert self.program_ukr.partners.count() == 1  # only UNICEF left
 
-        self.assertEqual(self.partner.programs.count(), 0)
+        assert self.partner.programs.count() == 0

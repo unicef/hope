@@ -13,13 +13,9 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Generator,
     Iterable,
-    List,
     Optional,
-    Tuple,
-    Type,
     Union,
 )
 
@@ -63,7 +59,7 @@ def decode_id_string_required(id_string: str) -> str:
     return b64decode(id_string).decode().split(":")[1]
 
 
-def decode_id_string(id_string: Optional[str]) -> Optional[str]:
+def decode_id_string(id_string: str | None) -> str | None:
     if not id_string:
         return None
     return decode_id_string_required(id_string)
@@ -75,20 +71,19 @@ def encode_id_base64_required(id_string: str, model_name: str) -> str:
     return b64encode(f"{model_name}Node:{str(id_string)}".encode()).decode()
 
 
-def encode_id_base64(id_string: Optional[str], model_name: str) -> Optional[str]:
+def encode_id_base64(id_string: str | None, model_name: str) -> str | None:
     if not id_string:
         return None
     return encode_id_base64_required(id_string, model_name)
 
 
-def get_program_id_from_headers(headers: Union[Dict, "HttpHeaders"]) -> Optional[str]:
+def get_program_id_from_headers(headers: Union[dict, "HttpHeaders"]) -> str | None:
     # TODO: need to double check if program_id is str or uuid?
     #  decoded/encoded ??
     # sometimes it get from info.context.headers or kwargs["Program"]: str
 
     program_id = headers.get("Program")
-    program_id = decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
-    return program_id
+    return decode_id_string(program_id) if program_id not in ("all", "undefined") else None
 
 
 def unique_slugify(
@@ -98,8 +93,7 @@ def unique_slugify(
     queryset: Optional["QuerySet"] = None,
     slug_separator: str = "-",
 ) -> None:
-    """
-    Calculates and stores a unique slug of ``value`` for an instance.
+    """Calculates and stores a unique slug of ``value`` for an instance.
 
     ``slug_field_name`` should be a string matching the name of the field to
     store the slug in (and the field to check against for uniqueness).
@@ -157,21 +151,21 @@ def _slug_strip(value: Any, separator: str = "-") -> str:
     if separator == "-" or not separator:
         re_sep = "-"
     else:
-        re_sep = "(?:-|{})".format(re.escape(separator))
+        re_sep = f"(?:-|{re.escape(separator)})"
     # Remove multiple instances and if an alternate separator is provided,
     # replace the default '-' separator.
     if separator != re_sep:
-        value = re.sub("{}+".format(re_sep), separator, value)
+        value = re.sub(f"{re_sep}+", separator, value)
     # Remove separator from the beginning and end of the slug.
     if separator:
         if separator != "-":
             re_sep = re.escape(separator)
 
-        value = re.sub(r"^{}+|{}+$".format(re_sep, re_sep), "", value)
+        value = re.sub(rf"^{re_sep}+|{re_sep}+$", "", value)
     return value
 
 
-def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
+def serialize_flex_attributes() -> dict[str, dict[str, Any]]:
     from django.db.models import F
 
     """
@@ -246,7 +240,7 @@ def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
     return result_dict
 
 
-def get_combined_attributes() -> Dict:
+def get_combined_attributes() -> dict:
     from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
         FieldFactory,
     )
@@ -262,20 +256,20 @@ def get_combined_attributes() -> Dict:
     }
 
 
-def get_attr_value(name: str, obj: Any, default: Optional[Any] = None) -> Any:
-    if isinstance(obj, (MutableMapping, dict)):
+def get_attr_value(name: str, obj: Any, default: Any | None = None) -> Any:
+    if isinstance(obj, MutableMapping | dict):
         return obj.get(name, default)
     return getattr(obj, name, default)
 
 
-def to_choice_object(choices: Iterable) -> List[Dict[str, Any]]:
+def to_choice_object(choices: Iterable) -> list[dict[str, Any]]:
     return sorted([{"name": name, "value": value} for value, name in choices], key=lambda choice: choice["name"])
 
 
-def rename_dict_keys(obj: Union[Dict, List, Any], convert_func: Callable) -> Any:
+def rename_dict_keys(obj: dict | list | Any, convert_func: Callable) -> Any:
     if isinstance(obj, dict):
         return {convert_func(k): rename_dict_keys(v, convert_func) for k, v in obj.items()}
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [rename_dict_keys(v, convert_func) for v in obj]
     return obj
 
@@ -295,7 +289,7 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
         raise
 
 
-def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
+def nested_dict_get(dictionary: dict, path: str) -> str | None:
     import functools
 
     return functools.reduce(
@@ -306,13 +300,13 @@ def nested_dict_get(dictionary: Dict, path: str) -> Optional[str]:
     )
 
 
-def get_count_and_percentage(count: int, all_items_count: int = 1) -> Dict[str, Union[int, float]]:
+def get_count_and_percentage(count: int, all_items_count: int = 1) -> dict[str, int | float]:
     all_items_count = all_items_count or 1  # fix division by zero
     percentage = (count / all_items_count) * 100
     return {"count": count, "percentage": percentage}
 
 
-def encode_ids(results: Any, model_name: str, key: str) -> List[Dict]:
+def encode_ids(results: Any, model_name: str, key: str) -> list[dict]:
     if results:
         for result in results:
             result_id = result[key]
@@ -320,9 +314,7 @@ def encode_ids(results: Any, model_name: str, key: str) -> List[Dict]:
     return results
 
 
-def to_dict(
-    instance: "Model", fields: Union[List, Tuple, None] = None, dict_fields: Optional[Dict] = None
-) -> Dict[str, Any]:
+def to_dict(instance: "Model", fields: list | tuple | None = None, dict_fields: dict | None = None) -> dict[str, Any]:
     from django.db.models import Model
     from django.forms import model_to_dict
 
@@ -368,20 +360,20 @@ def to_dict(
     return data
 
 
-def build_arg_dict(model_object: "Model", mapping_dict: Dict) -> Dict:
+def build_arg_dict(model_object: "Model", mapping_dict: dict) -> dict:
     return {key: nested_getattr(model_object, mapping_dict[key], None) for key in mapping_dict}
 
 
-def build_arg_dict_from_dict(data_dict: Dict, mapping_dict: Dict) -> Dict:
+def build_arg_dict_from_dict(data_dict: dict, mapping_dict: dict) -> dict:
     return {key: data_dict.get(value) for key, value in mapping_dict.items()}
 
 
-def build_arg_dict_from_dict_if_exists(data_dict: Dict, mapping_dict: Dict) -> Dict:
-    return {key: data_dict.get(value) for key, value in mapping_dict.items() if value in data_dict.keys()}
+def build_arg_dict_from_dict_if_exists(data_dict: dict, mapping_dict: dict) -> dict:
+    return {key: data_dict.get(value) for key, value in mapping_dict.items() if value in data_dict}
 
 
-def build_flex_arg_dict_from_list_if_exists(data_dict: Dict, flex_list: List) -> Dict:
-    return {key: data_dict[key] for key in flex_list if key in data_dict.keys()}
+def build_flex_arg_dict_from_list_if_exists(data_dict: dict, flex_list: list) -> dict:
+    return {key: data_dict[key] for key in flex_list if key in data_dict}
 
 
 class CustomOrderingFilter(OrderingFilter):
@@ -410,10 +402,8 @@ class CustomOrderingFilter(OrderingFilter):
                 new_ordering.append(field)
         return qs.order_by(*new_ordering)
 
-    def normalize_fields(self, fields: List) -> Dict:
-        """
-        Normalize the fields into an ordered map of {field name: param name}
-        """
+    def normalize_fields(self, fields: list) -> dict:
+        """Normalize the fields into an ordered map of {field name: param name}."""
         from django.db.models.functions import Lower
         from django.utils.itercompat import is_iterable
 
@@ -426,9 +416,7 @@ class CustomOrderingFilter(OrderingFilter):
 
         # fields is an iterable of field names
         assert all(
-            isinstance(field, (str, Lower))
-            or is_iterable(field)
-            and len(field) == 2  # may need to be wrapped in parens
+            isinstance(field, str | Lower) or is_iterable(field) and len(field) == 2  # may need to be wrapped in parens
             for field in fields
         ), "'fields' must contain strings or (field name, param name) pairs."
 
@@ -442,7 +430,7 @@ class CustomOrderingFilter(OrderingFilter):
             new_fields.append(field_name)
             self.lower_dict[field_name] = field
 
-        return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
+        return OrderedDict([(f, f) if isinstance(f, str | Lower) else f for f in new_fields])
 
 
 def is_valid_uuid(uuid_str: str) -> bool:
@@ -455,7 +443,7 @@ def is_valid_uuid(uuid_str: str) -> bool:
         return False
 
 
-def decode_and_get_payment_object(encoded_id: str, required: bool) -> Optional[Any]:
+def decode_and_get_payment_object(encoded_id: str, required: bool) -> Any | None:
     from hct_mis_api.apps.payment.models import Payment
 
     if required or encoded_id is not None:
@@ -468,24 +456,23 @@ def decode_and_get_payment_object(encoded_id: str, required: bool) -> Optional[A
     return None
 
 
-def decode_and_get_object(encoded_id: Optional[Union[int, str]], model: Type, required: bool) -> Optional[Any]:
+def decode_and_get_object(encoded_id: int | str | None, model: type, required: bool) -> Any | None:
     from django.shortcuts import get_object_or_404
 
     if required is True or encoded_id is not None:
         if isinstance(encoded_id, int):
             return get_object_or_404(model, id=encoded_id)
-        elif isinstance(encoded_id, str) and encoded_id.isnumeric():
+        if isinstance(encoded_id, str) and encoded_id.isnumeric():
             return get_object_or_404(model, id=int(encoded_id))
-        else:
-            return get_object_or_404(model, id=decode_id_string(encoded_id))
+        return get_object_or_404(model, id=decode_id_string(encoded_id))
     return None
 
 
-def decode_and_get_object_required(encoded_id: str, model: Type) -> Any:
+def decode_and_get_object_required(encoded_id: str, model: type) -> Any:
     return decode_and_get_object(encoded_id, model, required=True)
 
 
-def dict_to_camel_case(dictionary: Dict) -> Dict:
+def dict_to_camel_case(dictionary: dict) -> dict:
     from graphene.utils.str_converters import to_camel_case
 
     if isinstance(dictionary, dict):
@@ -502,7 +489,7 @@ def to_snake_case(camel_case_string: str) -> str:
     return snake_case[0] + snake_case[1:].lower()
 
 
-def check_concurrency_version_in_mutation(version: Optional[int], target: Any) -> None:
+def check_concurrency_version_in_mutation(version: int | None, target: Any) -> None:
     if version is None:
         return
 
@@ -511,8 +498,7 @@ def check_concurrency_version_in_mutation(version: Optional[int], target: Any) -
 
 
 def update_labels_mapping(csv_file: str) -> None:
-    """
-    WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
+    """WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py.
 
     IF YOU DON'T UNDERSTAND WHAT THIS FUNCTION DO, SIMPLY DO NOT TOUCH OR USE IT
 
@@ -565,7 +551,7 @@ def update_labels_mapping(csv_file: str) -> None:
                 rf"(\"label\": )({old_label}),([\S\s]*?)(\"xlsx_field\": \"{core_field}\",)",
                 rf"\1{new_label},\3\4",
                 new_content,
-                flags=re.M,
+                flags=re.MULTILINE,
             )
 
     with open(file_path, "r+") as f:
@@ -581,7 +567,7 @@ def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
     for row_number in range(1, sheet.nrows):
         row = sheet.row(row_number)
 
-        if all([cell.ctype == xlrd.XL_CELL_EMPTY for cell in row]):
+        if all(cell.ctype == xlrd.XL_CELL_EMPTY for cell in row):
             continue
 
         yield row
@@ -590,9 +576,9 @@ def xlrd_rows_iterator(sheet: "Worksheet") -> Generator:
 def chart_get_filtered_qs(
     qs: Any,
     year: int,
-    business_area_slug_filter: Optional[Dict] = None,
-    additional_filters: Optional[Dict] = None,
-    year_filter_path: Optional[str] = None,
+    business_area_slug_filter: dict | None = None,
+    additional_filters: dict | None = None,
+    year_filter_path: str | None = None,
 ) -> "QuerySet":
     if additional_filters is None:
         additional_filters = {}
@@ -609,11 +595,11 @@ def chart_get_filtered_qs(
     return qs.filter(year_filter, **business_area_slug_filter, **additional_filters)
 
 
-def parse_list_values_to_int(list_to_parse: List) -> List[int]:
-    return list(map(lambda x: int(x or 0), list_to_parse))
+def parse_list_values_to_int(list_to_parse: list) -> list[int]:
+    return [int(x or 0) for x in list_to_parse]
 
 
-def sum_lists_with_values(qs_values: Iterable, list_len: int) -> List[int]:
+def sum_lists_with_values(qs_values: Iterable, list_len: int) -> list[int]:
     data = [0] * list_len
     for values in qs_values:
         parsed_values = parse_list_values_to_int(values)
@@ -623,9 +609,7 @@ def sum_lists_with_values(qs_values: Iterable, list_len: int) -> List[int]:
     return data
 
 
-def chart_permission_decorator(
-    chart_resolve: Optional[Callable] = None, permissions: Optional[List] = None
-) -> Callable:
+def chart_permission_decorator(chart_resolve: Callable | None = None, permissions: list | None = None) -> Callable:
     if chart_resolve is None:
         return functools.partial(chart_permission_decorator, permissions=permissions)
 
@@ -643,11 +627,13 @@ def chart_permission_decorator(
             ):
                 return chart_resolve(*args, **kwargs)
             log_and_raise("Permission Denied")
+            return None
+        return None
 
     return resolve_f
 
 
-def chart_filters_decoder(filters: Dict) -> Dict:
+def chart_filters_decoder(filters: dict) -> dict:
     # in GPF we have filtering by all programs in this case need to remove key {program: "all"}
     if "program" in filters and filters.get("program") == "all":
         filters.pop("program")
@@ -655,8 +641,8 @@ def chart_filters_decoder(filters: Dict) -> Dict:
 
 
 def chart_create_filter_query(
-    filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
-) -> Dict:
+    filters: dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+) -> dict:
     filter_query = {}
     if program := filters.get("program"):
         filter_query.update({program_id_path: program})
@@ -671,7 +657,7 @@ def chart_create_filter_query(
 
 
 def chart_create_filter_query_for_payment_verification_gfk(
-    filters: Dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
+    filters: dict, program_id_path: str = "id", administrative_area_path: str = "admin_areas"
 ) -> Q:
     filter_query = Q()
     if program := filters.get("program"):
@@ -684,11 +670,11 @@ def chart_create_filter_query_for_payment_verification_gfk(
     return filter_query
 
 
-def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
+def resolve_flex_fields_choices_to_string(parent: Any) -> dict:
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
-    flex_fields_with_str_choices: Dict = {**parent.flex_fields}
+    flex_fields_with_str_choices: dict = {**parent.flex_fields}
     flex_fields_copy = deepcopy(flex_fields_with_str_choices)
     for flex_field_name, value in flex_fields_copy.items():
         flex_field = flex_fields.get(flex_field_name)
@@ -709,7 +695,7 @@ def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
     return flex_fields_with_str_choices
 
 
-def get_model_choices_fields(model: Type, excluded: Optional[List] = None) -> List[str]:
+def get_model_choices_fields(model: type, excluded: list | None = None) -> list[str]:
     if excluded is None:
         excluded = []
 
@@ -721,7 +707,7 @@ def get_model_choices_fields(model: Type, excluded: Optional[List] = None) -> Li
 
 
 class SheetImageLoader:
-    """Loads all images in a sheet"""
+    """Loads all images in a sheet."""
 
     _images = {}
 
@@ -741,19 +727,18 @@ class SheetImageLoader:
             self._images[f"{col}{row}"] = image._data
 
     def image_in(self, cell: "Cell") -> bool:
-        """Checks if there's an image in specified cell"""
+        """Checks if there's an image in specified cell."""
         return cell in self._images
 
     def get(self, cell: "Cell") -> Any:
-        """Retrieves image data from a cell"""
+        """Retrieves image data from a cell."""
         if cell not in self._images:
             raise ValueError(f"Cell {cell} doesn't contain an image")
-        else:
-            image = io.BytesIO(self._images[cell]())
-            return Image.open(image)
+        image = io.BytesIO(self._images[cell]())
+        return Image.open(image)
 
 
-def fix_flex_type_fields(items: Any, flex_fields: Dict) -> List[Dict]:
+def fix_flex_type_fields(items: Any, flex_fields: dict) -> list[dict]:
     for item in items:
         for key, value in item.flex_fields.items():
             if key in flex_fields:
@@ -764,7 +749,7 @@ def fix_flex_type_fields(items: Any, flex_fields: Dict) -> List[Dict]:
     return items
 
 
-def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> List:
+def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> list:
     excluded_ids_array = excluded_ids_string.split(",")
     excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
     excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]
@@ -794,7 +779,7 @@ def timezone_datetime(value: Any) -> datetime:
 
 
 def save_data_in_cache(
-    cache_key: str, data_lambda: Callable, timeout: int = 60 * 60 * 24, cache_condition: Optional[Callable] = None
+    cache_key: str, data_lambda: Callable, timeout: int = 60 * 60 * 24, cache_condition: Callable | None = None
 ) -> Any:
     cache_data = cache.get(cache_key, "NOT_CACHED")
     if cache_data == "NOT_CACHED":
@@ -828,7 +813,7 @@ def clear_cache_for_dashboard_totals() -> None:
 
 
 def clear_cache_for_key(key: str) -> None:
-    """remove cache if key starts with"""
+    """Remove cache if key starts with."""
     if hasattr(cache, "keys"):
         all_cache_keys = cache.keys(f"{key}*")
         for k in all_cache_keys:
@@ -884,7 +869,7 @@ def send_email_notification_on_commit(service: Any, user: "User") -> None:
 def send_email_notification(
     service: Any,
     user: Optional["User"] = None,
-    context_kwargs: Optional[Dict] = None,
+    context_kwargs: dict | None = None,
 ) -> None:
     if context_kwargs:
         context = service.get_email_context(**context_kwargs)

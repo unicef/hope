@@ -36,7 +36,6 @@ pytestmark = pytest.mark.django_db()
 @pytest.fixture
 def add_feedbacks() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
-    yield
 
 
 @pytest.fixture
@@ -94,7 +93,7 @@ def create_households_and_individuals() -> Household:
     hh.save()
     hh.set_admin_areas()
     hh.refresh_from_db()
-    yield hh
+    return hh
 
 
 def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
@@ -316,7 +315,7 @@ class TestFeedback:
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         pageFeedback.disappearTableRowLoading()
-        assert 1 == len(pageFeedback.getRows())
+        assert len(pageFeedback.getRows()) == 1
         assert "Negative Feedback" in pageFeedback.getRow(0).find_elements("tag name", "td")[1].text
 
         pageFeedback.selectGlobalProgramFilter("Draft Program")
@@ -324,7 +323,7 @@ class TestFeedback:
         pageFeedback.wait_for_disappear(pageFeedback.navGrievanceDashboard)
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
-        assert 0 == len(pageFeedback.getRows())
+        assert len(pageFeedback.getRows()) == 0
 
         pageFeedback.selectGlobalProgramFilter("All Programmes")
         assert "Programme Management" in pageProgrammeDetails.getHeaderTitle().text
@@ -332,7 +331,7 @@ class TestFeedback:
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         pageFeedback.disappearTableRowLoading()
-        assert 2 == len(pageFeedback.getRows())
+        assert len(pageFeedback.getRows()) == 2
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_create_feedback_with_household(
@@ -439,9 +438,7 @@ class TestFeedback:
         pageFeedback.getRow(0).click()
         assert "-" in pageFeedbackDetails.getProgramme().text
         pageFeedbackDetails.getButtonEdit().click()
-        from hct_mis_api.apps.program.models import Program
 
-        print(Program.objects.all())
         pageNewFeedback.selectProgramme("Draft Program")
         pageNewFeedback.getDescription().click()
         pageNewFeedback.getDescription().send_keys(Keys.CONTROL, "a")

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -22,10 +22,8 @@ from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 
 
-def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> Union[QuerySet, List]:
-    """
-    Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
-    """
+def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> QuerySet | list:
+    """Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area."""
     if separator in ["space", "tab"]:
         list_of_households = list(map(str.strip, text.split(" ")))
     elif separator == "new_line":
@@ -34,7 +32,7 @@ def get_households_from_text(program: Program, text: Any, target_field: Any, sep
         list_of_households = list(map(str.strip, text.split(separator)))
     if target_field == "unicef_id":
         return Household.objects.filter(unicef_id__in=list_of_households, program=program)
-    elif target_field == "unique_id":
+    if target_field == "unique_id":
         return Household.objects.filter(
             id__in=list_of_households,
             program=program,
@@ -60,15 +58,15 @@ class UpdateByXlsxStage1Form(forms.Form):
     )
     file = forms.FileField(required=True, help_text="Select XLSX file")
 
-    def clean_program(self) -> Optional[Program]:
+    def clean_program(self) -> Program | None:
         program = self.cleaned_data.get("program")
         ba = self.cleaned_data.get("business_area")
         if program.business_area != ba:
             self.add_error("program", "Program should belong to selected business area.")
         return program
 
-    def clean_registration_data_import(self) -> Optional[RegistrationDataImport]:
-        data: Optional[RegistrationDataImport] = self.cleaned_data.get("registration_data_import")
+    def clean_registration_data_import(self) -> RegistrationDataImport | None:
+        data: RegistrationDataImport | None = self.cleaned_data.get("registration_data_import")
         program: Program = self.cleaned_data["program"]
 
         if not data:
@@ -108,7 +106,7 @@ class UpdateByXlsxStage2Form(forms.Form):
             choices=[(xlsx_column, xlsx_column) for xlsx_column in self.xlsx_columns],
         )
 
-    def clean_xlsx_match_columns(self) -> Dict:
+    def clean_xlsx_match_columns(self) -> dict:
         data = self.cleaned_data["xlsx_match_columns"]
         required_columns = {"individual__unicef_id", "household__unicef_id"}
         all_columns = set(self.xlsx_columns)
@@ -182,7 +180,7 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["targeting_criteria"].widget = HiddenInput()
             self.fields["program_cycle"].widget = HiddenInput()
 
-    def clean_criteria(self) -> Optional[List]:
+    def clean_criteria(self) -> list | None:
         try:
             return get_households_from_text(  # type: ignore
                 self.program,
@@ -206,7 +204,7 @@ class MassEnrollForm(forms.Form):
             label="Select a program to enroll households to",
         )
 
-    def clean(self) -> Optional[Dict[str, Any]]:
+    def clean(self) -> dict[str, Any] | None:
         cleaned_data = super().clean()
         if "apply" in self.data:
             program_for_enroll = cleaned_data.get("program_for_enroll")

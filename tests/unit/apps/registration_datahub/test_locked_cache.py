@@ -33,5 +33,5 @@ class TestLockedCache(TestCase):
         for thread in threads:
             thread.join()
 
-        self.assertTrue(dummy_class1._executed)
-        self.assertFalse(dummy_class2._executed)
+        assert dummy_class1._executed
+        assert not dummy_class2._executed

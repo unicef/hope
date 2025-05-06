@@ -23,7 +23,7 @@ class ModifiedPaymentFactory(PaymentFactory):
     status = factory.Iterator(["Transaction Successful", "Distribution Successful", "Partially Distributed", "Pending"])
 
 
-@pytest.fixture()
+@pytest.fixture
 @pytest.mark.django_db(databases=["default", "read_only"])
 def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]], Household]:
     """

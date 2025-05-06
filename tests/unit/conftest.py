@@ -26,7 +26,7 @@ def pytest_addoption(parser: Parser) -> None:
 
 
 def pytest_configure(config: Config) -> None:
-    pytest.localhost = True if config.getoption("--localhost") else False
+    pytest.localhost = bool(config.getoption("--localhost"))
 
     sys._called_from_pytest = True
     from django.conf import settings

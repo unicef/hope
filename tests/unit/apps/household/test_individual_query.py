@@ -299,13 +299,11 @@ class TestIndividualQuery(APITestCase):
         cls.update_partner_access_to_program(cls.partner, cls.program_draft, [cls.household_one.admin_area])
         # just add one PENDING Ind to be sure filters works correctly
         IndividualFactory(
-            **{
-                "full_name": "Tester Test",
-                "given_name": "Tester",
-                "family_name": "Test",
-                "phone_no": "(953)681-4123",
-                "birth_date": "1943-07-23",
-            },
+            full_name="Tester Test",
+            given_name="Tester",
+            family_name="Test",
+            phone_no="(953)681-4123",
+            birth_date="1943-07-23",
             rdi_merge_status=MergeStatusModel.PENDING,
         )
 
@@ -786,22 +784,19 @@ class TestIndividualWithFlexFieldsQuery(APITestCase):
             },
             variables={"id": self.id_to_base64(self.individual.id, "IndividualNode")},
         )
-        self.assertEqual(
-            self.individual.flex_fields,
-            {
-                "pdu_field_1": {
-                    "1": {"value": 123.45, "collection_date": "2021-01-01"},
-                    "2": {"value": 234.56, "collection_date": "2021-01-01"},
-                    "3": {"value": None},
-                },
-                "pdu_field_2": {
-                    "1": {"value": None},
-                    "2": {"value": None},
-                    "3": {"value": None},
-                    "4": {"value": "Value D", "collection_date": "2021-01-01"},
-                },
+        assert self.individual.flex_fields == {
+            "pdu_field_1": {
+                "1": {"value": 123.45, "collection_date": "2021-01-01"},
+                "2": {"value": 234.56, "collection_date": "2021-01-01"},
+                "3": {"value": None},
             },
-        )
+            "pdu_field_2": {
+                "1": {"value": None},
+                "2": {"value": None},
+                "3": {"value": None},
+                "4": {"value": "Value D", "collection_date": "2021-01-01"},
+            },
+        }
 
 
 class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):

@@ -58,8 +58,8 @@ class TestClearRecordFilesTask(APITestCase):
         self.record_4.refresh_from_db()
         self.record_5.refresh_from_db()
 
-        self.assertIsNotNone(self.record_1.files)  # below 60 days
-        self.assertIsNone(self.record_2.files)  # updated
-        self.assertIsNotNone(self.record_3.files)  # status error
-        self.assertIsNotNone(self.record_4.files)  # below 60 dats
-        self.assertIsNone(self.record_5.files)  # updated
+        assert self.record_1.files is not None  # below 60 days
+        assert self.record_2.files is None  # updated
+        assert self.record_3.files is not None  # status error
+        assert self.record_4.files is not None  # below 60 dats
+        assert self.record_5.files is None  # updated

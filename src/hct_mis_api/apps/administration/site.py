@@ -1,10 +1,9 @@
-from typing import Any, List
+from typing import Any, TYPE_CHECKING
 
 from django.contrib import messages
 from django.contrib.messages import add_message
 from django.core.cache import cache as dj_cache
 from django.core.cache import caches
-from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import path
 from django.utils.html import format_html
@@ -15,6 +14,9 @@ from smart_admin.site import SmartAdminSite
 
 from hct_mis_api.apps.administration.forms import ClearCacheForm
 
+if TYPE_CHECKING:
+    from django.http import HttpRequest, HttpResponse
+
 cache = caches["default"]
 
 
@@ -22,7 +24,7 @@ def clean(v: str) -> str:
     return v.replace(r"\n", "").strip()
 
 
-def get_bookmarks(request: Any) -> List:
+def get_bookmarks(request: Any) -> list:
     quick_links = []
     for entry in config.QUICK_LINKS.split("\n"):
         if entry := clean(entry):
@@ -33,9 +35,7 @@ def get_bookmarks(request: Any) -> List:
                     args = None
                     if len(parts) == 1:
                         args = parts[0], "viewlink", parts[0], parts[0]
-                    elif len(parts) == 2:
-                        args = parts[0], "viewlink", parts[1], parts[0]
-                    elif len(parts) == 3:
+                    elif len(parts) == 2 or len(parts) == 3:
                         args = parts[0], "viewlink", parts[1], parts[0]
                     elif len(parts) == 4:
                         parts.reverse()
@@ -72,12 +72,10 @@ def clear_cache_view(request: "HttpRequest") -> "HttpResponse":
                     ctx["cache_keys"] = [key for key in dj_cache.keys("*") if key[0].isalpha()]
                     add_message(request, messages.SUCCESS, f"Finished remove cache for: {selected_keys}")
             return render(request, template, ctx)
-        else:
-            add_message(request, messages.ERROR, "Access Not Allowed. Only superuser have access to clear cache")
-            return render(request, template, ctx)
-    else:
-        add_message(request, messages.ERROR, "Not Possible Clear Cache For Test Settings")
+        add_message(request, messages.ERROR, "Access Not Allowed. Only superuser have access to clear cache")
         return render(request, template, ctx)
+    add_message(request, messages.ERROR, "Not Possible Clear Cache For Test Settings")
+    return render(request, template, ctx)
 
 
 class HopeAdminSite(SmartAdminSite):
@@ -85,7 +83,7 @@ class HopeAdminSite(SmartAdminSite):
     site_header = "HOPE Administration"
     index_title = "Index"
 
-    def get_urls(self) -> List:
+    def get_urls(self) -> list:
         urls = super().get_urls()
         custom_urls = [
             path("clear-cache/", self.admin_view(clear_cache_view), name="clear_cache"),

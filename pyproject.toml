@@ -1,251 +1,182 @@
-[tool.black]
-line-length = 120
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | migrations
-  | snapshots
-  | __pypackages__
-  | frontend
-)/
-'''
-# TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop
-[tool.isort]
-py_version = 312
-profile = "black"
-default_section = "THIRDPARTY"
-known_first_party = [
-    "account",
-    "core",
-    "grievance",
-    "household",
-    "id_management",
-    "intervention",
-    "payment",
-    "program",
-    "targeting.apps.TargetingConfig",
-    "utils",
-    "registration_datahub",
-    "mptt",
-    "django_extensions",
-    "registration_data",
-    "sanction_list",
-    "accountability",
+[build-system]
+build-backend = "setuptools.build_meta"
+
+requires = [ "setuptools", "wheel" ]
+
+[project]
+name = "hope"
+version = "3.2.0"
+description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
+readme = "README.md"
+license = { text = "None" }
+
+authors = [
+  { name = "HOPE UNICEF", email = "hope@mail.unicef.org" },
+  { name = "Kellton" },
 ]
-known_django = "django"
-sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-include_trailing_comma = true
-skip = ["migrations", "snapshots", "venv", ".venv", "__pypackages__", "frontend"]
-
-[tool.mypy]
-python_version = 3.12
-show_error_codes = true
-exclude = [
-    "migrations",
-    "venv",
-    "snapshots",
-    "__pypackages__",
-    "build"
+requires-python = "==3.12.*"
+classifiers = [ "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.12" ]
+dependencies = [
+  "black>=23,<24",
+  "celery[redis]>=5.2.7,<6",
+  "coreapi>=2.3.3,<3",
+  "defusedxml==0.7.0rc1",
+  "django~=3.2.15",
+  "django-admin-cursor-paginator>=0.1.3,<1",
+  "django-admin-extra-buttons>=1.5.4,<2",
+  "django-admin-sync>=0.7,<1",
+  "django-adminactions>=2.1,<3",
+  "django-adminfilters==2.4.2",
+  "django-advanced-filters>=2,<3",
+  "django-auditlog>=2.1.1,<3",
+  "django-celery-beat>=2.3,<3",
+  "django-celery-results>=2.3.1,<3",
+  "django-compressor>=4,<5",
+  "django-concurrency>=2.4,<3",
+  "django-constance[redis]>=2.9,<3",
+  "django-cors-headers>=3.13,<4",
+  "django-countries>=7.3.2,<8",
+  "django-csp>=3.7,<4",
+  "django-debug-toolbar>=4.3,<5",
+  "django-elasticsearch-dsl>=8,<9",
+  "django-environ>=0.10,<1",
+  "django-extensions>=3.1.5,<4",
+  "django-fernet-fields>=0.6",
+  "django-filter>=22,<23",
+  "django-flags>=5.0.12,<6",
+  "django-front-door>=0.10,<1",
+  "django-fsm>=2.8,<3",
+  "django-graphiql-debug-toolbar>=0.2,<1",
+  "django-hijack>=3.2.1,<4",
+  "django-import-export>=2.8,<3",
+  "django-import-export-celery>=1.2,<2",
+  "django-jsoneditor>=0.2.2,<1",
+  "django-markdownify>=0.9.2,<1",
+  "django-model-utils>=4.2,<5",
+  "django-mptt>=0.14,<1",
+  "django-multiselectfield==0.1.12",
+  "django-phonenumber-field>=7,<8",
+  "django-querysetsequence>=0.16,<1",
+  "django-redis>=5.2,<6",
+  "django-rest-extensions>=0.2",
+  "django-reversion>=5.0.2,<6",
+  "django-silk>=5.0.1,<6",
+  "django-smart-admin>=2,<3",
+  "django-smart-env",
+  "django-sql-explorer[xls]>=3,<4",
+  "django-storages[azure]>=1.12.3,<2",
+  "django-strategy-field>=3,<4",
+  "django-sysinfo>=2.6,<3",
+  "djangorestframework>=3.13.1,<4",
+  "drf-extensions==0.7.1",
+  "drf-jwt>=1.19.2,<2",
+  "drf-spectacular[sidecar]>=0.27,<1",
+  "elastic-transport==8.13",
+  "elasticsearch~=8.14.0",
+  "elasticsearch-dsl~=8.14.0",
+  "factory-boy>=3,<4",
+  "flower>=2.0.1",
+  "gevent>=23.9,<24",
+  "graphene-django~=2.14.0",
+  "graphene-file-upload>=1.3,<2",
+  "gunicorn>=20.1,<21",
+  "ipython>=8.4,<9",
+  "jedi>=0.18.1,<1",
+  "jinja2>=3.1.3,<4",
+  "jmespath>=1.0.1,<2",
+  "markupsafe>=2.1.1,<3",
+  "msoffcrypto-tool>=5.4.2",
+  "natural-keys>=2,<3",
+  "openpyxl==3.1.5",
+  "openpyxl-image-loader>=1.0.5,<2",
+  "phonenumbers>=8.12.49,<9",
+  "pillow>=10.2,<11",
+  "prompt-toolkit>=3.0.29,<4",
+  "psycopg2-binary>=2.9.3",
+  "ptyprocess>=0.7,<1",
+  "pycountry>=22.3,<23",
+  "pydyf==0.10",
+  "pygments>=2.12,<3",
+  "pyjwt>=2.4,<3",
+  "pytesseract>=0.3.9,<1",
+  "pytz>=2022.1,<2023",
+  "pyyaml>=6,<7",
+  "pyzipper>=0.3.6",
+  "sentry-sdk==2.8",
+  "setuptools==71.1",
+  "single-source>=0.3,<1",
+  "social-auth-app-django>=5,<6",
+  "social-auth-core>=4.2,<5",
+  "sorl-thumbnail==12.9",
+  "swapper>=1.3,<2",
+  "tblib>=1.7,<2",
+  "tomli>=2.0.1,<3",
+  "update>=0.0.1,<1",
+  "urllib3>=1.26.9,<2",
+  "weasyprint>=59,<60",
+  "xlrd>=1.2,<2",
 ]
 
-strict = true
-
-ignore_missing_imports = true # TODO
-follow_imports = "skip"
-
-# TODO: remove one, fix errors, repeat
-disable_error_code = [
-    "var-annotated", # this enforces Django Model fields to have type annotations
-    "attr-defined",
-    "misc", # cannot subclass DjangoObjectType
-    "union-attr",
-    "type-arg", # this misses type parameters for graphene.ObjectType
-    "no-any-return", # this enforces adding return None for function that returns None
+[dependency-groups]
+dev = [
+  "argh>=0.28,<1",
+  "coverage>=7.3.2,<8",
+  "django-stubs~=1.12.0",
+  "django-stubs-ext>=0.7,<1",
+  "django-webtest>=1.9.10,<2",
+  "djangorestframework-stubs~=1.7.0",
+  "faker>=17,<18",
+  "flake8>=6,<7",
+  "flake8-absolute-import>=1.0.0.1,<2",
+  "flake8-bugbear>=22.9.23,<23",
+  "flake8-formatter-junit-xml>=0.0.6,<1",
+  "flaky>=3.8.1,<4",
+  "freezegun>=0.3,<1",
+  "graphene-stubs>=0.15,<1",
+  "ipdb>=0.13.9,<1",
+  "openpyxl-stubs>=0.1.24,<1",
+  "parameterized>=0.8.1,<1",
+  "parso>=0.8.3,<1",
+  "pre-commit>=3.1.1,<4",
+  "pytest>=7.4.4,<8",
+  "pytest-cov>=4.1,<5",
+  "pytest-django>=4.5.2,<5",
+  "pytest-echo>=1.7.1,<2",
+  "pytest-html>=4.1.1",
+  "pytest-html-reporter>=0.2.9",
+  "pytest-randomly>=3.15,<4",
+  "pytest-repeat>=0.9.3,<1",
+  "pytest-rerunfailures>=13,<14",
+  "pytest-vcr>=1.0.2",
+  "pytest-xdist>=3.5,<4",
+  "requests-mock>=1.9.3,<2",
+  "responses>=0.22,<1",
+  "ruff>=0.11.8",
+  "selenium==4.29",
+  "snapshottest>=1.0.0a0,<2",
+  "tox>=4.25",
+  "types-freezegun>=1.1.10,<2",
+  "types-python-dateutil>=2.8.19.2,<3",
+  "types-pytz>=2022.4,<2023",
+  "types-redis>=4.3.21.2,<5",
+  "types-requests>=2.28.11.2,<3",
+  "unittest-xml-reporting>=3.2,<4",
+  "wasmer>=1.1,<2",
+  "watchdog>=2.1.8,<3",
+  "webdriver-manager==4.0.2",
 ]
+
+[tool.pdm]
+distribution = true
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = [ "src" ]
 
 [tool.django-stubs]
 django_settings_module = "hct_mis_api.settings"
 
 [tool.uv]
 package = true
-dev-dependencies = [
-    "mypy==0.982",
-    "django-stubs~=1.12.0",
-    "django-stubs-ext<1.0.0,>=0.7.0",
-    "djangorestframework-stubs~=1.7.0",
-    "argh<1.0,>=0.28",
-    "django-webtest<2.0.0,>=1.9.10",
-    "faker<18,>=17",
-    "flake8<7,>=6",
-    "flake8-absolute-import<2.0.0.0,>=1.0.0.1",
-    "flake8-bugbear<23.0.0,>=22.9.23",
-    "flake8-formatter-junit-xml<1.0.0,>=0.0.6",
-    "freezegun<1.0,>=0.3",
-    "graphene-stubs<1.0,>=0.15",
-    "ipdb<1.0.0,>=0.13.9",
-    "isort<6.0.0,>=5.10.1",
-    "openpyxl-stubs<1.0.0,>=0.1.24",
-    "parameterized<1.0.0,>=0.8.1",
-    "parso<1.0.0,>=0.8.3",
-    "pytest<8.0.0,>=7.4.4",
-    "pytest-django<5.0.0,>=4.5.2",
-    "pytest-echo<2.0.0,>=1.7.1",
-    "selenium==4.29.0",
-    "webdriver-manager==4.0.2",
-    "requests-mock<2.0.0,>=1.9.3",
-    "responses<1.0,>=0.22",
-    "snapshottest<2.0.0,>=1.0.0a0",
-    "types-freezegun<2.0.0,>=1.1.10",
-    "types-requests<3.0.0.0,>=2.28.11.2",
-    "types-python-dateutil<3.0.0.0,>=2.8.19.2",
-    "types-pytz<2023.0.0.0,>=2022.4.0.0",
-    "types-redis<5.0.0.0,>=4.3.21.2",
-    "unittest-xml-reporting<4.0.0,>=3.2.0",
-    "watchdog<3.0.0,>=2.1.8",
-    "wasmer<2.0.0,>=1.1.0",
-    "pre-commit<4.0.0,>=3.1.1",
-    "pytest-rerunfailures<14.0,>=13.0",
-    "pytest-randomly<4.0.0,>=3.15.0",
-    "pytest-cov<5.0.0,>=4.1.0",
-    "pytest-xdist<4.0.0,>=3.5.0",
-    "pytest-repeat<1.0.0,>=0.9.3",
-    "pytest-html>=4.1.1",
-    "pytest-vcr>=1.0.2",
-    "pytest-html-reporter>=0.2.9",
-    "flaky<4.0.0,>=3.8.1",
-    "coverage<8.0.0,>=7.3.2",
-]
-
-[tool.pdm]
-distribution = true
-
-[project]
-name = "hope"
-version = "3.2.0"
-description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
-authors = [
-    { name = "Tivix" },
-]
-dependencies = [
-    "setuptools==71.1.0",
-    "defusedxml==0.7.0rc1",
-    "Django~=3.2.15",
-    "elasticsearch~=8.14.0",
-    "graphene-django~=2.14.0",
-    "openpyxl==3.1.5",
-    "Jinja2<4.0.0,>=3.1.3",
-    "MarkupSafe<3.0.0,>=2.1.1",
-    "PyJWT<3.0.0,>=2.4.0",
-    "PyYAML<7.0,>=6.0",
-    "black<24,>=23",
-    "celery[redis]<6.0.0,>=5.2.7",
-    "coreapi<3.0.0,>=2.3.3",
-    "django-admin-cursor-paginator<1.0.0,>=0.1.3",
-    "django-admin-extra-buttons<2.0.0,>=1.5.4",
-    "django-admin-sync<1.0,>=0.7",
-    "django-adminactions<3.0,>=2.1",
-    "django-adminfilters==2.4.2",
-    "django-advanced-filters<3.0.0,>=2.0.0",
-    "django-auditlog<3.0.0,>=2.1.1",
-    "django-celery-beat<3.0.0,>=2.3.0",
-    "django-celery-results<3.0.0,>=2.3.1",
-    "django-concurrency<3.0,>=2.4",
-    "django-constance[redis]<3.0,>=2.9",
-    "django-cors-headers<4.0.0,>=3.13.0",
-    "django-countries<8.0.0,>=7.3.2",
-    "django-csp<4.0,>=3.7",
-    "django-elasticsearch-dsl<9.0,>=8.0",
-    "django-environ<1.0.0,>=0.10.0",
-    "django-extensions<4.0.0,>=3.1.5",
-    "django-filter<23,>=22",
-    "django-flags<6.0.0,>=5.0.12",
-    "django-front-door<1.0,>=0.10",
-    "django-fsm<3.0.0,>=2.8.0",
-    "django-hijack<4.0.0,>=3.2.1",
-    "django-import-export<3.0.0,>=2.8.0",
-    "django-import-export-celery<2.0,>=1.2",
-    "django-jsoneditor<1.0.0,>=0.2.2",
-    "django-markdownify<1.0.0,>=0.9.2",
-    "django-model-utils<5.0.0,>=4.2.0",
-    "django-mptt<1.0,>=0.14",
-    "django-multiselectfield==0.1.12",
-    "django-phonenumber-field<8,>=7",
-    "django-redis<6.0.0,>=5.2.0",
-    "django-reversion<6.0.0,>=5.0.2",
-    "django-silk<6.0.0,>=5.0.1",
-    "django-smart-admin<3,>=2",
-    "django-smart-env",
-    "django-sql-explorer[xls]<4,>=3",
-    "django-storages[azure]<2.0.0,>=1.12.3",
-    "django-strategy-field<4.0,>=3.0",
-    "django-sysinfo<3.0.0,>=2.6.0",
-    "django-compressor<5.0,>=4.0",
-    "django-querysetsequence<1.0,>=0.16",
-    "djangorestframework<4.0.0,>=3.13.1",
-    "drf-jwt<2.0.0,>=1.19.2",
-    "drf-spectacular[sidecar]<1.0,>=0.27",
-    "drf-extensions==0.7.1",
-    "elasticsearch-dsl~=8.14.0",
-    "gevent<24.0,>=23.9",
-    "graphene-file-upload<2.0.0,>=1.3.0",
-    "gunicorn<21.0.0,>=20.1.0",
-    "ipython<9.0.0,>=8.4.0",
-    "jedi<1.0.0,>=0.18.1",
-    "jmespath<2.0.0,>=1.0.1",
-    "natural-keys<3.0.0,>=2.0.0",
-    "openpyxl-image-loader<2.0.0,>=1.0.5",
-    "phonenumbers<9.0.0,>=8.12.49",
-    "pillow<11.0.0,>=10.2.0",
-    "prompt-toolkit<4.0.0,>=3.0.29",
-    "psycopg2-binary>=2.9.3",
-    "ptyprocess<1.0.0,>=0.7.0",
-    "pycountry<23.0,>=22.3",
-    "pygments<3.0.0,>=2.12.0",
-    "pytesseract<1.0.0,>=0.3.9",
-    "pytz<2023.0,>=2022.1",
-    "single-source<1.0.0,>=0.3.0",
-    "social-auth-app-django<6.0.0,>=5.0.0",
-    "social-auth-core<5.0.0,>=4.2.0",
-    "sorl-thumbnail==12.9",
-    "swapper<2.0.0,>=1.3.0",
-    "tblib<2.0.0,>=1.7.0",
-    "update<1.0.0,>=0.0.1",
-    "urllib3<2.0.0,>=1.26.9",
-    "xlrd<2.0,>=1.2",
-    "weasyprint<60.0,>=59.0",
-    "tomli<3.0.0,>=2.0.1",
-    "sentry-sdk==2.8.0",
-    "django-debug-toolbar<5.0.0,>=4.3.0",
-    "django-graphiql-debug-toolbar<1.0.0,>=0.2.0",
-    "django-rest-extensions>=0.2.0",
-    "pydyf==0.10.0",
-    "elastic-transport==8.13.0",
-    "flower>=2.0.1",
-    "factory-boy<4,>=3",
-    "django-fernet-fields>=0.6",
-    "msoffcrypto-tool>=5.4.2",
-    "pyzipper>=0.3.6",
-]
-requires-python = "==3.12.*"
-readme = "README.md"
-license = { text = "None" }
-
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-where = ["src"]

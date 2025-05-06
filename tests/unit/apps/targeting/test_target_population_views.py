@@ -67,7 +67,7 @@ class TestTargetPopulationViews:
         )
 
     @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
+        ("permissions", "partner_permissions", "access_to_program", "expected_status"),
         [
             ([], [], True, status.HTTP_403_FORBIDDEN),
             ([Permissions.TARGETING_VIEW_LIST], [], True, status.HTTP_200_OK),

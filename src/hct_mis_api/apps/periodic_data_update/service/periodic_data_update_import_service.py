@@ -1,6 +1,6 @@
 import datetime
 import json
-from typing import Any, Optional, Union
+from typing import Any
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -28,22 +28,19 @@ class PeriodicDataUpdateBaseForm(forms.Form):
 
 
 class StrictBooleanField(forms.Field):
-    def to_python(self, value: Union[Optional[str], bool]) -> Optional[bool]:
+    def to_python(self, value: str | None | bool) -> bool | None:
         if value is None or value == "":
             return None
         if value in (True, "True", "true", "TRUE", "1"):
             return True
-        elif value in (False, "False", "false", "FALSE", "0"):
+        if value in (False, "False", "false", "FALSE", "0"):
             return False
-        else:
-            raise ValidationError("Invalid boolean value", code="invalid")
+        raise ValidationError("Invalid boolean value", code="invalid")
 
 
 class StrictDateField(forms.DateField):
-    def to_python(self, value: Any) -> Optional[datetime.date]:
-        """
-        Override to cover other cases, i.e. integer value provided.
-        """
+    def to_python(self, value: Any) -> datetime.date | None:
+        """Override to cover other cases, i.e. integer value provided."""
         if value in self.empty_values:
             return None
         if isinstance(value, datetime.datetime):
@@ -60,10 +57,9 @@ class RowValidationError(ValidationError):
 
 
 def validation_error_to_json(
-    error: Union[ValidationError, list[ValidationError]], seen: Optional[set[int]] = None
+    error: ValidationError | list[ValidationError], seen: set[int] | None = None
 ) -> Any:  # pragma: no cover
-    """
-    Recursively convert a Django ValidationError into a JSON-serializable format.
+    """Recursively convert a Django ValidationError into a JSON-serializable format.
     Handles nested ValidationError instances within dicts and lists, avoiding infinite recursion by tracking seen objects.
 
     Args:
@@ -72,6 +68,7 @@ def validation_error_to_json(
 
     Returns:
         dict or list: A JSON-serializable representation of the errors.
+
     """
     if seen is None:
         seen = set()
@@ -86,12 +83,11 @@ def validation_error_to_json(
     if hasattr(error, "error_dict"):
         # Handle ValidationError with error_dict (errors from ModelForms, for example)
         return {key: validation_error_to_json(value, seen) for key, value in error.error_dict.items()}
-    elif hasattr(error, "error_list"):
+    if hasattr(error, "error_list"):
         # Handle ValidationError with error_list (non-field errors and formset errors)
         return [validation_error_to_json(e, seen) for e in error.error_list]
-    else:
-        # Handle simple ValidationError instances
-        return error.messages if hasattr(error, "messages") else str(error)
+    # Handle simple ValidationError instances
+    return error.messages if hasattr(error, "messages") else str(error)
 
 
 class PeriodicDataUpdateImportService:
@@ -137,8 +133,8 @@ class PeriodicDataUpdateImportService:
         self.wb = openpyxl.load_workbook(self.file)
         self.ws_pdu = self.wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
         self.ws_meta = self.wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        self.periodic_data_update_template_id: Optional[PeriodicDataUpdateTemplate] = None
-        self.flexible_attributes_dict: Optional[dict[str, FlexibleAttribute]] = None
+        self.periodic_data_update_template_id: PeriodicDataUpdateTemplate | None = None
+        self.flexible_attributes_dict: dict[str, FlexibleAttribute] | None = None
 
     @classmethod
     def read_periodic_data_update_template_object(cls, file: File) -> PeriodicDataUpdateTemplate:
@@ -184,8 +180,7 @@ class PeriodicDataUpdateImportService:
         self.flexible_attributes_dict = {field.name: field for field in flexible_attributes}
 
     def _read_header(self) -> list[str]:
-        header = [cell.value for cell in self.ws_pdu[1]]
-        return header
+        return [cell.value for cell in self.ws_pdu[1]]
 
     def _read_rows(self) -> tuple[list[dict], list]:
         header = self._read_header()
@@ -199,14 +194,14 @@ class PeriodicDataUpdateImportService:
             cleaned_data_list.append(cleaned_data)
         return cleaned_data_list, errors
 
-    def _read_row(self, errors: list, header: list, row: list, row_number: int) -> Optional[dict]:
+    def _read_row(self, errors: list, header: list, row: list, row_number: int) -> dict | None:
         row_empty_values = []
         for value in row:
             if value == "-":
                 row_empty_values.append(None)
             else:
                 row_empty_values.append(value)
-        data = dict(zip(header, row_empty_values))
+        data = dict(zip(header, row_empty_values, strict=False))
         form = self._build_form()(data=data)
         if not form.is_valid():
             form_errors = json.loads(form.errors.as_json())
@@ -217,8 +212,7 @@ class PeriodicDataUpdateImportService:
                 }
             )
             return None
-        cleaned_data = form.cleaned_data
-        return cleaned_data
+        return form.cleaned_data
 
     def _update_individuals(self, cleaned_data_list: list[dict]) -> None:
         individuals = []
@@ -267,7 +261,7 @@ class PeriodicDataUpdateImportService:
 
     def _get_round_value(
         self, individual: Individual, pdu_field_name: str, round_number: int
-    ) -> Optional[Union[str, int, float, bool]]:
+    ) -> str | int | float | bool | None:
         flex_fields_data = individual.flex_fields
         field_data = flex_fields_data.get(pdu_field_name)
         if field_data:
@@ -302,10 +296,10 @@ class PeriodicDataUpdateImportService:
     def _get_form_field_for_value(self, flexible_attribute: FlexibleAttribute) -> forms.Field:
         if flexible_attribute.pdu_data.subtype == PeriodicFieldData.STRING:
             return forms.CharField(required=False)
-        elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DECIMAL:
+        if flexible_attribute.pdu_data.subtype == PeriodicFieldData.DECIMAL:
             return forms.FloatField(required=False)
-        elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.BOOL:
+        if flexible_attribute.pdu_data.subtype == PeriodicFieldData.BOOL:
             return StrictBooleanField(required=False)
-        elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DATE:
+        if flexible_attribute.pdu_data.subtype == PeriodicFieldData.DATE:
             return StrictDateField(required=False)
         raise ValidationError(f"Invalid subtype for field {flexible_attribute.name}")

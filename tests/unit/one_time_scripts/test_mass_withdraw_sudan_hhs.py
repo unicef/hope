@@ -55,27 +55,9 @@ class TestMassWithdrawSudanHhs(TestCase):
         self.grievance_ticket.refresh_from_db()
         self.grievance_ticket2.refresh_from_db()
 
-        self.assertEqual(
-            self.household.withdrawn,
-            True,
-        )
-        self.assertEqual(
-            self.household.internal_data["withdrawn_tag"],
-            "Received Full entitlements",
-        )
-        self.assertEqual(
-            self.individuals[0].withdrawn,
-            True,
-        )
-        self.assertEqual(
-            self.document.status,
-            Document.STATUS_INVALID,
-        )
-        self.assertEqual(
-            self.grievance_ticket.status,
-            GrievanceTicket.STATUS_CLOSED,
-        )
-        self.assertEqual(
-            self.grievance_ticket2.status,
-            GrievanceTicket.STATUS_CLOSED,
-        )
+        assert self.household.withdrawn is True
+        assert self.household.internal_data["withdrawn_tag"] == "Received Full entitlements"
+        assert self.individuals[0].withdrawn is True
+        assert self.document.status == Document.STATUS_INVALID
+        assert self.grievance_ticket.status == GrievanceTicket.STATUS_CLOSED
+        assert self.grievance_ticket2.status == GrievanceTicket.STATUS_CLOSED

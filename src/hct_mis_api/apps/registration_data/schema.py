@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any
 
 import graphene
 from graphene_django import DjangoObjectType
@@ -47,7 +47,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     @staticmethod
     def resolve_batch_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(parent.batch_duplicates, parent.number_of_individuals),  # biographical
         ]
@@ -58,7 +58,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     @staticmethod
     def resolve_batch_unique_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(parent.batch_unique, parent.number_of_individuals),  # biographical
         ]
@@ -70,7 +70,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     @staticmethod
     def resolve_golden_record_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         return [
             get_count_and_percentage(parent.golden_record_duplicates, parent.number_of_individuals),  # biographical
         ]
@@ -78,7 +78,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     @staticmethod
     def resolve_golden_record_possible_duplicates_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(
                 parent.golden_record_possible_duplicates, parent.number_of_individuals
@@ -93,7 +93,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     @staticmethod
     def resolve_golden_record_unique_count_and_percentage(
         parent: RegistrationDataImport, info: Any, **kwargs: Any
-    ) -> List[Dict[str, Union[int, float]]]:
+    ) -> list[dict[str, int | float]]:
         result = [
             get_count_and_percentage(parent.golden_record_unique, parent.number_of_individuals),  # biographical
         ]
@@ -126,9 +126,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
                 RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
             ],
         ).exists()
-        if is_still_processing:
-            return False
-        return True
+        return not is_still_processing
 
     @staticmethod
     def resolve_biometric_deduplication_enabled(parent: RegistrationDataImport, info: Any) -> bool:
@@ -146,5 +144,5 @@ class Query(graphene.ObjectType):
     )
     registration_data_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_registration_data_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_registration_data_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(RegistrationDataImport.STATUS_CHOICE)

@@ -60,17 +60,17 @@ class PartnerAccessChangeSignal(TestCase):
         cls.program_other_unicef_through.save()
 
     def test_add_new_area_to_full_access(self) -> None:
-        self.assertEqual(self.program_partner_through.areas.count(), 2)
-        self.assertEqual(self.program_unicef_through.areas.count(), 2)
+        assert self.program_partner_through.areas.count() == 2
+        assert self.program_unicef_through.areas.count() == 2
 
-        self.assertEqual(self.program_other_unicef_through.areas.count(), 2)
+        assert self.program_other_unicef_through.areas.count() == 2
 
         self.new_area_in_afg = AreaFactory(name="Area in AFG", area_type=self.area_type_afg, p_code="AREA-IN-AFG")
         self.new_area_not_in_afg = AreaFactory(
             name="Area not in AFG", area_type=self.area_type_other, p_code="AREA-NOT-IN-AFG"
         )
 
-        self.assertEqual(self.program_partner_through.areas.count(), 2)
-        self.assertEqual(self.program_unicef_through.areas.count(), 3)
+        assert self.program_partner_through.areas.count() == 2
+        assert self.program_unicef_through.areas.count() == 3
 
-        self.assertEqual(self.program_other_unicef_through.areas.count(), 2)
+        assert self.program_other_unicef_through.areas.count() == 2

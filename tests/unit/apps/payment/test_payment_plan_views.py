@@ -68,7 +68,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        ("permissions", "expected_status"),
         [
             ([], status.HTTP_403_FORBIDDEN),
             ([Permissions.PM_VIEW_LIST], status.HTTP_403_FORBIDDEN),
@@ -213,7 +213,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
     def _bulk_approve_action_response(self) -> Any:
         ApprovalProcessFactory(payment_plan=self.payment_plan1)
         ApprovalProcessFactory(payment_plan=self.payment_plan2)
-        response = self.client.post(
+        return self.client.post(
             reverse(
                 "api:payments:payment-plans-managerial-bulk-action", kwargs={"business_area": self.afghanistan.slug}
             ),
@@ -226,7 +226,6 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
                 "comment": "Test comment",
             },
         )
-        return response
 
     def test_bulk_action(
         self,
@@ -279,13 +278,13 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert self.payment_plan2.status == PaymentPlan.Status.IN_APPROVAL
 
     @pytest.mark.parametrize(
-        "action_name, result",
-        (
+        ("action_name", "result"),
+        [
             (PaymentPlan.Action.APPROVE.name, Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name),
             (PaymentPlan.Action.AUTHORIZE.name, Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name),
             (PaymentPlan.Action.REVIEW.name, Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name),
             ("Some other action name", None),
-        ),
+        ],
     )
     def test_get_action_permission(self, action_name: str, result: str) -> None:
         payment_plan_managerial_viewset = PaymentPlanManagerialViewSet()

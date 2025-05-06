@@ -1,7 +1,7 @@
 import difflib
 import json
 from difflib import _mdiff
-from typing import Any, Dict, Sequence
+from typing import Any, Sequence
 
 from django import template
 from django.utils.safestring import mark_safe
@@ -17,7 +17,7 @@ register = template.Library()
 class HtmlDiff(difflib.HtmlDiff):
     def _format_line(self, side: Any, flag: Any, linenum: int, text: str) -> str:
         try:
-            line_number: str = "{}".format(linenum)
+            line_number: str = f"{linenum}"
             id = f' id="{self._prefix[side]}{line_number}"'
         except TypeError:
             id = ""
@@ -35,7 +35,7 @@ class HtmlDiff(difflib.HtmlDiff):
         context: bool = False,
         numlines: int = 5,
     ) -> str:
-        """Returns HTML table of side by side comparison with change highlights
+        """Returns HTML table of side by side comparison with change highlights.
 
         Arguments:
         fromlines -- list of "from" lines
@@ -49,8 +49,8 @@ class HtmlDiff(difflib.HtmlDiff):
             When context is False, controls the number of lines to place
             the "next" link anchors before the next change (so click of
             "next" link jumps to just before the change).
-        """
 
+        """
         # make unique anchor prefixes so that multiple tables may exist
         # on the same page without conflict.
         self._make_prefix()
@@ -97,14 +97,14 @@ class HtmlDiff(difflib.HtmlDiff):
         if fromdesc or todesc:
             header_row = "<thead><tr>{}{}{}{}</tr></thead>".format(
                 '<th class="diff_next"><br /></th>',
-                '<th colspan="2" class="diff_header">{}</th>'.format(fromdesc),
+                f'<th colspan="2" class="diff_header">{fromdesc}</th>',
                 '<th class="diff_next"><br /></th>',
-                '<th colspan="2" class="diff_header">{}</th>'.format(todesc),
+                f'<th colspan="2" class="diff_header">{todesc}</th>',
             )
         else:
             header_row = ""
 
-        table = self._table_template % dict(data_rows="".join(s), header_row=header_row, prefix=self._prefix[1])
+        table = self._table_template % {"data_rows": "".join(s), "header_row": header_row, "prefix": self._prefix[1]}
 
         return (
             table.replace("\0+", '<span class="diff_add">')
@@ -131,14 +131,14 @@ def adults(hh: Household) -> int:
 
 
 @register.filter
-def pretty_json(json_object: Dict) -> str:
+def pretty_json(json_object: dict) -> str:
     json_str = json.dumps(json_object, indent=4, sort_keys=True)
     lex = lexers.get_lexer_by_name("json")
     return mark_safe(highlight(json_str, lex, HtmlFormatter()))
 
 
 @register.filter
-def get_item(dictionary: Dict, key: Any) -> Any:
+def get_item(dictionary: dict, key: Any) -> Any:
     return dictionary.get(key)
 
 

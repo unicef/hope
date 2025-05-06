@@ -89,7 +89,7 @@ class ConstanceSettingsAPITest(APITestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
-        self.assertIn("BANNER_MESSAGE", response.data)
-        self.assertEqual(response.data["BANNER_MESSAGE"], "Default banner message")
+        assert "BANNER_MESSAGE" in response.data
+        assert response.data["BANNER_MESSAGE"] == "Default banner message"

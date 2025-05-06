@@ -14,9 +14,7 @@ def generate_numeric_token(digit_number: int = 3) -> int:
 
 
 def has_repeated_digits_more_than_3_times(token: int) -> bool:
-    """
-    check if the token has the same digit repeated more than 3 times in a row (like 1111)
-    """
+    """Check if the token has the same digit repeated more than 3 times in a row (like 1111)."""
     pattern = r"(\d)\1{3,}"
     return bool(re.search(pattern, str(token)))
 

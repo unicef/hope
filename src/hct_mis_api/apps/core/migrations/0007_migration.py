@@ -4,14 +4,20 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0006_migration'),
+        ("core", "0006_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='businessarea',
-            options={'ordering': ['name'], 'permissions': (('can_split', 'Can split BusinessArea'), ('ping_rapidpro', 'Can test RapidPRO connection'), ('execute_sync_rapid_pro', 'Can execute RapidPRO sync'))},
+            name="businessarea",
+            options={
+                "ordering": ["name"],
+                "permissions": (
+                    ("can_split", "Can split BusinessArea"),
+                    ("ping_rapidpro", "Can test RapidPRO connection"),
+                    ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
+                ),
+            },
         ),
     ]

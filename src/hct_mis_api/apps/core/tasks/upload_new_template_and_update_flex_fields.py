@@ -1,6 +1,5 @@
 import logging
 from io import BytesIO
-from typing import Optional
 
 from django.utils import timezone
 
@@ -28,7 +27,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
         xlsx_kobo_template_object.save()
 
     def execute(self, xlsx_kobo_template_id: str) -> None:
-        xlsx_kobo_template_object: Optional[XLSXKoboTemplate] = XLSXKoboTemplate.objects.filter(
+        xlsx_kobo_template_object: XLSXKoboTemplate | None = XLSXKoboTemplate.objects.filter(
             id=xlsx_kobo_template_id
         ).first()
         if not xlsx_kobo_template_object:

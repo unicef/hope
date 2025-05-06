@@ -74,8 +74,8 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(html_element, response.rendered_content)
+        assert response.status_code == status.HTTP_200_OK
+        assert html_element in response.rendered_content
 
     @override_settings(ROOT_TOKEN="test-token123")
     def test_restart_prepare_payment_plan_task_success(self) -> None:
@@ -90,11 +90,11 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        assert response.status_code == status.HTTP_302_FOUND
 
-        self.assertEqual(
-            list(messages.get_messages(response.wsgi_request))[0].message,
-            f"Task restarted for Payment Plan: {payment_plan.unicef_id}",
+        assert (
+            list(messages.get_messages(response.wsgi_request))[0].message
+            == f"Task restarted for Payment Plan: {payment_plan.unicef_id}"
         )
 
     @override_settings(ROOT_TOKEN="test-token123")
@@ -110,11 +110,11 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        assert response.status_code == status.HTTP_302_FOUND
 
-        self.assertEqual(
-            list(messages.get_messages(response.wsgi_request))[0].message,
-            f"The Payment Plan must has the status {PaymentPlan.Status.OPEN}",
+        assert (
+            list(messages.get_messages(response.wsgi_request))[0].message
+            == f"The Payment Plan must has the status {PaymentPlan.Status.OPEN}"
         )
 
     @override_settings(ROOT_TOKEN="test-token123")
@@ -139,9 +139,9 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
             HTTP_X_ROOT_TOKEN="test-token123",
         )
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        assert response.status_code == status.HTTP_302_FOUND
 
-        self.assertEqual(
-            list(messages.get_messages(response.wsgi_request))[0].message,
-            f"Task is already running for Payment Plan {payment_plan.unicef_id}.",
+        assert (
+            list(messages.get_messages(response.wsgi_request))[0].message
+            == f"Task is already running for Payment Plan {payment_plan.unicef_id}."
         )

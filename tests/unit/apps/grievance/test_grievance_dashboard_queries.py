@@ -86,42 +86,14 @@ class TestGrievanceDashboardQuery(APITestCase):
         }
 
         grievances_to_create = (
+            GrievanceTicket(category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_NEW),
+            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK, status=GrievanceTicket.STATUS_ON_HOLD),
             GrievanceTicket(
-                **{
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_NEW,
-                }
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_IN_PROGRESS
             ),
-            GrievanceTicket(
-                **{
-                    "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_ON_HOLD,
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                    "status": GrievanceTicket.STATUS_CLOSED,
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                    "status": GrievanceTicket.STATUS_CLOSED,
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                    "status": GrievanceTicket.STATUS_CLOSED,
-                }
-            ),
+            GrievanceTicket(category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, status=GrievanceTicket.STATUS_CLOSED),
+            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION, status=GrievanceTicket.STATUS_CLOSED),
+            GrievanceTicket(category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION, status=GrievanceTicket.STATUS_CLOSED),
         )
 
         for grievance_ticket in grievances_to_create:

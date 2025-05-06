@@ -4,47 +4,55 @@ from django.db import migrations, models
 import django.db.models.deletion
 from django.db.models import Subquery, OuterRef
 
+
 def migrate_dmppp_pp_fk(apps, schema_editor):  # pragma: no cover
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     DeliveryMechanismPerPaymentPlan = apps.get_model("payment", "DeliveryMechanismPerPaymentPlan")
 
-    subquery_dm = DeliveryMechanismPerPaymentPlan.objects.filter(
-        payment_plan=OuterRef("pk")
-    ).values("delivery_mechanism")[:1]
+    subquery_dm = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=OuterRef("pk")).values(
+        "delivery_mechanism"
+    )[:1]
 
-    subquery_fsp = DeliveryMechanismPerPaymentPlan.objects.filter(
-        payment_plan=OuterRef("pk")
-    ).values("financial_service_provider")[:1]
+    subquery_fsp = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=OuterRef("pk")).values(
+        "financial_service_provider"
+    )[:1]
 
-    PaymentPlan.objects.filter(
-        delivery_mechanism_per_payment_plan__isnull=False
-    ).update(
-        delivery_mechanism=Subquery(subquery_dm),
-        financial_service_provider=Subquery(subquery_fsp)
+    PaymentPlan.objects.filter(delivery_mechanism_per_payment_plan__isnull=False).update(
+        delivery_mechanism=Subquery(subquery_dm), financial_service_provider=Subquery(subquery_fsp)
     )
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('payment', '0017_migration'),
+        ("payment", "0017_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='deliverymechanismperpaymentplan',
-            name='payment_plan',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
-                                       related_name='delivery_mechanism_per_payment_plan', to='payment.paymentplan'),
+            model_name="deliverymechanismperpaymentplan",
+            name="payment_plan",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="delivery_mechanism_per_payment_plan",
+                to="payment.paymentplan",
+            ),
         ),
         migrations.AddField(
-            model_name='paymentplan',
-            name='delivery_mechanism',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='payment.deliverymechanism'),
+            model_name="paymentplan",
+            name="delivery_mechanism",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="payment.deliverymechanism"
+            ),
         ),
         migrations.AddField(
-            model_name='paymentplan',
-            name='financial_service_provider',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='payment.financialserviceprovider'),
+            model_name="paymentplan",
+            name="financial_service_provider",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="payment.financialserviceprovider",
+            ),
         ),
         migrations.RunPython(migrate_dmppp_pp_fk, reverse_code=migrations.RunPython.noop),
     ]

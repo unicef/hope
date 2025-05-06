@@ -1,6 +1,6 @@
 import abc
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 from django.db.models import QuerySet
 
@@ -24,11 +24,11 @@ class BaseSampling(abc.ABC):
         self.households: QuerySet[Household] = Household.objects.none()
 
     @abc.abstractmethod
-    def get_full_list_arguments(self) -> Optional[Dict]:
+    def get_full_list_arguments(self) -> dict | None:
         pass
 
     @abc.abstractmethod
-    def get_random_sampling_arguments(self) -> Optional[Dict]:
+    def get_random_sampling_arguments(self) -> dict | None:
         pass
 
     @abc.abstractmethod
@@ -43,7 +43,7 @@ class FullListSampling(BaseSampling):
         )
         self.sample_size = self.households.count()
 
-    def get_full_list_arguments(self) -> Dict:
+    def get_full_list_arguments(self) -> dict:
         return {
             "excluded_admin_areas": self.excluded_admin_areas_decoded,
         }
@@ -74,7 +74,7 @@ class RandomSampling(BaseSampling):
     def get_full_list_arguments(self) -> None:
         return None
 
-    def get_random_sampling_arguments(self) -> Dict:
+    def get_random_sampling_arguments(self) -> dict:
         return {
             "excluded_admin_areas": self.excluded_admin_areas_decoded,
             "confidence_interval": self.confidence_interval,
@@ -87,14 +87,14 @@ class RandomSampling(BaseSampling):
 @dataclass
 class ResultSampling:
     sample_size: int
-    full_list_arguments: Optional[Dict]
-    random_sampling_arguments: Optional[Dict]
+    full_list_arguments: dict | None
+    random_sampling_arguments: dict | None
     number_of_recipients: int
     households: QuerySet[Household]
 
 
 class Sampling:
-    def __init__(self, input_data: Dict, households: QuerySet[Household]) -> None:
+    def __init__(self, input_data: dict, households: QuerySet[Household]) -> None:
         self.input_data = input_data
         self.households = households
 
@@ -118,7 +118,7 @@ class Sampling:
             households=self.households,
         )
 
-    def generate_sampling(self) -> Tuple[int, int]:
+    def generate_sampling(self) -> tuple[int, int]:
         recipients_count = self.households.count()
         sampling = self._get_sampling()
         sampling.sampling(self.households)

@@ -33,16 +33,16 @@ class TestRemovePreGpfDataCommands(TestCase):
 
     def test_remove_pre_gpf_data(self) -> None:
         # check count before
-        self.assertEqual(Individual.all_objects.count(), 4)
-        self.assertEqual(PendingIndividual.all_objects.count(), 4)
-        self.assertEqual(Household.all_objects.count(), 4)
-        self.assertEqual(PendingHousehold.all_objects.count(), 4)
+        assert Individual.all_objects.count() == 4
+        assert PendingIndividual.all_objects.count() == 4
+        assert Household.all_objects.count() == 4
+        assert PendingHousehold.all_objects.count() == 4
 
         with mock.patch("sys.stdout", new=StringIO()):
             call_command("remove-pre-gpf-data")
 
         # check count after
-        self.assertEqual(Individual.all_objects.count(), 2)
-        self.assertEqual(PendingIndividual.all_objects.count(), 2)
-        self.assertEqual(Household.all_objects.count(), 2)
-        self.assertEqual(PendingHousehold.all_objects.count(), 2)
+        assert Individual.all_objects.count() == 2
+        assert PendingIndividual.all_objects.count() == 2
+        assert Household.all_objects.count() == 2
+        assert PendingHousehold.all_objects.count() == 2

@@ -162,133 +162,133 @@ class TestRecalculateData(TestCase):
     def test_recalculate_female_age_group_0_5_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_0_5_count, 1)
+        assert household.female_age_group_0_5_count == 1
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_6_11_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_6_11_count, 1)
+        assert household.female_age_group_6_11_count == 1
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_12_17_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_12_17_count, 1)
+        assert household.female_age_group_12_17_count == 1
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_18_59_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_18_59_count, 2)
+        assert household.female_age_group_18_59_count == 2
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_60_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_60_count, 0)
+        assert household.female_age_group_60_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_0_5_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_0_5_count, 0)
+        assert household.male_age_group_0_5_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_6_11_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_6_11_count, 0)
+        assert household.male_age_group_6_11_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_12_17_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_12_17_count, 0)
+        assert household.male_age_group_12_17_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_18_59_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_18_59_count, 0)
+        assert household.male_age_group_18_59_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_60_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_60_count, 1)
+        assert household.male_age_group_60_count == 1
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_0_5_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_0_5_disabled_count, 1)
+        assert household.female_age_group_0_5_disabled_count == 1
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_6_11_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_6_11_disabled_count, 1)
+        assert household.female_age_group_6_11_disabled_count == 1
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_12_17_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_12_17_disabled_count, 1)
+        assert household.female_age_group_12_17_disabled_count == 1
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_18_59_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_18_59_disabled_count, 2)
+        assert household.female_age_group_18_59_disabled_count == 2
 
     @freeze_time("2021-07-30")
     def test_recalculate_female_age_group_60_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.female_age_group_60_disabled_count, 0)
+        assert household.female_age_group_60_disabled_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_0_5_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_0_5_disabled_count, 0)
+        assert household.male_age_group_0_5_disabled_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_6_11_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_6_11_disabled_count, 0)
+        assert household.male_age_group_6_11_disabled_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_12_17_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_12_17_disabled_count, 0)
+        assert household.male_age_group_12_17_disabled_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_18_59_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_18_59_disabled_count, 0)
+        assert household.male_age_group_18_59_disabled_count == 0
 
     @freeze_time("2021-07-30")
     def test_recalculate_male_age_group_60_disabled_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.male_age_group_60_disabled_count, 1)
+        assert household.male_age_group_60_disabled_count == 1
 
     @freeze_time("2021-07-30")
     def test_recalculate_size(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.size, 6)
+        assert household.size == 6
 
     @freeze_time("2021-07-30")
     def test_recalculate_pregnant_count(self) -> None:
         recalculate_data(self.household)
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.pregnant_count, 2)
+        assert household.pregnant_count == 2
 
     @patch("hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task.delay")
     @freeze_time("2021-07-29")
@@ -389,23 +389,23 @@ class TestRecalculateData(TestCase):
 
         household, _ = recalculate_data(household=household, save=True)
 
-        self.assertEqual(household.size, 6)
-        self.assertEqual(household.female_age_group_0_5_count, 1)
-        self.assertEqual(household.male_age_group_0_5_count, 0)  # NON_BENEFICIARY
-        self.assertEqual(household.female_age_group_12_17_count, 1)
-        self.assertEqual(household.female_age_group_18_59_count, 3)
-        self.assertEqual(household.male_age_group_60_count, 1)
-        self.assertEqual(household.pregnant_count, 2)
-        self.assertEqual(household.female_age_group_0_5_disabled_count, 1)
-        self.assertEqual(household.female_age_group_12_17_disabled_count, 1)
-        self.assertEqual(household.female_age_group_18_59_disabled_count, 3)
-        self.assertEqual(household.children_count, 2)
-        self.assertEqual(household.female_children_count, 2)
-        self.assertEqual(household.children_disabled_count, 2)
-        self.assertEqual(household.female_children_disabled_count, 2)
+        assert household.size == 6
+        assert household.female_age_group_0_5_count == 1
+        assert household.male_age_group_0_5_count == 0  # NON_BENEFICIARY
+        assert household.female_age_group_12_17_count == 1
+        assert household.female_age_group_18_59_count == 3
+        assert household.male_age_group_60_count == 1
+        assert household.pregnant_count == 2
+        assert household.female_age_group_0_5_disabled_count == 1
+        assert household.female_age_group_12_17_disabled_count == 1
+        assert household.female_age_group_18_59_disabled_count == 3
+        assert household.children_count == 2
+        assert household.female_children_count == 2
+        assert household.children_disabled_count == 2
+        assert household.female_children_disabled_count == 2
 
     @freeze_time("2021-07-30")
     def test_recalculate_population_fields_task(self) -> None:
         recalculate_population_fields_task(household_ids=[self.household.pk])
         household = Household.objects.get(pk=self.household.pk)
-        self.assertEqual(household.size, 6)
+        assert household.size == 6

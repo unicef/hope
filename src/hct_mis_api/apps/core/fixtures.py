@@ -1,5 +1,5 @@
 import random
-from typing import Any, List
+from typing import Any
 
 import factory
 from factory import fuzzy
@@ -37,31 +37,27 @@ def create_afghanistan() -> BusinessArea:
 
 def create_ukraine() -> BusinessArea:
     return BusinessArea.objects.create(
-        **{
-            "code": "4410",
-            "name": "Ukraine",
-            "long_name": "UKRAINE",
-            "region_code": "66",
-            "region_name": "ECAR",
-            "slug": "ukraine",
-            "has_data_sharing_agreement": True,
-            "kobo_token": "YYY",
-        }
+        code="4410",
+        name="Ukraine",
+        long_name="UKRAINE",
+        region_code="66",
+        region_name="ECAR",
+        slug="ukraine",
+        has_data_sharing_agreement=True,
+        kobo_token="YYY",
     )
 
 
 def create_kenya() -> BusinessArea:
     return BusinessArea.objects.create(
-        **{
-            "code": "2400",
-            "name": "Kenya",
-            "long_name": "THE REPUBLIC OF KENYA",
-            "region_code": "63",
-            "region_name": "ESAR",
-            "slug": "kenya",
-            "has_data_sharing_agreement": True,
-            "kobo_token": "ZZZ",
-        }
+        code="2400",
+        name="Kenya",
+        long_name="THE REPUBLIC OF KENYA",
+        region_code="63",
+        region_name="ESAR",
+        slug="kenya",
+        has_data_sharing_agreement=True,
+        kobo_token="ZZZ",
     )
 
 
@@ -101,7 +97,7 @@ class DataCollectingTypeFactory(DjangoModelFactory):
     household_filters_available = True
 
     @factory.post_generation
-    def business_areas(self, create: Any, extracted: List[Any], **kwargs: Any) -> None:
+    def business_areas(self, create: Any, extracted: list[Any], **kwargs: Any) -> None:
         if not create:
             return
 
@@ -138,8 +134,7 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
         label = kwargs.pop("label", None)
         kwargs["label"] = {"English(EN)": label}
-        obj = super()._create(target_class, *args, **kwargs)
-        return obj
+        return super()._create(target_class, *args, **kwargs)
 
     class Meta:
         model = FlexibleAttribute

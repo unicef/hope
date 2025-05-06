@@ -267,7 +267,7 @@ class TestUpdateProgramPartners(APITestCase):
         )
 
         for program_partner_through in Program.objects.get(name="initial name").program_partner_through.all():
-            self.assertEqual(program_partner_through.full_area_access, True)
+            assert program_partner_through.full_area_access is True
 
         self.program.refresh_from_db()
 
@@ -293,20 +293,19 @@ class TestUpdateProgramPartners(APITestCase):
             },
         )
 
-        self.assertEqual(
-            ProgramPartnerThrough.objects.get(partner=self.partner, program__name="initial name").full_area_access, True
+        assert (
+            ProgramPartnerThrough.objects.get(partner=self.partner, program__name="initial name").full_area_access
+            is True
         )
-        self.assertEqual(
-            ProgramPartnerThrough.objects.get(
-                partner=self.other_partner, program__name="initial name"
-            ).full_area_access,
-            False,
+        assert (
+            ProgramPartnerThrough.objects.get(partner=self.other_partner, program__name="initial name").full_area_access
+            is False
         )
-        self.assertEqual(
+        assert (
             ProgramPartnerThrough.objects.get(
                 partner=self.unicef_partner, program__name="initial name"
-            ).full_area_access,
-            True,
+            ).full_area_access
+            is True
         )
 
     def test_update_program_of_other_partner_raise_error(self) -> None:
@@ -352,7 +351,7 @@ class TestUpdateProgramPartners(APITestCase):
             },
         )
 
-        self.assertEqual(ProgramPartnerThrough.objects.filter(program=self.program).count(), 2)
+        assert ProgramPartnerThrough.objects.filter(program=self.program).count() == 2
 
         self.program.refresh_from_db()
         # new partner has a role in this BA
@@ -375,4 +374,4 @@ class TestUpdateProgramPartners(APITestCase):
             },
         )
 
-        self.assertEqual(ProgramPartnerThrough.objects.filter(program=self.program).count(), 3)
+        assert ProgramPartnerThrough.objects.filter(program=self.program).count() == 3

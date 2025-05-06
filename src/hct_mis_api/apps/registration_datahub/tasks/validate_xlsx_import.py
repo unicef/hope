@@ -1,6 +1,5 @@
 import json
 import operator
-from typing import Dict
 
 from django.db import transaction
 
@@ -13,7 +12,7 @@ from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceV
 
 class ValidateXlsxImport:
     @transaction.atomic()
-    def execute(self, import_data: ImportData, program: Program) -> Dict:
+    def execute(self, import_data: ImportData, program: Program) -> dict:
         import_data.status = ImportData.STATUS_RUNNING
         import_data.save()
         errors = UploadXLSXInstanceValidator(program).validate_everything(
@@ -38,21 +37,20 @@ class ValidateXlsxImport:
         if not program.is_social_worker_program:
             if hh_sheet:
                 for row in hh_sheet.iter_rows(min_row=3):
-                    if not any([cell.value for cell in row]):
+                    if not any(cell.value for cell in row):
                         continue
                     number_of_households += 1
 
             if ind_sheet:
                 for row in ind_sheet.iter_rows(min_row=3):
-                    if not any([cell.value for cell in row]):
+                    if not any(cell.value for cell in row):
                         continue
                     number_of_individuals += 1
-        else:
-            if people_sheet:
-                for row in people_sheet.iter_rows(min_row=3):
-                    if not any([cell.value for cell in row]):
-                        continue
-                    number_of_individuals += 1
+        elif people_sheet:
+            for row in people_sheet.iter_rows(min_row=3):
+                if not any(cell.value for cell in row):
+                    continue
+                number_of_individuals += 1
         import_data.number_of_households = number_of_households
         import_data.number_of_individuals = number_of_individuals
         import_data.save()

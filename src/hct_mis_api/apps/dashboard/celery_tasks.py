@@ -16,9 +16,7 @@ CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 @log_start_and_end
 @sentry_tags
 def update_dashboard_figures(self: Any) -> None:
-    """
-    Celery task that runs every 24 hours to refresh dashboard data for allactive BA.
-    """
+    """Celery task that runs every 24 hours to refresh dashboard data for allactive BA."""
     business_areas_with_households = BusinessArea.objects.using("read_only").filter(active=True)
 
     for business_area in business_areas_with_households:
@@ -34,9 +32,7 @@ def update_dashboard_figures(self: Any) -> None:
 @log_start_and_end
 @sentry_tags
 def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
-    """
-    Celery task to refresh dashboard data for a specific business area.
-    """
+    """Celery task to refresh dashboard data for a specific business area."""
     try:
         business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
         set_sentry_business_area_tag(business_area.slug)

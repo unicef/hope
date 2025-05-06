@@ -343,24 +343,24 @@ class TestCloseDataChangeTickets(APITestCase):
             sex="MALE",
         )
         if should_close:
-            self.assertTrue(created_individual.exists())
+            assert created_individual.exists()
             created_individual = created_individual.first()
 
             document = Document.objects.get(document_number="123-123-UX-321")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
-            self.assertEqual(document.country, country_pl)
-            self.assertEqual(document.photo, "test_file_name.jpg")
+            assert document.country == country_pl
+            assert document.photo == "test_file_name.jpg"
 
             role = created_individual.households_and_roles.get(
                 role=ROLE_PRIMARY, household=self.household_one, individual=created_individual
             )
-            self.assertEqual(str(role.household.id), str(self.household_one.id))
+            assert str(role.household.id) == str(self.household_one.id)
 
             bank_account_info = BankAccountInfo.objects.get(individual=created_individual)
-            self.assertEqual(bank_account_info.bank_name, "privatbank")
-            self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
+            assert bank_account_info.bank_name == "privatbank"
+            assert bank_account_info.bank_account_number == "2356789789789789"
         else:
-            self.assertFalse(created_individual.exists())
+            assert not created_individual.exists()
 
     @parameterized.expand(
         [
@@ -385,31 +385,31 @@ class TestCloseDataChangeTickets(APITestCase):
         individual.refresh_from_db()
 
         if should_close:
-            self.assertEqual(individual.given_name, "Test")
-            self.assertEqual(individual.full_name, "Test Example")
-            self.assertEqual(individual.family_name, "Example")
-            self.assertEqual(individual.phone_no_alternative, "+48602203689")
-            self.assertEqual(individual.phone_no_alternative_valid, True)
-            self.assertEqual(individual.marital_status, SINGLE)
-            self.assertEqual(individual.sex, NOT_ANSWERED)
-            self.assertNotEqual(individual.birth_date, date(year=1980, month=2, day=1))
+            assert individual.given_name == "Test"
+            assert individual.full_name == "Test Example"
+            assert individual.family_name == "Example"
+            assert individual.phone_no_alternative == "+48602203689"
+            assert individual.phone_no_alternative_valid is True
+            assert individual.marital_status == SINGLE
+            assert individual.sex == NOT_ANSWERED
+            assert individual.birth_date != date(year=1980, month=2, day=1)
 
             role = individual.households_and_roles.get(role=ROLE_PRIMARY, individual=individual)
-            self.assertEqual(str(role.household.id), str(self.household_one.id))
+            assert str(role.household.id) == str(self.household_one.id)
 
             document = Document.objects.get(document_number="999-888-777")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
 
-            self.assertEqual(document.country, country_pl)
-            self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
-            self.assertEqual(document.photo, "test_file_name.jpg")
+            assert document.country == country_pl
+            assert document.type.key == IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+            assert document.photo == "test_file_name.jpg"
 
-            self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
-            self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
+            assert not Document.objects.filter(id=self.national_id.id).exists()
+            assert Document.objects.filter(id=self.birth_certificate.id).exists()
         else:
-            self.assertEqual(individual.given_name, "Benjamin")
-            self.assertEqual(individual.full_name, "Benjamin Butler")
-            self.assertEqual(individual.family_name, "Butler")
+            assert individual.given_name == "Benjamin"
+            assert individual.full_name == "Benjamin Butler"
+            assert individual.family_name == "Butler"
 
     def test_close_update_individual_document_photo(self) -> None:
         self.create_user_role_with_permissions(
@@ -474,9 +474,9 @@ class TestCloseDataChangeTickets(APITestCase):
         individual.refresh_from_db()
 
         document = Document.objects.get(document_number="999-888-777")
-        self.assertEqual(document.country, country_pl)
-        self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
-        self.assertEqual(document.photo.name, "new_test_file_name.jpg")
+        assert document.country == country_pl
+        assert document.type.key == IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+        assert document.photo.name == "new_test_file_name.jpg"
 
     @parameterized.expand(
         [
@@ -498,7 +498,7 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         self.household_one.refresh_from_db()
         if should_close:
-            self.assertEqual(self.household_one.village, "Test Village")
+            assert self.household_one.village == "Test Village"
 
     def test_close_individual_delete_with_correct_permissions(self) -> None:
         self.create_user_role_with_permissions(
@@ -517,11 +517,11 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         ind = Individual.objects.filter(id=self.individuals_household_two[0].id).first()
         ind.refresh_from_db()
-        self.assertTrue(ind.withdrawn)
+        assert ind.withdrawn
         changed_role_exists = IndividualRoleInHousehold.objects.filter(
             role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
         ).exists()
-        self.assertTrue(changed_role_exists)
+        assert changed_role_exists
 
     def test_close_individual_delete_without_permissions(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
@@ -536,42 +536,42 @@ class TestCloseDataChangeTickets(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        self.assertTrue(Individual.objects.filter(id=self.individuals_household_two[0].id).exists())
+        assert Individual.objects.filter(id=self.individuals_household_two[0].id).exists()
 
-    def test_close_household_delete(cls) -> None:
-        cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
+    def test_close_household_delete(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
 
         grievance_ticket = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
-            admin2=cls.admin_area_1,
-            business_area=cls.business_area,
+            admin2=self.admin_area_1,
+            business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketDeleteHouseholdDetailsFactory(
             ticket=grievance_ticket,
-            household=cls.household_one,
+            household=self.household_one,
             approve_status=True,
         )
 
-        cls.graphql_request(
-            request_string=cls.STATUS_CHANGE_MUTATION,
-            context={"user": cls.user},
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user},
             variables={
-                "grievanceTicketId": cls.id_to_base64(grievance_ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(grievance_ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
 
-        cls.household_one.refresh_from_db()
-        cls.individuals[0].refresh_from_db()
-        cls.individuals[1].refresh_from_db()
+        self.household_one.refresh_from_db()
+        self.individuals[0].refresh_from_db()
+        self.individuals[1].refresh_from_db()
 
-        cls.assertTrue(cls.household_one.withdrawn)
-        cls.assertTrue(cls.individuals[0].withdrawn)
-        cls.assertTrue(cls.individuals[1].withdrawn)
+        assert self.household_one.withdrawn
+        assert self.individuals[0].withdrawn
+        assert self.individuals[1].withdrawn
 
     def test_close_add_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
@@ -598,8 +598,8 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         bank_account_info = BankAccountInfo.objects.get(individual=created_individual)
-        self.assertEqual(bank_account_info.bank_name, "privatbank")
-        self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
+        assert bank_account_info.bank_name == "privatbank"
+        assert bank_account_info.bank_account_number == "2356789789789789"
 
     def test_close_update_individual_create_bank_account(self) -> None:
         self.create_user_role_with_permissions(
@@ -643,8 +643,8 @@ class TestCloseDataChangeTickets(APITestCase):
         individual.refresh_from_db()
 
         bank_account_info = BankAccountInfo.objects.get(individual=individual)
-        self.assertEqual(bank_account_info.bank_name, "privatbank")
-        self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
+        assert bank_account_info.bank_name == "privatbank"
+        assert bank_account_info.bank_account_number == "2356789789789789"
 
     def test_close_update_individual_update_bank_account(self) -> None:
         self.create_user_role_with_permissions(
@@ -703,5 +703,5 @@ class TestCloseDataChangeTickets(APITestCase):
         individual.refresh_from_db()
 
         bank_account_info = BankAccountInfo.objects.get(individual=individual)
-        self.assertEqual(bank_account_info.bank_name, "privatbank")
-        self.assertEqual(bank_account_info.bank_account_number, "1111222233334444")
+        assert bank_account_info.bank_name == "privatbank"
+        assert bank_account_info.bank_account_number == "1111222233334444"

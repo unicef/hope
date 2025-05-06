@@ -4,22 +4,21 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0015_migration'),
+        ("household", "0015_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='household',
-            name='mis_unicef_id',
+            model_name="household",
+            name="mis_unicef_id",
         ),
         migrations.RemoveField(
-            model_name='individual',
-            name='administration_of_rutf',
+            model_name="individual",
+            name="administration_of_rutf",
         ),
         migrations.RemoveField(
-            model_name='individual',
-            name='mis_unicef_id',
+            model_name="individual",
+            name="mis_unicef_id",
         ),
     ]

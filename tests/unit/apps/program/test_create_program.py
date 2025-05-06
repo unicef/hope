@@ -221,7 +221,7 @@ class TestCreateProgram(APITestCase):
 
     def test_create_program_with_deprecated_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
+            label="Deprecated", code="deprecated", description="Deprecated", deprecated=True
         )
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
@@ -234,7 +234,7 @@ class TestCreateProgram(APITestCase):
 
     def test_create_program_with_inactive_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
+            label="Inactive", code="inactive", description="Inactive", active=False
         )
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
@@ -248,7 +248,7 @@ class TestCreateProgram(APITestCase):
     def test_create_program_with_dct_from_other_ba(self) -> None:
         other_ba = BusinessAreaFactory()
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA", "active": True}
+            label="Test Wrong BA", code="test_wrong_ba", description="Test Wrong BA", active=True
         )
         dct.limit_to.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -263,7 +263,7 @@ class TestCreateProgram(APITestCase):
     def test_program_unique_constraints(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
-        self.assertEqual(Program.objects.count(), 0)
+        assert Program.objects.count() == 0
 
         # First, response is ok and program is created
         response_ok = self.graphql_request(
@@ -272,7 +272,7 @@ class TestCreateProgram(APITestCase):
             variables=self.program_data,
         )
         assert "errors" not in response_ok
-        self.assertEqual(Program.objects.count(), 1)
+        assert Program.objects.count() == 1
 
         # Second, response has error due to unique constraints
         response_error = self.graphql_request(
@@ -280,15 +280,15 @@ class TestCreateProgram(APITestCase):
             context={"user": self.user},
             variables=self.program_data,
         )
-        self.assertEqual(Program.objects.count(), 1)
-        self.assertEqual(
-            response_error["data"]["createProgram"]["validationErrors"]["__all__"][0],
-            f"Program for name: {self.program_data['programData']['name']} and business_area: {self.program_data['programData']['businessAreaSlug']} already exists.",
+        assert Program.objects.count() == 1
+        assert (
+            response_error["data"]["createProgram"]["validationErrors"]["__all__"][0]
+            == f"Program for name: {self.program_data['programData']['name']} and business_area: {self.program_data['programData']['businessAreaSlug']} already exists."
         )
 
         # Third, we remove program with given name and business area
         Program.objects.first().delete()
-        self.assertEqual(Program.objects.count(), 0)
+        assert Program.objects.count() == 0
 
         # Fourth, we can create program with the same name and business area like removed one
         response_ok = self.graphql_request(
@@ -297,7 +297,7 @@ class TestCreateProgram(APITestCase):
             variables=self.program_data,
         )
         assert "errors" not in response_ok
-        self.assertEqual(Program.objects.count(), 1)
+        assert Program.objects.count() == 1
 
     def test_create_program_with_programme_code(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -307,7 +307,7 @@ class TestCreateProgram(APITestCase):
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
         program = Program.objects.get(name="Test")
-        self.assertEqual(program.programme_code, "ABC2")
+        assert program.programme_code == "ABC2"
 
     @parameterized.expand(
         [
@@ -345,7 +345,7 @@ class TestCreateProgram(APITestCase):
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
         for program_partner_through in Program.objects.get(name="Test").program_partner_through.all():
-            self.assertEqual(program_partner_through.full_area_access, True)
+            assert program_partner_through.full_area_access is True
 
     def test_create_program_with_partners_none_partners_access(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -366,7 +366,7 @@ class TestCreateProgram(APITestCase):
         )
 
         program_count = Program.objects.filter(programme_code="ABC2").count()
-        self.assertEqual(program_count, 1)
+        assert program_count == 1
 
     def test_programme_code_can_be_reuse_in_different_business_area(self) -> None:
         business_area = BusinessAreaFactory()
@@ -379,7 +379,7 @@ class TestCreateProgram(APITestCase):
         )
 
         program_count = Program.objects.filter(programme_code="AB.2").count()
-        self.assertEqual(program_count, 2)
+        assert program_count == 2
 
     def test_create_program_without_programme_code(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -389,8 +389,8 @@ class TestCreateProgram(APITestCase):
         )
 
         program = Program.objects.get(name="Test")
-        self.assertIsNotNone(program.programme_code)
-        self.assertEqual(len(program.programme_code), 4)
+        assert program.programme_code is not None
+        assert len(program.programme_code) == 4
 
     def test_create_program_with_programme_code_as_empty_string(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -401,8 +401,8 @@ class TestCreateProgram(APITestCase):
         )
 
         program = Program.objects.get(name="Test")
-        self.assertIsNotNone(program.programme_code)
-        self.assertEqual(len(program.programme_code), 4)
+        assert program.programme_code is not None
+        assert len(program.programme_code) == 4
 
     def test_create_program_with_programme_code_lowercase(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -413,9 +413,9 @@ class TestCreateProgram(APITestCase):
         )
 
         program = Program.objects.get(name="Test")
-        self.assertIsNotNone(program.programme_code)
-        self.assertEqual(len(program.programme_code), 4)
-        self.assertEqual(program.programme_code, "AB2-")
+        assert program.programme_code is not None
+        assert len(program.programme_code) == 4
+        assert program.programme_code == "AB2-"
 
     def test_create_program_with_programme_code_not_within_allowed_characters(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)

@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 import graphene
 from graphene_django import DjangoObjectType
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.targeting.models import TargetingIndividualRuleFilterBlock
 
 
-def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> Dict:
+def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> dict:
     scopes = [Scope.TARGETING]
     if payment_plan.is_social_worker_program:
         scopes.append(Scope.XLSX_PEOPLE)
@@ -37,7 +37,7 @@ def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> Dict:
     return field
 
 
-def filter_choices(field: Optional[Dict], args: List) -> Optional[Dict]:
+def filter_choices(field: dict | None, args: list) -> dict | None:
     if not field:
         return None
     choices = field.get("choices")
@@ -59,19 +59,20 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
-        if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
+    def resolve_field_attribute(self, info: Any) -> dict | None:
+        if self.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
-                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.payment_plan
+                self.field_name, self.targeting_criteria_rule.targeting_criteria.payment_plan
             )
             return filter_choices(
-                field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
+                field_attribute,
+                self.arguments,  # type: ignore # can't convert graphene list to list
             )
         program = None
-        if parent.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
+        if self.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
             encoded_program_id = info.context.headers.get("Program")
             program = Program.objects.get(id=decode_id_string(encoded_program_id))
-        return FlexibleAttribute.objects.get(name=parent.field_name, program=program)
+        return FlexibleAttribute.objects.get(name=self.field_name, program=program)
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter
@@ -84,19 +85,19 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Any:
-        if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
+    def resolve_field_attribute(self, info: Any) -> Any:
+        if self.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
-                parent.field_name,
-                parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.payment_plan,
+                self.field_name,
+                self.individuals_filters_block.targeting_criteria_rule.targeting_criteria.payment_plan,
             )
-            return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
+            return filter_choices(field_attribute, self.arguments)  # type: ignore # can't convert graphene list to list
 
         program = None
-        if parent.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
+        if self.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
             encoded_program_id = info.context.headers.get("Program")
             program = Program.objects.get(id=decode_id_string(encoded_program_id))
-        return FlexibleAttribute.objects.get(name=parent.field_name, program=program)
+        return FlexibleAttribute.objects.get(name=self.field_name, program=program)
 
     class Meta:
         model = target_models.TargetingIndividualBlockRuleFilter
@@ -107,14 +108,14 @@ class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
     comparison_method = graphene.String()
     label_en = graphene.String()
 
-    def resolve_arguments(parent, info: Any) -> "GrapheneList":
-        return parent.arguments
+    def resolve_arguments(self, info: Any) -> "GrapheneList":
+        return self.arguments
 
-    def resolve_label_en(parent, info: Any) -> str:
+    def resolve_label_en(self, info: Any) -> str:
         field_labels_dict = {
             field: field.replace("__", " ").title() for field in AccountType.get_targeting_field_names()
         }
-        return field_labels_dict.get(parent.field_name, "")
+        return field_labels_dict.get(self.field_name, "")
 
     class Meta:
         model = target_models.TargetingCollectorBlockRuleFilter
@@ -123,8 +124,8 @@ class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
 class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
     individual_block_filters = graphene.List(TargetingIndividualBlockRuleFilterNode)
 
-    def resolve_individual_block_filters(parent, info: Any) -> "QuerySet":
-        return parent.individual_block_filters.all()
+    def resolve_individual_block_filters(self, info: Any) -> "QuerySet":
+        return self.individual_block_filters.all()
 
     class Meta:
         model = target_models.TargetingIndividualRuleFilterBlock
@@ -133,8 +134,8 @@ class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
 class TargetingCollectorRuleFilterBlockNode(DjangoObjectType):
     collector_block_filters = graphene.List(TargetingCollectorBlockRuleFilterNode)
 
-    def resolve_collector_block_filters(parent, info: Any) -> "QuerySet":
-        return parent.collector_block_filters.all()
+    def resolve_collector_block_filters(self, info: Any) -> "QuerySet":
+        return self.collector_block_filters.all()
 
     class Meta:
         model = target_models.TargetingCollectorRuleFilterBlock
@@ -162,19 +163,19 @@ class TargetingCriteriaNode(DjangoObjectType):
     household_ids = graphene.String()
     individual_ids = graphene.String()
 
-    def resolve_rules(parent, info: Any) -> "QuerySet":
-        return parent.rules.all()
+    def resolve_rules(self, info: Any) -> "QuerySet":
+        return self.rules.all()
 
-    def resolve_individual_ids(parent, info: Any) -> str:
+    def resolve_individual_ids(self, info: Any) -> str:
         ind_ids: set = set()
-        for rule in parent.rules.all():
+        for rule in self.rules.all():
             if rule.individual_ids:
                 ind_ids.update(ind_id.strip() for ind_id in rule.individual_ids.split(",") if ind_id.strip())
         return ", ".join(sorted(ind_ids))
 
-    def resolve_household_ids(parent, info: Any) -> str:
+    def resolve_household_ids(self, info: Any) -> str:
         hh_ids: set = set()
-        for rule in parent.rules.all():
+        for rule in self.rules.all():
             if rule.household_ids:
                 hh_ids.update(hh_id.strip() for hh_id in rule.household_ids.split(",") if hh_id.strip())
         return ", ".join(sorted(hh_ids))

@@ -26,7 +26,7 @@ class TestCountryCodeMap(TestCase):
         ]
     )
     def test_get_code(self, _: Any, iso_code: str, expected: str) -> None:
-        self.assertEqual(CountryCodeMap.objects.get_code(iso_code), expected)
+        assert CountryCodeMap.objects.get_code(iso_code) == expected
 
     @parameterized.expand(
         [
@@ -36,7 +36,7 @@ class TestCountryCodeMap(TestCase):
         ]
     )
     def test_get_iso2_code_from_ca_code(self, _: Any, ca_code: str, expected: str) -> None:
-        self.assertEqual(CountryCodeMap.objects.get_iso2_code(ca_code), expected)
+        assert CountryCodeMap.objects.get_iso2_code(ca_code) == expected
 
     @parameterized.expand(
         [
@@ -46,16 +46,16 @@ class TestCountryCodeMap(TestCase):
         ]
     )
     def test_get_iso3_code_from_ca_code(self, _: Any, ca_code: str, expected: str) -> None:
-        self.assertEqual(CountryCodeMap.objects.get_iso3_code(ca_code), expected)
+        assert CountryCodeMap.objects.get_iso3_code(ca_code) == expected
 
     def test_cache(self) -> None:
         CountryCodeMap.objects._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
         with self.assertNumQueries(1):
-            self.assertEqual(CountryCodeMap.objects.get_code("AFG"), "AFG")
-            self.assertEqual(CountryCodeMap.objects.get_code("afg"), "AFG")
-            self.assertEqual(CountryCodeMap.objects.get_code("af"), "AFG")
-            self.assertEqual(CountryCodeMap.objects.get_code("AUS"), "AUL")
-            self.assertEqual(CountryCodeMap.objects.get_iso3_code("AFG"), "AFG")
-            self.assertEqual(CountryCodeMap.objects.get_iso3_code("afg"), "AFG")
-            self.assertEqual(CountryCodeMap.objects.get_iso3_code("AUL"), "AUS")
-            self.assertEqual(CountryCodeMap.objects.get_iso2_code("AFg"), "AF")
+            assert CountryCodeMap.objects.get_code("AFG") == "AFG"
+            assert CountryCodeMap.objects.get_code("afg") == "AFG"
+            assert CountryCodeMap.objects.get_code("af") == "AFG"
+            assert CountryCodeMap.objects.get_code("AUS") == "AUL"
+            assert CountryCodeMap.objects.get_iso3_code("AFG") == "AFG"
+            assert CountryCodeMap.objects.get_iso3_code("afg") == "AFG"
+            assert CountryCodeMap.objects.get_iso3_code("AUL") == "AUS"
+            assert CountryCodeMap.objects.get_iso2_code("AFg") == "AF"

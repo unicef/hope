@@ -31,7 +31,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def standard_program() -> Program:
-    yield get_program_with_dct_type_and_name("Test For Edit", "TEST")
+    return get_program_with_dct_type_and_name("Test For Edit", "TEST")
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def program_with_three_cycles() -> Program:
     ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     ProgramCycleFactory(program=program, status=ProgramCycle.DRAFT)
     program.save()
-    yield program
+    return program
 
 
 @pytest.fixture
@@ -63,7 +63,7 @@ def program_with_different_cycles() -> Program:
         end_date=datetime.now() + relativedelta(days=20),
     )
     program.save()
-    yield program
+    return program
 
 
 def get_program_with_dct_type_and_name(
@@ -81,7 +81,7 @@ def get_program_with_dct_type_and_name(
         cycle_end_date = datetime.now() + relativedelta(days=10)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code=programme_code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -94,19 +94,18 @@ def get_program_with_dct_type_and_name(
         cycle__end_date=cycle_end_date,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 @pytest.fixture
 def standard_program_with_draft_programme_cycle() -> Program:
-    yield get_program_without_cycle_end_date(
+    return get_program_without_cycle_end_date(
         "Active Programme", "9876", status=Program.ACTIVE, program_cycle_status=ProgramCycle.DRAFT
     )
 
 
 @pytest.fixture
 def standard_active_program() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme",
         "9876",
         status=Program.ACTIVE,
@@ -117,7 +116,7 @@ def standard_active_program() -> Program:
 
 @pytest.fixture
 def standard_active_program_cycle_draft() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme",
         "9876",
         status=Program.ACTIVE,
@@ -128,7 +127,7 @@ def standard_active_program_cycle_draft() -> Program:
 
 @pytest.fixture
 def standard_active_program_with_draft_program_cycle() -> Program:
-    yield get_program_with_dct_type_and_name(
+    return get_program_with_dct_type_and_name(
         "Active Programme And DRAFT Programme Cycle",
         "LILI",
         status=Program.ACTIVE,
@@ -216,7 +215,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         is_follow_up=False,
         program_cycle=cycle,
     )
-    yield payment_plan[0]
+    return payment_plan[0]
 
 
 @pytest.fixture
@@ -355,7 +354,7 @@ class TestProgrammeDetails:
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         pageProgrammeDetails.getButtonActivateProgram().click()
         pageProgrammeDetails.getButtonActivateProgramModal().click()
-        assert 1 == len(pageProgrammeDetails.getProgramCycleRow())
+        assert len(pageProgrammeDetails.getProgramCycleRow()) == 1
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
         assert "-" in pageProgrammeDetails.getProgramCycleEndDate()[0].text
         assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
@@ -381,11 +380,11 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
         pageProgrammeDetails.getProgramCycleRow()
         for _ in range(50):
-            if 2 == len(pageProgrammeDetails.getProgramCycleRow()):
+            if len(pageProgrammeDetails.getProgramCycleRow()) == 2:
                 break
             sleep(0.1)
         else:
-            assert 2 == len(pageProgrammeDetails.getProgramCycleRow())
+            assert len(pageProgrammeDetails.getProgramCycleRow()) == 2
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[0].text
         assert datetime.now().strftime("%-d %b %Y") in pageProgrammeDetails.getProgramCycleEndDate()[0].text
@@ -533,21 +532,21 @@ class TestProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
         for _ in range(50):
-            if 3 == len(pageProgrammeDetails.getProgramCycleTitle()):
+            if len(pageProgrammeDetails.getProgramCycleTitle()) == 3:
                 break
             sleep(0.1)
         else:
-            assert 3 == len(pageProgrammeDetails.getProgramCycleTitle())
+            assert len(pageProgrammeDetails.getProgramCycleTitle()) == 3
         program_cycle_1 = pageProgrammeDetails.getProgramCycleTitle()[0].text
         program_cycle_3 = pageProgrammeDetails.getProgramCycleTitle()[2].text
         pageProgrammeDetails.getDeleteProgrammeCycle()[1].click()
         pageProgrammeDetails.getButtonDelete().click()
         for _ in range(50):
-            if 3 == len(pageProgrammeDetails.getProgramCycleTitle()):
+            if len(pageProgrammeDetails.getProgramCycleTitle()) == 3:
                 break
             sleep(0.1)
         else:
-            assert 2 == len(pageProgrammeDetails.getProgramCycleTitle())
+            assert len(pageProgrammeDetails.getProgramCycleTitle()) == 2
 
         assert program_cycle_1 in pageProgrammeDetails.getProgramCycleTitle()[0].text
         for _ in range(50):
@@ -562,11 +561,11 @@ class TestProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
         for _ in range(50):
-            if 3 == len(pageProgrammeDetails.getProgramCycleRow()):
+            if len(pageProgrammeDetails.getProgramCycleRow()) == 3:
                 break
             sleep(0.1)
         else:
-            assert 3 == len(pageProgrammeDetails.getProgramCycleRow())
+            assert len(pageProgrammeDetails.getProgramCycleRow()) == 3
         assert pageProgrammeDetails.getButtonEditProgramCycle()[0]
         assert pageProgrammeDetails.getButtonEditProgramCycle()[1]
         with pytest.raises(Exception):
@@ -674,7 +673,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getProgramCycleRow()
 
         for _ in range(50):
-            if 2 == len(pageProgrammeDetails.getProgramCycleStatus()):
+            if len(pageProgrammeDetails.getProgramCycleStatus()) == 2:
                 break
             sleep(0.1)
 

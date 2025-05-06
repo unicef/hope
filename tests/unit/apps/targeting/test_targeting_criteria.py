@@ -387,10 +387,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             targeting_criteria=t_criteria,
-            **{
-                "household_ids": f"{self.hh_1.unicef_id}",
-                "individual_ids": "",
-            },
+            household_ids=f"{self.hh_1.unicef_id}",
+            individual_ids="",
         )
 
         assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 1
@@ -403,10 +401,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             targeting_criteria=t_criteria2,
-            **{
-                "household_ids": f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
-                "individual_ids": "",
-            },
+            household_ids=f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
+            individual_ids="",
         )
         assert Household.objects.filter(t_criteria2.get_query()).distinct().count() == 2
 
@@ -420,10 +416,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             targeting_criteria=t_criteria,
-            **{
-                "household_ids": "",
-                "individual_ids": f"{self.hh_1.individuals.first().unicef_id}",
-            },
+            household_ids="",
+            individual_ids=f"{self.hh_1.individuals.first().unicef_id}",
         )
         assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 1
         t_criteria2 = TargetingCriteriaFactory()
@@ -435,10 +429,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             targeting_criteria=t_criteria2,
-            **{
-                "household_ids": "",
-                "individual_ids": f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
-            },
+            household_ids="",
+            individual_ids=f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
         )
 
         assert Household.objects.filter(t_criteria2.get_query()).distinct().count() == 2
@@ -453,10 +445,8 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
         )
         TargetingCriteriaRuleFactory(
             targeting_criteria=t_criteria,
-            **{
-                "household_ids": f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
-                "individual_ids": f"{self.hh_3.individuals.first().unicef_id}",
-            },
+            household_ids=f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
+            individual_ids=f"{self.hh_3.individuals.first().unicef_id}",
         )
 
         assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 3

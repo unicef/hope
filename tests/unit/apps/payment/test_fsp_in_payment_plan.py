@@ -253,11 +253,11 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                 "paymentPlanId": self.encoded_payment_plan_id,
             },
         )
-        assert (
-            "errors" not in new_get_volume_by_delivery_mechanism_response
-        ), new_get_volume_by_delivery_mechanism_response
+        assert "errors" not in new_get_volume_by_delivery_mechanism_response, (
+            new_get_volume_by_delivery_mechanism_response
+        )
 
         new_data = new_get_volume_by_delivery_mechanism_response["data"]["paymentPlan"]["volumeByDeliveryMechanism"]
         assert len(new_data) == 1
-        self.assertEqual(new_data[0]["volume"], 1500)
-        self.assertEqual(new_data[0]["volumeUsd"], 300)
+        assert new_data[0]["volume"] == 1500
+        assert new_data[0]["volumeUsd"] == 300

@@ -1,7 +1,6 @@
 import hashlib
 import json
 import logging
-from typing import List, Optional
 from uuid import UUID
 
 from django.core.cache import cache
@@ -31,7 +30,7 @@ logger = logging.getLogger(__name__)
 @app.task()
 @log_start_and_end
 @sentry_tags
-def recalculate_population_fields_chunk_task(households_ids: List[UUID], program_id: Optional[str] = None) -> None:
+def recalculate_population_fields_chunk_task(households_ids: list[UUID], program_id: str | None = None) -> None:
     from hct_mis_api.apps.household.models import Household, Individual
 
     # memory optimization
@@ -67,9 +66,7 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID], program
 @app.task()
 @log_start_and_end
 @sentry_tags
-def recalculate_population_fields_task(
-    household_ids: Optional[List[str]] = None, program_id: Optional[str] = None
-) -> None:
+def recalculate_population_fields_task(household_ids: list[str] | None = None, program_id: str | None = None) -> None:
     from hct_mis_api.apps.household.models import Household
 
     params = {}
@@ -187,7 +184,7 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
 @app.task()
 @log_start_and_end
 @sentry_tags
-def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
+def revalidate_phone_number_task(individual_ids: list[UUID]) -> None:
     individuals_to_update = []
     individuals = Individual.objects.filter(pk__in=individual_ids).only("phone_no", "phone_no_alternative")
     for individual in individuals:
@@ -200,7 +197,7 @@ def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
 @app.task()
 @log_start_and_end
 @sentry_tags
-def enroll_households_to_program_task(households_ids: List, program_for_enroll_id: str, user_id: str) -> None:
+def enroll_households_to_program_task(households_ids: list, program_for_enroll_id: str, user_id: str) -> None:
     task_params = {
         "task_name": "enroll_households_to_program_task",
         "household_ids": sorted([str(household_id) for household_id in households_ids]),

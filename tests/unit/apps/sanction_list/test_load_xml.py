@@ -22,37 +22,37 @@ class TestLoadXML(TestCase):
         task.execute()
 
         individuals = SanctionListIndividual.all_objects.all()
-        self.assertEqual(individuals.count(), 1)
+        assert individuals.count() == 1
 
         kpi_33_documents = individuals.get(reference_number="KPi.111").documents.all()
-        self.assertEqual(kpi_33_documents.count(), 1)
+        assert kpi_33_documents.count() == 1
 
         task = LoadSanctionListXMLTask(file_path=f"{main_test_files_path}/updated-consolidated.xml")
         task.execute()
 
         all_individuals = SanctionListIndividual.all_objects.all()
-        self.assertEqual(all_individuals.count(), 1)
+        assert all_individuals.count() == 1
 
         active_individuals = SanctionListIndividual.objects.filter(active=True)
-        self.assertEqual(active_individuals.count(), 1)
+        assert active_individuals.count() == 1
 
         updated_individual = active_individuals.get(reference_number="KPi.111")
-        self.assertEqual(updated_individual.third_name, "TEST")
-        self.assertEqual(updated_individual.listed_on, timezone.make_aware(datetime(year=2016, month=11, day=11)))
+        assert updated_individual.third_name == "TEST"
+        assert updated_individual.listed_on == timezone.make_aware(datetime(year=2016, month=11, day=11))
 
-        self.assertEqual(updated_individual.documents.all().count(), 2)
+        assert updated_individual.documents.all().count() == 2
 
         test_doc = updated_individual.documents.get(document_number="111222333555")
-        self.assertEqual(test_doc.type_of_document, "Passport")
+        assert test_doc.type_of_document == "Passport"
 
         task = LoadSanctionListXMLTask(file_path=f"{main_test_files_path}/updated2-consolidated.xml")
         task.execute()
 
         all_individuals = SanctionListIndividual.all_objects.all()
-        self.assertEqual(all_individuals.count(), 1)
+        assert all_individuals.count() == 1
 
         active_individuals = SanctionListIndividual.objects.filter(active=True)
-        self.assertEqual(active_individuals.count(), 1)
+        assert active_individuals.count() == 1
 
         updated_individual = active_individuals.get(reference_number="KPi.111")
-        self.assertEqual(updated_individual.listed_on, timezone.make_aware(datetime(year=2016, month=11, day=11)))
+        assert updated_individual.listed_on == timezone.make_aware(datetime(year=2016, month=11, day=11))

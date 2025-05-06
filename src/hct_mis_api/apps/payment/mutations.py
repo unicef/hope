@@ -2,7 +2,7 @@ import io
 import logging
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 from zipfile import BadZipFile
 
 from django.db import transaction
@@ -106,7 +106,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     @raise_program_status_is(Program.FINISHED)
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
+    def mutate(cls, root: Any, info: Any, input: dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
         payment_plan_object: "PaymentPlan" = get_payment_plan_object(input["cash_or_payment_plan_id"])
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan_object)
@@ -138,7 +138,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "EditPaymentVerificationMutation":
+    def mutate(cls, root: Any, info: Any, input: dict, **kwargs: Any) -> "EditPaymentVerificationMutation":
         payment_verification_id = decode_id_string(input.get("payment_verification_plan_id"))
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_id)
 
@@ -175,7 +175,7 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
     @is_authenticated
     @transaction.atomic
     def processed_mutate(
-        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, payment_verification_plan_id: str | None, **kwargs: Any
     ) -> "ActivatePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -243,7 +243,7 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, payment_verification_plan_id: str | None, **kwargs: Any
     ) -> "DiscardPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -277,7 +277,7 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, payment_verification_plan_id: str | None, **kwargs: Any
     ) -> "InvalidPaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -311,7 +311,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_verification_plan_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, payment_verification_plan_id: str | None, **kwargs: Any
     ) -> "DeletePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
@@ -357,8 +357,8 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
         cls,
         root: Any,
         info: Any,
-        payment_verification_id: Optional[str],
-        received_amount: Optional[int],
+        payment_verification_id: str | None,
+        received_amount: int | None,
         status: str,
         **kwargs: Any,
     ) -> "UpdatePaymentVerificationStatusAndReceivedAmount":
@@ -386,7 +386,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
             raise GraphQLError(
                 f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
             )
-        elif (
+        if (
             status == PaymentVerification.STATUS_NOT_RECEIVED
             and received_amount is not None
             and received_amount != Decimal(0)
@@ -397,7 +397,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
             raise GraphQLError(
                 f"Wrong status {PaymentVerification.STATUS_NOT_RECEIVED} when received_amount ({received_amount}) is not 0 or empty",
             )
-        elif status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES and (
+        if status == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES and (
             received_amount is None or received_amount == Decimal(0)
         ):
             logger.warning(
@@ -406,7 +406,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
             raise GraphQLError(
                 f"Wrong status {PaymentVerification.STATUS_RECEIVED_WITH_ISSUES} when received_amount ({received_amount}) is 0 or empty",
             )
-        elif status == PaymentVerification.STATUS_RECEIVED and received_amount != delivered_amount:
+        if status == PaymentVerification.STATUS_RECEIVED and received_amount != delivered_amount:
             received_amount_text = "None" if received_amount is None else received_amount
             logger.warning(
                 f"Wrong status {PaymentVerification.STATUS_RECEIVED} when received_amount ({received_amount_text}) ≠ delivered_amount ({delivered_amount})"
@@ -519,7 +519,7 @@ class XlsxErrorNode(graphene.ObjectType):
         return parent.sheet
 
     @staticmethod
-    def resolve_coordinates(parent: XlsxError, info: Any) -> Optional[str]:
+    def resolve_coordinates(parent: XlsxError, info: Any) -> str | None:
         return parent.coordinates
 
     @staticmethod
@@ -653,7 +653,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "ActionPaymentPlanMutation":
+    def mutate(cls, root: Any, info: Any, input: dict, **kwargs: Any) -> "ActionPaymentPlanMutation":
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
@@ -721,7 +721,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentPlanMutation":
+    def mutate(cls, root: Any, info: Any, input: dict, **kwargs: Any) -> "CreatePaymentPlanMutation":
         business_area_slug = info.context.headers.get("Business-Area")
         cls.has_permission(info, Permissions.PM_CREATE, business_area_slug)
 
@@ -748,7 +748,7 @@ class OpenPaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "OpenPaymentPlanMutation":
+    def mutate(cls, root: Any, info: Any, input: dict, **kwargs: Any) -> "OpenPaymentPlanMutation":
         business_area_slug = info.context.headers.get("Business-Area")
         cls.has_permission(info, Permissions.PM_CREATE, business_area_slug)
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
@@ -779,7 +779,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "UpdatePaymentPlanMutation":
+    def mutate(cls, root: Any, info: Any, input: dict, **kwargs: Any) -> "UpdatePaymentPlanMutation":
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
@@ -838,7 +838,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
     @classmethod
     def export_action(
-        cls, payment_plan: PaymentPlan, user_id: "UUID", fsp_xlsx_template_id: Optional[str] = None
+        cls, payment_plan: PaymentPlan, user_id: "UUID", fsp_xlsx_template_id: str | None = None
     ) -> PaymentPlan:
         if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
             msg = "You can only export Payment List for LOCKED Payment Plan"
@@ -850,10 +850,10 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, fsp_xlsx_template_id: Optional[str] = None, **kwargs: Any
+        cls, root: Any, info: Any, payment_plan_id: str, fsp_xlsx_template_id: str | None = None, **kwargs: Any
     ) -> "ExportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-        fsp_xlsx_template_id_str: Optional[str] = decode_id_string(fsp_xlsx_template_id)
+        fsp_xlsx_template_id_str: str | None = decode_id_string(fsp_xlsx_template_id)
         cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
         if fsp_xlsx_template_id:
             cls.has_permission(info, Permissions.PM_DOWNLOAD_FSP_AUTH_CODE, payment_plan.business_area)
@@ -876,7 +876,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymentListMutation):
     @classmethod
     def export_action(
-        cls, payment_plan: PaymentPlan, user_id: "UUID", fsp_xlsx_template_id: Optional[str] = None
+        cls, payment_plan: PaymentPlan, user_id: "UUID", fsp_xlsx_template_id: str | None = None
     ) -> PaymentPlan:
         if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             msg = "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
@@ -1090,8 +1090,8 @@ class ExcludeHouseholdsMutation(PermissionMutation):
         root: Any,
         info: Any,
         payment_plan_id: str,
-        excluded_households_ids: List[str],
-        exclusion_reason: Optional[str] = "",
+        excluded_households_ids: list[str],
+        exclusion_reason: str | None = "",
     ) -> "ExcludeHouseholdsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
@@ -1177,7 +1177,7 @@ class SplitPaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, split_type: str, payments_no: Optional[int], **kwargs: Any
+        cls, root: Any, info: Any, payment_plan_id: str, split_type: str, payments_no: int | None, **kwargs: Any
     ) -> "SplitPaymentPlanMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PM_SPLIT, payment_plan.business_area)
@@ -1290,7 +1290,7 @@ class AssignFundsCommitmentsMutation(PermissionMutation):
         root: Any,
         info: Any,
         payment_plan_id: str,
-        fund_commitment_items_ids: List[Optional[str]],
+        fund_commitment_items_ids: list[str | None],
     ) -> "AssignFundsCommitmentsMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 

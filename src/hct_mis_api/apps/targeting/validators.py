@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from django.core.exceptions import ValidationError
 
@@ -76,7 +76,7 @@ class TargetingCriteriaRuleFilterInputValidator:
 
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
-    def validate(rule: "Dict", program: "Program") -> None:
+    def validate(rule: "dict", program: "Program") -> None:
         households_filters_blocks = rule.get("households_filters_blocks", [])
         individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
 
@@ -90,9 +90,9 @@ class TargetingCriteriaRuleInputValidator:
 
 class TargetingCriteriaInputValidator:
     @staticmethod
-    def validate(targeting_criteria: Dict, program: Program) -> None:
+    def validate(targeting_criteria: dict, program: Program) -> None:
         program_dct = program.data_collecting_type
-        rules: List = targeting_criteria.get("rules", [])
+        rules: list = targeting_criteria.get("rules", [])
 
         if len(rules) < 1:
             raise ValidationError("There should be at least 1 rule in target criteria")

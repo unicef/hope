@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
@@ -27,11 +27,11 @@ class UniversalIndividualUpdateScript:
         business_area: BusinessArea,
         program: Program,
         file_path: str,
-        household_fields: Optional[Dict[str, Tuple[str, Any, Any]]] = None,
-        individual_fields: Optional[Dict[str, Tuple[str, Any, Any]]] = None,
-        individual_flex_fields: Optional[Dict[str, Tuple[str, Any, Any]]] = None,
-        document_fields: Optional[List[Tuple[str, str]]] = None,
-        deliver_mechanism_data_fields: Optional[Dict[str, Tuple[List[str], ...]]] = None,
+        household_fields: dict[str, tuple[str, Any, Any]] | None = None,
+        individual_fields: dict[str, tuple[str, Any, Any]] | None = None,
+        individual_flex_fields: dict[str, tuple[str, Any, Any]] | None = None,
+        document_fields: list[tuple[str, str]] | None = None,
+        deliver_mechanism_data_fields: dict[str, tuple[list[str], ...]] | None = None,
         ignore_empty_values: bool = True,
         deduplicate_es: bool = True,
         deduplicate_documents: bool = True,
@@ -60,8 +60,8 @@ class UniversalIndividualUpdateScript:
         self.batch_size = batch_size
 
     def validate_household_fields(
-        self, row: Tuple[Any, ...], headers: List[str], household: Any, row_index: int
-    ) -> List[str]:
+        self, row: tuple[Any, ...], headers: list[str], household: Any, row_index: int
+    ) -> list[str]:
         if self.household_fields is None:
             return []
         errors = []
@@ -73,8 +73,8 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_individual_fields(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
-    ) -> List[str]:
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+    ) -> list[str]:
         if self.individual_fields is None:
             return []
         errors = []
@@ -86,8 +86,8 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_individual_flex_fields(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
-    ) -> List[str]:
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+    ) -> list[str]:
         errors = []
         if self.individual_flex_fields is None:
             return []
@@ -99,8 +99,8 @@ class UniversalIndividualUpdateScript:
         return errors
 
     def validate_documents(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
-    ) -> List[str]:
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual, row_index: int
+    ) -> list[str]:
         if self.document_fields is None:
             return []
         errors = []
@@ -121,7 +121,7 @@ class UniversalIndividualUpdateScript:
                 errors.append(f"Row: {row_index} - Multiple documents with document type {document_type} found")
         return errors
 
-    def validate(self, sheet: Worksheet, headers: List[str]) -> List[str]:
+    def validate(self, sheet: Worksheet, headers: list[str]) -> list[str]:
         errors = []
         row_index = 1
         for row in sheet.iter_rows(min_row=2, values_only=True):
@@ -149,7 +149,7 @@ class UniversalIndividualUpdateScript:
             errors.extend(self.validate_documents(row, headers, individual, row_index))
         return errors
 
-    def handle_household_update(self, row: Tuple[Any, ...], headers: List[str], household: Any) -> None:
+    def handle_household_update(self, row: tuple[Any, ...], headers: list[str], household: Any) -> None:
         if self.household_fields is None:
             return
         for field, (_name, _validator, handler) in self.household_fields.items():
@@ -159,7 +159,7 @@ class UniversalIndividualUpdateScript:
                 continue
             setattr(household, _name, handled_value)
 
-    def handle_individual_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
+    def handle_individual_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
         if self.individual_fields is None:
             return
         for field, (_name, _validator, handler) in self.individual_fields.items():
@@ -169,7 +169,7 @@ class UniversalIndividualUpdateScript:
                 continue
             setattr(individual, _name, handled_value)
 
-    def handle_individual_flex_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
+    def handle_individual_flex_update(self, row: tuple[Any, ...], headers: list[str], individual: Individual) -> None:
         if self.individual_flex_fields is None:
             return
         for field, (name, _validator, handler) in self.individual_flex_fields.items():
@@ -180,8 +180,8 @@ class UniversalIndividualUpdateScript:
             individual.flex_fields[name] = handled_value
 
     def handle_documents_update(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual
-    ) -> Tuple[list, list]:
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual
+    ) -> tuple[list, list]:
         documents_to_update = []
         documents_to_create = []
         if self.document_fields is None:
@@ -216,7 +216,7 @@ class UniversalIndividualUpdateScript:
         return documents_to_update, documents_to_create
 
     def handle_delivery_mechanism_data_update(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual
+        self, row: tuple[Any, ...], headers: list[str], individual: Individual
     ) -> None:
         if self.deliver_mechanism_data_fields is None:
             return
@@ -244,7 +244,7 @@ class UniversalIndividualUpdateScript:
                 single_data_object.save()
                 single_data_object.update_unique_field()
 
-    def handle_update(self, sheet: Worksheet, headers: List[str]) -> List[str]:
+    def handle_update(self, sheet: Worksheet, headers: list[str]) -> list[str]:
         row_index = 1
         individual_ids = []
         household_fields_to_update = ["flex_fields"]
@@ -349,5 +349,4 @@ class UniversalIndividualUpdateScript:
                 Document.objects.filter(individual__id__in=processed_individuals_ids, status=Document.STATUS_PENDING),
                 program=self.program,
             )
-
-        print("Update successful")
+            print("Update successful")

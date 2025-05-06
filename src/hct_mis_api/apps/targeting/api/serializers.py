@@ -22,5 +22,4 @@ class TargetPopulationListSerializer(EncodedIdSerializerMixin):
     def get_status(obj: PaymentPlan) -> str:
         if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
             return obj.get_status_display()
-        else:
-            return "Assigned"
+        return "Assigned"

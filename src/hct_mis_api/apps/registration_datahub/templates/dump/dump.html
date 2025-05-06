@@ -2,7 +2,7 @@
 {% if value|islist %}
     <table>
     {% for el in value %}
-        {% with key|concat:":"|concat:forloop.counter as parent %}
+        {% with parent=key|concat:":"|concat:forloop.counter %}
             <tr><td>{{ parent }}</td></tr>
             <tr><td>{% dump el parent original %}</td></tr>
         {% endwith %}

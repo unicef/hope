@@ -27,7 +27,6 @@ wheels/
 MANIFEST
 backend/test-results/
 backend/lint-results/
-backend/mypy-results/
 backend/screenshot/
 backend/__pypackages__/
 cypress-results/
@@ -112,9 +111,6 @@ venv.bak/
 
 # mkdocs documentation
 /site
-
-# mypy
-.mypy_cache/
 
 # Pycharm/Jetbrains
 .idea*

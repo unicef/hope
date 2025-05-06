@@ -4,8 +4,7 @@ import graphene
 
 
 class BigInt(graphene.Scalar):
-    """
-    BigInt is an extension of the regular Int field
+    """BigInt is an extension of the regular Int field
     that supports Integers bigger than a signed
     32-bit integer.
     """

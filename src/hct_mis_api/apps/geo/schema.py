@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 import graphene
 from graphene import ObjectType, relay
@@ -35,7 +35,7 @@ class AreaTreeNode(ObjectType):
     level = graphene.Int()
 
     @staticmethod
-    def resolve_areas(parent: Area, info: Any, **kwargs: Any) -> List[Area]:
+    def resolve_areas(parent: Area, info: Any, **kwargs: Any) -> list[Area]:
         return parent.get_children()
 
     @staticmethod
@@ -57,10 +57,10 @@ class Query(graphene.ObjectType):
         business_area=graphene.String(required=True),
     )
 
-    def resolve_all_admin_areas(self, info: Any, **kwargs: Any) -> List[Area]:
+    def resolve_all_admin_areas(self, info: Any, **kwargs: Any) -> list[Area]:
         return Area.objects.all().order_by("area_type__area_level", "name")
 
-    def resolve_all_areas_tree(self, info: Any, business_area: str, **kwargs: Any) -> List[Area]:
+    def resolve_all_areas_tree(self, info: Any, business_area: str, **kwargs: Any) -> list[Area]:
         # get Area max level 3
         queryset = (
             Area.objects.filter(area_type__country__business_areas__slug=business_area, area_type__area_level__lte=3)

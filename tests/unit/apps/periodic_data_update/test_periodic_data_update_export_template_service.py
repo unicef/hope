@@ -89,22 +89,22 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
     ) -> None:
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         wb = service.generate_workbook()
-        self.assertIsNotNone(wb)
-        self.assertEqual(wb.sheetnames, [service.PDU_SHEET, service.META_SHEET])
+        assert wb is not None
+        assert wb.sheetnames == [service.PDU_SHEET, service.META_SHEET]
         meta_sheet = wb[service.META_SHEET]
         pdu_sheet = wb[service.PDU_SHEET]
-        self.assertEqual(meta_sheet["b1"].value, self.periodic_data_update_template.pk)
-        self.assertEqual(wb.custom_doc_props["pdu_template_id"].value, str(self.periodic_data_update_template.pk))
-        self.assertEqual(pdu_sheet.max_row, 3)
+        assert meta_sheet["b1"].value == self.periodic_data_update_template.pk
+        assert wb.custom_doc_props["pdu_template_id"].value == str(self.periodic_data_update_template.pk)
+        assert pdu_sheet.max_row == 3
 
     def test_save_xlsx_file(self) -> None:
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         service.generate_workbook()
         service.save_xlsx_file()
         self.periodic_data_update_template.refresh_from_db()
-        self.assertIsNotNone(self.periodic_data_update_template.file)
+        assert self.periodic_data_update_template.file is not None
         wb = openpyxl.load_workbook(self.periodic_data_update_template.file.file.path)
-        self.assertEqual(wb.sheetnames, [service.PDU_SHEET, service.META_SHEET])
+        assert wb.sheetnames == [service.PDU_SHEET, service.META_SHEET]
 
     def test_generate_header(self) -> None:
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
@@ -122,7 +122,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "month_worked__round_value",
             "month_worked__collection_date",
         ]
-        self.assertEqual(service._generate_header(), test_header)
+        assert service._generate_header() == test_header
 
     def test_generate_row_empty_flex_fields_individual(self) -> None:
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
@@ -142,7 +142,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "",
             "",
         ]
-        self.assertEqual(row, expected_row)
+        assert row == expected_row
 
     def test_generate_row_half_filled_flex_fields_individual(self) -> None:
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
@@ -171,7 +171,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             "",
             "",
         ]
-        self.assertEqual(row, expected_row)
+        assert row == expected_row
 
     def test_generate_row_fully_filled_flex_fields_individual(self) -> None:
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
@@ -192,7 +192,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         }
         individual.save()
         row = service._generate_row(individual)
-        self.assertIsNone(row)
+        assert row is None
 
     def test_get_individuals_queryset_registration_data_import_id_filter(self) -> None:
         rdi1 = RegistrationDataImportFactory()
@@ -205,8 +205,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual)
+        assert queryset.count() == 1
+        assert queryset.first() == individual
 
     def test_get_individuals_queryset_target_population_id_filter(self) -> None:
         create_household_and_individuals(
@@ -236,8 +236,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(set(queryset), set(self.individuals))
+        assert queryset.count() == 2
+        assert set(queryset) == set(self.individuals)
 
     def test_get_individuals_queryset_gender_filter(self) -> None:
         male = self.individuals[0]
@@ -250,8 +250,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), female)
+        assert queryset.count() == 1
+        assert queryset.first() == female
 
     @freeze_time("2024-07-12")
     def test_get_individuals_queryset_age_filter(self) -> None:
@@ -265,8 +265,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual32yo)
+        assert queryset.count() == 1
+        assert queryset.first() == individual32yo
 
     def test_get_individuals_queryset_registration_date_filter(self) -> None:
         individual2023 = self.individuals[0]
@@ -279,8 +279,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual2023)
+        assert queryset.count() == 1
+        assert queryset.first() == individual2023
 
     def test_get_individuals_queryset_admin_filter(self) -> None:
         area_type_level_1 = AreaTypeFactory(
@@ -322,8 +322,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(set(queryset), set(self.individuals))
+        assert queryset.count() == 2
+        assert set(queryset) == set(self.individuals)
 
         self.household.admin2 = area2a
         self.household.save()
@@ -331,8 +331,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(set(queryset), set(self.individuals))
+        assert queryset.count() == 2
+        assert set(queryset) == set(self.individuals)
 
     def test_get_individuals_queryset_has_grievance_ticket_referral_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -348,8 +348,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_with_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_with_ticket
 
     def test_get_individuals_queryset_has_grievance_ticket_referral_exclude_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -366,8 +366,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_without_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_without_ticket
 
     def test_get_individuals_queryset_has_grievance_ticket_negative_feedback_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -383,8 +383,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_with_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_with_ticket
 
     def test_get_individuals_queryset_has_grievance_ticket_positive_feedback_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -400,8 +400,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_with_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_with_ticket
 
     def test_get_individuals_queryset_has_grievance_ticket_needs_adjudication_filter(self) -> None:
         create_household_and_individuals(
@@ -441,8 +441,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(set(queryset), {individual_with_ticket, possible_duplicate})
+        assert queryset.count() == 2
+        assert set(queryset) == {individual_with_ticket, possible_duplicate}
 
     def test_get_individuals_queryset_has_grievance_ticket_system_flagging_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -463,8 +463,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_with_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_with_ticket
 
     def test_get_individuals_queryset_has_grievance_ticket_delete_individual_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -481,8 +481,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_with_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_with_ticket
 
     def test_get_individuals_queryset_has_grievance_ticket_individual_data_update_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -499,8 +499,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_with_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_with_ticket
 
     def test_get_individuals_queryset_has_grievance_ticket_sensitive_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -517,8 +517,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_with_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_with_ticket
 
     def test_get_individuals_queryset_has_grievance_ticket_complaint_filter(self) -> None:
         individual_with_ticket = self.individuals[0]
@@ -535,8 +535,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first(), individual_with_ticket)
+        assert queryset.count() == 1
+        assert queryset.first() == individual_with_ticket
 
     def test_get_individuals_queryset_received_assistance_filter(self) -> None:
         household_without_payment, individuals_without_payment = create_household_and_individuals(
@@ -565,8 +565,8 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(set(queryset), set(self.individuals))
+        assert queryset.count() == 2
+        assert set(queryset) == set(self.individuals)
 
         self.periodic_data_update_template.filters = {
             "received_assistance": False,
@@ -574,5 +574,5 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(set(queryset), set(individuals_without_payment))
+        assert queryset.count() == 2
+        assert set(queryset) == set(individuals_without_payment)

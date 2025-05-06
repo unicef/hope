@@ -18,6 +18,7 @@ from hct_mis_api.apps.sanction_list.models import (
     UploadedXLSXFile,
 )
 from hct_mis_api.apps.utils.mailjet import MailjetClient
+import contextlib
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -33,7 +34,7 @@ class CheckAgainstSanctionListTask:
         results_dict = {}
 
         for row in sheet.iter_rows(min_row=2):
-            if not any([cell.value for cell in row]):
+            if not any(cell.value for cell in row):
                 continue
 
             filter_values = {
@@ -45,16 +46,13 @@ class CheckAgainstSanctionListTask:
             }
 
             row_number = 1
-            for cell, header in zip(row, headers.keys()):
+            for cell, header in zip(row, headers.keys(), strict=False):
                 value = cell.value
                 row_number = cell.row
                 header_as_key = header.replace(" ", "_").lower().strip()
-                if header_as_key == "date_of_birth":
-                    if not isinstance(value, (datetime, date)):
-                        try:
-                            value = dateutil.parser.parse(value)
-                        except Exception:
-                            pass
+                if header_as_key == "date_of_birth" and not isinstance(value, datetime | date):
+                    with contextlib.suppress(Exception):
+                        value = dateutil.parser.parse(value)
                 if value:
                     filter_values[header_as_key] = value
 
@@ -76,7 +74,7 @@ class CheckAgainstSanctionListTask:
 
             if len(names) == 0:
                 continue
-            elif len(names) == 1:
+            if len(names) == 1:
                 name_query = Q(full_name__in=full_name_permutations) | Q(first_name__iexact=names[0])
             else:
                 name_query = Q(full_name__in=full_name_permutations) | (
@@ -98,7 +96,7 @@ class CheckAgainstSanctionListTask:
         }
         text_body = render_to_string("sanction_list/check_results.txt", context)
         html_body = render_to_string("sanction_list/check_results.html", context)
-        subject = f"Sanction List Check - file: {original_file_name}, " f"date: {today.strftime('%Y-%m-%d %I:%M %p')}"
+        subject = f"Sanction List Check - file: {original_file_name}, date: {today.strftime('%Y-%m-%d %I:%M %p')}"
 
         attachment_wb = Workbook()
         attachment_ws = attachment_wb.active

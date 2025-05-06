@@ -122,35 +122,35 @@ class TestSouthSudanUpdateScript(TestCase):
             "Update successful",
         ]
 
-        self.assertEqual(output, expected_output)
+        assert output == expected_output
         self.individual.refresh_from_db()
         self.individual2.refresh_from_db()
         individual = self.individual
         individual2 = self.individual2
         household = individual.household
-        self.assertEqual(household.admin1.p_code, "AF11")
-        self.assertEqual(household.admin2.p_code, "AF1115")
-        self.assertEqual(individual.given_name, "Jan")
-        self.assertEqual(individual.middle_name, "Roman")
-        self.assertEqual(individual.family_name, "Romaniak")
-        self.assertEqual(individual.full_name, "Jan Romaniak")
-        self.assertEqual(individual.birth_date, datetime.date(1991, 11, 18))
-        self.assertEqual(individual.sex, MALE)
-        self.assertEqual(individual.phone_no, "+48603499023")
-        self.assertEqual(individual.flex_fields.get("ss_hw_lot_num_i_f"), 32.0)
-        self.assertEqual(individual.flex_fields.get("ss_health_facility_name_i_f"), "ed")
-        self.assertEqual(individual.flex_fields.get("ss_hw_title_i_f"), "foo")
-        self.assertEqual(individual.flex_fields.get("ss_hw_work_id_i_f"), "bar")
-        self.assertEqual(individual.flex_fields.get("ss_hw_grade_i_f"), "fooooo")
-        self.assertEqual(individual.flex_fields.get("ss_hw_qualifications_i_f"), "baaaar")
-        self.assertEqual(individual.flex_fields.get("ss_hw_cadre_i_f"), "aaaaa")
-        self.assertEqual(individual.documents.get(type__key="national_id").document_number, "TEST123")
-        self.assertEqual(individual.documents.get(type__key="national_id").country.iso_code3, "POL")
+        assert household.admin1.p_code == "AF11"
+        assert household.admin2.p_code == "AF1115"
+        assert individual.given_name == "Jan"
+        assert individual.middle_name == "Roman"
+        assert individual.family_name == "Romaniak"
+        assert individual.full_name == "Jan Romaniak"
+        assert individual.birth_date == datetime.date(1991, 11, 18)
+        assert individual.sex == MALE
+        assert individual.phone_no == "+48603499023"
+        assert individual.flex_fields.get("ss_hw_lot_num_i_f") == 32.0
+        assert individual.flex_fields.get("ss_health_facility_name_i_f") == "ed"
+        assert individual.flex_fields.get("ss_hw_title_i_f") == "foo"
+        assert individual.flex_fields.get("ss_hw_work_id_i_f") == "bar"
+        assert individual.flex_fields.get("ss_hw_grade_i_f") == "fooooo"
+        assert individual.flex_fields.get("ss_hw_qualifications_i_f") == "baaaar"
+        assert individual.flex_fields.get("ss_hw_cadre_i_f") == "aaaaa"
+        assert individual.documents.get(type__key="national_id").document_number == "TEST123"
+        assert individual.documents.get(type__key="national_id").country.iso_code3 == "POL"
 
-        self.assertEqual(individual.documents.get(type__key="birth_certificate").document_number, "OLD")
-        self.assertEqual(individual.documents.get(type__key="birth_certificate").country.iso_code3, "DEU")
-        self.assertEqual(individual2.middle_name, "Testowy")
-        self.assertEqual(individual2.family_name, "Tesciak")
+        assert individual.documents.get(type__key="birth_certificate").document_number == "OLD"
+        assert individual.documents.get(type__key="birth_certificate").country.iso_code3 == "DEU"
+        assert individual2.middle_name == "Testowy"
+        assert individual2.family_name == "Tesciak"
 
     def test_south_sudan_update_script_validation_fails(self) -> None:
         with Capturing() as output:
@@ -166,4 +166,4 @@ class TestSouthSudanUpdateScript(TestCase):
             "Row: 2 - Country not found for field national_id_country_i_c and value Poland",
             "Row: 2 - Document type not found for field national_id_no_i_c",
         ]
-        self.assertEqual(output, expected_output)
+        assert output == expected_output

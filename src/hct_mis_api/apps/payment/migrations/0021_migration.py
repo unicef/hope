@@ -4,29 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0020_migration'),
+        ("payment", "0020_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='deliverymechanismdata',
-            name='delivery_mechanism',
+            model_name="deliverymechanismdata",
+            name="delivery_mechanism",
         ),
         migrations.AlterField(
-            model_name='paymentplan',
-            name='exclude_household_error',
-            field=models.TextField(blank=True, help_text='Exclusion reason (Targeting level) [sys]', null=True),
+            model_name="paymentplan",
+            name="exclude_household_error",
+            field=models.TextField(blank=True, help_text="Exclusion reason (Targeting level) [sys]", null=True),
         ),
         migrations.AlterField(
-            model_name='paymentplan',
-            name='excluded_ids',
-            field=models.TextField(blank=True, help_text='Targeting level exclusion IDs', null=True),
+            model_name="paymentplan",
+            name="excluded_ids",
+            field=models.TextField(blank=True, help_text="Targeting level exclusion IDs", null=True),
         ),
         migrations.AlterField(
-            model_name='paymentplan',
-            name='exclusion_reason',
-            field=models.TextField(blank=True, help_text='Exclusion reason (Targeting level)', null=True),
+            model_name="paymentplan",
+            name="exclusion_reason",
+            field=models.TextField(blank=True, help_text="Exclusion reason (Targeting level)", null=True),
         ),
     ]

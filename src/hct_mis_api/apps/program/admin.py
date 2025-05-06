@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any
 
 from django import forms
 from django.contrib import admin, messages
@@ -137,7 +137,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
     @button(
         permission="payment.add_paymentplan",
     )
-    def create_target_population_from_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+    def create_target_population_from_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         context = self.get_common_context(request, title="Create TargetPopulation")
         program = Program.objects.get(pk=pk)
         business_area = program.business_area
@@ -151,7 +151,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 
         elif "confirm" in request.POST:
             create_tp_from_list.delay(request.POST.dict(), str(request.user.pk), str(program.pk))
-            message = mark_safe(f'Creation of target population <b>{request.POST["name"]}</b> scheduled.')
+            message = mark_safe(f"Creation of target population <b>{request.POST['name']}</b> scheduled.")
             messages.success(request, message)
             url = reverse("admin:targeting_targetpopulation_changelist")
             return HttpResponseRedirect(url)
@@ -167,7 +167,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         return TemplateResponse(request, "admin/program/program/create_target_population_from_text.html", context)
 
     @button(permission="account.view_partner")
-    def partners(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
+    def partners(self, request: HttpRequest, pk: int) -> TemplateResponse | HttpResponseRedirect:
         context = self.get_common_context(request, pk, title="Partner access")
         program: Program = context["original"]
         PartnerAreaFormSet = formset_factory(PartnerAreaForm, extra=0, can_delete=True)
@@ -192,7 +192,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
                 for partner_area_form in partner_area_form_set:
                     form = partner_area_form.cleaned_data
                     if form and not form["DELETE"]:
-                        areas_ids = list(map(lambda area: str(area.id), form["areas"]))
+                        areas_ids = [str(area.id) for area in form["areas"]]
                         program_partner, _ = ProgramPartnerThrough.objects.update_or_create(
                             partner=form["partner"],
                             program=program,
@@ -221,8 +221,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 
         if is_editable:
             return TemplateResponse(request, "admin/program/program/program_partner_access.html", context)
-        else:
-            return TemplateResponse(request, "admin/program/program/program_partner_access_readonly.html", context)
+        return TemplateResponse(request, "admin/program/program/program_partner_access_readonly.html", context)
 
     @button(permission="account.can_reindex_programs")
     def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:

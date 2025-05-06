@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 from uuid import UUID
 
 from django import forms
@@ -84,11 +84,11 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         return self.id in Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)
 
     @classmethod
-    def get_partners_as_choices(cls) -> List:
+    def get_partners_as_choices(cls) -> list:
         return [(partner.id, partner.name) for partner in cls.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)]
 
     @classmethod
-    def get_partners_for_program_as_choices(cls, business_area_id: str, program_id: Optional[str] = None) -> List:
+    def get_partners_for_program_as_choices(cls, business_area_id: str, program_id: str | None = None) -> list:
         partners = cls.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
         if program_id:
             return [
@@ -96,12 +96,11 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
                 for partner in partners
                 if program_id in partner.get_program_ids_for_business_area(business_area_id)
             ]
-        else:
-            return [
-                (partner.id, partner.name)
-                for partner in partners
-                if partner.get_program_ids_for_business_area(business_area_id)
-            ]
+        return [
+            (partner.id, partner.name)
+            for partner in partners
+            if partner.get_program_ids_for_business_area(business_area_id)
+        ]
 
     @property
     def is_unicef(self) -> bool:
@@ -115,31 +114,31 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def is_editable(self) -> bool:
         return not self.is_unicef and not self.is_default
 
-    def has_full_area_access_in_program(self, program_id: Union[str, UUID]) -> bool:
+    def has_full_area_access_in_program(self, program_id: str | UUID) -> bool:
         return self.is_unicef or (
             self.program_partner_through.filter(program_id=program_id).first()
             and self.program_partner_through.filter(program_id=program_id).first().full_area_access
         )
 
-    def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
+    def get_program_ids_for_business_area(self, business_area_id: str) -> list[str]:
         return [
             str(program_id)
             for program_id in self.programs.filter(business_area_id=business_area_id).values_list("id", flat=True)
         ]
 
-    def has_program_access(self, program_id: Union[str, UUID]) -> bool:
+    def has_program_access(self, program_id: str | UUID) -> bool:
         return self.is_unicef or self.programs.filter(id=program_id).exists()
 
-    def has_area_access(self, area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
+    def has_area_access(self, area_id: str | UUID, program_id: str | UUID) -> bool:
         return self.is_unicef or self.get_program_areas(program_id).filter(id=area_id).exists()
 
-    def get_program_areas(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
+    def get_program_areas(self, program_id: str | UUID) -> QuerySet[Area]:
         return Area.objects.filter(
             program_partner_through__partner=self, program_partner_through__program_id=program_id
         )
 
     def get_roles_for_business_area(
-        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
+        self, business_area_slug: str | None = None, business_area_id: Optional["UUID"] = None
     ) -> QuerySet["Role"]:
         if not business_area_slug and not business_area_id:
             return Role.objects.none()
@@ -152,7 +151,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             business_area_partner_through__business_area_id=business_area_id,
         )
 
-    def add_roles_in_business_area(self, business_area_id: str, roles: List["Role"]) -> None:
+    def add_roles_in_business_area(self, business_area_id: str, roles: list["Role"]) -> None:
         business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             partner=self,
             business_area_id=business_area_id,
@@ -183,10 +182,9 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner.save()
         super().save(*args, **kwargs)
 
-    def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> List:
-        """
-        return list of permissions based on User Role BA and User Partner
-        if program_id is in arguments need to check if partner has access to this program
+    def permissions_in_business_area(self, business_area_slug: str, program_id: UUID | None = None) -> list:
+        """Return list of permissions based on User Role BA and User Partner
+        if program_id is in arguments need to check if partner has access to this program.
         """
         user_roles_query = UserRole.objects.filter(user=self, business_area__slug=business_area_slug).exclude(
             expiry_date__lt=timezone.now()
@@ -225,7 +223,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         ).distinct()
 
     def has_permission(
-        self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
+        self, permission: str, business_area: BusinessArea, program_id: UUID | None = None, write: bool = False
     ) -> bool:
         return permission in self.permissions_in_business_area(business_area.slug, program_id)
 
@@ -254,17 +252,15 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def email_user(  # type: ignore
         self,
         subject: str,
-        html_body: Optional[str] = None,
-        text_body: Optional[str] = None,
-        mailjet_template_id: Optional[int] = None,
-        body_variables: Optional[Dict[str, Any]] = None,
-        from_email: Optional[str] = None,
-        from_email_display: Optional[str] = None,
-        ccs: Optional[list[str]] = None,
+        html_body: str | None = None,
+        text_body: str | None = None,
+        mailjet_template_id: int | None = None,
+        body_variables: dict[str, Any] | None = None,
+        from_email: str | None = None,
+        from_email_display: str | None = None,
+        ccs: list[str] | None = None,
     ) -> None:
-        """
-        Send email to this user via Mailjet.
-        """
+        """Send email to this user via Mailjet."""
         email = MailjetClient(
             recipients=[self.email],
             subject=subject,
@@ -296,7 +292,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
 
 class HorizontalChoiceArrayField(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+    def formfield(self, form_class: Any | None = ..., choices_form_class: Any | None = ..., **kwargs: Any) -> Any:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,
@@ -363,7 +359,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         blank=True,
     )
 
-    def natural_key(self) -> Tuple:
+    def natural_key(self) -> tuple:
         return self.name, self.subsystem
 
     def clean(self) -> None:
@@ -378,7 +374,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         return f"{self.name} ({self.subsystem})"
 
     @classmethod
-    def get_roles_as_choices(cls) -> List:
+    def get_roles_as_choices(cls) -> list:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 
@@ -405,9 +401,8 @@ class IncompatibleRolesManager(models.Manager):
 
 
 class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
-    """
-    Keeps track of what roles are incompatible:
-    user cannot be assigned both of the roles in the same business area at the same time
+    """Keeps track of what roles are incompatible:
+    user cannot be assigned both of the roles in the same business area at the same time.
     """
 
     role_one = models.ForeignKey("account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE)

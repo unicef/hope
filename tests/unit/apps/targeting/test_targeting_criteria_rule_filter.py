@@ -123,9 +123,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         try:
             rule_filter.get_query()
-            self.assertTrue(False)
+            raise AssertionError()
         except ValidationError:
-            self.assertTrue(True)
+            assert True
 
         rule_filter = TargetingCriteriaRuleFilter(
             comparison_method="EQUALS",
@@ -134,9 +134,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         try:
             rule_filter.get_query()
-            self.assertTrue(False)
+            raise AssertionError()
         except ValidationError:
-            self.assertTrue(True)
+            assert True
 
         rule_filter = TargetingCriteriaRuleFilter(
             comparison_method="EQUALS",
@@ -144,17 +144,17 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         try:
             rule_filter.get_query()
-            self.assertTrue(False)
+            raise AssertionError()
         except ValidationError:
-            self.assertTrue(True)
+            assert True
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_equal(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(comparison_method="EQUALS", field_name="age", arguments=[50])
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query)
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(self.household_50_yo.pk, queryset[0].household.pk)
+        assert queryset.count() == 1
+        assert self.household_50_yo.pk == queryset[0].household.pk
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_not_equal(self) -> None:
@@ -163,24 +163,24 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query)
-        self.assertEqual(queryset.count(), 3)
-        self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
+        assert queryset.count() == 3
+        assert self.household_50_yo.pk not in [h.household.pk for h in queryset]
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_49(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(comparison_method="RANGE", field_name="age", arguments=[1, 49])
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
-        self.assertEqual(queryset.count(), 3)
-        self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
+        assert queryset.count() == 3
+        assert self.household_50_yo.pk not in [h.household.pk for h in queryset]
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_50(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(comparison_method="RANGE", field_name="age", arguments=[1, 50])
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
-        self.assertEqual(queryset.count(), 4)
-        self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
+        assert queryset.count() == 4
+        assert self.household_50_yo.pk in [h.household.pk for h in queryset]
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_gt_40(self) -> None:
@@ -189,8 +189,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
+        assert queryset.count() == 1
+        assert self.household_50_yo.pk in [h.household.pk for h in queryset]
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_lt_40(self) -> None:
@@ -199,8 +199,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
-        self.assertEqual(queryset.count(), 3)
-        self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
+        assert queryset.count() == 3
+        assert self.household_50_yo.pk not in [h.household.pk for h in queryset]
 
     @freeze_time("2020-09-28")
     def test_rule_filter_age_lt_49_should_contains_person_born_in_proper_year_before_birthday(self) -> None:
@@ -209,8 +209,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
-        self.assertEqual(queryset.count(), 4)
-        self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
+        assert queryset.count() == 4
+        assert self.household_50_yo.pk in [h.household.pk for h in queryset]
 
     @freeze_time("2020-09-29")
     def test_rule_filter_age_lt_49_shouldn_t_contains_person_born_in_proper_year_after_and_during_birthday(
@@ -221,15 +221,15 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
-        self.assertEqual(queryset.count(), 3)
-        self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
+        assert queryset.count() == 3
+        assert self.household_50_yo.pk not in [h.household.pk for h in queryset]
 
     def test_rule_filter_size_equals(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(comparison_method="EQUALS", field_name="size", arguments=[2])
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertTrue(self.household_size_2.pk in [h.pk for h in queryset])
+        assert queryset.count() == 1
+        assert self.household_size_2.pk in [h.pk for h in queryset]
 
     def test_rule_filter_size_not_equals(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -239,8 +239,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 3)
-        self.assertTrue(self.household_size_2.pk not in [h.pk for h in queryset])
+        assert queryset.count() == 3
+        assert self.household_size_2.pk not in [h.pk for h in queryset]
 
     def test_rule_filter_size_in_range_0_1(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -250,8 +250,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 3)
-        self.assertTrue(self.household_size_2.pk not in [h.pk for h in queryset])
+        assert queryset.count() == 3
+        assert self.household_size_2.pk not in [h.pk for h in queryset]
 
     def test_rule_filter_size_not_in_range_0_1(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -261,8 +261,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertTrue(self.household_size_2.pk in [h.pk for h in queryset])
+        assert queryset.count() == 1
+        assert self.household_size_2.pk in [h.pk for h in queryset]
 
     def test_rule_filter_size_gte_2(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -272,8 +272,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertTrue(self.household_size_2.pk in [h.pk for h in queryset])
+        assert queryset.count() == 1
+        assert self.household_size_2.pk in [h.pk for h in queryset]
 
     def test_rule_filter_size_lte_1(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -283,8 +283,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 3)
-        self.assertTrue(self.household_size_2.pk not in [h.pk for h in queryset])
+        assert queryset.count() == 3
+        assert self.household_size_2.pk not in [h.pk for h in queryset]
 
     def test_rule_filter_residence_status_equals(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -294,8 +294,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertTrue(self.household_refugee.pk in [h.pk for h in queryset])
+        assert queryset.count() == 1
+        assert self.household_refugee.pk in [h.pk for h in queryset]
 
     def test_rule_filter_residence_status_not_equals(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -305,8 +305,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 3)
-        self.assertTrue(self.household_refugee.pk not in [h.pk for h in queryset])
+        assert queryset.count() == 3
+        assert self.household_refugee.pk not in [h.pk for h in queryset]
 
     def test_rule_filter_registration_date_gte(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -316,7 +316,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
+        assert queryset.count() == 1
 
     def test_rule_filter_collector_arg_yes(self) -> None:
         # add Ind role and wallet
@@ -343,8 +343,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first().unicef_id, hh.unicef_id)
+        assert queryset.count() == 1
+        assert queryset.first().unicef_id == hh.unicef_id
 
     def test_rule_filter_collector_arg_no(self) -> None:
         # add Ind role and wallet
@@ -370,8 +370,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset.first().unicef_id, hh.unicef_id)
+        assert queryset.count() == 1
+        assert queryset.first().unicef_id == hh.unicef_id
 
     def test_rule_filter_collector_without_arg(self) -> None:
         # all HH list, no collector' filter
@@ -392,7 +392,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 4)
+        assert queryset.count() == 4
 
     def test_tc_rule_query_for_ind_hh_ids(self) -> None:
         pp = PaymentPlanFactory(program_cycle=self.households[0].program.cycles.first())
@@ -404,9 +404,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         tcr.save()
 
         query = tcr.get_query()
-        self.assertEqual(
-            str(query),
-            "(AND: (OR: ('unicef_id__in', ['HH-1', 'HH-2']), ('individuals__unicef_id__in', ['IND-11', 'IND-22'])))",
+        assert (
+            str(query)
+            == "(AND: (OR: ('unicef_id__in', ['HH-1', 'HH-2']), ('individuals__unicef_id__in', ['IND-11', 'IND-22'])))"
         )
 
         tcr.household_ids = ""
@@ -414,14 +414,14 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         tcr.save()
         tcr.refresh_from_db()
         query = tcr.get_query()
-        self.assertEqual(str(query), "(AND: ('individuals__unicef_id__in', ['IND-33', 'IND-44']))")
+        assert str(query) == "(AND: ('individuals__unicef_id__in', ['IND-33', 'IND-44']))"
 
         tcr.household_ids = "HH-88, HH-99"
         tcr.individual_ids = ""
         tcr.save()
         tcr.refresh_from_db()
         query = tcr.get_query()
-        self.assertEqual(str(query), "(AND: ('unicef_id__in', ['HH-88', 'HH-99']))")
+        assert str(query) == "(AND: ('unicef_id__in', ['HH-88', 'HH-99']))"
 
 
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
@@ -467,8 +467,8 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(self.household_total_households_4.pk, queryset[0].pk)
+        assert queryset.count() == 1
+        assert self.household_total_households_4.pk == queryset[0].pk
 
     def test_rule_filter_select_multiple_treatment_facility(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -479,7 +479,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
-        self.assertEqual(queryset.count(), 1)
+        assert queryset.count() == 1
 
     def test_rule_filter_select_multiple_treatment_facility_2(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -490,7 +490,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
-        self.assertEqual(queryset.count(), 2)
+        assert queryset.count() == 2
 
     def test_rule_filter_select_multiple_treatment_facility_not_contains(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -501,7 +501,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
-        self.assertEqual(queryset.count(), 1)
+        assert queryset.count() == 1
 
     def test_rule_filter_string_contains(self) -> None:
         rule_filter = TargetingCriteriaRuleFilter(
@@ -512,7 +512,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
         )
         query = rule_filter.get_query()
         queryset = Household.objects.filter(query)
-        self.assertEqual(queryset.count(), 1)
+        assert queryset.count() == 1
 
 
 class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
@@ -673,8 +673,8 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertIn(self.individual2, queryset)
+        assert queryset.count() == 1
+        assert self.individual2 in queryset
 
     def test_rule_filter_pdu_string_is_null(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -697,8 +697,8 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertIn(self.individual1, queryset)
+        assert queryset.count() == 1
+        assert self.individual1 in queryset
 
     def test_rule_filter_pdu_decimal_range(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -721,9 +721,9 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 2)
-        self.assertIn(self.individual1, queryset)
-        self.assertIn(self.individual2, queryset)
+        assert queryset.count() == 2
+        assert self.individual1 in queryset
+        assert self.individual2 in queryset
 
     def test_rule_filter_pdu_decimal_greater_than(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -746,10 +746,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 3)
-        self.assertIn(self.individual1, queryset)
-        self.assertIn(self.individual2, queryset)
-        self.assertIn(self.individual3, queryset)
+        assert queryset.count() == 3
+        assert self.individual1 in queryset
+        assert self.individual2 in queryset
+        assert self.individual3 in queryset
 
     def test_rule_filter_pdu_decimal_less_than(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -772,8 +772,8 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
         queryset = self.get_individuals_queryset().filter(query).distinct()
 
-        self.assertEqual(queryset.count(), 1)
-        self.assertIn(self.individual1, queryset)
+        assert queryset.count() == 1
+        assert self.individual1 in queryset
 
     def test_rule_filter_pdu_decimal_is_null(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -796,8 +796,8 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertIn(self.individual4, queryset)
+        assert queryset.count() == 1
+        assert self.individual4 in queryset
 
     def test_rule_filter_pdu_date_range(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -820,9 +820,9 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 2)
-        self.assertIn(self.individual1, queryset)
-        self.assertIn(self.individual3, queryset)
+        assert queryset.count() == 2
+        assert self.individual1 in queryset
+        assert self.individual3 in queryset
 
     def test_rule_filter_pdu_date_greater_than(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -845,8 +845,8 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertIn(self.individual4, queryset)
+        assert queryset.count() == 1
+        assert self.individual4 in queryset
 
     def test_rule_filter_pdu_date_less_than(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -869,9 +869,9 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
         queryset = self.get_individuals_queryset().filter(query).distinct()
 
-        self.assertEqual(queryset.count(), 2)
-        self.assertIn(self.individual1, queryset)
-        self.assertIn(self.individual3, queryset)
+        assert queryset.count() == 2
+        assert self.individual1 in queryset
+        assert self.individual3 in queryset
 
     def test_rule_filter_pdu_date_is_null(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -894,8 +894,8 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertIn(self.individual2, queryset)
+        assert queryset.count() == 1
+        assert self.individual2 in queryset
 
     def test_rule_filter_pdu_boolean_true(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -918,9 +918,9 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 2)
-        self.assertIn(self.individual1, queryset)
-        self.assertIn(self.individual2, queryset)
+        assert queryset.count() == 2
+        assert self.individual1 in queryset
+        assert self.individual2 in queryset
 
     def test_rule_filter_pdu_boolean_false(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -943,8 +943,8 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertIn(self.individual4, queryset)
+        assert queryset.count() == 1
+        assert self.individual4 in queryset
 
     def test_rule_filter_pdu_boolean_is_null(self) -> None:
         tc = TargetingCriteriaFactory()
@@ -967,5 +967,5 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
 
         queryset = self.get_individuals_queryset().filter(query).distinct()
-        self.assertEqual(queryset.count(), 1)
-        self.assertIn(self.individual3, queryset)
+        assert queryset.count() == 1
+        assert self.individual3 in queryset

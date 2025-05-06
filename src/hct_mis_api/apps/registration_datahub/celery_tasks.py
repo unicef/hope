@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from django.core.cache import cache
 from django.db import transaction
@@ -46,7 +46,7 @@ def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
 
 
 @contextmanager
-def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
+def locked_cache(key: int | str, timeout: int = 60 * 60 * 24) -> Any:
     now = timezone.now()
     try:
         if cache.get_or_set(key, now, timeout=timeout) == now:
@@ -307,7 +307,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
+def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> dict:
     from hct_mis_api.apps.registration_data.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
@@ -329,7 +329,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
+def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> dict:
     from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_data.models import ImportData
     from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
@@ -348,7 +348,7 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
         raise self.retry(exc=e)
 
 
-def check_and_set_taxid(queryset: "QuerySet") -> Dict:
+def check_and_set_taxid(queryset: "QuerySet") -> dict:
     qs = queryset.filter(unique_field__isnull=True)
     results = {"updated": [], "processed": [], "errors": []}
     for record in qs.all():
@@ -388,7 +388,7 @@ def deduplicate_documents(rdi_id: str) -> bool:
 @app.task(bind=True, default_retry_delay=60 * 5, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def check_rdi_import_periodic_task(self: Any, business_area_slug: Optional[str] = None) -> Optional[bool]:
+def check_rdi_import_periodic_task(self: Any, business_area_slug: str | None = None) -> bool | None:
     with cache.lock(
         f"check_rdi_import_periodic_task_{business_area_slug}",
         blocking_timeout=60 * 5,
@@ -417,8 +417,7 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: Optional[str] 
 @sentry_tags
 @log_start_and_end
 def remove_old_rdi_links_task(page_count: int = 100) -> None:
-    """This task removes linked RDI objects for households and related objects (individuals, documents etc.)"""
-
+    """This task removes linked RDI objects for households and related objects (individuals, documents etc.)."""
     from datetime import timedelta
 
     from constance import config
@@ -476,7 +475,7 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: Optional[str]) -> None:
+def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: str | None) -> None:
     from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )

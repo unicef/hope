@@ -171,12 +171,12 @@ class TestCreateSurvey(APITestCase):
                 },
             )
             survey = Survey.objects.get(title="Test survey")
-            self.assertTrue(task_mock.called)
-            self.assertEqual(task_mock.call_args[0][0], survey.id)
+            assert task_mock.called
+            assert task_mock.call_args[0][0] == survey.id
 
         households_ids = self.pp.payment_items.values_list("household_id", flat=True)
         households = Household.objects.filter(id__in=households_ids)
-        self.assertEqual(households[0].individuals.count(), 3)
+        assert households[0].individuals.count() == 3
         phone_number_1 = households[0].head_of_household.phone_no
         phone_number_2 = households[1].head_of_household.phone_no
         phone_number_3 = households[2].head_of_household.phone_no
@@ -200,17 +200,17 @@ class TestCreateSurvey(APITestCase):
                 start_flow_mock_1,
             ):
                 survey.refresh_from_db()
-                self.assertEqual(len(survey.successful_rapid_pro_calls), 0)
+                assert len(survey.successful_rapid_pro_calls) == 0
 
                 send_survey_to_users(survey.id)
                 survey.refresh_from_db()
 
-                self.assertEqual(start_flow_mock_1.call_count, 1)
-                self.assertEqual(start_flow_mock_1.call_args[0][0], "flow123")
-                self.assertEqual(len(start_flow_mock_1.call_args[0][1]), 3)  # sending only to HOHs, 3 households
-                self.assertEqual(len(survey.successful_rapid_pro_calls), 1)
-                self.assertEqual(survey.successful_rapid_pro_calls[0]["flow_uuid"], "flow123")
-                self.assertEqual(survey.successful_rapid_pro_calls[0]["urns"], [phone_number_1, phone_number_2])
+                assert start_flow_mock_1.call_count == 1
+                assert start_flow_mock_1.call_args[0][0] == "flow123"
+                assert len(start_flow_mock_1.call_args[0][1]) == 3  # sending only to HOHs, 3 households
+                assert len(survey.successful_rapid_pro_calls) == 1
+                assert survey.successful_rapid_pro_calls[0]["flow_uuid"] == "flow123"
+                assert survey.successful_rapid_pro_calls[0]["urns"] == [phone_number_1, phone_number_2]
 
             start_flow_mock_2 = MagicMock(
                 return_value=(
@@ -231,12 +231,12 @@ class TestCreateSurvey(APITestCase):
             ):
                 send_survey_to_users(survey.id)
                 survey.refresh_from_db()
-                self.assertEqual(start_flow_mock_2.call_count, 1)
-                self.assertEqual(start_flow_mock_2.call_args[0][0], "flow123")
-                self.assertEqual(len(start_flow_mock_2.call_args[0][1]), 1)  # 2 HOHs in households remaining total
-                self.assertEqual(len(survey.successful_rapid_pro_calls), 2)
-                self.assertEqual(survey.successful_rapid_pro_calls[1]["flow_uuid"], "flow123")
-                self.assertEqual(survey.successful_rapid_pro_calls[1]["urns"], [phone_number_3])
+                assert start_flow_mock_2.call_count == 1
+                assert start_flow_mock_2.call_args[0][0] == "flow123"
+                assert len(start_flow_mock_2.call_args[0][1]) == 1  # 2 HOHs in households remaining total
+                assert len(survey.successful_rapid_pro_calls) == 2
+                assert survey.successful_rapid_pro_calls[1]["flow_uuid"] == "flow123"
+                assert survey.successful_rapid_pro_calls[1]["urns"] == [phone_number_3]
 
     def test_create_survey_without_recipients(self) -> None:
         self.create_user_role_with_permissions(

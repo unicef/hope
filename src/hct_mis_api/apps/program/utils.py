@@ -1,6 +1,5 @@
 import re
 from random import randint
-from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import transaction
@@ -75,13 +74,12 @@ class CopyProgramPopulation:
         rdi_merge_status: str = MergeStatusModel.MERGED,
         create_collection: bool = True,
     ):
-        """
-        copy_from_individuals: QuerySet of Individuals to copy
+        """copy_from_individuals: QuerySet of Individuals to copy
         copy_from_households: QuerySet of Households to copy
         program: Program to which the data will be copied
         rdi_merge_status: rdi_merge_status for new objects
         create_collection: if True, new common collection will be created for original and copied object
-        rdi: RegistrationDataImport object to which new objects will be assigned
+        rdi: RegistrationDataImport object to which new objects will be assigned.
         """
         self.copy_from_individuals = copy_from_individuals
         self.copy_from_households = copy_from_households
@@ -116,7 +114,7 @@ class CopyProgramPopulation:
         individual.rdi_merge_status = self.rdi_merge_status
         return individual
 
-    def copy_individuals_with_collections(self) -> List[Individual]:
+    def copy_individuals_with_collections(self) -> list[Individual]:
         individuals_to_create = []
         for individual in self.copy_from_individuals:
             if not individual.individual_collection:
@@ -125,7 +123,7 @@ class CopyProgramPopulation:
             individuals_to_create.append(self.copy_individual(individual))
         return Individual.objects.bulk_create(individuals_to_create)
 
-    def copy_individuals_without_collections(self) -> List[Individual]:
+    def copy_individuals_without_collections(self) -> list[Individual]:
         individuals_to_create = []
         for individual in self.copy_from_individuals:
             copied_individual = self.copy_individual(individual)
@@ -151,7 +149,7 @@ class CopyProgramPopulation:
 
         return household
 
-    def copy_households_without_collections(self) -> List[Household]:
+    def copy_households_without_collections(self) -> list[Household]:
         households_to_create = []
         for household in self.copy_from_households:
             copied_household = self.copy_household(household)
@@ -159,7 +157,7 @@ class CopyProgramPopulation:
             households_to_create.append(copied_household)
         return Household.objects.bulk_create(households_to_create)
 
-    def copy_households_with_collections(self) -> List[Household]:
+    def copy_households_with_collections(self) -> list[Household]:
         households_to_create = []
         for household in self.copy_from_households:
             if not household.household_collection:
@@ -168,7 +166,7 @@ class CopyProgramPopulation:
             households_to_create.append(self.copy_household(household))
         return Household.objects.bulk_create(households_to_create)
 
-    def copy_household_related_data(self, new_households: List[Household]) -> None:
+    def copy_household_related_data(self, new_households: list[Household]) -> None:
         roles_to_create = []
         entitlement_cards_to_create = []
         for new_household in new_households:
@@ -180,7 +178,7 @@ class CopyProgramPopulation:
     def copy_roles_per_household(
         self,
         new_household: Household,
-    ) -> List[IndividualRoleInHousehold]:
+    ) -> list[IndividualRoleInHousehold]:
         roles_in_household = []
         copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from).exclude(
             Q(individual__withdrawn=True) | Q(individual__duplicate=True)
@@ -197,7 +195,7 @@ class CopyProgramPopulation:
         return roles_in_household
 
     @staticmethod
-    def copy_entitlement_cards_per_household(new_household: Household) -> List[EntitlementCard]:
+    def copy_entitlement_cards_per_household(new_household: Household) -> list[EntitlementCard]:
         entitlement_cards_in_household = []
         old_entitlement_cards = new_household.copied_from.entitlement_cards.all()
         for entitlement_card in old_entitlement_cards:
@@ -206,7 +204,7 @@ class CopyProgramPopulation:
             entitlement_cards_in_household.append(entitlement_card)
         return entitlement_cards_in_household
 
-    def copy_individual_related_data(self, new_individuals: List[Individual]) -> None:
+    def copy_individual_related_data(self, new_individuals: list[Individual]) -> None:
         individuals_to_update = []
         documents_to_create = []
         individual_identities_to_create = []
@@ -261,13 +259,11 @@ class CopyProgramPopulation:
 
     @staticmethod
     def copy_document_per_individual(
-        documents: List[Document],
+        documents: list[Document],
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-    ) -> List[Document]:
-        """
-        Clone document for individual if new individual_representation has been created.
-        """
+    ) -> list[Document]:
+        """Clone document for individual if new individual_representation has been created."""
         documents_list = []
         for document in documents:
             original_document_id = document.id
@@ -282,13 +278,11 @@ class CopyProgramPopulation:
 
     @staticmethod
     def copy_individual_identity_per_individual(
-        identities: List[IndividualIdentity],
+        identities: list[IndividualIdentity],
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-    ) -> List[IndividualIdentity]:
-        """
-        Clone individual_identity for individual if new individual_representation has been created.
-        """
+    ) -> list[IndividualIdentity]:
+        """Clone individual_identity for individual if new individual_representation has been created."""
         identities_list = []
         for identity in identities:
             original_identity_id = identity.id
@@ -301,13 +295,11 @@ class CopyProgramPopulation:
 
     @staticmethod
     def copy_bank_account_info_per_individual(
-        bank_accounts_info: List[BankAccountInfo],
+        bank_accounts_info: list[BankAccountInfo],
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-    ) -> List[BankAccountInfo]:
-        """
-        Clone bank_account_info for individual if new individual_representation has been created.
-        """
+    ) -> list[BankAccountInfo]:
+        """Clone bank_account_info for individual if new individual_representation has been created."""
         bank_accounts_info_list = []
         for bank_account_info in bank_accounts_info:
             original_bank_account_info_id = bank_account_info.id
@@ -320,13 +312,11 @@ class CopyProgramPopulation:
 
     @staticmethod
     def copy_delivery_mechanism_data_per_individual(
-        accounts: List[Account],
+        accounts: list[Account],
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-    ) -> List[Account]:
-        """
-        Clone bank_account_info for individual if new individual_representation has been created.
-        """
+    ) -> list[Account]:
+        """Clone bank_account_info for individual if new individual_representation has been created."""
         accounts_list = []
         for account in accounts:
             account.pk = None
@@ -508,7 +498,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):
                     keys = document_data.group(1).split(", ")
                     values = document_data.group(2).split(", ")
-                    document_dict = dict(zip(keys, values))
+                    document_dict = dict(zip(keys, values, strict=False))
                     error_message = f"Document already exists: {document_dict.get('document_number')}"
             else:
                 detail_index = error_message.find("DETAIL")
@@ -549,8 +539,8 @@ def copy_individual(individual: Individual, program: Program, rdi: RegistrationD
 
 
 def create_program_partner_access(
-    partners_data: List, program: Program, partner_access: Optional[str] = None
-) -> List[Dict]:
+    partners_data: list, program: Program, partner_access: str | None = None
+) -> list[dict]:
     if partner_access == Program.ALL_PARTNERS_ACCESS:
         partners = Partner.objects.filter(business_areas=program.business_area).exclude(
             name=settings.DEFAULT_EMPTY_PARTNER
@@ -573,7 +563,7 @@ def create_program_partner_access(
     return partners_data
 
 
-def remove_program_partner_access(partners_data: List, program: Program) -> None:
+def remove_program_partner_access(partners_data: list, program: Program) -> None:
     partner_ids = [partner_data["partner"] for partner_data in partners_data]
     existing_program_partner_access = ProgramPartnerThrough.objects.filter(
         program=program,
@@ -592,8 +582,7 @@ def get_flex_fields_without_pdu_values(individual: Individual) -> dict:
             name=flex_field, program=individual.program, type=FlexibleAttribute.PDU
         ).exists():
             continue
-        else:
-            flex_fields_without_pdu[flex_field] = flex_fields[flex_field]
+        flex_fields_without_pdu[flex_field] = flex_fields[flex_field]
     return flex_fields_without_pdu
 
 

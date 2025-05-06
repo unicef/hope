@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any, Dict
+from typing import Any
 
 from django.db.models import Q, QuerySet
 
@@ -68,9 +68,9 @@ class XlsxExportTargetingService:
         return self.workbook
 
     def _add_version(self) -> None:
-        self.ws_meta[
-            XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES
-        ] = XlsxExportTargetingService.VERSION_CELL_NAME
+        self.ws_meta[XlsxExportTargetingService.VERSION_CELL_NAME_COORDINATES] = (
+            XlsxExportTargetingService.VERSION_CELL_NAME
+        )
         self.ws_meta[XlsxExportTargetingService.VERSION_CELL_COORDINATES] = XlsxExportTargetingService.VERSION
 
     def _create_workbook(self) -> openpyxl.Workbook:
@@ -100,7 +100,7 @@ class XlsxExportTargetingService:
         self._add_individual_documents_to_row(individual, individual_row)
         self.ws_individuals.append(individual_row)
 
-    def _add_individual_documents_to_row(self, individual: Individual, row: Dict) -> None:
+    def _add_individual_documents_to_row(self, individual: Individual, row: dict) -> None:
         document: Document
         for document in individual.documents.all():
             column_index = self._add_document_column_header(document)

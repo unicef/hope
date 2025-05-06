@@ -27,8 +27,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """
-        <DocumentElement>
+        """<DocumentElement>
             <BusinessArea>
                 <BUSINESS_AREA_CODE>8970</BUSINESS_AREA_CODE>
                 <BUSINESS_AREA_NAME>Serbia</BUSINESS_AREA_NAME>
@@ -48,25 +47,25 @@ class Command(BaseCommand):
         for business_area_tag in root:
             business_area, _ = BusinessArea.objects.get_or_create(
                 code=business_area_tag.find("BUSINESS_AREA_CODE").text,
-                defaults=dict(
-                    name=business_area_tag.find("BUSINESS_AREA_NAME").text,
-                    long_name=business_area_tag.find("BUSINESS_AREA_LONG_NAME").text,
-                    region_code=business_area_tag.find("REGION_CODE").text,
-                    region_name=business_area_tag.find("REGION_NAME").text,
-                    has_data_sharing_agreement=True,
-                ),
+                defaults={
+                    "name": business_area_tag.find("BUSINESS_AREA_NAME").text,
+                    "long_name": business_area_tag.find("BUSINESS_AREA_LONG_NAME").text,
+                    "region_code": business_area_tag.find("REGION_CODE").text,
+                    "region_name": business_area_tag.find("REGION_NAME").text,
+                    "has_data_sharing_agreement": True,
+                },
             )
 
             if country := Country.objects.filter(name=business_area.name).first():
                 business_area.countries.add(country)
         BusinessArea.objects.get_or_create(
             code="GLOBAL",
-            defaults=dict(
-                name="Global",
-                long_name="Global Business Area",
-                region_code="GLOBAL",
-                region_name="GLOBAL",
-                has_data_sharing_agreement=True,
-            ),
+            defaults={
+                "name": "Global",
+                "long_name": "Global Business Area",
+                "region_code": "GLOBAL",
+                "region_name": "GLOBAL",
+                "has_data_sharing_agreement": True,
+            },
         )
         logger.debug(f"Imported business areas from {file}")

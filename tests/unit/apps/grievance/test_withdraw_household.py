@@ -107,5 +107,5 @@ class TestWithdrawHousehold(APITestCase):
         ind = Individual.objects.filter(id=individual.id).first()
         hh = Household.objects.filter(id=household.id).first()
 
-        self.assertTrue(ind.withdrawn)
-        self.assertTrue(hh.withdrawn)
+        assert ind.withdrawn
+        assert hh.withdrawn

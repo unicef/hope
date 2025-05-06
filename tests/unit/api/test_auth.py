@@ -15,6 +15,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from tests.unit.api.base import HOPEApiTestCase
 from tests.unit.api.factories import APITokenFactory
+import pytest
 
 
 class HOPEPermissionTest(TestCase):
@@ -53,7 +54,7 @@ class HOPEAuthenticationTest(HOPEApiTestCase):
     def test_auth_fails(self) -> None:
         p = HOPEAuthentication()
         request = MagicMock(META={"HTTP_AUTHORIZATION": "Token 123"})
-        with self.assertRaises(AuthenticationFailed):
+        with pytest.raises(AuthenticationFailed):
             p.authenticate(request)
 
 
@@ -68,12 +69,12 @@ class ViewAuthView(HOPEApiTestCase):
         self.client.logout()
         url = reverse("api:rdi-upload", args=[self.business_area.slug])
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, str(response.json()))
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, str(response.json())
 
     def test_no_perm(self) -> None:
         url = reverse("api:rdi-create", args=[self.business_area.slug])
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
         response = self.client.post(url, {}, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, str(response.json()))
+        assert response.status_code == status.HTTP_403_FORBIDDEN, str(response.json())
         data = response.json()
         self.assertDictEqual(data, {"detail": "You do not have permission to perform this action. API_RDI_CREATE"})

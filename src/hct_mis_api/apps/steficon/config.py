@@ -1,5 +1,4 @@
-"""
-Settings for Steficon namespaced in the STEFICON setting.
+"""Settings for Steficon namespaced in the STEFICON setting.
 For example your project's `settings.py` file might look like this:
 STEFICON = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -17,7 +16,7 @@ REST framework settings, checking for user settings first, then falling
 back to the defaults.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.conf import settings
 from django.core.signals import setting_changed
@@ -42,14 +41,14 @@ DEFAULTS = {
 
 
 class Config:
-    def __init__(self, user_settings: Optional[Dict] = None, defaults: Optional[Dict] = None) -> None:
+    def __init__(self, user_settings: dict | None = None, defaults: dict | None = None) -> None:
         if user_settings:
             self._user_settings = user_settings
         self.defaults = defaults or DEFAULTS
         self._cached_attrs = set()
 
     @property
-    def user_settings(self) -> Dict:
+    def user_settings(self) -> dict:
         if not hasattr(self, "_user_settings"):
             self._user_settings = getattr(settings, "STEFICON", {})
         return self._user_settings
@@ -65,9 +64,7 @@ class Config:
             # Fall back to defaults
             val = self.defaults[attr]
 
-        if attr in "RESULT":
-            val = import_string(val)
-        elif attr in "USED_BY" and val:
+        if attr in "RESULT" or attr in "USED_BY" and val:
             val = import_string(val)
 
         # Cache the result

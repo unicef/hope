@@ -220,8 +220,8 @@ class TestUpdateProgram(APITestCase):
         )
 
         self.program.refresh_from_db()
-        self.assertEqual(self.program.status, Program.ACTIVE)
-        self.assertEqual(self.program.data_collecting_type.code, "full_collection")
+        assert self.program.status == Program.ACTIVE
+        assert self.program.data_collecting_type.code == "full_collection"
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -234,7 +234,7 @@ class TestUpdateProgram(APITestCase):
                 "version": self.program.version,
             },
         )
-        self.assertEqual(self.program.data_collecting_type.code, "full_collection")
+        assert self.program.data_collecting_type.code == "full_collection"
 
     def test_update_draft_not_empty_program_with_dct(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -253,11 +253,11 @@ class TestUpdateProgram(APITestCase):
                 "version": self.program.version,
             },
         )
-        self.assertEqual(self.program.data_collecting_type.code, "full_collection")
+        assert self.program.data_collecting_type.code == "full_collection"
 
     def test_update_program_with_deprecated_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
+            label="Deprecated", code="deprecated", description="Deprecated", deprecated=True
         )
         dct.limit_to.add(self.business_area)
 
@@ -277,7 +277,7 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_inactive_dct(self) -> None:
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
+            label="Inactive", code="inactive", description="Inactive", active=False
         )
         dct.limit_to.add(self.business_area)
 
@@ -298,7 +298,7 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_with_dct_from_other_ba(self) -> None:
         other_ba = BusinessAreaFactory()
         dct, _ = DataCollectingType.objects.update_or_create(
-            **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
+            label="Test Wrong BA", code="test_wrong_ba", description="Test Wrong BA"
         )
         dct.limit_to.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
@@ -396,8 +396,8 @@ class TestUpdateProgram(APITestCase):
             },
         )
         program = Program.objects.get(id=self.program.id)
-        self.assertIsNotNone(program.programme_code)
-        self.assertEqual(program.programme_code, "AB/2")
+        assert program.programme_code is not None
+        assert program.programme_code == "AB/2"
 
     def test_update_program_without_programme_code(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -418,8 +418,8 @@ class TestUpdateProgram(APITestCase):
             },
         )
         program = Program.objects.get(id=self.program.id)
-        self.assertIsNotNone(program.programme_code)
-        self.assertEqual(len(program.programme_code), 4)
+        assert program.programme_code is not None
+        assert len(program.programme_code) == 4
 
     def test_update_program_with_duplicated_programme_code_among_the_same_business_area(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -441,9 +441,9 @@ class TestUpdateProgram(APITestCase):
             },
         )
         program = Program.objects.get(id=self.program.id)
-        self.assertIsNotNone(program.programme_code)
-        self.assertEqual(len(program.programme_code), 4)
-        self.assertEqual(program.programme_code, "ABC3")
+        assert program.programme_code is not None
+        assert len(program.programme_code) == 4
+        assert program.programme_code == "ABC3"
 
     def test_update_program_with_pdu_fields(self) -> None:
         self.create_user_role_with_permissions(
@@ -517,15 +517,12 @@ class TestUpdateProgram(APITestCase):
             },
             variables={"id": self.id_to_base64(self.program.id, "ProgramNode")},
         )
-        self.assertEqual(
-            self.program.pdu_fields.count(),
-            3,
-        )
-        self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_removed").first())
-        self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_updated").first())
-        self.assertEqual(FlexibleAttribute.objects.filter(name="pdu_field_updated").first().pdu_data.subtype, "BOOL")
-        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_new").first())
-        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_preserved").first())
+        assert self.program.pdu_fields.count() == 3
+        assert FlexibleAttribute.objects.filter(name="pdu_field_to_be_removed").first() is None
+        assert FlexibleAttribute.objects.filter(name="pdu_field_to_be_updated").first() is None
+        assert FlexibleAttribute.objects.filter(name="pdu_field_updated").first().pdu_data.subtype == "BOOL"
+        assert FlexibleAttribute.objects.filter(name="pdu_field_new").first() is not None
+        assert FlexibleAttribute.objects.filter(name="pdu_field_to_be_preserved").first() is not None
 
     def test_update_program_with_pdu_fields_invalid_data(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
@@ -900,14 +897,11 @@ class TestUpdateProgram(APITestCase):
         individual.flex_fields = populate_pdu_with_null_values(self.program, {})
         individual.save()
 
-        self.assertEqual(
-            individual.flex_fields,
-            {
-                "pdu_field_to_be_preserved": {"1": {"value": None}},
-                "pdu_field_to_be_removed": {"1": {"value": None}, "2": {"value": None}, "3": {"value": None}},
-                "pdu_field_to_be_updated": {"1": {"value": None}, "2": {"value": None}},
-            },
-        )
+        assert individual.flex_fields == {
+            "pdu_field_to_be_preserved": {"1": {"value": None}},
+            "pdu_field_to_be_removed": {"1": {"value": None}, "2": {"value": None}, "3": {"value": None}},
+            "pdu_field_to_be_updated": {"1": {"value": None}, "2": {"value": None}},
+        }
         update_data = {
             "programData": {
                 "id": self.id_to_base64(self.program.id, "ProgramNode"),
@@ -939,19 +933,16 @@ class TestUpdateProgram(APITestCase):
             },
         )
         individual.refresh_from_db()
-        self.assertEqual(
-            individual.flex_fields,
-            {
-                "pdu_field_to_be_preserved": {"1": {"value": None}},
-                "pdu_field_to_be_removed": {"1": {"value": None}, "2": {"value": None}, "3": {"value": None}},
-                "pdu_field_to_be_updated": {
-                    "1": {"value": None},
-                    "2": {"value": None},
-                    "3": {"value": None},
-                    "4": {"value": None},
-                },
+        assert individual.flex_fields == {
+            "pdu_field_to_be_preserved": {"1": {"value": None}},
+            "pdu_field_to_be_removed": {"1": {"value": None}, "2": {"value": None}, "3": {"value": None}},
+            "pdu_field_to_be_updated": {
+                "1": {"value": None},
+                "2": {"value": None},
+                "3": {"value": None},
+                "4": {"value": None},
             },
-        )
+        }
 
     @patch.dict(
         "os.environ",
@@ -967,8 +958,8 @@ class TestUpdateProgram(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.business_area)
         Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE)
         self.program.refresh_from_db()
-        self.assertEqual(self.program.status, Program.ACTIVE)
-        self.assertEqual(self.program.cycles.count(), 1)
+        assert self.program.status == Program.ACTIVE
+        assert self.program.cycles.count() == 1
         program_cycle = self.program.cycles.first()
         program_cycle.status = ProgramCycle.ACTIVE
         program_cycle.save()
@@ -989,7 +980,7 @@ class TestUpdateProgram(APITestCase):
         self.program.end_date = None
         self.program.save()
         self.program.refresh_from_db()
-        self.assertIsNone(self.program.end_date)
+        assert self.program.end_date is None
         # no program end date
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -1007,8 +998,8 @@ class TestUpdateProgram(APITestCase):
         self.program.end_date = self.program.start_date + timedelta(days=999)
         self.program.save()
         self.program.refresh_from_db()
-        self.assertIsNotNone(self.program.end_date)
-        self.assertEqual(str(self.program.deduplication_set_id), "12bc7994-9467-4f27-9954-d75a67d0e909")
+        assert self.program.end_date is not None
+        assert str(self.program.deduplication_set_id) == "12bc7994-9467-4f27-9954-d75a67d0e909"
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
@@ -1022,15 +1013,15 @@ class TestUpdateProgram(APITestCase):
         )
         # check if deduplication_set_id is null
         self.program.refresh_from_db()
-        self.assertIsNone(self.program.deduplication_set_id)
+        assert self.program.deduplication_set_id is None
         mock_delete_deduplication_set.assert_called_once_with("12bc7994-9467-4f27-9954-d75a67d0e909")
 
     def test_update_program_end_date_validation(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE, end_date=None)
         self.program.refresh_from_db()
-        self.assertEqual(self.program.status, Program.ACTIVE)
-        self.assertIsNone(self.program.end_date)
+        assert self.program.status == Program.ACTIVE
+        assert self.program.end_date is None
         program_cycle = self.program.cycles.first()
         program_cycle.start_date = self.program.start_date
         program_cycle.end_date = self.program.start_date + timedelta(days=5)

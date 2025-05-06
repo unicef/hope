@@ -60,7 +60,7 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
 
 
 @pytest.mark.xfail(reason="UNSTABLE")
-@pytest.mark.django_db()
+@pytest.mark.django_db
 @pytest.mark.usefixtures("login", "setup_household_and_payments")
 class TestSmokeCountryDashboard:
     def test_smoke_country_dashboard(self, pageCountryDashboard: CountryDashboard, business_area: Callable) -> None:
@@ -68,36 +68,36 @@ class TestSmokeCountryDashboard:
         pageCountryDashboard.getNavCountryDashboard().click()
         pageCountryDashboard.switch_to_dashboard_iframe()
         assert pageCountryDashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."
-        assert (
-            pageCountryDashboard.get_total_amount_paid_local().text != ""
-        ), "Expected total amount in local paid to be populated."
-        assert (
-            int(pageCountryDashboard.get_number_of_payments().text) > 0
-        ), "Expected number of payments to be greater than zero."
-        assert (
-            pageCountryDashboard.get_outstanding_payments().text == "0.00 USD"
-        ), "Expected outstanding payments to be 0.00 USD"
-        assert (
-            int(pageCountryDashboard.get_households_reached().text) > 0
-        ), "Expected households reached to be greater than zero."
+        assert pageCountryDashboard.get_total_amount_paid_local().text != "", (
+            "Expected total amount in local paid to be populated."
+        )
+        assert int(pageCountryDashboard.get_number_of_payments().text) > 0, (
+            "Expected number of payments to be greater than zero."
+        )
+        assert pageCountryDashboard.get_outstanding_payments().text == "0.00 USD", (
+            "Expected outstanding payments to be 0.00 USD"
+        )
+        assert int(pageCountryDashboard.get_households_reached().text) > 0, (
+            "Expected households reached to be greater than zero."
+        )
         assert int(pageCountryDashboard.get_pwd_reached().text) == 0, "Expected PWD reached to be zero."
-        assert (
-            int(pageCountryDashboard.get_children_reached().text) > 0
-        ), "Expected children reached to be greater than zero."
-        assert (
-            int(pageCountryDashboard.get_individuals_reached().text) > 0
-        ), "Expected individuals reached to be greater than zero."
-        assert pageCountryDashboard.driver.find_element(
-            By.ID, "payments-by-fsp"
-        ).is_displayed(), "Payments by FSP chart should be displayed."
-        assert pageCountryDashboard.driver.find_element(
-            By.ID, "payments-by-delivery"
-        ).is_displayed(), "Payments by Delivery chart should be displayed."
-        assert pageCountryDashboard.driver.find_element(
-            By.ID, "payments-by-sector"
-        ).is_displayed(), "Payments by Sector chart should be displayed."
-        assert pageCountryDashboard.driver.find_element(
-            By.ID, "payments-by-admin1"
-        ).is_displayed(), "Payments by Admin 1 chart should be displayed."
+        assert int(pageCountryDashboard.get_children_reached().text) > 0, (
+            "Expected children reached to be greater than zero."
+        )
+        assert int(pageCountryDashboard.get_individuals_reached().text) > 0, (
+            "Expected individuals reached to be greater than zero."
+        )
+        assert pageCountryDashboard.driver.find_element(By.ID, "payments-by-fsp").is_displayed(), (
+            "Payments by FSP chart should be displayed."
+        )
+        assert pageCountryDashboard.driver.find_element(By.ID, "payments-by-delivery").is_displayed(), (
+            "Payments by Delivery chart should be displayed."
+        )
+        assert pageCountryDashboard.driver.find_element(By.ID, "payments-by-sector").is_displayed(), (
+            "Payments by Sector chart should be displayed."
+        )
+        assert pageCountryDashboard.driver.find_element(By.ID, "payments-by-admin1").is_displayed(), (
+            "Payments by Admin 1 chart should be displayed."
+        )
 
         pageCountryDashboard.switch_to_default_content()

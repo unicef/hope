@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.models import (
@@ -52,7 +52,7 @@ class CheckRapidProVerificationTask:
         calculate_counts(payment_verification_plan)
         payment_verification_plan.save()
 
-    def _get_payment_record_verification_to_update(self, results: Any, phone_numbers: Dict) -> List:
+    def _get_payment_record_verification_to_update(self, results: Any, phone_numbers: dict) -> list:
         output = []
         for rapid_pro_result in results:
             payment_record_verification = self._rapid_pro_results_to_payment_record_verification(
@@ -64,7 +64,7 @@ class CheckRapidProVerificationTask:
 
     def _rapid_pro_results_to_payment_record_verification(
         self, payment_record_verifications_phone_number_dict: Any, rapid_pro_result: Any
-    ) -> Optional[PaymentVerification]:
+    ) -> PaymentVerification | None:
         received = rapid_pro_result.get("received")
         received_amount = rapid_pro_result.get("received_amount")
         phone_number = rapid_pro_result.get("phone_number")

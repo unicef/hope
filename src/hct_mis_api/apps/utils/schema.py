@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from django.core.files.storage import default_storage
 
@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Arg(graphene.Scalar):
-    """
-    Allows use of a JSON String for input / output from the GraphQL schema.
+    """Allows use of a JSON String for input / output from the GraphQL schema.
 
     Use of this type is *not recommended* as you lose the benefits of having a defined, static
     schema (one of the key benefits of GraphQL).
@@ -78,15 +77,14 @@ class TableTotalCashTransferredForPeople(graphene.ObjectType):
 
 
 class FlexFieldsScalar(graphene.Scalar):
-    """
-    Allows use of a JSON String for input / output from the GraphQL schema.
+    """Allows use of a JSON String for input / output from the GraphQL schema.
 
     Use of this type is *not recommended* as you lose the benefits of having a defined, static
     schema (one of the key benefits of GraphQL).
     """
 
     @staticmethod
-    def serialize(dt: Any) -> Optional[Any]:
+    def serialize(dt: Any) -> Any | None:
         if not dt:
             return dt
 

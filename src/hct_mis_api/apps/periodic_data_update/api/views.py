@@ -165,10 +165,10 @@ class PeriodicDataUpdateUploadViewSet(
         if serializer.is_valid():
             serializer.validated_data["created_by"] = request.user
             try:
-                serializer.validated_data[
-                    "template"
-                ] = PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
-                    serializer.validated_data["file"]
+                serializer.validated_data["template"] = (
+                    PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
+                        serializer.validated_data["file"]
+                    )
                 )
             except DjangoValidationError as e:
                 return Response(
@@ -183,8 +183,7 @@ class PeriodicDataUpdateUploadViewSet(
                 data=serializer.data,
                 status=status.HTTP_202_ACCEPTED,
             )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # pragma: no cover
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # pragma: no cover
 
 
 class PeriodicFieldViewSet(

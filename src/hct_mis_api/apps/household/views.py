@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, Optional, Union
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -25,7 +24,7 @@ from hct_mis_api.apps.utils.profiling import profiling
 logger = logging.getLogger(__name__)
 
 
-def get_individual(tax_id: str, business_area_code: Optional[str]) -> PendingIndividual:
+def get_individual(tax_id: str, business_area_code: str | None) -> PendingIndividual:
     pending_documents = (
         PendingDocument.objects.all()
         if not business_area_code
@@ -40,7 +39,7 @@ def get_individual(tax_id: str, business_area_code: Optional[str]) -> PendingInd
     raise Exception("Document with given tax_id not found")
 
 
-def get_household(detail_id: str, business_area_code: Optional[str]) -> Union[PendingHousehold, Household]:
+def get_household(detail_id: str, business_area_code: str | None) -> PendingHousehold | Household:
     kobo_asset_value = _prepare_kobo_asset_id_value(detail_id)
     households = (
         Household.objects.all()
@@ -71,9 +70,7 @@ def get_household(detail_id: str, business_area_code: Optional[str]) -> Union[Pe
     raise Exception("Household with given detail_id not found")
 
 
-def get_household_or_individual(
-    tax_id: Optional[str], detail_id: Optional[str], business_area_code: Optional[str]
-) -> Dict:
+def get_household_or_individual(tax_id: str | None, detail_id: str | None, business_area_code: str | None) -> dict:
     if tax_id and detail_id:
         raise Exception("tax_id and detail_id are mutually exclusive")
 
@@ -97,7 +94,7 @@ class HouseholdStatusView(APIView):
 
         tax_id = query_params.get("tax_id", None)
         detail_id = query_params.get("detail_id", None)
-        business_area_code: Optional[str] = query_params.get("business_area_code")
+        business_area_code: str | None = query_params.get("business_area_code")
 
         try:
             data = get_household_or_individual(tax_id, detail_id, business_area_code)

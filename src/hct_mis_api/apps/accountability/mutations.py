@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -58,7 +58,7 @@ class CreateCommunicationMessageMutation(PermissionMutation):
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateCommunicationMessageMutation":
+    def mutate(cls, root: Any, info: Any, input: dict[str, Any]) -> "CreateCommunicationMessageMutation":
         user = info.context.user
         business_area_slug = info.context.headers.get("Business-Area")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
@@ -83,7 +83,7 @@ class CreateFeedbackMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateFeedbackMutation":
+    def mutate(cls, root: Any, info: Any, input: dict[str, Any]) -> "CreateFeedbackMutation":
         program = None
         user = info.context.user
         business_area_slug = info.context.headers.get("Business-Area")
@@ -114,7 +114,7 @@ class UpdateFeedbackMutation(PermissionMutation):
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "UpdateFeedbackMutation":
+    def mutate(cls, root: Any, info: Any, input: dict[str, Any]) -> "UpdateFeedbackMutation":
         user = info.context.user
         old_feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback_id"]))
         feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback_id"]))
@@ -142,7 +142,7 @@ class CreateFeedbackMessageMutation(PermissionMutation):
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateFeedbackMessageMutation":
+    def mutate(cls, root: Any, info: Any, input: dict[str, Any]) -> "CreateFeedbackMessageMutation":
         feedback = get_object_or_404(Feedback, id=decode_id_string(input["feedback"]))
         cls.has_permission(info, Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE, feedback.business_area.slug)
 
@@ -162,7 +162,7 @@ class CreateSurveyMutation(PermissionMutation):
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict[str, Any]) -> "CreateSurveyMutation":
+    def mutate(cls, root: Any, info: Any, input: dict[str, Any]) -> "CreateSurveyMutation":
         business_area_slug = info.context.headers.get("Business-Area")
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 

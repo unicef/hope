@@ -13,6 +13,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+import contextlib
 
 
 class Common:
@@ -41,8 +42,7 @@ class Common:
                 sleep(1)
             else:
                 return elements
-        else:
-            raise Exception("No elements found")
+        raise Exception("No elements found")
 
     def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
         try:
@@ -121,8 +121,7 @@ class Common:
             sleep(delay_between_checks)
             if name in item.text:
                 return item
-        else:
-            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+        raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         current_page_url = self.driver.current_url
@@ -194,11 +193,9 @@ class Common:
     def get_value_of_attributes(self, attribute: str = "data-cy") -> None:
         sleep(1)
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
-        for ii in ids:
-            try:
-                print(f"{ii.text}: {ii.get_attribute(attribute)}")
-            except BaseException:
-                print(f"No text: {ii.get_attribute(attribute)}")
+        for _ii in ids:
+            with contextlib.suppress(BaseException):
+                pass
 
     def mouse_on_element(self, element: WebElement) -> None:
         hover = ActionChains(self.driver).move_to_element(element)
@@ -212,6 +209,6 @@ class Common:
         while True:
             if os.path.exists(filepath):
                 return True
-            elif time.time() - start_time > timeout:
+            if time.time() - start_time > timeout:
                 raise TimeoutError(f"File {filepath} not found after {timeout} seconds")
             sleep(0.02)
