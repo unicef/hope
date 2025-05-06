@@ -146,7 +146,7 @@ const EditProgramPage = (): ReactElement => {
       ? budgetValue.toFixed(2)
       : 0;
     const populationGoalValue = parseInt(values.population_goal, 10) ?? 0;
-    const populationGoalParsed = !Number.isNaN(population_goalValue)
+    const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
 

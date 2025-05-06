@@ -30,7 +30,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):
@@ -100,22 +100,22 @@ class BankAccountInfoSerializer(serializers.ModelSerializer):
         )
 
 
-class DeliveryMechanismDataSerializer(serializers.ModelSerializer):
+class AccountSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     individual_tab_data = serializers.SerializerMethodField()
 
     class Meta:
-        model = DeliveryMechanismData
+        model = Account
         fields = (
             "id",
             "name",
             "individual_tab_data",
         )
 
-    def get_name(self, obj: DeliveryMechanismData) -> str:
+    def get_name(self, obj: Account) -> str:
         return obj.account_type.label
 
-    def get_individual_tab_data(self, obj: DeliveryMechanismData) -> Dict:
+    def get_individual_tab_data(self, obj: Account) -> Dict:
         return dict(sorted(obj.data.items()))
 
 
@@ -298,7 +298,7 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
     documents = serializers.SerializerMethodField()
     identities = serializers.SerializerMethodField()
     bank_account_info = serializers.SerializerMethodField()
-    delivery_mechanisms_data = serializers.SerializerMethodField()
+    accounts = serializers.SerializerMethodField()
     roles_in_households = serializers.SerializerMethodField()
     flex_fields = serializers.SerializerMethodField()
     linked_grievances = serializers.SerializerMethodField()
@@ -337,7 +337,7 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             "documents",
             "identities",
             "bank_account_info",
-            "delivery_mechanisms_data",
+            "accounts",
             "email",
             "phone_no",
             "phone_no_valid",
@@ -369,14 +369,14 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             obj.bank_account_info(manager="all_merge_status_objects").all(), many=True
         ).data
 
-    def get_delivery_mechanisms_data(self, obj: Individual) -> Dict:
+    def get_accounts(self, obj: Individual) -> Dict:
         if self.context["request"].user.has_perm(
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value, obj.program
         ):
-            queryset = obj.delivery_mechanisms_data(manager="all_objects").all()
+            queryset = obj.accounts(manager="all_objects").all()
         else:
-            queryset = obj.delivery_mechanisms_data.none()
-        return DeliveryMechanismDataSerializer(queryset, many=True).data
+            queryset = obj.accounts.none()
+        return AccountSerializer(queryset, many=True).data
 
     def get_flex_fields(self, obj: Individual) -> Dict:
         return resolve_flex_fields_choices_to_string(obj)

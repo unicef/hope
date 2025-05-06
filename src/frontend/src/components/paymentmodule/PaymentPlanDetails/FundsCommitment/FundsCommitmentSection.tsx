@@ -25,7 +25,6 @@ import {
   PaymentPlanStatus,
   useAssignFundsCommitmentsPaymentPlanMutation,
 } from '@generated/graphql';
-import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
