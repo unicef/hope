@@ -366,10 +366,9 @@ class PaymentGatewayService:
                 assert response.remote_id == str(split.id), f"{response}, _object_id: {split.id}"
                 status = response.status
                 if status == PaymentInstructionStatus.DRAFT.value:
-                    status = self.api.change_payment_instruction_status(
+                    self.api.change_payment_instruction_status(
                         status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
                     )
-                assert status == PaymentInstructionStatus.OPEN.value, status
 
     def change_payment_instruction_status(
         self, new_status: PaymentInstructionStatus, obj: PaymentPlanSplit, validate_response: bool = True

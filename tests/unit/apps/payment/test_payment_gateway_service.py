@@ -2,6 +2,7 @@ import os
 from decimal import Decimal
 from typing import Any
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -651,6 +652,46 @@ class TestPaymentGatewayService(APITestCase):
 
         response_data = PaymentGatewayAPI().create_payment_instruction({})
         assert isinstance(response_data, PaymentInstructionData)
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._get")
+    def test_api_get_record(self, get_mock: Any) -> None:
+        get_mock.return_value = [
+            {
+                "id": "123",
+                "remote_id": "123",
+                "created": "123",
+                "modified": "123",
+                "parent": "123",
+                "status": "PENDING",
+                "auth_code": "123",
+                "record_code": "123",
+                "fsp_code": "123",
+            }
+        ], 200
+
+        response_data = PaymentGatewayAPI().get_record("123")
+        assert isinstance(response_data, PaymentRecordData)
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_change_payment_instruction_status(self, post_mock: Any) -> None:
+        s = Mock()
+        bad_status = "bad_status"
+        s.value = bad_status
+        with self.assertRaisesRegex(
+            PaymentGatewayAPI.PaymentGatewayAPIException,
+            "Can't set invalid Payment Instruction status:",
+        ):
+            PaymentGatewayAPI().change_payment_instruction_status(
+                s,
+                "123",
+            )
+
+        post_mock.return_value = {"status": "ABORTED"}, 200
+        response = PaymentGatewayAPI().change_payment_instruction_status(
+            PaymentInstructionStatus.ABORTED,
+            "123",
+        )
+        assert response == "ABORTED"
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_delivery_mechanisms")
     def test_sync_delivery_mechanisms(self, get_delivery_mechanisms_mock: Any) -> None:
