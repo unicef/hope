@@ -2,7 +2,7 @@ import datetime
 import json
 from typing import Union
 
-from django.core.management import call_command
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
@@ -10,11 +10,7 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_TAX_ID,
-    ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
     PendingDocument,
@@ -29,17 +25,17 @@ from hct_mis_api.contrib.aurora.fixtures import (
     RegistrationFactory,
 )
 from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.generic_registration_service import (
-    GenericRegistrationService,
+from hct_mis_api.contrib.aurora.services.people_registration_service import (
+    PeopleRegistrationService,
 )
 
 
-class TestGenericRegistrationService(TestCase):
+class TestPeopleRegistrationService(TestCase):
     databases = {"default"}
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(cls) -> None:
-        call_command("init-geo-fixtures")
         DocumentType.objects.create(key="tax_id", label="Tax ID")
         DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")
@@ -50,9 +46,6 @@ class TestGenericRegistrationService(TestCase):
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
-        admin1 = AreaFactory(p_code="UA07", name="Name1")
-        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
-        AreaFactory(p_code="UA0114007", name="Name3", parent=admin2)
 
         mapping = {
             "defaults": {"business_area": "ukraine", "country": "UA"},
@@ -92,7 +85,6 @@ class TestGenericRegistrationService(TestCase):
             "id_type": "tax_id",
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
-            "relationship_i_c": "head",
             "given_name_i_c": "Jan",
             "family_name_i_c": "Romaniak",
             "patronymic": "Roman",
@@ -103,58 +95,6 @@ class TestGenericRegistrationService(TestCase):
             "role_pr_i_c": "y",
             "disability_id_type_i_c": "disability_certificate",
             "disability_id_i_c": "xyz",
-        }
-        cls.individual_with_bank_account_and_tax = {
-            "id_type": "tax_id",
-            "tax_id_no_i_c": "123123123",
-            "bank_account_h_f": "y",
-            "relationship_i_c": "head",
-            "given_name_i_c": "Wiktor",
-            "family_name_i_c": "Lamiący",
-            "patronymic": "Stefan",
-            "birth_date": "1991-11-18",
-            "gender_i_c": "male",
-            "phone_no_i_c": "+393451232123",
-            "email": "email321@mail.com",
-        }
-        cls.individual_with_no_tax = {
-            "tax_id_no_i_c": "",
-            "bank_account_h_f": "y",
-            "relationship_i_c": "head",
-            "given_name_i_c": "Michał",
-            "family_name_i_c": "Brzęczący",
-            "patronymic": "Janusz",
-            "birth_date": "1991-11-18",
-            "gender_i_c": "male",
-            "phone_no_i_c": "+393451232124",
-            "email": "email111@mail.com",
-            "role_sec_i_c": "y",
-        }
-        cls.individual_without_bank_account = {
-            "id_type": "tax_id",
-            "tax_id_no_i_c": "TESTID",
-            "bank_account_h_f": "",
-            "relationship_i_c": "head",
-            "given_name_i_c": "Aleksiej",
-            "family_name_i_c": "Prysznicow",
-            "patronymic": "Paweł",
-            "birth_date": "1991-11-18",
-            "gender_i_c": "male",
-            "phone_no_i_c": "+393451212123",
-            "email": "email222@mail.com",
-        }
-        cls.individual_with_tax_id_which_is_too_long = {
-            "id_type": "tax_id",
-            "tax_id_no_i_c": "x" * 300,
-            "bank_account_h_f": "",
-            "relationship_i_c": "head",
-            "given_name_i_c": "Aleksiej",
-            "family_name_i_c": "Prysznicow",
-            "patronymic": "Paweł",
-            "birth_date": "1991-11-18",
-            "gender_i_c": "male",
-            "phone_no_i_c": "+393451214623",
-            "email": "email333@mail.com",
         }
         cls.defaults = {
             "registration": 2,
@@ -174,8 +114,6 @@ class TestGenericRegistrationService(TestCase):
     @parameterized.expand(
         [
             ("UA07", "UA0702", "UA0114007", "UA0114007", "admin4_h_c"),
-            (None, None, None, "UA0114007", "admin4_h_c"),
-            (None, None, "UA0114007", None, "admin3_h_c"),
             (None, "UA0702", None, None, "admin2_h_c"),
         ]
     )
@@ -201,67 +139,24 @@ class TestGenericRegistrationService(TestCase):
                 },
                 files=json.dumps(self.files).encode(),
             ),
-            Record(
-                **self.defaults,
-                source_id=2,
-                fields={"household": self.household, "individuals": [self.individual_with_bank_account_and_tax]},
-                files=json.dumps({}).encode(),
-            ),
-            Record(
-                **self.defaults,
-                source_id=3,
-                fields={"household": self.household, "individuals": [self.individual_with_no_tax]},
-                files=json.dumps(self.files).encode(),
-            ),
-            Record(
-                **self.defaults,
-                source_id=4,
-                fields={"household": self.household, "individuals": [self.individual_without_bank_account]},
-                files=json.dumps(self.files).encode(),
-            ),
-        ]
-        bad_records = [
-            Record(
-                **self.defaults,
-                source_id=1,
-                fields={"household": self.household, "individuals": [self.individual_with_tax_id_which_is_too_long]},
-                files=json.dumps(self.files).encode(),
-            ),
         ]
         records = Record.objects.bulk_create(records)
-        Record.objects.bulk_create(bad_records)
 
-        service = GenericRegistrationService(self.registration)
+        service = PeopleRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"generic rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in records]
         service.process_records(rdi.id, records_ids)
-        records[2].refresh_from_db()
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(PendingHousehold.objects.count(), 4)
-        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 4)
-        self.assertEqual(
-            PendingDocument.objects.filter(
-                document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
-            ).count(),
-            1,
-        )
-        self.assertEqual(
-            PendingDocument.objects.filter(
-                document_number="TESTID",
-                type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
-                program=rdi.program,
-            ).count(),
-            1,
-        )
+        records[0].refresh_from_db()
+        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 1)
+        self.assertEqual(PendingHousehold.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
 
-        # Checking only first is enough, because they all in one RDI
         pending_household = PendingHousehold.objects.all()[0]
         registration_data_import = pending_household.registration_data_import
         self.assertIn("ff", pending_household.flex_fields.keys())
         self.assertEqual(registration_data_import.program, self.program)
 
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
-        self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
 
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
@@ -278,7 +173,7 @@ class TestGenericRegistrationService(TestCase):
             ),
         ]
         records = Record.objects.bulk_create(records)
-        service = GenericRegistrationService(self.registration)
+        service = PeopleRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"generic rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in records]
         service.process_records(rdi.id, records_ids)
@@ -298,7 +193,6 @@ class TestGenericRegistrationService(TestCase):
                 "given_name": "Jan",
                 "middle_name": "Roman",
                 "family_name": "Romaniak",
-                "relationship": "HEAD",
                 "sex": "MALE",
                 "email": "email123@mail.com",
                 "phone_no": "+393892781511",

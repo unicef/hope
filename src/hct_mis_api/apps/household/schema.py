@@ -84,7 +84,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.nodes import (
@@ -204,7 +204,7 @@ class BankAccountInfoNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class DeliveryMechanismDataNode(BaseNodePermissionMixin, DjangoObjectType):
+class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION),)
 
     name = graphene.String(required=False)
@@ -214,10 +214,15 @@ class DeliveryMechanismDataNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.account_type.label
 
     def resolve_individual_tab_data(self, info: Any) -> dict:
-        return dict(sorted(self.data.items()))
+        data = dict(sorted(self.data.items()))
+        if self.number:
+            data["number"] = self.number
+        if self.financial_institution:
+            data["financial_institution"] = self.financial_institution.code
+        return data
 
     class Meta:
-        model = DeliveryMechanismData
+        model = Account
         exclude = ("unique_key", "signature_hash")
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -252,7 +257,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     phone_no_alternative_valid = graphene.Boolean()
     payment_channels = graphene.List(BankAccountInfoNode)
     preferred_language = graphene.String()
-    delivery_mechanisms_data = graphene.List(DeliveryMechanismDataNode)
+    accounts = graphene.List(AccountsNode)
     email = graphene.String(source="email")
     import_id = graphene.String()
 
@@ -335,15 +340,14 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     def resolve_phone_no_alternative_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_alternative_valid
 
-    def resolve_delivery_mechanisms_data(parent, info: Any) -> QuerySet[DeliveryMechanismData]:
+    def resolve_accounts(parent, info: Any) -> QuerySet[Account]:
         program = Program.objects.filter(id=get_program_id_from_headers(info.context.headers)).first()
         if not info.context.user.has_perm(
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
             program or parent.business_area,
         ):
-            return parent.delivery_mechanisms_data.none()
-
-        return parent.delivery_mechanisms_data.all()
+            return parent.accounts.none()
+        return parent.accounts(manager="all_objects").all()  # type: ignore
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:

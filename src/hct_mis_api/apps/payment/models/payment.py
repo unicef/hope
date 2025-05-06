@@ -1893,24 +1893,58 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
+class FinancialInstitution(TimeStampedUUIDModel):
+    class FinancialInstitutionType(models.TextChoices):
+        BANK = "bank", "Bank"
+        TELCO = "telco", "Telco"
+        OTHER = "other", "Other"
+
+    code = models.CharField(
+        max_length=30,
+        unique=True,
+    )
+    description = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
+
+
+class FinancialInstitutionMapping(TimeStampedUUIDModel):
+    financial_service_provider = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE)
+    financial_institution = models.ForeignKey(FinancialInstitution, on_delete=models.CASCADE)
+    code = models.CharField(max_length=30)
+
+    class Meta:
+        unique_together = ("financial_service_provider", "financial_institution")
+
+    def __str__(self) -> str:
+        return f"{self.financial_institution} to {self.financial_service_provider}: {self.code}"
+
+
+class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     ACCOUNT_FIELD_PREFIX = "account__"
 
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
-        related_name="delivery_mechanisms_data",
+        related_name="accounts",
     )
     account_type = models.ForeignKey(
         "payment.AccountType",
         on_delete=models.PROTECT,
-        related_name="accounts",
         null=True,  # TODO MB make not nullable after migrations
         blank=True,
     )
+    financial_institution = models.ForeignKey(
+        "payment.FinancialInstitution",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    number = models.CharField(max_length=256, blank=True, null=True)
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
-    unique_key = models.CharField(max_length=256, blank=True, null=True, unique=True, editable=False)  # type: ignore
+    unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)  # type: ignore
     is_unique = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)  # False for duplicated/withdrawn individual
 
     signature_fields = (
         "data",
@@ -1919,6 +1953,15 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
     objects = MergedManager()
     all_objects = models.Manager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("unique_key", "active", "is_unique"),
+                condition=Q(active=True) & Q(unique_key__isnull=False) & Q(is_unique=True),
+                name="unique_active_wallet",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
@@ -1939,13 +1982,21 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         for field in unique_fields:
             delivery_data[field] = self.data.get(field, None)
 
+        if self.number:
+            delivery_data["number"] = self.number
+
         return delivery_data
 
     def delivery_data(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> Dict:
         delivery_data = {}
 
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_config = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism).first()
+        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
+        collector_country = self.individual.household.country
+        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
+            dm_config = country_config
+        else:
+            dm_config = dm_configs.first()
         if not dm_config:
             return {}
 
@@ -1962,11 +2013,21 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
             else:
                 delivery_data[field] = getattr(associated_object, internal_field, None)
 
+        if self.number:
+            delivery_data["number"] = self.number
+        if self.financial_institution:
+            delivery_data["financial_institution"] = self.financial_institution.code
+
         return delivery_data
 
     def validate(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> bool:
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_config = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism).first()
+        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
+        collector_country = self.individual.household.country
+        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
+            dm_config = country_config
+        else:
+            dm_config = dm_configs.first()
         if not dm_config:
             logger.error(f"DeliveryMechanismConfig not found for {fsp}, {delivery_mechanism}")
             return True
@@ -1988,12 +2049,18 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         return True
 
     @classmethod
-    def validate_uniqueness(cls, qs: QuerySet["DeliveryMechanismData"]) -> None:
+    def validate_uniqueness(cls, qs: QuerySet["Account"]) -> None:
         for dmd in qs:
             dmd.update_unique_field()
 
     def update_unique_field(self) -> None:
         if hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
+            if not self.unique_fields:
+                self.is_unique = True
+                self.unique_key = None
+                self.save(update_fields=["unique_key", "is_unique"])
+                return
+
             sha256 = hashlib.sha256()
             sha256.update(self.individual.program.name.encode("utf-8"))
             sha256.update(self.account_type.key.encode("utf-8"))
@@ -2005,24 +2072,25 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
             self.unique_key = sha256.hexdigest()
             try:
                 with transaction.atomic():
-                    self.save(update_fields=["unique_key"])
+                    self.is_unique = True
+                    self.save(update_fields=["unique_key", "is_unique"])
             except IntegrityError:
                 with transaction.atomic():
                     self.is_unique = False
-                    self.save(update_fields=["is_unique"])
+                    self.save(update_fields=["unique_key", "is_unique"])
 
     @property
     def unique_fields(self) -> List[str]:
         return self.account_type.unique_fields
 
 
-class PendingDeliveryMechanismData(DeliveryMechanismData):
+class PendingAccount(Account):
     objects: PendingManager = PendingManager()  # type: ignore
 
     class Meta:
         proxy = True
-        verbose_name = "Imported Delivery Mechanism Data"
-        verbose_name_plural = "Imported Delivery Mechanism Datas"
+        verbose_name = "Imported Account"
+        verbose_name_plural = "Imported Accounts"
 
 
 class DeliveryMechanism(TimeStampedUUIDModel):
@@ -2065,6 +2133,9 @@ class DeliveryMechanismConfig(models.Model):
     fsp = models.ForeignKey(FinancialServiceProvider, on_delete=models.PROTECT)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, null=True, blank=True)
     required_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
+
+    def __str__(self) -> str:
+        return f"{self.delivery_mechanism.code} - {self.fsp.name}"  # pragma: no cover
 
 
 class AccountType(models.Model):
