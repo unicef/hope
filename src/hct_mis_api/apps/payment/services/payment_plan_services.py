@@ -31,10 +31,10 @@ from hct_mis_api.apps.payment.celery_tasks import (
     send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
+    Account,
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
-    DeliveryMechanismData,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
@@ -397,11 +397,11 @@ class PaymentPlanService:
 
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
-                wallet = DeliveryMechanismData.objects.filter(
+                wallet = Account.objects.filter(
                     individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
                 ).first()
                 if not wallet:
-                    wallet = DeliveryMechanismData.objects.create(
+                    wallet = Account.objects.create(
                         individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
                     )
                 has_valid_wallet = wallet.validate(

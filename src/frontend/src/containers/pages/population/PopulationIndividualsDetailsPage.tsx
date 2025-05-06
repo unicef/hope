@@ -5,7 +5,9 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
-import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
+import { IndividualAccounts } from '@components/population/IndividualAccounts';
+import { IndividualFlags } from '@components/population/IndividualFlags';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import {
   useAllIndividualsFlexFieldsAttributesQuery,
@@ -155,7 +157,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualDeliveryMechanisms individual={individual} />
+        <IndividualAccounts individual={individual} />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
           individual={individual}
