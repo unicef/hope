@@ -123,12 +123,6 @@ DATABASES = {
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
-if env("POSTGRES_SSL"):
-    DATABASES["default"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-    }
-
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {}
 
