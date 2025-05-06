@@ -100,7 +100,6 @@ ENV PATH="$APP_PATH/.venv/bin:$PATH"
 
 COPY ./src/gunicorn_config.py /conf/gunicorn_config.py
 COPY --chown=hope:hope --from=dist-builder $APP_PATH/.venv $APP_PATH/.venv
-COPY --chown=hope:hope --from=certs /data/psql-cert.crt /certs/psql-cert.crt
 COPY ./src/data $APP_PATH/data
 USER hope
 
