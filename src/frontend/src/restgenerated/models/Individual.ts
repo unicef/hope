@@ -29,7 +29,7 @@ export type Individual = {
     maritalStatus?: string;
     documents?: Array<Document>;
     birthDate: string;
-    deliveryMechanismsData?: Array<Account>;
+    accounts?: Array<Account>;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;
