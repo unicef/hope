@@ -5,7 +5,13 @@ RUN curl -o /data/waitforit -sSL https://github.com/maxcnunes/waitforit/releases
     && chmod +x /data/waitforit
 
 FROM curl as certs
-RUN curl -o /data/psql-cert-crt.crt -L https://www.microsoft.com/pkiops/certs/Microsoft%20RSA%20Root%20Certificate%20Authority%202017.crt && openssl x509 -in /data/psql-cert-crt.crt -out /data/psql-cert.crt
+RUN cd /data \
+  && curl -o microsoft.crt -L https://www.microsoft.com/pkiops/certs/Microsoft%20RSA%20Root%20Certificate%20Authority%202017.crt \
+  && openssl x509 -in microsoft.crt -out microsoft.pem \
+  && curl -o digicert-g2.pem -L https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem \
+  && curl -o digicert-ca.crt -L https://cacerts.digicert.com/DigiCertGlobalRootCA.crt \
+  && openssl x509 -in digicert-ca.crt -out digicert-ca.pem \
+  && cat microsoft.pem digicert-g2.pem digicert-ca.pem > psql-cert.crt
 
 # Base image
 FROM python:3.12.7-slim-bookworm as base
