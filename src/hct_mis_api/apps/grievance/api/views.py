@@ -86,6 +86,7 @@ class GrievanceTicketGlobalViewSet(
     serializer_classes_by_action = {
         "list": GrievanceTicketListSerializer,
         "retrieve": GrievanceTicketDetailSerializer,
+        "choices": GrievanceChoicesSerializer,
     }
     permissions_by_action = {
         "list":
@@ -106,6 +107,16 @@ class GrievanceTicketGlobalViewSet(
                 Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
                 Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
                 Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+            ],
+        "choices":
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+                *POPULATION_DETAILS,
             ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -129,3 +140,8 @@ class GrievanceTicketGlobalViewSet(
             .prefetch_related(*to_prefetch)
             .order_by("created_at")
         )
+
+    @action(detail=False, methods=["get"])
+    def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        return Response(data=self.get_serializer(instance={}).data)
+
