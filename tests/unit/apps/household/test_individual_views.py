@@ -63,10 +63,9 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -578,24 +577,20 @@ class TestIndividualDetail:
         )
 
         generate_delivery_mechanisms()
-        self.account_type_bank = AccountType.objects.get(key="bank")
-        self.dm_atm_card_data = DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=self.individual1,
-            account_type=self.account_type_bank,
             data={
-                "card_number": "123",
-                "card_expiry_date": "2022-01-01",
-                "name_of_cardholder": "Marek",
+                "card_number__bank": "123",
+                "card_expiry_date__bank": "2022-01-01",
+                "name_of_cardholder__bank": "Marek",
             },
         )
-        self.account_type_mobile = AccountType.objects.get(key="bank")
-        self.dm_mobile_money_data = DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=self.individual1,
-            account_type=self.account_type_mobile,
             data={
-                "service_provider_code": "ABC",
-                "delivery_phone_number": "123456789",
-                "provider": "Provider",
+                "service_provider_code__mobile": "ABC",
+                "delivery_phone_number__mobile": "123456789",
+                "provider__mobile": "Provider",
             },
         )
 
@@ -847,27 +842,19 @@ class TestIndividualDetail:
                 "bank_branch_name": self.bank_account_info.bank_branch_name,
             }
         ]
-
-        assert data["delivery_mechanisms_data"] == [
-            {
-                "id": str(self.dm_atm_card_data.id),
-                "name": self.account_type_bank.label,
-                "individual_tab_data": {
-                    "card_number": "123",
-                    "card_expiry_date": "2022-01-01",
-                    "name_of_cardholder": "Marek",
-                },
-            },
-            {
-                "id": str(self.dm_mobile_money_data.id),
-                "name": self.account_type_mobile.label,
-                "individual_tab_data": {
-                    "service_provider_code": "ABC",
-                    "delivery_phone_number": "123456789",
-                    "provider": "Provider",
-                },
-            },
-        ]
+        assert len(data["accounts"]) == 2
+        account_1 = data["accounts"][0]
+        account_2 = data["accounts"][1]
+        assert {
+            "card_expiry_date__bank": "2022-01-01",
+            "card_number__bank": "123",
+            "name_of_cardholder__bank": "Marek",
+        } == account_1["individual_tab_data"]
+        assert {
+            "service_provider_code__mobile": "ABC",
+            "delivery_phone_number__mobile": "123456789",
+            "provider__mobile": "Provider",
+        } == account_2["individual_tab_data"]
 
         assert data["linked_grievances"] == [
             {
