@@ -329,7 +329,7 @@ function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Documentation'),
+                label: t('Grievance Supporting Documents'),
                 value: mappedDocumentation(),
                 size: 3,
               },

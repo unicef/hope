@@ -24,6 +24,7 @@ import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/Paymen
 import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
 import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
+import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 
 const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
@@ -71,6 +72,11 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatus.Accepted ||
     status === PaymentPlanStatus.Finished;
 
+  const shouldDisplayFundsCommitment =
+    status === PaymentPlanStatus.InReview ||
+    status === PaymentPlanStatus.Accepted ||
+    status === PaymentPlanStatus.Finished;
+
   const { paymentPlan } = data;
   if (!paymentPlan) return null;
 
@@ -84,12 +90,13 @@ const PaymentPlanDetailsPage = (): ReactElement => {
       {status !== PaymentPlanStatus.Preparing && (
         <>
           <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayFundsCommitment && (
+            <FundsCommitmentSection paymentPlan={paymentPlan} />
+          )}
           {shouldDisplayEntitlement && (
             <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
           )}
-          {shouldDisplayFsp && (
-            <FspSection paymentPlan={paymentPlan} />
-          )}
+          {shouldDisplayFsp && <FspSection paymentPlan={paymentPlan} />}
           <ExcludeSection paymentPlan={paymentPlan} />
           <SupportingDocumentsSection paymentPlan={paymentPlan} />
           <PaymentPlanDetailsResults paymentPlan={paymentPlan} />

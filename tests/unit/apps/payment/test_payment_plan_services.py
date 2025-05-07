@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -257,16 +257,20 @@ class TestPaymentPlanServices(APITestCase):
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=hoh1,
             account_type=AccountType.objects.get(key="bank"),
         )
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=hoh1,
             account_type=AccountType.objects.get(key="bank"),
         )
         hh1 = HouseholdFactory(head_of_household=hoh1, program=program, business_area=self.business_area)
         hh2 = HouseholdFactory(head_of_household=hoh2, program=program, business_area=self.business_area)
+        hoh1.household = hh1
+        hoh1.save()
+        hoh2.household = hh2
+        hoh2.save()
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
@@ -305,13 +309,13 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(90):
+        with self.assertNumQueries(112):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
         self.assertEqual(pp.total_households_count, 2)
-        self.assertEqual(pp.total_individuals_count, 4)
+        self.assertEqual(pp.total_individuals_count, 6)
         self.assertEqual(pp.payment_items.count(), 2)
 
     @freeze_time("2020-10-10")
@@ -961,20 +965,40 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.LOCKED,
         )
-        PaymentFactory(
+        payment = PaymentFactory(
             parent=payment_plan,
             program_id=self.program.id,
             business_area_id=payment_plan.business_area_id,
             status=Payment.PENDING_STATUSES,
             financial_service_provider=None,
+            entitlement_quantity=None,
+            entitlement_quantity_usd=None,
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
         )
 
         with self.assertRaises(GraphQLError) as e:
             PaymentPlanService(payment_plan).lock_fsp()
         self.assertEqual(
             e.exception.message,
-            "All Payments must have assigned FSP",
+            "Payment Plan doesn't have FSP / DeliveryMechanism assigned.",
         )
+        payment_plan.financial_service_provider = self.fsp
+        payment_plan.delivery_mechanism = self.dm_transfer_to_account
+        payment.save()
+
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).lock_fsp()
+        self.assertEqual(
+            e.exception.message,
+            "All Payments must have entitlement quantity set.",
+        )
+        payment.entitlement_quantity = 100
+        payment.save()
+
+        PaymentPlanService(payment_plan).lock_fsp()
+        payment.refresh_from_db()
+        self.assertEqual(payment.financial_service_provider, self.fsp)
 
     def test_unlock_fsp(self) -> None:
         payment_plan = PaymentPlanFactory(

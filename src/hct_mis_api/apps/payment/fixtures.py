@@ -29,12 +29,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hct_mis_api.apps.payment.models import (
+    Account,
     AccountType,
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
     DeliveryMechanismConfig,
-    DeliveryMechanismData,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -359,20 +359,20 @@ class AccountTypeFactory(DjangoModelFactory):
         model = AccountType
 
 
-class DeliveryMechanismDataFactory(DjangoModelFactory):
+class AccountFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
     account_type = factory.SubFactory(AccountTypeFactory)
     rdi_merge_status = MergeStatusModel.MERGED
 
     class Meta:
-        model = DeliveryMechanismData
+        model = Account
 
 
-class PendingDeliveryMechanismDataFactory(DeliveryMechanismDataFactory):
+class PendingAccountFactory(AccountFactory):
     rdi_merge_status = MergeStatusModel.PENDING
 
     class Meta:
-        model = DeliveryMechanismData
+        model = Account
 
 
 def create_payment_verification_plan_with_status(
@@ -722,6 +722,7 @@ def update_fsps() -> None:
 def generate_delivery_mechanisms() -> None:
     account_types_data = [
         {
+            "payment_gateway_id": "123",
             "key": "bank",
             "label": "Bank",
             "unique_fields": [
@@ -729,6 +730,7 @@ def generate_delivery_mechanisms() -> None:
             ],
         },
         {
+            "payment_gateway_id": "456",
             "key": "mobile",
             "label": "Mobile",
             "unique_fields": [
@@ -742,6 +744,7 @@ def generate_delivery_mechanisms() -> None:
             defaults={
                 "label": at["label"],
                 "unique_fields": at["unique_fields"],
+                "payment_gateway_id": at["payment_gateway_id"],
             },
         )
     account_types = {at.key: at for at in AccountType.objects.all()}

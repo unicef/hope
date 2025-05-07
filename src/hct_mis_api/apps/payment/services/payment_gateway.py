@@ -98,6 +98,8 @@ class PaymentPayloadSerializer(serializers.Serializer):
     full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
     service_provider_code = serializers.CharField(required=False, allow_blank=True)
+    delivery_mechanism = serializers.CharField(required=True)
+    account_type = serializers.CharField(required=True)
 
 
 class PaymentSerializer(ReadOnlyModelSerializer):
@@ -122,6 +124,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
             "origination_currency": obj.currency,
+            "delivery_mechanism": obj.delivery_type.code,
+            "account_type": obj.delivery_type.account_type.key,
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
@@ -215,6 +219,7 @@ class FspConfig(FlexibleArgumentsDataclassMixin):
     key: str
     delivery_mechanism: int
     delivery_mechanism_name: str
+    country: Optional[str] = None
     label: Optional[str] = None
     required_fields: Optional[List[str]] = None
 
@@ -234,6 +239,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
 
 @dataclasses.dataclass()
 class AccountTypeData(FlexibleArgumentsDataclassMixin):
+    id: str
     key: str
     label: str
     unique_fields: List[str]
@@ -423,13 +429,17 @@ class PaymentGatewayService:
                 )
                 fsp.delivery_mechanisms.set(delivery_mechanisms)
 
-            dm_required_fields = {
-                config.delivery_mechanism: config.required_fields or [] for config in fsp_data.configs
-            }
+            # get last config for dm which doesn't have country assigned
+            dm_required_fields = {}
+            for config in fsp_data.configs:
+                if not config.country:
+                    dm_required_fields[config.delivery_mechanism] = config.required_fields
+
             for dm_id, required_fields in dm_required_fields.items():
                 DeliveryMechanismConfig.objects.update_or_create(
                     delivery_mechanism=DeliveryMechanism.objects.get(payment_gateway_id=dm_id),
                     fsp=fsp,
+                    country=None,  # TODO create config for each country in configs data?
                     defaults=dict(required_fields=required_fields),
                 )
 
@@ -446,6 +456,7 @@ class PaymentGatewayService:
             AccountType.objects.update_or_create(
                 key=account_type_data.key,
                 defaults={
+                    "payment_gateway_id": account_type_data.id,
                     "label": account_type_data.label,
                     "unique_fields": account_type_data.unique_fields or [],
                 },
@@ -542,6 +553,6 @@ class PaymentGatewayService:
                     "name": dm.name,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
-                    "account_type": AccountType.objects.get(key=dm.account_type),
+                    "account_type": AccountType.objects.get(payment_gateway_id=dm.account_type),
                 },
             )

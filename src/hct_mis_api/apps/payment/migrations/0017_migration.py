@@ -23,7 +23,8 @@ def migrate_payments_to_default_split(apps, schema_editor):  # pragma: no cover
 
     for payment_plan in PaymentPlan.objects.filter(splits__isnull=True).iterator():
         default_split = PaymentPlanSplit.objects.create(payment_plan=payment_plan)
-        if payment_plan.delivery_mechanism.sent_to_payment_gateway:
+        dm = getattr(payment_plan, "delivery_mechanism", None)
+        if dm and dm.sent_to_payment_gateway:
             # store the old object's id in a variable
             old_obj_id = default_split.id
             # it creates a new object
@@ -32,7 +33,7 @@ def migrate_payments_to_default_split(apps, schema_editor):  # pragma: no cover
             default_split.save()
             # and delete the old object
             PaymentPlanSplit.objects.filter(id=old_obj_id).delete()
-        payment_plan.payment_items.eligible().update(parent_split=default_split)
+        payment_plan.payment_items.all().update(parent_split=default_split)
 
 
 class Migration(migrations.Migration):
@@ -63,10 +64,6 @@ class Migration(migrations.Migration):
             name='payment_gateway_id',
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
-        migrations.RemoveConstraint(
-            model_name='deliverymechanismperpaymentplan',
-            name='unique payment_plan_delivery_mechanism',
-        ),
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
             name='chosen_configuration',
@@ -77,19 +74,11 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
-            name='delivery_mechanism_order',
-        ),
-        migrations.RemoveField(
-            model_name='deliverymechanismperpaymentplan',
             name='sent_by',
         ),
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
             name='sent_date',
-        ),
-        migrations.RemoveField(
-            model_name='deliverymechanismperpaymentplan',
-            name='sent_to_payment_gateway',
         ),
         migrations.RemoveField(
             model_name='deliverymechanismperpaymentplan',
@@ -109,21 +98,6 @@ class Migration(migrations.Migration):
             model_name='paymentplansplit',
             name='split_type',
             field=models.CharField(choices=[('NO_SPLIT', 'No Split'), ('BY_RECORDS', 'By Records'), ('BY_COLLECTOR', 'By Collector'), ('BY_ADMIN_AREA1', 'By Admin Area 1'), ('BY_ADMIN_AREA2', 'By Admin Area 2'), ('BY_ADMIN_AREA3', 'By Admin Area 3')], default='NO_SPLIT', max_length=24),
-        ),
-        migrations.AlterField(
-            model_name='paymentplan',
-            name='exclude_household_error',
-            field=models.TextField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name='paymentplan',
-            name='excluded_ids',
-            field=models.TextField(blank=True, help_text='Targeting level exclusion', null=True),
-        ),
-        migrations.AlterField(
-            model_name='paymentplan',
-            name='exclusion_reason',
-            field=models.TextField(blank=True, null=True),
         ),
         migrations.RunPython(migrate_payments_to_parent_split, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(migrate_payments_to_default_split, reverse_code=migrations.RunPython.noop),

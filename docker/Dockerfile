@@ -1,12 +1,3 @@
-FROM alpine:3.19.1 as curl
-RUN apk add curl && mkdir /data
-FROM curl as waitforit
-RUN curl -o /data/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/waitforit-linux_amd64 \
-    && chmod +x /data/waitforit
-
-FROM curl as certs
-RUN curl -o /data/psql-cert.crt -L https://cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
-
 # Base image
 FROM python:3.12.7-slim-bookworm as base
 ENV APP_PATH=/app
@@ -42,8 +33,6 @@ RUN apt-get update \
 ENV XDG_RUNTIME_DIR=/run/user/"${UID}"
 ENV DJANGO_SETTINGS_MODULE=hct_mis_api.config.settings
 WORKDIR $APP_PATH
-
-COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
 # Dist builder image
 FROM base as uv
@@ -111,7 +100,6 @@ ENV PATH="$APP_PATH/.venv/bin:$PATH"
 
 COPY ./src/gunicorn_config.py /conf/gunicorn_config.py
 COPY --chown=hope:hope --from=dist-builder $APP_PATH/.venv $APP_PATH/.venv
-COPY --chown=hope:hope --from=certs /data/psql-cert.crt /certs/psql-cert.crt
 COPY ./src/data $APP_PATH/data
 USER hope
 

@@ -19,7 +19,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     periodic_sync_payment_gateway_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -472,6 +472,8 @@ class TestPaymentGatewayService(APITestCase):
                         "first_name": self.payments[0].collector.given_name,
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
+                        "delivery_mechanism": "transfer",
+                        "account_type": "bank",
                     },
                     "extra_data": {},
                 }
@@ -497,6 +499,8 @@ class TestPaymentGatewayService(APITestCase):
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
                         "service_provider_code": self.payments[0].collector.flex_fields["service_provider_code_i_f"],
+                        "delivery_mechanism": "mobile_money",
+                        "account_type": "mobile",
                     },
                     "extra_data": {},
                 }
@@ -515,7 +519,7 @@ class TestPaymentGatewayService(APITestCase):
         }, 200
 
         primary_collector = self.payments[0].collector
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=primary_collector,
             data={
                 "service_provider_code": "ABC",
@@ -553,6 +557,8 @@ class TestPaymentGatewayService(APITestCase):
                         "service_provider_code": "ABC",
                         "number": "123456789",
                         "provider": "Provider",
+                        "delivery_mechanism": "mobile_money",
+                        "account_type": "mobile",
                     },
                     "extra_data": {},
                 }
@@ -655,8 +661,8 @@ class TestPaymentGatewayService(APITestCase):
         dm_cash.save()
 
         get_delivery_mechanisms_mock.return_value = [
-            DeliveryMechanismData(id=33, code="new_dm", name="New DM", transfer_type="CASH", account_type="bank"),
-            DeliveryMechanismData(id=2, code="cash", name="Cash", transfer_type="CASH", account_type="bank"),
+            DeliveryMechanismData(id=33, code="new_dm", name="New DM", transfer_type="CASH", account_type="123"),
+            DeliveryMechanismData(id=2, code="cash", name="Cash", transfer_type="CASH", account_type="123"),
         ]
 
         pg_service = PaymentGatewayService()

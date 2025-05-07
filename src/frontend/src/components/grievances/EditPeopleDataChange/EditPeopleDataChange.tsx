@@ -88,43 +88,39 @@ function EditPeopleDataChange({
           <Title>
             <Typography variant="h6">{t('Bio Data')}</Typography>
           </Title>
-          <Grid container spacing={3}>
-            <FieldArray
-              name="individualDataUpdateFields"
-              render={(arrayHelpers) => (
-                <>
-                  {values.individualDataUpdateFields.map((item, index) => (
-                    <EditPeopleDataChangeFieldRow
-                      // eslint-disable-next-line react/no-array-index-key
-                      key={`${index}-${item?.fieldName}`}
-                      itemValue={item}
-                      index={index}
-                      individual={fullIndividual.individual}
-                      fields={
-                        editPeopleFieldsData.allEditPeopleFieldsAttributes
-                      }
-                      notAvailableFields={notAvailableItems}
-                      onDelete={() => arrayHelpers.remove(index)}
-                      values={values}
-                    />
-                  ))}
-                  <Grid size={{ xs: 4 }}>
-                    <Button
-                      color="primary"
-                      onClick={() => {
-                        arrayHelpers.push({ fieldName: null, fieldValue: '' });
-                      }}
-                      startIcon={<AddCircleOutline />}
-                      data-cy="button-add-new-field"
-                      disabled={isEditTicket}
-                    >
-                      {t('Add new field')}
-                    </Button>
-                  </Grid>
-                </>
-              )}
-            />
-          </Grid>
+          <FieldArray
+            name="individualDataUpdateFields"
+            render={(arrayHelpers) => (
+              <>
+                {values.individualDataUpdateFields.map((item, index) => (
+                  <EditPeopleDataChangeFieldRow
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${index}-${item?.fieldName}`}
+                    itemValue={item}
+                    index={index}
+                    individual={fullIndividual.individual}
+                    fields={editPeopleFieldsData.allEditPeopleFieldsAttributes}
+                    notAvailableFields={notAvailableItems}
+                    onDelete={() => arrayHelpers.remove(index)}
+                    values={values}
+                  />
+                ))}
+                <Grid size={{ xs: 4 }}>
+                  <Button
+                    color="primary"
+                    onClick={() => {
+                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                    }}
+                    startIcon={<AddCircleOutline />}
+                    data-cy="button-add-new-field"
+                    disabled={isEditTicket}
+                  >
+                    {t('Add new field')}
+                  </Button>
+                </Grid>
+              </>
+            )}
+          />
         </BoxWithBorders>
       )}
       <BoxWithBorders>

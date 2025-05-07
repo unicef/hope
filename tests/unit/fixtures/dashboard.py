@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Dict, Optional
 
 from django.db import transaction
 
@@ -10,6 +10,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class ModifiedPaymentFactory(PaymentFactory):
@@ -24,35 +25,34 @@ class ModifiedPaymentFactory(PaymentFactory):
 
 @pytest.fixture()
 @pytest.mark.django_db(databases=["default", "read_only"])
-def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
+def populate_dashboard_cache() -> Callable[[BusinessAreaFactory, Optional[Dict]], Household]:
     """
     Fixture to populate the dashboard cache for a specific business area,
     verify creation in the default DB, and ensure readability in the read_only DB.
     """
 
-    def _populate_dashboard_cache(afghanistan: BusinessAreaFactory) -> Household:
+    def _populate_dashboard_cache(
+        afghanistan: BusinessAreaFactory, household_extra_args: Optional[Dict] = None
+    ) -> Household:
         """
         Create household and related records
         """
         with transaction.atomic(using="default"):
+            program = ProgramFactory(business_area=afghanistan)
             household, _ = create_household(
                 household_args={
                     "business_area": afghanistan,
-                    "size": 14,
+                    "size": 5,
+                    "children_count": 2,
                     "female_age_group_0_5_disabled_count": 1,
-                    "female_age_group_6_11_disabled_count": 0,
-                    "female_age_group_12_17_disabled_count": 2,
-                    "female_age_group_18_59_disabled_count": 2,
-                    "female_age_group_60_disabled_count": 5,
-                    "male_age_group_0_5_disabled_count": 0,
-                    "male_age_group_6_11_disabled_count": 1,
-                    "male_age_group_12_17_disabled_count": 2,
-                    "male_age_group_18_59_disabled_count": 0,
+                    "female_age_group_6_11_disabled_count": 1,
                     "male_age_group_60_disabled_count": 1,
                     "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
+                    "program": program,
+                    **(household_extra_args or {}),
                 }
             )
-            ModifiedPaymentFactory.create_batch(5, household=household)
+            ModifiedPaymentFactory.create_batch(5, household=household, program=program)
 
         return household
 

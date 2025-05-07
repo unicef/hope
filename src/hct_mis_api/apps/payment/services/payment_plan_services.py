@@ -31,10 +31,10 @@ from hct_mis_api.apps.payment.celery_tasks import (
     send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
+    Account,
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
-    DeliveryMechanismData,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
@@ -239,8 +239,19 @@ class PaymentPlanService:
         return self.payment_plan
 
     def lock_fsp(self) -> PaymentPlan:
+        dm = getattr(self.payment_plan, "delivery_mechanism", None)
+        fsp = getattr(self.payment_plan, "financial_service_provider", None)
+        if not dm or not fsp:
+            raise GraphQLError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
+
         if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
-            raise GraphQLError("All Payments must have assigned FSP")
+            self.payment_plan.eligible_payments.update(
+                financial_service_provider=self.payment_plan.financial_service_provider,
+                delivery_type=self.payment_plan.delivery_mechanism,
+            )
+
+        if self.payment_plan.eligible_payments.filter(entitlement_quantity__isnull=True).exists():
+            raise GraphQLError("All Payments must have entitlement quantity set.")
 
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
@@ -384,11 +395,11 @@ class PaymentPlanService:
 
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
-                wallet = DeliveryMechanismData.objects.filter(
+                wallet = Account.objects.filter(
                     individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
                 ).first()
                 if not wallet:
-                    wallet = DeliveryMechanismData.objects.create(
+                    wallet = Account.objects.create(
                         individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
                     )
                 has_valid_wallet = wallet.validate(
@@ -696,6 +707,8 @@ class PaymentPlanService:
                 currency=payment.currency,
                 entitlement_quantity=payment.entitlement_quantity,
                 entitlement_quantity_usd=payment.entitlement_quantity_usd,
+                financial_service_provider=self.payment_plan.financial_service_provider,
+                delivery_type=self.payment_plan.delivery_mechanism,
             )
             for payment in payments_to_copy
         ]
@@ -732,6 +745,8 @@ class PaymentPlanService:
             dispersion_end_date=dispersion_end_date,
             start_date=source_pp.start_date,
             end_date=source_pp.end_date,
+            delivery_mechanism=source_pp.delivery_mechanism,
+            financial_service_provider=source_pp.financial_service_provider,
         )
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))

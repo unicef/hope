@@ -44,6 +44,8 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
 )
+from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
+from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
 
 def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:
@@ -283,6 +285,24 @@ class TestPaymentPlanQueries(APITestCase):
           canExportXlsx
           canDownloadXlsx
           canSendXlsxPassword
+        }
+      }
+    """
+
+    PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY = """
+      query PaymentPlan($id: ID!) {
+        paymentPlan(id: $id) {
+          status
+          availableFundsCommitments {
+              fundsCommitmentNumber
+              fundsCommitmentItems {
+                  paymentPlan {
+                      name
+                  }
+                  fundsCommitmentItem
+                  recSerialNumber
+              }
+          }
         }
       }
     """
@@ -1047,4 +1067,107 @@ class TestPaymentPlanQueries(APITestCase):
             request_string=self.PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA,
             context={"user": self.user},
             variables={"businessArea": "afghanistan", "id": encode_id_base64(payment_plan.id, "PaymentPlan")},
+        )
+
+    @freeze_time("2020-10-10")
+    def test_payment_plan_available_funds_commitments(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            name="FC TEST",
+            status=PaymentPlan.Status.IN_REVIEW,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            created_by=self.user,
+            currency="PLN",
+        )
+
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="123",
+            funds_commitment_item="001",
+            rec_serial_number="0001",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="123",
+            funds_commitment_item="002",
+            rec_serial_number="0002",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="345",
+            funds_commitment_item="001",
+            rec_serial_number="0003",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="345",
+            funds_commitment_item="002",
+            rec_serial_number="0004",
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        fc1 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="123", funds_commitment_item="001"
+        )
+        fc1.payment_plan = payment_plan
+        fc1.save()
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        fc2 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="123", funds_commitment_item="002"
+        )
+        fc2.payment_plan = payment_plan
+        fc2.save()
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        payment_plan2 = PaymentPlanFactory(
+            status=PaymentPlan.Status.IN_REVIEW,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            created_by=self.user,
+            currency="PLN",
+        )
+
+        fc3 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="345", funds_commitment_item="001"
+        )
+        fc3.payment_plan = payment_plan2
+        fc3.save()
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        fc4 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="345", funds_commitment_item="002"
+        )
+        fc4.payment_plan = payment_plan2
+        fc4.save()
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
         )

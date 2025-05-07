@@ -85,6 +85,7 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
+from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
@@ -1275,6 +1276,43 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
         return cls(payment_plan=payment_plan_copy)
 
 
+class AssignFundsCommitmentsMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Input:
+        payment_plan_id = graphene.ID(required=True)
+        fund_commitment_items_ids = graphene.List(graphene.String)
+
+    @classmethod
+    @is_authenticated
+    def mutate(
+        cls,
+        root: Any,
+        info: Any,
+        payment_plan_id: str,
+        fund_commitment_items_ids: List[Optional[str]],
+    ) -> "AssignFundsCommitmentsMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        cls.has_permission(info, Permissions.PM_ASSIGN_FUNDS_COMMITMENTS, payment_plan.business_area)
+
+        if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
+            raise GraphQLError("Payment plan must be in review")
+
+        funds_commitment_items = FundsCommitmentItem.objects.filter(rec_serial_number__in=fund_commitment_items_ids)
+        if funds_commitment_items.filter(payment_plan_id__isnull=False).exclude(payment_plan=payment_plan).exists():
+            raise GraphQLError("Chosen Funds Commitments are already assigned to different Payment Plan")
+
+        if funds_commitment_items.exclude(office=payment_plan.business_area).exists():
+            raise GraphQLError("Chosen Funds Commitments have wrong Business Area")
+
+        FundsCommitmentItem.objects.filter(payment_plan=payment_plan).update(payment_plan=None)
+        funds_commitment_items.update(payment_plan=payment_plan)
+
+        payment_plan.refresh_from_db()
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     # PaymentVerification
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
@@ -1305,6 +1343,7 @@ class Mutations(graphene.ObjectType):
     exclude_households = ExcludeHouseholdsMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
     copy_targeting_criteria = CopyTargetingCriteriaMutation.Field()
+    assign_funds_commitments = AssignFundsCommitmentsMutation.Field()
 
     # Payment Plan XLSX
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
