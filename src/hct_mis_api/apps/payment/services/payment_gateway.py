@@ -380,7 +380,7 @@ class PaymentGatewayService:
             if validate_response:
                 assert new_status.value == response_status, f"{new_status.value} != {response_status}"
             return response_status
-        return None  # pragma: no-cover
+        return None  # pragma: no cover
 
     def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         def _handle_errors(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
@@ -553,7 +553,7 @@ class PaymentGatewayService:
 
     def sync_record(self, payment: Payment) -> None:
         if not payment.parent.is_payment_gateway:
-            return
+            return  # pragma: no cover
 
         pg_payment_record = self.api.get_record(payment.id)
         if pg_payment_record:
@@ -565,7 +565,7 @@ class PaymentGatewayService:
         exchange_rate = payment_plan.get_exchange_rate()
 
         if not payment_plan.is_payment_gateway:
-            return
+            return  # pragma: no cover
 
         payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
 
