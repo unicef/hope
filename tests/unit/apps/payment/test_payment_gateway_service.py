@@ -343,6 +343,126 @@ class TestPaymentGatewayService(APITestCase):
         assert get_records_for_payment_instruction_mock.call_count == 0
         assert change_payment_instruction_status_mock.call_count == 2
 
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        return_value="FINALIZED",
+    )
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
+    )
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    def test_sync_payment_plan(
+        self,
+        get_quantity_in_usd_mock: Any,
+        get_records_for_payment_instruction_mock: Any,
+        get_exchange_rate_mock: Any,
+        change_payment_instruction_status_mock: Any,
+    ) -> None:
+        self.pp_split_1.sent_to_payment_gateway = True
+        self.pp_split_2.sent_to_payment_gateway = True
+        self.pp_split_1.save()
+        self.pp_split_2.save()
+
+        self.payments[0].status = Payment.STATUS_ERROR
+        self.payments[1].status = Payment.STATUS_DISTRIBUTION_SUCCESS
+        self.payments[0].save()
+        self.payments[1].save()
+
+        get_records_for_payment_instruction_mock.side_effect = [
+            [
+                PaymentRecordData(
+                    id=1,
+                    remote_id=str(self.payments[0].id),
+                    created="2023-10-10",
+                    modified="2023-10-11",
+                    record_code="1",
+                    parent="1",
+                    status="TRANSFERRED_TO_BENEFICIARY",
+                    auth_code="1",
+                    payout_amount=float(self.payments[0].entitlement_quantity),
+                    fsp_code="1",
+                )
+            ],
+            [
+                PaymentRecordData(
+                    id=2,
+                    remote_id=str(self.payments[1].id),
+                    created="2023-10-10",
+                    modified="2023-10-11",
+                    record_code="2",
+                    parent="2",
+                    status="ERROR",
+                    auth_code="2",
+                    payout_amount=0.0,
+                    fsp_code="2",
+                    message="Error",
+                ),
+            ],
+        ]
+
+        pg_service = PaymentGatewayService()
+        pg_service.api.get_records_for_payment_instruction = get_records_for_payment_instruction_mock  # type: ignore
+
+        # check PaymentVerificationSummary before run sync
+        assert PaymentVerificationSummary.objects.filter(payment_plan=self.pp).count() == 0
+
+        pg_service.sync_payment_plan(self.pp)
+        assert get_records_for_payment_instruction_mock.call_count == 2
+        self.payments[0].refresh_from_db()
+        assert self.payments[0].status == Payment.STATUS_DISTRIBUTION_SUCCESS
+        assert self.payments[0].fsp_auth_code == "1"
+        assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
+        assert self.payments[0].delivered_quantity_usd == 100.0
+
+        self.payments[1].refresh_from_db()
+        assert self.payments[1].status == Payment.STATUS_ERROR
+        assert self.payments[1].fsp_auth_code == "2"
+        assert self.payments[1].delivered_quantity is None
+        assert self.payments[1].reason_for_unsuccessful_payment == "Error"
+
+        assert PaymentVerificationSummary.objects.filter(payment_plan=self.pp).count() == 1
+        self.pp.refresh_from_db()
+        assert self.pp.status == PaymentPlan.Status.FINISHED
+
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_record")
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
+    def test_sync_record(
+        self,
+        get_quantity_in_usd_mock: Any,
+        get_record_mock: Any,
+        get_exchange_rate_mock: Any,
+    ) -> None:
+        self.payments[0].status = Payment.STATUS_ERROR
+        self.payments[0].save()
+
+        get_record_mock.side_effect = [
+            PaymentRecordData(
+                id=1,
+                remote_id=str(self.payments[0].id),
+                created="2023-10-10",
+                modified="2023-10-11",
+                record_code="1",
+                parent="1",
+                status="TRANSFERRED_TO_BENEFICIARY",
+                auth_code="1",
+                payout_amount=float(self.payments[0].entitlement_quantity),
+                fsp_code="1",
+            )
+        ]
+
+        pg_service = PaymentGatewayService()
+        pg_service.api.get_record = get_record_mock  # type: ignore
+
+        pg_service.sync_record(self.payments[0])
+        assert get_record_mock.call_count == 1
+        self.payments[0].refresh_from_db()
+        assert self.payments[0].status == Payment.STATUS_DISTRIBUTION_SUCCESS
+        assert self.payments[0].fsp_auth_code == "1"
+        assert self.payments[0].delivered_quantity == self.payments[0].entitlement_quantity
+        assert self.payments[0].delivered_quantity_usd == 100.0
+
     def test_get_hope_status(self) -> None:
         p = PaymentRecordData(
             id=1,

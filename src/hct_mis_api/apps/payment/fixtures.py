@@ -258,12 +258,7 @@ class PaymentPlanFactory(DjangoModelFactory):
     targeting_criteria = factory.SubFactory(TargetingCriteriaFactory)
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
-    dispersion_start_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=False,
-        after_now=True,
-        tzinfo=utc,
-    )
+    dispersion_start_date = factory.Faker("date_this_decade")
     dispersion_end_date = factory.LazyAttribute(lambda o: o.dispersion_start_date + timedelta(days=randint(60, 1000)))
     female_children_count = factory.fuzzy.FuzzyInteger(2, 4)
     male_children_count = factory.fuzzy.FuzzyInteger(2, 4)
