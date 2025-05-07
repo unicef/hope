@@ -29,7 +29,7 @@ from hct_mis_api.apps.sanction_list.api.serializers import SanctionListIndividua
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
-class HouseholdDataUpdateTicketDetailSerializer(serializers.ModelSerializer):
+class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketHouseholdDataUpdateDetails
         fields = (
@@ -38,7 +38,7 @@ class HouseholdDataUpdateTicketDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class IndividualDataUpdateTicketDetailSerializer(serializers.ModelSerializer):
+class IndividualDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketIndividualDataUpdateDetails
         fields = (
@@ -48,7 +48,7 @@ class IndividualDataUpdateTicketDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class AddIndividualTicketDetailSerializer(serializers.ModelSerializer):
+class AddIndividualTicketDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketAddIndividualDetails
         fields = (
@@ -58,7 +58,7 @@ class AddIndividualTicketDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class TicketDeleteIndividualDetails(serializers.ModelSerializer):
+class DeleteIndividualTicketDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketDeleteIndividualDetails
         fields = (
@@ -68,7 +68,7 @@ class TicketDeleteIndividualDetails(serializers.ModelSerializer):
         )
 
 
-class DeleteHouseholdTicketDetailSerializer(serializers.ModelSerializer):
+class DeleteHouseholdTicketDetailsSerializer(serializers.ModelSerializer):
     reason_household = HouseholdSimpleSerializer()
     class Meta:
         model = TicketDeleteHouseholdDetails
@@ -79,7 +79,7 @@ class DeleteHouseholdTicketDetailSerializer(serializers.ModelSerializer):
             "reason_household",
         )
 
-class SystemFlaggingTicketDetailSerializer(serializers.ModelSerializer):
+class SystemFlaggingTicketDetailsSerializer(serializers.ModelSerializer):
     golden_records_individual = IndividualForTicketSerializer()
     sanction_list_individual = SanctionListIndividualSerializer()
     class Meta:
@@ -92,7 +92,7 @@ class SystemFlaggingTicketDetailSerializer(serializers.ModelSerializer):
             "sanction_list_individual",
         )
 
-class PaymentVerificationTicketDetailSerializer(serializers.ModelSerializer):
+class PaymentVerificationTicketDetailsSerializer(serializers.ModelSerializer):
     has_multiple_payment_verifications = serializers.SerializerMethodField()
     payment_verification = PaymentVerificationSerializer()
     class Meta:
@@ -172,7 +172,7 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
             return DeduplicationEngineSimilarityPairSerializer(obj.get("dedup_engine_similarity_pair")).data
         return {}
 
-class NeedsAdjudicationTicketDetailSerializer(serializers.ModelSerializer):
+class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
     has_duplicated_document = serializers.SerializerMethodField()
     golden_records_individual = IndividualForTicketSerializer()
     extra_data = serializers.SerializerMethodField()
@@ -205,3 +205,15 @@ class NeedsAdjudicationTicketDetailSerializer(serializers.ModelSerializer):
                 "dedup_engine_similarity_pair": obj.extra_data.get("dedup_engine_similarity_pair"),
             }
         ).data
+
+
+TICKET_DETAILS_SERIALIZER_MAPPING = {
+    TicketHouseholdDataUpdateDetails: HouseholdDataUpdateTicketDetailsSerializer,
+    TicketIndividualDataUpdateDetails: IndividualDataUpdateTicketDetailsSerializer,
+    TicketAddIndividualDetails: AddIndividualTicketDetailsSerializer,
+    TicketDeleteIndividualDetails: DeleteIndividualTicketDetailsSerializer,
+    TicketDeleteHouseholdDetails: DeleteHouseholdTicketDetailsSerializer,
+    TicketSystemFlaggingDetails: SystemFlaggingTicketDetailsSerializer,
+    TicketPaymentVerificationDetails: PaymentVerificationTicketDetailsSerializer,
+    TicketNeedsAdjudicationDetails: NeedsAdjudicationTicketDetailsSerializer,
+}
