@@ -54,6 +54,10 @@ class HouseholdUploadMixin:
         PendingAccount.objects.create(individual=member, **doc)
 
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: Dict) -> PendingIndividual:
+        photo = member_data.pop("photo", None)
+        if photo:
+            data = photo.removeprefix("data:image/png;base64,")
+            photo = get_photo_from_stream(data)
         documents = member_data.pop("documents", [])
         accounts = member_data.pop("accounts", [])
         member_of = None
@@ -66,6 +70,7 @@ class HouseholdUploadMixin:
             program=rdi.program,
             registration_data_import=rdi,
             business_area=rdi.business_area,
+            photo=photo,
             **member_data,
         )
         for doc in documents:
