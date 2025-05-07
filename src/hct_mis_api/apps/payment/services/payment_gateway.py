@@ -305,7 +305,9 @@ class PaymentGatewayAPI(BaseAPI):
         response_data, _ = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
         return PaymentInstructionData.create_from_dict(response_data)
 
-    def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
+    def change_payment_instruction_status(
+        self, status: PaymentInstructionStatus, remote_id: str, validate_response: bool = True
+    ) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
             raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
 
@@ -317,9 +319,11 @@ class PaymentGatewayAPI(BaseAPI):
             PaymentInstructionStatus.READY: self.Endpoints.READY_PAYMENT_INSTRUCTION_STATUS,
             PaymentInstructionStatus.FINALIZED: self.Endpoints.FINALIZE_PAYMENT_INSTRUCTION_STATUS,
         }
-        response_data, _ = self._post(action_endpoint_map[status].format(remote_id=remote_id))
+        response_data, _ = self._post(
+            action_endpoint_map[status].format(remote_id=remote_id), validate_response=validate_response
+        )
 
-        return response_data["status"]
+        return response_data.get("status", "")
 
     def add_records_to_payment_instruction(
         self, payment_records: List[Payment], remote_id: str, validate_response: bool = True
@@ -337,6 +341,10 @@ class PaymentGatewayAPI(BaseAPI):
             f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}"
         )
         return [PaymentRecordData.create_from_dict(record_data) for record_data in response_data]
+
+    def get_record(self, payment_id: str) -> Optional[PaymentRecordData]:
+        response_data, _ = self._get(f"{self.Endpoints.GET_PAYMENT_RECORDS}?remote_id={payment_id}")
+        return PaymentRecordData.create_from_dict(response_data[0]) if response_data else None
 
 
 class PaymentGatewayService:
@@ -358,19 +366,21 @@ class PaymentGatewayService:
                 assert response.remote_id == str(split.id), f"{response}, _object_id: {split.id}"
                 status = response.status
                 if status == PaymentInstructionStatus.DRAFT.value:
-                    status = self.api.change_payment_instruction_status(
+                    self.api.change_payment_instruction_status(
                         status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
                     )
-                assert status == PaymentInstructionStatus.OPEN.value, status
 
     def change_payment_instruction_status(
-        self, new_status: PaymentInstructionStatus, obj: PaymentPlanSplit
+        self, new_status: PaymentInstructionStatus, obj: PaymentPlanSplit, validate_response: bool = True
     ) -> Optional[str]:
         if obj.is_payment_gateway:
-            response_status = self.api.change_payment_instruction_status(new_status, obj.id)
-            assert new_status.value == response_status, f"{new_status.value} != {response_status}"
+            response_status = self.api.change_payment_instruction_status(
+                new_status, obj.id, validate_response=validate_response
+            )
+            if validate_response:
+                assert new_status.value == response_status, f"{new_status.value} != {response_status}"
             return response_status
-        return None
+        return None  # pragma: no cover
 
     def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         def _handle_errors(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
@@ -468,7 +478,7 @@ class PaymentGatewayService:
         pg_payment_records: List[PaymentRecordData],
         container: PaymentPlanSplit,
         payment_plan: PaymentPlan,
-        exchange_rate: Decimal,
+        exchange_rate: float,
     ) -> None:
         try:
             matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
@@ -540,8 +550,38 @@ class PaymentGatewayService:
                     payment_plan.save()
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
-                    payment_plan.status_finished()
-                    payment_plan.save()
+
+    def sync_record(self, payment: Payment) -> None:
+        if not payment.parent.is_payment_gateway:
+            return  # pragma: no cover
+
+        pg_payment_record = self.api.get_record(payment.id)
+        if pg_payment_record:
+            self.update_payment(
+                payment, [pg_payment_record], payment.parent_split, payment.parent, payment.parent.get_exchange_rate()
+            )
+
+    def sync_payment_plan(self, payment_plan: PaymentPlan) -> None:
+        exchange_rate = payment_plan.get_exchange_rate()
+
+        if not payment_plan.is_payment_gateway:
+            return  # pragma: no cover
+
+        payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
+
+        for instruction in payment_instructions:
+            payments = instruction.split_payment_items.all().order_by("unicef_id")
+            pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
+            for payment in payments:
+                self.update_payment(payment, pg_payment_records, instruction, payment_plan, exchange_rate)
+
+        if payment_plan.is_reconciled:
+            payment_plan.status_finished()
+            payment_plan.save()
+            for instruction in payment_instructions:
+                self.change_payment_instruction_status(
+                    PaymentInstructionStatus.FINALIZED, instruction, validate_response=False
+                )
 
     def sync_delivery_mechanisms(self) -> None:
         delivery_mechanisms: List[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
