@@ -135,7 +135,6 @@ DEFAULTS = {
     ),
     "SOCIAL_AUTH_REDIRECT_IS_HTTPS": (bool, True),
     "LOG_LEVEL": (str, "ERROR"),
-    "POSTGRES_SSL": (bool, False),
     "GIT_VERSION": (str, "UNKNOWN"),
     "EXCHANGE_RATE_CACHE_EXPIRY": (int, 60 * 60 * 24),
     "USE_DUMMY_EXCHANGE_RATES": (str, "no"),
