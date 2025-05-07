@@ -408,3 +408,35 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
 
     def get_import_id(self, obj: Individual) -> str:
         return f"{obj.unicef_id} (Detail ID {obj.detail_id})" if obj.detail_id else obj.unicef_id
+
+
+
+class IndividualForTicketSerializer(serializers.ModelSerializer):
+    household = HouseholdSimpleSerializer()
+    deduplication_golden_record_results = serializers.SerializerMethodField()
+    documents = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "unicef_id",
+            "full_name",
+            "birth_date",
+            "last_registration_date",
+            "sex",
+            "deduplication_golden_record_results",
+            "duplicate",
+            "documents",
+        )
+
+    @extend_schema_field(DeduplicationResultSerializer(many=True))
+    def get_deduplication_golden_record_results(self, obj: Individual) -> ReturnDict:
+        key = "duplicates" if obj.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
+        results = obj.deduplication_golden_record_results.get(key, {})
+        serializer = DeduplicationResultSerializer(results, many=True, context=self.context)
+        return serializer.data
+
+    @extend_schema_field(DocumentSerializer(many=True))
+    def get_documents(self, obj: Individual) -> Dict:
+        return DocumentSerializer(obj.documents(manager="all_merge_status_objects").all(), many=True).data
