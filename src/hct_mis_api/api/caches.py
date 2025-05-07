@@ -140,3 +140,18 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
         )
 
         return key
+
+
+class AreaLimitKeyBit(KeyBitBase):
+    def get_data(
+        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+    ) -> str:
+        area_limits = ",".join(
+            map(
+                str,
+                request.user.partner.get_area_limits_for_program(view_instance.program.id)
+                .order_by("created_at")
+                .values_list("id", flat=True),
+            )
+        )
+        return area_limits

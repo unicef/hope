@@ -18,32 +18,14 @@ from hct_mis_api.apps.core.api.mixins import (
     BusinessAreaVisibilityMixin,
     CountActionMixin,
     ProgramVisibilityMixin,
-    SerializerActionMixin, GrievanceVisibilityMixin,
+    SerializerActionMixin,
 )
+from hct_mis_api.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hct_mis_api.apps.grievance.api.mixins import GrievancePermissionsMixin
-from hct_mis_api.apps.grievance.api.serializers import GrievanceTicketListSerializer
+from hct_mis_api.apps.grievance.api.serializers.grievance_ticket import GrievanceTicketListSerializer, \
+    GrievanceTicketDetailSerializer
 from hct_mis_api.apps.grievance.filters import GrievanceTicketFilter
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.api.caches import (
-    HouseholdListKeyConstructor,
-    IndividualListKeyConstructor,
-)
-from hct_mis_api.apps.household.api.serializers.household import (
-    HouseholdDetailSerializer,
-    HouseholdListSerializer,
-    HouseholdMemberSerializer,
-)
-from hct_mis_api.apps.household.api.serializers.individual import (
-    IndividualDetailSerializer,
-    IndividualListSerializer,
-)
-from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
-from hct_mis_api.apps.household.models import (
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
-)
-from hct_mis_api.apps.program.models import Program
 
 
 class GrievanceTicketViewSet(
