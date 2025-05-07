@@ -47,6 +47,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       fundsCommitments {
         fundsCommitmentNumber
+        insufficientAmount
         fundsCommitmentItems {
           id
           fundsCommitmentItem
