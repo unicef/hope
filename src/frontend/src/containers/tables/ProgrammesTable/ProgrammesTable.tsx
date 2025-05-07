@@ -35,7 +35,7 @@ function ProgrammesTable({
       search: filter.search,
       startDate: filter.startDate || null,
       endDate: filter.endDate || null,
-      status: filter.status,
+      status: filter.status !== '' ? filter.status : undefined,
       sector: filter.sector,
       numberOfHouseholds: JSON.stringify({
         before: filter.numberOfHouseholdsMin,

@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
@@ -185,10 +185,10 @@ class RdiMergeTask:
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
 
-                    dmds = PendingDeliveryMechanismData.objects.filter(
+                    dmds = PendingAccount.objects.filter(
                         individual_id__in=individual_ids,
                     )
-                    PendingDeliveryMechanismData.validate_uniqueness(dmds)
+                    PendingAccount.validate_uniqueness(dmds)
                     dmds.update(rdi_merge_status=MergeStatusModel.MERGED)
                     PendingIndividualRoleInHousehold.objects.filter(
                         household_id__in=household_ids, individual_id__in=individual_ids

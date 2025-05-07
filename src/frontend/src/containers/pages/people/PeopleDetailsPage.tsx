@@ -5,7 +5,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PeopleBioData } from '@components/people/PeopleBioData/PeopleBioData';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
-import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
+import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import { BigValueContainer } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
@@ -155,7 +155,7 @@ const PeopleDetailsPage = (): ReactElement => {
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualDeliveryMechanisms individual={individual} />
+        <IndividualAccounts individual={individual} />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
           individual={individual}

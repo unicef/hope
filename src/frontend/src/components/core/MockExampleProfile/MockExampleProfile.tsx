@@ -2,16 +2,16 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Profile } from '@restgenerated/models/Profile';
 
 const MockExampleProfile = () => {
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
 
-  const { data: meData, isLoading: meLoading } = useQuery<Profile>({
-    queryKey: ['profile', businessArea],
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
       return RestService.restBusinessAreasUsersProfileRetrieve({
-        businessAreaSlug: businessArea,
+        businessAreaSlug: businessAreaSlug,
+        program: programSlug,
       });
     },
   });

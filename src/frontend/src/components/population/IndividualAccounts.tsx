@@ -11,7 +11,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 
-interface IndividualDeliveryMechanismsProps {
+interface IndividualAccountsProps {
   individual: IndividualDetail;
 }
 
@@ -22,9 +22,9 @@ const Overview = styled(Paper)`
   margin-bottom: ${({ theme }) => theme.spacing(4)};
 `;
 
-export const IndividualDeliveryMechanisms: FC<
-  IndividualDeliveryMechanismsProps
-> = ({ individual }) => {
+export const IndividualAccounts: FC<IndividualAccountsProps> = ({
+  individual,
+}) => {
   const permissions = usePermissions();
   const canViewDeliveryMechanisms = hasPermissions(
     PERMISSIONS.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
@@ -33,10 +33,7 @@ export const IndividualDeliveryMechanisms: FC<
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  if (
-    !individual?.deliveryMechanismsData?.length ||
-    !canViewDeliveryMechanisms
-  ) {
+  if (!individual?.accounts?.length || !canViewDeliveryMechanisms) {
     return null;
   }
   return (
@@ -47,7 +44,7 @@ export const IndividualDeliveryMechanisms: FC<
         </Typography>
       </Title>
       <Grid container spacing={6}>
-        {individual.deliveryMechanismsData.map((mechanism, index) => {
+        {individual.accounts.map((mechanism, index) => {
           const tabData = JSON.parse(mechanism.individualTabData);
           return (
             <Grid size={{ xs: 12 }} key={index}>
@@ -61,9 +58,7 @@ export const IndividualDeliveryMechanisms: FC<
                   </Grid>
                 ))}
               </Grid>
-              {index < individual.deliveryMechanismsData.length - 1 && (
-                <DividerLine />
-              )}
+              {index < individual.accounts.length - 1 && <DividerLine />}
             </Grid>
           );
         })}

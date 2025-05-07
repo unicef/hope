@@ -5,7 +5,7 @@ import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
-import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
+import { MouseEvent, ReactElement, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
