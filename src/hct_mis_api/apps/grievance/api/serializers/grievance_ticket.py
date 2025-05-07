@@ -8,6 +8,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
+from hct_mis_api.apps.grievance.api.serializers.ticket_detail import TICKET_DETAILS_SERIALIZER_MAPPING
 from hct_mis_api.apps.grievance.models import GrievanceTicket, GrievanceDocument, TicketNote, \
     TicketHouseholdDataUpdateDetails, TicketIndividualDataUpdateDetails, TicketAddIndividualDetails, \
     TicketDeleteIndividualDetails, TicketDeleteHouseholdDetails, TicketSystemFlaggingDetails, \
@@ -121,11 +122,11 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     postpone_deduplication = serializers.BooleanField(source="business_area.postpone_deduplication")
     individual = IndividualSimpleSerializer(source="ticket_details.individual", allow_null=True)
     payment_record = serializers.SerializerMethodField()
-    # TODO: all the ticket_detail types
     linked_tickets = serializers.SerializerMethodField()
     existing_tickets = serializers.SerializerMethodField()
     documentation = serializers.SerializerMethodField()
     ticket_notes = TicketNoteSerializer(many=True)
+    ticket_details = serializers.SerializerMethodField()
 
     class Meta(GrievanceTicketListSerializer.Meta):
         fields = GrievanceTicketListSerializer.Meta.fields + (  # type: ignore
@@ -161,3 +162,8 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
 
     def get_documentation(self, obj: GrievanceTicket) -> Dict:
         return GrievanceDocumentSerializer(obj.support_documents.order_by("created_at").all(), many=True).data
+
+    def get_ticket_details(self, obj: GrievanceTicket) -> Dict:
+        ticket_details = obj.ticket_details
+        serializer = TICKET_DETAILS_SERIALIZER_MAPPING.get(ticket_details.__class__.__name__)
+        return serializer(ticket_details).data if serializer else None
