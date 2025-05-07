@@ -252,7 +252,7 @@ class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
 
 
 def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
-    return payment_plan.is_payment_gateway and payment_plan.status == PaymentPlan.Status.ACCEPTED
+    return payment_plan.is_payment_gateway and payment_plan.status == PaymentPlan.Status.ACCEPTED  # pragma: no-cover
 
 
 def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:

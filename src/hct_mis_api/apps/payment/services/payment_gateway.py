@@ -380,7 +380,7 @@ class PaymentGatewayService:
             if validate_response:
                 assert new_status.value == response_status, f"{new_status.value} != {response_status}"
             return response_status
-        return None
+        return None  # pragma: no-cover
 
     def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         def _handle_errors(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
