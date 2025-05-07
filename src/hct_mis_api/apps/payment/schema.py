@@ -530,6 +530,7 @@ class FundsCommitmentItemNode(DjangoObjectType):
 class FundsCommitmentNode(graphene.ObjectType):
     funds_commitment_number = graphene.String()
     funds_commitment_items = graphene.List(FundsCommitmentItemNode)
+    insufficient_amount = graphene.Boolean()
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
@@ -816,7 +817,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
         return [
             FundsCommitmentNode(
-                funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
+                funds_commitment_number=group.funds_commitment_number,
+                funds_commitment_items=group.filtered_items,
+                insufficient_amount=False,
             )
             for group in groups
         ]
@@ -833,8 +836,26 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         ).first()
 
         if group:
+            insufficient_amount = False
+
+            # Aggregate the total commitment amounts from the available items
+            totals = available_items_qs.aggregate(
+                total_fc_local_currency_amount=Sum("commitment_amount_local"),
+                total_fc_usd_currency_amount=Sum("commitment_amount_usd"),
+            )
+
+            total_fc_local_currency_amount = totals["total_fc_local_currency_amount"] or 0
+            total_fc_usd_currency_amount = totals["total_fc_usd_currency_amount"] or 0
+
+            if total_fc_local_currency_amount:
+                insufficient_amount = total_fc_local_currency_amount < parent.total_entitled_quantity
+            elif total_fc_usd_currency_amount:
+                insufficient_amount = total_fc_usd_currency_amount < parent.total_entitled_quantity_usd
+
             return FundsCommitmentNode(
-                funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
+                funds_commitment_number=group.funds_commitment_number,
+                funds_commitment_items=group.filtered_items,
+                insufficient_amount=insufficient_amount,
             )
         return None
 
