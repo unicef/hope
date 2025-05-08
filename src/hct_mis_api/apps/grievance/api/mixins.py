@@ -1,7 +1,9 @@
 from django.db.models import Q
 
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from tests.selenium.conftest import business_area
 
 
 class GrievancePermissionsMixin:
@@ -24,7 +26,15 @@ class GrievancePermissionsMixin:
                 Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
                 Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
                 Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
-            ]
+            ],
+            "count": [
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            ],
         }
         action = self.action
         sensitive_category_filter = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
@@ -34,7 +44,7 @@ class GrievancePermissionsMixin:
         filters = Q()
 
         # program-nested viewset
-        if self.program:
+        if hasattr(self, "program"):
             permissions_in_program = user.permissions_in_business_area(self.business_area_slug, self.program.id)
 
             can_view_ex_sensitive_all = permissions_map[action][0] in permissions_in_program
@@ -93,12 +103,12 @@ class GrievancePermissionsMixin:
 
         # global viewset
         else:
-            programs_can_view_ex_sensitive_all = set(user.get_program_ids_for_permissions_in_business_area(self.business_area_slug, [permissions_map[action][0]]))
-            programs_can_view_ex_sensitive_creator = set(user.get_program_ids_for_permissions_in_business_area(self.business_area_slug, [permissions_map[action][1]]))
-            programs_can_view_ex_sensitive_owner = set(user.get_program_ids_for_permissions_in_business_area(self.business_area_slug, [permissions_map[action][2]]))
-            programs_can_view_sensitive_all = set(user.get_program_ids_for_permissions_in_business_area(self.business_area_slug, [permissions_map[action][3]]))
-            programs_can_view_sensitive_creator = set(user.get_program_ids_for_permissions_in_business_area(self.business_area_slug, [permissions_map[action][4]]))
-            programs_can_view_sensitive_owner = set(user.get_program_ids_for_permissions_in_business_area(self.business_area_slug, [permissions_map[action][5]]))
+            programs_can_view_ex_sensitive_all = set(user.get_program_ids_for_permissions_in_business_area(self.business_area.id, [permissions_map[action][0]]))
+            programs_can_view_ex_sensitive_creator = set(user.get_program_ids_for_permissions_in_business_area(self.business_area.id, [permissions_map[action][1]]))
+            programs_can_view_ex_sensitive_owner = set(user.get_program_ids_for_permissions_in_business_area(self.business_area.id, [permissions_map[action][2]]))
+            programs_can_view_sensitive_all = set(user.get_program_ids_for_permissions_in_business_area(self.business_area.id, [permissions_map[action][3]]))
+            programs_can_view_sensitive_creator = set(user.get_program_ids_for_permissions_in_business_area(self.business_area.id, [permissions_map[action][4]]))
+            programs_can_view_sensitive_owner = set(user.get_program_ids_for_permissions_in_business_area(self.business_area.id, [permissions_map[action][5]]))
 
             # only_ex_sensitive = programs_can_view_ex_sensitive_all - programs_can_view_sensitive_all
             # if only_ex_sensitive:
@@ -145,14 +155,16 @@ class GrievancePermissionsMixin:
             #     filters |= Q(program_id__in=owner_sensitive) & Q(**assigned_to_filter) & Q(**sensitive_category_filter)
 
             if programs_can_view_ex_sensitive_all:
-                filters |= Q(programs_id__in=programs_can_view_ex_sensitive_all) & ~Q(**sensitive_category_filter)
+                filters |= Q(programs__id__in=programs_can_view_ex_sensitive_all) & ~Q(**sensitive_category_filter)
             if programs_can_view_sensitive_all:
-                filters |= Q(programs_id__in=programs_can_view_sensitive_all, **sensitive_category_filter)
+                filters |= Q(programs__id__in=programs_can_view_sensitive_all, **sensitive_category_filter)
             if programs_can_view_ex_sensitive_creator:
-                filters |= Q(programs_id__in=programs_can_view_ex_sensitive_creator) & Q(**created_by_filter) & ~Q(**sensitive_category_filter)
+                filters |= Q(programs__id__in=programs_can_view_ex_sensitive_creator) & Q(**created_by_filter) & ~Q(**sensitive_category_filter)
             if programs_can_view_ex_sensitive_owner:
-                filters |= Q(programs_id__in=programs_can_view_ex_sensitive_owner) & Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
+                filters |= Q(programs__id__in=programs_can_view_ex_sensitive_owner) & Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
             if programs_can_view_sensitive_creator:
-                filters |= Q(programs_id__in=programs_can_view_sensitive_creator) & Q(**created_by_filter) & Q(**sensitive_category_filter)
+                filters |= Q(programs__id__in=programs_can_view_sensitive_creator) & Q(**created_by_filter) & Q(**sensitive_category_filter)
             if programs_can_view_sensitive_owner:
-                filters |= Q(programs_id__in=programs_can_view_sensitive_owner) & Q(**assigned_to_filter) & Q(**sensitive_category_filter)
+                filters |= Q(programs__id__in=programs_can_view_sensitive_owner) & Q(**assigned_to_filter) & Q(**sensitive_category_filter)
+
+        return filters
