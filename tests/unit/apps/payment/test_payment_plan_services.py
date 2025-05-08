@@ -464,8 +464,8 @@ class TestPaymentPlanServices(APITestCase):
             status=PaymentPlan.Status.FINISHED,
             is_follow_up=True,
         )
-        dispersion_start_date = (payment_plan.dispersion_start_date + timedelta(days=1)).date()
-        dispersion_end_date = (payment_plan.dispersion_end_date + timedelta(days=1)).date()
+        dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+        dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
         self.assertEqual(
