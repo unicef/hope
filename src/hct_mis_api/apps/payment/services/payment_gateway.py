@@ -546,6 +546,9 @@ class PaymentGatewayService:
                             self.update_payment(payment, pg_payment_records, instruction, payment_plan, exchange_rate)
 
                 if payment_plan.is_reconciled:
+                    # TODO: MB to check if we need it here
+                    payment_plan.status_finished()
+                    payment_plan.save()
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
