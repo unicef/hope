@@ -1,34 +1,25 @@
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from rest_framework import serializers
-from datetime import date
 
-from hct_mis_api.apps.account.api.serializers import UserSerializer, PartnerSerializer
-from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.api.serializers import PartnerSerializer, UserSerializer
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
-from hct_mis_api.apps.grievance.api.serializers.ticket_detail import TICKET_DETAILS_SERIALIZER_MAPPING
-from hct_mis_api.apps.grievance.models import GrievanceTicket, GrievanceDocument, TicketNote, \
-    TicketHouseholdDataUpdateDetails, TicketIndividualDataUpdateDetails, TicketAddIndividualDetails, \
-    TicketDeleteIndividualDetails, TicketDeleteHouseholdDetails, TicketSystemFlaggingDetails, \
-    TicketPaymentVerificationDetails, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.api.serializers.ticket_detail import (
+    TICKET_DETAILS_SERIALIZER_MAPPING,
+)
+from hct_mis_api.apps.grievance.models import (
+    GrievanceDocument,
+    GrievanceTicket,
+    TicketNote,
+)
 from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
-    LinkedGrievanceTicketSerializer, IndividualSimpleSerializer, IndividualForTicketSerializer,
+    IndividualSimpleSerializer,
 )
-from hct_mis_api.apps.household.models import (
-    Household,
-    Individual,
-)
-from hct_mis_api.apps.payment.api.serializers import PaymentVerificationSerializer
 from hct_mis_api.apps.payment.services.payment_gateway import PaymentSerializer
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.nodes import DeduplicationEngineSimilarityPairNode
-from hct_mis_api.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
-from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
+
 
 class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,6 +28,7 @@ class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
             "id",
             "unicef_id",
         )
+
 
 class GrievanceDocumentSerializer(serializers.ModelSerializer):
     file_name = serializers.SerializerMethodField()
@@ -63,6 +55,7 @@ class GrievanceDocumentSerializer(serializers.ModelSerializer):
     def get_file_path(self, obj: GrievanceDocument) -> str:
         return obj.file_path
 
+
 class TicketNoteSerializer(serializers.ModelSerializer):
     created_by = UserSerializer()
 
@@ -75,6 +68,7 @@ class TicketNoteSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
 
 class GrievanceTicketListSerializer(serializers.ModelSerializer):
     programs = serializers.SerializerMethodField()
@@ -166,7 +160,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     def get_documentation(self, obj: GrievanceTicket) -> Dict:
         return GrievanceDocumentSerializer(obj.support_documents.order_by("created_at"), many=True).data
 
-    def get_ticket_details(self, obj: GrievanceTicket) -> Dict:
+    def get_ticket_details(self, obj: GrievanceTicket) -> Optional[Dict]:
         ticket_details = obj.ticket_details
         serializer = TICKET_DETAILS_SERIALIZER_MAPPING.get(ticket_details.__class__.__name__)
         return serializer(ticket_details).data if serializer else None

@@ -2,14 +2,12 @@ from typing import Any, Optional
 
 from django.db.models import QuerySet
 
-from rest_framework_extensions.key_constructor.bits import KeyBitBase
-
 from hct_mis_api.api.caches import (
+    AreaLimitKeyBit,
     BusinessAreaAndProgramLastUpdatedKeyBit,
-    KeyConstructorMixin, AreaLimitKeyBit,
+    KeyConstructorMixin,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import Household, Individual
 
 
 class GrievanceTicketListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
@@ -23,6 +21,7 @@ class GrievanceTicketListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
             programs__slug__in=[program_slug],
             business_area__slug=business_area_slug,
         )
+
 
 class GrievanceTicketListKeyConstructor(KeyConstructorMixin):
     household_list = GrievanceTicketListKeyBit()

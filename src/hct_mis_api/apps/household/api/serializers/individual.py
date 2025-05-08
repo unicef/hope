@@ -410,7 +410,6 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
         return f"{obj.unicef_id} (Detail ID {obj.detail_id})" if obj.detail_id else obj.unicef_id
 
 
-
 class IndividualForTicketSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
     deduplication_golden_record_results = serializers.SerializerMethodField()

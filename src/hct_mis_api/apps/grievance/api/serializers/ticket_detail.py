@@ -1,33 +1,33 @@
+from datetime import date
 from typing import Any, Dict, Optional
 
-from rest_framework import serializers
-from datetime import date
-
-from hct_mis_api.apps.account.api.serializers import UserSerializer, PartnerSerializer
-from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
-from hct_mis_api.apps.grievance.models import GrievanceTicket, GrievanceDocument, TicketNote, \
-    TicketHouseholdDataUpdateDetails, TicketIndividualDataUpdateDetails, TicketAddIndividualDetails, \
-    TicketDeleteIndividualDetails, TicketDeleteHouseholdDetails, TicketSystemFlaggingDetails, \
-    TicketPaymentVerificationDetails, TicketNeedsAdjudicationDetails
-from hct_mis_api.apps.household.api.serializers.individual import (
-    HouseholdSimpleSerializer,
-    LinkedGrievanceTicketSerializer, IndividualSimpleSerializer, IndividualForTicketSerializer,
-)
-from hct_mis_api.apps.household.models import (
-    Household,
-    Individual,
-)
-from hct_mis_api.apps.payment.api.serializers import PaymentVerificationSerializer
-from hct_mis_api.apps.payment.services.payment_gateway import PaymentSerializer
-from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.nodes import DeduplicationEngineSimilarityPairNode
-from hct_mis_api.apps.sanction_list.api.serializers import SanctionListIndividualSerializer
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from rest_framework import serializers
+
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.models import (
+    TicketAddIndividualDetails,
+    TicketDeleteHouseholdDetails,
+    TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketPaymentVerificationDetails,
+    TicketSystemFlaggingDetails,
+)
+from hct_mis_api.apps.household.api.serializers.individual import (
+    HouseholdSimpleSerializer,
+    IndividualForTicketSerializer,
+)
+from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.payment.api.serializers import PaymentVerificationSerializer
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.sanction_list.api.serializers import (
+    SanctionListIndividualSerializer,
+)
+
 
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -53,8 +53,7 @@ class AddIndividualTicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketAddIndividualDetails
         fields = (
             "id",
-            "approve_status"
-            "individual_data",
+            "approve_status" "individual_data",
         )
 
 
@@ -63,44 +62,45 @@ class DeleteIndividualTicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketDeleteIndividualDetails
         fields = (
             "id",
-            "approve_status"
-            "role_reassign_data",
+            "approve_status" "role_reassign_data",
         )
 
 
 class DeleteHouseholdTicketDetailsSerializer(serializers.ModelSerializer):
     reason_household = HouseholdSimpleSerializer()
+
     class Meta:
         model = TicketDeleteHouseholdDetails
         fields = (
             "id",
-            "approve_status"
-            "role_reassign_data",
+            "approve_status" "role_reassign_data",
             "reason_household",
         )
+
 
 class SystemFlaggingTicketDetailsSerializer(serializers.ModelSerializer):
     golden_records_individual = IndividualForTicketSerializer()
     sanction_list_individual = SanctionListIndividualSerializer()
+
     class Meta:
         model = TicketSystemFlaggingDetails
         fields = (
             "id",
-            "approve_status"
-            "role_reassign_data",
+            "approve_status" "role_reassign_data",
             "golden_records_individual",
             "sanction_list_individual",
         )
 
+
 class PaymentVerificationTicketDetailsSerializer(serializers.ModelSerializer):
     has_multiple_payment_verifications = serializers.SerializerMethodField()
     payment_verification = PaymentVerificationSerializer()
+
     class Meta:
         model = TicketPaymentVerificationDetails
         fields = (
             "id",
-            "approve_status"
-            "new_status",
+            "approve_status" "new_status",
             "old_received_amount",
             "new_received_amount",
             "payment_verification_status",
@@ -155,6 +155,7 @@ class DeduplicationEngineSimilarityPairSerializer(serializers.Serializer):
     similarity_score = serializers.CharField()
     status_code = serializers.CharField()
 
+
 class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
     golden_records = DeduplicationResultSerializer(many=True)
     possible_duplicate = DeduplicationResultSerializer(many=True)
@@ -166,11 +167,10 @@ class TicketNeedsAdjudicationDetailsExtraDataSerializer(serializers.Serializer):
             scope = Program.objects.filter(slug=program_slug, business_area__slug=business_area_slug).first()
         else:
             scope = BusinessArea.objects.filter(slug=business_area_slug).first()
-        if self.context["request"].user.has_perm(
-            Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS.value, scope
-        ):
+        if self.context["request"].user.has_perm(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS.value, scope):
             return DeduplicationEngineSimilarityPairSerializer(obj.get("dedup_engine_similarity_pair")).data
         return {}
+
 
 class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
     has_duplicated_document = serializers.SerializerMethodField()
@@ -184,8 +184,7 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketNeedsAdjudicationDetails
         fields = (
             "id",
-            "has_duplicated_document"
-            "golden_records_individual",
+            "has_duplicated_document" "golden_records_individual",
             "extra_data",
             "possible_duplicates",
             "selected_duplicates",
