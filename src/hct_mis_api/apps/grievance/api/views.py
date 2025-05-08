@@ -1,10 +1,11 @@
 from typing import Any
 
-from django.db.models import Prefetch, QuerySet
-
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
+from django.db.models import Case, DateField, F, Q, QuerySet, When, Prefetch
+from django.utils import timezone
+
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -48,7 +49,7 @@ class GrievanceTicketViewSet(
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = GrievanceTicketFilter
     admin_area_model_fields = ["admin2"]
-    program_model_fields = ["programs"]
+    program_model_field = "programs"
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
@@ -64,6 +65,16 @@ class GrievanceTicketViewSet(
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related(*to_prefetch)
+            .annotate(
+                total=Case(
+                    When(
+                        status=GrievanceTicket.STATUS_CLOSED,
+                        then=F("updated_at") - F("created_at"),
+                    ),
+                    default=timezone.now() - F("created_at"),  # type: ignore
+                    output_field=DateField(),
+                )
+            ).annotate(total_days=F("total__day"))
             .order_by("created_at")
         )
 
@@ -97,7 +108,6 @@ class GrievanceTicketGlobalViewSet(
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-                *POPULATION_DETAILS,
             ],
         "retrieve":
             [
@@ -116,13 +126,12 @@ class GrievanceTicketGlobalViewSet(
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-                *POPULATION_DETAILS,
             ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = GrievanceTicketFilter
     admin_area_model_fields = ["admin2"]
-    program_model_fields = ["programs"]
+    program_model_field = "programs"
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
@@ -138,6 +147,16 @@ class GrievanceTicketGlobalViewSet(
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
             .prefetch_related(*to_prefetch)
+            .annotate(
+                total=Case(
+                    When(
+                        status=GrievanceTicket.STATUS_CLOSED,
+                        then=F("updated_at") - F("created_at"),
+                    ),
+                    default=timezone.now() - F("created_at"),  # type: ignore
+                    output_field=DateField(),
+                )
+            ).annotate(total_days=F("total__day"))
             .order_by("created_at")
         )
 

@@ -83,8 +83,8 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     admin2 = AreaListSerializer()
     assigned_to = UserSerializer()
     created_by = UserSerializer()
-    user_modified = UserSerializer()
     related_tickets = serializers.SerializerMethodField()
+    total_days = serializers.SerializerMethodField()
 
     class Meta:
         model = GrievanceTicket
@@ -111,10 +111,13 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
         )
 
     def get_programs(self, obj: GrievanceTicket) -> Dict:
-        return ProgramSmallSerializer(obj.programs.order_by("created_at").all(), many=True).data
+        return ProgramSmallSerializer(obj.programs.order_by("created_at"), many=True).data
 
     def get_related_tickets(self, obj: GrievanceTicket) -> Dict:
-        return GrievanceTicketSimpleSerializer(obj._related_tickets.order_by("created_at").all(), many=True).data
+        return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
+
+    def get_total_days(self, obj: GrievanceTicket) -> int:
+        return obj.total_days
 
 
 class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketListSerializer):
@@ -155,13 +158,13 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
         return PaymentSerializer(payment_record).data
 
     def get_linked_tickets(self, obj: GrievanceTicket) -> Dict:
-        return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("created_at").all(), many=True).data
+        return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("created_at"), many=True).data
 
     def get_existing_tickets(self, obj: GrievanceTicket) -> Dict:
-        return GrievanceTicketSimpleSerializer(obj._existing_tickets.order_by("created_at").all(), many=True).data
+        return GrievanceTicketSimpleSerializer(obj._existing_tickets.order_by("created_at"), many=True).data
 
     def get_documentation(self, obj: GrievanceTicket) -> Dict:
-        return GrievanceDocumentSerializer(obj.support_documents.order_by("created_at").all(), many=True).data
+        return GrievanceDocumentSerializer(obj.support_documents.order_by("created_at"), many=True).data
 
     def get_ticket_details(self, obj: GrievanceTicket) -> Dict:
         ticket_details = obj.ticket_details
