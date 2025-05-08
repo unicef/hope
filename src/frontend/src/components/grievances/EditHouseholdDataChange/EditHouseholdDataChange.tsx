@@ -51,7 +51,7 @@ function EditHouseholdDataChange({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+    useAllEditHouseholdFieldsQuery({ fetchPolicy: 'network-only' });
 
   const householdFieldsDict =
     householdFieldsData?.allEditHouseholdFieldsAttributes;
