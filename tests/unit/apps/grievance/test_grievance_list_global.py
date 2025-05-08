@@ -501,3 +501,80 @@ class TestGrievanceTicketGlobalList:
         assert str(self.grievance_tickets[6].id) in result_ids
         assert str(self.grievance_tickets[7].id) not in result_ids
         assert str(self.grievance_tickets[8].id) in result_ids
+
+    @pytest.mark.parametrize(
+        "permissions, program, area_limit, expected_tickets",
+        [
+            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], 1, False, [0, 2, 6, 8]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], 1, False, [0, 6, 8]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER], 1, False, [0, 2, 6, 8]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], 1, False, [4]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR], 1, False, []),
+            ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER], 1, False, [4]),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                1,
+                False,
+                [0, 2, 4, 6, 8],
+            ),
+            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], 2, False, [1, 7]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], 2, False, [1, 7]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER], 2, False, [7]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], 2, False, [3, 5]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR], 2, False, [3, 5]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER], 2, False, [3]),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                2,
+                False,
+                [1, 3, 5, 7],
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                1,
+                True,
+                [0, 4, 6, 8],
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+                2,
+                True,
+                [1, 7],
+            ),
+        ],
+    )
+    def test_grievance_ticket_global_list_based_on_permissions(
+        self,
+        permissions: list,
+        program: int,
+        area_limit: bool,
+        expected_tickets: list,
+        create_user_role_with_permissions: Callable,
+        set_admin_area_limits_in_program: Callable,
+    ) -> None:
+        program = self.program_afghanistan1 if program == 1 else self.program_afghanistan2
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            program=program,
+        )
+        if area_limit:
+            set_admin_area_limits_in_program(self.partner, program, [self.area1])
+
+        response = self.api_client.get(
+            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.data["results"]
+        assert len(response_results) == len(expected_tickets)
+
+        response_count = self.api_client.get(
+            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == len(expected_tickets)
+
+        result_ids = [result["id"] for result in response_results]
+        for i in expected_tickets:
+            assert str(self.grievance_tickets[i].id) in result_ids
