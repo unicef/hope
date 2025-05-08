@@ -73,6 +73,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "permissions_in_scope",
             "user_roles",
             "partner_roles",
+            "cross_area_filter_available",
         )
 
     @staticmethod
