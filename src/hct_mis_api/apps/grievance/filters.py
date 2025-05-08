@@ -21,7 +21,7 @@ from graphene_django.filter import GlobalIDFilter
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
+from hct_mis_api.apps.core.utils import get_program_id_from_headers
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, Household, Individual

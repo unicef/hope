@@ -1,11 +1,10 @@
 from typing import Any
 
-from constance import config
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
-from django.db.models import Case, DateField, F, Q, QuerySet, When, Prefetch
+from django.db.models import Case, DateField, F, QuerySet, When
 from django.utils import timezone
 
+from constance import config
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -13,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.permissions import Permissions, POPULATION_DETAILS
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaVisibilityMixin,
@@ -23,8 +22,11 @@ from hct_mis_api.apps.core.api.mixins import (
 )
 from hct_mis_api.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hct_mis_api.apps.grievance.api.mixins import GrievancePermissionsMixin
-from hct_mis_api.apps.grievance.api.serializers.grievance_ticket import GrievanceTicketListSerializer, \
-    GrievanceTicketDetailSerializer, GrievanceChoicesSerializer
+from hct_mis_api.apps.grievance.api.serializers.grievance_ticket import (
+    GrievanceChoicesSerializer,
+    GrievanceTicketDetailSerializer,
+    GrievanceTicketListSerializer,
+)
 from hct_mis_api.apps.grievance.filters import GrievanceTicketFilter
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -37,14 +39,14 @@ class GrievanceTicketViewSet(
     BaseViewSet,
 ):
     queryset = GrievanceTicket.objects.filter(ignored=False)
-    serializer_class = GrievanceTicketListSerializer,
+    serializer_class = GrievanceTicketListSerializer
     PERMISSIONS = [
-            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+        Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+        Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+        Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
     ]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = GrievanceTicketFilter
@@ -74,7 +76,8 @@ class GrievanceTicketViewSet(
                     default=timezone.now() - F("created_at"),  # type: ignore
                     output_field=DateField(),
                 )
-            ).annotate(total_days=F("total__day"))
+            )
+            .annotate(total_days=F("total__day"))
             .order_by("created_at")
         )
 
@@ -100,33 +103,30 @@ class GrievanceTicketGlobalViewSet(
         "choices": GrievanceChoicesSerializer,
     }
     permissions_by_action = {
-        "list":
-            [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-        "retrieve":
-            [
-                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
-            ],
-        "choices":
-            [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
+        "list": [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
+        "retrieve": [
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        ],
+        "choices": [
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+            Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+        ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = GrievanceTicketFilter
@@ -156,7 +156,8 @@ class GrievanceTicketGlobalViewSet(
                     default=timezone.now() - F("created_at"),  # type: ignore
                     output_field=DateField(),
                 )
-            ).annotate(total_days=F("total__day"))
+            )
+            .annotate(total_days=F("total__day"))
             .order_by("created_at")
         )
 

@@ -10,12 +10,13 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import (
+    AdminAreaLimitedToFactory,
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
-    UserFactory, AdminAreaLimitedToFactory,
+    UserFactory,
 )
-from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Role, AdminAreaLimitedTo
+from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Role
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
@@ -167,7 +168,7 @@ class TestUserProfile:
                 *self.role_p3.permissions,
             ]
         }
-        assert profile_data["cross_area_filter_available"] == False
+        assert profile_data["cross_area_filter_available"] is False
 
     def test_user_profile_in_scope_program(self) -> None:
         response = self.api_client.get(self.user_profile_url, {"program": self.program1.slug})
@@ -225,7 +226,7 @@ class TestUserProfile:
                 *self.role_p2.permissions,
             ]
         }
-        assert profile_data["cross_area_filter_available"] == False
+        assert profile_data["cross_area_filter_available"] is False
 
     @pytest.mark.parametrize(
         "permissions, filter_available",
@@ -235,10 +236,10 @@ class TestUserProfile:
         ],
     )
     def test_cross_area_filter_available_in_scope_business_area(
-            self,
-            permissions: list,
-            filter_available: bool,
-            create_user_role_with_permissions: Any,
+        self,
+        permissions: list,
+        filter_available: bool,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -263,11 +264,11 @@ class TestUserProfile:
         ],
     )
     def test_cross_area_filter_available_in_scope_program(
-            self,
-            permissions: list,
-            area_limits: bool,
-            filter_available: bool,
-            create_user_role_with_permissions: Any,
+        self,
+        permissions: list,
+        area_limits: bool,
+        filter_available: bool,
+        create_user_role_with_permissions: Any,
     ) -> None:
         create_user_role_with_permissions(
             user=self.user,
@@ -569,7 +570,7 @@ class TestProgramUsers:
                 "id": user.partner.id,
                 "name": user.partner.name,
             }
-            assert user_result["cross_area_filter_available"] == False
+            assert user_result["cross_area_filter_available"] is False
 
         # self.user
         response_results[0]["partner_roles"] = []

@@ -187,9 +187,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
         )
 
         filter_q = Q()
-        for program_id in (
-            Program.objects.filter(id__in=program_ids).values_list("id", flat=True)
-        ):
+        for program_id in Program.objects.filter(id__in=program_ids).values_list("id", flat=True):
             program_q = Q(**{f"{self.program_model_field}__id__in": [program_id]})
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
             # apply admin area limits if partner has restrictions
