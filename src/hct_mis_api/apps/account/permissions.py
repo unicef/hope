@@ -113,6 +113,8 @@ class Permissions(Enum):
     PM_DOWNLOAD_FSP_AUTH_CODE = auto()
     PM_SEND_XLSX_PASSWORD = auto()
     PM_ASSIGN_FUNDS_COMMITMENTS = auto()
+    PM_SYNC_PAYMENT_PLAN_WITH_PG = auto()
+    PM_SYNC_PAYMENT_WITH_PG = auto()
 
     # PaymentPlanSupportingDocument
     PM_DOWNLOAD_SUPPORTING_DOCUMENT = auto()

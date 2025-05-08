@@ -369,8 +369,8 @@ class TestPaymentPlanServices(APITestCase):
             )
             payments.append(payment)
 
-        dispersion_start_date = (pp.dispersion_start_date + timedelta(days=1)).date()
-        dispersion_end_date = (pp.dispersion_end_date + timedelta(days=1)).date()
+        dispersion_start_date = pp.dispersion_start_date + timedelta(days=1)
+        dispersion_end_date = pp.dispersion_end_date + timedelta(days=1)
 
         with self.assertRaisesMessage(
             ValidationError, "Cannot create a follow-up for a payment plan with no unsuccessful payments"
@@ -481,8 +481,8 @@ class TestPaymentPlanServices(APITestCase):
             currency="PLN",
             is_follow_up=True,
         )
-        dispersion_start_date = (payment_plan.dispersion_start_date + timedelta(days=1)).date()
-        dispersion_end_date = (payment_plan.dispersion_end_date + timedelta(days=1)).date()
+        dispersion_start_date = payment_plan.dispersion_start_date + timedelta(days=1)
+        dispersion_end_date = payment_plan.dispersion_end_date + timedelta(days=1)
         payment_plan = PaymentPlanService(payment_plan).update(
             {
                 "dispersion_start_date": dispersion_start_date,
