@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.account.models import Partner, Role
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -11,7 +11,9 @@ class TestSignalCreateBusinessArea(TestCase):
         super().setUpTestData()
 
         cls.partner_unicef = PartnerFactory(name="UNICEF")
-        Role.objects.get_or_create(name="Role for UNICEF Partners", subsystem="HOPE")
+        RoleFactory(
+            name="Role for UNICEF Partners", subsystem="HOPE", is_visible_on_ui=False, is_available_for_partner=False
+        )
         cls.unicef_hq = PartnerFactory(name="UNICEF HQ", parent=cls.partner_unicef)
 
     def test_signal_add_partner_role(self) -> None:
