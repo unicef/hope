@@ -13,9 +13,9 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
-    UserFactory,
+    UserFactory, AdminAreaLimitedToFactory,
 )
-from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Role
+from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Role, AdminAreaLimitedTo
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
@@ -25,6 +25,7 @@ from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -166,6 +167,7 @@ class TestUserProfile:
                 *self.role_p3.permissions,
             ]
         }
+        assert profile_data["cross_area_filter_available"] == False
 
     def test_user_profile_in_scope_program(self) -> None:
         response = self.api_client.get(self.user_profile_url, {"program": self.program1.slug})
@@ -223,6 +225,64 @@ class TestUserProfile:
                 *self.role_p2.permissions,
             ]
         }
+        assert profile_data["cross_area_filter_available"] == False
+
+    @pytest.mark.parametrize(
+        "permissions, filter_available",
+        [
+            ([Permissions.GRIEVANCES_CROSS_AREA_FILTER], True),
+            ([], False),
+        ],
+    )
+    def test_cross_area_filter_available_in_scope_business_area(
+            self,
+            permissions: list,
+            filter_available: bool,
+            create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        response = self.api_client.get(self.user_profile_url)
+        assert response.status_code == status.HTTP_200_OK
+
+        profile_data = response.data
+        assert profile_data["cross_area_filter_available"] == filter_available
+
+    @pytest.mark.parametrize(
+        "permissions, area_limits, filter_available",
+        [
+            ([Permissions.GRIEVANCES_CROSS_AREA_FILTER], True, False),
+            ([Permissions.GRIEVANCES_CROSS_AREA_FILTER], False, True),
+            ([], True, False),
+            ([], False, False),
+        ],
+    )
+    def test_cross_area_filter_available_in_scope_program(
+            self,
+            permissions: list,
+            area_limits: bool,
+            filter_available: bool,
+            create_user_role_with_permissions: Any,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        if area_limits:
+            area = AreaFactory()
+            AdminAreaLimitedToFactory(partner=self.user.partner, program=self.program1, areas=[area])
+
+        response = self.api_client.get(self.user_profile_url, {"program": self.program1.slug})
+        assert response.status_code == status.HTTP_200_OK
+        profile_data = response.data
+        assert profile_data["cross_area_filter_available"] == filter_available
 
 
 class TestUserList:
