@@ -424,3 +424,80 @@ class TestGrievanceTicketGlobalList:
             reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
         )
         assert response_count.status_code == status.HTTP_403_FORBIDDEN
+
+
+    def test_grievance_ticket_global_list_area_limits(
+        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            ],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        set_admin_area_limits_in_program(self.partner, self.program_afghanistan1, [self.area1])
+        set_admin_area_limits_in_program(self.partner, self.program_afghanistan2, [self.area2])
+
+        # Only grievance tickets with area1 in program1 and area2 in program2 should be returned.
+
+        response = self.api_client.get(
+            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.data["results"]
+        assert len(response_results) == 7
+
+        result_ids = [result["id"] for result in response_results]
+        assert str(self.grievance_tickets[0].id) in result_ids  # program1, area1
+        assert str(self.grievance_tickets[1].id) not in result_ids  # program2, area1
+        assert str(self.grievance_tickets[2].id) not in result_ids  # program1, area2
+        assert str(self.grievance_tickets[3].id) in result_ids  # program2, area2
+        assert str(self.grievance_tickets[4].id) in result_ids  # program1, area1
+        assert str(self.grievance_tickets[5].id) in result_ids  # program2, area2
+        assert str(self.grievance_tickets[6].id) in result_ids  # program1, area None
+        assert str(self.grievance_tickets[7].id) in result_ids  # program2, area None
+        assert str(self.grievance_tickets[8].id) in result_ids  # program1, area1
+
+    def test_grievance_ticket_global_list_with_permissions_in_one_program(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            ],
+            business_area=self.afghanistan,
+            program=self.program_afghanistan1,
+        )
+
+        # Only grievance tickets in program1 should be returned.
+
+        response = self.api_client.get(
+            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.data["results"]
+        assert len(response_results) == 5
+
+        result_ids = [result["id"] for result in response_results]
+        assert str(self.grievance_tickets[0].id) in result_ids
+        assert str(self.grievance_tickets[1].id) not in result_ids
+        assert str(self.grievance_tickets[2].id) in result_ids
+        assert str(self.grievance_tickets[3].id) not in result_ids
+        assert str(self.grievance_tickets[4].id) in result_ids
+        assert str(self.grievance_tickets[5].id) not in result_ids
+        assert str(self.grievance_tickets[6].id) in result_ids
+        assert str(self.grievance_tickets[7].id) not in result_ids
+        assert str(self.grievance_tickets[8].id) in result_ids
