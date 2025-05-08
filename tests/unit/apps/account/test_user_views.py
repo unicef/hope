@@ -569,6 +569,7 @@ class TestProgramUsers:
                 "id": user.partner.id,
                 "name": user.partner.name,
             }
+            assert user_result["cross_area_filter_available"] == False
 
         # self.user
         response_results[0]["partner_roles"] = []
