@@ -1,0 +1,117 @@
+volumes:
+  backend-data:
+  ipython_data_local:
+
+
+services:
+
+  backend:
+    image: unicef/hct-mis-backend
+    entrypoint: entrypoint.sh
+    stdin_open: true
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+      target: dev
+    ports:
+      - "8080:8000"
+    volumes:
+      - ../src:/app/src
+      - ../tests:/app/tests
+      - backend-data:/data
+      - ../pyproject.toml:/app/pyproject.toml
+      - ../uv.lock:/packages/uv.lock
+      - ipython_data_local:/root/.ipython
+    command: "dev"
+    depends_on:
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: [
+        "CMD",
+        "python3",
+        "-c",
+        "import http.client; \
+        conn = http.client.HTTPConnection('localhost', 8000); \
+        conn.request('GET', '/_health'); \
+        response = conn.getresponse(); \
+        exit(0) if response.status == 200 else exit(1);"
+      ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  celery-worker:
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    volumes:
+      - ../src:/app/src
+      - backend-data:/data
+    command: "celery-worker"
+    depends_on:
+      backend:
+        condition: service_started
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "celery", "status" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  celery-beat:
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    volumes:
+      - ../src:/app/src/
+      - backend-data:/data
+    command: "celery-beat"
+    depends_on:
+      backend:
+        condition: service_started
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "celery", "status" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  celery-flower:
+    stdin_open: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    command: "celery-flower"
+    volumes:
+      - ../src:/app/src
+      - backend-data:/data
+    ports:
+      - "5555:5555"
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - celery-worker
+      - valkey
