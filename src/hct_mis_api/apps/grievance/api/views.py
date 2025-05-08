@@ -23,7 +23,7 @@ from hct_mis_api.apps.core.api.mixins import (
 from hct_mis_api.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hct_mis_api.apps.grievance.api.mixins import GrievancePermissionsMixin
 from hct_mis_api.apps.grievance.api.serializers.grievance_ticket import GrievanceTicketListSerializer, \
-    GrievanceTicketDetailSerializer
+    GrievanceTicketDetailSerializer, GrievanceChoicesSerializer
 from hct_mis_api.apps.grievance.filters import GrievanceTicketFilter
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -144,4 +144,3 @@ class GrievanceTicketGlobalViewSet(
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return Response(data=self.get_serializer(instance={}).data)
-
