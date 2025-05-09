@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.conf import settings
 from django.test import TestCase
@@ -9,6 +10,7 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area, AreaType
 from hct_mis_api.apps.household.models import (
+    HEAD,
     MALE,
     DocumentType,
     PendingDocument,
@@ -56,12 +58,20 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project, mapping={})
-
+        files = {
+            "individual-details": [
+                {
+                    "photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                    "national_id_photo_i_c": "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+                }
+            ]
+        }
         records = [
             Record(
                 registration=25,
                 timestamp=timezone.make_aware(datetime.datetime(2023, 5, 1)),
                 source_id=1,
+                files=json.dumps(files).encode(),
                 fields={
                     "household-info": [{"admin1_h_c": "NG002", "admin2_h_c": "NG002001", "admin3_h_c": "NG002001007"}],
                     "intro-and-consent": [
@@ -74,6 +84,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                             "phone_no_i_c": "+2348023456789",
                             "birth_date_i_c": "1988-04-08",
                             "given_name_i_c": "Giulio",
+                            "middle_name_i_c": "D",
                             "national_id_no": "01234567891",
                             "account_details": {
                                 "uba_code": "000004",
@@ -82,7 +93,6 @@ class TestNigeriaPeopleRegistrationService(TestCase):
                                 "holder_name": "xxxx",
                             },
                             "family_name_i_c": "Franco",
-                            "confirm_phone_no": "+2348023456789",
                             "national_id_no_i_c": "01234567891",
                             "estimated_birth_date_i_c": "y",
                             "frontline_worker_designation_i_f": "H2HCL",  # ff
@@ -122,16 +132,18 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         self.assertIsNotNone(primary_collector.phone_no)
         self.assertEqual(primary_collector.sex, MALE)
         self.assertEqual(primary_collector.email, "gfranco@unicef.org")
+        self.assertEqual(primary_collector.full_name, "Giulio D Franco")
+        self.assertEqual(primary_collector.relationship, HEAD)
         self.assertIsNotNone(primary_collector.phone_no_alternative)
         self.assertEqual(
             primary_collector.flex_fields,
             {
                 "frontline_worker_designation_i_f": "H2HCL",
                 "national_id_no": "01234567891",
-                "national_id_no_i_c": "01234567891",
             },
         )
         self.assertEqual(primary_collector.rdi_merge_status, "PENDING")
+        self.assertIsNotNone(primary_collector.photo.url)
         self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
 
         primary_role = PendingIndividualRoleInHousehold.objects.first()
@@ -153,3 +165,4 @@ class TestNigeriaPeopleRegistrationService(TestCase):
         national_id = PendingDocument.objects.filter(document_number="01234567891").first()
         self.assertEqual(national_id.individual, primary_collector)
         self.assertEqual(national_id.rdi_merge_status, "PENDING")
+        self.assertIsNotNone(national_id.photo.url)

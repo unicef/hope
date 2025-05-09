@@ -4,7 +4,8 @@ from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
@@ -20,6 +21,7 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
     Account,
@@ -45,6 +47,7 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hct_mis_api.apps.utils.security import is_root
+from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -221,6 +224,45 @@ class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
         )
 
 
+class FundsCommitmentItemInline(admin.TabularInline):  # or admin.StackedInline
+    model = FundsCommitmentItem
+    extra = 0
+    can_delete = False
+    show_change_link = True
+    fields = readonly_fields = (
+        "rec_serial_number",
+        "funds_commitment_group",
+        "funds_commitment_item",
+        "fc_status",
+        "commitment_amount_local",
+        "commitment_amount_usd",
+        "total_open_amount_local",
+        "total_open_amount_usd",
+    )
+    raw_id_fields = ("funds_commitment_group",)
+
+    def has_add_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+    def has_change_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+    def has_delete_permission(self: Any, request: Any, obj: Any = None) -> bool:
+        return False
+
+
+def can_sync_with_payment_gateway(payment_plan: PaymentPlan) -> bool:
+    return payment_plan.is_payment_gateway and payment_plan.status == PaymentPlan.Status.ACCEPTED  # pragma: no cover
+
+
+def has_payment_plan_pg_sync_permission(request: Any, payment_plan: PaymentPlan) -> bool:
+    return request.user.has_permission(
+        Permissions.PM_SYNC_PAYMENT_PLAN_WITH_PG.value,
+        payment_plan.business_area,
+        payment_plan.program_cycle.program_id,
+    )
+
+
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     list_display = (
@@ -261,14 +303,47 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     search_fields = ("id", "unicef_id", "name")
     date_hierarchy = "updated_at"
+    inlines = [FundsCommitmentItemInline]
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
+
+    @button(
+        visible=lambda btn: can_sync_with_payment_gateway(btn.original),
+        permission=lambda request, payment_plan, *args, **kwargs: has_payment_plan_pg_sync_permission(
+            request, payment_plan
+        ),
+    )
+    def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            from hct_mis_api.apps.payment.services.payment_gateway import (
+                PaymentGatewayService,
+            )
+
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            PaymentGatewayService().sync_payment_plan(payment_plan)
+
+            return redirect(reverse("admin:payment_paymentplan_change", args=[pk]))
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.sync_with_payment_gateway,
+                message="Do you confirm to Sync with Payment Gateway?",
+            )
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
     model = PaymentHouseholdSnapshot
     readonly_fields = ("snapshot_data", "household_id")
+
+
+def has_payment_pg_sync_permission(request: Any, payment: Payment) -> bool:
+    return request.user.has_permission(
+        Permissions.PM_SYNC_PAYMENT_WITH_PG.value,
+        payment.business_area,
+        payment.parent.program_cycle.program_id,
+    )
 
 
 @admin.register(Payment)
@@ -338,6 +413,28 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
+
+    @button(
+        visible=lambda btn: can_sync_with_payment_gateway(btn.original.parent),
+        permission=lambda request, payment, *args, **kwargs: has_payment_pg_sync_permission(request, payment),
+    )
+    def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        if request.method == "POST":
+            from hct_mis_api.apps.payment.services.payment_gateway import (
+                PaymentGatewayService,
+            )
+
+            payment = Payment.objects.get(pk=pk)
+            PaymentGatewayService().sync_record(payment)
+
+            return redirect(reverse("admin:payment_payment_change", args=[pk]))
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.sync_with_payment_gateway,
+                message="Do you confirm to Sync with Payment Gateway?",
+            )
 
 
 @admin.register(FinancialServiceProviderXlsxTemplate)

@@ -6,6 +6,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
+    HEAD,
     ROLE_PRIMARY,
     DocumentType,
     PendingDocument,
@@ -42,13 +43,16 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
             "individual-details": {
                 "given_name_i_c": "individual.given_name",
                 "family_name_i_c": "individual.family_name",
+                "middle_name_i_c": "individual.middle_name",
                 "birth_date_i_c": "individual.birth_date",
                 "gender_i_c": "individual.sex",
                 "email_i_c": "individual.email",
                 "phone_no_i_c": "individual.phone_no",
                 "estimated_birth_date_i_c": "individual.estimated_birth_date",
-                "confirm_phone_no": "individual.phone_no_alternative",
                 "account_details": "account_details.data",
+                "photo_i_c": "individual.photo",
+                "national_id_photo_i_c": "document.doc_national-photo",
+                "national_id_no_i_c": "document.doc_national-document_number",
             },
         }
 
@@ -62,6 +66,8 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         )
 
         individual = individuals[0]
+        individual.relationship = HEAD
+        individual.save()
         collector = pr_collector or head or individual
         head_of_household = head or individual
         household.head_of_household = head_of_household
@@ -82,10 +88,14 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         national_id = individual_dict.get("national_id_no_i_c")
         if not national_id:
             return None
+        photo = None
+        if photo_base_64 := individual_dict.get("national_id_photo_i_c", None):
+            photo = self._prepare_picture_from_base64(photo_base_64, national_id)
         return PendingDocument.objects.create(
             program=imported_individual.program,
             document_number=national_id,
             individual=imported_individual,
             type=DocumentType.objects.get(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]),
             country=Country.objects.get(iso_code2="NG"),
+            photo=photo,
         )
