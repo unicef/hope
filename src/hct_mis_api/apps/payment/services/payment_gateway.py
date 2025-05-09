@@ -132,10 +132,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "full_name": collector_data.get("full_name", ""),
             "middle_name": collector_data.get("middle_name", ""),
         }
-        if obj.delivery_type.code == "mobile_money" and not delivery_mech_data:  # this workaround need to be dropped
-            base_data["service_provider_code"] = collector_data.get("flex_fields", {}).get(
-                "service_provider_code_i_f", ""
-            )
 
         payload = PaymentPayloadSerializer(data=base_data)
         if not payload.is_valid():
@@ -144,7 +140,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         payload_data = payload.data
 
         if delivery_mech_data:
-            payload_data.update(delivery_mech_data)
+            payload_data["account"] = delivery_mech_data
 
         return payload_data
 
@@ -464,9 +460,9 @@ class PaymentGatewayService:
         account_types_data = self.api.get_account_types()
         for account_type_data in account_types_data:
             AccountType.objects.update_or_create(
-                key=account_type_data.key,
+                payment_gateway_id=account_type_data.id,
                 defaults={
-                    "payment_gateway_id": account_type_data.id,
+                    "key": account_type_data.key,
                     "label": account_type_data.label,
                     "unique_fields": account_type_data.unique_fields or [],
                 },
@@ -588,9 +584,9 @@ class PaymentGatewayService:
         delivery_mechanisms: List[DeliveryMechanismData] = self.api.get_delivery_mechanisms()
         for dm in delivery_mechanisms:
             DeliveryMechanism.objects.update_or_create(
-                code=dm.code,
+                payment_gateway_id=dm.id,
                 defaults={
-                    "payment_gateway_id": dm.id,
+                    "code": dm.code,
                     "name": dm.name,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
