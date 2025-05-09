@@ -29,49 +29,59 @@ def create_default_object(apps, schema_editor):
         member_label_plural="Individuals",
         master_detail=False,
     )
-    Program.objects.filter(
-        data_collecting_type__type=DataCollectingType.Type.SOCIAL
-    ).update(beneficiary_group=default_social_worker_beneficiary_group)
-    Program.objects.exclude(
-        data_collecting_type__type=DataCollectingType.Type.SOCIAL
-    ).update(beneficiary_group=default_household_beneficiary_group)
+    Program.objects.filter(data_collecting_type__type=DataCollectingType.Type.SOCIAL).update(
+        beneficiary_group=default_social_worker_beneficiary_group
+    )
+    Program.objects.exclude(data_collecting_type__type=DataCollectingType.Type.SOCIAL).update(
+        beneficiary_group=default_household_beneficiary_group
+    )
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('program', '0001_migration'),
+        ("program", "0001_migration"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BeneficiaryGroup',
+            name="BeneficiaryGroup",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('group_label', models.CharField(max_length=255)),
-                ('group_label_plural', models.CharField(max_length=255)),
-                ('member_label', models.CharField(max_length=255)),
-                ('member_label_plural', models.CharField(max_length=255)),
-                ('master_detail', models.BooleanField(default=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("name", models.CharField(max_length=255, unique=True)),
+                ("group_label", models.CharField(max_length=255)),
+                ("group_label_plural", models.CharField(max_length=255)),
+                ("member_label", models.CharField(max_length=255)),
+                ("member_label_plural", models.CharField(max_length=255)),
+                ("master_detail", models.BooleanField(default=True)),
             ],
             options={
-                'verbose_name': 'Beneficiary Group',
-                'verbose_name_plural': 'Beneficiary Groups',
-                'ordering': ('name',),
+                "verbose_name": "Beneficiary Group",
+                "verbose_name_plural": "Beneficiary Groups",
+                "ordering": ("name",),
             },
         ),
         migrations.AddField(
-            model_name='program',
-            name='beneficiary_group',
-            field=models.ForeignKey(null=True, blank=True, on_delete=django.db.models.deletion.PROTECT, related_name='programs', to='program.beneficiarygroup'),
+            model_name="program",
+            name="beneficiary_group",
+            field=models.ForeignKey(
+                null=True,
+                blank=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="programs",
+                to="program.beneficiarygroup",
+            ),
         ),
         migrations.RunPython(create_default_object, migrations.RunPython.noop),
         migrations.AlterField(
-            model_name='program',
-            name='beneficiary_group',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='programs', to='program.beneficiarygroup'),
+            model_name="program",
+            name="beneficiary_group",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, related_name="programs", to="program.beneficiarygroup"
+            ),
         ),
     ]

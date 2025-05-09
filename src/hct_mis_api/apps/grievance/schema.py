@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from django.core.files.storage import default_storage
 from django.db.models import Case, DateField, F, Q, QuerySet, When
@@ -95,7 +95,7 @@ class GrievanceDocumentNode(DjangoObjectType):
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
-    permission_classes: Tuple[Type[BasePermission], ...] = (
+    permission_classes: tuple[type[BasePermission], ...] = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER),
@@ -125,7 +125,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         business_area = object_instance.business_area
         user = info.context.user
         # when selected All programs in GPF program_id is None
-        program_id: Optional[str] = get_program_id_from_headers(info.context.headers)
+        program_id: str | None = get_program_id_from_headers(info.context.headers)
         program = Program.objects.filter(id=program_id).first()
         scope = program or business_area
 
@@ -153,7 +153,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         if (
             user.has_perm(perm, ticket_program or business_area) or check_creator or check_assignee
         ) and has_partner_area_access:
-            return None
+            return
 
         log_and_raise(
             f"User is not active creator/assignee and does not have '{perm}' permission"
@@ -167,21 +167,21 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         connection_class = ExtendedConnection
 
     @staticmethod
-    def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
+    def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Any | None:
         return getattr(grievance_ticket.ticket_details, "household", None)
 
     @staticmethod
-    def resolve_individual(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
+    def resolve_individual(grievance_ticket: GrievanceTicket, info: Any) -> Any | None:
         return getattr(grievance_ticket.ticket_details, "individual", None)
 
     @staticmethod
-    def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
+    def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Any | None:
         payment_verification = getattr(grievance_ticket.ticket_details, "payment_verification", None)
         payment_obj = getattr(grievance_ticket.ticket_details, "payment", None)
         return getattr(payment_verification, "payment", None) if payment_verification else payment_obj
 
     @staticmethod
-    def resolve_admin(grievance_ticket: GrievanceTicket, info: Any) -> Optional[str]:
+    def resolve_admin(grievance_ticket: GrievanceTicket, info: Any) -> str | None:
         return getattr(grievance_ticket.admin2, "name", None)
 
     @staticmethod
@@ -242,7 +242,7 @@ class TicketComplaintDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_payment_record(self, info: Any) -> Optional[Any]:
+    def resolve_payment_record(self, info: Any) -> Any | None:
         return getattr(self, "payment", None)
 
 
@@ -255,7 +255,7 @@ class TicketSensitiveDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_payment_record(self, info: Any) -> Optional[Any]:
+    def resolve_payment_record(self, info: Any) -> Any | None:
         return getattr(self, "payment", None)
 
 
@@ -268,8 +268,8 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_individual_data(self, info: Any) -> Dict:
-        individual_data: Dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
+    def resolve_individual_data(self, info: Any) -> dict:
+        individual_data: dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -336,8 +336,8 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_individual_data(self, info: Any) -> Dict:
-        individual_data: Dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
+    def resolve_individual_data(self, info: Any) -> dict:
+        individual_data: dict = self.individual_data  # type: ignore # mypy doesn't get that Arg() is a Dict
         flex_fields = individual_data.get("flex_fields")
         if flex_fields:
             images_flex_fields_names = FlexibleAttribute.objects.filter(type=TYPE_IMAGE).values_list("name", flat=True)
@@ -392,7 +392,7 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     @staticmethod
-    def resolve_household_data(parent: TicketHouseholdDataUpdateDetails, info: Any) -> Dict:
+    def resolve_household_data(parent: TicketHouseholdDataUpdateDetails, info: Any) -> dict:
         household_data = parent.household_data
         if admin_area_title := household_data.get("admin_area_title"):
             if value := admin_area_title.get("value"):
@@ -412,10 +412,10 @@ class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
     possible_duplicate = graphene.List(DeduplicationResultNode)
     dedup_engine_similarity_pair = graphene.Field(DeduplicationEngineSimilarityPairNode)
 
-    def resolve_golden_records(self, info: Any) -> List[Dict]:
+    def resolve_golden_records(self, info: Any) -> list[dict]:
         return encode_ids(self.golden_records, "Individual", "hit_id")
 
-    def resolve_possible_duplicate(self, info: Any) -> List[Dict]:
+    def resolve_possible_duplicate(self, info: Any) -> list[dict]:
         return encode_ids(self.possible_duplicate, "Individual", "hit_id")
 
 
@@ -497,7 +497,7 @@ class IssueTypesObject(graphene.ObjectType):
     label = graphene.String()
     sub_categories = graphene.List(ChoiceObject)
 
-    def resolve_sub_categories(self, info: Any) -> List[Dict[str, str]]:
+    def resolve_sub_categories(self, info: Any) -> list[dict[str, str]]:
         return [{"name": value, "value": key} for key, value in self.get("sub_categories").items()]
 
 
@@ -638,32 +638,32 @@ class Query(graphene.ObjectType):
         # is available only if user does not have ANY area limits in the program (has full-area-access)
         return user.has_perm(perm, program or business_area) and not user.partner.has_area_limits_in_program(program_id)
 
-    def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
 
-    def resolve_grievance_ticket_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_grievance_ticket_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
 
-    def resolve_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
 
-    def resolve_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)
 
-    def resolve_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> List[Dict]:
+    def resolve_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> list[dict]:
         categories = dict(GrievanceTicket.CATEGORY_CHOICES)
         return [
             {"category": key, "label": categories[key], "sub_categories": value}
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
         ]
 
-    def resolve_grievance_ticket_priority_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_grievance_ticket_priority_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PRIORITY_CHOICES)
 
-    def resolve_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(URGENCY_CHOICES)
 
-    def resolve_all_add_individuals_fields_attributes(self, info: Any, **kwargs: Any) -> List:
+    def resolve_all_add_individuals_fields_attributes(self, info: Any, **kwargs: Any) -> list:
         business_area_slug = info.context.headers.get("Business-Area")
         fields = (
             FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE)
@@ -677,7 +677,7 @@ class Query(graphene.ObjectType):
         )
         return sort_by_attr(all_options, "label.English(EN)")
 
-    def resolve_all_edit_household_fields_attributes(self, info: Any, **kwargs: Any) -> List:
+    def resolve_all_edit_household_fields_attributes(self, info: Any, **kwargs: Any) -> list:
         business_area_slug = info.context.headers.get("Business-Area")
         fields = (
             FieldFactory.from_scope(Scope.HOUSEHOLD_UPDATE)
@@ -692,7 +692,7 @@ class Query(graphene.ObjectType):
 
         return sort_by_attr(all_options, "label.English(EN)")
 
-    def resolve_all_edit_people_fields_attributes(self, info: Any, **kwargs: Any) -> List:
+    def resolve_all_edit_people_fields_attributes(self, info: Any, **kwargs: Any) -> list:
         business_area_slug = info.context.headers.get("Business-Area")
         fields = FieldFactory.from_scope(Scope.PEOPLE_UPDATE).apply_business_area(business_area_slug)
         all_options = list(fields) + list(
@@ -709,7 +709,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_grievances(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, object]:
+    ) -> dict[str, object]:
         grievance_tickets = chart_get_filtered_qs(
             GrievanceTicket.objects,
             year,

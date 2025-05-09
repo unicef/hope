@@ -2,7 +2,7 @@ import logging
 import time
 import typing
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -38,7 +38,7 @@ class KoboRequestsSession(requests.Session):
 
 
 class KoboAPI:
-    def __init__(self, business_area_slug: Optional[str] = None):
+    def __init__(self, business_area_slug: str | None = None):
         if business_area_slug is not None:
             self.business_area = BusinessArea.objects.get(slug=business_area_slug)
             self.KPI_URL = self.business_area.kobo_url or settings.KOBO_KF_URL
@@ -48,9 +48,9 @@ class KoboAPI:
 
         self._get_token()
 
-    def _handle_paginated_results(self, url: str) -> List[Dict]:
+    def _handle_paginated_results(self, url: str) -> list[dict]:
         next_url = url
-        results: List = []
+        results: list = []
 
         # if there will be more than 30000 results,
         # we need to make additional queries
@@ -65,7 +65,7 @@ class KoboAPI:
         endpoint: str,
         append_api: bool = True,
         add_limit: bool = True,
-        additional_query_params: Optional[Any] = None,
+        additional_query_params: Any | None = None,
     ) -> str:
         endpoint.strip("/")
         if endpoint != "token" and append_api is True:
@@ -94,7 +94,7 @@ class KoboAPI:
 
         self._client.headers.update({"Authorization": f"token {token}"})
 
-    def _handle_request(self, url: str) -> Dict:
+    def _handle_request(self, url: str) -> dict:
         response = self._client.get(url=url)
         try:
             response.raise_for_status()
@@ -103,19 +103,15 @@ class KoboAPI:
             raise
         return response.json()
 
-    def _post_request(
-        self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
-    ) -> requests.Response:
+    def _post_request(self, url: str, data: dict | None = None, files: typing.IO | None = None) -> requests.Response:
         return self._client.post(url=url, data=data, files=files)
 
-    def _patch_request(
-        self, url: str, data: Optional[Dict] = None, files: Optional[typing.IO] = None
-    ) -> requests.Response:
+    def _patch_request(self, url: str, data: dict | None = None, files: typing.IO | None = None) -> requests.Response:
         return self._client.patch(url=url, data=data, files=files)
 
     def create_template_from_file(
-        self, bytes_io_file: Optional[typing.IO], xlsx_kobo_template_object: XLSXKoboTemplate, template_id: str = ""
-    ) -> Optional[Tuple[Dict, str]]:
+        self, bytes_io_file: typing.IO | None, xlsx_kobo_template_object: XLSXKoboTemplate, template_id: str = ""
+    ) -> tuple[dict, str] | None:
         data = {
             "name": "Untitled",
             "asset_type": "template",
@@ -162,7 +158,7 @@ class KoboAPI:
         log_and_raise("Fetching import data took too long", error_type=RetryError)
         return None
 
-    def get_all_projects_data(self) -> List:
+    def get_all_projects_data(self) -> list:
         if not self.business_area:
             logger.warning("Business area is not provided")
             raise ValueError("Business area is not provided")
@@ -171,12 +167,12 @@ class KoboAPI:
         results = self._handle_paginated_results(projects_url)
         return filter_by_owner(results, self.business_area)
 
-    def get_single_project_data(self, uid: str) -> Dict:
+    def get_single_project_data(self, uid: str) -> dict:
         projects_url = self._get_url(f"assets/{uid}")
 
         return self._handle_request(projects_url)
 
-    def get_project_submissions(self, uid: str, only_active_submissions: bool) -> List:
+    def get_project_submissions(self, uid: str, only_active_submissions: bool) -> list:
         additional_query_params = None
         if only_active_submissions:
             additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'

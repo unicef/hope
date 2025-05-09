@@ -134,17 +134,17 @@ class Migration(migrations.Migration):
             sql="\n            CREATE OR REPLACE FUNCTION payment_plan_business_area_seq() RETURNS trigger \n                LANGUAGE plpgsql\n                AS $$\n            begin\n                execute format('create sequence if not exists payment_plan_business_area_seq_%s', translate(NEW.id::text, '-','_'));\n                return NEW;\n            end\n            $$;\n\n            ",
         ),
         migrations.RunSQL(
-            sql='CREATE TRIGGER payment_plan_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_plan_business_area_seq();',
+            sql="CREATE TRIGGER payment_plan_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_plan_business_area_seq();",
         ),
         migrations.RunSQL(
             sql="\n            CREATE OR REPLACE FUNCTION payment_business_area_seq() RETURNS trigger \n                LANGUAGE plpgsql\n                AS $$\n            begin\n                execute format('create sequence if not exists payment_business_area_seq_%s', translate(NEW.id::text, '-','_'));\n                return NEW;\n            end\n            $$;\n\n            ",
         ),
         migrations.RunSQL(
-            sql='CREATE TRIGGER payment_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_business_area_seq();',
+            sql="CREATE TRIGGER payment_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_business_area_seq();",
         ),
         migrations.RunSQL(
             sql="""
-            CREATE OR REPLACE FUNCTION program_cycle_business_area_seq() RETURNS trigger 
+            CREATE OR REPLACE FUNCTION program_cycle_business_area_seq() RETURNS trigger
                 LANGUAGE plpgsql
                 AS $$
                 BEGIN

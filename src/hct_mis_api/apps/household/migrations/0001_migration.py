@@ -62,8 +62,8 @@ class Migration(migrations.Migration):
                 ("removed_date", models.DateTimeField(blank=True, null=True)),
                 ("last_sync_at", models.DateTimeField(blank=True, null=True)),
                 ("bank_name", models.CharField(max_length=255)),
-                ("bank_account_number",models.CharField(db_index=True, max_length=64)),
-                ("debit_card_number", models.CharField(blank=True, db_index=True, default='', max_length=255)),
+                ("bank_account_number", models.CharField(db_index=True, max_length=64)),
+                ("debit_card_number", models.CharField(blank=True, db_index=True, default="", max_length=255)),
                 ("bank_branch_name", models.CharField(blank=True, default="", max_length=255)),
                 ("account_holder_name", models.CharField(blank=True, default="", max_length=255)),
             ],
@@ -1051,7 +1051,7 @@ class Migration(migrations.Migration):
                     return NEW;
                 end
                 $$;
-                CREATE TRIGGER create_hhc_unicef_id BEFORE INSERT ON household_householdcollection 
+                CREATE TRIGGER create_hhc_unicef_id BEFORE INSERT ON household_householdcollection
                 FOR EACH ROW EXECUTE PROCEDURE create_hhc_unicef_id();
                 """,
             reverse_sql="""
@@ -1107,7 +1107,7 @@ class Migration(migrations.Migration):
             CREATE OR REPLACE FUNCTION create_ii_unicef_id() RETURNS trigger
                 LANGUAGE plpgsql
                 AS $$
-            begin 
+            begin
                 IF NEW.unicef_id IS NULL THEN
                     NEW.unicef_id := format('IND-%s-%s',TO_CHAR(NEW.first_registration_date, 'yy'), trim(replace(to_char(NEW.unicef_id_index,'0000,0000'),',','.')));
                 END IF;

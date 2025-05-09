@@ -4,14 +4,20 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('steficon', '0001_migration'),
+        ("steficon", "0001_migration"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='rule',
-            options={'permissions': (('process_file', 'Can Process File'), ('check_diff', 'Can Check Diff'), ('changelog', 'Can Check Changelog'), ('rerun_rule', 'Can Rerun Rule'))},
+            name="rule",
+            options={
+                "permissions": (
+                    ("process_file", "Can Process File"),
+                    ("check_diff", "Can Check Diff"),
+                    ("changelog", "Can Check Changelog"),
+                    ("rerun_rule", "Can Rerun Rule"),
+                )
+            },
         ),
     ]

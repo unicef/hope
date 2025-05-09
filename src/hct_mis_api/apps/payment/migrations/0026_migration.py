@@ -7,36 +7,48 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('geo', '0004_migration'),
-        ('payment', '0025_migration'),
+        ("geo", "0004_migration"),
+        ("payment", "0025_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='account',
-            name='number',
+            model_name="account",
+            name="number",
             field=models.CharField(blank=True, max_length=256, null=True),
         ),
         migrations.CreateModel(
-            name='FinancialInstitution',
+            name="FinancialInstitution",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('code', models.CharField(max_length=30, unique=True)),
-                ('description', models.CharField(blank=True, max_length=255, null=True)),
-                ('type', models.CharField(choices=[('bank', 'Bank'), ('telco', 'Telco'), ('other', 'Other')], max_length=30)),
-                ('country', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='geo.country')),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("code", models.CharField(max_length=30, unique=True)),
+                ("description", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "type",
+                    models.CharField(choices=[("bank", "Bank"), ("telco", "Telco"), ("other", "Other")], max_length=30),
+                ),
+                (
+                    "country",
+                    models.ForeignKey(
+                        blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="geo.country"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='account',
-            name='financial_institution',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='payment.financialinstitution'),
+            model_name="account",
+            name="financial_institution",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="payment.financialinstitution"
+            ),
         ),
     ]

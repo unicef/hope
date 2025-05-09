@@ -3,7 +3,7 @@ import string
 from datetime import timedelta
 from decimal import Decimal
 from random import randint
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from django.utils import timezone
@@ -381,7 +381,7 @@ def create_payment_verification_plan_with_status(
     business_area: BusinessArea,
     program: Program,
     status: str,
-    verification_channel: Optional[str] = None,
+    verification_channel: str | None = None,
     create_failed_payments: bool = False,
 ) -> PaymentVerificationPlan:
     if not hasattr(payment_plan, "payment_verification_summary"):

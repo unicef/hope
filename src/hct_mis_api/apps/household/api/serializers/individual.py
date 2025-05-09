@@ -1,6 +1,5 @@
 import uuid
 from datetime import date
-from typing import Dict, Optional
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -115,7 +114,7 @@ class AccountSerializer(serializers.ModelSerializer):
     def get_name(self, obj: Account) -> str:
         return obj.account_type.label
 
-    def get_individual_tab_data(self, obj: Account) -> Dict:
+    def get_individual_tab_data(self, obj: Account) -> dict:
         return dict(sorted(obj.data.items()))
 
 
@@ -179,7 +178,7 @@ class DeduplicationResultSerializer(serializers.Serializer):
     def get_location(self, obj: dict) -> str:
         return obj.get("location", "Not provided")
 
-    def get_age(self, obj: dict) -> Optional[int]:
+    def get_age(self, obj: dict) -> int | None:
         dob = obj.get("dob")
         if not dob:
             return None
@@ -358,18 +357,18 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             return role.role
         return ROLE_NO_ROLE
 
-    def get_documents(self, obj: Individual) -> Dict:
+    def get_documents(self, obj: Individual) -> dict:
         return DocumentSerializer(obj.documents(manager="all_merge_status_objects").all(), many=True).data
 
-    def get_identities(self, obj: Individual) -> Dict:
+    def get_identities(self, obj: Individual) -> dict:
         return IndividualIdentitySerializer(obj.identities(manager="all_merge_status_objects").all(), many=True).data
 
-    def get_bank_account_info(self, obj: Individual) -> Dict:
+    def get_bank_account_info(self, obj: Individual) -> dict:
         return BankAccountInfoSerializer(
             obj.bank_account_info(manager="all_merge_status_objects").all(), many=True
         ).data
 
-    def get_accounts(self, obj: Individual) -> Dict:
+    def get_accounts(self, obj: Individual) -> dict:
         if self.context["request"].user.has_perm(
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value, obj.program
         ):
@@ -378,15 +377,15 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             queryset = obj.accounts.none()
         return AccountSerializer(queryset, many=True).data
 
-    def get_flex_fields(self, obj: Individual) -> Dict:
+    def get_flex_fields(self, obj: Individual) -> dict:
         return resolve_flex_fields_choices_to_string(obj)
 
-    def get_roles_in_households(self, obj: Individual) -> Dict:
+    def get_roles_in_households(self, obj: Individual) -> dict:
         return IndividualRoleInHouseholdSerializer(
             obj.households_and_roles(manager="all_merge_status_objects"), many=True
         ).data
 
-    def get_linked_grievances(self, obj: Individual) -> Dict:
+    def get_linked_grievances(self, obj: Individual) -> dict:
         if obj.household:
             queryset = GrievanceTicket.objects.filter(household_unicef_id=obj.household.unicef_id)
         else:

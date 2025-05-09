@@ -56,7 +56,7 @@ class DocumentAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase, RdiMergeStatusA
             obj.individual.set_relationship_confirmed_flag(cleared)
             obj.cleared_by = request.user
             obj.cleared_date = timezone.now()
-        return super(DocumentAdmin, self).save_model(request, obj, form, change)
+        return super().save_model(request, obj, form, change)
 
 
 @admin.register(DocumentType)

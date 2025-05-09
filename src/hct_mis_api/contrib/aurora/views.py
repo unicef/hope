@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.conf import settings
 from django.contrib import messages
@@ -52,7 +52,7 @@ class RegistrationDataView(PermissionRequiredMixin, TemplateView):
     ]
     raise_exception = False
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         kwargs["registration"] = self.registration
         kwargs["drf_page_size"] = settings.REST_FRAMEWORK["PAGE_SIZE"]
         return super().get_context_data(**kwargs)

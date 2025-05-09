@@ -24,11 +24,7 @@ else
       ;;
     "lint")
       mkdir -p ./lint-results
-      flake8 --format=junit-xml . > ./lint-results/flake8.xml
-      ;;
-    "mypy")
-      mkdir -p ./mypy-results
-      mypy --junit-xml ./mypy-results/mypy.xml .
+      tox -e lint
       ;;
     *)
       exec "$@"

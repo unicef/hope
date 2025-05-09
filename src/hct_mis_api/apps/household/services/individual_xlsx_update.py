@@ -1,4 +1,4 @@
-from typing import IO, Any, Dict, List, Optional
+from typing import IO, Any
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
@@ -40,11 +40,11 @@ class IndividualXlsxUpdate:
         self.xlsx_match_columns = xlsx_update_file.xlsx_match_columns or []
         self.wb = openpyxl.load_workbook(xlsx_update_file.file, data_only=True)
         self.individuals_ws = self.wb["Individuals"]
-        self.report_dict: Dict = {}
+        self.report_dict: dict = {}
         self._validate_columns_names()
         self._build_helpers()
 
-    def get_matching_report(self) -> Dict:
+    def get_matching_report(self) -> dict:
         report_dict = {
             IndividualXlsxUpdate.STATUS_UNIQUE: [],
             IndividualXlsxUpdate.STATUS_NO_MATCH: [],
@@ -78,7 +78,7 @@ class IndividualXlsxUpdate:
         Individual.objects.bulk_update(individuals, columns)
 
     @staticmethod
-    def _column_name_by_attr(attr: Dict) -> Optional[str]:
+    def _column_name_by_attr(attr: dict) -> str | None:
         if attr.get("associated_with") == _INDIVIDUAL:
             return f"individual__{attr.get('name')}"
         if attr.get("associated_with") == _HOUSEHOLD:
@@ -93,7 +93,7 @@ class IndividualXlsxUpdate:
         if invalid_columns:
             raise InvalidColumnsError(f"Invalid columns: {invalid_columns}")
 
-    def _build_helpers(self) -> List:
+    def _build_helpers(self) -> list:
         first_row = self.individuals_ws[1]
         self.columns_names = [cell.value for cell in first_row]
         self.columns_names_index_dict = {cell.value: cell.col_idx for cell in first_row}

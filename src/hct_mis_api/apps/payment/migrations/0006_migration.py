@@ -5,20 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0005_migration'),
+        ("payment", "0005_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='deliverymechanismdata',
-            name='data',
+            model_name="deliverymechanismdata",
+            name="data",
             field=models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
         ),
         migrations.AlterField(
-            model_name='paymentverificationplan',
-            name='sex_filter',
+            model_name="paymentverificationplan",
+            name="sex_filter",
             field=models.CharField(blank=True, max_length=10, null=True),
         ),
     ]

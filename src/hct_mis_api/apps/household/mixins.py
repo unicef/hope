@@ -9,8 +9,6 @@ class IndividualDeliveryDataMixin:
         return self.full_name + "xxx"
     """
 
-    pass
-
 
 class HouseholdDeliveryDataMixin:
     """
@@ -22,5 +20,3 @@ class HouseholdDeliveryDataMixin:
     def address_example(self) -> str:
         return self.address + "xxx"
     """
-
-    pass

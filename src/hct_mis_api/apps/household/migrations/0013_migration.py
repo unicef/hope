@@ -5,27 +5,31 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0012_migration'),
-        ('program', '0003_migration'),
+        ("household", "0012_migration"),
+        ("program", "0003_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='household',
-            name='programs',
+            model_name="household",
+            name="programs",
         ),
         migrations.AlterField(
-            model_name='household',
-            name='program',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='households',
-                                    to='program.program'),
+            model_name="household",
+            name="program",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, related_name="households", to="program.program"
+            ),
         ),
         migrations.AlterField(
-            model_name='individual',
-            name='program',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='individuals',
-                                    to='program.program', db_index=True),
+            model_name="individual",
+            name="program",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="individuals",
+                to="program.program",
+                db_index=True,
+            ),
         ),
     ]

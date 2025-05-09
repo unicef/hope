@@ -1,23 +1,27 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load engine static admin_urls %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load admin_urls engine static %}
 {% block extrastyle %}
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static "admin/steficon/code.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static "admin/steficon/diff.css" %}">
     <script type="text/javascript" src="{% static "admin/js/collapse.js" %}"></script>
-{% endblock %}
+{% endblock extrastyle %}
+
 {% block breadcrumbs-active %}
     &rsaquo; <a href="{% url opts|admin_urlname:'diff' original.pk %}">Code History</a>
     &rsaquo; Revert to {{ state.timestamp|date:"d, M Y H:i" }}
-{% endblock %}
+{% endblock breadcrumbs-active %}
+
 {% block content_title %}<h1>Warning!!</h1>
 <h2>
     You are reverting rule '{{ original }}' to commit <a href="{% url "admin:steficon_rulecommit_change" state.pk %}">#{{ state.version }}</a> of {{ state.timestamp|date:"d, M Y H:i" }}.</h2>
-{% endblock %}
+{% endblock content_title %}
+
 {% block object-tools-items %}
 <li><form method="post">{% csrf_token %}
     &nbsp;&nbsp;<input class="default" type="submit" name="_restore" value="Restore All Data">&nbsp;
     &nbsp;&nbsp;<input type="submit" name="_revert"  value="Revert Code Only">&nbsp;&nbsp;</form></li>
-{% endblock %}
+{% endblock object-tools-items %}
+
 {% block action-content %}
         <fieldset class="module aligned">
             <h2>Fields</h2>
@@ -47,13 +51,14 @@
         <fieldset class="module aligned collapse">
             <h2>Code Changes</h2>
             <div class="code d-none" id="tab-diff">
-{#                {{ state|diff:"after,current" }}#}
+{# {{ state|diff:"after,current" }} #}
                 {{ state|diff:"before,current" }}
             </div>
         </fieldset>
         <pre class="code" id="tab-code">
     </pre>
-{% endblock %}
+{% endblock action-content %}
+
 {% block document_ready %}{{ block.super }}
     <script>
         window.addEventListener('load', function () {
@@ -66,4 +71,4 @@
             }
         });
     </script>
-{% endblock %}
+{% endblock document_ready %}

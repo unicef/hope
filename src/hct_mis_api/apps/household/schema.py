@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Iterable
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import (
@@ -156,7 +156,7 @@ class DocumentNode(DjangoObjectType):
         return getattr(parent.country, "iso_code3", "")
 
     @staticmethod
-    def resolve_photo(parent: Document, info: Any) -> Optional[String]:
+    def resolve_photo(parent: Document, info: Any) -> String | None:
         return parent.photo.url if parent.photo else None
 
     class Meta:
@@ -229,7 +229,7 @@ class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
-    permission_classes: Tuple[Type[BasePermission], ...] = (
+    permission_classes: tuple[type[BasePermission], ...] = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),
@@ -269,7 +269,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     )
 
     @classmethod
-    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Model | None:
         return super().get_node(info, object_id, get_object_queryset=Individual.all_merge_status_objects)
 
     @staticmethod
@@ -285,14 +285,14 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.detail_id else parent.unicef_id
 
     @staticmethod
-    def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
+    def resolve_preferred_language(parent: Individual, info: Any) -> str | None:
         return parent.get_preferred_language_display()
 
     @staticmethod
     def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
         return BankAccountInfo.all_merge_status_objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
 
-    def resolve_bank_account_info(parent, info: Any) -> Optional[BankAccountInfo]:
+    def resolve_bank_account_info(parent, info: Any) -> BankAccountInfo | None:
         bank_account_info = parent.bank_account_info(manager="all_merge_status_objects").first()  # type: ignore
         if bank_account_info:
             return bank_account_info
@@ -304,28 +304,28 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
             return role.role
         return ROLE_NO_ROLE
 
-    def resolve_deduplication_golden_record_results(parent, info: Any) -> List[Dict]:
+    def resolve_deduplication_golden_record_results(parent, info: Any) -> list[dict]:
         key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
 
-    def resolve_deduplication_batch_results(parent, info: Any) -> List[Dict]:
+    def resolve_deduplication_batch_results(parent, info: Any) -> list[dict]:
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
 
-    def resolve_relationship(parent, info: Any) -> Optional[Enum]:
+    def resolve_relationship(parent, info: Any) -> Enum | None:
         # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
         if not parent.relationship:
             return None
         return parent.relationship
 
-    def resolve_photo(parent, info: Any) -> Optional[str]:
+    def resolve_photo(parent, info: Any) -> str | None:
         if parent.photo:
             return parent.photo.url
         return None
 
-    def resolve_flex_fields(parent, info: Any) -> Dict:
+    def resolve_flex_fields(parent, info: Any) -> dict:
         return resolve_flex_fields_choices_to_string(parent)
 
     def resolve_age(parent, info: Any) -> Int:
@@ -467,7 +467,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         return ""
 
     @staticmethod
-    def resolve_delivered_quantities(parent: Household, info: Any) -> List[Dict[str, Any]]:
+    def resolve_delivered_quantities(parent: Household, info: Any) -> list[dict[str, Any]]:
         return delivered_quantity_service(parent)
 
     @staticmethod
@@ -505,7 +505,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         ).exists()
 
     @staticmethod
-    def resolve_flex_fields(parent: Household, info: Any) -> Dict:
+    def resolve_flex_fields(parent: Household, info: Any) -> dict:
         return resolve_flex_fields_choices_to_string(parent)
 
     @staticmethod
@@ -513,7 +513,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         return parent.active_individuals.count()
 
     @staticmethod
-    def resolve_program_registration_id(parent: Household, info: Any) -> Optional[str]:
+    def resolve_program_registration_id(parent: Household, info: Any) -> str | None:
         if not parent.program_registration_id:
             return None
         return parent.program_registration_id.split("#")[0]
@@ -577,11 +577,10 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 default=Value(STATUS_ACTIVE),
             )
         )
-        qs = super().get_queryset(queryset, info)
-        return qs
+        return super().get_queryset(queryset, info)
 
     @classmethod
-    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Model | None:
         return super().get_node(info, object_id, get_object_queryset=Household.all_merge_status_objects)
 
     class Meta:
@@ -756,18 +755,22 @@ class Query(graphene.ObjectType):
 
             filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
 
-        queryset = queryset.filter(filter_q)
-        return queryset
+        return queryset.filter(filter_q)
 
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-        ).prefetch_related("choices").order_by("created_at")
+        yield from (
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+            .prefetch_related("choices")
+            .order_by("created_at")
+        )
 
     def resolve_all_individuals_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").order_by("created_at")
+        yield from (
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+            .exclude(type=FlexibleAttribute.PDU)
+            .prefetch_related("choices")
+            .order_by("created_at")
+        )
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user
@@ -846,50 +849,50 @@ class Query(graphene.ObjectType):
             queryset = queryset.annotate(sanction_list_confirmed_match_annotated=subquery)
         return queryset
 
-    def resolve_residence_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_residence_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
 
-    def resolve_sex_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_sex_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(SEX_CHOICE)
 
-    def resolve_marital_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_marital_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(MARITAL_STATUS_CHOICE)
 
-    def resolve_relationship_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_relationship_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(RELATIONSHIP_CHOICE)
 
-    def resolve_role_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_role_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(ROLE_CHOICE)
 
-    def resolve_document_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_document_type_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return [{"name": x.label, "value": x.key} for x in DocumentType.objects.all()]
 
-    def resolve_identity_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_identity_type_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(AGENCY_TYPE_CHOICES)
 
-    def resolve_countries_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_countries_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
 
-    def resolve_severity_of_disability_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_severity_of_disability_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(SEVERITY_OF_DISABILITY_CHOICES)
 
-    def resolve_observed_disability_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_observed_disability_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(OBSERVED_DISABILITY_CHOICE)
 
-    def resolve_flag_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_flag_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)
 
-    def resolve_work_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_work_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(WORK_STATUS_CHOICE)
 
-    def resolve_deduplication_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_deduplication_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_section_households_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         ).filter(household__collect_type=Household.CollectType.STANDARD.value)
@@ -899,7 +902,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_section_individuals_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         ).filter(household__collect_type=Household.CollectType.STANDARD.value)
@@ -910,7 +913,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_section_people_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         payment_items_qs: "QuerySet" = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         ).filter(household__collect_type=Household.CollectType.SINGLE.value)
@@ -921,7 +924,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_section_child_reached(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         households_child_params = [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -941,7 +944,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_individuals_reached_by_age_and_gender(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         households_params = [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -969,7 +972,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_people_reached_by_age_and_gender(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         households_params = [
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
@@ -997,7 +1000,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_individuals_with_disability_reached_by_age(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         households_params_with_disability = [
             "female_age_group_0_5_disabled_count",
             "female_age_group_6_11_disabled_count",
@@ -1059,7 +1062,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_people_with_disability_reached_by_age(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         households_params_with_disability = [
             "female_age_group_0_5_disabled_count",
             "female_age_group_6_11_disabled_count",

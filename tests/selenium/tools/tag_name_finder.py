@@ -21,19 +21,19 @@ def printing(what: str, web_driver: WebDriver, label: str = "data-cy", page_obje
     for ii in ids:
         data_cy_attribute = ii.get_attribute(label)
         var_name = [i.capitalize() for i in data_cy_attribute.lower().replace(".", " ").replace("-", " ").split(" ")]
-        method_name = "get" + "".join(var_name)
+        "get" + "".join(var_name)
         var_name[0] = var_name[0].lower()
         var_name = "".join(var_name)  # type: ignore
         if what == "Mapping":
-            print(f"{var_name} = '{ii.tag_name}[{label}=\"{data_cy_attribute}\"]'")
+            pass
         if what == "Methods":
-            print(f"def {method_name}(self) -> WebElement: \n\treturn self.wait_for(self.{var_name})\n")
+            pass
         if what == "Text":
-            print(f"{ii.text}")
+            pass
         if what == "Assert":
-            print(f'assert "{ii.text}" in {page_object_str}.{method_name}().text')
+            pass
         if what == "Input":
-            print(f'{page_object_str}.{method_name}().send_keys("")')
+            pass
 
 
 if __name__ == "__main__":
@@ -53,7 +53,5 @@ if __name__ == "__main__":
     while exit_loop != "exit":
         exit_loop = input("Open the page and press Enter or write exit")
         printing("Mapping", driver)
-        print("\n")
         printing("Methods", driver)
-        print("\n")
         printing("Assert", driver)

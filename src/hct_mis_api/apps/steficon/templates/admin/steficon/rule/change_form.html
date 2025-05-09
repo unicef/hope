@@ -1,20 +1,21 @@
-{% extends "admin_extra_buttons/change_form.html" %}{% load i18n admin_urls engine static %}
+{% extends "admin_extra_buttons/change_form.html" %}{% load admin_urls engine i18n static %}
 
 {% block object-tools-items %}
-{#     removes standard django buttons   #}
+{# removes standard django buttons #}
     {% include "admin_extra_buttons/includes/change_form_buttons.html" %}
     <li>{{ original.latest.version|default_if_none:"No release" }}</li>
-{% endblock %}
+{% endblock object-tools-items %}
+
 {% block submit_buttons_bottom %}
     <div class="submit-row">
-    <input type="submit" value="{% trans 'Save and continue editing' %}" name="_continue">
-    <input type="submit" value="{% trans 'Release' %}" name="_save">
+    <input type="submit" value="{% translate 'Save and continue editing' %}" name="_continue">
+    <input type="submit" value="{% translate 'Release' %}" name="_save">
     {% if not is_popup and has_delete_permission and original %}
         {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
-        <p class="deletelink-box"><a href="{% add_preserved_filters delete_url %}" class="deletelink">{% trans "Delete" %}</a></p>
+        <p class="deletelink-box"><a href="{% add_preserved_filters delete_url %}" class="deletelink">{% translate "Delete" %}</a></p>
     {% endif %}
     </div>
-{% endblock %}
+{% endblock submit_buttons_bottom %}
 
 {% block admin_change_form_document_ready %}{{ block.super }}
     <style>
@@ -58,4 +59,4 @@
             });
         }
     </script>
-{% endblock %}
+{% endblock admin_change_form_document_ready %}

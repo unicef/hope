@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from django.db import transaction
 
@@ -28,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class DeduplicateAndCheckAgainstSanctionsListTask:
     @transaction.atomic()
-    def execute(self, should_populate_index: bool, individuals_ids: List[str]) -> None:
+    def execute(self, should_populate_index: bool, individuals_ids: list[str]) -> None:
         individuals = Individual.objects.filter(id__in=individuals_ids)
         business_area = individuals.first().business_area
 

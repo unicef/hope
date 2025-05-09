@@ -468,7 +468,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     def test_validate_file_extension(self) -> None:
         file_path, expected_values = (
-            f"{self.FILES_DIR_PATH}/" f"image.png",
+            f"{self.FILES_DIR_PATH}/image.png",
             [{"row_number": 1, "message": "Only .xlsx files are accepted for import"}],
         )
         with open(file_path, "rb") as file:
@@ -484,7 +484,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     def test_validate_file_content_as_xlsx(self) -> None:
         file_path, expected_values = (
-            f"{self.FILES_DIR_PATH}/" f"not_excel_file.xlsx",
+            f"{self.FILES_DIR_PATH}/not_excel_file.xlsx",
             [{"row_number": 1, "message": "Invalid .xlsx file"}],
         )
         with open(file_path, "rb") as file:

@@ -185,7 +185,6 @@ class Command(BaseCommand):
         household_ids = []
         amount = options["amount"]
         seed = options["seed"]
-        print(f"Generating xlsx file ({amount}x HHs & INDs) with seed {seed}")
 
         generated_dir = os.path.join(settings.PROJECT_ROOT, "..", "generated")
         if not os.path.exists(generated_dir):

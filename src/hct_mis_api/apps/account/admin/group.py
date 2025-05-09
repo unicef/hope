@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
@@ -64,19 +64,19 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
     def changeform_view(
         self,
         request: HttpRequest,
-        object_id: Optional[str] = None,
+        object_id: str | None = None,
         form_url: str = "",
-        extra_context: Optional[Dict] = None,
+        extra_context: dict | None = None,
     ) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request: HttpRequest, form: Any, formsets: Any, add: bool = False) -> List[Dict]:
+    def construct_change_message(self, request: HttpRequest, form: Any, formsets: Any, add: bool = False) -> list[dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
-            changed: Dict[str, Any] = change_message[0]["changed"]
+            changed: dict[str, Any] = change_message[0]["changed"]
             changed["permissions"] = {
                 "added": sorted(new_perms.difference(self.existing_perms)),
                 "removed": sorted(self.existing_perms.difference(new_perms)),
@@ -106,10 +106,10 @@ class UserGroupAdmin(GetManyFromRemoteMixin, HOPEModelAdminBase):
             )
         )
 
-    def check_sync_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.is_staff
 
-    def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False
 
     def _get_data(self, record: Any) -> str:

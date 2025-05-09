@@ -86,7 +86,7 @@ try:  # pragma: no cover
                             with atomic():
                                 Payment.objects.bulk_update(elements, ["vulnerability_score"])
                                 transaction.set_rollback(True)
-                            self.message_user(request, "{} scores calculated".format(len(elements)))
+                            self.message_user(request, f"{len(elements)} scores calculated")
                         else:
                             self.message_user(request, "No records found", messages.WARNING)
                     except Exception as e:

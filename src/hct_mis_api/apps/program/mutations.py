@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -68,7 +68,7 @@ class CreateProgram(
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CreateProgram":
+    def processed_mutate(cls, root: Any, info: Any, program_data: dict) -> "CreateProgram":
         business_area_slug = program_data.pop("business_area_slug", None)
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 
@@ -153,7 +153,7 @@ class UpdateProgram(
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
+    def processed_mutate(cls, root: Any, info: Any, program_data: dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
@@ -235,7 +235,7 @@ class UpdateProgramPartners(
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
+    def processed_mutate(cls, root: Any, info: Any, program_data: dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
@@ -302,7 +302,7 @@ class CopyProgram(
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
+    def processed_mutate(cls, root: Any, info: Any, program_data: dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
         partners_data = program_data.pop("partners", [])
         partner_access = program_data.get("partner_access", [])
