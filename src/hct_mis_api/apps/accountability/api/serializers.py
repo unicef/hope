@@ -2,8 +2,15 @@ from typing import Optional
 
 from rest_framework import serializers
 
-from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
+from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage, Message
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
+from hct_mis_api.apps.household.api.serializers.household import (
+    HouseholdSmallSerializer,
+)
+from hct_mis_api.apps.payment.api.serializers import FollowUpPaymentPlanSerializer
+from hct_mis_api.apps.registration_data.api.serializers import (
+    RegistrationDataImportListSerializer,
+)
 
 
 class FeedbackMessageSerializer(serializers.ModelSerializer):
@@ -149,3 +156,45 @@ class FeedbackUpdateSerializer(serializers.ModelSerializer):
             "comments",
             "consent",
         )
+
+
+class MessageListSerializer(serializers.ModelSerializer):
+    created_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Message
+        fields = (
+            "id",
+            "unicef_id",
+            "title",
+            "number_of_recipients",
+            "created_by",
+            "created_at",
+        )
+
+    def get_created_by(self, obj: Feedback) -> str:
+        return f"{obj.created_by.first_name} {obj.created_by.last_name}"
+
+
+class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
+    households = HouseholdSmallSerializer(many=True, read_only=True)
+    payment_plan = FollowUpPaymentPlanSerializer(many=True, read_only=True)
+    registration_data_import = RegistrationDataImportListSerializer(many=True, read_only=True)
+
+    class Meta(MessageListSerializer.Meta):
+        fields = MessageListSerializer.Meta.fields + (  # type: ignore
+            "body",
+            "households",
+            "payment_plan",
+            "registration_data_import",
+            "sampling_type",
+            "full_list_arguments",
+            "random_sampling_arguments",
+            "sample_size",
+            # "program",
+        )
+
+
+class MessageCreateSerializer(serializers.Serializer):
+    title = serializers.CharField(required=True)
+    body = serializers.CharField(required=True)

@@ -21,11 +21,17 @@ from hct_mis_api.apps.accountability.api.serializers import (
     FeedbackMessageCreateSerializer,
     FeedbackMessageSerializer,
     FeedbackUpdateSerializer,
+    MessageCreateSerializer,
+    MessageDetailSerializer,
+    MessageListSerializer,
 )
-from hct_mis_api.apps.accountability.filters import FeedbackFilter
-from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage
+from hct_mis_api.apps.accountability.filters import FeedbackFilter, MessagesFilter
+from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage, Message
 from hct_mis_api.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
+)
+from hct_mis_api.apps.accountability.services.message_crud_services import (
+    MessageCrudServices,
 )
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
@@ -173,3 +179,63 @@ class FeedbackViewSet(
             feedback=feedback, description=serializer.validated_data["description"], created_by=request.user
         )
         return Response(FeedbackMessageSerializer(feedback_message).data, status=status.HTTP_201_CREATED)
+
+
+class MessageViewSet(
+    CountActionMixin,
+    SerializerActionMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    BaseViewSet,
+):
+    filter_backends = (
+        filters.DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_class = MessagesFilter
+    search_fields = (
+        "unicef_id",
+        "id",
+    )
+    http_method_names = ["get", "post", "patch"]
+    serializer_classes_by_action = {
+        "list": MessageListSerializer,
+        "retrieve": MessageDetailSerializer,
+        "create": MessageCreateSerializer,
+    }
+    permissions_by_action = {
+        "list": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+        "retrieve": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
+        "create": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+    }
+
+    def get_object(self) -> Message:
+        return get_object_or_404(Message, id=self.kwargs.get("pk"))
+
+    def get_queryset(self) -> QuerySet[Feedback]:
+        qs = Message.objects.filter(business_area__slug=self.kwargs.get("business_area_slug"))
+        if program_slug := self.kwargs.get("program_slug"):
+            qs = qs.filter(program__slug=program_slug)
+        return qs
+
+    @extend_schema(
+        responses={
+            201: MessageDetailSerializer,
+        },
+    )
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
+        message = MessageCrudServices.create(request.user, business_area, serializer.validated_data)
+        program_id = None
+        if message.payment_plan and message.payment_plan.program_cycle.program:
+            program_id = message.payment_plan.program_cycle.program.pk
+        elif message.registration_data_import:
+            program_id = getattr(message.registration_data_import, "program_id", None)
+        log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", request.user, program_id, None, message)
+        headers = self.get_success_headers(serializer.data)
+        return Response(MessageDetailSerializer(message).data, status=status.HTTP_201_CREATED, headers=headers)
