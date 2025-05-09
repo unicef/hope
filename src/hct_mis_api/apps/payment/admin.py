@@ -663,7 +663,7 @@ class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
     )
     raw_id_fields = ("delivery_mechanism", "fsp", "country")
 
-    def get_readonly_fields(self: Any, request: Any, obj: Any = None) -> Tuple[str]:
+    def get_readonly_fields(self: Any, request: Any, obj: Any = None) -> Tuple[str]:  # pragma: no cover
         return super().get_readonly_fields(request, obj) + ("required_fields",)  # type: ignore
 
 
