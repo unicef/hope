@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.db.models import Q, Value
 from django.shortcuts import get_object_or_404
@@ -17,9 +17,9 @@ from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCy
 
 def validate_cycle_timeframes_overlapping(
     program: Program,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    current_cycle_id: Optional[str] = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    current_cycle_id: str | None = None,
 ) -> None:
     cycle_qs = program.cycles.exclude(id=current_cycle_id)
     if start_date:
@@ -76,7 +76,7 @@ class ProgramCycleListSerializer(serializers.ModelSerializer):
             return "-"
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
-    def get_admin_url(self, obj: ProgramCycle) -> Optional[str]:
+    def get_admin_url(self, obj: ProgramCycle) -> str | None:
         user = self.context["request"].user
         return obj.admin_url if user.is_superuser else None
 
@@ -97,8 +97,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         business_area_slug = request.parser_context["kwargs"]["business_area_slug"]
         program_slug = request.parser_context["kwargs"]["program_slug"]
-        program = get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
-        return program
+        return get_object_or_404(Program, business_area__slug=business_area_slug, slug=program_slug)
 
     def validate_title(self, value: str) -> str:
         program = self.get_program()
@@ -107,7 +106,7 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"title": "Programme Cycles' title should be unique."})
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         request = self.context["request"]
         program = self.get_program()
         start_date = data["start_date"]
@@ -171,7 +170,7 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
 
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         program = self.instance.program
         start_date = data.get("start_date")
         end_date = data.get("end_date")

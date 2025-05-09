@@ -51,10 +51,7 @@ class AllowedProgramsKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        allowed_programs = ",".join(
-            map(str, request.user.get_program_ids_for_business_area(view_instance.business_area.id))
-        )
-        return allowed_programs
+        return ",".join(map(str, request.user.get_program_ids_for_business_area(view_instance.business_area.id)))
 
 
 class ProgramListKeyConstructor(KeyConstructorMixin):

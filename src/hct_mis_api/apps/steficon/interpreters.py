@@ -5,7 +5,7 @@ import sys
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
-from typing import Any, Dict, List, Type
+from typing import Any
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
@@ -37,7 +37,7 @@ class Interpreter:
         return config.RESULT()
 
 
-def call_rule(rule_id: UUID, context: Dict) -> Any:
+def call_rule(rule_id: UUID, context: dict) -> Any:
     from hct_mis_api.apps.steficon.models import Rule
 
     rule: Rule = Rule.objects.get(id=rule_id)
@@ -51,7 +51,7 @@ class PythonExec(Interpreter):
     def code(self) -> Any:
         return compile(self.init_string, "<code>", mode="exec")
 
-    def execute(self, context: Dict) -> Any:
+    def execute(self, context: dict) -> Any:
         gl = {
             "__builtins__": {
                 "__build_class__": __build_class__,
@@ -84,7 +84,7 @@ class PythonExec(Interpreter):
                 logger.exception(e)
 
         pts = self.get_result()
-        locals_ = dict()
+        locals_ = {}
         locals_["context"] = context
         locals_["result"] = pts
         try:
@@ -128,7 +128,7 @@ class PythonExec(Interpreter):
             "exec",
         ]:
             if forbidden in self.init_string:
-                errors.append("Code contains an invalid statement '{}'".format(forbidden))
+                errors.append(f"Code contains an invalid statement '{forbidden}'")
         if errors:
             raise ValidationError(errors)
         try:
@@ -147,7 +147,7 @@ def get_env(**options: Any) -> Environment:
     return env
 
 
-interpreters: List[Type[Interpreter]] = [
+interpreters: list[type[Interpreter]] = [
     PythonExec,
 ]
-mapping: Dict[str, Type[Interpreter]] = {a.label.lower(): a for a in interpreters}
+mapping: dict[str, type[Interpreter]] = {a.label.lower(): a for a in interpreters}

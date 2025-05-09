@@ -192,7 +192,7 @@ class TestRdiKoboCreateTask(TestCase):
 
         documents = PendingDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
-            sorted(list(documents)),
+            sorted(documents),
             [
                 "Tesa Testowski 222",
                 "Tesa XLast",
@@ -555,7 +555,7 @@ class TestRdiKoboCreateTask(TestCase):
 
     def test_handle_household_dict(self) -> None:
         bank_accounts_to_create, households_to_create = [], []
-        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
+        collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = {}, {}, {}
         household = {
             "_id": 1111,
             "uuid": "qweqweqweqwe",

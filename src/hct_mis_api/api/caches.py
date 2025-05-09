@@ -1,5 +1,5 @@
 import functools
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from django.conf import settings
 from django.core.cache import cache
@@ -117,7 +117,7 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
     specific_view_cache_key = ""
 
     def _get_queryset(
-        self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
+        self, business_area_slug: Any | None, program_slug: Any | None, view_instance: Any | None
     ) -> QuerySet:
         return view_instance.get_queryset()
 
@@ -134,9 +134,7 @@ class BusinessAreaAndProgramLastUpdatedKeyBit(KeyBitBase):
         latest_updated_at = queryset["latest_updated_at"]
         obj_count = queryset["obj_count"]
 
-        key = (
+        return (
             f"{business_area_slug}:{business_area_version}:{program_slug}:{self.specific_view_cache_key}"
             f":{latest_updated_at}:{obj_count}"
         )
-
-        return key

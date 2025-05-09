@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
@@ -83,8 +83,8 @@ class NigeriaPeopleRegistrationService(GenericRegistrationService):
         record.mark_as_imported()
 
     def _prepare_national_id(
-        self, individual_dict: Dict, imported_individual: PendingIndividual
-    ) -> Optional[PendingDocument]:
+        self, individual_dict: dict, imported_individual: PendingIndividual
+    ) -> PendingDocument | None:
         national_id = individual_dict.get("national_id_no_i_c")
         if not national_id:
             return None

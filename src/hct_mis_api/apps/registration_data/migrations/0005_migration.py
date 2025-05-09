@@ -5,27 +5,38 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0011_migration'),
-        ('registration_data', '0004_migration'),
+        ("household", "0011_migration"),
+        ("registration_data", "0004_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='deduplicationenginesimilaritypair',
-            name='status_code',
+            model_name="deduplicationenginesimilaritypair",
+            name="status_code",
             field=models.CharField(default="200", max_length=20),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='deduplicationenginesimilaritypair',
-            name='individual1',
-            field=models.ForeignKey(null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, related_name='biometric_duplicates_1', to='household.individual'),
+            model_name="deduplicationenginesimilaritypair",
+            name="individual1",
+            field=models.ForeignKey(
+                null=True,
+                blank=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="biometric_duplicates_1",
+                to="household.individual",
+            ),
         ),
         migrations.AlterField(
-            model_name='deduplicationenginesimilaritypair',
-            name='individual2',
-            field=models.ForeignKey(null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, related_name='biometric_duplicates_2', to='household.individual'),
+            model_name="deduplicationenginesimilaritypair",
+            name="individual2",
+            field=models.ForeignKey(
+                null=True,
+                blank=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="biometric_duplicates_2",
+                to="household.individual",
+            ),
         ),
     ]

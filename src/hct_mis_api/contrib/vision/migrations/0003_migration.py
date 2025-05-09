@@ -9,7 +9,7 @@ DECLARE
 
 BEGIN
     -- Check if FundsCommitmentGroup exists, if not create it
-    SELECT id INTO fc_group_id FROM vision_fundscommitmentgroup 
+    SELECT id INTO fc_group_id FROM vision_fundscommitmentgroup
     WHERE funds_commitment_number = NEW.funds_commitment_number;
 
     IF fc_group_id IS NULL THEN
@@ -104,17 +104,19 @@ DROP TRIGGER IF EXISTS funds_commitment_insert_trigger ON vision_fundscommitment
 DROP FUNCTION IF EXISTS funds_commitment_trigger_function;
 """
 
+
 def create_trigger(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute(TRIGGER_FUNCTION)
         cursor.execute(TRIGGER_CREATION)
 
+
 def drop_trigger(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute(TRIGGER_DELETION)
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ("vision", "0002_migration"),
     ]

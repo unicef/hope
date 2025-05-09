@@ -1,7 +1,7 @@
 import logging
 from dataclasses import asdict
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.db.transaction import atomic
 from django.urls import reverse
@@ -143,16 +143,16 @@ class IndividualSerializer(serializers.ModelSerializer):
             "program",
         ]
 
-    def validate_role(self, value: str) -> Optional[str]:
+    def validate_role(self, value: str) -> str | None:
         if value in (ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
         if not value:
             return ROLE_NO_ROLE
-        elif value.upper()[0] == "P":
+        if value.upper()[0] == "P":
             return ROLE_PRIMARY
-        elif value.upper()[0] == "A":
+        if value.upper()[0] == "A":
             return ROLE_ALTERNATE
-        raise ValidationError("Invalid value %s. " "Check values at %s" % (value, reverse("api:role-list")))
+        raise ValidationError("Invalid value %s. Check values at %s" % (value, reverse("api:role-list")))
 
 
 class HouseholdSerializer(serializers.ModelSerializer):
@@ -181,12 +181,12 @@ class HouseholdSerializer(serializers.ModelSerializer):
         ]
         validators = [HouseholdValidator()]
 
-    def to_representation(self, instance: PendingHousehold) -> Dict:
+    def to_representation(self, instance: PendingHousehold) -> dict:
         ret = super().to_representation(instance)
         ret.pop("members", None)
         return ret
 
-    def validate(self, attrs: Dict) -> Dict:
+    def validate(self, attrs: dict) -> dict:
         def get_related() -> int:
             return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
 
@@ -224,7 +224,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
         return value
 
     @atomic()
-    def create(self, validated_data: Dict) -> Dict:
+    def create(self, validated_data: dict) -> dict:
         created_by = validated_data.pop("user")
         households = validated_data.pop("households")
         program = validated_data.pop("program")

@@ -1,5 +1,4 @@
 import logging
-from typing import Dict
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -43,14 +42,14 @@ class ExportSurveySampleService:
             wb.save(tmp.name)
             self.survey.store_sample_file(filename, File(tmp))
 
-    def get_email_context(self) -> Dict:
+    def get_email_context(self) -> dict:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         survey_id = encode_id_base64(self.survey.id, "Survey")
         api = reverse("download-survey-sample", args=[survey_id])
         link = f"{protocol}://{settings.FRONTEND_HOST}{api}"
 
         msg = "Survey sample xlsx file was generated and below You have the link to download this file."
-        context = {
+        return {
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
             "email": self.user.email,
@@ -58,7 +57,6 @@ class ExportSurveySampleService:
             "link": link,
             "title": "Survey sample XLSX file generated",
         }
-        return context
 
     def _generate_file(self) -> openpyxl.Workbook:
         wb = self._create_workbook()

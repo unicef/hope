@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Union
+from typing import Any
 
 from django import template
 from django.core import serializers
@@ -21,7 +21,7 @@ json_value_escapes = {
 
 
 # TODO: if passed a dict, it would go into infinite loop
-def _jsonfy(value: Any) -> Union[str, dict]:
+def _jsonfy(value: Any) -> str | dict:
     ret = None
     try:
         if isinstance(value, Model):
@@ -36,13 +36,13 @@ def _jsonfy(value: Any) -> Union[str, dict]:
 
 
 @register.filter
-def pretty_json(context: Dict) -> str:
-    data: Dict = {}
+def pretty_json(context: dict) -> str:
+    data: dict = {}
     if isinstance(context, dict):
         for key, value in context.items():
             data[key] = _jsonfy(value)
     else:
-        jsoned: Union[str, Dict] = _jsonfy(context)
+        jsoned: str | dict = _jsonfy(context)
         if isinstance(jsoned, str):
             data = {"obj": jsoned, "type": type(context).__name__}
         else:

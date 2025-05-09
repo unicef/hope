@@ -22,7 +22,6 @@ def export_migration_info_to_csv(filename="migrations_info.csv"):
         writer = csv.writer(file)
         writer.writerow(column_names)
         writer.writerows(rows)
-    print(f"Migration info exported to {filename}")
 
 
 def clear_migration_table():
@@ -39,7 +38,6 @@ def fake_migrations(excluded_migrations):
 
 def apply_migrations():
     call_command("migrate")
-    print("Migrations applied.")
 
 
 if __name__ == "__main__":

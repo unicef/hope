@@ -1,5 +1,4 @@
 import re
-from typing import Dict, Optional
 
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import Individual
@@ -19,7 +18,7 @@ def field_label_to_field_name(input_string: str) -> str:
     return input_string.lower()
 
 
-def populate_pdu_with_null_values(program: Program, current_flex_fields: Optional[Dict] = None) -> Dict:
+def populate_pdu_with_null_values(program: Program, current_flex_fields: dict | None = None) -> dict:
     """
     Populate the PDU with null values for all the flexible attributes.
     """

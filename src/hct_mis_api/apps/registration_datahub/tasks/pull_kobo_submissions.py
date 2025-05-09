@@ -2,7 +2,6 @@ import json
 import operator
 import time
 from io import BytesIO
-from typing import Dict
 
 from django.core.files import File
 from django.db import transaction
@@ -19,7 +18,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 class PullKoboSubmissions:
     @transaction.atomic()
-    def execute(self, kobo_import_data: KoboImportData, program: Program) -> Dict:
+    def execute(self, kobo_import_data: KoboImportData, program: Program) -> dict:
         kobo_import_data.status = KoboImportData.STATUS_RUNNING
         kobo_import_data.save()
         kobo_api = KoboAPI(kobo_import_data.business_area_slug)

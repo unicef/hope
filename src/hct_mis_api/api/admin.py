@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 from django import forms
 from django.contrib import admin, messages
@@ -77,7 +77,7 @@ class APITokenForm(forms.ModelForm):
         model = APIToken
         exclude = ("key",)
 
-    def __init__(self, *args: Any, instance: Optional[Any] = None, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, instance: Any | None = None, **kwargs: Any) -> None:
         super().__init__(*args, instance=instance, **kwargs)
         if instance:
             self.fields["valid_for"].queryset = BusinessArea.objects.filter(
@@ -115,17 +115,17 @@ class APITokenAdmin(SmartModelAdmin):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("user")
 
-    def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> Tuple[str, ...]:
+    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> tuple[str, ...]:
         if obj:
             return super().get_fields(request, obj)
         return "user", "grants", "valid_to"
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> Tuple[str, ...]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = None) -> tuple[str, ...]:
         if obj:
             return "user", "valid_from"
-        return tuple()
+        return ()
 
-    def _get_email_context(self, request: HttpRequest, obj: Any) -> Dict[str, Any]:
+    def _get_email_context(self, request: HttpRequest, obj: Any) -> dict[str, Any]:
         return {
             "obj": obj,
             "friendly_name": obj.user.first_name or obj.user.username,
@@ -152,10 +152,10 @@ class APITokenAdmin(SmartModelAdmin):
     def changeform_view(
         self,
         request: HttpRequest,
-        object_id: Optional[Any] = None,
+        object_id: Any | None = None,
         form_url: str = "",
-        extra_context: Optional[Any] = None,
-    ) -> Union[HttpResponse, HttpResponse, HttpResponseRedirect]:
+        extra_context: Any | None = None,
+    ) -> HttpResponse | HttpResponse | HttpResponseRedirect:
         try:
             return super().changeform_view(request, object_id, form_url, extra_context)
         except NoBusinessAreaAvailable:
@@ -186,5 +186,5 @@ class APILogEntryAdmin(SmartModelAdmin):
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False

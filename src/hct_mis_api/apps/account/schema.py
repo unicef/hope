@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -36,7 +36,6 @@ from hct_mis_api.apps.core.utils import (
     get_program_id_from_headers,
     to_choice_object,
 )
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.household.models import Household, Individual
 
@@ -44,12 +43,13 @@ logger = logging.getLogger(__name__)
 
 
 if TYPE_CHECKING:
+    from hct_mis_api.apps.geo.models import Area
     from django.db.models.query import QuerySet
 
     from graphene import Node
 
 
-def permissions_resolver(user_roles: "QuerySet[RoleAssignment]") -> Set:
+def permissions_resolver(user_roles: "QuerySet[RoleAssignment]") -> set:
     all_user_roles = user_roles
     permissions_set = set()
     for user_role in all_user_roles:
@@ -92,7 +92,7 @@ class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
     is_accountability_applicable = graphene.Boolean()
 
-    def resolve_permissions(self, info: Any) -> Set:
+    def resolve_permissions(self, info: Any) -> set:
         return info.context.user.permissions_in_business_area(self.slug)
 
     def resolve_is_accountability_applicable(self, info: Any) -> bool:
@@ -125,7 +125,7 @@ class UserNode(DjangoObjectType):
     def resolve_user_roles(self, info: Any) -> "QuerySet[Role]":
         return self.role_assignments.order_by("business_area__slug")
 
-    def resolve_permissions_in_scope(self, info: Any) -> Set:
+    def resolve_permissions_in_scope(self, info: Any) -> set:
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
@@ -159,13 +159,13 @@ class JSONLazyString(graphene.Scalar):
         return json.dumps(dt, cls=LazyEncoder)
 
     @staticmethod
-    def parse_literal(node: "Node") -> Optional[Dict]:
+    def parse_literal(node: "Node") -> dict | None:
         if isinstance(node, graphene.String):
             return json.loads(node.value)
         return None
 
     @staticmethod
-    def parse_value(value: Any) -> Dict:
+    def parse_value(value: Any) -> dict:
         return json.loads(value)
 
 
@@ -177,14 +177,13 @@ class PartnerNode(DjangoObjectType):
     class Meta:
         model = Partner
 
-    def resolve_areas(self, info: Any) -> "List[Area]":
+    def resolve_areas(self, info: Any) -> "list[Area]":
         return self.get_areas_for_program(self.partner_program).order_by("name")
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
         if self.has_area_limits_in_program(self.partner_program):
             return "ADMIN_AREA"
-        else:
-            return "BUSINESS_AREA"
+        return "BUSINESS_AREA"
 
 
 class Query(graphene.ObjectType):
@@ -215,16 +214,16 @@ class Query(graphene.ObjectType):
             raise PermissionDenied("Permission Denied: User is not authenticated.")
         return info.context.user
 
-    def resolve_user_roles_choices(self, info: Any) -> List[Dict[str, Any]]:
+    def resolve_user_roles_choices(self, info: Any) -> list[dict[str, Any]]:
         return [
-            dict(name=role.name, value=role.id, subsystem=role.subsystem)
+            {"name": role.name, "value": role.id, "subsystem": role.subsystem}
             for role in Role.objects.all().order_by("name")
         ]
 
-    def resolve_user_status_choices(self, info: Any) -> List[Dict[str, Any]]:
+    def resolve_user_status_choices(self, info: Any) -> list[dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
 
-    def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
+    def resolve_user_partner_choices(self, info: Any) -> list[dict[str, Any]]:
         business_area_slug = info.context.headers.get("Business-Area")
         return to_choice_object(
             list(
@@ -236,8 +235,8 @@ class Query(graphene.ObjectType):
         )
 
     def resolve_partner_for_grievance_choices(
-        self, info: Any, household_id: Optional[str] = None, individual_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+        self, info: Any, household_id: str | None = None, individual_id: str | None = None
+    ) -> list[dict[str, Any]]:
         business_area_id = str(BusinessArea.objects.get(slug=info.context.headers.get("Business-Area")).id)
         encoded_program_id = info.context.headers.get("Program")
         if encoded_program_id and encoded_program_id != "all":

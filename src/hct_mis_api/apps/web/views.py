@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Dict
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -14,7 +13,7 @@ import requests
 logger = logging.getLogger(__name__)
 
 
-def get_manifest() -> Dict[str, Dict[str, str]]:
+def get_manifest() -> dict[str, dict[str, str]]:
     manifest_path = settings.MANIFEST_FILE
     manifest_url = staticfiles_storage.url(manifest_path)
 
@@ -28,7 +27,7 @@ def get_manifest() -> Dict[str, Dict[str, str]]:
         return response.json()
 
     path = f"{settings.PROJECT_ROOT}/apps/web/static/{manifest_path}"
-    with open(path, "r") as f:
+    with open(path) as f:
         return json.loads(f.read())
 
 
@@ -38,7 +37,7 @@ def react_main(request: HttpRequest) -> HttpResponse:
     context = {
         "assets": {
             "file": static(f"web/{manifest['src/main.tsx']['file']}"),
-            "css": map(lambda css: static(f"web/{css}"), manifest["src/main.tsx"]["css"]),
+            "css": (static(f"web/{css}") for css in manifest["src/main.tsx"]["css"]),
         },
         "settings": settings,
     }

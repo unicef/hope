@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
@@ -57,12 +57,12 @@ class ContentTypeChoiceField(forms.ModelChoiceField):
         *,
         empty_label: str = "---------",
         required: bool = True,
-        widget: Optional[Any] = None,
-        label: Optional[Any] = None,
-        initial: Optional[Any] = None,
+        widget: Any | None = None,
+        label: Any | None = None,
+        initial: Any | None = None,
         help_text: str = "",
-        to_field_name: Optional[str] = None,
-        limit_choices_to: Union[Union[Q, Dict[str, Any]], "_ChoicesCallable", None] = None,
+        to_field_name: str | None = None,
+        limit_choices_to: Union[Q | dict[str, Any], "_ChoicesCallable", None] = None,
         **kwargs: Any,
     ) -> None:
         queryset = ContentType.objects.order_by("model", "app_label")

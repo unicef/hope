@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         with Path(options["file"]).open() as f:
-            for line in f.readlines():
+            for line in f:
                 iso_code, ca_code = line.split()
                 country = Country.objects.get(iso_code3=iso_code)
                 CountryCodeMap.objects.get_or_create(country=country, defaults={"ca_code": ca_code})

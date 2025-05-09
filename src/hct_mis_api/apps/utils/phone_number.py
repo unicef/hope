@@ -1,12 +1,12 @@
 import logging
-from typing import Any, Union
+from typing import Any
 
 import phonenumbers
 
 logger = logging.getLogger(__name__)
 
 
-def is_right_phone_number_format(phone_number: Union[str, Any]) -> bool:
+def is_right_phone_number_format(phone_number: str | Any) -> bool:
     # from phonenumbers.parse method description:
     # This method will throw a NumberParseException if the number is not
     # considered to be a possible number.

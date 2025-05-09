@@ -47,6 +47,6 @@ export PYTHONPATH=$MAIN_DIR/src:$PYTHONPATH
 export OUTPUT_DATA_ROOT=$MAIN_DIR/tests/selenium/output_data
 export DATA_VOLUME=$OUTPUT_DATA_ROOT/data
 pushd  $MAIN_DIR/src/frontend
-yarn 
-yarn build-for-backend 
+yarn
+yarn build-for-backend
 popd

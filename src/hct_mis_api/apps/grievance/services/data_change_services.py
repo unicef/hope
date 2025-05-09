@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, List
 
 from django.contrib.auth.models import AbstractUser
 
@@ -30,7 +29,7 @@ class InvalidIssueTypeError(Exception):
     pass
 
 
-def get_service(grievance_ticket: GrievanceTicket, extras: Dict) -> DataChangeService:
+def get_service(grievance_ticket: GrievanceTicket, extras: dict) -> DataChangeService:
     issue_type = grievance_ticket.issue_type
     if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL:
         return AddIndividualService(grievance_ticket, extras)
@@ -45,12 +44,12 @@ def get_service(grievance_ticket: GrievanceTicket, extras: Dict) -> DataChangeSe
     raise InvalidIssueTypeError("Invalid issue type")
 
 
-def save_data_change_extras(grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
+def save_data_change_extras(grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:
     service = get_service(grievance_ticket, extras)
     return service.save()
 
 
-def update_data_change_extras(grievance_ticket: GrievanceTicket, extras: Dict, input_data: Dict) -> GrievanceTicket:
+def update_data_change_extras(grievance_ticket: GrievanceTicket, extras: dict, input_data: dict) -> GrievanceTicket:
     service = get_service(grievance_ticket, extras)
     return service.update()
 

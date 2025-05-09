@@ -1,9 +1,11 @@
-from django.db.models.query import QuerySet
-
 from django_filters import BooleanFilter, CharFilter
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.program.models import Program
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
 
 class ProgramFilter(UpdatedAtFilter):

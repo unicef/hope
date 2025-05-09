@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.db.models import QuerySet
 
@@ -15,7 +15,7 @@ class HouseholdListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "household_list"
 
     def _get_queryset(
-        self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
+        self, business_area_slug: Any | None, program_slug: Any | None, view_instance: Any | None
     ) -> QuerySet:
         return Household.all_merge_status_objects.filter(
             program__slug=program_slug,
@@ -27,7 +27,7 @@ class IndividualListKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):
     specific_view_cache_key = "individual_list"
 
     def _get_queryset(
-        self, business_area_slug: Optional[Any], program_slug: Optional[Any], view_instance: Optional[Any]
+        self, business_area_slug: Any | None, program_slug: Any | None, view_instance: Any | None
     ) -> QuerySet:
         return Individual.all_merge_status_objects.filter(
             program__slug=program_slug,
@@ -39,7 +39,7 @@ class AreaLimitKeyBit(KeyBitBase):
     def get_data(
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
-        area_limits = ",".join(
+        return ",".join(
             map(
                 str,
                 request.user.partner.get_area_limits_for_program(view_instance.program.id)
@@ -47,7 +47,6 @@ class AreaLimitKeyBit(KeyBitBase):
                 .values_list("id", flat=True),
             )
         )
-        return area_limits
 
 
 class HouseholdListKeyConstructor(KeyConstructorMixin):

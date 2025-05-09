@@ -4,28 +4,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='LogEntry',
+            name="LogEntry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.UUIDField(db_index=True, null=True)),
-                ('action', models.CharField(choices=[('CREATE', 'Create'), ('UPDATE', 'Update'), ('DELETE', 'Delete'), ('SOFT_DELETE', 'Soft Delete')], db_index=True, max_length=100, verbose_name='action')),
-                ('object_repr', models.TextField(blank=True)),
-                ('changes', models.JSONField(null=True, verbose_name='change message')),
-                ('timestamp', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='timestamp')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("object_id", models.UUIDField(db_index=True, null=True)),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[
+                            ("CREATE", "Create"),
+                            ("UPDATE", "Update"),
+                            ("DELETE", "Delete"),
+                            ("SOFT_DELETE", "Soft Delete"),
+                        ],
+                        db_index=True,
+                        max_length=100,
+                        verbose_name="action",
+                    ),
+                ),
+                ("object_repr", models.TextField(blank=True)),
+                ("changes", models.JSONField(null=True, verbose_name="change message")),
+                ("timestamp", models.DateTimeField(auto_now_add=True, db_index=True, verbose_name="timestamp")),
             ],
             options={
-                'verbose_name': 'log entry',
-                'verbose_name_plural': 'log entries',
-                'ordering': ['-timestamp'],
-                'get_latest_by': 'timestamp',
+                "verbose_name": "log entry",
+                "verbose_name_plural": "log entries",
+                "ordering": ["-timestamp"],
+                "get_latest_by": "timestamp",
             },
         ),
     ]

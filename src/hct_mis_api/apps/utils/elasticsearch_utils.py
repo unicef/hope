@@ -1,7 +1,7 @@
 import enum
 import logging
 from time import sleep
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Model
 
@@ -24,7 +24,7 @@ def populate_index(queryset: "QuerySet", doc: Any, parallel: bool = False) -> No
     doc().update(qs, parallel=parallel)
 
 
-def _create(models: Optional[List[Model]]) -> None:
+def _create(models: list[Model] | None) -> None:
     import elasticsearch
 
     for index in registry.get_indices(models):
@@ -35,20 +35,20 @@ def _create(models: Optional[List[Model]]) -> None:
             logger.exception(f"Failed to create index {index._name}")
 
 
-def _populate(models: Optional[List[Any]], options: Dict) -> None:
+def _populate(models: list[Any] | None, options: dict) -> None:
     parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()
         doc().update(qs, parallel=parallel)
 
 
-def _delete(models: Optional[List[Model]]) -> bool:
+def _delete(models: list[Model] | None) -> bool:
     for index in registry.get_indices(models):
         index.delete(ignore=404)
     return True
 
 
-def _rebuild(models: Optional[List[Model]], options: Dict) -> None:
+def _rebuild(models: list[Model] | None, options: dict) -> None:
     if not _delete(models):
         return
 
@@ -56,7 +56,7 @@ def _rebuild(models: Optional[List[Model]], options: Dict) -> None:
     _populate(models, options)
 
 
-def rebuild_search_index(models: Optional[List[Model]] = None, options: Optional[Dict] = None) -> None:
+def rebuild_search_index(models: list[Model] | None = None, options: dict | None = None) -> None:
     if options is None:
         options = {"parallel": False, "quiet": True}
     _rebuild(models=models, options=options)
@@ -70,7 +70,7 @@ def delete_all_indexes() -> None:
     _delete(models=None)
 
 
-def remove_elasticsearch_documents_by_matching_ids(id_list: List[str], document: "Type[Document]") -> None:
+def remove_elasticsearch_documents_by_matching_ids(id_list: list[str], document: "type[Document]") -> None:
     query_dict = {"query": {"terms": {"_id": [str(_id) for _id in id_list]}}}
     document.search().params(search_type="dfs_query_then_fetch").update_from_dict(query_dict).delete()
 

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0021_migration'),
+        ("payment", "0021_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='accounttype',
-            name='payment_gateway_id',
+            model_name="accounttype",
+            name="payment_gateway_id",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

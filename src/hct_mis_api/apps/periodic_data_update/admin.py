@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
@@ -22,7 +20,7 @@ class PeriodicDataUpdateUploadInline(admin.TabularInline):
     fields = ("id", "status", "created_by", "created_at")
     readonly_fields = fields
 
-    def has_add_permission(self, request: HttpRequest, obj: Optional[PeriodicDataUpdateUpload] = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: PeriodicDataUpdateUpload | None = None) -> bool:
         return False
 
 

@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Any, Dict, List
+from typing import Any
 
 from django.core.management import BaseCommand
 from django.db.models import Q
@@ -24,7 +24,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
-        default_roles_matrix: List[Dict[str, Any]] = [
+        default_roles_matrix: list[dict[str, Any]] = [
             {"name": "Basic User", "permissions": [Permissions.DASHBOARD_VIEW_COUNTRY]},
             {
                 "name": "Advanced Registration Reader",
@@ -295,10 +295,8 @@ class Command(BaseCommand):
 
         if options["delete_all"]:
             Role.objects.all().delete()
-            print("All old roles were deleted.")
         if options["delete_incompatible"]:
             IncompatibleRoles.objects.all().delete()
-            print("Old incompatible roles pairs were deleted.")
 
         roles_created = []
         for default_role in default_roles_matrix:
@@ -312,9 +310,9 @@ class Command(BaseCommand):
                 roles_created.append(role.name)
 
         if roles_created:
-            print(f"New roles were created: {', '.join(roles_created)}")
+            pass
         else:
-            print("No new roles were created.")
+            pass
 
         incompatible_roles_created = []
         for role_pair in default_incompatible_roles:
@@ -328,6 +326,6 @@ class Command(BaseCommand):
                 )
                 incompatible_roles_created.append(f"{role_pair[0]} and {role_pair[1]}")
         if incompatible_roles_created:
-            print(f"Incompatible roles pairs created: {', '.join(incompatible_roles_created)}")
+            pass
         else:
-            print("No new incompatible roles pairs were created.")
+            pass

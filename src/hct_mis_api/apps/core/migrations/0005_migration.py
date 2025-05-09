@@ -5,20 +5,19 @@ import fernet_fields.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0004_migration'),
+        ("core", "0004_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='filetemp',
-            name='password',
+            model_name="filetemp",
+            name="password",
             field=fernet_fields.fields.EncryptedCharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='filetemp',
-            name='xlsx_password',
+            model_name="filetemp",
+            name="xlsx_password",
             field=fernet_fields.fields.EncryptedCharField(blank=True, max_length=255, null=True),
         ),
     ]

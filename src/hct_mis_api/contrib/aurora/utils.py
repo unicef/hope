@@ -1,8 +1,7 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, TYPE_CHECKING
 from urllib.parse import urlencode
 
-from django.db.models.options import Options
 from django.db.transaction import atomic
 from django.utils import timezone
 
@@ -18,10 +17,13 @@ from hct_mis_api.contrib.aurora.models import (
     Registration,
 )
 
+if TYPE_CHECKING:
+    from django.db.models.options import Options
+
 logger = logging.getLogger(__name__)
 
 
-def fetch_metadata(auth_token: str) -> List:
+def fetch_metadata(auth_token: str) -> list:
     decoders = [
         # codecs.CoreJSONCodec(),
         codecs.JSONCodec()
@@ -73,7 +75,7 @@ def fetch_metadata(auth_token: str) -> List:
     return ret
 
 
-def get_metadata(auth_token: str) -> Dict:
+def get_metadata(auth_token: str) -> dict:
     auth = coreapi.auth.TokenAuthentication(scheme="Token", token=auth_token)
 
     client = coreapi.Client(auth=auth)
@@ -82,7 +84,7 @@ def get_metadata(auth_token: str) -> Dict:
     return client.get(schema["record"] + f"metadata/?{rnd}")
 
 
-def fetch_records(auth_token: str, overwrite: bool = False, **filters: Any) -> Dict:
+def fetch_records(auth_token: str, overwrite: bool = False, **filters: Any) -> dict:
     decoders = [codecs.JSONCodec()]
     auth = coreapi.auth.TokenAuthentication(scheme="Token", token=auth_token)
 

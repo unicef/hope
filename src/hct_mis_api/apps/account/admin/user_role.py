@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.contrib import admin
 from django.db.models import QuerySet
@@ -49,21 +49,21 @@ class RoleAssignmentInline(admin.TabularInline):
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def has_add_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         if isinstance(obj, Partner):
             if obj.is_parent or obj.is_unicef_subpartner:
                 return False  # Disable adding if Partner is a parent or is a UNICEF subpartner
             return request.user.can_add_business_area_to_partner()
         return True
 
-    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_change_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         if isinstance(obj, Partner):
             if obj.is_unicef_subpartner:
                 return False  # Disable editing if Partner is a UNICEF subpartner
             return request.user.can_add_business_area_to_partner()
         return True
 
-    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def has_delete_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         if isinstance(obj, Partner):
             if obj.is_unicef_subpartner:
                 return False  # Disable deleting if Partner is a UNICEF subpartner
@@ -102,11 +102,11 @@ class RoleAssignmentAdmin(HOPEModelAdminBase):
             )
         )
 
-    def get_actions(self, request: HttpRequest) -> Dict:
+    def get_actions(self, request: HttpRequest) -> dict:
         return admin.ModelAdmin.get_actions(self, request)  # unoverride
 
-    def check_sync_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def check_sync_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return request.user.is_staff
 
-    def check_publish_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+    def check_publish_permission(self, request: HttpRequest, obj: Any | None = None) -> bool:
         return False

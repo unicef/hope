@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from django.db.models import QuerySet
@@ -14,23 +14,23 @@ class VisibilityBackend:
     """
 
     @classmethod
-    def has_area_access(cls, partner: "Partner", area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
+    def has_area_access(cls, partner: "Partner", area_id: str | UUID, program_id: str | UUID) -> bool:
         area_limits = cls.get_area_limits_for_program(partner, program_id)
         return not area_limits.exists() or area_limits.filter(id=area_id).exists()
 
     @classmethod
-    def has_area_limits_in_program(cls, partner: "Partner", program_id: Union[str, UUID]) -> bool:
+    def has_area_limits_in_program(cls, partner: "Partner", program_id: str | UUID) -> bool:
         return cls.get_area_limits_for_program(partner, program_id).exists()
 
     @classmethod
-    def get_areas_for_program(cls, partner: "Partner", program_id: Union[str, UUID]) -> QuerySet["Area"]:
+    def get_areas_for_program(cls, partner: "Partner", program_id: str | UUID) -> QuerySet["Area"]:
         from hct_mis_api.apps.geo.models import Area
 
         area_limits = cls.get_area_limits_for_program(partner, program_id)
         return area_limits or Area.objects.filter(area_type__country__business_areas__program__id=program_id)
 
     @classmethod
-    def get_area_limits_for_program(cls, partner: "Partner", program_id: Union[str, UUID]) -> QuerySet["Area"]:
+    def get_area_limits_for_program(cls, partner: "Partner", program_id: str | UUID) -> QuerySet["Area"]:
         from hct_mis_api.apps.account.models import AdminAreaLimitedTo
         from hct_mis_api.apps.geo.models import Area
 

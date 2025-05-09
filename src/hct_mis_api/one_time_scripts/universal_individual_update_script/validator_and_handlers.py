@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Optional
+from typing import Any
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import timezone_datetime
@@ -11,7 +11,7 @@ from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 def handle_date_field(
     value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
-) -> Optional[date]:
+) -> date | None:
     if value is None or value == "":
         return None
     return timezone_datetime(value).date()
@@ -23,15 +23,13 @@ def handle_simple_field(value: Any, name: str, household: Any, business_area: Bu
 
 def handle_admin_field(
     value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
-) -> Optional[Area]:
+) -> Area | None:
     if value is None or value == "":
         return None
     return Area.objects.get(p_code=value)
 
 
-def validate_admin(
-    value: Any, name: str, household: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+def validate_admin(value: Any, name: str, household: Any, business_area: BusinessArea, program: Program) -> str | None:
     if value is None or value == "":
         return None
     countries = business_area.countries.all()
@@ -42,13 +40,13 @@ def validate_admin(
 
 def validate_string(
     value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     return None
 
 
 def validate_date(
     value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     if value is None or value == "":
         return None
     try:
@@ -60,7 +58,7 @@ def validate_date(
 
 def validate_phone_number(
     value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     if value is None or value == "":
         return None
     is_valid = is_valid_phone_number(value)
@@ -71,7 +69,7 @@ def validate_phone_number(
 
 def validate_sex(
     value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     if value is None or value == "":
         return None
     sex_choices = [value for value, _ in SEX_CHOICE]
@@ -82,5 +80,5 @@ def validate_sex(
 
 def validate_flex_field_string(
     value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
-) -> Optional[str]:
+) -> str | None:
     return None

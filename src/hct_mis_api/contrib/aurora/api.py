@@ -1,5 +1,3 @@
-from typing import Optional
-
 from rest_framework import serializers
 
 from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
@@ -13,7 +11,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = ("aurora_id", "hope_id", "name")
 
-    def get_hope_id(self, obj: Organization) -> Optional[str]:
+    def get_hope_id(self, obj: Organization) -> str | None:
         return str(obj.business_area.pk) if obj.business_area else None
 
 
@@ -26,7 +24,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = ("organization", "aurora_id", "hope_id", "name")
 
-    def get_hope_id(self, obj: Project) -> Optional[str]:
+    def get_hope_id(self, obj: Project) -> str | None:
         return str(obj.programme.pk) if obj.programme else None
 
 
