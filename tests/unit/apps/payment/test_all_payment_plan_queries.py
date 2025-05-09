@@ -303,6 +303,10 @@ class TestPaymentPlanQueries(APITestCase):
                   recSerialNumber
               }
           }
+          fundsCommitments {
+              fundsCommitmentNumber
+              insufficientAmount
+          }
         }
       }
     """
@@ -1070,7 +1074,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
     @freeze_time("2020-10-10")
-    def test_payment_plan_available_funds_commitments(self) -> None:
+    def test_payment_plan_funds_commitments(self) -> None:
         payment_plan = PaymentPlanFactory(
             name="FC TEST",
             status=PaymentPlan.Status.IN_REVIEW,
@@ -1079,9 +1083,13 @@ class TestPaymentPlanQueries(APITestCase):
             dispersion_end_date=datetime(2020, 12, 10),
             created_by=self.user,
             currency="PLN",
+            total_entitled_quantity=200,
+            total_entitled_quantity_usd=100,
         )
 
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+
+        # 1
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
             context={"user": self.user},
@@ -1093,26 +1101,57 @@ class TestPaymentPlanQueries(APITestCase):
             funds_commitment_number="123",
             funds_commitment_item="001",
             rec_serial_number="0001",
+            commitment_amount_local=50,
+            commitment_amount_usd=50,
+            currency_code="PLN",
         )
         FundsCommitmentFactory(
             business_area=self.business_area.code,
             funds_commitment_number="123",
             funds_commitment_item="002",
             rec_serial_number="0002",
+            commitment_amount_local=160,
+            commitment_amount_usd=50,
+            currency_code="PLN",
         )
         FundsCommitmentFactory(
             business_area=self.business_area.code,
             funds_commitment_number="345",
             funds_commitment_item="001",
             rec_serial_number="0003",
+            commitment_amount_local=50,
+            commitment_amount_usd=50,
+            currency_code="UYU",
         )
         FundsCommitmentFactory(
             business_area=self.business_area.code,
             funds_commitment_number="345",
             funds_commitment_item="002",
             rec_serial_number="0004",
+            commitment_amount_local=50,
+            commitment_amount_usd=50,
+            currency_code="UYU",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="678",
+            funds_commitment_item="001",
+            rec_serial_number="0005",
+            commitment_amount_local=50,
+            commitment_amount_usd=30,
+            currency_code="UYU",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="678",
+            funds_commitment_item="002",
+            rec_serial_number="0006",
+            commitment_amount_local=50,
+            commitment_amount_usd=80,
+            currency_code="PLN",
         )
 
+        # 2
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
             context={"user": self.user},
@@ -1124,6 +1163,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
         fc1.payment_plan = payment_plan
         fc1.save()
+        # 3 insufficientAmount True, local
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
             context={"user": self.user},
@@ -1135,6 +1175,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
         fc2.payment_plan = payment_plan
         fc2.save()
+        # 4 insufficientAmount False, local
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
             context={"user": self.user},
@@ -1142,19 +1183,24 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         payment_plan2 = PaymentPlanFactory(
+            name="FC TEST2",
             status=PaymentPlan.Status.IN_REVIEW,
             program_cycle=self.program_cycle,
             dispersion_start_date=datetime(2020, 8, 10),
             dispersion_end_date=datetime(2020, 12, 10),
             created_by=self.user,
             currency="PLN",
+            total_entitled_quantity=200,
+            total_entitled_quantity_usd=100,
         )
+        encoded_payment_plan_id = encode_id_base64(payment_plan2.id, "PaymentPlan")
 
         fc3 = FundsCommitmentItem.objects.get(
             funds_commitment_group__funds_commitment_number="345", funds_commitment_item="001"
         )
         fc3.payment_plan = payment_plan2
         fc3.save()
+        # 5 insufficientAmount True, currency not match -> usd
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
             context={"user": self.user},
@@ -1166,6 +1212,44 @@ class TestPaymentPlanQueries(APITestCase):
         )
         fc4.payment_plan = payment_plan2
         fc4.save()
+        # 6 insufficientAmount False, currency not match -> usd
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        payment_plan3 = PaymentPlanFactory(
+            name="FC TEST3",
+            status=PaymentPlan.Status.IN_REVIEW,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            created_by=self.user,
+            currency="PLN",
+            total_entitled_quantity=200,
+            total_entitled_quantity_usd=100,
+        )
+        encoded_payment_plan_id = encode_id_base64(payment_plan3.id, "PaymentPlan")
+
+        fc5 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="678", funds_commitment_item="001"
+        )
+        fc5.payment_plan = payment_plan3
+        fc5.save()
+        # 7 insufficientAmount True, more than 1 currency -> usd
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        fc6 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="678", funds_commitment_item="002"
+        )
+        fc6.payment_plan = payment_plan3
+        fc6.save()
+        # insufficientAmount False, more than 1 currency -> usd
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
             context={"user": self.user},
