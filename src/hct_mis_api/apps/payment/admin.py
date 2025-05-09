@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django import forms
 from django.contrib import admin, messages
@@ -662,9 +662,7 @@ class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
         ("country", AutoCompleteFilter),
     )
     raw_id_fields = ("delivery_mechanism", "fsp", "country")
-
-    def get_readonly_fields(self: Any, request: Any, obj: Any = None) -> Tuple[str]:  # pragma: no cover
-        return super().get_readonly_fields(request, obj) + ("required_fields",)  # type: ignore
+    readonly_fields = ("required_fields", "fsp", "delivery_mechanism", "country")
 
 
 @admin.register(FinancialInstitutionMapping)
