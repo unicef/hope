@@ -31,7 +31,6 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     CountActionMixin,
-    ProgramMixin,
     SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
@@ -56,7 +55,6 @@ class FeedbackMixin:
 
 class FeedbackViewSet(
     CountActionMixin,
-    ProgramMixin,
     SerializerActionMixin,
     FeedbackMixin,
     mixins.RetrieveModelMixin,
