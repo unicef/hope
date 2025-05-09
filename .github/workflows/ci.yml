@@ -81,15 +81,6 @@ jobs:
       - name: Install dependencies
         run: uv sync --cache-dir ./uv-cache --frozen
 
-      - name: testing key
-        run: |
-          echo "testing key"
-          echo ${{ steps.cache-venv-restore.outputs.cache-primary-key }}
-          echo ${{ steps.cache-venv-restore.outputs.cache-hit }}
-          echo ${{ steps.cache-venv-save.outputs.cache-hit }}
-          echo ${{ runner.os }}-venv
-          echo ${{ runner.os }}-venv
-
       - name: Save vEnv cache
         id: cache-venv-save
         uses: actions/cache@v4
@@ -97,7 +88,7 @@ jobs:
           path: |
             ./venv
             ./tox
-          key: ${{ steps.cache-venv-restore.outputs.cache-primary-key }}
+          key: ${{ runner.os }}-venv
 
       - name: Run Test suite
         run: tox -e unit
