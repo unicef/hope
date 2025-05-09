@@ -1,10 +1,11 @@
 import logging
+from typing import Union
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
-
-from graphql import GraphQLError
 
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.accountability.services.sampling import Sampling
@@ -21,7 +22,9 @@ logger = logging.getLogger(__name__)
 
 class MessageCrudServices:
     @classmethod
-    def create(cls, user: AbstractUser, business_area: BusinessArea, input_data: dict) -> Message:
+    def create(
+        cls, user: Union[AbstractBaseUser, AnonymousUser], business_area: BusinessArea, input_data: dict
+    ) -> Message:
         verifier = MessageArgumentVerifier(input_data)
         verifier.verify()
 
@@ -51,9 +54,7 @@ class MessageCrudServices:
             )
 
         if message.number_of_recipients == 0:
-            err_msg = "No recipients found for the given criteria"
-            logger.warning(err_msg)
-            raise GraphQLError(err_msg)
+            raise ValidationError("No recipients found for the given criteria")
 
         message.save()
         phone_numbers = message.households.filter(

@@ -47,6 +47,12 @@ export { DisabilityEnum as DisabilityEnumCamelCase } from './models/DisabilityEn
 export type { Document as DocumentCamelCase } from './models/Document';
 export { DocumentStatusEnum as DocumentStatusEnumCamelCase } from './models/DocumentStatusEnum';
 export { DocumentTypeEnum as DocumentTypeEnumCamelCase } from './models/DocumentTypeEnum';
+export type { FeedbackCreate as FeedbackCreateCamelCase } from './models/FeedbackCreate';
+export type { FeedbackDetail as FeedbackDetailCamelCase } from './models/FeedbackDetail';
+export type { FeedbackList as FeedbackListCamelCase } from './models/FeedbackList';
+export type { FeedbackMessage as FeedbackMessageCamelCase } from './models/FeedbackMessage';
+export type { FeedbackMessageCreate as FeedbackMessageCreateCamelCase } from './models/FeedbackMessageCreate';
+export type { FeedbackUpdate as FeedbackUpdateCamelCase } from './models/FeedbackUpdate';
 export type { FinancialServiceProvider as FinancialServiceProviderCamelCase } from './models/FinancialServiceProvider';
 export { FlexFieldClassificationEnum as FlexFieldClassificationEnumCamelCase } from './models/FlexFieldClassificationEnum';
 export type { FollowUpPaymentPlan as FollowUpPaymentPlanCamelCase } from './models/FollowUpPaymentPlan';
@@ -66,6 +72,7 @@ export type { Individual as IndividualCamelCase } from './models/Individual';
 export type { IndividualChoices as IndividualChoicesCamelCase } from './models/IndividualChoices';
 export type { IndividualDetail as IndividualDetailCamelCase } from './models/IndividualDetail';
 export type { IndividualList as IndividualListCamelCase } from './models/IndividualList';
+export { IssueTypeEnum as IssueTypeEnumCamelCase } from './models/IssueTypeEnum';
 export { MaritalStatusEnum as MaritalStatusEnumCamelCase } from './models/MaritalStatusEnum';
 export { MemoryDisabilityEnum as MemoryDisabilityEnumCamelCase } from './models/MemoryDisabilityEnum';
 export { ObservedDisabilityEnum as ObservedDisabilityEnumCamelCase } from './models/ObservedDisabilityEnum';
@@ -77,6 +84,7 @@ export type { PaginatedAreaTypeList as PaginatedAreaTypeListCamelCase } from './
 export type { PaginatedBeneficiaryGroupList as PaginatedBeneficiaryGroupListCamelCase } from './models/PaginatedBeneficiaryGroupList';
 export type { PaginatedBusinessAreaList as PaginatedBusinessAreaListCamelCase } from './models/PaginatedBusinessAreaList';
 export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './models/PaginatedCountryList';
+export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
 export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } from './models/PaginatedOrganizationList';
@@ -99,6 +107,7 @@ export type { PaginatedTPHouseholdListList as PaginatedTPHouseholdListListCamelC
 export type { PaginatedUserList as PaginatedUserListCamelCase } from './models/PaginatedUserList';
 export type { Partner as PartnerCamelCase } from './models/Partner';
 export { PartnerAccessEnum as PartnerAccessEnumCamelCase } from './models/PartnerAccessEnum';
+export type { PatchedFeedbackUpdate as PatchedFeedbackUpdateCamelCase } from './models/PatchedFeedbackUpdate';
 export type { PatchedPaymentPlanCreateUpdate as PatchedPaymentPlanCreateUpdateCamelCase } from './models/PatchedPaymentPlanCreateUpdate';
 export type { PatchedPaymentVerificationPlanCreate as PatchedPaymentVerificationPlanCreateCamelCase } from './models/PatchedPaymentVerificationPlanCreate';
 export type { PatchedPaymentVerificationUpdate as PatchedPaymentVerificationUpdateCamelCase } from './models/PatchedPaymentVerificationUpdate';
