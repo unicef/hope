@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django import forms
 from django.contrib import admin, messages
@@ -647,23 +647,8 @@ class FinancialInstitutionAdmin(HOPEModelAdminBase):
     raw_id_fields = ("country",)
 
 
-class DeliveryMechanismConfigForm(forms.ModelForm):
-    required_fields = CommaSeparatedArrayField(required=False)
-
-    class Meta:
-        model = DeliveryMechanismConfig
-        fields = [
-            "required_fields",
-            "delivery_mechanism",
-            "fsp",
-            "country",
-        ]  # Add all fields you want to display in the admin
-
-
 @admin.register(DeliveryMechanismConfig)
 class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
-    form = DeliveryMechanismConfigForm
-
     list_display = (
         "id",
         "delivery_mechanism",
@@ -677,6 +662,9 @@ class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
         ("country", AutoCompleteFilter),
     )
     raw_id_fields = ("delivery_mechanism", "fsp", "country")
+
+    def get_readonly_fields(self: Any, request: Any, obj: Any = None) -> Tuple[str]:
+        return super().get_readonly_fields(request, obj) + ("required_fields",)  # type: ignore
 
 
 @admin.register(FinancialInstitutionMapping)
