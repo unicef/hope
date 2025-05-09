@@ -78,7 +78,9 @@ django_settings_module = "hct_mis_api.settings"
 
 [tool.uv]
 package = true
-dev-dependencies = [
+
+[dependency-groups]
+dev = [
     "mypy==0.982",
     "django-stubs~=1.12.0",
     "django-stubs-ext<1.0.0,>=0.7.0",
@@ -124,6 +126,7 @@ dev-dependencies = [
     "pytest-html-reporter>=0.2.9",
     "flaky<4.0.0,>=3.8.1",
     "coverage<8.0.0,>=7.3.2",
+    "tox>=4.25.0",
 ]
 
 [tool.pdm]

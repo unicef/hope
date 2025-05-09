@@ -53,7 +53,8 @@ def pytest_configure(config: Config) -> None:
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.CACHE_ENABLED = False
-    settings.TESTS_ROOT = "/app/tests/unit"
+    settings.TESTS_ROOT =os.getenv("TESTS_ROOT")
+    settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
     settings.CACHES = {
         "default": {
             "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
