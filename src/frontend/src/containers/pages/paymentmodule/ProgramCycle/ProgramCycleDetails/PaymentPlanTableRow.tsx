@@ -1,7 +1,4 @@
-import {
-  AllPaymentPlansForTableQuery,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '@generated/graphql';
+import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import React, { ReactElement } from 'react';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
@@ -13,9 +10,10 @@ import {
 } from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { FollowUpPaymentPlansModal } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/FollowUpPaymentPlansModal';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 
 interface PaymentPlanTableRowProps {
-  paymentPlan: AllPaymentPlansForTableQuery['allPaymentPlans']['edges'][0]['node'];
+  paymentPlan: PaymentPlanList;
   canViewDetails: boolean;
 }
 
@@ -50,13 +48,13 @@ export const PaymentPlanTableRow = ({
         {paymentPlan.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(paymentPlan.totalEntitledQuantity, paymentPlan.currency)}`}
+        {`${formatCurrencyWithSymbol(Number(paymentPlan.totalEntitledQuantity), paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(paymentPlan.totalUndeliveredQuantity, paymentPlan.currency)}`}
+        {`${formatCurrencyWithSymbol(Number(paymentPlan.totalUndeliveredQuantity), paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(paymentPlan.totalDeliveredQuantity, paymentPlan.currency)}`}
+        {`${formatCurrencyWithSymbol(Number(paymentPlan.totalDeliveredQuantity), paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{paymentPlan.dispersionStartDate}</UniversalMoment>

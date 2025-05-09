@@ -17,18 +17,18 @@ import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction'
 import {
   Action,
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanQuery,
   useAllFinancialServiceProviderXlsxTemplatesQuery,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({

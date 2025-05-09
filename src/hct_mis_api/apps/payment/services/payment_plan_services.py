@@ -2,21 +2,21 @@ import datetime
 import logging
 from functools import partial
 from itertools import groupby
-from typing import IO, TYPE_CHECKING, Callable, Dict, Optional
+from typing import IO, TYPE_CHECKING, Callable, Dict, Optional, Union
 
 from django.contrib.admin.options import get_content_type_for_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import OuterRef
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from constance import config
-from graphql import GraphQLError
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
-from hct_mis_api.apps.core.utils import chunks, decode_id_string
+from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
@@ -56,7 +56,10 @@ from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidato
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
 
-    from hct_mis_api.apps.account.models import User
+    from django.contrib.auth.base_user import AbstractBaseUser
+    from django.contrib.auth.models import AnonymousUser
+
+    from hct_mis_api.apps.account.models import AbstractUser, User
 
 
 class PaymentPlanService:
@@ -111,7 +114,7 @@ class PaymentPlanService:
         }
         return actions_to_approval_type_map[self.action]
 
-    def execute_update_status_action(self, input_data: Dict, user: "User") -> PaymentPlan:
+    def execute_update_status_action(self, input_data: Dict, user: Union["AbstractUser", "User"]) -> PaymentPlan:
         """Get function from get_action_function and execute it
         return PaymentPlan object
         """
@@ -128,7 +131,7 @@ class PaymentPlanService:
     def validate_action(self) -> None:
         actions = list(self.actions_map.keys())
         if self.action not in actions:
-            raise GraphQLError(f"Not Implemented Action: {self.action}. List of possible actions: {actions}")
+            raise ValidationError(f"Not Implemented Action: {self.action}. List of possible actions: {actions}")
 
     def get_action_function(self) -> Optional[Callable]:
         return self.actions_map.get(self.action)
@@ -155,12 +158,12 @@ class PaymentPlanService:
 
     def send_to_payment_gateway(self) -> PaymentPlan:
         if self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
-            raise GraphQLError("Sending in progress")
+            raise ValidationError("Sending in progress")
 
         if self.payment_plan.can_send_to_payment_gateway:
             send_to_payment_gateway.delay(self.payment_plan.pk, self.user.pk)
         else:
-            raise GraphQLError("Already sent to Payment Gateway")
+            raise ValidationError("Already sent to Payment Gateway")
 
         return self.payment_plan
 
@@ -181,7 +184,7 @@ class PaymentPlanService:
 
     def tp_rebuild(self) -> PaymentPlan:
         if self.payment_plan.status not in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]:
-            raise GraphQLError("Can only Rebuild Population for Locked or Open Population status")
+            raise ValidationError("Can only Rebuild Population for Locked or Open Population status")
 
         self.payment_plan.build_status_pending()
         self.payment_plan.save(update_fields=("build_status", "built_at"))
@@ -197,7 +200,7 @@ class PaymentPlanService:
         self.payment_plan.status_open()
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
-            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+            raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
         self.payment_plan.currency = input_data["currency"]
         self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
@@ -216,7 +219,7 @@ class PaymentPlanService:
 
     def lock(self) -> PaymentPlan:
         if not self.payment_plan.can_be_locked:
-            raise GraphQLError("At least one valid Payment should exist in order to Lock the Payment Plan")
+            raise ValidationError("At least one valid Payment should exist in order to Lock the Payment Plan")
 
         self.payment_plan.payment_items.all().filter(payment_plan_hard_conflicted=True).update(conflicted=True)
         self.payment_plan.status_lock()
@@ -242,16 +245,15 @@ class PaymentPlanService:
         dm = getattr(self.payment_plan, "delivery_mechanism", None)
         fsp = getattr(self.payment_plan, "financial_service_provider", None)
         if not dm or not fsp:
-            raise GraphQLError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
+            raise ValidationError("Payment Plan doesn't have FSP / DeliveryMechanism assigned.")
 
         if self.payment_plan.eligible_payments.filter(financial_service_provider__isnull=True).exists():
             self.payment_plan.eligible_payments.update(
                 financial_service_provider=self.payment_plan.financial_service_provider,
                 delivery_type=self.payment_plan.delivery_mechanism,
             )
-
         if self.payment_plan.eligible_payments.filter(entitlement_quantity__isnull=True).exists():
-            raise GraphQLError("All Payments must have entitlement quantity set.")
+            raise ValidationError("All Payments must have entitlement quantity set.")
 
         self.payment_plan.status_lock_fsp()
         self.payment_plan.save()
@@ -273,7 +275,7 @@ class PaymentPlanService:
         if not approval_process:
             msg = f"Approval Process object not found for PaymentPlan {self.payment_plan.pk}"
             logging.exception(msg)
-            raise GraphQLError(msg)
+            raise ValidationError(msg)
 
         # validate approval required number and user as well
         self.validate_acceptance_process_approval_count(approval_process)
@@ -303,7 +305,7 @@ class PaymentPlanService:
             ],
         }
         if self.action and self.payment_plan.status not in action_to_statuses_map[self.action]:
-            raise GraphQLError(
+            raise ValidationError(
                 f"Not possible to create {self.action} for Payment Plan within status {self.payment_plan.status}"
             )
 
@@ -311,7 +313,7 @@ class PaymentPlanService:
         approval_type = self.get_approval_type_by_action()
         required_number = self.get_required_number_by_approval_type(approval_process)
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:
-            raise GraphQLError(
+            raise ValidationError(
                 f"Can't create new approval. Required Number ({required_number}) of {approval_type} is already created"
             )
         # validate if the user can create approval
@@ -329,12 +331,12 @@ class PaymentPlanService:
 
                 created_approval_type = status_to_approval_type_map[self.payment_plan.status]
                 if approvals_by_user.filter(type=created_approval_type).exists():
-                    raise GraphQLError(
+                    raise ValidationError(
                         f"Can't create {approval_type}. User have already created {created_approval_type}"
                     )
             # validate other approval types
             elif approvals_by_user.filter(type=approval_type).exists():
-                raise GraphQLError(f"Can't create new {approval_type}. User have already created {approval_type}")
+                raise ValidationError(f"Can't create new {approval_type}. User have already created {approval_type}")
 
     def check_payment_plan_and_update_status(self, approval_process: ApprovalProcess) -> None:
         approval_type = self.get_approval_type_by_action()
@@ -391,7 +393,7 @@ class PaymentPlanService:
             if not collector_id:
                 msg = f"Couldn't find a primary collector in {household['unicef_id']}"
                 logging.exception(msg)
-                raise GraphQLError(msg)
+                raise ValidationError(msg)
 
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
@@ -425,7 +427,7 @@ class PaymentPlanService:
         try:
             Payment.objects.bulk_create(payments_to_create)
         except IntegrityError as e:
-            raise GraphQLError("Duplicated Households in provided Targeting List") from e
+            raise ValidationError("Duplicated Households in provided Targeting List") from e
         payment_plan.refresh_from_db()
         create_payment_plan_snapshot_data(payment_plan)
         PaymentPlanService.generate_signature(payment_plan)
@@ -448,18 +450,17 @@ class PaymentPlanService:
     @staticmethod
     def create(input_data: Dict, user: "User", business_area_slug: str) -> PaymentPlan:
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-        program_cycle_id = decode_id_string(input_data["program_cycle_id"])
-        program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+        program_cycle = get_object_or_404(ProgramCycle, pk=input_data["program_cycle_id"])
         program = program_cycle.program
         if program_cycle.status == ProgramCycle.FINISHED:
-            raise GraphQLError("Impossible to create Payment Plan for Programme Cycle within Finished status")
+            raise ValidationError("Impossible to create Target Population for Programme Cycle within Finished status")
 
         if program.status != Program.ACTIVE:
-            raise GraphQLError("Impossible to create Payment Plan for Programme within not Active status")
+            raise ValidationError("Impossible to create Target Population for Programme within not Active status")
 
         pp_name = input_data.get("name", "").strip()
         if PaymentPlan.objects.filter(name=pp_name, program_cycle__program=program, is_removed=False).exists():
-            raise GraphQLError(f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
+            raise ValidationError(f"Target Population with name: {pp_name} and program: {program.name} already exists.")
 
         with transaction.atomic():
             targeting_criteria = PaymentPlanService.create_targeting_criteria(input_data["targeting_criteria"], program)
@@ -485,7 +486,7 @@ class PaymentPlanService:
             delivery_mechanism_code = input_data.get("delivery_mechanism_code")
 
             if fsp_id and delivery_mechanism_code:
-                fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
+                fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
                 delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
                 payment_plan.financial_service_provider = fsp
                 payment_plan.delivery_mechanism = delivery_mechanism
@@ -517,21 +518,21 @@ class PaymentPlanService:
             any([excluded_ids, exclusion_reason, targeting_criteria_input])
             and not self.payment_plan.is_population_open()
         ):
-            raise GraphQLError(f"Not Allow edit targeting criteria within status {self.payment_plan.status}")
+            raise ValidationError(f"Not Allow edit targeting criteria within status {self.payment_plan.status}")
 
         if not self.payment_plan.is_population_locked() and (vulnerability_score_min or vulnerability_score_max):
-            raise GraphQLError(
+            raise ValidationError(
                 "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
             )
 
         if any(
             [dispersion_start_date, dispersion_end_date, input_data.get("currency")]
         ) and self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.DRAFT]:
-            raise GraphQLError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
+            raise ValidationError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
         if name:
             if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
-                raise GraphQLError("Name can be changed only within Open status")
+                raise ValidationError("Name can be changed only within Open status")
             name = name.strip()
 
             if (
@@ -539,7 +540,7 @@ class PaymentPlanService:
                 .exclude(id=self.payment_plan.pk)
                 .exists()
             ):
-                raise GraphQLError(f"Name '{name}' and program '{program.name}' already exists.")
+                raise ValidationError(f"Name '{name}' and program '{program.name}' already exists.")
             self.payment_plan.name = name
 
         if self.payment_plan.is_follow_up:
@@ -548,9 +549,9 @@ class PaymentPlanService:
             input_data.pop("currency", None)
 
         if program_cycle_id := input_data.get("program_cycle_id"):
-            program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id))
+            program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
             if program_cycle.status == ProgramCycle.FINISHED:
-                raise GraphQLError("Not possible to assign Finished Program Cycle")
+                raise ValidationError("Not possible to assign Finished Program Cycle")
             self.payment_plan.program_cycle = program_cycle
 
         if vulnerability_score_min != self.payment_plan.vulnerability_score_min:
@@ -580,7 +581,7 @@ class PaymentPlanService:
 
         if dispersion_end_date and dispersion_end_date != self.payment_plan.dispersion_end_date:
             if dispersion_end_date <= timezone.now().date():
-                raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+                raise ValidationError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
             self.payment_plan.dispersion_end_date = dispersion_end_date
 
         new_currency = input_data.get("currency")
@@ -593,7 +594,7 @@ class PaymentPlanService:
                 new_currency != USDC
                 and delivery_mechanism.transfer_type == DeliveryMechanism.TransferType.DIGITAL.value
             ):
-                raise GraphQLError(
+                raise ValidationError(
                     "For delivery mechanism Transfer to Digital Wallet only currency USDC can be assigned."
                 )
             self.payment_plan.currency = new_currency
@@ -606,7 +607,7 @@ class PaymentPlanService:
             should_rebuild_list = True
 
         if fsp_id and delivery_mechanism_code:
-            fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
+            fsp = get_object_or_404(FinancialServiceProvider, pk=fsp_id)
             delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
             if (
                 self.payment_plan.financial_service_provider != fsp
@@ -631,7 +632,7 @@ class PaymentPlanService:
 
     def delete(self) -> PaymentPlan:
         if self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.TP_OPEN]:
-            raise GraphQLError("Deletion is only allowed when the status is 'Open'")
+            raise ValidationError("Deletion is only allowed when the status is 'Open'")
 
         if self.payment_plan.status == PaymentPlan.Status.OPEN:
             if self.payment_plan.program_cycle.payment_plans.count() == 1:
@@ -668,7 +669,7 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_per_fsp"])
         return self.payment_plan
 
-    def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
+    def import_xlsx_per_fsp(self, user: Union["User", "AbstractBaseUser", "AnonymousUser"], file: IO) -> PaymentPlan:
         with transaction.atomic():
             self.payment_plan.background_action_status_xlsx_importing_reconciliation()
             self.payment_plan.save()
@@ -718,15 +719,18 @@ class PaymentPlanService:
 
     @transaction.atomic
     def create_follow_up(
-        self, user: "User", dispersion_start_date: datetime.date, dispersion_end_date: datetime.date
+        self,
+        user: Union["User", "AbstractBaseUser", "AnonymousUser"],
+        dispersion_start_date: datetime.date,
+        dispersion_end_date: datetime.date,
     ) -> PaymentPlan:
         source_pp = self.payment_plan
 
         if source_pp.is_follow_up:
-            raise GraphQLError("Cannot create a follow-up of a follow-up Payment Plan")
+            raise ValidationError("Cannot create a follow-up of a follow-up Payment Plan")
 
         if not source_pp.unsuccessful_payments().exists():
-            raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
+            raise ValidationError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
             name=source_pp.name + " Follow Up",
@@ -768,14 +772,14 @@ class PaymentPlanService:
         payments = self.payment_plan.eligible_payments.all()
         payments_count = payments.count()
         if not payments_count:
-            raise GraphQLError("No payments to split")
+            raise ValidationError("No payments to split")
 
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             if not chunks_no:
-                raise GraphQLError("Payments Number is required for split by records")
+                raise ValidationError("Payments Number is required for split by records")
 
             if chunks_no > payments_count or chunks_no < PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK:
-                raise GraphQLError(
+                raise ValidationError(
                     f"Payment Parts number should be between {PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK} and total number of payments"
                 )
             payments_chunks = list(chunks(list(payments.order_by("unicef_id")), chunks_no))
@@ -803,7 +807,7 @@ class PaymentPlanService:
 
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
-            raise GraphQLError(
+            raise ValidationError(
                 f"Too many Payment Parts to split: {payments_chunks_count}, maximum is {PaymentPlanSplit.MAX_CHUNKS}"
             )
 

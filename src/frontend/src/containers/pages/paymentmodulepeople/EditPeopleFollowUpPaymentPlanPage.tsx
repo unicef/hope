@@ -6,13 +6,15 @@ import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPl
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import {
-  useAllTargetPopulationsQuery,
-  usePaymentPlanQuery,
-  useUpdatePpMutation,
+  PaymentPlanBackgroundActionStatus,
+  PaymentPlanStatus,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
@@ -21,45 +23,90 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 
 const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { paymentPlanId } = useParams();
   const { t } = useTranslation();
-  const { data: paymentPlanData, loading: loadingPaymentPlan } =
-    usePaymentPlanQuery({
-      variables: {
-        id: paymentPlanId,
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+
+  const { data: paymentPlan, isLoading: loadingPaymentPlan } =
+    useQuery<PaymentPlanDetail>({
+      queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+          businessAreaSlug: businessArea,
+          id: paymentPlanId,
+          programSlug: programId,
+        }),
+      refetchInterval: () => {
+        const { status, backgroundActionStatus } = paymentPlan;
+        if (
+          status === PaymentPlanStatus.Preparing ||
+          (backgroundActionStatus !== null &&
+            backgroundActionStatus !==
+              PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+        ) {
+          return 3000;
+        }
+
+        return false;
       },
-      fetchPolicy: 'cache-and-network',
+      refetchIntervalInBackground: true,
     });
 
-  const [mutate] = useUpdatePpMutation();
+  const { mutateAsync: updatePaymentPlan, isPending: loadingUpdate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id: mutationId,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+        requestBody;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansPartialUpdate({
+          businessAreaSlug,
+          id: mutationId,
+          programSlug,
+          requestBody,
+        }),
+    });
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
-    useAllTargetPopulationsQuery({
-      variables: {
-        businessArea,
+  const {
+    data: allTargetPopulationsData,
+    isLoading: loadingTargetPopulations,
+  } = useQuery<PaginatedTargetPopulationListList>({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
         status: 'DRAFT',
-        program: programId,
-      },
-    });
+      });
+    },
+  });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
-  if (!allTargetPopulationsData || !paymentPlanData) return null;
+  if (!allTargetPopulationsData || !paymentPlan) return null;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
     return <PermissionDenied />;
 
-  const { paymentPlan } = paymentPlanData;
-
   const initialValues = {
     paymentPlanId: paymentPlan.id,
     currency: {
-      name: paymentPlan.currencyName,
+      name: paymentPlan.currency,
       value: paymentPlan.currency,
     },
     dispersionStartDate: paymentPlan.dispersionStartDate,
@@ -90,23 +137,24 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    const requestBody = {
+      dispersionStartDate: values.dispersionStartDate,
+      dispersionEndDate: values.dispersionEndDate,
+      currency: values.currency?.value
+        ? values.currency.value
+        : values.currency,
+    };
     try {
-      const res = await mutate({
-        variables: {
-          paymentPlanId: values.paymentPlanId,
-          dispersionStartDate: values.dispersionStartDate,
-          dispersionEndDate: values.dispersionEndDate,
-          currency: values.currency?.value
-            ? values.currency.value
-            : values.currency,
-        },
+      const res = await updatePaymentPlan({
+        businessAreaSlug: businessArea,
+        id: paymentPlanId,
+        programSlug: programId,
+        requestBody,
       });
       showMessage(t('Follow-up Payment Plan Edited'));
-      navigate(
-        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
 
@@ -124,6 +172,7 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
             handleSubmit={submitForm}
             baseUrl={baseUrl}
             permissions={permissions}
+            loadingUpdate={loadingUpdate}
           />
           <PaymentPlanTargeting
             allTargetPopulations={allTargetPopulationsData}

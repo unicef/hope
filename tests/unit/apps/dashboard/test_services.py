@@ -30,6 +30,7 @@ TEST_DATE = timezone.datetime(CURRENT_YEAR, 7, 15, tzinfo=timezone.utc)
 
 
 @pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
+@pytest.mark.django_db(transaction=True)
 def test_get_cache_key(cache_name: str, cache_class: Any, slug: str) -> None:
     """Test that get_cache_key returns the expected key."""
     expected_key: str = f"dashboard_data_{slug}"

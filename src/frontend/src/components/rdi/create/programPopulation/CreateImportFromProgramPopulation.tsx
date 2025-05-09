@@ -1,9 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import {
-  useAllProgramsForChoicesQuery,
-  useCreateRegistrationProgramPopulationImportMutation,
-} from '@generated/graphql';
+import { useCreateRegistrationProgramPopulationImportMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
@@ -17,12 +14,15 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 export const CreateImportFromProgramPopulationForm = ({
   setSubmitForm,
   setSubmitDisabled,
 }): ReactElement => {
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -56,15 +56,17 @@ export const CreateImportFromProgramPopulationForm = ({
     ),
   });
 
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-        compatibleDct: true,
-        beneficiaryGroupMatch: true,
-      },
-      fetchPolicy: 'network-only',
+  const queryVariables = {
+    businessAreaSlug: businessArea,
+    beneficiaryGroupMatch: programId,
+    compatibleDct: programId,
+    first: 100,
+  };
+
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', queryVariables],
+      queryFn: () => RestService.restBusinessAreasProgramsList(queryVariables),
     });
 
   const onSubmit = async (values): Promise<void> => {
@@ -117,9 +119,10 @@ export const CreateImportFromProgramPopulationForm = ({
   if (programsDataLoading) return <LoadingComponent />;
   if (!programsData) return null;
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData.results.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   return (
     <FormikProvider value={formik}>

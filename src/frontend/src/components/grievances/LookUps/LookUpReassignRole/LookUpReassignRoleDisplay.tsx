@@ -3,6 +3,7 @@ import { Box, Grid2 as Grid } from '@mui/material';
 import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { BlueText, LightGrey, StyledBox } from '../LookUpStyles';
+import { GrievanceTicketQuery } from '@generated/graphql';
 
 export function LookUpReassignRoleDisplay({
   selectedHousehold,
@@ -10,14 +11,15 @@ export function LookUpReassignRoleDisplay({
   setLookUpDialogOpen,
   disabled,
 }: {
-  selectedHousehold;
+  selectedHousehold?:
+    | GrievanceTicketQuery['grievanceTicket']['household']
+    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   selectedIndividual;
   setLookUpDialogOpen;
   disabled?: boolean;
 }): ReactElement {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   return (
     <StyledBox>
       <Grid container>

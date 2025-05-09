@@ -504,7 +504,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_unicef_id(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
@@ -520,7 +520,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_household_unicef_id(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
@@ -536,7 +536,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_head_of_household_family_name(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
@@ -552,7 +552,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_category(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CATEGORY,
@@ -568,7 +568,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_status(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
@@ -584,7 +584,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_multiple_statuses(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
@@ -600,7 +600,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_min_date_range(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
@@ -616,7 +616,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_max_date_range(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
@@ -632,7 +632,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_min_and_max_date_range(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
@@ -648,7 +648,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_admin(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
@@ -664,7 +664,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_issue_type(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ISSUE_TYPE,
@@ -680,7 +680,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_priority(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_PRIORITY,
@@ -696,7 +696,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_urgency(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_URGENCY,
@@ -712,7 +712,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_assigned_to(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ASSIGNED_TO,
@@ -729,7 +729,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_by_registration_data_import(self, mock_execute_test_es_query: Any) -> None:
         self.maxDiff = None
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_REGISTRATION_DATA_IMPORT,
@@ -749,7 +749,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_grievance_query_es_search_grievance_type(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_GRIEVANCE_TYPE,
@@ -765,7 +765,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_multiple_filters_should_return_grievance_1(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_MULTIPLE_FILTERS,
@@ -786,7 +786,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @patch("hct_mis_api.apps.grievance.filters.execute_es_query", side_effect=execute_test_es_query)
     def test_program_filter_returns_grievance_3(self, mock_execute_test_es_query: Any) -> None:
-        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area)
+        self.create_user_role_with_permissions(self.user, [*self.PERMISSION], self.business_area, self.program_1)
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_PROGRAM,

@@ -18,10 +18,7 @@ import { Delete, Edit } from '@mui/icons-material';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
-import {
-  TargetingCriteriaRuleObjectType,
-  useAvailableFspsForDeliveryMechanismsQuery,
-} from '@generated/graphql';
+import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { ReactElement, useEffect, useState } from 'react';
@@ -30,6 +27,10 @@ import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { LabelizedField } from '@components/core/LabelizedField';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { FspChoices } from '@restgenerated/models/FspChoices';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -281,12 +282,23 @@ export function Criteria({
   criteriaIndex,
   criteria,
 }: CriteriaProps): ReactElement {
+  const { businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const [deliveryMechanismToDisplay, setDeliveryMechanismToDisplay] =
     useState('');
   const [fspToDisplay, setFspToDisplay] = useState('');
-  const { data: availableFspsForDeliveryMechanismData } =
-    useAvailableFspsForDeliveryMechanismsQuery();
+  const { data: availableFspsForDeliveryMechanismData } = useQuery<
+    FspChoices[]
+  >({
+    queryKey: [
+      'businessAreasAvailableFspsForDeliveryMechanismsList',
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
+        businessAreaSlug: businessArea,
+      }),
+  });
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openHH, setOpenHH] = useState(false);
   const [openIND, setOpenIND] = useState(false);
@@ -300,13 +312,12 @@ export function Criteria({
   const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
 
   useEffect(() => {
-    const mappedDeliveryMechanisms =
-      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms?.map(
-        (el) => ({
-          name: el.deliveryMechanism.name,
-          value: el.deliveryMechanism.code,
-        }),
-      );
+    const mappedDeliveryMechanisms = availableFspsForDeliveryMechanismData?.map(
+      (el) => ({
+        name: el.deliveryMechanism.name,
+        value: el.deliveryMechanism.code,
+      }),
+    );
 
     const deliveryMechanismName =
       deliveryMechanism?.name ||
@@ -315,7 +326,7 @@ export function Criteria({
       )?.name;
 
     const mappedFsps =
-      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms
+      availableFspsForDeliveryMechanismData
         ?.find(
           (el) =>
             el.deliveryMechanism.code === deliveryMechanism ||

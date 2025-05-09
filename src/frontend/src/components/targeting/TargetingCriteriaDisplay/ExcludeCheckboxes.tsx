@@ -35,7 +35,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
       {isDetailsPage ? (
         <Box mt={3} p={3}>
           <Grid container spacing={3}>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               {isStandardDctType && (
                 <NoWrapCheckbox
                   disabled
@@ -73,7 +73,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                 />
               )}
             </Grid>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               {screenBeneficiary && isSocialDctType && (
                 <NoWrapCheckbox
                   disabled
@@ -119,7 +119,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
         <Box mt={3} p={3}>
           <Grid container spacing={3}>
             {isStandardDctType && (
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Field
                   name="flagExcludeIfActiveAdjudicationTicket"
                   label={t(
@@ -132,7 +132,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {isSocialDctType && (
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Field
                   name="flagExcludeIfActiveAdjudicationTicket"
                   label={t(
@@ -145,7 +145,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {screenBeneficiary && isStandardDctType && (
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Field
                   name="flagExcludeIfOnSanctionList"
                   label={t(
@@ -158,7 +158,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {screenBeneficiary && isSocialDctType && (
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Field
                   name="flagExcludeIfOnSanctionList"
                   label={t(

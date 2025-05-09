@@ -105,7 +105,11 @@ export function ReassignMultipleRoleBox({
                 ticket={ticket}
                 household={householdAndRole.household}
                 individualToReassign={selectedIndividualToReassign}
-                initialSelectedIndividualId={reassignDataDictByIndividualId[selectedIndividualToReassign.id]?.new_individual}
+                initialSelectedIndividualId={
+                  reassignDataDictByIndividualId[
+                    selectedIndividualToReassign.id
+                  ]?.new_individual
+                }
               />
             </Box>
           ));
@@ -153,7 +157,11 @@ export function ReassignMultipleRoleBox({
                   ticket={ticket}
                   household={household}
                   individualToReassign={selectedIndividualToReassign}
-                  initialSelectedIndividualId={reassignDataDictByIndividualId[selectedIndividualToReassign.id]?.new_individual}
+                  initialSelectedIndividualId={
+                    reassignDataDictByIndividualId[
+                      selectedIndividualToReassign.id
+                    ]?.new_individual
+                  }
                 />
               </Box>
             )}

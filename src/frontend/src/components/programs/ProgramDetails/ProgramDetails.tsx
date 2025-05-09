@@ -1,18 +1,23 @@
-import { PartnerAccess } from '@components/programs/constants';
+import { StatusBox } from '@components/core/StatusBox';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
-import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
-import { choicesToDict, programStatusToColor } from '@utils/utils';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { MiśTheme } from '../../../theme';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import {
+  choicesToDict,
+  isPartnerVisible,
+  programStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { MiśTheme } from 'src/theme';
+import styled from 'styled-components';
+import { PartnerAccess } from '../constants';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)};
@@ -34,7 +39,7 @@ const StyledBox = styled(Box)`
 `;
 
 interface ProgramDetailsProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
   choices: ProgrammeChoiceDataQuery;
 }
 
@@ -49,7 +54,7 @@ export const ProgramDetails = ({
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const renderAdminAreasCount = (
-    partner: ProgramQuery['program']['partners'][0],
+    partner: ProgramDetail['partners'][0],
   ): ReactElement => {
     const counts = {
       1: 0,
@@ -78,8 +83,9 @@ export const ProgramDetails = ({
     );
   };
 
-  const partners = program.partners.filter(
-    (partner) => partner.name !== 'UNICEF',
+  let partners = [];
+  partners = program.partners.filter((partner) =>
+    isPartnerVisible(partner.name),
   );
 
   const showPartners = partners.length > 0;
@@ -144,7 +150,6 @@ export const ProgramDetails = ({
               }
             />
           </Grid>
-
           <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Administrative Areas of implementation')}
@@ -173,7 +178,7 @@ export const ProgramDetails = ({
         <NumberOfHouseHolds>
           <LabelizedField label={t('Programme size')}>
             <NumberOfHouseHoldsValue>
-              {program.totalNumberOfHouseholds}
+              {program.householdCount}
             </NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>

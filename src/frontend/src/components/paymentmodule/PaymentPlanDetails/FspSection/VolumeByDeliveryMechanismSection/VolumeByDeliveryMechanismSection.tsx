@@ -2,11 +2,11 @@ import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { FC } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -23,7 +23,7 @@ const ChartContainer = styled.div`
 `;
 
 interface VolumeByDeliveryMechanismSectionProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 const DeliveryMechanismsColorsMap = new Map([
@@ -43,10 +43,10 @@ const DeliveryMechanismsColorsMap = new Map([
 ]);
 
 export const getDeliveryMechanismColor = (
-  deliveryMechanism: string,
+  delivery_mechanism: string,
 ): string => {
-  if (DeliveryMechanismsColorsMap.has(deliveryMechanism)) {
-    return DeliveryMechanismsColorsMap.get(deliveryMechanism);
+  if (DeliveryMechanismsColorsMap.has(delivery_mechanism)) {
+    return DeliveryMechanismsColorsMap.get(delivery_mechanism);
   }
   return '#CCC';
 };
@@ -69,7 +69,7 @@ export const VolumeByDeliveryMechanismSection: FC<
         >
           <LabelizedField
             label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name ?? '-'})`}
-            value={`${vdm.volume ?? '0.00'} ${paymentPlan.currency} (${vdm.volumeUsd ?? '0.00'} USD)`}
+            value={`${vdm.volume ?? '0.00'} ${paymentPlan.currency} (${vdm.volume_usd ?? '0.00'} USD)`}
           />
         </FieldBorder>
       </Grid>
@@ -80,7 +80,7 @@ export const VolumeByDeliveryMechanismSection: FC<
     (el) => `${el.deliveryMechanism.name} (${el.deliveryMechanism.fsp?.name})`,
   );
 
-  const chartData = volumeByDeliveryMechanism.map((el) => el.volumeUsd);
+  const chartData = volumeByDeliveryMechanism.map((el) => el.volume_usd);
 
   const chartColors = (): string[] => {
     return volumeByDeliveryMechanism.map((el) =>

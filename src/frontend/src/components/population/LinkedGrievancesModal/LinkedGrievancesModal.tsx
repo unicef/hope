@@ -21,7 +21,6 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { grievanceTicketStatusToColor, choicesToDict } from '@utils/utils';
 import {
   GrievancesChoiceDataQuery,
-  HouseholdNode,
   useAllGrievanceTicketQuery,
 } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
@@ -48,7 +47,9 @@ const StyledDialog = styled(Dialog)`
 `;
 
 interface LinkedGrievancesModalProps {
-  household: HouseholdNode;
+  //TODO: add types
+  household;
+  // household: HouseholdDetail;
   businessArea: string;
   baseUrl: string;
   grievancesChoices: GrievancesChoiceDataQuery;

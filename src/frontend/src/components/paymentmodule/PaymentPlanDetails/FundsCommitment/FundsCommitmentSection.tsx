@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { Title } from '@components/core/Title';
 import {
   Box,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Checkbox,
-  ListItemText,
-  SelectChangeEvent,
+  FormControl,
   IconButton,
   InputAdornment,
-  Tooltip,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   styled,
+  Tooltip,
+  Typography,
   Grid2 as Grid,
 } from '@mui/material';
-import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import { Title } from '@components/core/Title';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { t } from 'i18next';
+import React, { useState } from 'react';
 import {
   PaymentPlanDocument,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useAssignFundsCommitmentsPaymentPlanMutation,
 } from '@generated/graphql';
-import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
@@ -41,7 +41,7 @@ const XIcon = styled(Close)`
 `;
 
 interface FundsCommitmentSectionProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({

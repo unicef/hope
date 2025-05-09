@@ -5,7 +5,6 @@ from hct_mis_api.apps.account.schema import PartnerType, UserNode
 from hct_mis_api.apps.core.schema import BusinessAreaNode
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentNode
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -348,7 +347,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     linked_tickets = graphene.List(graphene.ID)
     household = graphene.GlobalID(node=HouseholdNode, required=False)
     individual = graphene.GlobalID(node=IndividualNode, required=False)
-    payment_record = graphene.GlobalID(node=PaymentNode, required=False)
+    payment_record = graphene.String()  # graphene.GlobalID(node=PaymentNode, required=False)
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)

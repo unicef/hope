@@ -1,17 +1,16 @@
-import { ReactElement } from 'react';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { PaymentPlanStatus } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
+import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TableWrapper } from '@components/core/TableWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
 import { LookUpTargetPopulationTableRowSurveys } from './LookUpTargetPopulationTableRowSurveys';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  PaymentPlanNode,
-  PaymentPlanStatus,
-  useAllPaymentPlansForTableQuery,
-} from '@generated/graphql';
 
 interface LookUpTargetPopulationTableSurveysProps {
   filter;
@@ -41,21 +40,37 @@ export function LookUpTargetPopulationTableSurveys({
 }: LookUpTargetPopulationTableSurveysProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables: AllPaymentPlansForTableQueryVariables = {
+  const initialQueryVariables = {
     totalHouseholdsCountWithValidPhoneNoMin:
       filter.totalHouseholdsCountMin || 0,
     totalHouseholdsCountWithValidPhoneNoMax:
       filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
-    program: programId,
     createdAtRange: JSON.stringify({
       min: filter.createdAtRangeMin || null,
       max: filter.createdAtRangeMax || null,
     }),
     statusNot: PaymentPlanStatus.Open,
     isTargetPopulation: true,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   };
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: paymentPlansData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentPlanListList>({
+    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentPlansList(
+        queryVariables,
+      );
+    },
+  });
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
@@ -63,16 +78,18 @@ export function LookUpTargetPopulationTableSurveys({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
+      <UniversalRestTable
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllPaymentPlansForTableQuery}
-        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        data={paymentPlansData}
+        isLoading={isLoading}
+        error={error}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        renderRow={(row: PaymentPlanList) => (
           <LookUpTargetPopulationTableRowSurveys
             radioChangeHandler={enableRadioButton && handleRadioChange}
             selectedTargetPopulation={selectedTargetPopulation}

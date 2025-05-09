@@ -84,6 +84,8 @@ export function LookUpProgrammesTableSurveys({
           renderRow={(row) => (
             <LookUpProgrammesTableRowSurveys
               key={row.id}
+              //TODO: fix
+              //@ts-ignore
               program={row}
               choicesData={choicesData}
               radioChangeHandler={handleRadioChange}

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
+from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
 
@@ -16,6 +17,7 @@ from hct_mis_api.apps.core.fixtures import (
     create_pdu_flexible_attribute,
 )
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
@@ -36,15 +38,16 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 class TestRdiXlsxPeople(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         PartnerFactory(name="UNHCR")
         content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx").read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")
         cls.business_area = create_afghanistan()
+        parent = AreaFactory(p_code="AF11", name="Name")
+        AreaFactory(p_code="AF1115", name="Name2", parent=parent)
 
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
             RdiXlsxPeopleCreateTask,

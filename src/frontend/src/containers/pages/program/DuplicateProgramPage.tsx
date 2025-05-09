@@ -9,14 +9,17 @@ import {
   useAllAreasTreeQuery,
   useCopyProgramMutation,
   usePduSubtypeChoicesDataQuery,
-  useProgramQuery,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { decodeIdString } from '@utils/utils';
+import {
+  decodeIdString,
+  mapPartnerChoicesWithoutUnicef,
+  isPartnerVisible,
+} from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,6 +34,9 @@ import {
 import { omit } from 'lodash';
 import { editProgramDetailsValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -45,10 +51,15 @@ const DuplicateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const { data, loading: loadingProgram } = useProgramQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
+  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
+    queryKey: ['businessAreaProgram', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
   });
+
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
@@ -167,7 +178,12 @@ const DuplicateProgramPage = (): ReactElement => {
     pdusubtypeChoicesLoading
   )
     return <LoadingComponent />;
-  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+  if (
+    !program ||
+    !treeData ||
+    !userPartnerChoicesData ||
+    !pdusubtypeChoicesData
+  )
     return null;
 
   const {
@@ -185,7 +201,7 @@ const DuplicateProgramPage = (): ReactElement => {
     frequencyOfPayments = 'REGULAR',
     partners,
     partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
-  } = data.program;
+  } = program;
 
   const initialValues = {
     editMode: true,
@@ -198,22 +214,21 @@ const DuplicateProgramPage = (): ReactElement => {
     beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
     description,
     budget,
-    administrativeAreasOfImplementation,
+    administrativeAreasOfImplementation: administrativeAreasOfImplementation,
     populationGoal,
     cashPlus,
     frequencyOfPayments,
     partners: partners
-      .filter((partner) => partner.name !== 'UNICEF')
+      .filter((partner) => isPartnerVisible(partner.name))
       .map((partner) => ({
         id: partner.id,
         areas: partner.areas.map((area) => decodeIdString(area.id)),
         areaAccess: partner.areaAccess,
       })),
-    partnerAccess,
+    partnerAccess: partnerAccess,
     pduFields: [],
   };
-  initialValues.budget =
-    data.program.budget === '0.00' ? '' : data.program.budget;
+  initialValues.budget = program.budget === '0.00' ? '' : program.budget;
 
   const stepFields = [
     [
@@ -289,14 +304,10 @@ const DuplicateProgramPage = (): ReactElement => {
         errors,
         setErrors,
       }) => {
-        const mappedPartnerChoices = userPartnerChoices
-          .filter((partner) => partner.name !== 'UNICEF')
-          .map((partner) => ({
-            value: partner.value,
-            label: partner.name,
-            disabled: values.partners.some((p) => p.id === partner.value),
-          }));
-
+        const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+          userPartnerChoices,
+          values.partners,
+        );
         const handleNextStep = async () => {
           await handleNext({
             validateForm,
