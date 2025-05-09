@@ -47,7 +47,7 @@ function EditIndividualDataChange({
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
   const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } =
-    useAllAddIndividualFieldsQuery();
+    useAllAddIndividualFieldsQuery({ fetchPolicy: 'network-only' });
 
   const [
     getIndividual,
