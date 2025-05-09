@@ -91,7 +91,7 @@ jobs:
           key: ${{ runner.os }}-venv
 
       - name: Run Test suite
-        run: tox -e unit
+        run: uv run tox -e unit
 
       - name: Tear down Docker Compose
         if: always()
