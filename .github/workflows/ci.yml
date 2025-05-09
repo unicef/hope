@@ -88,6 +88,7 @@ jobs:
           echo ${{ steps.cache-venv-restore.outputs.cache-hit }}
           echo ${{ steps.cache-venv-save.outputs.cache-hit }}
           echo ${{ runner.os }}-venv
+          echo ${{ runner.os }}-venv
 
       - name: Save vEnv cache
         id: cache-venv-save
