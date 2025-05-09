@@ -33,6 +33,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { Close } from '@mui/icons-material';
 import { LabelizedField } from '@components/core/LabelizedField';
+import { WarningTooltip } from '@core/WarningTooltip';
 
 const EndInputAdornment = styled(InputAdornment)`
   margin-right: 10px;
@@ -83,8 +84,6 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     (commitment) =>
       commitment.fundsCommitmentNumber === selectedFundsCommitment?.fundsCommitmentNumber,
   );
-
-  console.log(selectedCommitment);
 
   const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value as string[];
@@ -263,9 +262,13 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
           <>
             <Box mt={2}>
               {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
-                <Typography variant="h6" fontWeight="bold" mb={2}>
-                  {t('Funds Commitment Number')}: {selectedCommitment.fundsCommitmentNumber}
-                </Typography>
+                  <Typography variant="h6" fontWeight="bold" mb={2}>
+                    {t('Funds Commitment Number')}: {selectedCommitment.fundsCommitmentNumber} {paymentPlan.fundsCommitments.insufficientAmount && <WarningTooltip
+                      message={t(
+                        'Insufficient Commitment Amount',
+                      )}
+                    />}
+                  </Typography>
               )}
               {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
                 (item, index) => (
@@ -319,7 +322,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                       <Grid size={3}>
                         <LabelizedField
                           label={t('Sponsor')}
-                          value={`${item.sponsor} ${item.sponsorName}`}
+                          value={`${item.sponsor ?? '-'} ${item.sponsorName ?? '-'}`}
                         />
                       </Grid>
                     </Grid>
