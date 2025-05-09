@@ -81,6 +81,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --cache-dir ./uv-cache --frozen
 
+      - name: testing key
+        run: echo ${{ steps.cache-venv-restore.outputs.cache-primary-key }}
+
       - name: Save vEnv cache
         id: cache-venv-save
         uses: actions/cache@v4
