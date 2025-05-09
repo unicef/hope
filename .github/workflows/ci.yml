@@ -52,7 +52,7 @@ jobs:
 
       - name: Wait for Redis to be ready
         run: |
-          until docker exec $(docker-compose -f development_tools/compose.yml  ps -q redis) redis-cli ping | grep PONG; do
+          until docker exec $(docker-compose -f development_tools/compose.yml  ps -q valkey) redis-cli ping | grep PONG; do
             echo "Waiting for Redis..."
             sleep 2
           done
