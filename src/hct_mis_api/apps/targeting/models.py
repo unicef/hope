@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 from django.db import models
 from django.db.models import JSONField, Q
@@ -52,7 +52,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
     def get_rules(self) -> "QuerySet":
         return self.rules.all()
 
-    def get_excluded_household_ids(self) -> List[str]:
+    def get_excluded_household_ids(self) -> list[str]:
         hh_ids_list = []
         hh_ids_list.extend(hh_id.strip() for hh_id in self.payment_plan.excluded_ids.split(",") if hh_id.strip())
         return hh_ids_list
@@ -152,16 +152,14 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     @property
     def is_social_worker_program(self) -> bool:
         try:
-            return (
-                self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
-            )
+            return self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
         except (
             AttributeError,
             TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,
         ):
             return False
 
-    def get_core_fields(self) -> List:
+    def get_core_fields(self) -> list:
         if self.is_social_worker_program:
             return FieldFactory.from_only_scopes([Scope.TARGETING, Scope.XLSX_PEOPLE])
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
@@ -201,7 +199,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     def is_social_worker_program(self) -> bool:
         return False
 
-    def get_core_fields(self) -> List:
+    def get_core_fields(self) -> list:
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     def get_lookup_prefix(self, associated_with: Any) -> str:

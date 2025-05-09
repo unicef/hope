@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 import graphene
 from graphene_django import DjangoObjectType
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.targeting.models import TargetingIndividualRuleFilterBlock
 
 
-def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> Dict:
+def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> dict:
     scopes = [Scope.TARGETING]
     if payment_plan.is_social_worker_program:
         scopes.append(Scope.XLSX_PEOPLE)
@@ -37,7 +37,7 @@ def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> Dict:
     return field
 
 
-def filter_choices(field: Optional[Dict], args: List) -> Optional[Dict]:
+def filter_choices(field: dict | None, args: list) -> dict | None:
     if not field:
         return None
     choices = field.get("choices")
@@ -59,13 +59,14 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_arguments(self, info: Any) -> "GrapheneList":
         return self.arguments
 
-    def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
+    def resolve_field_attribute(parent, info: Any) -> dict | None:
         if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
                 parent.field_name, parent.targeting_criteria_rule.targeting_criteria.payment_plan
             )
             return filter_choices(
-                field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
+                field_attribute,
+                parent.arguments,  # type: ignore # can't convert graphene list to list
             )
         program = None
         if parent.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:

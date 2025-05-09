@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -13,28 +13,29 @@ from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCy
 
 def validate_cycle_timeframes_overlapping(
     program: Program,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-    current_cycle_id: Optional[str] = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    current_cycle_id: str | None = None,
 ) -> None:
     cycle_qs = program.cycles.exclude(id=current_cycle_id)
-    if start_date:
-        if cycle_qs.filter(Q(start_date__lte=start_date) & Q(end_date__gte=start_date)).exists():
-            raise serializers.ValidationError(
-                {"start_date": "Programme Cycles' timeframes must not overlap with the provided start date."}
-            )
-    if end_date:
-        if cycle_qs.filter(Q(start_date__lte=end_date) & Q(end_date__gte=end_date)).exists():
-            raise serializers.ValidationError(
-                {"end_date": "Programme Cycles' timeframes must not overlap with the provided end date."}
-            )
-    if start_date and end_date:
-        if cycle_qs.filter(
+    if start_date and cycle_qs.filter(Q(start_date__lte=start_date) & Q(end_date__gte=start_date)).exists():
+        raise serializers.ValidationError(
+            {"start_date": "Programme Cycles' timeframes must not overlap with the provided start date."}
+        )
+    if end_date and cycle_qs.filter(Q(start_date__lte=end_date) & Q(end_date__gte=end_date)).exists():
+        raise serializers.ValidationError(
+            {"end_date": "Programme Cycles' timeframes must not overlap with the provided end date."}
+        )
+    if (
+        start_date
+        and end_date
+        and cycle_qs.filter(
             Q(start_date__lte=start_date) & Q(end_date__gte=end_date)
             | Q(start_date__gte=start_date) & Q(end_date__lte=end_date)
             | Q(start_date__lte=end_date) & Q(end_date__gte=start_date)
-        ).exists():
-            raise serializers.ValidationError("Programme Cycles' timeframes must not overlap with the provided dates.")
+        ).exists()
+    ):
+        raise serializers.ValidationError("Programme Cycles' timeframes must not overlap with the provided dates.")
 
 
 class ProgramCycleListSerializer(EncodedIdSerializerMixin):
@@ -72,7 +73,7 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
             return "-"
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
-    def get_admin_url(self, obj: ProgramCycle) -> Optional[str]:
+    def get_admin_url(self, obj: ProgramCycle) -> str | None:
         user = self.context["request"].user
         return obj.admin_url if user.is_superuser else None
 
@@ -91,8 +92,7 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
 
     @staticmethod
     def get_program(program_id: str) -> Program:
-        program = get_object_or_404(Program, id=decode_id_string(program_id))
-        return program
+        return get_object_or_404(Program, id=decode_id_string(program_id))
 
     def validate_title(self, value: str) -> str:
         program = self.get_program(self.context["request"].parser_context["kwargs"]["program_id"])
@@ -101,7 +101,7 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
             raise serializers.ValidationError({"title": "Programme Cycles' title should be unique."})
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         request = self.context["request"]
         program = self.get_program(request.parser_context["kwargs"]["program_id"])
         start_date = data["start_date"]
@@ -165,7 +165,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
 
         return value
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         program = self.instance.program
         start_date = data.get("start_date")
         end_date = data.get("end_date")
@@ -200,11 +200,10 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
                 )
 
         if end_date:
-            if program_end_date:
-                if not (program_start_date <= end_date <= program_end_date):
-                    raise serializers.ValidationError(
-                        {"end_date": "Programme Cycle end date must be within the programme's start and end dates."}
-                    )
+            if program_end_date and not (program_start_date <= end_date <= program_end_date):
+                raise serializers.ValidationError(
+                    {"end_date": "Programme Cycle end date must be within the programme's start and end dates."}
+                )
 
             if start_date and end_date < start_date:
                 raise serializers.ValidationError({"end_date": "End date cannot be earlier than the start date."})

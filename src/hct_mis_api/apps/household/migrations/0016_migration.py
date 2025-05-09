@@ -4,108 +4,113 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0015_migration'),
+        ("household", "0015_migration"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='document',
-            name='unique_if_not_removed_and_valid_for_representations',
+            model_name="document",
+            name="unique_if_not_removed_and_valid_for_representations",
         ),
         migrations.RemoveField(
-            model_name='bankaccountinfo',
-            name='is_original',
+            model_name="bankaccountinfo",
+            name="is_original",
         ),
         migrations.RemoveField(
-            model_name='document',
-            name='is_migration_handled',
+            model_name="document",
+            name="is_migration_handled",
         ),
         migrations.RemoveField(
-            model_name='document',
-            name='is_original',
+            model_name="document",
+            name="is_original",
         ),
         migrations.RemoveField(
-            model_name='entitlementcard',
-            name='is_original',
+            model_name="entitlementcard",
+            name="is_original",
         ),
         migrations.RemoveField(
-            model_name='household',
-            name='is_migration_handled',
+            model_name="household",
+            name="is_migration_handled",
         ),
         migrations.RemoveField(
-            model_name='household',
-            name='is_original',
+            model_name="household",
+            name="is_original",
         ),
         migrations.RemoveField(
-            model_name='household',
-            name='migrated_at',
+            model_name="household",
+            name="migrated_at",
         ),
         migrations.RemoveField(
-            model_name='individual',
-            name='is_migration_handled',
+            model_name="individual",
+            name="is_migration_handled",
         ),
         migrations.RemoveField(
-            model_name='individual',
-            name='is_original',
+            model_name="individual",
+            name="is_original",
         ),
         migrations.RemoveField(
-            model_name='individual',
-            name='migrated_at',
+            model_name="individual",
+            name="migrated_at",
         ),
         migrations.RemoveField(
-            model_name='individualidentity',
-            name='is_migration_handled',
+            model_name="individualidentity",
+            name="is_migration_handled",
         ),
         migrations.RemoveField(
-            model_name='individualidentity',
-            name='is_original',
+            model_name="individualidentity",
+            name="is_original",
         ),
         migrations.RemoveField(
-            model_name='individualroleinhousehold',
-            name='is_migration_handled',
+            model_name="individualroleinhousehold",
+            name="is_migration_handled",
         ),
         migrations.RemoveField(
-            model_name='individualroleinhousehold',
-            name='is_original',
+            model_name="individualroleinhousehold",
+            name="is_original",
         ),
         migrations.RemoveField(
-            model_name='individualroleinhousehold',
-            name='migrated_at',
+            model_name="individualroleinhousehold",
+            name="migrated_at",
         ),
         migrations.AddField(
-            model_name='document',
-            name='removed_date',
+            model_name="document",
+            name="removed_date",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='individualidentity',
-            name='removed_date',
+            model_name="individualidentity",
+            name="removed_date",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='individualroleinhousehold',
-            name='removed_date',
+            model_name="individualroleinhousehold",
+            name="removed_date",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='document',
-            name='is_removed',
+            model_name="document",
+            name="is_removed",
             field=models.BooleanField(db_index=True, default=False),
         ),
         migrations.AlterField(
-            model_name='individualidentity',
-            name='is_removed',
+            model_name="individualidentity",
+            name="is_removed",
             field=models.BooleanField(db_index=True, default=False),
         ),
         migrations.AlterField(
-            model_name='individualroleinhousehold',
-            name='is_removed',
+            model_name="individualroleinhousehold",
+            name="is_removed",
             field=models.BooleanField(db_index=True, default=False),
         ),
         migrations.AddConstraint(
-            model_name='document',
-            constraint=models.UniqueConstraint(condition=models.Q(models.Q(('is_removed', False), ('status', 'VALID'), ('rdi_merge_status', 'MERGED'))), fields=('document_number', 'type', 'country', 'program'), name='unique_if_not_removed_and_valid_for_representations'),
+            model_name="document",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(
+                    models.Q(("is_removed", False), ("status", "VALID"), ("rdi_merge_status", "MERGED"))
+                ),
+                fields=("document_number", "type", "country", "program"),
+                name="unique_if_not_removed_and_valid_for_representations",
+            ),
         ),
     ]

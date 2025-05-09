@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from functools import reduce
-from typing import Any, List
+from typing import Any
 
 from hct_mis_api.apps.core.utils import (
     get_combined_attributes,
@@ -46,7 +46,7 @@ class RdiBaseCreateTask:
 
         field = self.COMBINED_FIELDS[header]
 
-        casters: List = [
+        casters: list = [
             DefaultValueCaster(),
             BooleanValueCaster,
             SelectOneValueCaster,

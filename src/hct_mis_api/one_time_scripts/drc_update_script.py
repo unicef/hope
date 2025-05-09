@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from django.db import transaction
 
@@ -11,12 +11,12 @@ from hct_mis_api.one_time_scripts.universal_individual_update_script.validator_a
     validate_phone_number,
 )
 
-individual_fields: Dict[str, Tuple[str, Any, Any]] = {
+individual_fields: dict[str, tuple[str, Any, Any]] = {
     "phone_no": ("phone_no", validate_phone_number, handle_simple_field),
     "payment_delivery_phone_no_i_c": ("payment_delivery_phone_no", validate_phone_number, handle_simple_field),
 }
 
-deliver_mechanism_data_fields: Dict[str, Tuple[List[str], ...]] = {
+deliver_mechanism_data_fields: dict[str, tuple[list[str], ...]] = {
     "mobile_money": (
         ["service_provider_code__mobile_money_i_c", "service_provider_code__mobile_money"],
         ["provider__mobile_money_i_c", "provider__mobile_money"],

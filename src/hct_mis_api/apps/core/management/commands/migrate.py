@@ -2,7 +2,7 @@ import time
 from argparse import ArgumentParser
 from collections import OrderedDict
 from importlib import import_module
-from typing import Any, Iterable, List, Optional, Tuple
+from typing import Any, Iterable
 
 from django.apps import apps
 from django.conf import settings
@@ -68,7 +68,7 @@ class Command(BaseCommand):
             help="Creates tables for apps without migrations.",
         )
 
-    def _run_checks(self, **kwargs: Any) -> List:
+    def _run_checks(self, **kwargs: Any) -> list:
         issues = run_checks(tags=[Tags.database])
         issues.extend(super()._run_checks(**kwargs))
         return issues
@@ -106,8 +106,8 @@ class Command(BaseCommand):
             name_str = "; ".join("{} in {}".format(", ".join(names), app) for app, names in conflicts.items())
             raise CommandError(
                 "Conflicting migrations detected; multiple leaf nodes in the "
-                "migration graph: ({}).\nTo fix them run "
-                "'python manage.py makemigrations --merge'".format(name_str)
+                f"migration graph: ({name_str}).\nTo fix them run "
+                "'python manage.py makemigrations --merge'"
             )
 
         # If they supplied command line arguments, work out what they mean.
@@ -122,11 +122,11 @@ class Command(BaseCommand):
                 raise CommandError(str(err))
             if run_syncdb:
                 if app_label in executor.loader.migrated_apps:
-                    raise CommandError("Can't use run_syncdb with app '{}' as it has migrations.".format(app_label))
+                    raise CommandError(f"Can't use run_syncdb with app '{app_label}' as it has migrations.")
             elif app_label not in executor.loader.migrated_apps:
-                raise CommandError("App '{}' does not have migrations.".format(app_label))
+                raise CommandError(f"App '{app_label}' does not have migrations.")
 
-        targets: List[Tuple[Any, Optional[str]]]
+        targets: list[tuple[Any, str | None]]
         if options["app_label"] and options["migration_name"]:
             migration_name = options["migration_name"]
             if migration_name == "zero":
@@ -136,13 +136,10 @@ class Command(BaseCommand):
                     migration = executor.loader.get_migration_by_prefix(app_label, migration_name)
                 except AmbiguityError:
                     raise CommandError(
-                        "More than one migration matches '{}' in app '{}'. "
-                        "Please be more specific.".format(migration_name, app_label)
+                        f"More than one migration matches '{migration_name}' in app '{app_label}'. Please be more specific."
                     )
                 except KeyError:
-                    raise CommandError(
-                        "Cannot find a migration matching '{}' from app '{}'.".format(migration_name, app_label)
-                    )
+                    raise CommandError(f"Cannot find a migration matching '{migration_name}' from app '{app_label}'.")
                 targets = [(app_label, migration.name)]
             target_app_labels_only = False
         elif options["app_label"]:
@@ -171,7 +168,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.MIGRATE_HEADING("Operations to perform:"))
             if run_syncdb:
                 if options["app_label"]:
-                    self.stdout.write(self.style.MIGRATE_LABEL("  Synchronize unmigrated app: {}".format(app_label)))
+                    self.stdout.write(self.style.MIGRATE_LABEL(f"  Synchronize unmigrated app: {app_label}"))
                 else:
                     self.stdout.write(
                         self.style.MIGRATE_LABEL("  Synchronize unmigrated apps: ")
@@ -184,16 +181,11 @@ class Command(BaseCommand):
                 )
             else:
                 if targets[0][1] is None:
-                    self.stdout.write(
-                        self.style.MIGRATE_LABEL("  Unapply all migrations: ")
-                        + "{}".format(
-                            targets[0][0],
-                        )
-                    )
+                    self.stdout.write(self.style.MIGRATE_LABEL("  Unapply all migrations: ") + f"{targets[0][0]}")
                 else:
                     self.stdout.write(
                         self.style.MIGRATE_LABEL("  Target specific migration: ")
-                        + "{}, from {}".format(targets[0][1], targets[0][0])
+                        + f"{targets[0][1]}, from {targets[0][0]}"
                     )
 
         pre_migrate_state = executor._create_project_state(with_applied_migrations=True)
@@ -279,15 +271,13 @@ class Command(BaseCommand):
             plan=plan,
         )
 
-    def migration_progress_callback(
-        self, action: str, migration: Optional[str] = None, fake: Optional[bool] = False
-    ) -> None:
+    def migration_progress_callback(self, action: str, migration: str | None = None, fake: bool | None = False) -> None:
         if self.verbosity >= 1:
             compute_time = self.verbosity > 1
             if action == "apply_start":
                 if compute_time:
                     self.start = time.time()
-                self.stdout.write("  Applying {}...".format(migration), ending="")
+                self.stdout.write(f"  Applying {migration}...", ending="")
                 self.stdout.flush()
             elif action == "apply_success":
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
@@ -298,7 +288,7 @@ class Command(BaseCommand):
             elif action == "unapply_start":
                 if compute_time:
                     self.start = time.time()
-                self.stdout.write("  Unapplying {}...".format(migration), ending="")
+                self.stdout.write(f"  Unapplying {migration}...", ending="")
                 self.stdout.flush()
             elif action == "unapply_success":
                 elapsed = " (%.3fs)" % (time.time() - self.start) if compute_time else ""
@@ -352,9 +342,9 @@ class Command(BaseCommand):
                     if not model._meta.can_migrate(connection):
                         continue
                     if self.verbosity >= 3:
-                        self.stdout.write("    Processing {}.{} model\n".format(app_name, model._meta.object_name))
+                        self.stdout.write(f"    Processing {app_name}.{model._meta.object_name} model\n")
                     if self.verbosity >= 1:
-                        self.stdout.write("    Creating table {}\n".format(model._meta.db_table))
+                        self.stdout.write(f"    Creating table {model._meta.db_table}\n")
                     editor.create_model(model)
 
             # Deferred SQL is executed when exiting the editor's context.
@@ -362,7 +352,7 @@ class Command(BaseCommand):
                 self.stdout.write("    Running deferred SQL...\n")
 
     @staticmethod
-    def describe_operation(operation: Any, backwards: Any) -> Tuple[str, bool]:
+    def describe_operation(operation: Any, backwards: Any) -> tuple[str, bool]:
         """Return a string that describes a migration operation for --plan."""
         prefix = ""
         is_error = False

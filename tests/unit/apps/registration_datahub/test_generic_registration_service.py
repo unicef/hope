@@ -287,14 +287,12 @@ class TestGenericRegistrationService(TestCase):
         assert PendingDocument.objects.get(document_number="123123123", type__key="tax_id")
         assert PendingDocument.objects.get(document_number="xyz", type__key="disability_certificate")
         assert PendingIndividual.objects.get(
-            **{
-                "given_name": "Jan",
-                "middle_name": "Roman",
-                "family_name": "Romaniak",
-                "relationship": "HEAD",
-                "sex": "MALE",
-                "email": "email123@mail.com",
-                "phone_no": "+393892781511",
-            }
+            given_name="Jan",
+            middle_name="Roman",
+            family_name="Romaniak",
+            relationship="HEAD",
+            sex="MALE",
+            email="email123@mail.com",
+            phone_no="+393892781511",
         )
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)

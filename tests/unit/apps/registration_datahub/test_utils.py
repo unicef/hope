@@ -10,23 +10,22 @@ from hct_mis_api.apps.registration_datahub.utils import (
 
 class TestRdiUtils(TestCase):
     def test_calculate_hash_for_kobo_submission(self) -> None:
-        test_data1 = json.load(
-            open(
-                f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission1.json"
-            )
-        )
-        test_data2 = json.load(
-            open(
-                f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission2.json"
-            )
-        )
-        test_data3 = json.load(
-            open(
-                f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission3.json"
-            )
-        )
-        hash1 = calculate_hash_for_kobo_submission(test_data1)
-        hash2 = calculate_hash_for_kobo_submission(test_data2)
-        hash3 = calculate_hash_for_kobo_submission(test_data3)
+        with open(
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission1.json"
+        ) as test_file1:
+            test_data1 = json.load(test_file1)
+            hash1 = calculate_hash_for_kobo_submission(test_data1)
+
+        with open(
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission2.json"
+        ) as test_file2:
+            test_data2 = json.load(test_file2)
+            hash2 = calculate_hash_for_kobo_submission(test_data2)
+
+        with open(
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission3.json"
+        ) as test_file3:
+            test_data3 = json.load(test_file3)
+            hash3 = calculate_hash_for_kobo_submission(test_data3)
         self.assertEqual(hash1, hash2)
         self.assertNotEqual(hash1, hash3)

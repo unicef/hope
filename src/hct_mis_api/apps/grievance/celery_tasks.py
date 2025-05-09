@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from typing import Any, List
+from typing import Any
 
 from django.db.models import Q
 from django.utils import timezone
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @log_start_and_end
 @sentry_tags
 def deduplicate_and_check_against_sanctions_list_task(
-    self: Any, should_populate_index: bool, individuals_ids: List[str]
+    self: Any, should_populate_index: bool, individuals_ids: list[str]
 ) -> None:
     try:
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (

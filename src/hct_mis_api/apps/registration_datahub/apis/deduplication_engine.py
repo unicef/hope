@@ -1,5 +1,4 @@
 import dataclasses
-from typing import List, Tuple
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 
@@ -73,7 +72,7 @@ class DeduplicationEngineAPI(BaseAPI):
         response_data, _ = self._get(self.Endpoints.GET_DEDUPLICATION_SET.format(pk=deduplication_set_id))
         return response_data
 
-    def bulk_upload_images(self, deduplication_set_id: str, images: List[DeduplicationImage]) -> dict:
+    def bulk_upload_images(self, deduplication_set_id: str, images: list[DeduplicationImage]) -> dict:
         response_data, _ = self._post(
             self.Endpoints.BULK_UPLOAD_IMAGES.format(deduplication_set_pk=deduplication_set_id),
             [dataclasses.asdict(image) for image in images],
@@ -90,7 +89,7 @@ class DeduplicationEngineAPI(BaseAPI):
         response_data, _ = self._get(self.Endpoints.GET_DUPLICATES.format(deduplication_set_pk=deduplication_set_id))
         return response_data
 
-    def process_deduplication(self, deduplication_set_id: str) -> Tuple[dict, int]:
+    def process_deduplication(self, deduplication_set_id: str) -> tuple[dict, int]:
         response_data, status = self._post(
             self.Endpoints.PROCESS_DEDUPLICATION.format(pk=deduplication_set_id), validate_response=False
         )

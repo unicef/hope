@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from django.http import HttpRequest, HttpResponse
 
@@ -14,13 +14,13 @@ from smart_admin.console.email import (
 from hct_mis_api.apps.utils.security import is_root
 
 
-def masker(value: Any, request: HttpRequest) -> Union[Any, str]:
+def masker(value: Any, request: HttpRequest) -> Any | str:
     if is_root(request):
         return value
     return "****"
 
 
-def email(self: Any, request: HttpRequest, extra_context: Optional[Dict] = None) -> HttpResponse:
+def email(self: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
     context = self.each_context(request)
     context["title"] = "Test Email"
     context["smtp"] = {

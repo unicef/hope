@@ -1,6 +1,6 @@
 import json
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from django.db.models import (
     Case,
@@ -230,7 +230,7 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_rejected_on(self, info: Any) -> Optional[str]:
+    def resolve_rejected_on(self, info: Any) -> str | None:
         if self.approvals.filter(type=Approval.REJECT).exists():
             if self.sent_for_finance_release_date:
                 return "IN_REVIEW"
@@ -241,13 +241,12 @@ class ApprovalProcessNode(BaseNodePermissionMixin, DjangoObjectType):
         return None
 
     def resolve_actions(self, info: Any) -> "FilteredActionsListNode":
-        resp = FilteredActionsListNode(
+        return FilteredActionsListNode(
             approval=self.approvals.filter(type=Approval.APPROVAL),
             authorization=self.approvals.filter(type=Approval.AUTHORIZATION),
             finance_release=self.approvals.filter(type=Approval.FINANCE_RELEASE),
             reject=self.approvals.filter(type=Approval.REJECT),
         )
-        return resp
 
 
 class PaymentConflictDataNode(graphene.ObjectType):
@@ -259,10 +258,10 @@ class PaymentConflictDataNode(graphene.ObjectType):
     payment_id = graphene.String()
     payment_unicef_id = graphene.String()
 
-    def resolve_payment_plan_id(self, info: Any) -> Optional[str]:
+    def resolve_payment_plan_id(self, info: Any) -> str | None:
         return encode_id_base64(self["payment_plan_id"], "PaymentPlan")  # type: ignore
 
-    def resolve_payment_id(self, info: Any) -> Optional[str]:
+    def resolve_payment_id(self, info: Any) -> str | None:
         return encode_id_base64(self["payment_id"], "Payment")  # type: ignore
 
 
@@ -335,33 +334,33 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_payment_plan_hard_conflicted_data(self, info: Any) -> List[Any]:
+    def resolve_payment_plan_hard_conflicted_data(self, info: Any) -> list[Any]:
         if self.parent.status != PaymentPlan.Status.OPEN:
-            return list()
+            return []
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_hard_conflicted_data", []))
 
-    def resolve_payment_plan_soft_conflicted_data(self, info: Any) -> List[Any]:
+    def resolve_payment_plan_soft_conflicted_data(self, info: Any) -> list[Any]:
         if self.parent.status != PaymentPlan.Status.OPEN:
-            return list()
+            return []
         return PaymentNode._parse_pp_conflict_data(getattr(self, "payment_plan_soft_conflicted_data", []))
 
-    def resolve_payment_plan_hard_conflicted(self, info: Any) -> Union[Any, graphene.Boolean]:
+    def resolve_payment_plan_hard_conflicted(self, info: Any) -> Any | graphene.Boolean:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_hard_conflicted
 
-    def resolve_payment_plan_soft_conflicted(self, info: Any) -> Union[Any, graphene.Boolean]:
+    def resolve_payment_plan_soft_conflicted(self, info: Any) -> Any | graphene.Boolean:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_soft_conflicted
 
     def resolve_full_name(self, info: Any) -> str:
         # TODO: add to test this one
         return self.head_of_household.full_name if self.head_of_household else ""
 
-    def resolve_verification(self, info: Any) -> Optional[Any]:
+    def resolve_verification(self, info: Any) -> Any | None:
         return self.payment_verifications.first()
 
     def resolve_distribution_modality(self, info: Any) -> str:
         return self.parent.unicef_id
 
-    def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
+    def resolve_service_provider(self, info: Any) -> FinancialServiceProvider | None:
         return self.financial_service_provider
 
     def resolve_debit_card_number(self, info: Any) -> str:
@@ -370,21 +369,20 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_debit_card_issuer(self, info: Any) -> str:
         return get_debit_card_issuer(self.collector)
 
-    def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
+    def resolve_total_persons_covered(self, info: Any) -> int | None:
         # TODO: migrate old data maybe?
         if household_snapshot := getattr(self, "household_snapshot", None):
             return household_snapshot.snapshot_data.get("size")
-        else:
-            # old Payment has only household.size, backward compatible with legacy data
-            return self.household.size
+        # old Payment has only household.size, backward compatible with legacy data
+        return self.household.size
 
-    def resolve_additional_collector_name(self, info: Any) -> Optional[graphene.String]:
+    def resolve_additional_collector_name(self, info: Any) -> graphene.String | None:
         return getattr(self, "additional_collector_name", None)
 
-    def resolve_additional_document_type(self, info: Any) -> Optional[graphene.String]:
+    def resolve_additional_document_type(self, info: Any) -> graphene.String | None:
         return getattr(self, "additional_document_type", None)
 
-    def resolve_additional_document_number(self, info: Any) -> Optional[graphene.String]:
+    def resolve_additional_document_number(self, info: Any) -> graphene.String | None:
         return getattr(self, "additional_document_number", None)
 
     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
@@ -393,36 +391,36 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_snapshot_collector_delivery_phone_no(self, info: Any) -> Any:
         return PaymentNode.get_collector_field(self, "payment_delivery_phone_no")
 
-    def resolve_snapshot_collector_bank_name(self, info: Any) -> Optional[str]:
+    def resolve_snapshot_collector_bank_name(self, info: Any) -> str | None:
         if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
             return bank_account_info.get("bank_name")
         return None
 
-    def resolve_snapshot_collector_bank_account_number(self, info: Any) -> Optional[str]:
+    def resolve_snapshot_collector_bank_account_number(self, info: Any) -> str | None:
         if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
             return bank_account_info.get("bank_account_number")
         return None
 
-    def resolve_snapshot_collector_debit_card_number(self, info: Any) -> Optional[str]:
+    def resolve_snapshot_collector_debit_card_number(self, info: Any) -> str | None:
         if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
             return bank_account_info.get("debit_card_number")
         return None
 
     @classmethod
-    def get_collector_field(cls, payment: "Payment", field_name: str) -> Union[None, str, Dict]:
+    def get_collector_field(cls, payment: "Payment", field_name: str) -> None | str | dict:
         """return primary_collector or alternate_collector field value or None"""
         if household_snapshot := getattr(payment, "household_snapshot", None):
             household_snapshot_data = household_snapshot.snapshot_data
             collector_data = (
                 household_snapshot_data.get("primary_collector")
                 or household_snapshot_data.get("alternate_collector")
-                or dict()
+                or {}
             )
             return collector_data.get(field_name)
         return None
 
     @classmethod
-    def _parse_pp_conflict_data(cls, conflicts_data: List) -> List[Any]:
+    def _parse_pp_conflict_data(cls, conflicts_data: list) -> list[Any]:
         """parse list of conflicted payment plans data from Payment model json annotations"""
         return [json.loads(conflict) for conflict in conflicts_data]
 
@@ -464,7 +462,7 @@ class DeliveryMechanismPerPaymentPlanNode(DjangoObjectType):
 
 def _calculate_volume(
     delivery_mechanism_per_payment_plan: "DeliveryMechanismPerPaymentPlan", field: str
-) -> Optional[Decimal]:
+) -> Decimal | None:
     if not delivery_mechanism_per_payment_plan.financial_service_provider:
         return None
     # TODO simple volume calculation
@@ -482,10 +480,10 @@ class VolumeByDeliveryMechanismNode(graphene.ObjectType):
     def resolve_delivery_mechanism(self, info: Any) -> "VolumeByDeliveryMechanismNode":
         return self  # DeliveryMechanismPerPaymentPlanNode uses the same model
 
-    def resolve_volume(self, info: Any) -> Optional[_decimal.Decimal]:  # non-usd
+    def resolve_volume(self, info: Any) -> _decimal.Decimal | None:  # non-usd
         return _calculate_volume(self, "entitlement_quantity")  # type: ignore
 
-    def resolve_volume_usd(self, info: Any) -> Optional[_decimal.Decimal]:
+    def resolve_volume_usd(self, info: Any) -> _decimal.Decimal | None:
         return _calculate_volume(self, "entitlement_quantity_usd")  # type: ignore
 
     class Meta:
@@ -505,7 +503,7 @@ class FspChoice(graphene.ObjectType):
     name = graphene.String()
     configurations = graphene.List(FspConfiguration)
 
-    def resolve_id(self, info: Any) -> Optional[str]:
+    def resolve_id(self, info: Any) -> str | None:
         return encode_id_base64(self["id"], "FinancialServiceProvider")  # type: ignore
 
 
@@ -586,7 +584,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return parent.program
 
     @staticmethod
-    def resolve_split_choices(parent: PaymentPlan, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_split_choices(parent: PaymentPlan, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
     @staticmethod
@@ -632,13 +630,12 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             ).exists()
         ):
             return False
-        else:
-            for dm_per_payment_plan in payment_plan.delivery_mechanisms.all():
-                if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
-                    dm_per_payment_plan.delivery_mechanism
-                ):
-                    return False
-            return True
+        for dm_per_payment_plan in payment_plan.delivery_mechanisms.all():
+            if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
+                dm_per_payment_plan.delivery_mechanism
+            ):
+                return False
+        return True
 
     @classmethod
     def resolve_has_fsp_delivery_mechanism_xlsx_template(cls, parent: PaymentPlan, info: Any) -> bool:
@@ -671,7 +668,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return parent.fsp_communication_channel
 
     @staticmethod
-    def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
+    def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> dict[str, int]:
         return parent.eligible_payments.aggregate(
             delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
             delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
@@ -729,12 +726,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         if parent.status != PaymentPlan.Status.ACCEPTED:
             return False
 
-        if parent.splits.filter(
-            sent_to_payment_gateway=True,
-        ).exists():
-            return False
-
-        return True
+        return not parent.splits.filter(sent_to_payment_gateway=True).exists()
 
     @staticmethod
     def resolve_supporting_documents(parent: PaymentPlan, info: Any) -> "QuerySet":
@@ -779,11 +771,13 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
     @staticmethod
     def resolve_can_send_xlsx_password(parent: PaymentPlan, info: Any) -> bool:
-        if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
-            if parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API:
-                if not info.context.user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, parent.business_area):
-                    return False
-                return parent.has_export_file
+        if (
+            parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            and parent.fsp_communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        ):
+            if not info.context.user.has_perm(Permissions.PM_SEND_XLSX_PASSWORD.value, parent.business_area):
+                return False
+            return parent.has_export_file
         return False
 
 
@@ -1006,7 +1000,7 @@ class Query(graphene.ObjectType):
         input=AvailableFspsForDeliveryMechanismsInput(),
     )
 
-    def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, input: Dict, **kwargs: Any) -> List:
+    def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, input: dict, **kwargs: Any) -> list:
         business_area_slug = info.context.headers.get("Business-Area")
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
         delivery_mechanisms = (
@@ -1015,7 +1009,7 @@ class Query(graphene.ObjectType):
             .order_by("delivery_mechanism_order")
         )
 
-        def get_fsps_for_delivery_mechanism(mechanism_name: str) -> List:
+        def get_fsps_for_delivery_mechanism(mechanism_name: str) -> list:
             fsps = FinancialServiceProvider.objects.filter(
                 Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism__name=mechanism_name)
                 | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
@@ -1058,15 +1052,15 @@ class Query(graphene.ObjectType):
             .distinct()
         )
 
-    def resolve_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict[str, int]:
+    def resolve_sample_size(self, info: Any, input: dict, **kwargs: Any) -> dict[str, int]:
         payment_plan_object: "PaymentPlan" = get_payment_plan_object(input["cash_or_payment_plan_id"])
 
         def get_payment_records(
             obj: PaymentPlan,
-            payment_verification_plan: Optional[PaymentVerificationPlan],
+            payment_verification_plan: PaymentVerificationPlan | None,
             verification_channel: str,
         ) -> QuerySet:
-            kw: Dict = {}
+            kw: dict = {}
             if payment_verification_plan:
                 kw["payment_verification_plan"] = payment_verification_plan
             if verification_channel == PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO:
@@ -1094,41 +1088,41 @@ class Query(graphene.ObjectType):
             "sample_size": payment_records_sample_count,
         }
 
-    def resolve_all_rapid_pro_flows(self, info: Any, business_area_slug: str, **kwargs: Any) -> List[RapidProFlow]:
+    def resolve_all_rapid_pro_flows(self, info: Any, business_area_slug: str, **kwargs: Any) -> list[RapidProFlow]:
         api = RapidProAPI(business_area_slug, RapidProAPI.MODE_VERIFICATION)
         return api.get_flows()
 
-    def resolve_payment_record_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_payment_record_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Payment.STATUS_CHOICE)
 
-    def resolve_payment_record_entitlement_card_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_payment_record_entitlement_card_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Payment.ENTITLEMENT_CARD_STATUS_CHOICE)
 
-    def resolve_payment_record_delivery_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_payment_record_delivery_type_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(DeliveryMechanism.get_choices())
 
-    def resolve_cash_plan_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_cash_plan_verification_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.STATUS_CHOICES)
 
-    def resolve_cash_plan_verification_sampling_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_cash_plan_verification_sampling_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.SAMPLING_CHOICES)
 
     def resolve_cash_plan_verification_verification_channel_choices(
         self, info: Any, **kwargs: Any
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         return to_choice_object(PaymentVerificationPlan.VERIFICATION_CHANNEL_CHOICES)
 
-    def resolve_payment_verification_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_payment_verification_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
-    def resolve_all_delivery_mechanisms(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_all_delivery_mechanisms(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(DeliveryMechanism.get_choices())
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_payment_verification(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         filters = chart_filters_decoder(kwargs)
         result = payment_verification_chart_query(
             year,
@@ -1148,7 +1142,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_payment_verification_for_people(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         filters = chart_filters_decoder(kwargs)
         result = payment_verification_chart_query(
             year,
@@ -1168,7 +1162,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_volume_by_delivery_mechanism(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )
@@ -1191,7 +1185,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
-    def resolve_chart_payment(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict[str, Any]:
+    def resolve_chart_payment(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> dict[str, Any]:
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
         )
@@ -1215,7 +1209,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_section_total_transferred(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs)
         )
@@ -1225,7 +1219,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_table_total_cash_transferred_by_administrative_area(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
         admin_areas = total_cash_transferred_by_administrative_area_table_query(
@@ -1259,7 +1253,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_table_total_cash_transferred_by_administrative_area_for_people(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
         admin_areas = total_cash_transferred_by_administrative_area_table_query(
@@ -1291,7 +1285,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
-    def resolve_chart_total_transferred_cash_by_country(self, info: Any, year: int, **kwargs: Any) -> Dict[str, Any]:
+    def resolve_chart_total_transferred_cash_by_country(self, info: Any, year: int, **kwargs: Any) -> dict[str, Any]:
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, "global", {}, True)
 
         countries_and_amounts = (
@@ -1330,11 +1324,11 @@ class Query(graphene.ObjectType):
 
         return {"labels": labels, "datasets": datasets}
 
-    def resolve_currency_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_currency_choices(self, *args: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object([c for c in CURRENCY_CHOICES if c[0] != ""])
 
-    def resolve_payment_plan_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_payment_plan_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PaymentPlan.Status.choices)
 
-    def resolve_payment_plan_background_action_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_payment_plan_background_action_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(PaymentPlan.BackgroundActionStatus.choices)

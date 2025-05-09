@@ -55,9 +55,9 @@ def worker_int(worker: Any) -> None:
     for threadId, stack in sys._current_frames().items():
         code.append("\n# Thread: {}({})".format(id2name.get(threadId, ""), threadId))
         for filename, lineno, name, line in traceback.extract_stack(stack):
-            code.append('File: "{}", line {}, in {}'.format(filename, lineno, name))
+            code.append(f'File: "{filename}", line {lineno}, in {name}')
             if line:
-                code.append("  {}".format(line.strip()))
+                code.append(f"  {line.strip()}")
     worker.log.warning("\n".join(code))
 
 

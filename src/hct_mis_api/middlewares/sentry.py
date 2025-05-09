@@ -36,5 +36,4 @@ class SentryScopeMiddleware:
                 business_area = match.group("country") if match else self.business_area
             scope.set_tag("username", request.user.username)
             scope.set_tag("business_area", business_area)
-            response = self.get_response(request)
-        return response
+        return self.get_response(request)

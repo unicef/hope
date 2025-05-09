@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Type
+from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
@@ -44,7 +44,7 @@ class DashboardDataView(APIView):
         """
         is_global = business_area_slug.lower() == "global"
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        data_cache: Type[DashboardDataCache] = DashboardGlobalDataCache if is_global else DashboardDataCache
+        data_cache: type[DashboardDataCache] = DashboardGlobalDataCache if is_global else DashboardDataCache
 
         if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
             return Response(
@@ -107,7 +107,7 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
 
     template_name = "dashboard/dashboard.html"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)

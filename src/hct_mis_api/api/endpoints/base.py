@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -40,15 +40,18 @@ class HOPEAPIView(APIView):
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
         ret = super().dispatch(request, *args, **kwargs)
-        if request.method.upper() in self.log_http_methods and (ret.status_code < 300 or ret.status_code > 400):
-            if request.auth:
-                log = APILogEntry.objects.create(
-                    token=request.auth,
-                    url=request.path,
-                    method=request.method.upper(),
-                    status_code=ret.status_code,
-                )
-                assert log.pk
+        if (
+            request.method.upper() in self.log_http_methods
+            and (ret.status_code < 300 or ret.status_code > 400)
+            and request.auth
+        ):
+            log = APILogEntry.objects.create(
+                token=request.auth,
+                url=request.path,
+                method=request.method.upper(),
+                status_code=ret.status_code,
+            )
+            assert log.pk
 
         return ret
 
@@ -74,7 +77,7 @@ class HOPEAPIBusinessAreaViewSet(SelectedBusinessAreaMixin, HOPEAPIViewSet):
 
 class ConstanceSettingsAPIView(HOPEAPIView):
     def get(self, request: HttpRequest) -> Response:
-        rest_settings: Dict[str, Any] = {}
+        rest_settings: dict[str, Any] = {}
         for setting_name in dir(config):
             if setting_name.startswith("REST_"):
                 setting_value = getattr(config, setting_name)

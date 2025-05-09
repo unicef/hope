@@ -1,7 +1,7 @@
 import json
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -83,11 +83,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         )
         self.business_area = BusinessArea.objects.get(id=business_area_id)
 
-        self.reduced_submissions: List[Any] = []
-        self.attachments: List[Dict] = []
+        self.reduced_submissions: list[Any] = []
+        self.attachments: list[dict] = []
         super().__init__()
 
-    def _handle_image_field(self, value: Any, is_flex_field: bool) -> Optional[Union[str, File]]:
+    def _handle_image_field(self, value: Any, is_flex_field: bool) -> str | File | None:
         logger.info(f"Processing image field: {value}")
         if not self.registration_data_import.pull_pictures:
             return None
@@ -117,9 +117,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             return value
         return float(value)
 
-    def _cast_and_assign(
-        self, value: Union[str, list], field: str, obj: Union[PendingIndividual, PendingHousehold]
-    ) -> None:
+    def _cast_and_assign(self, value: str | list, field: str, obj: PendingIndividual | PendingHousehold) -> None:
         complex_fields = {
             "IMAGE": self._handle_image_field,
             "GEOPOINT": self._handle_geopoint_field,
@@ -149,7 +147,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         else:
             setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(self, documents_and_identities: List) -> None:
+    def _handle_documents_and_identities(self, documents_and_identities: list) -> None:
         identity_fields = {
             "scope_id",
             "unhcr_id",
@@ -194,7 +192,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         PendingIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
-    def _handle_collectors(collectors_dict: Dict, individuals_dict: Dict) -> None:
+    def _handle_collectors(collectors_dict: dict, individuals_dict: dict) -> None:
         collectors_to_bulk_create = []
         for hash_key, collectors_list in collectors_dict.items():
             for collector in collectors_list:
@@ -206,7 +204,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     def execute(
         self,
         import_data_id: str,
-        program_id: Optional[str] = None,
+        program_id: str | None = None,
     ) -> None:
         self.registration_data_import.status = RegistrationDataImport.IMPORTING
         self.registration_data_import.save()
@@ -360,7 +358,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             name = i_field.replace("_i_c", "")
                             current_individual_bank_account["individual"] = individual_obj
                             current_individual_bank_account[name] = i_value
-                        elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
+                        elif i_field.endswith(("_h_c", "_h_f")):
                             try:
                                 self._cast_and_assign(i_value, i_field, household_obj)
                             except Exception as e:

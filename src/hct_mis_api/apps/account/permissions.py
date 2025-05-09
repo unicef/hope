@@ -2,7 +2,7 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Iterable
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 @unique
 class Permissions(Enum):
     def _generate_next_value_(  # type: ignore # https://github.com/python/mypy/issues/7591
-        name: str, start: int, count: int, last_values: List[Any]
+        name: str, start: int, count: int, last_values: list[Any]
     ) -> Any:
         return name
 
@@ -244,7 +244,7 @@ class Permissions(Enum):
     CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
 
     @classmethod
-    def choices(cls) -> Tuple:
+    def choices(cls) -> tuple:
         return tuple((i.value, i.value.replace("_", " ")) for i in cls)
 
 
@@ -338,7 +338,7 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     return any(user.has_perm(permission.name, obj) for permission in permissions)
 
 
-def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
+def hopePermissionClass(permission: Permissions) -> type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info: Any, **kwargs: Any) -> bool:
@@ -351,7 +351,7 @@ def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
     return XDPerm
 
 
-def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
+def hopeOneOfPermissionClass(*permissions: Permissions) -> type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod
         def has_permission(cls, info: Any, **kwargs: Any) -> bool:
@@ -365,14 +365,14 @@ def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
 class AdminUrlNodeMixin:
     admin_url = graphene.String()
 
-    def resolve_admin_url(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
+    def resolve_admin_url(self, info: Any, **kwargs: Any) -> graphene.String | None:
         if info.context.user.is_superuser:
             return self.admin_url
         return None
 
 
 class BaseNodePermissionMixin:
-    permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,)
+    permission_classes: tuple[type[BasePermission], ...] = (AllowAny,)
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Any) -> None:
@@ -384,7 +384,7 @@ class BaseNodePermissionMixin:
             raise PermissionDenied("Permission Denied")
 
     @classmethod
-    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Model | None:
         try:
             if "get_object_queryset" in kwargs:
                 object_instance = kwargs.get("get_object_queryset").get(pk=object_id)
@@ -423,12 +423,12 @@ class BaseNodePermissionMixin:
 class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
     def __init__(
         self,
-        type: Type,
-        fields: Optional[Any] = None,
-        order_by: Optional[Any] = None,
-        extra_filter_meta: Optional[Any] = None,
-        filterset_class: Optional[Any] = None,
-        permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,),
+        type: type,
+        fields: Any | None = None,
+        order_by: Any | None = None,
+        extra_filter_meta: Any | None = None,
+        filterset_class: Any | None = None,
+        permission_classes: tuple[type[BasePermission], ...] = (AllowAny,),
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -441,7 +441,7 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         super().__init__(type, *args, **kwargs)
 
     @property
-    def args(self) -> Dict:
+    def args(self) -> dict:
         return to_arguments(self._base_args or OrderedDict(), self.filtering_args)
 
     @args.setter
@@ -452,7 +452,7 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
     def filterset_class(self) -> Any:
         if not self._filterset_class:
             fields = self._fields or self.node_type._meta.filter_fields
-            meta = dict(model=self.model, fields=fields)
+            meta = {"model": self.model, "fields": fields}
             if self._extra_filter_meta:
                 meta.update(self._extra_filter_meta)
 
@@ -499,9 +499,9 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         iterable: Iterable,
         info: Any,
         args: Any,
-        filtering_args: List,
+        filtering_args: list,
         filterset_class: Any,
-        permission_classes: List,
+        permission_classes: list,
     ) -> Any:
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if business_area := info.context.headers.get("Business-Area"):
@@ -533,7 +533,7 @@ class DjangoPermissionFilterConnectionField(DjangoPermissionFilterFastConnection
 
 class BaseMutationPermissionMixin:
     @classmethod
-    def is_authenticated(cls, info: Any) -> Optional[bool]:
+    def is_authenticated(cls, info: Any) -> bool | None:
         if not info.context.user.is_authenticated:
             cls.raise_not_authenticated_error()
         return True
@@ -543,7 +543,7 @@ class BaseMutationPermissionMixin:
         cls,
         info: Any,
         permission: Any,
-        business_area_arg: Union[str, BusinessArea],
+        business_area_arg: str | BusinessArea,
         raise_error: bool = True,
     ) -> bool:
         from hct_mis_api.apps.program.models import Program
@@ -561,11 +561,9 @@ class BaseMutationPermissionMixin:
         program = Program.objects.filter(id=get_program_id_from_headers(info.context.headers)).first()
 
         if not any(
-            [
-                permission.name
-                for permission in permissions
-                if info.context.user.has_perm(permission.name, program or business_area)
-            ]
+            permission.name
+            for permission in permissions
+            if info.context.user.has_perm(permission.name, program or business_area)
         ):
             return cls.raise_permission_denied_error(raise_error=raise_error)
         return True

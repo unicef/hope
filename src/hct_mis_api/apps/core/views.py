@@ -79,9 +79,8 @@ class UploadFile(UploadFilePermissionMixin, View):
             new_file.save()
             messages.success(request, f"File {new_file.file.name} has been successfully uploaded.")
             return HttpResponseRedirect(reverse("upload-file"))
-        else:
-            messages.error(request, self.format_form_error(form))
-            return render(request, self.template_name, {"form": StorageFileForm(user=user)})
+        messages.error(request, self.format_form_error(form))
+        return render(request, self.template_name, {"form": StorageFileForm(user=user)})
 
     @property
     def template_name(self) -> str:

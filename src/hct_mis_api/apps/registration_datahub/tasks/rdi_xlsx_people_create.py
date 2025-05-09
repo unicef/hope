@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable
 
 from django.db import transaction
 
@@ -46,9 +46,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     def __init__(self) -> None:
         super().__init__()
-        self.index_id: Optional[int] = None
+        self.index_id: int | None = None
         self.households_to_update = []
-        self.COMBINED_FIELDS: Dict = {
+        self.COMBINED_FIELDS: dict = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM])
             .apply_business_area()
             .to_dict_by("xlsx_field"),
@@ -81,7 +81,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     def _create_hh_ind(
-        self, obj_to_create: Any, row: Any, first_row: Any, complex_fields: Dict, complex_types: Dict, sheet_title: str
+        self, obj_to_create: Any, row: Any, first_row: Any, complex_fields: dict, complex_types: dict, sheet_title: str
     ) -> None:
         registration_data_import = obj_to_create.registration_data_import
         excluded = ("pp_age", "pp_index_id")
@@ -196,7 +196,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         delivery_mechanism_xlsx_fields = DeliveryMechanismData.get_scope_delivery_mechanisms_fields(by="xlsx_field")
 
-        complex_fields: Dict[str, Dict[str, Callable]] = {
+        complex_fields: dict[str, dict[str, Callable]] = {
             "individuals": {
                 "pp_photo_i_c": self._handle_image_field,
                 "pp_primary_collector_id": self._handle_collectors,
@@ -229,14 +229,14 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         complex_fields["individuals"].update(
             {f"pp_{field}": self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
         )
-        document_complex_types: Dict[str, Callable] = {}
+        document_complex_types: dict[str, Callable] = {}
         for document_type in DocumentType.objects.all():
             document_complex_types[f"pp_{document_type.key}_i_c"] = self._handle_document_fields
             document_complex_types[f"pp_{document_type.key}_no_i_c"] = self._handle_document_fields
             document_complex_types[f"pp_{document_type.key}_photo_i_c"] = self._handle_document_photo_fields
             document_complex_types[f"pp_{document_type.key}_issuer_i_c"] = self._handle_document_issuing_country_fields
         complex_fields["individuals"].update(document_complex_types)
-        complex_types: Dict[str, Callable] = {
+        complex_types: dict[str, Callable] = {
             "GEOPOINT": self._handle_geopoint_field,
             "IMAGE": self._handle_image_field,
             "DECIMAL": self._handle_decimal_field,

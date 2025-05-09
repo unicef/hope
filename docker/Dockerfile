@@ -76,11 +76,11 @@ RUN --mount=type=cache,target=/root/.uv-cache \
     uv sync --cache-dir=/root/.uv-cache \
         --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-editable --frozen --extra distribution --no-install-package hope
+        --no-editable --frozen --group dev --no-install-package hope
 COPY ./tests ./tests
 COPY ./src/data $APP_PATH/data
 COPY ./manage.py ./manage.py
-COPY .flake8 pyproject.toml uv.lock MANIFEST.in ./
+COPY pyproject.toml uv.lock ruff.toml tox.ini MANIFEST.in ./
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
@@ -102,7 +102,7 @@ COPY ./src/ ./src/
 COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hct_mis_api/apps/web/static/web
 RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-dev --no-editable --frozen --extra distribution
+        --no-dev --no-editable --frozen
 
 
 ## Dist (backend only) image

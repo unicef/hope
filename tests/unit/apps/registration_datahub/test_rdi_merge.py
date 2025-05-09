@@ -515,16 +515,14 @@ class TestRdiMergeTask(TestCase):
         )
         self.set_imported_individuals(household)
         external_collector = PendingIndividualFactory(
-            **{
-                "full_name": "External Collector",
-                "given_name": "External",
-                "family_name": "Collector",
-                "relationship": NON_BENEFICIARY,
-                "birth_date": "1962-02-02",  # age 39
-                "sex": "OTHER",
-                "registration_data_import": self.rdi,
-                "email": "xd@com",
-            }
+            full_name="External Collector",
+            given_name="External",
+            family_name="Collector",
+            relationship=NON_BENEFICIARY,
+            birth_date="1962-02-02",
+            sex="OTHER",
+            registration_data_import=self.rdi,
+            email="xd@com",
         )
         role = PendingIndividualRoleInHousehold(individual=external_collector, household=household, role=ROLE_ALTERNATE)
         role.save()

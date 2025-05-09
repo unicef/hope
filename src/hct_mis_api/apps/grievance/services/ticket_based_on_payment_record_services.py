@@ -1,5 +1,4 @@
 from base64 import b64decode
-from typing import Dict, List, Optional, Type
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -14,8 +13,8 @@ from hct_mis_api.apps.payment.models import Payment
 
 
 def create_tickets_based_on_payment_records_service(
-    grievance_ticket: GrievanceTicket, details: Dict, model: Type
-) -> List[GrievanceTicket]:
+    grievance_ticket: GrievanceTicket, details: dict, model: type
+) -> list[GrievanceTicket]:
     individual_encoded_id = details.get("individual")
     individual = decode_and_get_object(individual_encoded_id, Individual, False)
 
@@ -36,7 +35,7 @@ def create_tickets_based_on_payment_records_service(
         grievance_tickets_to_return = [grievance_ticket]
 
     # for the first ticket_details use already create grievance_ticket
-    ticket: Optional[GrievanceTicket] = grievance_ticket
+    ticket: GrievanceTicket | None = grievance_ticket
     # create linked tickets for all payment ids
     for payment_record_encoded_id in payment_record_encoded_ids_list:
         node_name, obj_id = b64decode(payment_record_encoded_id).decode().split(":")
@@ -66,7 +65,7 @@ def create_tickets_based_on_payment_records_service(
 
 
 def update_ticket_based_on_payment_record_service(
-    grievance_ticket: GrievanceTicket, extras: Dict, input_data: Dict
+    grievance_ticket: GrievanceTicket, extras: dict, input_data: dict
 ) -> GrievanceTicket:
     ticket_details = grievance_ticket.ticket_details
 

@@ -1,6 +1,6 @@
 import logging
 import mimetypes
-from typing import Any, Optional
+from typing import Any
 
 from django.db import transaction
 from django.db.models import QuerySet
@@ -160,7 +160,8 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             old_payment_plan.export_file_per_fsp = copy_model_object(payment_plan.export_file_per_fsp)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=input_data, user=request.user  # type: ignore
+            input_data=input_data,
+            user=request.user,  # type: ignore
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -171,7 +172,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             new_object=payment_plan,
         )
 
-    def _get_action_permission(self, action_name: str) -> Optional[str]:
+    def _get_action_permission(self, action_name: str) -> str | None:
         action_to_permissions_map = {
             PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
             PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,

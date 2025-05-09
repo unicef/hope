@@ -1,7 +1,6 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from django.forms.models import inlineformset_factory
-from django.forms.utils import ErrorList
 from django.test import TestCase
 
 from hct_mis_api.apps.account.admin.forms import (
@@ -21,6 +20,9 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea
+
+if TYPE_CHECKING:
+    from django.forms.utils import ErrorList
 
 
 class RoleAssignmentsTest(TestCase):

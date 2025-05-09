@@ -316,7 +316,7 @@ class TestFeedback:
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         pageFeedback.disappearTableRowLoading()
-        assert 1 == len(pageFeedback.getRows())
+        assert len(pageFeedback.getRows()) == 1
         assert "Negative Feedback" in pageFeedback.getRow(0).find_elements("tag name", "td")[1].text
 
         pageFeedback.selectGlobalProgramFilter("Draft Program")
@@ -324,7 +324,7 @@ class TestFeedback:
         pageFeedback.wait_for_disappear(pageFeedback.navGrievanceDashboard)
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
-        assert 0 == len(pageFeedback.getRows())
+        assert len(pageFeedback.getRows()) == 0
 
         pageFeedback.selectGlobalProgramFilter("All Programmes")
         assert "Programme Management" in pageProgrammeDetails.getHeaderTitle().text
@@ -332,7 +332,7 @@ class TestFeedback:
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         pageFeedback.disappearTableRowLoading()
-        assert 2 == len(pageFeedback.getRows())
+        assert len(pageFeedback.getRows()) == 2
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_create_feedback_with_household(

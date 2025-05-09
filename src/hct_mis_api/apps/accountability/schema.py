@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
@@ -131,13 +131,13 @@ class Query(graphene.ObjectType):
 
         return queryset
 
-    def resolve_survey_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_survey_category_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Survey.CATEGORY_CHOICES)
 
-    def resolve_feedback_issue_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_feedback_issue_type_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Feedback.ISSUE_TYPE_CHOICES)
 
-    def resolve_accountability_communication_message_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict:
+    def resolve_accountability_communication_message_sample_size(self, info: Any, input: dict, **kwargs: Any) -> dict:
         verifier = MessageArgumentVerifier(input)
         verifier.verify()
 
@@ -151,7 +151,7 @@ class Query(graphene.ObjectType):
             "sample_size": sample_size,
         }
 
-    def resolve_accountability_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict:
+    def resolve_accountability_sample_size(self, info: Any, input: dict, **kwargs: Any) -> dict:
         if payment_plan := input.get("payment_plan"):
             obj = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan))
             households = Household.objects.filter(payment__parent=obj)
@@ -169,6 +169,6 @@ class Query(graphene.ObjectType):
             "sample_size": sample_size,
         }
 
-    def resolve_survey_available_flows(self, info: Any, *args: Any, **kwargs: Any) -> List:
+    def resolve_survey_available_flows(self, info: Any, *args: Any, **kwargs: Any) -> list:
         api = RapidProAPI(info.context.headers["Business-Area"], RapidProAPI.MODE_SURVEY)
         return api.get_flows()

@@ -168,7 +168,7 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
 
         self.individual.refresh_from_db()
         self.assertEqual(self.individual.deduplication_batch_status, UNIQUE_IN_BATCH)
-        self.assertEqual(self.individual.deduplication_golden_record_results, dict())
+        self.assertEqual(self.individual.deduplication_golden_record_results, {})
 
         self.add_individual_grievance_ticket.refresh_from_db()
         self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_CLOSED)

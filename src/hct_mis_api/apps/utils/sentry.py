@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from typing import Any, Callable, Optional, Type
+from typing import Any, Callable
 
 from sentry_sdk import configure_scope, set_tag
 
@@ -33,21 +33,19 @@ class SentryFilter:
     }
 
     @staticmethod
-    def filter_exception(exc_info: dict, exc_to_filter: Type[Exception], msg_to_filter: Optional[str] = None) -> bool:
+    def filter_exception(exc_info: dict, exc_to_filter: type[Exception], msg_to_filter: str | None = None) -> bool:
         exc_type, exc_value, tb = exc_info
         if not isinstance(exc_value, exc_to_filter):
             return False
-        if msg_to_filter and msg_to_filter not in getattr(exc_value, "message", str(exc_value)):
-            return False
-        return True
+        return not (msg_to_filter and msg_to_filter not in getattr(exc_value, "message", str(exc_value)))
 
     @staticmethod
     def filter_log(
         log_record: logging.LogRecord,
         logger: str,
-        severity: Optional[str] = None,
-        msg_to_filter: Optional[str] = None,
-        exc_text: Optional[str] = None,
+        severity: str | None = None,
+        msg_to_filter: str | None = None,
+        exc_text: str | None = None,
     ) -> bool:
         if log_record.name != logger:
             return False
@@ -55,21 +53,15 @@ class SentryFilter:
             return False
         if msg_to_filter and msg_to_filter not in log_record.msg:
             return False
-        if exc_text and exc_text not in getattr(log_record, "exc_text", ""):
-            return False
-        return True
+        return not (exc_text and exc_text not in getattr(log_record, "exc_text", ""))
 
     def filter_exceptions(self, hint: dict) -> bool:
-        if self.is_graphql_permission_denied_exception(hint["exc_info"]):
-            return True
-        return False
+        return bool(self.is_graphql_permission_denied_exception(hint["exc_info"]))
 
-    def filter_logs(self, hint: dict, url: Optional[str] = None) -> bool:
-        if self.is_graphql_permission_denied_log_error(hint, url):
-            return True
-        return False
+    def filter_logs(self, hint: dict, url: str | None = None) -> bool:
+        return bool(self.is_graphql_permission_denied_log_error(hint, url))
 
-    def before_send(self, event: dict, hint: dict) -> Optional[dict]:
+    def before_send(self, event: dict, hint: dict) -> dict | None:
         url = event.get("transaction")
         if url and url in self.IGNORABLE_URLS:
             return None
@@ -81,7 +73,7 @@ class SentryFilter:
 
         return event
 
-    def is_graphql_permission_denied_log_error(self, hint: dict, url: Optional[str] = None) -> bool:
+    def is_graphql_permission_denied_log_error(self, hint: dict, url: str | None = None) -> bool:
         if not url:
             return False
         if not url.startswith("/api/graphql"):

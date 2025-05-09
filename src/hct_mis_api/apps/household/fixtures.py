@@ -1,5 +1,5 @@
 import random
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from django.conf import settings
 
@@ -47,7 +47,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 faker = Faker()
 
 
-def flex_field_households(o: Any) -> Dict:
+def flex_field_households(o: Any) -> dict:
     return {
         "treatment_facility_h_f": random.sample(
             [
@@ -65,7 +65,7 @@ def flex_field_households(o: Any) -> Dict:
     }
 
 
-def flex_field_individual(o: Any) -> Dict:
+def flex_field_individual(o: Any) -> dict:
     return {
         "wellbeing_index_i_f": random.choice(["24", "150d", "666", None]),
         "school_enrolled_before_i_f": random.choice(["0", "1", None]),
@@ -325,8 +325,8 @@ class EntitlementCardFactory(DjangoModelFactory):
 
 
 def create_household(
-    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
-) -> Tuple[Household, List[Individual]]:
+    household_args: dict | None = None, individual_args: dict | None = None
+) -> tuple[Household, list[Individual]]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -379,8 +379,8 @@ def create_household(
 
 
 def create_household_with_individual_with_collectors(
-    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
-) -> Tuple[Household, List[Individual]]:
+    household_args: dict | None = None, individual_args: dict | None = None
+) -> tuple[Household, list[Individual]]:
     """HH.size default is 2, first Ind is Primary Collector and second id so will be Alternate Collector"""
     if household_args is None:
         household_args = {}
@@ -443,8 +443,8 @@ def create_household_with_individual_with_collectors(
 
 
 def create_household_for_fixtures(
-    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
-) -> Tuple[Household, Individual]:
+    household_args: dict | None = None, individual_args: dict | None = None
+) -> tuple[Household, Individual]:
     if household_args is None:
         household_args = {}
     if individual_args is None:
@@ -505,8 +505,8 @@ def create_household_for_fixtures(
 
 
 def create_household_and_individuals(
-    household_data: Optional[Dict] = None, individuals_data: Optional[List[Dict]] = None, imported: bool = False
-) -> Tuple[Household, List[Individual]]:
+    household_data: dict | None = None, individuals_data: list[dict] | None = None, imported: bool = False
+) -> tuple[Household, list[Individual]]:
     if household_data is None:
         household_data = {}
     if individuals_data is None:
@@ -528,7 +528,7 @@ def create_household_and_individuals(
             individual_data["program"] = household.program
         if "registration_data_import" not in individual_data:
             individual_data["registration_data_import"] = household.registration_data_import
-    individuals: List[Individual] = [
+    individuals: list[Individual] = [
         IndividualFactory(
             household=None,
             **individual_data,
@@ -550,10 +550,9 @@ def create_household_and_individuals(
     return household, individuals
 
 
-def create_individual_document(individual: Individual, document_type: Optional[str] = None) -> Document:
+def create_individual_document(individual: Individual, document_type: str | None = None) -> Document:
     additional_fields = {}
     if document_type:
         document_type = DocumentTypeFactory(type=document_type)
         additional_fields["type"] = document_type
-    document = DocumentFactory(individual=individual, **additional_fields)
-    return document
+    return DocumentFactory(individual=individual, **additional_fields)

@@ -1,5 +1,5 @@
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 from requests import Response, session
 from requests.adapters import HTTPAdapter
@@ -46,9 +46,7 @@ class BaseAPI:
 
         return response
 
-    def _post(
-        self, endpoint: str, data: Optional[Union[Dict, List]] = None, validate_response: bool = True
-    ) -> Tuple[Dict, int]:
+    def _post(self, endpoint: str, data: dict | list | None = None, validate_response: bool = True) -> tuple[dict, int]:
         response = self._client.post(f"{self.api_url}{endpoint}", json=data)
         if validate_response:
             response = self.validate_response(response)
@@ -57,12 +55,12 @@ class BaseAPI:
         except ValueError:
             return {}, response.status_code
 
-    def _get(self, endpoint: str, params: Optional[Dict] = None) -> Tuple[Dict, int]:
+    def _get(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
         response = self._client.get(f"{self.api_url}{endpoint}", params=params)
         response = self.validate_response(response)
         return response.json(), response.status_code
 
-    def _delete(self, endpoint: str, params: Optional[Dict] = None) -> Tuple[Dict, int]:
+    def _delete(self, endpoint: str, params: dict | None = None) -> tuple[dict, int]:
         response = self._client.delete(f"{self.api_url}{endpoint}", params=params)
         response = self.validate_response(response)
         try:
@@ -94,11 +92,9 @@ class ActionMixin:
     def get_permissions(self) -> Any:
         if self.action in self.permission_classes_by_action:
             return [permission() for permission in self.permission_classes_by_action[self.action]]
-        else:
-            return super().get_permissions()  # pragma: no cover
+        return super().get_permissions()  # pragma: no cover
 
     def get_serializer_class(self) -> Any:
         if self.action in self.serializer_classes_by_action:
             return self.serializer_classes_by_action[self.action]
-        else:
-            return super().get_serializer_class()  # pragma: no cover
+        return super().get_serializer_class()  # pragma: no cover

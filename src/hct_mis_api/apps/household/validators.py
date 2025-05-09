@@ -1,5 +1,5 @@
 import logging
-from typing import IO, Any, List
+from typing import IO, Any
 
 from django.core.exceptions import ValidationError
 
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class HouseholdValidator(BaseValidator):
-    def validate_consent(self, files: List[IO], *args: Any, **kwargs: Any) -> None:
+    def validate_consent(self, files: list[IO], *args: Any, **kwargs: Any) -> None:
         if self.__name__.startswith("Create") and not files:
             logger.error("Consent image is required.")
             raise ValidationError("Consent image is required.")

@@ -45,4 +45,3 @@ services:
       - elasticsearch
     env_file:
       - .env-selenium
-

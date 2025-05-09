@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class ProgramValidator(BaseValidator):
     @classmethod
-    def validate_status_change(cls, *args: Any, **kwargs: Any) -> Optional[None]:
+    def validate_status_change(cls, *args: Any, **kwargs: Any) -> None | None:
         status_to_set = kwargs.get("program_data").get("status")
         program = kwargs.get("program")
         current_status = program.status
@@ -28,10 +28,10 @@ class ProgramValidator(BaseValidator):
         if current_status == Program.DRAFT and status_to_set != Program.ACTIVE:
             logger.error("Draft status can only be changed to Active")
             raise ValidationError("Draft status can only be changed to Active")
-        elif current_status == Program.ACTIVE and status_to_set != Program.FINISHED:
+        if current_status == Program.ACTIVE and status_to_set != Program.FINISHED:
             logger.error("Active status can only be changed to Finished")
             raise ValidationError("Active status can only be changed to Finished")
-        elif current_status == Program.FINISHED and status_to_set != Program.ACTIVE:
+        if current_status == Program.FINISHED and status_to_set != Program.ACTIVE:
             logger.error("Finished status can only be changed to Active")
             raise ValidationError("Finished status can only be changed to Active")
 
@@ -54,7 +54,7 @@ class ProgramValidator(BaseValidator):
                 raise ValidationError("Cannot finish programme without end date")
 
     @classmethod
-    def validate_end_date(cls, *args: Any, **kwargs: Any) -> Optional[None]:
+    def validate_end_date(cls, *args: Any, **kwargs: Any) -> None | None:
         program = kwargs.get("program")
         start_date = kwargs.get("start_date")
         end_date = kwargs.get("end_date")
@@ -83,7 +83,7 @@ class ProgrammeCodeValidator(BaseValidator):
         cls,
         programme_code: str,
         business_area: "BusinessArea",
-        program: Optional[Program] = None,
+        program: Program | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -114,7 +114,7 @@ def validate_data_collecting_type(
 
     if not original_program_data_collecting_type:
         raise ValidationError("The original Programme must have a Data Collection Type.")
-    elif (
+    if (
         data_collecting_type.code != original_program_data_collecting_type.code
         and data_collecting_type not in original_program_data_collecting_type.compatible_types.all()
     ):

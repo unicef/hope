@@ -141,13 +141,13 @@ class TestPaymentSignature(APITestCase):
             ],
         }
 
-        input_data = dict(
-            business_area_slug="afghanistan",
-            name="paymentPlanName",
-            program_cycle_id=program_cycle_id,
-            targeting_criteria=targeting_criteria,
-            excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
-        )
+        input_data = {
+            "business_area_slug": "afghanistan",
+            "name": "paymentPlanName",
+            "program_cycle_id": program_cycle_id,
+            "targeting_criteria": targeting_criteria,
+            "excluded_ids": "TEST_INVALID_ID_01, TEST_INVALID_ID_02",
+        }
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
             pp = PaymentPlanService.create(

@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from typing import IO, TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import IO, TYPE_CHECKING, Any
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -66,11 +66,11 @@ logger = logging.getLogger(__name__)
 
 @transaction.atomic()
 def create_registration_data_import_objects(
-    registration_data_import_data: Dict,
+    registration_data_import_data: dict,
     user: "User",
     data_source: str,
     allow_delivery_mechanisms_validation_errors: bool = False,
-) -> Tuple[RegistrationDataImport, ImportData, BusinessArea]:
+) -> tuple[RegistrationDataImport, ImportData, BusinessArea]:
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
 
@@ -108,10 +108,10 @@ def create_registration_data_import_objects(
 
 @transaction.atomic()
 def create_registration_data_import_for_import_program_population(
-    registration_data_import_data: Dict,
+    registration_data_import_data: dict,
     user: "User",
     import_to_program_id: str,
-) -> Tuple[RegistrationDataImport, BusinessArea]:
+) -> tuple[RegistrationDataImport, BusinessArea]:
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
@@ -148,7 +148,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
 
     @classmethod
     def validate_import_data(
-        cls, import_data_id: Optional[str], allow_delivery_mechanisms_validation_errors: bool = False
+        cls, import_data_id: str | None, allow_delivery_mechanisms_validation_errors: bool = False
     ) -> None:
         import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
         if import_data.status != ImportData.STATUS_FINISHED and not (
@@ -164,7 +164,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
     @transaction.atomic()
     @is_authenticated
     def processed_mutate(
-        cls, root: Any, info: Any, registration_data_import_data: Dict
+        cls, root: Any, info: Any, registration_data_import_data: dict
     ) -> "RegistrationXlsxImportMutation":
         allow_delivery_mechanisms_validation_errors = registration_data_import_data.pop(
             "allow_delivery_mechanisms_validation_errors", False
@@ -228,7 +228,7 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
     @transaction.atomic()
     @is_authenticated
     def processed_mutate(
-        cls, root: Any, info: Any, registration_data_import_data: Dict
+        cls, root: Any, info: Any, registration_data_import_data: dict
     ) -> "RegistrationProgramPopulationImportMutation":
         import_to_program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=import_to_program_id)
@@ -313,7 +313,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(
-        cls, root: Any, info: Any, registration_data_import_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, registration_data_import_id: str | None, **kwargs: Any
     ) -> "RegistrationDeduplicationMutation":
         registration_data_import_id = decode_id_string(registration_data_import_id)
         old_rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -348,7 +348,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     @transaction.atomic()
     @is_authenticated
     def processed_mutate(
-        cls, root: Any, info: Any, registration_data_import_data: Dict
+        cls, root: Any, info: Any, registration_data_import_data: dict
     ) -> RegistrationXlsxImportMutation:
         allow_delivery_mechanisms_validation_errors = registration_data_import_data.pop(
             "allow_delivery_mechanisms_validation_errors", False
@@ -410,7 +410,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
-    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "MergeRegistrationDataImportMutation":
+    def mutate(cls, root: Any, info: Any, id: str | None, **kwargs: Any) -> "MergeRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(
             id=decode_id,
@@ -458,7 +458,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
-    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "RefuseRegistrationDataImportMutation":
+    def mutate(cls, root: Any, info: Any, id: str | None, **kwargs: Any) -> "RefuseRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
         obj_hct = RegistrationDataImport.objects.get(id=decode_id)
@@ -503,7 +503,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
     @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
-    def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "EraseRegistrationDataImportMutation":
+    def mutate(cls, root: Any, info: Any, id: str | None, **kwargs: Any) -> "EraseRegistrationDataImportMutation":
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(id=decode_id)
         obj_hct = RegistrationDataImport.objects.get(id=decode_id)

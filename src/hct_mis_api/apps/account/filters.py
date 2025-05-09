@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from django.contrib.auth import get_user_model
 from django.db.models import Q
@@ -81,13 +81,13 @@ class UsersFilter(FilterSet):
             | Q(role_assignments__program=None, role_assignments__business_area=business_area)
         )
 
-    def partners_filter(self, qs: "QuerySet", name: str, values: List["UUID"]) -> "QuerySet[User]":
+    def partners_filter(self, qs: "QuerySet", name: str, values: list["UUID"]) -> "QuerySet[User]":
         q_obj = Q()
         for value in values:
             q_obj |= Q(partner__id=value)
         return qs.filter(q_obj)
 
-    def roles_filter(self, qs: "QuerySet", name: str, values: List) -> "QuerySet[User]":
+    def roles_filter(self, qs: "QuerySet", name: str, values: list) -> "QuerySet[User]":
         business_area_slug = self.data.get("business_area")
         q_obj = Q()
         for value in values:

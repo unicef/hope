@@ -1,6 +1,5 @@
 import json
 import logging
-from typing import Dict, Optional
 
 from hct_mis_api.apps.steficon.config import (
     SAFETY_HIGH,
@@ -17,13 +16,11 @@ logger = logging.getLogger(__name__)
 # SAFETY_HIGH = 3  # only accept json values
 
 
-def clean_context(context: Dict) -> Optional[Dict]:
+def clean_context(context: dict) -> dict | None:
     try:
-        if config.SAFETY_LEVEL == SAFETY_NONE:
+        if config.SAFETY_LEVEL == SAFETY_NONE or config.SAFETY_LEVEL == SAFETY_STANDARD:
             return context
-        elif config.SAFETY_LEVEL == SAFETY_STANDARD:
-            return context
-        elif config.SAFETY_LEVEL == SAFETY_HIGH:
+        if config.SAFETY_LEVEL == SAFETY_HIGH:
             return json.loads(json.dumps(context))
     except Exception as e:
         logger.exception(e)

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django import forms
 from django.conf import settings
@@ -34,7 +34,7 @@ class ElasticsearchPanel:
     def rebuild_search_index(self, request: HttpRequest) -> None:
         rebuild_search_index()
 
-    def __call__(self, model_admin: Any, request: HttpRequest, extra_context: Optional[Dict] = None) -> HttpResponse:
+    def __call__(self, model_admin: Any, request: HttpRequest, extra_context: dict | None = None) -> HttpResponse:
         context = model_admin.each_context(request)
         context["config"] = {
             "ELASTICSEARCH_HOST": settings.ELASTICSEARCH_HOST,

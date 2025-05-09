@@ -1,6 +1,6 @@
 import contextlib
 import logging
-from typing import Iterable, Tuple
+from typing import Iterable
 
 from django.core.cache import cache
 from django.db import transaction
@@ -155,7 +155,7 @@ class RdiMergeTask:
 
     def _create_grievance_ticket_for_delivery_mechanisms_errors(
         self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
-    ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
+    ) -> tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
         comments = f"This is a system generated ticket for RDI {obj_hct}"
         grievance_ticket = GrievanceTicket(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,

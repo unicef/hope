@@ -2,7 +2,7 @@ import contextlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import date, datetime
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Iterable
 from urllib.request import urlopen
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -33,10 +33,10 @@ class LoadSanctionListXMLTask:
 
     INDIVIDUAL_TAG_PATH = "INDIVIDUALS/INDIVIDUAL"
 
-    def __init__(self, file_path: Optional[str] = None) -> None:
+    def __init__(self, file_path: str | None = None) -> None:
         self.file_path = file_path
 
-        self.VALUES_PATHS: Dict[str, Any] = {
+        self.VALUES_PATHS: dict[str, Any] = {
             "data_id": "DATAID",
             "version_num": "VERSIONNUM",
             "first_name": "FIRST_NAME",
@@ -62,18 +62,18 @@ class LoadSanctionListXMLTask:
         }
 
     @staticmethod
-    def _get_text_from_path(individual_tag: ET.Element, path: str) -> Union[str, None]:
+    def _get_text_from_path(individual_tag: ET.Element, path: str) -> str | None:
         tag = individual_tag.find(path)
         if isinstance(tag, ET.Element):
             return tag.text
         return None
 
     @staticmethod
-    def _get_designation(individual_tag: ET.Element, *args: Any, **kwargs: Any) -> Union[str, None]:
+    def _get_designation(individual_tag: ET.Element, *args: Any, **kwargs: Any) -> str | None:
         designation_tag_name = "DESIGNATION"
         designation_tag = individual_tag.find(designation_tag_name)
         if isinstance(designation_tag, ET.Element):
-            designations: List[str] = [value_tag.text for value_tag in individual_tag.find(designation_tag_name)]
+            designations: list[str] = [value_tag.text for value_tag in individual_tag.find(designation_tag_name)]
             return " ".join(designations)
         return ""
 
@@ -144,19 +144,23 @@ class LoadSanctionListXMLTask:
             alias_name_tag = tag.find("ALIAS_NAME")
             is_valid_quality_tag = isinstance(quality_tag, ET.Element) and quality_tag.text
             is_valid_name_tag = isinstance(alias_name_tag, ET.Element) and alias_name_tag.text
-            if is_valid_quality_tag and is_valid_name_tag:
-                if quality_tag.text.lower() in ("good", "a.k.a") and alias_name_tag.text:
-                    aliases.add(
-                        SanctionListIndividualAliasName(
-                            individual=self._get_individual_from_db_or_file(individual),
-                            name=alias_name_tag.text,
-                        )
+            if (
+                is_valid_quality_tag
+                and is_valid_name_tag
+                and quality_tag.text.lower() in ("good", "a.k.a")
+                and alias_name_tag.text
+            ):
+                aliases.add(
+                    SanctionListIndividualAliasName(
+                        individual=self._get_individual_from_db_or_file(individual),
+                        name=alias_name_tag.text,
                     )
+                )
 
         return aliases
 
     @staticmethod
-    def _get_country_field(individual_tag: ET.Element, path: str, *args: Any, **kwargs: Any) -> Union[str, None, set]:
+    def _get_country_field(individual_tag: ET.Element, path: str, *args: Any, **kwargs: Any) -> str | None | set:
         tags = individual_tag.findall(path)
 
         countries = set()
@@ -189,13 +193,12 @@ class LoadSanctionListXMLTask:
             }
         return set()
 
-    def _get_country_of_birth(self, individual_tag: ET.Element, *args: Any, **kwargs: Any) -> Optional[str]:
+    def _get_country_of_birth(self, individual_tag: ET.Element, *args: Any, **kwargs: Any) -> str | None:
         path = "INDIVIDUAL_PLACE_OF_BIRTH/COUNTRY"
         countries = self._get_country_field(individual_tag, path)
         if isinstance(countries, set):
-            return sorted(list(countries), key=lambda country: country.name).pop()
-        else:
-            return countries
+            return sorted(countries, key=lambda country: country.name).pop()
+        return countries
 
     def _get_nationalities(
         self,
@@ -261,7 +264,7 @@ class LoadSanctionListXMLTask:
 
         return documents
 
-    def _get_individual_data(self, individual_tag: ET.Element) -> Dict:
+    def _get_individual_data(self, individual_tag: ET.Element) -> dict:
         individual_data_dict = {
             "individual": SanctionListIndividual(),
             "documents": None,
@@ -279,15 +282,15 @@ class LoadSanctionListXMLTask:
                 raw_value = self._get_text_from_path(individual_tag, path_or_func)
                 value = self._cast_field_value_to_correct_type(SanctionListIndividual, field_name, raw_value)
 
-            if hasattr(individual, field_name) and field_name not in individual_data_dict.keys():
+            if hasattr(individual, field_name) and field_name not in individual_data_dict:
                 setattr(individual, field_name, value)
-            elif field_name in individual_data_dict.keys():
+            elif field_name in individual_data_dict:
                 individual_data_dict[field_name] = value
 
         return individual_data_dict
 
     @cached_property
-    def _get_individual_fields(self) -> List[str]:
+    def _get_individual_fields(self) -> list[str]:
         excluded_fields = {
             "id",
             "history",
@@ -331,7 +334,7 @@ class LoadSanctionListXMLTask:
             )
         }
 
-    def _get_individuals_to_update(self, individuals_from_file: Iterable) -> Set[SanctionListIndividual]:
+    def _get_individuals_to_update(self, individuals_from_file: Iterable) -> set[SanctionListIndividual]:
         individuals_to_update = set()
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
         for individual in individuals_from_file:
@@ -352,11 +355,10 @@ class LoadSanctionListXMLTask:
 
     def _get_individuals_to_deactivate(self, individuals_from_file: Iterable[SanctionListIndividual]) -> QuerySet:
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
-        ids = self._get_all_individuals_from_db.difference(
+        return self._get_all_individuals_from_db.difference(
             self._get_existing_individuals(individuals_reference_numbers)
         ).values_list("id", flat=True)
         # need to return id's calling delete() on qs set all to inactive state
-        return ids
 
     @staticmethod
     def _get_reference_numbers_list(
@@ -410,12 +412,7 @@ class LoadSanctionListXMLTask:
             individual_data_dict = self._get_individual_data(individual_tag)
             individual = individual_data_dict["individual"]
             individual.full_name = (
-                (
-                    f"{individual.first_name} "
-                    f"{individual.second_name} "
-                    f"{individual.third_name} "
-                    f"{individual.fourth_name}"
-                )
+                (f"{individual.first_name} {individual.second_name} {individual.third_name} {individual.fourth_name}")
                 .strip()
                 .title()
             )

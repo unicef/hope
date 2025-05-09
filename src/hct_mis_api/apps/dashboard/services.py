@@ -1,7 +1,7 @@
 import calendar
 import json
 from collections import defaultdict
-from typing import Any, Dict, Optional, Protocol
+from typing import Any, Protocol
 
 from django.core.cache import cache
 from django.db.models import Case, Count, DecimalField, F, Q, Sum, Value, When
@@ -46,7 +46,7 @@ class DashboardDataCache(Protocol):
         return f"dashboard_data_{business_area_slug}"
 
     @classmethod
-    def get_data(cls, business_area_slug: str) -> Optional[Dict[str, Any]]:
+    def get_data(cls, business_area_slug: str) -> dict[str, Any] | None:
         """
         Retrieve cached dashboard data for a given business area.
         """
@@ -57,7 +57,7 @@ class DashboardDataCache(Protocol):
         return None
 
     @classmethod
-    def store_data(cls, business_area_slug: str, data: Dict[str, Any]) -> None:
+    def store_data(cls, business_area_slug: str, data: dict[str, Any]) -> None:
         """
         Store data in Redis cache for a given business area.
         """

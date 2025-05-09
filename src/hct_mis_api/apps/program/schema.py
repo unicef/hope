@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from django.db.models import (
     Case,
@@ -267,25 +267,25 @@ class Query(graphene.ObjectType):
             .order_by("custom_order", "start_date")
         )
 
-    def resolve_program_cycle_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_program_cycle_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(ProgramCycle.STATUS_CHOICE)
 
-    def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_program_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
 
-    def resolve_program_frequency_of_payments_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_program_frequency_of_payments_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.FREQUENCY_OF_PAYMENTS_CHOICE)
 
-    def resolve_program_sector_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_program_sector_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.SECTOR_CHOICE)
 
-    def resolve_program_scope_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_program_scope_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.SCOPE_CHOICE)
 
-    def resolve_cash_plan_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_cash_plan_status_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
 
-    def resolve_data_collecting_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def resolve_data_collecting_type_choices(self, info: Any, **kwargs: Any) -> list[dict[str, Any]]:
         return list(
             DataCollectingType.objects.filter(
                 Q(
@@ -306,7 +306,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
-    def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
+    def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> dict:
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = dict(Program.SECTOR_CHOICE)
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, business_area_slug, filters, True)
@@ -342,7 +342,7 @@ class Query(graphene.ObjectType):
     @cached_in_django_cache(24)
     def resolve_chart_total_transferred_by_month(
         self, info: Any, business_area_slug: str, year: int, **kwargs: Any
-    ) -> Dict:
+    ) -> dict:
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(
             year, business_area_slug, chart_filters_decoder(kwargs), True
         )

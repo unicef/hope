@@ -52,8 +52,7 @@ class ADUSerMixin:
     def _get_ad_form(self, request: HttpRequest) -> Form:
         if request.method == "POST":
             return self.ad_form_class(request.POST, request=request)
-        else:
-            return self.ad_form_class(request=request)
+        return self.ad_form_class(request=request)
 
     def _sync_ad_data(self, user: User) -> None:
         ms_graph = MicrosoftGraphAPI()
@@ -114,74 +113,71 @@ class ADUSerMixin:
         ctx = self.get_common_context(
             request,
             None,
-            **{
-                "change": True,
-                "is_popup": False,
-                "save_as": False,
-                "has_delete_permission": False,
-                "has_add_permission": False,
-                "has_change_permission": True,
-            },
+            change=True,
+            is_popup=False,
+            save_as=False,
+            has_delete_permission=False,
+            has_add_permission=False,
+            has_change_permission=True,
         )
         form = self._get_ad_form(request)
-        if request.method == "POST":
-            if form.is_valid():
-                emails = set(form.cleaned_data["emails"].split())
-                role = form.cleaned_data["role"]
-                business_area = form.cleaned_data["business_area"]
-                partner = form.cleaned_data["partner"]  # pragma: no cover
-                users_to_bulk_create = []
-                users_role_to_bulk_create = []
-                existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
-                results = self.Results([], [], [], [])
-                try:
-                    ms_graph = MicrosoftGraphAPI()
-                    for email in emails:
-                        try:
-                            if email in existing:
-                                user = account_models.User.objects.get(email=email)
-                                self._sync_ad_data(user)
-                                results.updated.append(user)
-                            else:
-                                user_data = ms_graph.get_user_data(email=email)
-                                user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                                user = account_models.User(**user_args, partner=partner)  # pragma: no cover
-                                if user.first_name is None:
-                                    user.first_name = ""
-                                if user.last_name is None:
-                                    user.last_name = ""
-                                job_title = user_data.get("jobTitle")
-                                if job_title is not None:
-                                    user.job_title = job_title
-                                user.set_unusable_password()
-                                users_to_bulk_create.append(user)
-                                global_business_area = BusinessArea.objects.filter(slug="global").first()
-                                basic_role = account_models.Role.objects.filter(name="Basic User").first()
-                                if global_business_area and basic_role:
-                                    users_role_to_bulk_create.append(
-                                        account_models.RoleAssignment(
-                                            business_area=global_business_area,
-                                            user=user,
-                                            role=basic_role,
-                                        )
+        if request.method == "POST" and form.is_valid():
+            emails = set(form.cleaned_data["emails"].split())
+            role = form.cleaned_data["role"]
+            business_area = form.cleaned_data["business_area"]
+            partner = form.cleaned_data["partner"]  # pragma: no cover
+            users_to_bulk_create = []
+            users_role_to_bulk_create = []
+            existing = set(account_models.User.objects.filter(email__in=emails).values_list("email", flat=True))
+            results = self.Results([], [], [], [])
+            try:
+                ms_graph = MicrosoftGraphAPI()
+                for email in emails:
+                    try:
+                        if email in existing:
+                            user = account_models.User.objects.get(email=email)
+                            self._sync_ad_data(user)
+                            results.updated.append(user)
+                        else:
+                            user_data = ms_graph.get_user_data(email=email)
+                            user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+                            user = account_models.User(**user_args, partner=partner)  # pragma: no cover
+                            if user.first_name is None:
+                                user.first_name = ""
+                            if user.last_name is None:
+                                user.last_name = ""
+                            job_title = user_data.get("jobTitle")
+                            if job_title is not None:
+                                user.job_title = job_title
+                            user.set_unusable_password()
+                            users_to_bulk_create.append(user)
+                            global_business_area = BusinessArea.objects.filter(slug="global").first()
+                            basic_role = account_models.Role.objects.filter(name="Basic User").first()
+                            if global_business_area and basic_role:
+                                users_role_to_bulk_create.append(
+                                    account_models.RoleAssignment(
+                                        business_area=global_business_area,
+                                        user=user,
+                                        role=basic_role,
                                     )
-                                results.created.append(user)
+                                )
+                            results.created.append(user)
 
-                            users_role_to_bulk_create.append(
-                                account_models.RoleAssignment(role=role, business_area=business_area, user=user)
-                            )
-                        except HTTPError as e:
-                            if e.response.status_code != 404:
-                                raise
-                            results.missing.append(email)
-                        except Http404:
-                            results.missing.append(email)
-                    account_models.User.objects.bulk_create(users_to_bulk_create)
-                    account_models.RoleAssignment.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
-                    ctx["results"] = results
-                    return TemplateResponse(request, "admin/load_users.html", ctx)
-                except Exception as e:
-                    logger.exception(e)
-                    self.message_user(request, str(e), messages.ERROR)
+                        users_role_to_bulk_create.append(
+                            account_models.RoleAssignment(role=role, business_area=business_area, user=user)
+                        )
+                    except HTTPError as e:
+                        if e.response.status_code != 404:
+                            raise
+                        results.missing.append(email)
+                    except Http404:
+                        results.missing.append(email)
+                account_models.User.objects.bulk_create(users_to_bulk_create)
+                account_models.RoleAssignment.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
+                ctx["results"] = results
+                return TemplateResponse(request, "admin/load_users.html", ctx)
+            except Exception as e:
+                logger.exception(e)
+                self.message_user(request, str(e), messages.ERROR)
         ctx["form"] = form
         return TemplateResponse(request, "admin/load_users.html", ctx)

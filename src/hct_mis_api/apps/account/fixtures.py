@@ -1,6 +1,6 @@
 import random
 import time
-from typing import Any, List
+from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -34,8 +34,8 @@ class PartnerFactory(DjangoModelFactory):
 
 
 class BusinessAreaFactory(DjangoModelFactory):
-    name = factory.Sequence(lambda x: "BusinessArea{}".format(x))
-    code = factory.Sequence(lambda x: "BA{}".format(x))
+    name = factory.Sequence(lambda x: f"BusinessArea{x}")
+    code = factory.Sequence(lambda x: f"BA{x}")
     active = True
 
     class Meta:
@@ -108,7 +108,7 @@ class AdminAreaLimitedToFactory(DjangoModelFactory):
         model = AdminAreaLimitedTo
 
     @factory.post_generation
-    def areas(self, create: bool, extracted: List[Any], **kwargs: Any) -> None:
+    def areas(self, create: bool, extracted: list[Any], **kwargs: Any) -> None:
         if not create:
             return
 

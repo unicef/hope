@@ -4,11 +4,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Generator,
-    List,
-    Tuple,
-    Type,
     Union,
 )
 
@@ -49,7 +45,7 @@ class ActiveRecordFilter(ListFilter):
     parameter_name = "active"
 
     def __init__(
-        self, request: "HttpRequest", params: Dict[str, str], model: Type[Model], model_admin: ModelAdmin
+        self, request: "HttpRequest", params: dict[str, str], model: type[Model], model_admin: ModelAdmin
     ) -> None:
         super().__init__(request, params, model, model_admin)
         for p in self.expected_parameters():
@@ -63,10 +59,10 @@ class ActiveRecordFilter(ListFilter):
     def value(self) -> str:
         return self.used_parameters.get(self.parameter_name, "")
 
-    def expected_parameters(self) -> List:
+    def expected_parameters(self) -> list:
         return [self.parameter_name]
 
-    def choices(self, changelist: List) -> Generator:
+    def choices(self, changelist: list) -> Generator:
         for lookup, title in ((None, "All"), ("1", "Yes"), ("0", "No")):
             yield {
                 "selected": self.value() == lookup,
@@ -83,7 +79,7 @@ class ActiveRecordFilter(ListFilter):
 
 
 class ValidityManagerMixin:
-    def get_list_filter(self, request: "HttpRequest") -> List:
+    def get_list_filter(self, request: "HttpRequest") -> list:
         return list(self.list_filter) + [ActiveRecordFilter]
 
 
@@ -116,9 +112,8 @@ class CountryAdmin(ValidityManagerMixin, SyncMixin, FieldsetMixin, HOPEModelAdmi
 
     def get_list_display(
         self, request: "HttpRequest"
-    ) -> Union[List[Union[str, Callable[[Any], str]]], Tuple[Union[str, Callable[[Any], str]], ...]]:
-        ret = super().get_list_display(request)
-        return ret
+    ) -> list[str | Callable[[Any], str]] | tuple[str | Callable[[Any], str], ...]:
+        return super().get_list_display(request)
 
 
 @admin.register(AreaType)
@@ -160,7 +155,7 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdm
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
-    def field_choices(self, field: Any, request: "HttpRequest", model_admin: ModelAdmin) -> List[Tuple[str, str]]:
+    def field_choices(self, field: Any, request: "HttpRequest", model_admin: ModelAdmin) -> list[tuple[str, str]]:
         if "area_type__country__exact" not in request.GET:
             return []
         return AreaType.objects.filter(country=request.GET["area_type__country__exact"]).values_list("id", "name")

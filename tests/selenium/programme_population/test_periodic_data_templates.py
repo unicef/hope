@@ -132,7 +132,7 @@ class TestPeriodicDataTemplates:
             program=program,
             business_area=program.business_area,
             status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
-            filters=dict(),
+            filters={},
             rounds_data=[
                 {
                     "field": string_attribute.name,
@@ -176,7 +176,7 @@ class TestPeriodicDataTemplates:
             business_area=program.business_area,
             status=PeriodicDataUpdateTemplate.Status.EXPORTED,
             number_of_records=10,
-            filters=dict(),
+            filters={},
             rounds_data=[
                 {
                     "field": string_attribute.name,
@@ -234,7 +234,7 @@ class TestPeriodicDataTemplates:
             program=program,
             business_area=program.business_area,
             status=PeriodicDataUpdateTemplate.Status.TO_EXPORT,
-            filters=dict(),
+            filters={},
             rounds_data=rounds_data,
         )
         periodic_data_update_template.refresh_from_db()

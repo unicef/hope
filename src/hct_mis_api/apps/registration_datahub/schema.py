@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import graphene
 from graphene import relay
@@ -29,7 +29,7 @@ class ImportedDocumentNode(DjangoObjectType):
     def resolve_country(parent, info: Any) -> str:
         return getattr(parent.country, "name", "")
 
-    def resolve_photo(parent, info: Any) -> Optional[str]:
+    def resolve_photo(parent, info: Any) -> str | None:
         if parent.photo:
             return parent.photo.url
         return None
@@ -84,7 +84,7 @@ class ImportDataNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
     @staticmethod
-    def resolve_xlsx_validation_errors(parent: ImportData, info: Any) -> List[str]:
+    def resolve_xlsx_validation_errors(parent: ImportData, info: Any) -> list[str]:
         errors = []
         if parent.validation_errors:
             errors.extend(json.loads(parent.validation_errors))
@@ -101,7 +101,7 @@ class KoboImportDataNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
 
-    def resolve_kobo_validation_errors(parrent, info: Any) -> List[str]:
+    def resolve_kobo_validation_errors(parrent, info: Any) -> list[str]:
         if not parrent.validation_errors:
             return []
         return json.loads(parrent.validation_errors)
@@ -119,8 +119,8 @@ class Query(graphene.ObjectType):
     deduplication_batch_status_choices = graphene.List(ChoiceObject)
     deduplication_golden_record_status_choices = graphene.List(ChoiceObject)
 
-    def resolve_deduplication_batch_status_choices(self, info: Any) -> List[Dict[str, Any]]:
+    def resolve_deduplication_batch_status_choices(self, info: Any) -> list[dict[str, Any]]:
         return to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE)
 
-    def resolve_deduplication_golden_record_status_choices(self, info: Any) -> List[Dict[str, Any]]:
+    def resolve_deduplication_golden_record_status_choices(self, info: Any) -> list[dict[str, Any]]:
         return to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE)

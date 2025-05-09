@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from django.db import transaction
 from django.db.models import QuerySet
@@ -76,13 +76,13 @@ class IndividualsIBANXlsxUpdate:
             if column not in columns:
                 self.validation_errors.append(f"No {column} column in provided file")
 
-    def _get_matching_report_for_single_row(self, row: Row) -> Tuple[str, Any]:
+    def _get_matching_report_for_single_row(self, row: Row) -> tuple[str, Any]:
         # TODO: refactor output types
         filter_value = row[self.matching_column_index - 1].value
         individuals = self._get_queryset().filter(**{self.MATCHING_COLUMN.lower(): filter_value})
         if not individuals.count():
             return self.STATUS_NO_MATCH, self._row_report_data(row)
-        elif individuals.count() > 1:
+        if individuals.count() > 1:
             return self.STATUS_MULTIPLE_MATCH, self._row_report_data(row)
         return self.STATUS_UNIQUE, (self._row_report_data(row), individuals.first())
 
@@ -138,7 +138,7 @@ class IndividualsIBANXlsxUpdate:
 
                 BankAccountInfo.objects.bulk_update(updated_bank_accounts, ["bank_account_number", "bank_name"])
 
-    def _get_email_context(self, message: str) -> Dict:
+    def _get_email_context(self, message: str) -> dict:
         return {
             "first_name": self.xlsx_update_file.uploaded_by.first_name,
             "last_name": self.xlsx_update_file.uploaded_by.last_name,
@@ -182,7 +182,7 @@ class IndividualsIBANXlsxUpdate:
             logger.exception(e)
 
     @staticmethod
-    def _prepare_email(context: Dict) -> MailjetClient:
+    def _prepare_email(context: dict) -> MailjetClient:
         text_body = render_to_string(
             "admin/household/individual/individuals_iban_xlsx_update_email.txt", context=context
         )
@@ -190,11 +190,9 @@ class IndividualsIBANXlsxUpdate:
             "admin/household/individual/individuals_iban_xlsx_update_email.txt", context=context
         )
 
-        email = MailjetClient(
+        return MailjetClient(
             subject=f"Individual IBANs xlsx [{context['upload_file_id']}] update result",
             recipients=[context["email"]],
             html_body=html_body,
             text_body=text_body,
         )
-
-        return email

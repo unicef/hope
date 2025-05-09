@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest, HttpResponse
@@ -15,7 +15,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 logger = logging.getLogger(__name__)
 
 
-def social_details(backend: Any, details: Dict, response: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+def social_details(backend: Any, details: dict, response: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
     logger.debug(f"social_details response:\n{response}")
     logger.debug(f"user_data:\n{backend.user_data(None, response=response)}")
     r = social_auth.social_details(backend, details, response, *args, **kwargs)
@@ -29,7 +29,7 @@ def social_details(backend: Any, details: Dict, response: HttpRequest, *args: An
 
 
 def user_details(
-    strategy: Any, details: Dict, backend: Any, user: Optional[Any] = None, *args: Any, **kwargs: Any
+    strategy: Any, details: dict, backend: Any, user: Any | None = None, *args: Any, **kwargs: Any
 ) -> HttpResponse:
     logger.debug(f"user_details for user {user} details:\n{details}")
     # social_core_user.user_details use details dict to override some fields on User instance
@@ -49,18 +49,18 @@ def user_details(
 
 
 def require_email(
-    strategy: Any, details: Dict, user: Optional[User] = None, is_new: bool = False, *args: Any, **kwargs: Any
+    strategy: Any, details: dict, user: User | None = None, is_new: bool = False, *args: Any, **kwargs: Any
 ) -> None:
     if user and user.email:
         return
-    elif is_new and not details.get("email"):
+    if is_new and not details.get("email"):
         logger.error("Email couldn't be validated")
         raise InvalidEmail(strategy)
 
 
 def create_user(
-    strategy: Any, details: Dict, backend: Any, user: Union[bool, User], *args: Any, **kwargs: Any
-) -> Optional[Dict[str, Union[bool, User]]]:
+    strategy: Any, details: dict, backend: Any, user: bool | User, *args: Any, **kwargs: Any
+) -> dict[str, bool | User] | None:
     if user:
         return {"is_new": False}
 

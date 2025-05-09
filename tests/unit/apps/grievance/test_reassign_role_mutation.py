@@ -70,15 +70,13 @@ class TestRoleReassignMutation(APITestCase):
         cls.household.registration_data_import.save()
 
         cls.individual = IndividualFactory(
-            **{
-                "full_name": "Benjamin Butler",
-                "given_name": "Benjamin",
-                "family_name": "Butler",
-                "phone_no": "(953)682-4596",
-                "birth_date": "1943-07-30",
-                "household": None,
-                "program": program_one,
-            },
+            full_name="Benjamin Butler",
+            given_name="Benjamin",
+            family_name="Butler",
+            phone_no="(953)682-4596",
+            birth_date="1943-07-30",
+            household=None,
+            program=program_one,
         )
 
         cls.household.head_of_household = cls.individual
@@ -189,39 +187,33 @@ class TestRoleReassignMutationNewTicket(APITestCase):
         cls.household.registration_data_import.save()
 
         cls.individual_1 = IndividualFactory(
-            **{
-                "full_name": "Benjamin Butler",
-                "given_name": "Benjamin",
-                "family_name": "Butler",
-                "phone_no": "(953)682-4596",
-                "birth_date": "1943-07-30",
-                "household": None,
-                "program": program_one,
-            },
+            full_name="Benjamin Butler",
+            given_name="Benjamin",
+            family_name="Butler",
+            phone_no="(953)682-4596",
+            birth_date="1943-07-30",
+            household=None,
+            program=program_one,
         )
 
         cls.individual_2 = IndividualFactory(
-            **{
-                "full_name": "Andrew Jackson",
-                "given_name": "Andrew",
-                "family_name": "Jackson",
-                "phone_no": "(853)692-4696",
-                "birth_date": "1963-09-12",
-                "household": None,
-                "program": program_one,
-            },
+            full_name="Andrew Jackson",
+            given_name="Andrew",
+            family_name="Jackson",
+            phone_no="(853)692-4696",
+            birth_date="1963-09-12",
+            household=None,
+            program=program_one,
         )
 
         cls.individual_3 = IndividualFactory(
-            **{
-                "full_name": "Ulysses Grant",
-                "given_name": "Ulysses",
-                "family_name": "Grant",
-                "phone_no": "(953)682-1111",
-                "birth_date": "1913-01-31",
-                "household": None,
-                "program": program_one,
-            },
+            full_name="Ulysses Grant",
+            given_name="Ulysses",
+            family_name="Grant",
+            phone_no="(953)682-1111",
+            birth_date="1913-01-31",
+            household=None,
+            program=program_one,
         )
 
         cls.household.head_of_household = cls.individual_1

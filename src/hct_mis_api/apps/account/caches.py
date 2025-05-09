@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.models import Program
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import Program
+    from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.account.models import User
 
 
 def get_user_permissions_version_key(user: "User") -> str:

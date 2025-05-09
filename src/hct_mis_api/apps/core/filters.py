@@ -1,6 +1,6 @@
 import json
 from datetime import date, timedelta
-from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
+from typing import Any, Callable
 
 from django.db.models import QuerySet
 from django.forms import (
@@ -20,50 +20,48 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 
 
-def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
+def _clean_data_for_range_field(value: Any, field: Callable) -> dict | None:
     if value:
         clean_data = {}
         values = json.loads(value)
         if isinstance(values, dict):
             for field_name, field_value in values.items():
                 field_instance = field()
-                if isinstance(field_instance, (DateTimeField, DateField)):
+                if isinstance(field_instance, DateTimeField | DateField):
                     if field_value is None:
                         continue
                     field_value = parse(field_value, fuzzy=True)
-                if isinstance(field_instance, IntegerField):
-                    if not field_value:
-                        continue
+                if isinstance(field_instance, IntegerField) and not field_value:
+                    continue
                 clean_data[field_name] = field_instance.clean(field_value)
         return clean_data or None
-    else:
-        return None
+    return None
 
 
 class IntegerRangeField(Field):
-    def clean(self, value: Any) -> Optional[Dict]:
+    def clean(self, value: Any) -> dict | None:
         return _clean_data_for_range_field(value, IntegerField)
 
 
 class DecimalRangeField(Field):
-    def clean(self, value: Any) -> Optional[Dict]:
+    def clean(self, value: Any) -> dict | None:
         return _clean_data_for_range_field(value, DecimalField)
 
 
 class DateTimeRangeField(Field):
-    def clean(self, value: Any) -> Optional[Dict]:
+    def clean(self, value: Any) -> dict | None:
         return _clean_data_for_range_field(value, DateTimeField)
 
 
 class DateRangeField(Field):
-    def clean(self, value: Any) -> Optional[Dict]:
+    def clean(self, value: Any) -> dict | None:
         return _clean_data_for_range_field(value, DateField)
 
 
 class BaseRangeFilter(Filter):
-    field_class: Optional[Type[Field]] = None
+    field_class: type[Field] | None = None
 
-    def filter(self, qs: QuerySet, values: Tuple) -> QuerySet:
+    def filter(self, qs: QuerySet, values: tuple) -> QuerySet:
         if values:
             min_value = values.get("min")
             max_value = values.get("max")
@@ -96,10 +94,10 @@ class DecimalRangeFilter(BaseRangeFilter):
     field_class = DecimalRangeField
 
 
-def filter_age(field_name: str, qs: QuerySet, min_age: Optional[int], max_age: Optional[int]) -> QuerySet:
+def filter_age(field_name: str, qs: QuerySet, min_age: int | None, max_age: int | None) -> QuerySet:
     current = timezone.now().date()
     lookup_expr = "range"
-    values: Union[date, Tuple[date, date]]
+    values: date | tuple[date, date]
     if min_age is not None and max_age is not None:
         lookup_expr = "range"
         # min year +1 , day-1
@@ -121,7 +119,7 @@ def filter_age(field_name: str, qs: QuerySet, min_age: Optional[int], max_age: O
 class AgeRangeFilter(Filter):
     field_class = IntegerRangeField
 
-    def filter(self, qs: QuerySet, values: Union[date, Tuple[date, date]]) -> QuerySet:
+    def filter(self, qs: QuerySet, values: date | tuple[date, date]) -> QuerySet:
         if values:
             min_value = values.get("min")  # 20
             max_value = values.get("max")  # 21

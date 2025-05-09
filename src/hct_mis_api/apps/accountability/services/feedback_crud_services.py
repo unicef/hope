@@ -14,9 +14,12 @@ from hct_mis_api.apps.program.models import Program
 class FeedbackCrudServices:
     @classmethod
     def validate_lookup(cls, feedback: Feedback) -> None:
-        if feedback.household_lookup is not None and feedback.individual_lookup is not None:
-            if feedback.household_lookup != feedback.individual_lookup.household:
-                raise Exception("Household lookup does not match individual lookup")
+        if (
+            feedback.household_lookup is not None
+            and feedback.individual_lookup is not None
+            and feedback.household_lookup != feedback.individual_lookup.household
+        ):
+            raise Exception("Household lookup does not match individual lookup")
 
     @classmethod
     def create(cls, user: AbstractUser, business_area: BusinessArea, input_data: dict) -> Feedback:

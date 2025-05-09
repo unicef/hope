@@ -88,77 +88,25 @@ jobs:
             --push \
             ./
 
-  isort:
+  lint:
     runs-on: ubuntu-latest
     needs: [build_and_push_dev]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: DockerHub login
-        uses: docker/login-action@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          python-version: 3.12
+          architecture: 'x64'
+      - uses: yezz123/setup-uv@v4.1
 
-      - name: Check
-        run: |
-          docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            isort . --check-only
+      - name: Install deps
+        run: uv sync --group dev
 
-  black:
-    runs-on: ubuntu-latest
-    needs: [build_and_push_dev]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: DockerHub login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Check
-        run: |
-          docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            black . --check
-
-  flake8:
-    runs-on: ubuntu-latest
-    needs: [build_and_push_dev]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: DockerHub login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Check
-        run: |
-          docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            flake8 .
-
-  mypy:
-    runs-on: ubuntu-latest
-    needs: [build_and_push_dev]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: DockerHub login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Check
-        run: |
-          docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            mypy .
+      - name: lint
+        run: uv run tox -e lint
 
   build_and_push_dist:
     needs: [build_and_push_dev]
@@ -205,13 +153,13 @@ jobs:
             -f ./docker/Dockerfile \
             --target dist \
             --push ./"
-          
+
           if [ "${{ github.ref }}" = "refs/heads/master" ]; then
             version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
             tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$version
             build_command="$build_command -t $tagged_image"
           fi
-          
+
           eval $build_command
 
   unit_tests:
@@ -255,7 +203,7 @@ jobs:
       - name: E2E tests
         run: |
           extra_options=""
-          
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             extra_options="-m 'not night'"
           fi
@@ -306,7 +254,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
   deploy:
     runs-on: ubuntu-latest
-    needs: [e2e_tests, unit_tests, isort, black, flake8, mypy, frontend_tests]
+    needs: [e2e_tests, unit_tests, lint, frontend_tests]
     if: |
       github.event_name == 'push' &&
       (

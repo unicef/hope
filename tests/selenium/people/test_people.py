@@ -86,7 +86,7 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code=programme_code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -95,7 +95,6 @@ def get_program_with_dct_type_and_name(
         status=status,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 def get_social_program_with_dct_type_and_name(
@@ -103,7 +102,7 @@ def get_social_program_with_dct_type_and_name(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code=programme_code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -112,7 +111,6 @@ def get_social_program_with_dct_type_and_name(
         status=status,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 @pytest.mark.usefixtures("login")
@@ -246,7 +244,7 @@ class TestSmokePeople:
         pagePeople.getIndividualTableRow(0).click()
         assert "21.36" in pagePeopleDetails.getLabelTotalCashReceived().text
         pagePeopleDetails.waitForRows()
-        assert 1 == len(pagePeopleDetails.getRows())
+        assert len(pagePeopleDetails.getRows()) == 1
         assert "21.36" in pagePeopleDetails.getRows()[0].text
         assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
         assert add_people_with_payment_record.unicef_id in pagePeopleDetails.getRows()[0].text

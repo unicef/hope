@@ -1,5 +1,5 @@
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 from django.db.transaction import atomic
@@ -35,7 +35,7 @@ class RDISerializer(serializers.ModelSerializer):
         model = RegistrationDataImport
         fields = ("name", "program")
 
-    def create(self, validated_data: Dict) -> None:
+    def create(self, validated_data: dict) -> None:
         return super().create(validated_data)
 
 

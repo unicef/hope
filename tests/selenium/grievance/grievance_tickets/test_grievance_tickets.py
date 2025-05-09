@@ -109,13 +109,12 @@ def hh_with_payment_record(household_without_disabilities: Household) -> Payment
         business_area=household_without_disabilities.business_area,
         created_by=User.objects.first(),
     )
-    payment = PaymentFactory(
+    return PaymentFactory(
         parent=payment_plan,
         household=household_without_disabilities,
         delivered_quantity_usd=None,
         business_area=household_without_disabilities.business_area,
     )
-    return payment
 
 
 def find_text_of_label(element: WebElement) -> str:
@@ -135,7 +134,7 @@ def create_program(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group).first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
@@ -143,7 +142,6 @@ def create_program(
         status=status,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 def create_custom_household(
@@ -215,23 +213,21 @@ def generate_grievance(
     assigned_to = User.objects.first() if assigned_to is None else assigned_to
     business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
     grievance_ticket = GrievanceTicket.objects.create(
-        **{
-            "business_area": business_area,
-            "unicef_id": unicef_id,
-            "language": "Polish",
-            "consent": True,
-            "description": "grievance_ticket_1",
-            "category": category,
-            "status": status,
-            "created_by": created_by,
-            "assigned_to": assigned_to,
-            "created_at": created_at,
-            "updated_at": updated_at,
-            "household_unicef_id": household_unicef_id,
-            "priority": priority,
-            "urgency": urgency,
-            "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
-        }
+        business_area=business_area,
+        unicef_id=unicef_id,
+        language="Polish",
+        consent=True,
+        description="grievance_ticket_1",
+        category=category,
+        status=status,
+        created_by=created_by,
+        assigned_to=assigned_to,
+        created_at=created_at,
+        updated_at=updated_at,
+        household_unicef_id=household_unicef_id,
+        priority=priority,
+        urgency=urgency,
+        issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
     )
 
     hh = create_custom_household(observed_disability=[])
@@ -296,7 +292,7 @@ def add_grievance_tickets() -> GrievanceTicket:
 def create_four_grievance_tickets() -> [GrievanceTicket]:
     GrievanceTicket._meta.get_field("created_at").auto_now_add = False
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
-    grievance = list()
+    grievance = []
     for _ in range(4):
         grievance.append(create_grievance_referral(assigned_to=""))
     GrievanceTicket._meta.get_field("created_at").auto_now_add = True
@@ -382,7 +378,7 @@ class TestSmokeGrievanceTickets:
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
         assert "SET URGENCY" in pageGrievanceTickets.getButtonSetUrgency().text
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
-        assert 2 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 2
         expected_labels = [
             "Ticket ID",
             "Status",
@@ -417,7 +413,7 @@ class TestSmokeGrievanceTickets:
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getTicketListRow()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        assert len(pageGrievanceTickets.getTicketListRow()) == 1
         pageGrievanceTickets.getSelectAll().click()
         assert "ASSIGN" in pageGrievanceTickets.getButtonAssign().text
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
@@ -1179,7 +1175,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getInputNewnote().send_keys("Test adding new note.")
         pageGrievanceDetailsPage.getButtonNewNote().click()
         user = pageGrievanceDetailsPage.getNoteName().text
-        assert 1 == len(pageGrievanceDetailsPage.getNoteRows())
+        assert len(pageGrievanceDetailsPage.getNoteRows()) == 1
         assert user in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert "Test adding new note." in pageGrievanceDetailsPage.getNoteRows()[0].text
@@ -1354,7 +1350,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()
-        assert 3 == len(pageIndividuals.getIndividualTableRow())
+        assert len(pageIndividuals.getIndividualTableRow()) == 3
         for icon in pageIndividuals.getIndividualTableRow()[0].find_elements(By.TAG_NAME, "svg"):
             assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
             break

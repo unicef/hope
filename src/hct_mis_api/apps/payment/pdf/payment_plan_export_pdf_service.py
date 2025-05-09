@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.db.models import Count, Q, Sum
@@ -27,7 +27,7 @@ class PaymentPlanPDFExportService:
         self.is_social_worker_program = payment_plan.program.is_social_worker_program
 
     @staticmethod
-    def get_link(api_url: Optional[str] = None) -> str:
+    def get_link(api_url: str | None = None) -> str:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
         if api_url:
@@ -43,10 +43,10 @@ class PaymentPlanPDFExportService:
             f"/{self.payment_plan.business_area.slug}/programs/{program_id}/payment-module/payment-plans/{str(payment_plan_id)}"
         )
 
-    def get_email_context(self, user: "User") -> Dict:
+    def get_email_context(self, user: "User") -> dict:
         msg = "Payment Plan Summary PDF file(s) have been generated, and below you will find the link to download the file(s)."
 
-        context = {
+        return {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
@@ -54,8 +54,6 @@ class PaymentPlanPDFExportService:
             "link": self.download_link,
             "title": "Payment Plan Payment List files generated",
         }
-
-        return context
 
     def generate_pdf_summary(self) -> Any:
         self.generate_web_links()

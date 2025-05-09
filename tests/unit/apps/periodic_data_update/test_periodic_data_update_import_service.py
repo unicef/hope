@@ -40,9 +40,9 @@ def add_pdu_data_to_xlsx(
     for row_index, row in enumerate(rows):
         for col_index, value in enumerate(row):
             ws_pdu.cell(row=row_index + 2, column=col_index + 7, value=value)
-    tmp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")
-    wb.save(tmp_file.name)
-    tmp_file.seek(0)
+    with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+        wb.save(tmp_file.name)
+        tmp_file.seek(0)
     return tmp_file
 
 
@@ -109,7 +109,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=self.program,
             business_area=self.business_area,
-            filters=dict(),
+            filters={},
             rounds_data=rounds_data,
         )
         service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
@@ -402,7 +402,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
             program=self.program,
             business_area=self.business_area,
-            filters=dict(),
+            filters={},
             rounds_data=[
                 {
                     "field": self.string_attribute.name,

@@ -461,7 +461,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
         assert "errors" not in open_payment_plan_response, open_payment_plan_response
-        assert "OPEN" == open_payment_plan_response["data"]["openPaymentPlan"]["paymentPlan"]["status"]
+        assert open_payment_plan_response["data"]["openPaymentPlan"]["paymentPlan"]["status"] == "OPEN"
 
         # check if Cycle is active
         assert ProgramCycle.objects.filter(title="NEW NEW NAME").first().status == "ACTIVE"
@@ -541,25 +541,25 @@ class TestPaymentPlanReconciliation(APITestCase):
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
             context={"user": self.user},
-            variables=dict(
-                input=dict(
-                    paymentPlanId=encoded_payment_plan_id,
-                    deliveryMechanisms=[
+            variables={
+                "input": {
+                    "paymentPlanId": encoded_payment_plan_id,
+                    "deliveryMechanisms": [
                         dm_cash.code,
                     ],
-                )
-            ),
+                }
+            },
         )
         assert "errors" not in choose_dms_response, choose_dms_response
 
         available_fsps_query_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
             context={"user": self.user},
-            variables=dict(
-                input={
+            variables={
+                "input": {
                     "paymentPlanId": encoded_payment_plan_id,
                 }
-            ),
+            },
         )
         assert "errors" not in available_fsps_query_response, available_fsps_query_response
         available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
@@ -788,9 +788,9 @@ class TestPaymentPlanReconciliation(APITestCase):
                             "file": uploaded_file,
                         },
                     )
-                    assert (
-                        "errors" in import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]
-                    ), import_mutation_response
+                    assert "errors" in import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"], (
+                        import_mutation_response
+                    )
                     assert (
                         import_mutation_response["data"]["importXlsxPaymentPlanPaymentListPerFsp"]["errors"][0][
                             "message"
@@ -1060,10 +1060,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment_plan.refresh_from_db()
         self.assertTrue(
             all(
-                [
-                    payment.entitlement_quantity == payment.delivered_quantity
-                    for payment in payment_plan.eligible_payments
-                ]
+                payment.entitlement_quantity == payment.delivered_quantity for payment in payment_plan.eligible_payments
             )
         )
 

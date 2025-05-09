@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 
+
 def migrate_registration_id_to_detail_id(apps, schema_editor):
     PendingHousehold = apps.get_model("household", "PendingHousehold")
     PendingIndividual = apps.get_model("household", "PendingIndividual")
@@ -9,19 +10,22 @@ def migrate_registration_id_to_detail_id(apps, schema_editor):
     Individual = apps.get_model("household", "Individual")
 
     PendingIndividual.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(
-        detail_id=models.F("registration_id"))
+        detail_id=models.F("registration_id")
+    )
     PendingHousehold.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(
-        detail_id=models.F("registration_id"))
+        detail_id=models.F("registration_id")
+    )
     Individual.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(
-        detail_id=models.F("registration_id"))
+        detail_id=models.F("registration_id")
+    )
     Household.objects.filter(registration_id__isnull=False, detail_id__isnull=True).update(
-        detail_id=models.F("registration_id"))
+        detail_id=models.F("registration_id")
+    )
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0013_migration'),
+        ("household", "0013_migration"),
     ]
 
     operations = [

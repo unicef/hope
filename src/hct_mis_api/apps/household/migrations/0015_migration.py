@@ -4,28 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0014_migration'),
+        ("household", "0014_migration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='household',
-            name='registration_id',
+            model_name="household",
+            name="registration_id",
         ),
         migrations.RemoveField(
-            model_name='individual',
-            name='registration_id',
+            model_name="individual",
+            name="registration_id",
         ),
         migrations.AlterField(
-            model_name='household',
-            name='detail_id',
-            field=models.CharField(blank=True, help_text='Kobo asset ID, Xlsx row ID, Aurora registration ID', max_length=150, null=True),
+            model_name="household",
+            name="detail_id",
+            field=models.CharField(
+                blank=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID", max_length=150, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='individual',
-            name='detail_id',
-            field=models.CharField(blank=True, help_text='Kobo asset ID, Xlsx row ID, Aurora registration ID', max_length=150, null=True),
+            model_name="individual",
+            name="detail_id",
+            field=models.CharField(
+                blank=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID", max_length=150, null=True
+            ),
         ),
     ]

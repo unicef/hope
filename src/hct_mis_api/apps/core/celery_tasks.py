@@ -29,8 +29,7 @@ class transaction_celery_task:  # used as decorator
             except Exception as e:
                 logger.error(e)
 
-        task_func = app.task(*self.task_args, **self.task_kwargs)(wrapper_func)
-        return task_func
+        return app.task(*self.task_args, **self.task_kwargs)(wrapper_func)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -52,8 +51,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
         if exc.xlsx_kobo_template_object.first_connection_failed_time > one_day_earlier_time:
             logger.exception(exc)
             raise self.retry(exc=exc)
-        else:
-            exc.xlsx_kobo_template_object.status = XLSXKoboTemplate.UNSUCCESSFUL
+        exc.xlsx_kobo_template_object.status = XLSXKoboTemplate.UNSUCCESSFUL
     except Exception as e:
         logger.exception(e)
         raise

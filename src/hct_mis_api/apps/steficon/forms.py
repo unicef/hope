@@ -1,10 +1,9 @@
 import csv
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from django import forms
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms import HiddenInput, Media, Textarea
@@ -20,6 +19,7 @@ from hct_mis_api.apps.steficon.widget import (
 )
 
 if TYPE_CHECKING:
+    from django.contrib.contenttypes.models import ContentType
     from django.db.models.fields import _ChoicesCallable
 
 logger = logging.getLogger(__name__)
@@ -67,11 +67,11 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
     results = forms.CharField(
         label="Results columns",
         required=True,
-        help_text="Comma separated list od Result attributes " "to add to the produced CSV. ",
+        help_text="Comma separated list od Result attributes to add to the produced CSV. ",
     )
     background = forms.BooleanField(label="Run in background", required=False)
 
-    def clean_results(self) -> Dict:
+    def clean_results(self) -> dict:
         try:
             return self.cleaned_data["results"].split(",")
         except Exception as e:
@@ -88,13 +88,13 @@ class RuleDownloadCSVFileProcessForm(CSVOptionsForm, forms.Form):
         for fname in ["delimiter", "quotechar", "quoting", "escapechar"]:
             self.fields[fname].widget = HiddenInput()  # type: ignore # FIXME
 
-    def clean_fields(self) -> Optional[List]:
+    def clean_fields(self) -> list | None:
         try:
             return self.cleaned_data["fields"].split(",")
         except Exception as e:
             raise ValidationError(str(e))
 
-    def clean_data(self) -> Optional[Dict]:
+    def clean_data(self) -> dict | None:
         try:
             return json.loads(self.cleaned_data["data"])
         except Exception as e:
@@ -107,12 +107,12 @@ class TPModelChoiceField(forms.ModelChoiceField):
         *,
         empty_label: str = "---------",
         required: bool = True,
-        widget: Optional[Any] = None,
-        label: Optional[Any] = None,
-        initial: Optional[Any] = None,
+        widget: Any | None = None,
+        label: Any | None = None,
+        initial: Any | None = None,
         help_text: str = "",
-        to_field_name: Optional[str] = None,
-        limit_choices_to: Union[Union[Q, Dict[str, Any]], "_ChoicesCallable", None] = None,
+        to_field_name: str | None = None,
+        limit_choices_to: Union[Q | dict[str, Any], "_ChoicesCallable", None] = None,
         **kwargs: Any,
     ) -> None:
         queryset = PaymentPlan.objects.all()
@@ -132,7 +132,7 @@ class TPModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj: Any) -> str:
         if obj and obj.business_area:
             return f"{obj.name} ({obj.business_area.name})"
-        elif obj.name:
+        if obj.name:
             return f"{obj.name}"
         return str(obj)
 
@@ -152,7 +152,7 @@ class RuleTestForm(forms.Form):
             media = media + field.widget.media
         return media
 
-    def clean_raw_data(self) -> Optional[Dict]:
+    def clean_raw_data(self) -> dict | None:
         original = self.cleaned_data["raw_data"]
         if original:
             try:
@@ -161,7 +161,7 @@ class RuleTestForm(forms.Form):
                 raise ValidationError(str(e))
         return None
 
-    def clean_file(self) -> Optional[Dict]:
+    def clean_file(self) -> dict | None:
         original = self.cleaned_data["file"]
         if original:
             try:
@@ -199,14 +199,14 @@ class RuleForm(forms.ModelForm):
         model = Rule
         exclude = ("updated_by", "created_by")
 
-    def clean(self) -> Optional[Dict]:
-        if len(self.cleaned_data.keys()) == 1 and "allowed_business_areas" in self.cleaned_data.keys():
+    def clean(self) -> dict | None:
+        if len(self.cleaned_data.keys()) == 1 and "allowed_business_areas" in self.cleaned_data:
             # added that just for update 'allowed_business_areas'
             return self.cleaned_data
         self._validate_unique = True
         code = self.cleaned_data.get("definition", "")
         language = self.cleaned_data["language"]
-        interpreter: Type[Interpreter] = mapping[language]
+        interpreter: type[Interpreter] = mapping[language]
         i: Interpreter = interpreter(code)
         try:
             i.validate()

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Any, Optional
+from typing import Any
 
 import graphene
 from dateutil.parser import parse
@@ -24,7 +24,7 @@ class DeduplicationResultNode(graphene.ObjectType):
     duplicate = graphene.Boolean()
     distinct = graphene.Boolean()
 
-    def resolve_age(self, info: Any) -> Optional[int]:
+    def resolve_age(self, info: Any) -> int | None:
         date_of_birth = self.get("dob")
         if date_of_birth:
             today = date.today()
@@ -58,7 +58,7 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     location = graphene.String()
 
     @staticmethod
-    def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
+    def resolve_photo(parent: Any, info: Any) -> graphene.String | None:
         from hct_mis_api.apps.household.models import Individual
 
         # photo url serialization storage timeout
@@ -66,7 +66,7 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
         return individual.photo.url if individual.photo else None
 
     @staticmethod
-    def resolve_id(parent: Any, info: Any) -> Optional[str]:
+    def resolve_id(parent: Any, info: Any) -> str | None:
         return encode_id_base64(parent.get("id"), "Individual")
 
 

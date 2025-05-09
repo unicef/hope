@@ -95,8 +95,8 @@ def test_refresh_data(
 
     for item in refreshed_data:
         assert item.keys() >= required_fields, f"Missing required fields in {cache_name}: {item.keys()}"
-        assert (
-            item.keys() & expected_optional_fields == expected_optional_fields
-        ), f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        assert item.keys() & expected_optional_fields == expected_optional_fields, (
+            f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        )
     cached_data = cache.get(cache_key)
     assert cached_data is not None, "Data not cached"

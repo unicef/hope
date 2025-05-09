@@ -30,7 +30,7 @@ def create_constant_objects(apps, schema_editor):
             "is_visible_on_ui": False,
             "is_available_for_partner": True,
             "permissions": [],
-        }
+        },
     )
     Partner.objects.get_or_create(name="UNICEF")
 
@@ -55,7 +55,6 @@ def migrate_user_roles(apps, schema_editor):
         .select_related("user__partner", "business_area")
     )
 
-
     program_access_mapping = {
         (partner_id, business_area_id): list(
             ProgramPartnerThrough.objects.filter(
@@ -73,9 +72,7 @@ def migrate_user_roles(apps, schema_editor):
         batch_end = batch_start + BATCH_SIZE
         batched_user_roles_ids = user_roles_ids[batch_start:batch_end]
         batched_user_roles = list(
-            RoleAssignment.objects.filter(
-            id__in=batched_user_roles_ids
-            ).select_related(
+            RoleAssignment.objects.filter(id__in=batched_user_roles_ids).select_related(
                 "user",
                 "user__partner",
                 "business_area",
@@ -135,13 +132,10 @@ def migrate_partner_roles_and_access(apps, schema_editor):
     register(Partner)
 
     # do not create RoleAssignments for partners that are parents or UNICEF
-    partner_roles = (
-        BusinessAreaPartnerThrough.objects.exclude(
-            Q(partner_id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
-            | Q(partner__name="UNICEF")
-        )
-        .select_related("partner", "business_area")
-    )
+    partner_roles = BusinessAreaPartnerThrough.objects.exclude(
+        Q(partner_id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
+        | Q(partner__name="UNICEF")
+    ).select_related("partner", "business_area")
 
     program_access_mapping = {
         (partner_id, business_area_id): list(
@@ -160,9 +154,7 @@ def migrate_partner_roles_and_access(apps, schema_editor):
         batch_end = batch_start + BATCH_SIZE
         batched_partner_roles_ids = partner_roles_ids[batch_start:batch_end]
         batched_partner_roles = list(
-            BusinessAreaPartnerThrough.objects.filter(
-                id__in=batched_partner_roles_ids
-            )
+            BusinessAreaPartnerThrough.objects.filter(id__in=batched_partner_roles_ids)
             .select_related("partner", "business_area")
             .prefetch_related("roles")
         )
@@ -179,7 +171,9 @@ def migrate_partner_roles_and_access(apps, schema_editor):
             if programs:
                 partner.allowed_business_areas.add(business_area)
                 new_assignments.extend(
-                    RoleAssignment(user=None, partner=partner, role=role, business_area=business_area, program_id=program)
+                    RoleAssignment(
+                        user=None, partner=partner, role=role, business_area=business_area, program_id=program
+                    )
                     for role in roles
                     for program in programs
                 )
@@ -188,9 +182,8 @@ def migrate_partner_roles_and_access(apps, schema_editor):
             RoleAssignment.objects.bulk_create(new_assignments)
 
     # area limits - only for non-full-area-access; do not create records for partners that are parents
-    area_access = (
-        ProgramPartnerThrough.objects.filter(full_area_access=False)
-        .exclude(partner_id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
+    area_access = ProgramPartnerThrough.objects.filter(full_area_access=False).exclude(
+        partner_id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True)
     )
 
     area_access_ids = list(area_access.values_list("id", flat=True))
@@ -203,9 +196,7 @@ def migrate_partner_roles_and_access(apps, schema_editor):
 
         batched_area_access_ids = area_access_ids[batch_start:batch_end]
         batched_area_access = list(
-            ProgramPartnerThrough.objects.filter(
-                id__in=batched_area_access_ids
-            )
+            ProgramPartnerThrough.objects.filter(id__in=batched_area_access_ids)
             .select_related("partner", "program")
             .prefetch_related("areas")
         )
@@ -264,9 +255,7 @@ def migrate_unicef_partners(apps, schema_editor):
     unicef_hq.allowed_business_areas.set(BusinessArea.objects.all())
 
     for business_area in BusinessArea.objects.exclude(slug="global"):
-        unicef_subpartner , _ = Partner.objects.get_or_create(
-            name=f"UNICEF Partner for {business_area.slug}"
-        )
+        unicef_subpartner, _ = Partner.objects.get_or_create(name=f"UNICEF Partner for {business_area.slug}")
         unicef_subpartner.allowed_business_areas.add(business_area)
 
         new_assignments.append(
@@ -298,7 +287,9 @@ def migrate_unicef_partners(apps, schema_editor):
     empty_partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
     User.objects.filter(partner=unicef_partner).annotate(
         ba_count=Count("role_assignments__business_area", distinct=True)
-    ).filter(Q(ba_count=0) | Q(ba_count=1, role_assignments__business_area__slug="global")).update(partner=empty_partner)
+    ).filter(Q(ba_count=0) | Q(ba_count=1, role_assignments__business_area__slug="global")).update(
+        partner=empty_partner
+    )
 
     # UNICEF users with roles in single Business Area will be assigned to UNICEF Sub-partner for that Business Area
     unicef_users_in_single_ba = (
@@ -308,9 +299,15 @@ def migrate_unicef_partners(apps, schema_editor):
     )
 
     unicef_subpartners = {
-        ba.slug: Partner.objects.get(name=f"UNICEF Partner for {ba.slug}") for ba in BusinessArea.objects.exclude(slug="global")
+        ba.slug: Partner.objects.get(name=f"UNICEF Partner for {ba.slug}")
+        for ba in BusinessArea.objects.exclude(slug="global")
     }
-    for ba in RoleAssignment.objects.filter(user__in=unicef_users_in_single_ba).exclude(business_area__slug="global").values_list("business_area__slug", flat=True).distinct():
+    for ba in (
+        RoleAssignment.objects.filter(user__in=unicef_users_in_single_ba)
+        .exclude(business_area__slug="global")
+        .values_list("business_area__slug", flat=True)
+        .distinct()
+    ):
         unicef_users = unicef_users_in_single_ba.filter(role_assignments__business_area__slug=ba)
         unicef_users.update(partner=unicef_subpartners[ba])
 
@@ -324,9 +321,8 @@ def migrate_unicef_partners(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('account', '0008_migration'),
+        ("account", "0008_migration"),
     ]
 
     operations = [
@@ -335,4 +331,3 @@ class Migration(migrations.Migration):
         migrations.RunPython(migrate_partner_roles_and_access, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(migrate_unicef_partners, reverse_code=migrations.RunPython.noop),
     ]
-

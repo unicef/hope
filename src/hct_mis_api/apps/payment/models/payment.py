@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from django import forms
 from django.conf import settings
@@ -141,11 +141,11 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
         return self.payment_plan.delivery_mechanisms.first().financial_service_provider
 
     @property
-    def chosen_configuration(self) -> Optional[str]:
+    def chosen_configuration(self) -> str | None:
         return self.payment_plan.delivery_mechanisms.first().chosen_configuration
 
     @property
-    def delivery_mechanism(self) -> Optional[str]:
+    def delivery_mechanism(self) -> str | None:
         return self.payment_plan.delivery_mechanisms.first().delivery_mechanism
 
 
@@ -585,7 +585,7 @@ class PaymentPlan(
         need to call from source_payment_plan level
         like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
         """
-        payments_qs = (
+        return (
             self.unsuccessful_payments()
             .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
             .exclude(
@@ -600,7 +600,6 @@ class PaymentPlan(
                 .values_list("household_id", flat=True)
             )
         )
-        return payments_qs
 
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
@@ -612,23 +611,19 @@ class PaymentPlan(
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
                 return ModifiedData(approval_process.sent_for_approval_date, approval_process.sent_for_approval_by)
-            if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
-                if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
-                    return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.IN_REVIEW:
-                if (
-                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
-                    .order_by("created_at")
-                    .last()
-                ):
-                    return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.ACCEPTED:
-                if (
-                    approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
-                    .order_by("created_at")
-                    .last()
-                ):
-                    return ModifiedData(approval.created_at, approval.created_by)
+            approval = approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last()
+            if approval and self.status == PaymentPlan.Status.IN_AUTHORIZATION:
+                return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.IN_REVIEW and (
+                approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION).order_by("created_at").last()
+            ):
+                return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.ACCEPTED and (
+                approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
+                .order_by("created_at")
+                .last()
+            ):
+                return ModifiedData(approval.created_at, approval.created_by)
         return ModifiedData(self.updated_at)
 
     # from generic pp
@@ -645,7 +640,7 @@ class PaymentPlan(
     def available_payment_records(
         self,
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
-        extra_validation: Optional[Callable] = None,
+        extra_validation: Callable | None = None,
     ) -> QuerySet:
         params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
@@ -660,11 +655,9 @@ class PaymentPlan(
         payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
 
         if extra_validation:
-            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+            payment_records = [pr.pk for pr in filter(extra_validation, payment_records)]
 
-        qs = Payment.objects.filter(pk__in=payment_records)
-
-        return qs
+        return Payment.objects.filter(pk__in=payment_records)
 
     @property
     def program(self) -> "Program":
@@ -731,7 +724,7 @@ class PaymentPlan(
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
 
     @property
-    def excluded_household_ids_targeting_level(self) -> List:
+    def excluded_household_ids_targeting_level(self) -> list:
         return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
 
     @property
@@ -754,19 +747,18 @@ class PaymentPlan(
         return not has_hh_ids and not has_ind_ids
 
     @property
-    def excluded_beneficiaries_ids(self) -> List[str]:
+    def excluded_beneficiaries_ids(self) -> list[str]:
         """based on Program DCT return HH or Ind IDs"""
-        beneficiaries_ids = (
+        return (
             list(self.payment_items.filter(excluded=True).values_list("household__individuals__unicef_id", flat=True))
             if self.is_social_worker_program
             else list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
         )
-        return beneficiaries_ids
 
     @property
     def currency_exchange_date(self) -> datetime:
         now = timezone.now().date()
-        return self.dispersion_end_date if self.dispersion_end_date < now else now
+        return min(now, self.dispersion_end_date)
 
     @property
     def can_create_payment_verification_plan(self) -> int:
@@ -781,15 +773,14 @@ class PaymentPlan(
         try:
             if self.status == PaymentPlan.Status.LOCKED:
                 return self.export_file_entitlement is not None
-            elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+            if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
                 return self.export_file_per_fsp is not None
-            else:
-                return False
+            return False
         except FileTemp.DoesNotExist:
             return False
 
     @property
-    def payment_list_export_file_link(self) -> Optional[str]:
+    def payment_list_export_file_link(self) -> str | None:
         """
         for Locked plan return export_file_entitlement file link
         for Accepted and Finished export_file_per_fsp file link
@@ -855,11 +846,11 @@ class PaymentPlan(
         return self.acceptance_process_threshold.finance_release_number_required
 
     @property
-    def last_approval_process_date(self) -> Optional[datetime]:
+    def last_approval_process_date(self) -> datetime | None:
         return self._get_last_approval_process_data().modified_date
 
     @property
-    def last_approval_process_by(self) -> Optional[str]:
+    def last_approval_process_by(self) -> str | None:
         return self._get_last_approval_process_data().modified_by
 
     @property
@@ -874,15 +865,14 @@ class PaymentPlan(
                 sent_to_payment_gateway=False,
             ).exists()
             return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
-        else:
-            return (
-                status_accepted
-                and self.delivery_mechanisms.filter(
-                    sent_to_payment_gateway=False,
-                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    financial_service_provider__payment_gateway_id__isnull=False,
-                ).exists()
-            )
+        return (
+            status_accepted
+            and self.delivery_mechanisms.filter(
+                sent_to_payment_gateway=False,
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                financial_service_provider__payment_gateway_id__isnull=False,
+            ).exists()
+        )
 
     # @transitions #####################################################################
 
@@ -1201,7 +1191,7 @@ class PaymentPlan(
 
 
 class FlexFieldArrayField(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+    def formfield(self, form_class: Any | None = ..., choices_form_class: Any | None = ..., **kwargs: Any) -> Any:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         # TODO exclude PDU here
         flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
@@ -1286,12 +1276,12 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @staticmethod
     def get_data_from_payment_snapshot(
-        household_data: Dict[str, Any],
-        core_field: Dict[str, Any],
+        household_data: dict[str, Any],
+        core_field: dict[str, Any],
         delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
-    ) -> Optional[str]:
+    ) -> str | None:
         core_field_name = core_field["name"]
-        collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or dict()
+        collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or {}
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 
@@ -1345,7 +1335,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return collector_data.get(lookup, None) or collector_data.get(main_key, None)
 
         if core_field["associated_with"] == _HOUSEHOLD:
-            return household_data.get(lookup, None)
+            return household_data.get(lookup)
 
         return None
 
@@ -1367,14 +1357,12 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
             return None
 
-        snapshot_data = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+        return FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
             snapshot.snapshot_data, core_field, delivery_mechanism_data
         )
 
-        return snapshot_data
-
     @classmethod
-    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list, None]:
+    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> str | float | list | None:
         # we can get if needed payment.parent.program.is_social_worker_program
         snapshot = getattr(payment, "household_snapshot", None)
         if not snapshot:
@@ -1383,7 +1371,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         snapshot_data = snapshot.snapshot_data
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
-        collector_data = primary_collector or alternate_collector or dict()
+        collector_data = primary_collector or alternate_collector or {}
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
@@ -1446,23 +1434,23 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return getattr(obj, nested_field, None) or ""
 
     @staticmethod
-    def get_document_number_by_doc_type_key(snapshot_data: Dict[str, Any], document_type_key: str) -> str:
+    def get_document_number_by_doc_type_key(snapshot_data: dict[str, Any], document_type_key: str) -> str:
         collector_data = (
-            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or {}
         )
         documents_list = collector_data.get("documents", [])
         documents_dict = {doc.get("type"): doc for doc in documents_list}
         return documents_dict.get(document_type_key, {}).get("document_number", "")
 
     @staticmethod
-    def get_alternate_collector_doc_numbers(snapshot_data: Dict[str, Any]) -> str:
-        alternate_collector_data = snapshot_data.get("alternate_collector", {}) or dict()
+    def get_alternate_collector_doc_numbers(snapshot_data: dict[str, Any]) -> str:
+        alternate_collector_data = snapshot_data.get("alternate_collector", {}) or {}
         doc_list = alternate_collector_data.get("documents", [])
         doc_numbers = [doc.get("document_number", "") for doc in doc_list]
         return ", ".join(doc_numbers)
 
     @staticmethod
-    def get_admin_level_2(snapshot_data: Dict[str, Any]) -> str:
+    def get_admin_level_2(snapshot_data: dict[str, Any]) -> str:
         area = Area.objects.filter(pk=snapshot_data.get("admin2_id")).first()
         return area.name if area else ""
 
@@ -1568,10 +1556,7 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         ):
             return False
 
-        if self.distribution_limit == 0.0:
-            return False
-
-        return True
+        return self.distribution_limit != 0.0
 
     def can_accept_volume(self, volume: Decimal) -> bool:
         if self.distribution_limit is None:
@@ -1584,7 +1569,7 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
 
     @property
-    def configurations(self) -> List[Optional[dict]]:
+    def configurations(self) -> list[dict | None]:
         return []  # temporary disabled
         if not self.is_payment_gateway:
             return []
@@ -1883,16 +1868,15 @@ class Payment(
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 
-        elif delivered_quantity < self.entitlement_quantity:
+        if delivered_quantity < self.entitlement_quantity:
             return Payment.STATUS_DISTRIBUTION_PARTIAL
 
-        elif delivered_quantity == self.entitlement_quantity:
+        if delivered_quantity == self.entitlement_quantity:
             return Payment.STATUS_DISTRIBUTION_SUCCESS
 
-        else:
-            raise ValidationError(
-                f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
-            )
+        raise ValidationError(
+            f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
+        )
 
 
 class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
@@ -1956,7 +1940,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         return associated_objects.get(associated_with)
 
     @cached_property
-    def delivery_data(self) -> Dict:
+    def delivery_data(self) -> dict:
         delivery_data = {}
         for field in self.delivery_mechanism_all_fields_definitions:
             associated_object = self.get_associated_object(field["associated_with"])
@@ -1982,7 +1966,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
             self.is_valid = True
 
     def update_unique_field(self) -> None:
-        if self.is_valid and hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
+        if self.is_valid and hasattr(self, "unique_fields") and isinstance(self.unique_fields, list | tuple):
             sha256 = hashlib.sha256()
             sha256.update(self.individual.program.name.encode("utf-8"))
 
@@ -2010,33 +1994,33 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
                 self.unique_key = unique_key
 
     @property
-    def delivery_mechanism_all_fields_definitions(self) -> List[dict]:
+    def delivery_mechanism_all_fields_definitions(self) -> list[dict]:
         all_core_fields = get_core_fields_attributes()
         return [field for field in all_core_fields if field["name"] in self.all_fields]
 
     @property
-    def delivery_mechanism_required_fields_definitions(self) -> List[dict]:
+    def delivery_mechanism_required_fields_definitions(self) -> list[dict]:
         all_core_fields = get_core_fields_attributes()
         return [field for field in all_core_fields if field["name"] in self.required_fields]
 
     @property
-    def all_fields(self) -> List[dict]:
+    def all_fields(self) -> list[dict]:
         return self.delivery_mechanism.all_fields
 
     @property
-    def all_dm_fields(self) -> List[dict]:
+    def all_dm_fields(self) -> list[dict]:
         return self.delivery_mechanism.all_dm_fields
 
     @property
-    def unique_fields(self) -> List[str]:
+    def unique_fields(self) -> list[str]:
         return self.delivery_mechanism.unique_fields
 
     @property
-    def required_fields(self) -> List[str]:
+    def required_fields(self) -> list[str]:
         return self.delivery_mechanism.required_fields
 
     @classmethod
-    def get_all_delivery_mechanisms_fields(cls, by_xlsx_name: bool = False) -> List[str]:
+    def get_all_delivery_mechanisms_fields(cls, by_xlsx_name: bool = False) -> list[str]:
         fields = []
         for dm in DeliveryMechanism.objects.filter(is_active=True):
             fields.extend([f for f in dm.all_dm_fields if f not in fields])
@@ -2047,17 +2031,15 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         return fields
 
     @classmethod
-    def get_scope_delivery_mechanisms_fields(cls, by: str = "name") -> List[str]:
+    def get_scope_delivery_mechanisms_fields(cls, by: str = "name") -> list[str]:
         from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
             FieldFactory,
         )
         from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
-        delivery_mechanisms_fields = list(FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).keys())
+        return list(FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).to_dict_by(by).keys())
 
-        return delivery_mechanisms_fields
-
-    def get_grievance_ticket_payload_for_errors(self) -> Dict[str, Any]:
+    def get_grievance_ticket_payload_for_errors(self) -> dict[str, Any]:
         return {
             "id": str(self.id),
             "label": self.delivery_mechanism.name,
@@ -2146,15 +2128,15 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         )
 
     @property
-    def all_fields(self) -> List[str]:
+    def all_fields(self) -> list[str]:
         return self.required_fields + self.optional_fields
 
     @property
-    def all_dm_fields(self) -> List[str]:
+    def all_dm_fields(self) -> list[str]:
         core_fields = [cf["name"] for cf in CORE_FIELDS_ATTRIBUTES]
         return [field for field in self.all_fields if field not in core_fields]
 
-    def get_core_fields_definitions(self) -> List[dict]:
+    def get_core_fields_definitions(self) -> list[dict]:
         core_fields = [cf["name"] for cf in CORE_FIELDS_ATTRIBUTES]
         return [
             {
@@ -2177,21 +2159,21 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         ]
 
     @classmethod
-    def get_all_core_fields_definitions(cls) -> List[dict]:
+    def get_all_core_fields_definitions(cls) -> list[dict]:
         definitions = []
         for delivery_mechanism in cls.objects.filter(is_active=True).order_by("code"):
             definitions.extend(delivery_mechanism.get_core_fields_definitions())
         return definitions
 
     @classmethod
-    def get_choices(cls, only_active: bool = True) -> List[Tuple[str, str]]:
+    def get_choices(cls, only_active: bool = True) -> list[tuple[str, str]]:
         dms = cls.objects.all().values_list("code", "name")
         if only_active:
             dms.filter(is_active=True)
         return list(dms)
 
     @classmethod
-    def get_delivery_mechanisms_to_xlsx_fields_mapping(cls) -> Dict[str, List[str]]:
+    def get_delivery_mechanisms_to_xlsx_fields_mapping(cls) -> dict[str, list[str]]:
         required_fields_map = defaultdict(list)
         for dm in cls.objects.filter(is_active=True):
             required_fields_map[dm.code].extend([f"{field}_i_c" for field in dm.required_fields])

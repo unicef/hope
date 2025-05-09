@@ -510,7 +510,7 @@ class TestPaymentPlanQueries(APITestCase):
             variables={
                 "businessArea": "afghanistan",
                 "program": encode_id_base64(self.pp.program.pk, "Program"),
-                **{"deliveryTypes": ["cash", "referral"]},
+                "deliveryTypes": ["cash", "referral"],
             },
         )
 

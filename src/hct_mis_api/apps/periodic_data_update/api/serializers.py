@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.shortcuts import get_object_or_404
 
@@ -46,7 +46,7 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
             "filters",
         )
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         rounds_data = data.get("rounds_data", [])
         # Check for duplicate field names
         field_names = [item["field"] for item in rounds_data]
@@ -54,7 +54,7 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"rounds_data": "Each Field can only be used once in the template."})
         return data
 
-    def create(self, validated_data: Dict[str, Any]) -> PeriodicDataUpdateTemplate:
+    def create(self, validated_data: dict[str, Any]) -> PeriodicDataUpdateTemplate:
         validated_data["created_by"] = self.context["request"].user
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area"]
         program_id = self.context["request"].parser_context["kwargs"]["program_id"]

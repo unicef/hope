@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable, Optional, Tuple
+from typing import Any, Iterable
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -58,7 +58,7 @@ class IndividualDeliveryMechanismDataInline(admin.TabularInline):
     show_change_link = True
     can_delete = False
 
-    def has_add_permission(self, request: HttpRequest, obj: Optional[Individual] = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: Individual | None = None) -> bool:
         return False
 
 
@@ -223,39 +223,38 @@ class IndividualAdmin(
                 "admin/household/individual/individuals_iban_xlsx_update.html",
                 context,
             )
+        form = UpdateIndividualsIBANFromXlsxForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    xlsx_update_file = XlsxUpdateFile(
+                        file=form.cleaned_data["file"],
+                        business_area=form.cleaned_data["business_area"],
+                        uploaded_by=request.user,
+                    )
+                    xlsx_update_file.save()
+
+                    transaction.on_commit(
+                        lambda: update_individuals_iban_from_xlsx_task.delay(xlsx_update_file.id, request.user.id)
+                    )
+
+                    self.message_user(
+                        request,
+                        f"Started IBAN update for {form.cleaned_data['business_area']}, results will be send to {request.user.email}",
+                        messages.SUCCESS,
+                    )
+                    return redirect(reverse("admin:household_individual_changelist"))
+
+            except Exception as e:
+                self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+
         else:
-            form = UpdateIndividualsIBANFromXlsxForm(request.POST, request.FILES)
-            if form.is_valid():
-                try:
-                    with transaction.atomic():
-                        xlsx_update_file = XlsxUpdateFile(
-                            file=form.cleaned_data["file"],
-                            business_area=form.cleaned_data["business_area"],
-                            uploaded_by=request.user,
-                        )
-                        xlsx_update_file.save()
-
-                        transaction.on_commit(
-                            lambda: update_individuals_iban_from_xlsx_task.delay(xlsx_update_file.id, request.user.id)
-                        )
-
-                        self.message_user(
-                            request,
-                            f"Started IBAN update for {form.cleaned_data['business_area']}, results will be send to {request.user.email}",
-                            messages.SUCCESS,
-                        )
-                        return redirect(reverse("admin:household_individual_changelist"))
-
-                except Exception as e:
-                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
-
-            else:
-                context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
-                return TemplateResponse(
-                    request,
-                    "admin/household/individual/individuals_iban_xlsx_update.html",
-                    context,
-                )
+            context = self.get_common_context(request, title="Add/Update Individual IBAN by xlsx", form=form)
+            return TemplateResponse(
+                request,
+                "admin/household/individual/individuals_iban_xlsx_update.html",
+                context,
+            )
 
     def revalidate_phone_number_sync(self, request: HttpRequest, queryset: QuerySet) -> None:
         try:
@@ -278,7 +277,7 @@ class IndividualAdmin(
 class InputFilter(admin.SimpleListFilter):
     template: str = "admin/household/individual/business_area_slug_input_filter.html"
 
-    def lookups(self, request: HttpRequest, model_admin: Any) -> Optional[Iterable[Tuple[Any, str]]]:
+    def lookups(self, request: HttpRequest, model_admin: Any) -> Iterable[tuple[Any, str]] | None:
         return [(None, "")]
 
 
@@ -361,7 +360,7 @@ class IndividualRepresentationInline(admin.TabularInline):
             Individual.all_objects.select_related("program").all().only("unicef_id", "copied_from", "program__name")
         )  # pragma: no cover
 
-    def has_add_permission(self, request: HttpRequest, obj: Optional[Individual] = None) -> bool:
+    def has_add_permission(self, request: HttpRequest, obj: Individual | None = None) -> bool:
         return False  # Disable adding new individual representations inline
 
 
@@ -388,5 +387,5 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     def number_of_representations(self, obj: IndividualCollection) -> int:
         return obj.individuals(manager="all_objects").count()
 
-    def business_area(self, obj: IndividualCollection) -> Optional[BusinessArea]:
+    def business_area(self, obj: IndividualCollection) -> BusinessArea | None:
         return obj.business_area

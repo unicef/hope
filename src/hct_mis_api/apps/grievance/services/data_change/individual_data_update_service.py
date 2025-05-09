@@ -1,6 +1,6 @@
 import dataclasses
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
@@ -70,8 +70,8 @@ from hct_mis_api.apps.utils.phone import is_valid_phone_number
 @dataclasses.dataclass
 class DeliveryMechanismDataPayloadField:
     name: str
-    value: Optional[str] = None
-    previous_value: Optional[str] = None
+    value: str | None = None
+    previous_value: str | None = None
 
 
 @dataclasses.dataclass
@@ -79,11 +79,11 @@ class DeliveryMechanismDataPayload:
     id: str
     label: str
     approve_status: bool
-    data_fields: List[DeliveryMechanismDataPayloadField]
+    data_fields: list[DeliveryMechanismDataPayloadField]
 
 
 class IndividualDataUpdateService(DataChangeService):
-    def save(self) -> List[GrievanceTicket]:
+    def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
         individual_encoded_id = individual_data_update_issue_type_extras.get("individual")
@@ -109,12 +109,12 @@ class IndividualDataUpdateService(DataChangeService):
         flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
-        individual_data_with_approve_status: Dict[str, Any] = {
+        individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
         }
-        for field in individual_data_with_approve_status.keys():
+        for field in individual_data_with_approve_status:
             current_value = getattr(individual, field, None)
-            if isinstance(current_value, (datetime, date)):
+            if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             elif field in ("phone_no", "phone_no_alternative", "payment_delivery_phone_no"):
                 current_value = str(current_value)
@@ -159,9 +159,9 @@ class IndividualDataUpdateService(DataChangeService):
             identities_to_remove_with_approve_status
         )
         individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
-        individual_data_with_approve_status[
-            "payment_channels_to_remove"
-        ] = payment_channels_to_remove_with_approve_status
+        individual_data_with_approve_status["payment_channels_to_remove"] = (
+            payment_channels_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
             payment_channels_to_edit
         )
@@ -169,9 +169,9 @@ class IndividualDataUpdateService(DataChangeService):
             payment_channels_to_remove_with_approve_status
         )
         individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
-        individual_data_with_approve_status[
-            "delivery_mechanism_data_to_remove"
-        ] = delivery_mechanism_data_to_remove_with_approve_status
+        individual_data_with_approve_status["delivery_mechanism_data_to_remove"] = (
+            delivery_mechanism_data_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
             delivery_mechanism_data_to_edit
         )
@@ -212,13 +212,13 @@ class IndividualDataUpdateService(DataChangeService):
         to_date_string(new_individual_data, "birth_date")
         verify_flex_fields(flex_fields, "individuals")
         save_images(flex_fields, "individuals")
-        individual_data_with_approve_status: Dict[str, Any] = {
+        individual_data_with_approve_status: dict[str, Any] = {
             to_snake_case(field): {"value": value, "approve_status": False}
             for field, value in new_individual_data.items()
         }
-        for field in individual_data_with_approve_status.keys():
+        for field in individual_data_with_approve_status:
             current_value = getattr(individual, field, None)
-            if isinstance(current_value, (datetime, date)):
+            if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             elif field in ("phone_no", "phone_no_alternative", "payment_delivery_phone_no"):
                 current_value = str(current_value)
@@ -263,9 +263,9 @@ class IndividualDataUpdateService(DataChangeService):
             identities_to_remove_with_approve_status
         )
         individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
-        individual_data_with_approve_status[
-            "payment_channels_to_remove"
-        ] = payment_channels_to_remove_with_approve_status
+        individual_data_with_approve_status["payment_channels_to_remove"] = (
+            payment_channels_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
             payment_channels_to_edit
         )
@@ -273,9 +273,9 @@ class IndividualDataUpdateService(DataChangeService):
             payment_channels_to_remove_with_approve_status
         )
         individual_data_with_approve_status["delivery_mechanism_data"] = delivery_mechanism_data_with_approve_status
-        individual_data_with_approve_status[
-            "delivery_mechanism_data_to_remove"
-        ] = delivery_mechanism_data_to_remove_with_approve_status
+        individual_data_with_approve_status["delivery_mechanism_data_to_remove"] = (
+            delivery_mechanism_data_to_remove_with_approve_status
+        )
         individual_data_with_approve_status["delivery_mechanism_data_to_edit"] = prepare_edit_delivery_mechanism_data(
             delivery_mechanism_data_to_edit
         )

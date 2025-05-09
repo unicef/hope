@@ -5,21 +5,28 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('household', '0006_migration'),
-        ('grievance', '0006_migration'),
+        ("household", "0006_migration"),
+        ("grievance", "0006_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tickethouseholddataupdatedetails',
-            name='household',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='household_data_update_ticket_details', to='household.household'),
+            model_name="tickethouseholddataupdatedetails",
+            name="household",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="household_data_update_ticket_details",
+                to="household.household",
+            ),
         ),
         migrations.AlterField(
-            model_name='ticketindividualdataupdatedetails',
-            name='individual',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='individual_data_update_ticket_details', to='household.individual'),
+            model_name="ticketindividualdataupdatedetails",
+            name="individual",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="individual_data_update_ticket_details",
+                to="household.individual",
+            ),
         ),
     ]

@@ -72,48 +72,42 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         Household.objects.all().update(unicef_id="HH-22-0059.7225")
 
         grievance_ticket_1 = GrievanceTicket(
-            **{
-                "business_area": cls.business_area,
-                "admin2": cls.admin_area_1,
-                "language": "Polish",
-                "consent": True,
-                "description": "ticket_1",
-                "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                "status": GrievanceTicket.STATUS_NEW,
-                "created_by": cls.user,
-                "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7223",
-            }
+            business_area=cls.business_area,
+            admin2=cls.admin_area_1,
+            language="Polish",
+            consent=True,
+            description="ticket_1",
+            category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=cls.user,
+            assigned_to=cls.user,
+            household_unicef_id="HH-22-0059.7223",
         )
 
         grievance_ticket_2 = GrievanceTicket(
-            **{
-                "business_area": cls.business_area,
-                "admin2": cls.admin_area_2,
-                "language": "English",
-                "consent": True,
-                "description": "ticket_2",
-                "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-                "status": GrievanceTicket.STATUS_ON_HOLD,
-                "created_by": cls.user,
-                "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7224",
-            }
+            business_area=cls.business_area,
+            admin2=cls.admin_area_2,
+            language="English",
+            consent=True,
+            description="ticket_2",
+            category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            status=GrievanceTicket.STATUS_ON_HOLD,
+            created_by=cls.user,
+            assigned_to=cls.user,
+            household_unicef_id="HH-22-0059.7224",
         )
 
         grievance_ticket_3 = GrievanceTicket(
-            **{
-                "business_area": cls.business_area,
-                "admin2": cls.admin_area_2,
-                "language": "Polish, English",
-                "consent": True,
-                "description": "ticket_3",
-                "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                "created_by": cls.user,
-                "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7225",
-            }
+            business_area=cls.business_area,
+            admin2=cls.admin_area_2,
+            language="Polish, English",
+            consent=True,
+            description="ticket_3",
+            category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            status=GrievanceTicket.STATUS_IN_PROGRESS,
+            created_by=cls.user,
+            assigned_to=cls.user,
+            household_unicef_id="HH-22-0059.7225",
         )
 
         GrievanceTicket.objects.bulk_create((grievance_ticket_1, grievance_ticket_2, grievance_ticket_3))

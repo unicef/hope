@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
@@ -144,7 +144,7 @@ class HouseholdFilter(FilterSet):
             return qs.exclude(
                 head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
             )
-        elif value is False:
+        if value is False:
             return qs.filter(
                 head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
             )
@@ -169,9 +169,9 @@ class HouseholdFilter(FilterSet):
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
-    def _get_elasticsearch_query_for_households(self, search: str) -> Dict:
+    def _get_elasticsearch_query_for_households(self, search: str) -> dict:
         business_area = self.data["business_area"]
-        query: Dict[str, Any] = {
+        query: dict[str, Any] = {
             "size": "100",
             "_source": False,
             "query": {
@@ -264,16 +264,14 @@ class HouseholdFilter(FilterSet):
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
             return qs.filter(program__status=Program.ACTIVE)
-        elif value is False:
+        if value is False:
             return qs.filter(program__status=Program.FINISHED)
-        else:
-            return qs
+        return qs
 
     def rdi_merge_status_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value == MergeStatusModel.PENDING:
             return qs.filter(rdi_merge_status=MergeStatusModel.PENDING)
-        else:
-            return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
+        return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
 
 
 class IndividualFilter(FilterSet):
@@ -327,10 +325,9 @@ class IndividualFilter(FilterSet):
     def rdi_merge_status_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value == MergeStatusModel.PENDING:
             return qs.filter(rdi_merge_status=MergeStatusModel.PENDING)
-        else:
-            return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
+        return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
 
-    def flags_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
+    def flags_filter(self, qs: QuerySet, name: str, value: list[str]) -> QuerySet:
         q_obj = Q()
         if NEEDS_ADJUDICATION in value:
             q_obj |= Q(deduplication_golden_record_status=NEEDS_ADJUDICATION)
@@ -358,7 +355,7 @@ class IndividualFilter(FilterSet):
         es_ids = [x.meta["id"] for x in es_response]
         return qs.filter(Q(id__in=es_ids)).distinct()
 
-    def _get_elasticsearch_query_for_individuals(self, search: str) -> Dict:
+    def _get_elasticsearch_query_for_individuals(self, search: str) -> dict:
         business_area = self.data["business_area"]
         return {
             "size": "100",
@@ -421,7 +418,7 @@ class IndividualFilter(FilterSet):
         document_type = self.data.get("document_type")
         return qs.filter(documents__type__key=document_type, documents__document_number__icontains=document_number)
 
-    def status_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
+    def status_filter(self, qs: QuerySet, name: str, value: list[str]) -> QuerySet:
         q_obj = Q()
         if STATUS_DUPLICATE in value:
             q_obj |= Q(duplicate=True)
@@ -438,10 +435,9 @@ class IndividualFilter(FilterSet):
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
         if value is True:
             return qs.filter(program__status=Program.ACTIVE)
-        elif value is False:
+        if value is False:
             return qs.filter(program__status=Program.FINISHED)
-        else:
-            return qs
+        return qs
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
         return queryset.filter(registration_data_import__pk=decode_id_string(value))

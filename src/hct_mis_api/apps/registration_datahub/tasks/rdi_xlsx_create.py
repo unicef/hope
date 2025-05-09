@@ -1,17 +1,15 @@
 import logging
-import traceback
 import uuid
 from collections import defaultdict
 from datetime import date, datetime
 from functools import cached_property, partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, TYPE_CHECKING
 
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
-from django.db.models import QuerySet
 from django.utils import timezone
 
 import openpyxl
@@ -55,6 +53,9 @@ from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
+
 logger = logging.getLogger(__name__)
 
 
@@ -66,7 +67,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     """
 
     def __init__(self) -> None:
-        self.image_loader: Optional[SheetImageLoader] = None
+        self.image_loader: SheetImageLoader | None = None
         self.business_area = None
         self.households = {}
         self.documents = {}
@@ -76,7 +77,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
         self.program = None
-        self.pdu_flexible_attributes: Optional[QuerySet[FlexibleAttribute]] = None
+        self.pdu_flexible_attributes: QuerySet[FlexibleAttribute] | None = None
         super().__init__()
 
     @cached_property
@@ -188,7 +189,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         is_field_required: bool = False,
         *args: Any,
         **kwargs: Any,
-    ) -> Union[File, str, None]:
+    ) -> File | str | None:
         if self.image_loader.image_in(cell.coordinate):
             image = self.image_loader.get(cell.coordinate)
             file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -229,11 +230,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if isinstance(value, str):
             if value.lower() == "false":
                 return False
-            elif value.lower() == "true":
+            if value.lower() == "true":
                 return True
         return value
 
-    def _handle_geopoint_field(self, value: Any, *args: Any, **kwargs: Any) -> Union[str, Point]:
+    def _handle_geopoint_field(self, value: Any, *args: Any, **kwargs: Any) -> str | Point:
         if not value:
             return ""
 
@@ -475,7 +476,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
             by="xlsx_field"
         )
-        complex_fields: Dict[str, Dict[str, Callable]] = {
+        complex_fields: dict[str, dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,
                 "primary_collector_id": self._handle_collectors,
@@ -506,16 +507,16 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             },
         }
         complex_fields["individuals"].update(
-            {field: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
+            dict.fromkeys(delivery_mechanism_xlsx_fields, self._handle_delivery_mechanism_fields)
         )
-        document_complex_types: Dict[str, Callable] = {}
+        document_complex_types: dict[str, Callable] = {}
         for document_type in DocumentType.objects.all():
             document_complex_types[f"{document_type.key}_i_c"] = self._handle_document_fields
             document_complex_types[f"{document_type.key}_no_i_c"] = self._handle_document_fields
             document_complex_types[f"{document_type.key}_photo_i_c"] = self._handle_document_photo_fields
             document_complex_types[f"{document_type.key}_issuer_i_c"] = self._handle_document_issuing_country_fields
         complex_fields["individuals"].update(document_complex_types)
-        complex_types: Dict[str, Callable] = {
+        complex_types: dict[str, Callable] = {
             "GEOPOINT": self._handle_geopoint_field,
             "IMAGE": self._handle_image_field,
             "DECIMAL": self._handle_decimal_field,
@@ -760,5 +761,4 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 )
         except Exception:  # pragma: no cover
             # print stack trace
-            print(traceback.format_exc())  # pragma: no cover
             raise  # pragma: no cover

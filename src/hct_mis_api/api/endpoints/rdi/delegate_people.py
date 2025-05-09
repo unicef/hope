@@ -1,9 +1,8 @@
-from typing import Dict
+import typing
 from uuid import UUID
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
@@ -12,6 +11,9 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     PendingIndividualRoleInHousehold,
 )
+
+if typing.TYPE_CHECKING:
+    from rest_framework.request import Request
 
 
 class DelegateSerializer(serializers.Serializer):
@@ -22,7 +24,7 @@ class DelegateSerializer(serializers.Serializer):
 class DelegatePeopleSerializer(serializers.Serializer):
     delegates = DelegateSerializer(many=True, required=True, allow_empty=False, allow_null=False)
 
-    def create(self, validated_data: Dict) -> Dict:
+    def create(self, validated_data: dict) -> dict:
         delegates = validated_data.pop("delegates")
         updated = 0
         for delegate in delegates:

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -68,7 +68,7 @@ class CreateProgram(
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CreateProgram":
+    def processed_mutate(cls, root: Any, info: Any, program_data: dict) -> "CreateProgram":
         business_area_slug = program_data.pop("business_area_slug", None)
         business_area = BusinessArea.objects.get(slug=business_area_slug)
 
@@ -149,7 +149,7 @@ class UpdateProgram(
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
+    def processed_mutate(cls, root: Any, info: Any, program_data: dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
@@ -187,10 +187,9 @@ class UpdateProgram(
             programme_code=programme_code,
             excluded_validators="validate_partners_data",
         )
-        if program.status == Program.FINISHED:
-            # Only reactivation is possible
-            if status_to_set != Program.ACTIVE or len(program_data) > 1:
-                raise ValidationError("You cannot change finished program")
+        # Only reactivation is possible
+        if program.status == Program.FINISHED and status_to_set != Program.ACTIVE or len(program_data) > 1:
+            raise ValidationError("You cannot change finished program")
         if beneficiary_group_id := program_data.pop("beneficiary_group", None):
             beneficiary_group = BeneficiaryGroup.objects.get(id=beneficiary_group_id)
             if old_program.registration_imports.exists() and old_program.beneficiary_group != beneficiary_group:
@@ -231,7 +230,7 @@ class UpdateProgramPartners(
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
+    def processed_mutate(cls, root: Any, info: Any, program_data: dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
@@ -239,7 +238,7 @@ class UpdateProgramPartners(
         business_area = program.business_area
         partners_data = program_data.pop("partners", [])
         partner = info.context.user.partner
-        partner_access = program_data.get("partner_access", None)
+        partner_access = program_data.get("partner_access")
         old_partner_access = old_program.partner_access
 
         cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
@@ -298,7 +297,7 @@ class CopyProgram(
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
+    def processed_mutate(cls, root: Any, info: Any, program_data: dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
         partners_data = program_data.pop("partners", [])
         partner_access = program_data.get("partner_access", [])

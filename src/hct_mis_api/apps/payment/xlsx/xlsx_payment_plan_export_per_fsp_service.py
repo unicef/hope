@@ -3,7 +3,6 @@ import string
 import zipfile
 from io import BytesIO
 from tempfile import NamedTemporaryFile
-from typing import List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -62,7 +61,7 @@ def generate_token_and_order_numbers(payment: Payment) -> Payment:
 
 
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
-    def __init__(self, payment_plan: PaymentPlan, fsp_xlsx_template_id: Optional[str] = None):
+    def __init__(self, payment_plan: PaymentPlan, fsp_xlsx_template_id: str | None = None):
         self.batch_size = 5000
         self.payment_plan = payment_plan
         self.is_social_worker_program = self.payment_plan.is_social_worker_program
@@ -106,7 +105,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
         return fsp_xlsx_template_per_delivery_mechanism.xlsx_template
 
-    def _remove_column_for_people(self, fsp_template_columns: List[str]) -> List[str]:
+    def _remove_column_for_people(self, fsp_template_columns: list[str]) -> list[str]:
         """remove columns and return list"""
         if self.is_social_worker_program:
             return list(
@@ -114,13 +113,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             )
         return list(filter(lambda col_name: col_name not in ["individual_id"], fsp_template_columns))
 
-    def _remove_core_fields_for_people(self, fsp_template_core_fields: List[str]) -> List[str]:
+    def _remove_core_fields_for_people(self, fsp_template_core_fields: list[str]) -> list[str]:
         """remove columns and return list"""
         if self.is_social_worker_program:
             return list(filter(lambda col_name: col_name not in ["household_unicef_id"], fsp_template_core_fields))
         return list(fsp_template_core_fields)
 
-    def prepare_headers(self, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
+    def prepare_headers(self, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> list[str]:
         # get headers
         column_list = list(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS)
         if fsp_xlsx_template and fsp_xlsx_template.columns:
@@ -142,13 +141,12 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             column_list.append(document_field)
 
         column_list = self._remove_column_for_people(column_list)
-        column_list = self._remove_core_fields_for_people(column_list)
-        return column_list
+        return self._remove_core_fields_for_people(column_list)
 
     def add_rows(
         self,
         fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate",
-        payment_ids: List[int],
+        payment_ids: list[int],
         ws: "Worksheet",
     ) -> None:
         for i in range(0, len(payment_ids), self.batch_size):
@@ -158,7 +156,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             for payment in payment_qs:
                 ws.append(self.get_payment_row(payment, fsp_xlsx_template))
 
-    def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
+    def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> list[str]:
         fsp_template_columns = self._remove_column_for_people(fsp_xlsx_template.columns)
         # remove fsp_auth_code if fsp_xlsx_template_id not provided
         if not self.export_fsp_auth_code and "fsp_auth_code" in fsp_template_columns:
@@ -206,15 +204,14 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         snapshot_data = snapshot.snapshot_data
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
-        collector_data = primary_collector or alternate_collector or dict()
+        collector_data = primary_collector or alternate_collector or {}
 
         if attribute.associated_with == FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL:
             return collector_data.get("flex_fields", {}).get(name, "")
-        else:
-            return snapshot_data.get("flex_fields", {}).get(name, "")
+        return snapshot_data.get("flex_fields", {}).get(name, "")
 
     def save_workbook(
-        self, zip_file: zipfile.ZipFile, wb: "Workbook", filename: str, password: Optional[str] = None
+        self, zip_file: zipfile.ZipFile, wb: "Workbook", filename: str, password: str | None = None
     ) -> None:
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
@@ -237,7 +234,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self,
         delivery_mechanism_per_payment_plan_list: QuerySet["DeliveryMechanismPerPaymentPlan"],
         zip_file: zipfile.ZipFile,
-        password: Optional[str] = None,
+        password: str | None = None,
     ) -> None:
         for delivery_mechanism_per_payment_plan in delivery_mechanism_per_payment_plan_list:
             fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
@@ -263,7 +260,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self,
         delivery_mechanism_per_payment_plan_list: QuerySet["DeliveryMechanismPerPaymentPlan"],
         zip_file: zipfile.ZipFile,
-        password: Optional[str] = None,
+        password: str | None = None,
     ) -> None:
         # there should be only one delivery mechanism/fsp in order to generate split file
         # this is guarded in SplitPaymentPlanMutation

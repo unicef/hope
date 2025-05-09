@@ -360,7 +360,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
 
         response_data = response["data"]["approveNeedsAdjudication"]["grievanceTicket"]
         selected_individuals = response_data["needsAdjudicationTicketDetails"]["possibleDuplicates"]
-        selected_individuals_ids = list(map(lambda d: d["id"], selected_individuals))
+        selected_individuals_ids = [d["id"] for d in selected_individuals]
 
         self.assertEqual(grievance_ticket_id, response_data["id"])
         self.assertIn(self.id_to_base64(self.individuals[0].id, "IndividualNode"), selected_individuals_ids)

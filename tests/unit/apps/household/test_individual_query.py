@@ -305,13 +305,11 @@ class TestIndividualQuery(APITestCase):
 
         # just add one PENDING Ind to be sure filters works correctly
         IndividualFactory(
-            **{
-                "full_name": "Tester Test",
-                "given_name": "Tester",
-                "family_name": "Test",
-                "phone_no": "(953)681-4123",
-                "birth_date": "1943-07-23",
-            },
+            full_name="Tester Test",
+            given_name="Tester",
+            family_name="Test",
+            phone_no="(953)681-4123",
+            birth_date="1943-07-23",
             rdi_merge_status=MergeStatusModel.PENDING,
         )
 

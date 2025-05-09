@@ -2,7 +2,7 @@ import copy
 import logging
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.files import File
@@ -462,7 +462,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _to_values_list(instances: List, field_name: str) -> str:
+    def _to_values_list(instances: list, field_name: str) -> str:
         values_list = list(instances.values_list(field_name, flat=True))
         return ", ".join([str(value) for value in values_list])
 
@@ -727,7 +727,7 @@ class GenerateReportService:
         self.ws_report.append(headers_row)
 
     def _add_rows(self) -> int:
-        get_row_methods: Tuple = GenerateReportService.ROW_CONTENT_METHODS[self.report.report_type]
+        get_row_methods: tuple = GenerateReportService.ROW_CONTENT_METHODS[self.report.report_type]
         all_instances = get_row_methods[0](self.report)
         self.report.number_of_records = all_instances.count()
         number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report.report_type])
@@ -784,7 +784,7 @@ class GenerateReportService:
         context = {
             "report_type": self.report.get_report_type_display(),
             "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
-            "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/programs/all/reporting/{encode_id_base64(self.report.id, "Report")}',
+            "report_url": f"https://{settings.FRONTEND_HOST}/{self.business_area.slug}/programs/all/reporting/{encode_id_base64(self.report.id, 'Report')}",
             "title": "Report",
         }
         text_body = render_to_string("report.txt", context=context)

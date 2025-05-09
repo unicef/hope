@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Sequence
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -85,23 +85,26 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
         _clear_deduplication_individuals_fields(distinct_individuals)
 
-    if ticket_details.ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
-        # both individuals are distinct, report false positive
-        if not duplicate_individuals and distinct_individuals:
-            from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-                BiometricDeduplicationService,
-            )
+    # both individuals are distinct, report false positive
+    if (
+        ticket_details.ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY
+        and not duplicate_individuals
+        and distinct_individuals
+    ):
+        from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+            BiometricDeduplicationService,
+        )
 
-            photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
-            service = BiometricDeduplicationService()
-            try:
-                service.report_false_positive_duplicate(
-                    photos[0],
-                    photos[1],
-                    str(ticket_details.ticket.registration_data_import.program.deduplication_set_id),
-                )
-            except service.api.API_EXCEPTION_CLASS:
-                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
+        photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
+        service = BiometricDeduplicationService()
+        try:
+            service.report_false_positive_duplicate(
+                photos[0],
+                photos[1],
+                str(ticket_details.ticket.registration_data_import.program.deduplication_set_id),
+            )
+        except service.api.API_EXCEPTION_CLASS:
+            logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
@@ -114,7 +117,7 @@ def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, u
     close_needs_adjudication_new_ticket(ticket_details, user)
 
 
-def _get_min_max_score(golden_records: List[Dict]) -> Tuple[float, float]:
+def _get_min_max_score(golden_records: list[dict]) -> tuple[float, float]:
     items = [item.get("score", 0.0) for item in golden_records]
 
     return min(items, default=0.0), max(items, default=0.0)
@@ -125,11 +128,11 @@ def create_grievance_ticket_with_details(
     possible_duplicate: Individual,
     business_area: BusinessArea,
     issue_type: int,
-    dedup_engine_similarity_pair: Optional[DeduplicationEngineSimilarityPair] = None,
-    possible_duplicates: Optional[List[Individual]] = None,
-    registration_data_import: Optional[RegistrationDataImport] = None,
+    dedup_engine_similarity_pair: DeduplicationEngineSimilarityPair | None = None,
+    possible_duplicates: list[Individual] | None = None,
+    registration_data_import: RegistrationDataImport | None = None,
     is_multiple_duplicates_version: bool = False,
-) -> Tuple[Optional[GrievanceTicket], Optional[TicketNeedsAdjudicationDetails]]:
+) -> tuple[GrievanceTicket | None, TicketNeedsAdjudicationDetails | None]:
     from hct_mis_api.apps.grievance.models import (
         GrievanceTicket,
         TicketNeedsAdjudicationDetails,
@@ -198,12 +201,12 @@ def create_needs_adjudication_tickets(
     results_key: str,
     business_area: BusinessArea,
     issue_type: int,
-    registration_data_import: Optional[RegistrationDataImport] = None,
+    registration_data_import: RegistrationDataImport | None = None,
 ) -> None:
     from hct_mis_api.apps.household.models import Individual
 
     if not individuals_queryset:
-        return None
+        return
 
     unique_individuals = set()
     individuals_to_remove_from_es = set()
@@ -251,7 +254,7 @@ def create_needs_adjudication_tickets_for_biometrics(
     # if one of individuals is in already merged population mark it as original
 
     if not deduplication_pairs.exists():
-        return None
+        return
 
     new_tickets = []
 
@@ -284,8 +287,8 @@ def create_needs_adjudication_tickets_for_biometrics(
 
 def mark_as_duplicate_individual(
     individual_to_remove: Individual,
-    unique_individual: Optional[Individual],
-    household: Optional[Household],
+    unique_individual: Individual | None,
+    household: Household | None,
     user: AbstractUser,
     program: "Program",
 ) -> None:

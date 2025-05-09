@@ -1,5 +1,6 @@
 import os
 import time
+from contextlib import suppress
 from time import sleep
 from typing import Literal, Union
 
@@ -205,11 +206,9 @@ class Common:
     def get_value_of_attributes(self, attribute: str = "data-cy") -> None:
         sleep(1)
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
-        for ii in ids:
-            try:
-                print(f"{ii.text}: {ii.get_attribute(attribute)}")  # type: ignore
-            except BaseException:
-                print(f"No text: {ii.get_attribute(attribute)}")  # type: ignore
+        for _ in ids:
+            with suppress(BaseException):
+                pass  # type: ignore
 
     def mouse_on_element(self, element: WebElement) -> None:
         hover = ActionChains(self.driver).move_to_element(element)  # type: ignore
@@ -223,6 +222,6 @@ class Common:
         while True:
             if os.path.exists(filepath):
                 return True
-            elif time.time() - start_time > timeout:
+            if time.time() - start_time > timeout:
                 raise TimeoutError(f"File {filepath} not found after {timeout} seconds")
             sleep(0.02)

@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -36,7 +36,7 @@ class CreateReport(ReportValidator, CommonValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, report_data: Dict) -> "CreateReport":
+    def mutate(cls, root: Any, info: Any, report_data: dict) -> "CreateReport":
         business_area = BusinessArea.objects.get(slug=report_data.pop("business_area_slug"))
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
 
@@ -93,7 +93,7 @@ class RestartCreateReport(PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root: Any, info: Any, report_data: Dict) -> "RestartCreateReport":
+    def mutate(cls, root: Any, info: Any, report_data: dict) -> "RestartCreateReport":
         business_area = BusinessArea.objects.get(slug=report_data.get("business_area_slug"))
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
         report = get_object_or_404(Report, id=decode_id_string(report_data.get("report_id")))
@@ -103,9 +103,8 @@ class RestartCreateReport(PermissionMutation):
             msg = "Impossible restart now. Status must be 'Processing' and more than 30 mins after last running."
             logger.error(msg)
             raise GraphQLError(msg)
-        else:
-            report_export_task.delay(report_id=str(report.id))
-            report.refresh_from_db()
+        report_export_task.delay(report_id=str(report.id))
+        report.refresh_from_db()
         return RestartCreateReport(report)
 
 

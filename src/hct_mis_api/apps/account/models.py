@@ -1,6 +1,6 @@
 import logging
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 from uuid import UUID
 
 from django import forms
@@ -85,11 +85,11 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         return self.id in Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)
 
     @classmethod
-    def get_partners_as_choices(cls) -> List:
+    def get_partners_as_choices(cls) -> list:
         return [(partner.id, partner.name) for partner in cls.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)]
 
     @classmethod
-    def get_partners_for_program_as_choices(cls, business_area_id: str, program_id: Optional[str] = None) -> List:
+    def get_partners_for_program_as_choices(cls, business_area_id: str, program_id: str | None = None) -> list:
         role_assignments = RoleAssignment.objects.filter(business_area_id=business_area_id)
         if program_id:
             role_assignments = role_assignments.filter(Q(program_id=program_id) | Q(program=None))
@@ -109,7 +109,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def is_editable(self) -> bool:
         return not self.is_unicef and not self.is_default
 
-    def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
+    def get_program_ids_for_business_area(self, business_area_id: str) -> list[str]:
         from hct_mis_api.apps.program.models import Program
 
         if self.role_assignments.filter(business_area_id=business_area_id, program=None).exists():
@@ -121,8 +121,8 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         return [str(program_id) for program_id in programs_ids]
 
     def get_program_ids_for_permission_in_business_area(
-        self, business_area_id: str, permissions: List[Permissions], one_of_permissions: bool
-    ) -> List[str]:
+        self, business_area_id: str, permissions: list[Permissions], one_of_permissions: bool
+    ) -> list[str]:
         """
         Return list of program ids that the partner has permissions for in the given business area -
         If one_of_permissions=True, the function will return programs in which the user has at least one of the permissions.
@@ -143,7 +143,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             ).values_list("program_id", flat=True)
         return [str(program_id) for program_id in programs_ids]
 
-    def has_program_access(self, program_id: Union[str, UUID]) -> bool:
+    def has_program_access(self, program_id: str | UUID) -> bool:
         from hct_mis_api.apps.program.models import Program
 
         return (
@@ -156,20 +156,20 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             .exists()
         )
 
-    def has_area_access(self, area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
+    def has_area_access(self, area_id: str | UUID, program_id: str | UUID) -> bool:
         return (
             not self.has_area_limits_in_program(program_id)
             or self.get_area_limits_for_program(program_id).filter(id=area_id).exists()
         )
 
-    def get_area_limits_for_program(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
+    def get_area_limits_for_program(self, program_id: str | UUID) -> QuerySet[Area]:
         area_limits = AdminAreaLimitedTo.objects.filter(partner=self, program_id=program_id)
         return Area.objects.filter(admin_area_limits__in=area_limits)
 
-    def has_area_limits_in_program(self, program_id: Union[str, UUID]) -> bool:
+    def has_area_limits_in_program(self, program_id: str | UUID) -> bool:
         return self.get_area_limits_for_program(program_id).exists()
 
-    def get_areas_for_program(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
+    def get_areas_for_program(self, program_id: str | UUID) -> QuerySet[Area]:
         area_limits = self.get_area_limits_for_program(program_id)
         return (
             area_limits
@@ -203,7 +203,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             raise ValidationError(f"{self.partner} is a parent partner and cannot have users.")
         super().save(*args, **kwargs)
 
-    def has_program_access(self, program_id: Union[str, UUID]) -> bool:
+    def has_program_access(self, program_id: str | UUID) -> bool:
         from hct_mis_api.apps.program.models import Program
 
         return (
@@ -217,7 +217,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             .exists()
         )
 
-    def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
+    def get_program_ids_for_business_area(self, business_area_id: str) -> list[str]:
         """
         Return list of program ids that the user (or user's partner) has access to in the given business area.
         """
@@ -235,8 +235,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return [str(program_id) for program_id in programs_ids]
 
     def get_program_ids_for_permission_in_business_area(
-        self, business_area_id: str, permissions: List[Permissions], one_of_permissions: bool
-    ) -> List[str]:
+        self, business_area_id: str, permissions: list[Permissions], one_of_permissions: bool
+    ) -> list[str]:
         """
         Return list of program ids that the user (or user's partner) has permissions for in the given business area -
         If one_of_permissions=True, the function will return programs in which the user has at least one of the permissions.
@@ -264,7 +264,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ).values_list("program_id", flat=True)
         return [str(program_id) for program_id in programs_ids]
 
-    def permissions_in_business_area(self, business_area_slug: str, program_id: Union[UUID, str, None] = None) -> set:
+    def permissions_in_business_area(self, business_area_slug: str, program_id: UUID | str | None = None) -> set:
         """
         return list of permissions for the given business area and program,
         retrieved from RoleAssignments of the user and their partner
@@ -332,13 +332,13 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def email_user(  # type: ignore
         self,
         subject: str,
-        html_body: Optional[str] = None,
-        text_body: Optional[str] = None,
-        mailjet_template_id: Optional[int] = None,
-        body_variables: Optional[Dict[str, Any]] = None,
-        from_email: Optional[str] = None,
-        from_email_display: Optional[str] = None,
-        ccs: Optional[list[str]] = None,
+        html_body: str | None = None,
+        text_body: str | None = None,
+        mailjet_template_id: int | None = None,
+        body_variables: dict[str, Any] | None = None,
+        from_email: str | None = None,
+        from_email_display: str | None = None,
+        ccs: list[str] | None = None,
     ) -> None:
         """
         Send email to this user via Mailjet.
@@ -376,7 +376,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
 
 class HorizontalChoiceArrayField(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+    def formfield(self, form_class: Any | None = ..., choices_form_class: Any | None = ..., **kwargs: Any) -> Any:
         widget = FilteredSelectMultiple(self.verbose_name, False)
         defaults = {
             "form_class": forms.MultipleChoiceField,
@@ -544,7 +544,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
     is_visible_on_ui = models.BooleanField(default=True)
     is_available_for_partner = models.BooleanField(default=True)
 
-    def natural_key(self) -> Tuple:
+    def natural_key(self) -> tuple:
         return self.name, self.subsystem
 
     def clean(self) -> None:
@@ -559,7 +559,7 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         return f"{self.name} ({self.subsystem})"
 
     @classmethod
-    def get_roles_as_choices(cls) -> List:
+    def get_roles_as_choices(cls) -> list:
         return [(role.id, role.name) for role in cls.objects.all()]
 
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from django.core.files.storage import default_storage
 
@@ -86,7 +86,7 @@ class FlexFieldsScalar(graphene.Scalar):
     """
 
     @staticmethod
-    def serialize(dt: Any) -> Optional[Any]:
+    def serialize(dt: Any) -> Any | None:
         if not dt:
             return dt
 

@@ -38,7 +38,7 @@ class CountryDashboard(BaseComponents):
                 self.driver.switch_to.frame(iframe)
                 return
             except TimeoutException:
-                print(f"Attempt {attempt + 1} - Could not locate iframe 'Dashboard'. Checking all iframes on page.")
+                pass
             sleep(2)
         raise NoSuchElementException("Could not locate iframe with title 'Dashboard' after multiple attempts.")
 
