@@ -19,7 +19,7 @@ def printing(what: str, web_driver: WebDriver, label: str = "data-cy", page_obje
     """
     ids = web_driver.find_elements(By.XPATH, f"//*[@{label}]")
     for ii in ids:
-        data_cy_attribute = ii.get_attribute(label)  # type: ignore
+        data_cy_attribute = ii.get_attribute(label)
         var_name = [i.capitalize() for i in data_cy_attribute.lower().replace(".", " ").replace("-", " ").split(" ")]
         method_name = "get" + "".join(var_name)
         var_name[0] = var_name[0].lower()

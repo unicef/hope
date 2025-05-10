@@ -51,7 +51,6 @@ class DeduplicationEngineApiTest(TestCase):
         mock_post.return_value = {}, 200
 
         api.create_deduplication_set(deduplication_set)
-        print(dataclasses.asdict(deduplication_set))
         mock_post.assert_called_once_with("deduplication_sets/", dataclasses.asdict(deduplication_set))
 
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")

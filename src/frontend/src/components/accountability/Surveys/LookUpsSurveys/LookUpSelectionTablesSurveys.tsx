@@ -5,6 +5,7 @@ import { LookUpTargetPopulationTableSurveys } from '@containers/tables/Surveys/L
 import { usePermissions } from '@hooks/usePermissions';
 import { SurveyTabsValues } from '@utils/constants';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpSelectionTablesSurveysProps {
   selectedTab: number;
@@ -16,7 +17,7 @@ interface LookUpSelectionTablesSurveysProps {
   onValueChange;
   handleChange;
 }
-export function LookUpSelectionTablesSurveys({
+function LookUpSelectionTablesSurveys({
   selectedTab,
   choicesData,
   values,
@@ -61,3 +62,8 @@ export function LookUpSelectionTablesSurveys({
     </>
   );
 }
+
+export default withErrorBoundary(
+  LookUpSelectionTablesSurveys,
+  'LookUpSelectionTablesSurveys',
+);

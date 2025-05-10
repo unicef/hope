@@ -12,6 +12,7 @@ import {
   PaymentPlanStatus,
   useAllPaymentPlansForTableQuery,
 } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpTargetPopulationTableCommunicationProps {
   filter;
@@ -30,7 +31,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export const LookUpTargetPopulationTableCommunication = ({
+const LookUpTargetPopulationTableCommunication = ({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -89,3 +90,8 @@ export const LookUpTargetPopulationTableCommunication = ({
     renderTable()
   );
 };
+
+export default withErrorBoundary(
+  LookUpTargetPopulationTableCommunication,
+  'LookUpTargetPopulationTableCommunication',
+);

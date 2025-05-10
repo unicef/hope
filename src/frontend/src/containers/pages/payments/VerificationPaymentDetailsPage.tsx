@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   PaymentVerificationPlanStatus,
   usePaymentQuery,
@@ -16,14 +16,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { AdminButton } from '@core/AdminButton';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function VerificationPaymentDetailsPage(): ReactElement {
+function VerificationPaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const location = useLocation();
   const { data, loading, error } = usePaymentQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -83,24 +82,20 @@ export function VerificationPaymentDetailsPage(): ReactElement {
     </PageHeader>
   );
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'VerificationPaymentDetailsPage.tsx');
-      }}
-      componentName="VerificationPaymentDetailsPage"
-    >
-      <div>
-        {toolbar}
-        <VerificationPaymentDetails
-          payment={payment}
-          canViewActivityLog={hasPermissions(
-            PERMISSIONS.ACTIVITY_LOG_VIEW,
-            permissions,
-          )}
-        />
-      </div>
-    </UniversalErrorBoundary>
+    <>
+      {toolbar}
+      <VerificationPaymentDetails
+        payment={payment}
+        canViewActivityLog={hasPermissions(
+          PERMISSIONS.ACTIVITY_LOG_VIEW,
+          permissions,
+        )}
+      />
+    </>
   );
 }
+
+export default withErrorBoundary(
+  VerificationPaymentDetailsPage,
+  'VerificationPaymentDetailsPage',
+);

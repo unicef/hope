@@ -65,8 +65,6 @@ class TestPhoneNumberVerification(TestCase):
             )
             cls.individuals.append(individuals[0])
 
-            household.programs.add(program)
-
             payment = PaymentFactory(
                 parent=payment_plan,
                 household=household,
@@ -114,8 +112,6 @@ class TestPhoneNumberVerification(TestCase):
                 {"registration_data_import": other_registration_data_import},
             )
             cls.other_individuals.append(other_individuals[0])
-
-            other_household.programs.add(program)
 
             other_payment_record = PaymentFactory(
                 parent=other_payment_plan,

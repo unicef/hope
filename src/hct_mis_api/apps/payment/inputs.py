@@ -69,6 +69,8 @@ class CreatePaymentPlanInput(graphene.InputObjectType):
     targeting_criteria = TargetingCriteriaObjectType(required=True)
     excluded_ids = graphene.String(required=True)
     exclusion_reason = graphene.String()
+    fsp_id = graphene.ID(required=False)
+    delivery_mechanism_code = graphene.String(required=False)
 
 
 class OpenPaymentPlanInput(graphene.InputObjectType):
@@ -92,23 +94,5 @@ class UpdatePaymentPlanInput(graphene.InputObjectType):
     excluded_ids = graphene.String()
     exclusion_reason = graphene.String()
 
-
-class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-    delivery_mechanisms = graphene.List(graphene.String, required=True)
-
-
-class FSPToDeliveryMechanismMappingInput(graphene.InputObjectType):
-    fsp_id = graphene.ID(required=True)
-    delivery_mechanism = graphene.String(required=True)
-    chosen_configuration = graphene.String(required=False)
-    order = graphene.Int(required=True)
-
-
-class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
-    mappings = graphene.List(FSPToDeliveryMechanismMappingInput, required=True)
-
-
-class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
-    payment_plan_id = graphene.ID(required=True)
+    fsp_id = graphene.ID(required=False)
+    delivery_mechanism_code = graphene.String(required=False)

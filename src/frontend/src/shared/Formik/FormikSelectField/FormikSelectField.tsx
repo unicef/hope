@@ -31,6 +31,7 @@ export function FormikSelectField({
   icon = null,
   disableClearable = false,
   onChange,
+  onClear,
   ...otherProps
 }): ReactElement {
   const isInvalid = Boolean(
@@ -115,6 +116,9 @@ export function FormikSelectField({
                 size="small"
                 onClick={() => {
                   form.setFieldValue(field.name, multiple ? [] : '');
+                  if (onClear) {
+                    onClear();
+                  }
                 }}
               >
                 <XIcon fontSize="small" />

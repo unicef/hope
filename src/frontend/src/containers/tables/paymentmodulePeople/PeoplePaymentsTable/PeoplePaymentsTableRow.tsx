@@ -9,12 +9,15 @@ import { WarningTooltip } from '@components/core/WarningTooltip';
 import {
   formatCurrencyWithSymbol,
   opacityToHex,
+  paymentStatusDisplayMap,
+  paymentStatusToColor,
   renderSomethingOrDash,
 } from '@utils/utils';
 import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { ReactElement, SyntheticEvent } from 'react';
+import { StatusBox } from '@components/core/StatusBox';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -171,6 +174,13 @@ export const PeoplePaymentsTableRow = ({
       </TableCell>
       <TableCell data-cy="delivered-quantity-cell" align="left">
         {renderDeliveredQuantity()}
+      </TableCell>
+      <TableCell>
+        <StatusBox
+          status={payment.status}
+          statusToColor={paymentStatusToColor}
+          statusNameMapping={paymentStatusDisplayMap}
+        />
       </TableCell>
       {hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
         <TableCell data-cy="fsp-auth-code-cell" align="left">

@@ -53,6 +53,8 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         return self.rules.all()
 
     def get_excluded_household_ids(self) -> List[str]:
+        if not self.payment_plan.excluded_ids:
+            return []
         hh_ids_list = []
         hh_ids_list.extend(hh_id.strip() for hh_id in self.payment_plan.excluded_ids.split(",") if hh_id.strip())
         return hh_ids_list
@@ -223,10 +225,6 @@ class TargetingCollectorRuleFilterBlock(
 
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
-    """
-    This is one field like 'bank_account_number__transfer_to_account' - YES, NO
-    """
-
     collector_block_filters = models.ForeignKey(
         "TargetingCollectorRuleFilterBlock",
         related_name="collector_block_filters",
@@ -263,16 +261,11 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
         collectors_ind_query = Individual.objects.filter(
             pk__in=list(collector_primary_qs),
         )
-        # If argument is Yes
-        if argument.lower() == "yes":
-            individuals_with_field_query = collectors_ind_query.filter(
-                delivery_mechanisms_data__data__has_key=self.field_name,
-                delivery_mechanisms_data__is_valid=True,
-            )
-        # If argument is No
-        else:
-            individuals_with_field_query = collectors_ind_query.exclude(
-                delivery_mechanisms_data__data__has_key=self.field_name,
-                delivery_mechanisms_data__is_valid=True,
-            )
+
+        account_type, field_name = self.field_name.split("__")
+        query_method = collectors_ind_query.filter if argument is True else collectors_ind_query.exclude
+        individuals_with_field_query = query_method(
+            accounts__data__has_key=field_name,
+            accounts__account_type__key=account_type,
+        )
         return Q(pk__in=list(individuals_with_field_query.values_list("household_id", flat=True)))

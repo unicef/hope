@@ -110,10 +110,10 @@ class FlexibleAttributeImporter:
                             field_suffix in self.CORE_FIELD_SUFFIXES or field_suffix in self.FLEX_FIELD_SUFFIXES
                         )
                         if is_empty_and_not_index_field and is_core_or_flex_field:
-                            logger.error(f"Survey Sheet: Row {row_number + 1}: English label cannot be empty")
+                            logger.warning(f"Survey Sheet: Row {row_number + 1}: English label cannot be empty")
                             raise ValidationError(f"Survey Sheet: Row {row_number + 1}: English label cannot be empty")
                     if object_type_to_add == "choice" and not value:
-                        logger.error(f"Choices Sheet: Row {row_number + 1}: English label cannot be empty")
+                        logger.warning(f"Choices Sheet: Row {row_number + 1}: English label cannot be empty")
                         raise ValidationError(f"Choices Sheet: Row {row_number + 1}: English label cannot be empty")
 
                 self.json_fields_to_create[label].update({language: cleared_value if value else ""})
@@ -126,7 +126,7 @@ class FlexibleAttributeImporter:
         if header_name in model_fields:
             if header_name == "type":
                 if not value:
-                    logger.error(f"Survey Sheet: Row {row_number + 1}: Type is required")
+                    logger.warning(f"Survey Sheet: Row {row_number + 1}: Type is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Type is required")
                 choice_key = value.split(" ")[0]
                 if choice_key == "calculate":
@@ -140,10 +140,10 @@ class FlexibleAttributeImporter:
                 ) and not value
 
                 if is_attribute_name_empty:
-                    logger.error(f"Survey Sheet: Row {row_number + 1}: Name is required")
+                    logger.warning(f"Survey Sheet: Row {row_number + 1}: Name is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Name is required")
                 if is_choice_list_name_empty:
-                    logger.error(f"Survey Sheet: Row {row_number + 1}: List Name is required")
+                    logger.warning(f"Survey Sheet: Row {row_number + 1}: List Name is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: List Name is required")
                 self.object_fields_to_create[header_name] = value if value else ""
 
@@ -160,7 +160,7 @@ class FlexibleAttributeImporter:
                     f"Survey Sheet: Row {row_number + 1}: "
                     f"Calculated result field type must be provided for calculate type fields"
                 )
-                logger.error(validation_error_message)
+                logger.warning(validation_error_message)
                 raise ValidationError(validation_error_message)
             elif choice_key not in self.CALCULATE_TYPE_CHOICE_MAP.keys():
                 validation_error_message = (
@@ -168,7 +168,7 @@ class FlexibleAttributeImporter:
                     f"Invalid type: {choice_key} for calculate field, valid choices are "
                     f"{', '.join(self.CALCULATE_TYPE_CHOICE_MAP.keys())}"
                 )
-                logger.error(validation_error_message)
+                logger.warning(validation_error_message)
                 raise ValidationError(validation_error_message)
             else:
                 self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
@@ -353,7 +353,7 @@ class FlexibleAttributeImporter:
 
                 if obj:
                     if obj.type != self.object_fields_to_create["type"] and not obj.is_removed:
-                        logger.error(
+                        logger.warning(
                             f"Survey Sheet: Row {row_number + 1}: Type of the " f"attribute cannot be changed!"
                         )
                         raise ValidationError(

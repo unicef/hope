@@ -15,10 +15,11 @@ import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { useProgramContext } from '../../../programContext';
-import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
+import MergeRegistrationDataImportDialog from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
 import { AdminButton } from '@core/AdminButton';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -32,7 +33,7 @@ const MergeButtonContainer = styled.span`
   margin-left: ${({ theme }) => theme.spacing(4)};
 `;
 
-export const RegistrationDataImportDetailsPageHeader = ({
+const RegistrationDataImportDetailsPageHeader = ({
   registration,
   canMerge,
   canRerunDedupe,
@@ -157,3 +158,8 @@ export const RegistrationDataImportDetailsPageHeader = ({
     </>
   );
 };
+
+export default withErrorBoundary(
+  RegistrationDataImportDetailsPageHeader,
+  'RegistrationDataImportDetailsPageHeader',
+);

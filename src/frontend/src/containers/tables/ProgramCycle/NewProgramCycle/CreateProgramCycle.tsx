@@ -30,6 +30,7 @@ import {
 import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface CreateProgramCycleProps {
   program: ProgramQuery['program'];
@@ -42,7 +43,7 @@ interface MutationError extends DefaultError {
   data: any;
 }
 
-export const CreateProgramCycle = ({
+const CreateProgramCycle = ({
   program,
   onClose,
   onSubmit,
@@ -159,7 +160,7 @@ export const CreateProgramCycle = ({
                     <FormHelperText error>{error.data.title}</FormHelperText>
                   )}
                 </Grid>
-                <Grid size={{ xs:6 }} data-cy="start-date-cycle">
+                <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
                   <Field
                     name="start_date"
                     label={t('Start Date')}
@@ -174,7 +175,7 @@ export const CreateProgramCycle = ({
                     </FormHelperText>
                   )}
                 </Grid>
-                <Grid size={{ xs:6 }} data-cy="end-date-cycle">
+                <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
                   <Field
                     name="end_date"
                     label={t('End Date')}
@@ -210,3 +211,5 @@ export const CreateProgramCycle = ({
     </Formik>
   );
 };
+
+export default withErrorBoundary(CreateProgramCycle, 'CreateProgramCycle');

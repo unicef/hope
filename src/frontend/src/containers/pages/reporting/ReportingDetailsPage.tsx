@@ -4,7 +4,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import EmailIcon from '@mui/icons-material/Email';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { ALL_REPORTS_QUERY } from '../../../apollo/queries/reporting/AllReports';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -29,7 +29,7 @@ import {
   useRestartCreateReportMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const IconContainer = styled.div`
   color: #d1d1d1;
@@ -49,13 +49,13 @@ const IconsContainer = styled.div`
   align-items: center;
   font-size: 50px;
 `;
-export function ReportingDetailsPage(): ReactElement {
+
+function ReportingDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
-  const location = useLocation();
 
   const [mutate, { loading: restartReportLoading }] =
     useRestartCreateReportMutation();
@@ -196,14 +196,7 @@ export function ReportingDetailsPage(): ReactElement {
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ReportingDetailsPage.tsx');
-      }}
-      componentName="ReportingDetailsPage"
-    >
+    <>
       <PageHeader
         title={
           <span>
@@ -277,6 +270,8 @@ export function ReportingDetailsPage(): ReactElement {
           </GreyText>
         </>
       )}
-    </UniversalErrorBoundary>
+    </>
   );
 }
+
+export default withErrorBoundary(ReportingDetailsPage, 'ReportingDetailsPage');

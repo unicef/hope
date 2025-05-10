@@ -11,13 +11,14 @@ import { RecipientsTableRow } from './RecipientsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface RecipientsTableProps {
   id: string;
   canViewDetails: boolean;
 }
 
-export function RecipientsTable({
+function RecipientsTable({
   id,
   canViewDetails,
 }: RecipientsTableProps): ReactElement {
@@ -66,3 +67,5 @@ export function RecipientsTable({
     </TableWrapper>
   );
 }
+
+export default withErrorBoundary(RecipientsTable, 'RecipientsTable');

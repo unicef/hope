@@ -9,7 +9,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PeoplePaymentPlansTable } from '@containers/tables/paymentmodulePeople/PeoplePaymentPlansTable';
 import { PeoplePaymentPlansFilters } from '@containers/tables/paymentmodulePeople/PeoplePaymentPlansTable/PeoplePaymentPlansFilters';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -39,33 +39,28 @@ export const PeoplePaymentModulePage = (): ReactElement => {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PeoplePaymentModulePage.tsx');
-      }}
-      componentName="PeoplePaymentModulePage"
-    >
-      <>
-        <PageHeader title={t('Payment Module')} />
-        <PeoplePaymentPlansFilters
-          filter={filter}
-          setFilter={setFilter}
-          initialFilter={initialFilter}
-          appliedFilter={appliedFilter}
-          setAppliedFilter={setAppliedFilter}
+    <>
+      <PageHeader title={t('Payment Module')} />
+      <PeoplePaymentPlansFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
+      <TableWrapper>
+        <PeoplePaymentPlansTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.PM_VIEW_DETAILS,
+            permissions,
+          )}
         />
-        <TableWrapper>
-          <PeoplePaymentPlansTable
-            filter={appliedFilter}
-            canViewDetails={hasPermissions(
-              PERMISSIONS.PM_VIEW_DETAILS,
-              permissions,
-            )}
-          />
-        </TableWrapper>
-      </>
-    </UniversalErrorBoundary>
+      </TableWrapper>
+    </>
   );
 };
+export default withErrorBoundary(
+  PeoplePaymentModulePage,
+  'PeoplePaymentModulePage',
+);

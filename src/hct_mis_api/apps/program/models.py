@@ -153,6 +153,23 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         (SELECTED_PARTNERS_ACCESS, _("Selected partners access")),
     )
 
+    data_collecting_type = models.ForeignKey(
+        "core.DataCollectingType",
+        related_name="programs",
+        on_delete=models.PROTECT,
+        help_text="Program data collecting type",
+    )
+    beneficiary_group = models.ForeignKey(
+        BeneficiaryGroup,
+        on_delete=models.PROTECT,
+        related_name="programs",
+        help_text="Program beneficiary group",
+    )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
+    partners = models.ManyToManyField(
+        to="account.Partner", through=ProgramPartnerThrough, related_name="programs", help_text="Program partners"
+    )
+    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
     name = CICharField(
         max_length=255,
         validators=[
@@ -163,64 +180,62 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             ProhibitNullCharactersValidator(),
         ],
         db_index=True,
+        help_text="Program name",
     )
-    programme_code = models.CharField(max_length=4, null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
+    programme_code = models.CharField(max_length=4, null=True, blank=True, help_text="Program code")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")
     description = models.CharField(
         blank=True,
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+        help_text="Program description",
     )
-    start_date = models.DateField(db_index=True)
-    end_date = models.DateField(null=True, blank=True, db_index=True)
-    data_collecting_type = models.ForeignKey(
-        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT
-    )
-    beneficiary_group = models.ForeignKey(
-        BeneficiaryGroup,
-        on_delete=models.PROTECT,
-        related_name="programs",
-    )
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
-    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True)
+    start_date = models.DateField(db_index=True, help_text="Program start date")
+    end_date = models.DateField(null=True, blank=True, db_index=True, help_text="Program end date")
+    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True, help_text="Program sector")
     budget = models.DecimalField(
         decimal_places=2,
         max_digits=11,
         validators=[MinValueValidator(Decimal("0.00"))],
         db_index=True,
+        help_text="Program budget",
     )
     frequency_of_payments = models.CharField(
         max_length=50,
         choices=FREQUENCY_OF_PAYMENTS_CHOICE,
+        help_text="Program frequency of payments",
     )
     scope = models.CharField(
         blank=True,
         null=True,
         max_length=50,
         choices=SCOPE_CHOICE,
+        help_text="Program scope",
     )
-    partners = models.ManyToManyField(to="account.Partner", through=ProgramPartnerThrough, related_name="programs")
+
     partner_access = models.CharField(
         max_length=50,
         choices=PARTNER_ACCESS_CHOICE,
         default=SELECTED_PARTNERS_ACCESS,
+        help_text="Program partner access",
     )
-    cash_plus = models.BooleanField()
-    population_goal = models.PositiveIntegerField()
+    cash_plus = models.BooleanField(help_text="Program cash+")
+    population_goal = models.PositiveIntegerField(help_text="Program population goal")
     administrative_areas_of_implementation = models.CharField(
         max_length=255,
         blank=True,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+        help_text="Program administrative area of implementation",
     )
-    is_visible = models.BooleanField(default=True)
-    household_count = models.PositiveIntegerField(default=0)
-    individual_count = models.PositiveIntegerField(default=0)
-
-    deduplication_set_id = models.UUIDField(blank=True, null=True)
     biometric_deduplication_enabled = models.BooleanField(
         default=False, help_text="Enable Deduplication of Face Images"
     )
+    # System fields
+    is_visible = models.BooleanField(default=True, help_text="Program is visible in UI [sys]")
+    household_count = models.PositiveIntegerField(default=0, help_text="Program household count [sys]")
+    individual_count = models.PositiveIntegerField(default=0, help_text="Program individual count [sys]")
+
+    deduplication_set_id = models.UUIDField(blank=True, null=True, help_text="Program deduplication set id [sys]")
 
     objects = SoftDeletableIsVisibleManager()
 
@@ -262,7 +277,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         )
 
     def adjust_program_size(self) -> None:
-        self.household_count = self.household_set.count()
+        self.household_count = self.households.count()
         self.individual_count = self.individuals.count()
 
     @property
@@ -422,12 +437,14 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
             raise DRFValidationError("Program should be within Active status.")
 
     def validate_payment_plan_status(self) -> None:
+        """validate status for Finishing Cycle"""
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         if (
             PaymentPlan.objects.filter(program_cycle=self)
             .exclude(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+                status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+                + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
             )
             .exists()
         ):

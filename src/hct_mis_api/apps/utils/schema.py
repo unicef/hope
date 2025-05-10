@@ -96,7 +96,7 @@ class FlexFieldsScalar(graphene.Scalar):
                 try:
                     dt[name] = default_storage.url(value)
                 except Exception as e:
-                    logger.exception(e)
+                    logger.warning(e)
                     raise
 
         return dt

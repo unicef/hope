@@ -22,7 +22,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           </h6>
         </div>
         <p
-          class="sc-hORkcV gblmyS"
+          class="sc-gQJZgv RhQhK"
         >
           Select Entitlement Formula
         </p>
@@ -118,15 +118,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           class="MuiBox-root css-70qvj9"
         >
           <div
-            class="sc-fAomSb dSoyqU"
+            class="sc-iXqmyu dwxXXx"
           />
           <div
-            class="sc-hUAZgl dTBiBD"
+            class="sc-lertIE hmoMSh"
           >
             Or
           </div>
           <div
-            class="sc-fAomSb dSoyqU"
+            class="sc-iXqmyu dwxXXx"
           />
         </div>
       </div>
@@ -137,7 +137,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
           class="MuiBox-root css-11ze7cv"
         >
           <div
-            class="sc-bCjwNj iLXGIR MuiBox-root css-7jugx5"
+            class="sc-dOUtaJ gieBEI MuiBox-root css-7jugx5"
           >
             <button
               class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-4ifa8d-MuiButtonBase-root-MuiButton-root"
@@ -165,7 +165,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
               Export Xlsx
             </button>
             <p
-              class="sc-dVupuq fMFAME"
+              class="sc-bCjwNj gQdXnP"
             >
               Template contains payment list with all targeted households
             </p>
@@ -211,7 +211,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
               </div>
             </div>
             <p
-              class="sc-dVupuq fMFAME"
+              class="sc-bCjwNj gQdXnP"
             >
               Uploaded file should contain entitlement for each household
             </p>
@@ -219,7 +219,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
         </div>
       </div>
       <div
-        class="sc-gpHbIA eWafEJ"
+        class="sc-dJkDXt ePWtJN"
       />
       <div>
         <span
@@ -236,7 +236,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1
             color="textSecondary"
           >
             <div
-              class="sc-cSaEAk kSLkBi"
+              class="sc-fuExOL fQRxDJ"
               data-cy="total-entitled-quantity-usd"
             >
               424 USD (424 USD)

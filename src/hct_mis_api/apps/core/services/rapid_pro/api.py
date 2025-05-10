@@ -62,7 +62,7 @@ class RapidProAPI:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
         return response.json()
 
@@ -71,7 +71,7 @@ class RapidProAPI:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.exception(e.response.text)
+            logger.warning(e.response.text)
 
             raise
         return response.json()
@@ -117,7 +117,7 @@ class RapidProAPI:
             except requests.exceptions.HTTPError as e:
                 errors = self._parse_json_urns_error(e, phone_numbers)
                 if errors:
-                    logger.error("wrong phone numbers " + str(errors))
+                    logger.warning("wrong phone numbers " + str(errors))
                     raise ValidationError(message={"phone_numbers": errors}) from e
                 raise
 
@@ -203,7 +203,7 @@ class RapidProAPI:
             response, _ = self.start_flow(test_flow["uuid"], [phone_number])
             return None, response
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             return str(e), None
 
     def test_connection_flow_run(
@@ -238,7 +238,7 @@ class RapidProAPI:
                 "flow_start_status": flow_start_status,
             }
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             return str(e), None
 
     def broadcast_message(self, phone_numbers: List[str], message: str) -> None:
@@ -258,6 +258,6 @@ class RapidProAPI:
             print(e.response.json())
             errors = self._parse_json_urns_error(e, phone_numbers)
             if errors:
-                logger.error("wrong phone numbers " + str(errors))
+                logger.warning("wrong phone numbers " + str(errors))
                 raise ValidationError(message={"phone_numbers": errors}) from e
             raise

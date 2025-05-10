@@ -1324,7 +1324,6 @@ class TestGrievanceTickets:
             By.CSS_SELECTOR, 'input[type="checkbox"]'
         ).click()
         pageGrievanceDetailsPage.getButtonMarkDuplicate().click()
-        pageGrievanceDetailsPage.getButtonConfirm().click()
         pageGrievanceDetailsPage.getPeopleIcon()
         assert "people-icon" in [
             ii.get_attribute("data-cy")

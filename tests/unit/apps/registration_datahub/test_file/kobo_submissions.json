@@ -40,9 +40,9 @@
                 "individual_questions/bank_info/bank_account_number_i_c": "UA3481939838393949",
                 "individual_questions/bank_info/bank_name_i_c": "Privat",
                 "individual_questions/bank_info/bank_branch_name_i_c": "Privat 2",
-                "individual_questions/service_provider_code__mobile_money_i_c": "ABD",
-                "individual_questions/delivery_phone_number__mobile_money_i_c": "+48880110457",
-                "individual_questions/provider__mobile_money_i_c": "ALFA"
+                "individual_questions/account__mobile__service_provider_i_c": "ABD",
+                "individual_questions/account__mobile__delivery_phone_number_i_c": "+48880110457",
+                "individual_questions/account__mobile__provider_i_c": "ALFA"
             },
             {
                 "individual_questions/role_i_c": "alternate",
@@ -65,9 +65,9 @@
                 "individual_questions/more_information/birth_certificate_issuer_i_c": "AFG",
                 "individual_questions/birth_date_i_c": "1988-03-23",
                 "individual_questions/is_only_collector": "NO",
-                "individual_questions/service_provider_code__mobile_money_i_c": "ABC",
-                "individual_questions/delivery_phone_number__mobile_money_i_c": "+48880110456",
-                "individual_questions/provider__mobile_money_i_c": "SIGMA"
+                "individual_questions/account__mobile__service_provider_code_i_c": "ABC",
+                "individual_questions/account__mobile__delivery_phone_number_i_c": "+48880110456",
+                "individual_questions/account__mobile__provider_i_c": "SIGMA"
             }
         ],
         "wash_questions/score_bed": "5",

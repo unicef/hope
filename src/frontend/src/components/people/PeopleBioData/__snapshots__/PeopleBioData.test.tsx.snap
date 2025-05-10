@@ -3,7 +3,7 @@
 exports[`components/population/IndividualBioData should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eiwqOE bQCHZw css-1gtchvp-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fAomSb ecupQ css-1gtchvp-MuiPaper-root"
     style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
@@ -537,7 +537,7 @@ Jameschester, SC 24934
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
       >
         <div
-          class="sc-dPKAra dRtbrg"
+          class="sc-gpHbIA bSOdZM"
         />
       </div>
       <div
@@ -715,7 +715,7 @@ Jameschester, SC 24934
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
       >
         <div
-          class="sc-dPKAra dRtbrg"
+          class="sc-gpHbIA bSOdZM"
         />
       </div>
       <div
@@ -770,7 +770,7 @@ Jameschester, SC 24934
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
       >
         <div
-          class="sc-dPKAra dRtbrg"
+          class="sc-gpHbIA bSOdZM"
         />
       </div>
       <div
@@ -838,7 +838,7 @@ Jameschester, SC 24934
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
       >
         <div
-          class="sc-dPKAra dRtbrg"
+          class="sc-gpHbIA bSOdZM"
         />
       </div>
       <div
@@ -895,7 +895,7 @@ Jameschester, SC 24934
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
       >
         <div
-          class="sc-dPKAra dRtbrg"
+          class="sc-gpHbIA bSOdZM"
         />
       </div>
       <div

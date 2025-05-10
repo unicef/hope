@@ -87,7 +87,7 @@ def get_partner(partner: int) -> Optional[Partner]:
         try:
             return Partner.objects.get(id=partner)
         except Partner.DoesNotExist as dne:
-            logger.error(f"Partner {partner} does not exist")
+            logger.warning(f"Partner {partner} does not exist")
             raise GraphQLError(f"Partner {partner} does not exist") from dne
     return None
 
@@ -802,9 +802,6 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_payment_channels_to_create = graphene.List(graphene.Int)
         approved_payment_channels_to_edit = graphene.List(graphene.Int)
         approved_payment_channels_to_remove = graphene.List(graphene.Int)
-        approved_delivery_mechanism_data_to_create = graphene.List(graphene.Int)
-        approved_delivery_mechanism_data_to_edit = graphene.List(graphene.Int)
-        approved_delivery_mechanism_data_to_remove = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
         version = BigInt(required=False)
 
@@ -826,9 +823,6 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_payment_channels_to_create: List,
         approved_payment_channels_to_edit: List,
         approved_payment_channels_to_remove: List,
-        approved_delivery_mechanism_data_to_create: List,
-        approved_delivery_mechanism_data_to_edit: List,
-        approved_delivery_mechanism_data_to_remove: List,
         flex_fields_approve_data: Dict,
         **kwargs: Any,
     ) -> "IndividualDataChangeApproveMutation":
@@ -864,9 +858,6 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
             "payment_channels": approved_payment_channels_to_create,
             "payment_channels_to_remove": approved_payment_channels_to_remove,
             "payment_channels_to_edit": approved_payment_channels_to_edit,
-            "delivery_mechanism_data": approved_delivery_mechanism_data_to_create,
-            "delivery_mechanism_data_to_remove": approved_delivery_mechanism_data_to_remove,
-            "delivery_mechanism_data_to_edit": approved_delivery_mechanism_data_to_edit,
         }
 
         for field_name, item in individual_data.items():

@@ -153,7 +153,7 @@ class Common:
             selectOption = f'li[data-cy="select-option-{optionName}"]'
             self.wait_for(selectOption).click()
         actions = ActionChains(self.driver)
-        actions.send_keys(Keys.ESCAPE).perform()  # type: ignore
+        actions.send_keys(Keys.ESCAPE).perform()
         try:
             self.wait_for_disappear(selectOption)
         except BaseException:
@@ -183,7 +183,7 @@ class Common:
 
     def scroll(self, scroll_by: int = 600, wait_after_start_scrolling: int = 2, execute: int = 1) -> None:
         for _ in range(execute):
-            self.driver.execute_script(  # type: ignore
+            self.driver.execute_script(
                 f"""
                 container = document.querySelector("div[data-cy='main-content']")
                 container.scrollBy(0,{scroll_by})
@@ -196,12 +196,12 @@ class Common:
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
         for ii in ids:
             try:
-                print(f"{ii.text}: {ii.get_attribute(attribute)}")  # type: ignore
+                print(f"{ii.text}: {ii.get_attribute(attribute)}")
             except BaseException:
-                print(f"No text: {ii.get_attribute(attribute)}")  # type: ignore
+                print(f"No text: {ii.get_attribute(attribute)}")
 
     def mouse_on_element(self, element: WebElement) -> None:
-        hover = ActionChains(self.driver).move_to_element(element)  # type: ignore
+        hover = ActionChains(self.driver).move_to_element(element)
         hover.perform()
 
     def wait_for_element_clickable(self, locator: str) -> bool:

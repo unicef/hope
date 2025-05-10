@@ -3,8 +3,8 @@ import { act } from 'react';
 import wait from 'waait';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { render } from '../../../../testUtils/testUtils';
-import { PaymentsPeopleTable } from '.';
 import { fakeApolloAllPaymentsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentsHousehold';
+import PaymentsPeopleTable from './PaymentsPeopleTable';
 
 describe('containers/tables/payments/PaymentsPeopleTable', () => {
   it('should render with data', async () => {

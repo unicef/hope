@@ -5,7 +5,7 @@ import wait from 'waait';
 import { fakeApolloAllPaymentsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentsHousehold';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { render } from '../../../../testUtils/testUtils';
-import { PaymentsHouseholdTable } from '.';
+import PaymentsHouseholdTable from './PaymentsHouseholdTable';
 
 describe('containers/tables/payments/PaymentsHouseholdTable', () => {
   it('should render with data', async () => {

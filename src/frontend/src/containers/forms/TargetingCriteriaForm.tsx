@@ -1,14 +1,37 @@
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
+import {
+  useAllCollectorFieldsAttributesQuery,
+  useAvailableFspsForDeliveryMechanismsQuery,
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
+import { AddCircleOutline } from '@mui/icons-material';
 import {
   Box,
   Button,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Grid2 as Grid,
+  Tooltip,
   Typography,
 } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import {
+  chooseFieldType,
+  clearField,
+  formatCriteriaCollectorsFiltersBlocks,
+  formatCriteriaFilters,
+  formatCriteriaIndividualsFiltersBlocks,
+  HhIdValidation,
+  IndIdValidation,
+  mapCriteriaToInitialValues,
+  validate,
+} from '@utils/targetingUtils';
 import { Field, FieldArray, Formik } from 'formik';
 import {
   Component,
@@ -19,32 +42,17 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
-import {
-  chooseFieldType,
-  clearField,
-  formatCriteriaFilters,
-  formatCriteriaIndividualsFiltersBlocks,
-  formatCriteriaCollectorsFiltersBlocks,
-  HhIdValidation,
-  IndIdValidation,
-  mapCriteriaToInitialValues,
-} from '@utils/targetingUtils';
 import { DialogContainer } from '../dialogs/DialogContainer';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
-import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
-import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
-import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
-import { useProgramContext } from 'src/programContext';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
-import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
+import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
+import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -59,7 +67,59 @@ const StyledBox = styled(Box)`
   width: 100%;
 `;
 
-const validationSchema = Yup.object().shape({
+const requiredSchema = Yup.object().shape({
+  deliveryMechanism: Yup.string().required('Delivery Mechanism is required'),
+  fsp: Yup.string().required('FSP is required'),
+  householdIds: HhIdValidation,
+  individualIds: IndIdValidation,
+  filters: Yup.array().of(
+    Yup.object().shape({
+      fieldName: Yup.string().required('Field Type is required'),
+    }),
+  ),
+  individualsFiltersBlocks: Yup.array().of(
+    Yup.object().shape({
+      individualBlockFilters: Yup.array().of(
+        Yup.object().shape({
+          fieldName: Yup.string().required('Field Type is required'),
+          fieldAttribute: Yup.object().shape({
+            type: Yup.string().required(),
+          }),
+          roundNumber: Yup.string()
+            .nullable()
+            .when(
+              ['fieldName', 'fieldAttribute'],
+              (_fieldName, _fieldAttribute, schema) => {
+                const parent = schema.parent;
+                if (
+                  parent &&
+                  parent.fieldAttribute &&
+                  parent.fieldAttribute?.type === 'PDU'
+                ) {
+                  return Yup.string().required('Round Number is required');
+                }
+                return Yup.string().notRequired();
+              },
+            ),
+        }),
+      ),
+    }),
+  ),
+  collectorsFiltersBlocks: Yup.array().of(
+    Yup.object().shape({
+      collectorBlockFilters: Yup.array().of(
+        Yup.object().shape({
+          fieldName: Yup.string().required('Field Type is required'),
+          value: Yup.string().required('Field Value is required'),
+        }),
+      ),
+    }),
+  ),
+});
+
+const optionalSchema = Yup.object().shape({
+  deliveryMechanism: Yup.string(),
+  fsp: Yup.string(),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
   filters: Yup.array().of(
@@ -111,7 +171,7 @@ interface ArrayFieldWrapperProps {
   arrayHelpers;
   children: ReactNode;
 }
-class ArrayFieldWrapper extends Component<ArrayFieldWrapperProps> {
+class ArrayFieldWrapper extends Component<ArrayFieldWrapperProps, any> {
   getArrayHelpers(): object {
     const { arrayHelpers } = this.props;
     return arrayHelpers;
@@ -132,6 +192,7 @@ interface TargetingCriteriaFormPropTypes {
   householdFiltersAvailable: boolean;
   collectorsFiltersAvailable: boolean;
   isSocialWorkingProgram: boolean;
+  criteriaIndex: number;
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -146,9 +207,15 @@ export const TargetingCriteriaForm = ({
   householdFiltersAvailable,
   collectorsFiltersAvailable,
   isSocialWorkingProgram,
+  criteriaIndex,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+
+  const confirm = useConfirmation();
+  const confirmationText = t(
+    'Are you sure you want to ‘Lock’ TP without validating FSP and Delivery Mechanism requirements? This might result in individuals’ exclusion at later stages.',
+  );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -160,6 +227,8 @@ export const TargetingCriteriaForm = ({
     useAllCollectorFieldsAttributesQuery({
       fetchPolicy: 'cache-first',
     });
+  const { data: availableFspsForDeliveryMechanismData } =
+    useAvailableFspsForDeliveryMechanismsQuery();
 
   const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -170,6 +239,18 @@ export const TargetingCriteriaForm = ({
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
   const [allCollectorFieldsChoicesDict, setAllCollectorFieldsChoicesDict] =
     useState(null);
+
+  const [openPaymentChannelCollapse, setOpenPaymentChannelCollapse] = useState(
+    !!initialValue.deliveryMechanism,
+  );
+
+  useEffect(() => {
+    setOpenPaymentChannelCollapse(!!initialValue.deliveryMechanism);
+  }, [initialValue.deliveryMechanism]);
+
+  const handlePaymentChannelButtonClick = () => {
+    setOpenPaymentChannelCollapse(!openPaymentChannelCollapse);
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -210,91 +291,14 @@ export const TargetingCriteriaForm = ({
 
   if (!data || !allCollectorFieldsAttributesData) return null;
 
-  const filterNullOrNoSelections = (filter): boolean =>
-    !filter.isNull &&
-    (filter.value === null ||
-      filter.value === '' ||
-      (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
-        filter.value &&
-        filter.value.length === 0));
-
-  const filterEmptyFromTo = (filter): boolean =>
-    !filter.isNull &&
-    typeof filter.value === 'object' &&
-    filter.value !== null &&
-    Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
-    Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
-    !filter.value.from &&
-    !filter.value.to;
-
-  const validate = (values) => {
-    const hasHouseholdsFiltersBlocksErrors =
-      values.householdsFiltersBlocks.some(filterNullOrNoSelections) ||
-      values.householdsFiltersBlocks.some(filterEmptyFromTo);
-
-    const hasBlockFiltersErrors = (blocks) => {
-      if (!blocks || !Array.isArray(blocks)) {
-        return false;
-      }
-
-      return blocks.some((block) => {
-        if (!block.blockFilters || !Array.isArray(block.blockFilters)) {
-          return false;
-        }
-
-        const hasNulls = block.blockFilters.some(filterNullOrNoSelections);
-        const hasFromToError = block.blockFilters.some(filterEmptyFromTo);
-        return hasNulls || hasFromToError;
-      });
-    };
-
-    const hasIndividualsFiltersBlocksErrors = hasBlockFiltersErrors(
-      values.individualsFiltersBlocks,
-    );
-    const hasCollectorsFiltersBlocksErrors = hasBlockFiltersErrors(
-      values.collectorsFiltersBlocks,
-    );
-
-    const errors: { nonFieldErrors?: string[] } = {};
-    if (
-      hasHouseholdsFiltersBlocksErrors ||
-      hasIndividualsFiltersBlocksErrors ||
-      hasCollectorsFiltersBlocksErrors
-    ) {
-      errors.nonFieldErrors = ['You need to fill out missing values.'];
-    }
-    if (
-      values.householdsFiltersBlocks.length +
-        values.individualsFiltersBlocks.length +
-        values.collectorsFiltersBlocks.length ===
-        0 &&
-      (!values.householdIds || values.householdIds.length === 0) &&
-      (!values.individualIds || values.individualIds.length === 0)
-    ) {
-      errors.nonFieldErrors = [
-        `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
-      ];
-    } else if (
-      values.individualsFiltersBlocks.filter(
-        (block) => block.blockFilters && block.blockFilters.length === 0,
-      ).length > 0 ||
-      values.collectorsFiltersBlocks.filter(
-        (block) => block.blockFilters && block.blockFilters.length === 0,
-      ).length > 0
-    ) {
-      errors.nonFieldErrors = [
-        `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
-      ];
-    }
-    return errors;
-  };
-
   const handleSubmit = (values, bag): void => {
     const householdsFiltersBlocks = formatCriteriaFilters(
       values.householdsFiltersBlocks,
     );
     const individualIds = values.individualIds;
     const householdIds = values.householdIds;
+    const deliveryMechanism = values.deliveryMechanism;
+    const fsp = values.fsp;
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
@@ -308,21 +312,42 @@ export const TargetingCriteriaForm = ({
       collectorsFiltersBlocks,
       individualIds,
       householdIds,
+      deliveryMechanism,
+      fsp,
     });
     return bag.resetForm();
   };
-  if (loading || !open) return null;
+
+  const validationSchema = openPaymentChannelCollapse
+    ? requiredSchema
+    : optionalSchema;
+
+  if (loading || !open || !availableFspsForDeliveryMechanismData) return null;
 
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
         onSubmit={handleSubmit}
-        validate={validate}
+        validate={(values) => validate(values, beneficiaryGroup)}
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values, resetForm, errors }) => {
+        {({ submitForm, values, resetForm, setFieldValue, errors }) => {
+          const fsps =
+            availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms ||
+            [];
+          const mappedDeliveryMechanisms = fsps.map((el) => ({
+            name: el.deliveryMechanism.name,
+            value: el.deliveryMechanism.code,
+          }));
+          const mappedFsps =
+            fsps
+              .find(
+                (el) => el.deliveryMechanism.code === values.deliveryMechanism,
+              )
+              ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
+
           return (
             <Dialog
               open={open}
@@ -475,7 +500,7 @@ export const TargetingCriteriaForm = ({
                           ref={individualsFiltersBlocksWrapperRef}
                         >
                           {values.individualsFiltersBlocks.map(
-                            (each, index) => (
+                            (_each, index) => (
                               <TargetingCriteriaIndividualFilterBlocks
                                 // eslint-disable-next-line
                                 key={index}
@@ -557,6 +582,78 @@ export const TargetingCriteriaForm = ({
                         </Button>
                       </ButtonBox>
                     </Box>
+                    {criteriaIndex === 0 && (
+                      <Box mt={2} display="flex" flexDirection="column">
+                        <ButtonBox style={{ width: '600px' }}>
+                          <Button
+                            data-cy="button-collector-rule"
+                            onClick={() => handlePaymentChannelButtonClick()}
+                            color="primary"
+                            startIcon={<AddCircleOutline />}
+                          >
+                            <Box
+                              style={{ textAlign: 'left' }}
+                              display="flex"
+                              flexDirection="column"
+                            >
+                              <Box>PAYMENT CHANNEL VALIDATION</Box>
+                              <Box>
+                                (Delivery mechanism and FSP requirements)
+                              </Box>
+                            </Box>
+                          </Button>
+                        </ButtonBox>
+                        <Collapse in={openPaymentChannelCollapse}>
+                          <Box mt={4}>
+                            <Grid container spacing={3}>
+                              <Grid size={{ xs: 12 }}>
+                                <Field
+                                  name="deliveryMechanism"
+                                  label="Select Delivery Mechanism"
+                                  type="text"
+                                  fullWidth
+                                  required={openPaymentChannelCollapse}
+                                  variant="outlined"
+                                  choices={mappedDeliveryMechanisms}
+                                  component={FormikSelectField}
+                                  onChange={() => {
+                                    setFieldValue('fsp', '');
+                                  }}
+                                  onClear={() => {
+                                    setFieldValue('fsp', '');
+                                  }}
+                                  data-cy="input-delivery-mechanism"
+                                />
+                              </Grid>
+                              <Grid size={{ xs: 12 }}>
+                                <Tooltip
+                                  title={
+                                    !values.deliveryMechanism
+                                      ? 'Select delivery mechanism first'
+                                      : ''
+                                  }
+                                >
+                                  <div>
+                                    <Field
+                                      name="fsp"
+                                      label="Select FSP"
+                                      type="text"
+                                      fullWidth
+                                      disabled={!values.deliveryMechanism}
+                                      required={openPaymentChannelCollapse}
+                                      variant="outlined"
+                                      component={FormikSelectField}
+                                      choices={mappedFsps}
+                                      data-cy="input-fsp"
+                                    />
+                                  </div>
+                                </Tooltip>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        </Collapse>
+                      </Box>
+                    )}
                   </>
                 ) : null}
               </DialogContent>
@@ -573,7 +670,17 @@ export const TargetingCriteriaForm = ({
                         Cancel
                       </Button>
                       <Button
-                        onClick={submitForm}
+                        onClick={
+                          !values.deliveryMechanism && !values.fsp
+                            ? () =>
+                                confirm({
+                                  title: t('Warning'),
+                                  content: confirmationText,
+                                }).then(() => {
+                                  submitForm();
+                                })
+                            : submitForm
+                        }
                         type="submit"
                         color="primary"
                         variant="contained"

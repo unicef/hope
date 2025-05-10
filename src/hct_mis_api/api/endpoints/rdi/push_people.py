@@ -81,6 +81,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
             "unicef_id",
             "household",
             "detail_id",
+            "program",
         ]
 
 

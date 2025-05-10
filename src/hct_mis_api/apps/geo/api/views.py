@@ -14,7 +14,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import GeoViewListPermission
-from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin
+from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin, PermissionsMixin
 from hct_mis_api.apps.geo.api.caches import AreaKeyConstructor
 from hct_mis_api.apps.geo.api.filters import AreaFilter
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
@@ -25,11 +25,12 @@ logger = logging.getLogger(__name__)
 
 class AreaViewSet(
     BusinessAreaMixin,
+    PermissionsMixin,
     mixins.ListModelMixin,
     GenericViewSet,
 ):
     serializer_class = AreaListSerializer
-    permission_classes = [GeoViewListPermission]
+    permission_classes = [GeoViewListPermission]  # type: ignore
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = AreaFilter
 

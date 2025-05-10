@@ -10,12 +10,13 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ProgramDetailsProps {
   targetPopulation;
 }
 
-export function TargetPopulationDetails({
+function TargetPopulationDetails({
   targetPopulation,
 }: ProgramDetailsProps): ReactElement {
   const { createdBy, program, programCycle } = targetPopulation;
@@ -65,3 +66,8 @@ export function TargetPopulationDetails({
     </ContainerColumnWithBorder>
   );
 }
+
+export default withErrorBoundary(
+  TargetPopulationDetails,
+  'TargetPopulationDetails',
+);

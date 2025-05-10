@@ -215,7 +215,8 @@ export function validate(
       .filter((el) => el)
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
-          errors.documentation = 'Documentation name and file are required';
+          errors.documentation =
+            'Grievance Supporting Document name and file are required';
         }
       });
   }
@@ -225,7 +226,7 @@ export function validate(
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
           errors.documentationToUpdate =
-            'Documentation name and file are required';
+            'Grievance Supporting Document name and file are required';
         }
       });
   }
@@ -526,7 +527,8 @@ export function validateUsingSteps(
       .filter((el) => el)
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
-          errors.documentation = 'Documentation name and file are required';
+          errors.documentation =
+            'Grievance Supporting Document name and file are required';
         }
       });
   }

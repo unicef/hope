@@ -1,4 +1,10 @@
-import { Box, FormHelperText, Grid2 as Grid, GridSize, Typography } from '@mui/material';
+import {
+  Box,
+  FormHelperText,
+  Grid2 as Grid,
+  GridSize,
+  Typography,
+} from '@mui/material';
 import { Field } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +30,7 @@ import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLin
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { useProgramContext } from 'src/programContext';
 import { replaceLabels } from '@components/grievances/utils/createGrievanceUtils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -52,7 +59,7 @@ export interface DescriptionProps {
   permissions: string[];
 }
 
-export function Description({
+function Description({
   values,
   showIssueType,
   selectedIssueType,
@@ -120,7 +127,7 @@ export function Description({
               {
                 label: t('Category'),
                 value: <span>{categoryChoices[values.category]}</span>,
-                size: 3,
+                size: 4,
               },
               showIssueType(values) && {
                 label: t('Issue Type'),
@@ -129,7 +136,7 @@ export function Description({
                     {replaceLabels(selectedIssueType(values), beneficiaryGroup)}
                   </span>
                 ),
-                size: 9,
+                size: 8,
               },
               {
                 label: `${beneficiaryGroup?.groupLabel} ID`,
@@ -220,7 +227,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="admin"
               variant="outlined"
@@ -228,7 +235,7 @@ export function Description({
               disabled={Boolean(values.selectedHousehold?.admin2)}
             />
           </Grid>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="area"
               fullWidth
@@ -237,7 +244,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="language"
               multiline
@@ -284,7 +291,7 @@ export function Description({
         <Box pt={5}>
           <BoxWithBorders>
             <Grid container spacing={4}>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Box py={3}>
                   <LookUpLinkedTickets
                     values={values}
@@ -294,7 +301,7 @@ export function Description({
               </Grid>
               {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                 values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <Box py={3}>
                     <LookUpPaymentRecord
                       values={values}
@@ -316,7 +323,7 @@ export function Description({
             <Title>
               <Typography variant="h6">
                 {t(
-                  'Documentation: upload of document: support documentation for the ticket',
+                  'Grievance Supporting Documents: upload of documents for the ticket',
                 )}
               </Typography>
             </Title>
@@ -331,3 +338,4 @@ export function Description({
     </>
   );
 }
+export default withErrorBoundary(Description, 'Description');

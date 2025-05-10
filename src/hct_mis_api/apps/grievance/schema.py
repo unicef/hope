@@ -317,6 +317,17 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                     documents[index]["value"] = current_value
             individual_data["documents"] = documents
 
+        if admin_area_title := individual_data.get("admin_area_title"):
+            if value := admin_area_title.get("value"):
+                area = Area.objects.get(p_code=value)
+                admin_area_title["value"] = f"{area.name} - {area.p_code}"
+
+            if previous_value := admin_area_title.get("previous_value"):
+                area = Area.objects.get(p_code=previous_value)
+                admin_area_title["previous_value"] = f"{area.name} - {area.p_code}"
+
+            individual_data["admin_area_title"] = admin_area_title
+
         return individual_data
 
 

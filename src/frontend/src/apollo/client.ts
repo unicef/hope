@@ -139,7 +139,10 @@ const link = ApolloLink.from([
   validationErrorMiddleware,
   errorLink,
   redirectLink,
-  createUploadLink({ uri: GRAPHQL_URL }),
+  //adding this to mock in jest tests
+  typeof createUploadLink === 'function'
+    ? createUploadLink({ uri: GRAPHQL_URL })
+    : () => void 0,
 ]);
 let client;
 

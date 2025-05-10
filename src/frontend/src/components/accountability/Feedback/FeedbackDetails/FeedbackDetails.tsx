@@ -11,6 +11,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface FeedbackDetailsProps {
   feedback: FeedbackQuery['feedback'];
@@ -18,7 +19,7 @@ interface FeedbackDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export function FeedbackDetails({
+function FeedbackDetails({
   feedback,
   canViewHouseholdDetails,
   canViewIndividualDetails,
@@ -169,3 +170,5 @@ export function FeedbackDetails({
     </Grid>
   );
 }
+
+export default withErrorBoundary(FeedbackDetails, 'FeedbackDetails');

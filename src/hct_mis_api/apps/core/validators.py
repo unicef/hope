@@ -68,7 +68,7 @@ class BaseValidator:
                 errors_list.append(e.message)
 
         if errors_list:
-            logger.error(", ".join(errors_list))
+            logger.warning(", ".join(errors_list))
             raise Exception(", ".join(errors_list))
 
 

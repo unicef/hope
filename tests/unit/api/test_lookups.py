@@ -154,8 +154,6 @@ class AreaListTests(HOPEApiTestCase):
             "original_id": area.original_id,
             "name": area.name,
             "p_code": area.p_code,
-            "geom": str(area.geom),
-            "point": area.point,
             "valid_from": area.valid_from.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "valid_until": area.valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "extras": area.extras,
@@ -163,6 +161,8 @@ class AreaListTests(HOPEApiTestCase):
             "rght": area.rght,
             "tree_id": area.tree_id,
             "level": area.level,
+            "latitude": area.latitude,
+            "longitude": area.longitude,
             "parent": str(area.parent.id) if area.parent else None,
             "area_type": str(area.area_type.id),
         }

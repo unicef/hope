@@ -192,7 +192,7 @@ class GrievanceTicketFilter(FilterSet):
             Individual.objects.filter(relationship=HEAD)
             .filter(
                 Q(full_name__icontains=search)
-                | Q(registration_id__icontains=search)
+                | Q(detail_id__icontains=search)
                 | Q(program_registration_id__icontains=search)
                 | Q(phone_no__icontains=search)
                 | Q(phone_no_alternative__icontains=search)

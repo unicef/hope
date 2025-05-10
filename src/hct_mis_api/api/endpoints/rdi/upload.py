@@ -29,6 +29,11 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -96,6 +101,19 @@ class DocumentSerializer(serializers.ModelSerializer):
         ]
 
 
+class AccountSerializer(serializers.ModelSerializer):
+    account_type = serializers.SlugRelatedField(slug_field="key", required=True, queryset=AccountType.objects.all())
+    number = serializers.CharField(allow_blank=True, required=False)
+    financial_institution = serializers.SlugRelatedField(
+        slug_field="code", required=False, queryset=FinancialInstitution.objects.all()
+    )
+    data = serializers.JSONField(required=False, default=dict)  # type: ignore
+
+    class Meta:
+        model = PendingAccount
+        exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
+
+
 class IndividualSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
@@ -106,6 +124,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
+    accounts = AccountSerializer(many=True, required=False)
 
     class Meta:
         model = PendingIndividual
@@ -121,6 +140,7 @@ class IndividualSerializer(serializers.ModelSerializer):
             "version",
             "vector_column",
             "unicef_id",
+            "program",
         ]
 
     def validate_role(self, value: str) -> Optional[str]:
@@ -153,7 +173,8 @@ class HouseholdSerializer(serializers.ModelSerializer):
             "program",
             "kobo_submission_uuid",
             "kobo_submission_time",
-            "geopoint",
+            "latitude",
+            "longitude",
             "detail_id",
             "version",
             "unicef_id",

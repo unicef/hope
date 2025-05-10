@@ -702,10 +702,16 @@ class TestProgrammeDetails:
         )
         pageProgrammeDetails.getButtonSave().click()
         for _ in range(50):
-            if "Start Date cannot be before Programme Start Date" in pageProgrammeDetails.getStartDateCycleDiv().text:
+            if (
+                "Start Date*\nStart Date cannot be before Programme Start Date"
+                in pageProgrammeDetails.getStartDateCycleDiv().text
+            ):
                 break
             sleep(0.1)
-        assert "Start Date cannot be before Programme Start Date" in pageProgrammeDetails.getStartDateCycleDiv().text
+        assert (
+            "Start Date*\nStart Date cannot be before Programme Start Date"
+            in pageProgrammeDetails.getStartDateCycleDiv().text
+        )
 
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(

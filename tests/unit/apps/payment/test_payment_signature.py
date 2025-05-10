@@ -12,6 +12,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
@@ -19,8 +20,14 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
@@ -36,6 +43,7 @@ class TestPaymentSignature(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        generate_delivery_mechanisms()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
 
@@ -120,12 +128,23 @@ class TestPaymentSignature(APITestCase):
         hoh2 = IndividualFactory(household=None, program=program)
         hh1 = HouseholdFactory(head_of_household=hoh1, program=program)
         hh2 = HouseholdFactory(head_of_household=hoh2, program=program)
+        hoh1.household = hh1
+        hoh1.save()
+        hoh2.household = hh2
+        hoh2.save()
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+
+        for ind in [hoh1, hoh2]:
+            AccountFactory(individual=ind)
+
         program_cycle = program.cycles.first()
         program_cycle_id = self.id_to_base64(program_cycle.id, "ProgramCycleNode")
+
+        fsp = FinancialServiceProviderFactory()
 
         targeting_criteria = {
             "flag_exclude_if_active_adjudication_ticket": False,
@@ -147,6 +166,8 @@ class TestPaymentSignature(APITestCase):
             program_cycle_id=program_cycle_id,
             targeting_criteria=targeting_criteria,
             excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
+            fsp_id=encode_id_base64(fsp.id, "FinancialServiceProvider"),
+            delivery_mechanism_code=dm_cash.code,
         )
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):

@@ -137,9 +137,6 @@ class PaymentModuleDetails(BaseComponents):
     def getLabelRelatedFollowUpPaymentPlans(self) -> WebElement:
         return self.wait_for(self.labelRelatedFollowUpPaymentPlans)
 
-    def getButtonSetUpFsp(self) -> WebElement:
-        return self.wait_for(self.buttonSetUpFsp)
-
     def getButtonCreateExclusions(self) -> WebElement:
         return self.wait_for(self.buttonCreateExclusions)
 

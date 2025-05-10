@@ -78,13 +78,9 @@ export const individualMinimal = gql`
         level
         pCode
       }
-      programs {
-        edges {
-          node {
-            id
-            name
-          }
-        }
+      program {
+        id
+        name
       }
       totalCashReceivedUsd
       lastRegistrationDate
@@ -131,9 +127,8 @@ export const individualDetailed = gql`
       accountHolderName
       bankBranchName
     }
-    deliveryMechanismsData {
+    accounts {
       name
-      isValid
       individualTabData
     }
     documents {
@@ -151,7 +146,6 @@ export const individualDetailed = gql`
       }
     }
     enrolledInNutritionProgramme
-    administrationOfRutf
     household {
       registrationDataImport {
         name

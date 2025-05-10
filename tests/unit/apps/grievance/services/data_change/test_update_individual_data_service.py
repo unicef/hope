@@ -5,7 +5,7 @@ import pytest
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.geo.fixtures import CountryFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
 from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
@@ -322,8 +322,9 @@ class TestUpdateIndividualDataService(TestCase):
         self.assertEqual(document_to_edit.document_number, "111111")
 
     def test_update_people_individual_hh_fields(self) -> None:
-        CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
+        pl = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
         CountryFactory(name="Other Country", short_name="Oth", iso_code2="O", iso_code3="OTH", iso_num="111")
+        AreaFactory(area_type__country=pl, p_code="PL22M33", name="Test Area M")
         hh_fields = [
             "consent",
             "residence_status",
@@ -364,6 +365,8 @@ class TestUpdateIndividualDataService(TestCase):
                     else getattr(hh, hh_field)
                 ),
             }
+        # add admin_area_title > HH.admin_area
+        ind_data["admin_area_title"] = {"value": "PL22M33", "approve_status": True, "previous_value": None}
         self.ticket.individual_data_update_ticket_details.individual_data = ind_data
         self.ticket.individual_data_update_ticket_details.save()
 
@@ -376,3 +379,6 @@ class TestUpdateIndividualDataService(TestCase):
                 getattr(hh, hh_field).iso_code3 if isinstance(getattr(hh, hh_field), Country) else getattr(hh, hh_field)
             )
             self.assertEqual(hh_value, new_data.get(hh_field))
+
+        self.assertEqual(hh.admin_area.p_code, "PL22M33")
+        self.assertEqual(hh.admin_area.name, "Test Area M")

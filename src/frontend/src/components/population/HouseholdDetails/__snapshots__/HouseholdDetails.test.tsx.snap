@@ -3,7 +3,7 @@
 exports[`components/population/HouseholdDetails should render 1`] = `
 <div>
   <div
-    class="sc-hUAZgl gDXFUw"
+    class="sc-lertIE iXrrNu"
   >
     <div
       class="sc-fLDLck hGbkJg"
@@ -15,7 +15,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-flQbIK fyeLKR"
+      class="sc-bHTlQz fSnBDv"
     >
       <div
         class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
@@ -462,7 +462,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
     </div>
   </div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-gQJZgv fxVvkO css-1gtchvp-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jdabBK bsdLOJ css-1gtchvp-MuiPaper-root"
     style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
@@ -533,7 +533,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
       >
         <div
-          class="sc-jHswkR gbXbxF"
+          class="sc-dPKAra kHfZVn"
         >
           <div>
             <span
@@ -550,7 +550,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
                 color="textSecondary"
               >
                 <div
-                  class="sc-cSaEAk kSLkBi"
+                  class="sc-fuExOL fQRxDJ"
                 >
                   USD 0.00
                 </div>
