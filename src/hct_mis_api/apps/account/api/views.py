@@ -79,6 +79,7 @@ class UserViewSet(
         serializer = self.get_serializer(user)
         return Response(serializer.data)
 
+    @extend_schema(parameters=[OpenApiParameter(name="serializer",  type=str)])
     @etag_decorator(UserListKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=UserListKeyConstructor())
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
