@@ -249,7 +249,7 @@ def download_path(worker_id: str) -> str:
         yield settings.DOWNLOAD_DIRECTORY
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def driver(download_path: str) -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -273,12 +273,12 @@ def driver(download_path: str) -> Chrome:
     yield driver
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def live_server() -> LiveServer:
     yield LiveServer("localhost")
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=True)
 def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
     try:
         driver.live_server = live_server
