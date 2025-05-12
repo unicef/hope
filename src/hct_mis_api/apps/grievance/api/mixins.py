@@ -45,12 +45,12 @@ class GrievancePermissionsMixin:
         if hasattr(self, "program"):
             permissions_in_program = user.permissions_in_business_area(self.business_area_slug, self.program.id)
 
-            can_view_ex_sensitive_all = permissions_map[action][0] in permissions_in_program
-            can_view_ex_sensitive_creator = permissions_map[action][1] in permissions_in_program
-            can_view_ex_sensitive_owner = permissions_map[action][2] in permissions_in_program
-            can_view_sensitive_all = permissions_map[action][3] in permissions_in_program
-            can_view_sensitive_creator = permissions_map[action][4] in permissions_in_program
-            can_view_sensitive_owner = permissions_map[action][5] in permissions_in_program
+            can_view_ex_sensitive_all = permissions_map[action][0].value in permissions_in_program
+            can_view_ex_sensitive_creator = permissions_map[action][1].value in permissions_in_program
+            can_view_ex_sensitive_owner = permissions_map[action][2].value in permissions_in_program
+            can_view_sensitive_all = permissions_map[action][3].value in permissions_in_program
+            can_view_sensitive_creator = permissions_map[action][4].value in permissions_in_program
+            can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
 
             # if can_view_ex_sensitive_all and can_view_sensitive_all:
             #     return Q()
