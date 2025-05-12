@@ -66,9 +66,9 @@ export const UsersTableRow = ({ user }: UsersTableRowProps): ReactElement => {
               <GreyText>Country / Program / Role</GreyText>
             </Box>
             <Box margin={1} data-cy="mapped-country-role">
-              {mappedRoles.length ? mappedRoles : 'No roles assigned.'}
+              {mappedRoles?.length ? mappedRoles : 'No roles assigned.'}
             </Box>
-            {mappedPartnerRoles.length > 0 && (
+            {mappedPartnerRoles?.length > 0 && (
               <>
                 <Box margin={1} data-cy="partner-role">
                   <GreyText>Partner Roles</GreyText>
