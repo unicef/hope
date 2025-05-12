@@ -19,14 +19,14 @@ export const UsersTableRow = ({ user }: UsersTableRowProps): ReactElement => {
   const [open, setOpen] = useState(false);
 
   const mappedRoles = user?.userRoles?.map((el) => (
-    <p key={el.role.name}>
-      {el.businessArea.name} / {el.program?.name || 'All'} / {el.role.name}
+    <p key={el.role?.name}>
+      {el.businessArea?.name} / {el.program?.name || 'All'} / {el.role?.name}
     </p>
   ));
 
   const mappedPartnerRoles = user?.partnerRoles?.map((el) => (
-    <p key={el.role.name}>
-      {el.businessArea.name} / {el.program?.name || 'All'} / {el.role.name}
+    <p key={el.role?.name}>
+      {el.businessArea?.name} / {el.program?.name || 'All'} / {el.role?.name}
     </p>
   ));
 

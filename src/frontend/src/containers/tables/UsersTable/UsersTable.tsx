@@ -28,6 +28,7 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
       program: programId,
       limit: 10,
       offset: 0,
+      serializer: 'program_users',
     }),
     [
       filter.search,
@@ -47,7 +48,6 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
       businessAreaSlug: businessArea,
       offset: queryVariables.offset,
       limit: queryVariables.limit,
-      serializer: 'program_users',
     };
   }, [initialQueryVariables, queryVariables, businessArea]);
 

@@ -69,14 +69,11 @@ export const UniversalRestTable = <T, K>({
     defaultOrderDirection,
   );
 
-  console.log('queryVariables', queryVariables);
-
   const filteredQueryVariables = useMemo(() => {
     const filtered = filterEmptyParams(queryVariables);
     return {
       ...filtered,
       businessAreaSlug: queryVariables.businessAreaSlug,
-      programSlug: queryVariables.programSlug,
       ...(queryVariables.ordering ? { ordering: queryVariables.ordering } : {}),
     };
   }, [queryVariables]);
