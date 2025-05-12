@@ -2699,10 +2699,10 @@
   dependencies:
     "@typescript-eslint/utils" "^8.18.1"
 
-"@tanstack/query-core@5.68.0":
-  version "5.68.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.68.0.tgz#3765573de58741c68fb80b128d3e3ffb4d80cb68"
-  integrity sha512-r8rFYYo8/sY/LNaOqX84h12w7EQev4abFXDWy4UoDVUJzJ5d9Fbmb8ayTi7ScG+V0ap44SF3vNs/45mkzDGyGw==
+"@tanstack/query-core@5.75.7":
+  version "5.75.7"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.75.7.tgz#8de9de6de4ae33e532f1fc99a8633e3461f30db9"
+  integrity sha512-4BHu0qnxUHOSnTn3ow9fIoBKTelh0GY08yn1IO9cxjBTsGvnxz1ut42CHZqUE3Vl/8FAjcHsj8RNJMoXvjgHEA==
 
 "@tanstack/query-devtools@5.65.0":
   version "5.65.0"
@@ -2716,12 +2716,12 @@
   dependencies:
     "@tanstack/query-devtools" "5.65.0"
 
-"@tanstack/react-query@^5.68.0":
-  version "5.68.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.68.0.tgz#f7b242eb800ce7c36b4edbe26c9ba8478eb18826"
-  integrity sha512-mMOdGDKlwTP/WV72QqSNf4PAMeoBp/DqBHQ222wBfb51Looi8QUqnCnb9O98ZgvNISmy6fzxRGBJdZ+9IBvX2Q==
+"@tanstack/react-query@^5.75.7":
+  version "5.75.7"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.75.7.tgz#5984900369365614edb4a0ed16c1cb521d9fb5ee"
+  integrity sha512-JYcH1g5pNjKXNQcvvnCU/PueaYg05uKBDHlWIyApspv7r5C0BM12n6ysa2QF2T+1tlPnNXOob8vr8o96Nx0GxQ==
   dependencies:
-    "@tanstack/query-core" "5.68.0"
+    "@tanstack/query-core" "5.75.7"
 
 "@testing-library/dom@^10.4.0":
   version "10.4.0"
@@ -7688,10 +7688,10 @@ strip-json-comments@^3.1.1:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
 
-styled-components@^6.1.8:
-  version "6.1.15"
-  resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-6.1.15.tgz#7651904d5424d08c1046056eb39024cc23c72ab7"
-  integrity sha512-PpOTEztW87Ua2xbmLa7yssjNyUF9vE7wdldRfn1I2E6RTkqknkBYpj771OxM/xrvRGinLy2oysa7GOd7NcZZIA==
+styled-components@^6.1.18:
+  version "6.1.18"
+  resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-6.1.18.tgz#9647497a92326ba9d758051c914f15004d524bb9"
+  integrity sha512-Mvf3gJFzZCkhjY2Y/Fx9z1m3dxbza0uI9H1CbNZm/jSHCojzJhQ0R7bByrlFJINnMzz/gPulpoFFGymNwrsMcw==
   dependencies:
     "@emotion/is-prop-valid" "1.2.2"
     "@emotion/unitless" "0.8.1"
