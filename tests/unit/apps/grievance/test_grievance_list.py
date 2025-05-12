@@ -530,3 +530,83 @@ class TestGrievanceTicketList:
         result_ids = [result["id"] for result in response_results]
         for i in expected_tickets:
             assert str(self.grievance_tickets[i].id) in result_ids
+
+    def test_grievance_ticket_list_caching(
+        self,
+        create_user_role_with_permissions: Callable,
+        set_admin_area_limits_in_program: Callable,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            ],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag = response.headers["etag"]
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(response.json()["results"]) == 9
+            assert len(ctx.captured_queries) == 70
+
+        # no change - use cache
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_second_call = response.headers["etag"]
+            assert etag == etag_second_call
+            assert len(ctx.captured_queries) == 10
+
+        ticket = self.grievance_tickets[0]
+        ticket.priority = 1
+        ticket.save()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_third_call = response.headers["etag"]
+            assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
+            assert etag_third_call not in [etag, etag_second_call]
+            # 5 queries are saved because of cached permissions calculations
+            assert len(ctx.captured_queries) == 65
+
+        set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_changed_areas = response.headers["etag"]
+            assert len(response.json()["results"]) == 6
+            assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
+            assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
+            assert len(ctx.captured_queries) == 53
+
+        ticket.delete()
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_fourth_call = response.headers["etag"]
+            assert len(response.json()["results"]) == 5
+            assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
+            assert len(ctx.captured_queries) == 46
+
+        # no change - use cache
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.api_client.get(self.list_url)
+            assert response.status_code == status.HTTP_200_OK
+            assert response.has_header("etag")
+            etag_fifth_call = response.headers["etag"]
+            assert etag_fifth_call == etag_fourth_call
+            assert len(ctx.captured_queries) == 10
