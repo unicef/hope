@@ -105,7 +105,7 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
         )
 
     def get_programs(self, obj: GrievanceTicket) -> Dict:
-        return ProgramSmallSerializer(obj.programs.order_by("created_at"), many=True).data
+        return ProgramSmallSerializer(obj.programs, many=True).data
 
     def get_related_tickets(self, obj: GrievanceTicket) -> Dict:
         return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
