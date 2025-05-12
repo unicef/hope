@@ -71,6 +71,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "permissions_in_scope",
             "user_roles",
             "partner_roles",
+            "status",
+            "last_login",
         )
 
     @staticmethod
