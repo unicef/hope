@@ -1,4 +1,5 @@
 from typing import Any, List
+from unittest.mock import MagicMock, patch
 
 from django.urls import reverse
 
@@ -7,7 +8,10 @@ from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.accountability.fixtures import FeedbackFactory
+from hct_mis_api.apps.accountability.fixtures import (
+    CommunicationMessageFactory,
+    FeedbackFactory,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -665,3 +669,172 @@ class TestFeedbackViewSet:
             assert feedback_message["created_by"] == "Test User"
             assert "id" in feedback_message
             assert "created_at" in feedback_message
+
+
+class TestMessageViewSet:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
+        self.client = api_client(self.user)
+        self.program_active = ProgramFactory(
+            name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
+        )
+        self.hh_1 = HouseholdFactory(program=self.program_active)
+        self.msg_1 = CommunicationMessageFactory(
+            program=self.program_active,
+            business_area=self.afghanistan,
+            title="MSG title",
+            body="MSG body",
+            created_by=self.user,
+            sampling_type="FULL_LIST",
+        )
+        # Message without Program
+        CommunicationMessageFactory(
+            program=None,
+            business_area=self.afghanistan,
+            title="MSG title without Program",
+            body="MSG body without Program",
+            created_by=self.user,
+            sampling_type="RANDOM",
+        )
+        self.url_list = reverse(
+            "api:accountability:messages-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+        self.url_count = reverse(
+            "api:accountability:messages-count",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+        self.url_details = reverse(
+            "api:accountability:messages-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": str(self.msg_1.pk),
+            },
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+                status.HTTP_200_OK,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_msg_get_list(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(self.url_list)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert len(resp_data["results"]) == 1
+            msg = resp_data["results"][0]
+            assert "id" in msg
+            assert "unicef_id" in msg
+            assert msg["title"] == "MSG title"
+            assert "number_of_recipients" in msg
+            assert "created_by" in msg
+            assert "created_at" in msg
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+                status.HTTP_200_OK,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_msg_get_count(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(self.url_count)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert resp_data["count"] == 1
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
+                status.HTTP_200_OK,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_msg_details(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(self.url_details)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["body"] == "MSG body"
+            assert resp_data["households"] is not None
+            assert resp_data["payment_plan"] is None
+            assert resp_data["registration_data_import"] is None
+            assert resp_data["sampling_type"] == "FULL_LIST"
+            assert resp_data["full_list_arguments"]["excluded_admin_areas"] == []
+            assert resp_data["random_sampling_arguments"] is None
+            assert resp_data["sample_size"] == 0
+            assert resp_data["admin_url"] is not None
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_new_message(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        broadcast_message_mock = MagicMock(return_value=None)
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+        ):
+            response = self.client.post(
+                self.url_list,
+                {
+                    "title": "New Message for Active Program",
+                    "body": "Thank you for tests! Looks Good To Me!",
+                    "sampling_type": "FULL_LIST",
+                    "full_list_arguments": {"excluded_admin_areas": []},
+                    "random_sampling_arguments": None,
+                    "households": [str(self.hh_1.pk)],
+                },
+                format="json",
+            )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["title"] == "New Message for Active Program"
+            assert resp_data["body"] == "Thank you for tests! Looks Good To Me!"
+            assert resp_data["sample_size"] == 1

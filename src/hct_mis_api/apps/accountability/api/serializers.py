@@ -7,7 +7,11 @@ from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdSmallSerializer,
 )
-from hct_mis_api.apps.payment.api.serializers import FollowUpPaymentPlanSerializer
+from hct_mis_api.apps.payment.api.serializers import (
+    FollowUpPaymentPlanSerializer,
+    FullListSerializer,
+    RandomSamplingSerializer,
+)
 from hct_mis_api.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
@@ -191,10 +195,16 @@ class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
             "full_list_arguments",
             "random_sampling_arguments",
             "sample_size",
-            # "program",
+            "admin_url",
         )
 
 
 class MessageCreateSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
     body = serializers.CharField(required=True)
+    sampling_type = serializers.ChoiceField(required=True, choices=Message.SamplingChoices)
+    full_list_arguments = FullListSerializer()
+    random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
+    payment_plan = serializers.CharField(required=False)
+    registration_data_import = serializers.CharField(required=False)
+    households = serializers.ListSerializer(child=serializers.CharField(), required=False)
