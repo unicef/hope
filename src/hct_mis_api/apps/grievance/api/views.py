@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import Case, DateField, F, QuerySet, When
+from django.db.models import Case, DateField, F, QuerySet, When, OuterRef, Prefetch
 from django.utils import timezone
 
 from constance import config
@@ -59,14 +59,16 @@ class GrievanceTicketViewSet(
             to_prefetch.append(key)
             if "household" in value:
                 to_prefetch.append(f"{key}__{value['household']}")
+                to_prefetch.append(f"{key}__{value['household']}__admin2")
             if "golden_records_individual" in value:
                 to_prefetch.append(f"{key}__{value['golden_records_individual']}__household")
+                to_prefetch.append(f"{key}__{value['golden_records_individual']}__household__admin2")
         return (
             super()
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
-            .prefetch_related(*to_prefetch)
+            .prefetch_related("programs", *to_prefetch)
             .annotate(
                 total=Case(
                     When(
@@ -146,7 +148,7 @@ class GrievanceTicketGlobalViewSet(
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
-            .prefetch_related(*to_prefetch)
+            .prefetch_related("programs", *to_prefetch)
             .annotate(
                 total=Case(
                     When(
