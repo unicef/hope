@@ -36,7 +36,7 @@ class TestSampleSizeQuery(APITestCase):
         for household in cls.households:
             PaymentFactory(household=household, parent=cls.pp)
 
-        cls.rdi_id = RegistrationDataImport.objects.order_by("?").first().id
+        cls.rdi_id = str(RegistrationDataImport.objects.order_by("?").first().id)
 
         cls.sampling_data = {
             Message.SamplingChoices.FULL_LIST: {
@@ -80,7 +80,7 @@ class TestSampleSizeQuery(APITestCase):
 
         data = {
             "input": {
-                "paymentPlan": self.id_to_base64(self.pp.id, "PaymentPlanNode"),
+                "paymentPlan": str(self.pp.id),
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
@@ -115,7 +115,7 @@ class TestSampleSizeQuery(APITestCase):
 
         data = {
             "input": {
-                "households": [self.id_to_base64(household.id, "HouseholdNode") for household in self.households],
+                "households": [str(household.id) for household in self.households],
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
@@ -151,7 +151,7 @@ class TestSampleSizeQuery(APITestCase):
 
         data = {
             "input": {
-                "registrationDataImport": self.id_to_base64(self.rdi_id, "RegistrationDataImportNode"),
+                "registrationDataImport": self.rdi_id,
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
