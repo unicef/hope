@@ -1,4 +1,5 @@
 {% extends "admin_extra_buttons/action_page.html" %}
+
 {% block action-content %}
     <table>
         <tr>
@@ -12,13 +13,13 @@
                 </form>
             </td>
             <td><img width="400" src="data:image/jpeg;base64, {{ img }}">
-{#            {{ imgdata }}#}
-{#                {{ img }}#}
-{#                {{ record }}#}
+{# {{ imgdata }} #}
+{# {{ img }} #}
+{# {{ record }} #}
             </td>
         </tr>
     </table>
     <pre>
     {{ content }}
     </pre>
-{% endblock %}
+{% endblock action-content %}

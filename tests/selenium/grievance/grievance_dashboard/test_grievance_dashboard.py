@@ -56,7 +56,7 @@ def add_grievances() -> None:
 def grievances() -> [GrievanceTicket]:
     GrievanceTicket._meta.get_field("created_at").auto_now_add = False
     GrievanceTicket._meta.get_field("updated_at").auto_now = False
-    grievances = list()
+    grievances = []
     grievances.append(
         generate_grievance(
             created_at=str(timezone.now() - timedelta(days=20)),
@@ -106,23 +106,21 @@ def generate_grievance(
             else None
         )
     grievance_ticket = GrievanceTicket.objects.create(
-        **{
-            "business_area": business_area,
-            "unicef_id": unicef_id,
-            "language": "Polish",
-            "consent": True,
-            "description": "grievance_ticket_1",
-            "category": category,
-            "issue_type": issue_type,
-            "status": status,
-            "created_by": created_by,
-            "assigned_to": assigned_to,
-            "created_at": created_at,
-            "updated_at": updated_at,
-            "household_unicef_id": household_unicef_id,
-            "priority": priority,
-            "urgency": urgency,
-        }
+        business_area=business_area,
+        unicef_id=unicef_id,
+        language="Polish",
+        consent=True,
+        description="grievance_ticket_1",
+        category=category,
+        issue_type=issue_type,
+        status=status,
+        created_by=created_by,
+        assigned_to=assigned_to,
+        created_at=created_at,
+        updated_at=updated_at,
+        household_unicef_id=household_unicef_id,
+        priority=priority,
+        urgency=urgency,
     )
 
     from hct_mis_api.apps.grievance.models import TicketReferralDetails

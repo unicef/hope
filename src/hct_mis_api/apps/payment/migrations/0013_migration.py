@@ -5,15 +5,39 @@ import django_fsm
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payment', '0012_migration'),
+        ("payment", "0012_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='paymentplan',
-            name='status',
-            field=django_fsm.FSMField(choices=[('TP_OPEN', 'Open'), ('TP_LOCKED', 'Locked'), ('PROCESSING', 'Processing'), ('STEFICON_WAIT', 'Steficon Wait'), ('STEFICON_RUN', 'Steficon Run'), ('STEFICON_COMPLETED', 'Steficon Completed'), ('STEFICON_ERROR', 'Steficon Error'), ('DRAFT', 'Draft'), ('PREPARING', 'Preparing'), ('OPEN', 'Open'), ('LOCKED', 'Locked'), ('LOCKED_FSP', 'Locked FSP'), ('IN_APPROVAL', 'In Approval'), ('IN_AUTHORIZATION', 'In Authorization'), ('IN_REVIEW', 'In Review'), ('ACCEPTED', 'Accepted'), ('FINISHED', 'Finished'), ('MIGRATION_BLOCKED', 'Migration Blocked'), ('MIGRATION_FAILED', 'Migration Failed')], db_index=True, default='TP_OPEN', max_length=50),
+            model_name="paymentplan",
+            name="status",
+            field=django_fsm.FSMField(
+                choices=[
+                    ("TP_OPEN", "Open"),
+                    ("TP_LOCKED", "Locked"),
+                    ("PROCESSING", "Processing"),
+                    ("STEFICON_WAIT", "Steficon Wait"),
+                    ("STEFICON_RUN", "Steficon Run"),
+                    ("STEFICON_COMPLETED", "Steficon Completed"),
+                    ("STEFICON_ERROR", "Steficon Error"),
+                    ("DRAFT", "Draft"),
+                    ("PREPARING", "Preparing"),
+                    ("OPEN", "Open"),
+                    ("LOCKED", "Locked"),
+                    ("LOCKED_FSP", "Locked FSP"),
+                    ("IN_APPROVAL", "In Approval"),
+                    ("IN_AUTHORIZATION", "In Authorization"),
+                    ("IN_REVIEW", "In Review"),
+                    ("ACCEPTED", "Accepted"),
+                    ("FINISHED", "Finished"),
+                    ("MIGRATION_BLOCKED", "Migration Blocked"),
+                    ("MIGRATION_FAILED", "Migration Failed"),
+                ],
+                db_index=True,
+                default="TP_OPEN",
+                max_length=50,
+            ),
         ),
     ]

@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from typing import List
 
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
@@ -31,7 +30,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 
 
 class HouseholdDataUpdateService(DataChangeService):
-    def save(self) -> List[GrievanceTicket]:
+    def save(self) -> list[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
         household_encoded_id = household_data_update_issue_type_extras.get("household")
@@ -47,7 +46,7 @@ class HouseholdDataUpdateService(DataChangeService):
         }
         for field in household_data_with_approve_status.keys():
             current_value = getattr(household, field, None)
-            if isinstance(current_value, (datetime, date)):
+            if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             if isinstance(current_value, Country):
                 current_value = current_value.alpha3
@@ -95,7 +94,7 @@ class HouseholdDataUpdateService(DataChangeService):
         }
         for field in household_data_with_approve_status.keys():
             current_value = getattr(household, field, None)
-            if isinstance(current_value, (datetime, date)):
+            if isinstance(current_value, datetime | date):
                 current_value = current_value.isoformat()
             if isinstance(current_value, Country):
                 current_value = current_value.alpha3

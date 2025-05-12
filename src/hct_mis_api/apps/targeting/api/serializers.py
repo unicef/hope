@@ -1,5 +1,3 @@
-from typing import Dict
-
 from rest_framework import serializers
 
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -35,8 +33,7 @@ class TargetPopulationListSerializer(serializers.ModelSerializer):
     def get_status(obj: PaymentPlan) -> str:
         if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
             return obj.get_status_display()
-        else:
-            return "Assigned"
+        return "Assigned"
 
 
 class TargetingCollectorBlockRuleFilterSerializer(serializers.ModelSerializer):
@@ -108,7 +105,7 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
             "collectors_filters_blocks",
         )
 
-    def to_representation(self, instance: TargetingCriteriaRule) -> Dict:
+    def to_representation(self, instance: TargetingCriteriaRule) -> dict:
         data = super().to_representation(instance)
         filters_data = instance.filters
         if filters_data:

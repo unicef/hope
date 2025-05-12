@@ -21,5 +21,4 @@ class ValidationErrorMutationMixin(graphene.ObjectType):
             logger.warning(e)
             if hasattr(e, "error_dict"):
                 return cls(validation_errors=e.message_dict)
-            else:
-                raise
+            raise

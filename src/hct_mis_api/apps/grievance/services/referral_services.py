@@ -1,11 +1,9 @@
-from typing import Dict, List, Optional, Tuple
-
 from hct_mis_api.apps.core.utils import decode_and_get_object
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketReferralDetails
 from hct_mis_api.apps.household.models import Household, Individual
 
 
-def save_referral_service(grievance_ticket: GrievanceTicket, extras: Dict) -> List[GrievanceTicket]:
+def save_referral_service(grievance_ticket: GrievanceTicket, extras: dict) -> list[GrievanceTicket]:
     household, individual = fetch_household_and_individual(extras)
 
     create_new_ticket(grievance_ticket, household, individual)
@@ -14,7 +12,7 @@ def save_referral_service(grievance_ticket: GrievanceTicket, extras: Dict) -> Li
 
 
 def create_new_ticket(
-    grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
+    grievance_ticket: GrievanceTicket, household: Household | None, individual: Individual | None
 ) -> GrievanceTicket:
     TicketReferralDetails.objects.create(
         individual=individual,
@@ -25,7 +23,7 @@ def create_new_ticket(
     return grievance_ticket
 
 
-def update_referral_service(grievance_ticket: GrievanceTicket, extras: Dict, input_data: Dict) -> GrievanceTicket:
+def update_referral_service(grievance_ticket: GrievanceTicket, extras: dict, input_data: dict) -> GrievanceTicket:
     household, individual = fetch_household_and_individual(extras)
 
     ticket_details = grievance_ticket.referral_ticket_details
@@ -38,7 +36,7 @@ def update_referral_service(grievance_ticket: GrievanceTicket, extras: Dict, inp
     return grievance_ticket
 
 
-def fetch_household_and_individual(extras: Dict) -> Tuple[Optional[Household], Optional[Individual]]:
+def fetch_household_and_individual(extras: dict) -> tuple[Household | None, Individual | None]:
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get("referral_ticket_extras", {})
     individual_encoded_id = feedback_ticket_extras.get("individual")
@@ -49,7 +47,7 @@ def fetch_household_and_individual(extras: Dict) -> Tuple[Optional[Household], O
 
 
 def update_ticket(
-    grievance_ticket: GrievanceTicket, household: Optional[Household], individual: Optional[Individual]
+    grievance_ticket: GrievanceTicket, household: Household | None, individual: Individual | None
 ) -> None:
     ticket_details = grievance_ticket.referral_ticket_details
     if individual:

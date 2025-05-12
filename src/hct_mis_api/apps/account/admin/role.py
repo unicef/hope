@@ -1,6 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
-from uuid import UUID
+from typing import Any, TYPE_CHECKING
 
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
@@ -23,6 +22,9 @@ from hct_mis_api.apps.account.admin.filters import (
 from hct_mis_api.apps.account.admin.forms import RoleAdminForm
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
@@ -95,19 +97,19 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     def changeform_view(
         self,
         request: HttpRequest,
-        object_id: Optional[str] = None,
+        object_id: str | None = None,
         form_url: str = "",
-        extra_context: Optional[Dict] = None,
+        extra_context: dict | None = None,
     ) -> HttpResponse:
         if object_id:
             self.existing_perms = self._perms(request, object_id)
         return super().changeform_view(request, object_id, form_url, extra_context)
 
-    def construct_change_message(self, request: HttpRequest, form: Any, formsets: Any, add: bool = False) -> List[Dict]:
+    def construct_change_message(self, request: HttpRequest, form: Any, formsets: Any, add: bool = False) -> list[dict]:
         change_message = construct_change_message(form, formsets, add)
         if not add and "permissions" in form.changed_data:
             new_perms = self._perms(request, form.instance.id)
-            changed: Dict[str, Any] = change_message[0]["changed"]
+            changed: dict[str, Any] = change_message[0]["changed"]
             changed["permissions"] = {
                 "added": sorted(new_perms.difference(self.existing_perms)),
                 "removed": sorted(self.existing_perms.difference(new_perms)),

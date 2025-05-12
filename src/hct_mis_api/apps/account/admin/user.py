@@ -1,7 +1,7 @@
 import csv
 import logging
 from collections import defaultdict, namedtuple
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Type, Union
+from typing import TYPE_CHECKING, Any, Sequence, Union
 
 from django import forms
 from django.conf import settings
@@ -142,15 +142,15 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             )
         )
 
-    def get_readonly_fields(self, request: HttpRequest, obj: Optional[Any] = ...) -> Sequence[str]:
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None = ...) -> Sequence[str]:
         if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
 
-    def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> List[str]:
+    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> list[str]:
         return ["last_name", "first_name", "email", "username", "job_title", "last_login"]
 
-    def get_fieldsets(self, request: HttpRequest, obj: Optional[Any] = None) -> Any:
+    def get_fieldsets(self, request: HttpRequest, obj: Any | None = None) -> Any:
         fieldsets = self.base_fieldset
         if request.user.is_superuser:
             fieldsets += self.extra_fieldsets  # type: ignore
@@ -186,7 +186,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         context["business_ares_roles"] = dict(ba_roles)
         return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
-    def get_actions(self, request: HttpRequest) -> Dict:
+    def get_actions(self, request: HttpRequest) -> dict:
         actions = super().get_actions(request)
         if not request.user.has_perm("account.can_create_kobo_user"):
             if "create_kobo_user_qs" in actions:
@@ -235,10 +235,9 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
 
                     self.message_user(request, msg)
             return HttpResponseRedirect(request.get_full_path())
-        else:
-            ctx = self.get_common_context(request, title="Add Role", selection=queryset)
-            ctx["form"] = AddRoleForm()
-            return render(request, "admin/account/user/business_area_role.html", context=ctx)
+        ctx = self.get_common_context(request, title="Add Role", selection=queryset)
+        ctx["form"] = AddRoleForm()
+        return render(request, "admin/account/user/business_area_role.html", context=ctx)
 
     add_business_area_role.short_description = "Add/Remove Business Area roles"
 
@@ -246,7 +245,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     def import_csv(self, request: HttpRequest) -> TemplateResponse:
         from django.contrib.admin.helpers import AdminForm
 
-        context: Dict = self.get_common_context(request, processed=False)
+        context: dict = self.get_common_context(request, processed=False)
         if request.method == "GET":
             form = ImportCSVForm(initial={"partner": account_models.Partner.objects.first()})
             context["form"] = form
@@ -333,7 +332,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
         return TemplateResponse(request, "admin/account/user/import_csv.html", context)
 
-    def __init__(self, model: Type, admin_site: Any) -> None:
+    def __init__(self, model: type, admin_site: Any) -> None:
         super().__init__(model, admin_site)
 
     def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:

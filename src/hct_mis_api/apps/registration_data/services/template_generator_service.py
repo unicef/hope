@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple
+from typing import Iterable
 
 import openpyxl
 from openpyxl.worksheet.worksheet import Worksheet
@@ -81,7 +81,7 @@ class TemplateFileGeneratorService:
         """
         self.import_helper_ws.append([default_helper_text])
 
-    def _get_pdu_columns(self) -> Tuple[List[str], List[str]]:
+    def _get_pdu_columns(self) -> tuple[list[str], list[str]]:
         name_row = []
         label_row = []
         for flexible_attribute in self.pdu_attributes:
@@ -99,7 +99,7 @@ class TemplateFileGeneratorService:
                 return flexible_attribute.label["English(EN)"]
         return flexible_attribute.name
 
-    def _handle_choices(self, fields: Dict) -> None:
+    def _handle_choices(self, fields: dict) -> None:
         self.choices_ws.append(["Field Name", "Label", "Value to be used in template"])
         for field_name, field_value in fields.items():
             is_admin_level = field_name in ("admin1_h_c", "admin2_h_c")
@@ -115,9 +115,9 @@ class TemplateFileGeneratorService:
                     ]
                     self.choices_ws.append(row)
 
-    def _handle_name_and_label_row(self, fields: Dict) -> Tuple[List[str], List[str]]:
-        names: List[str] = []
-        labels: List[str] = []
+    def _handle_name_and_label_row(self, fields: dict) -> tuple[list[str], list[str]]:
+        names: list[str] = []
+        labels: list[str] = []
 
         for field_name, field_value in fields.items():
             names.append(field_name)

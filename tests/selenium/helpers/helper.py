@@ -207,9 +207,9 @@ class Common:
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
         for ii in ids:
             try:
-                print(f"{ii.text}: {ii.get_attribute(attribute)}")
+                pass
             except BaseException:
-                print(f"No text: {ii.get_attribute(attribute)}")
+                pass
 
     def mouse_on_element(self, element: WebElement) -> None:
         hover = ActionChains(self.driver).move_to_element(element)
@@ -223,6 +223,6 @@ class Common:
         while True:
             if os.path.exists(filepath):
                 return True
-            elif time.time() - start_time > timeout:
+            if time.time() - start_time > timeout:
                 raise TimeoutError(f"File {filepath} not found after {timeout} seconds")
             sleep(0.02)

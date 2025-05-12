@@ -1,5 +1,5 @@
 import uuid
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Sequence
 from uuid import UUID
 
 from django.conf import settings
@@ -38,12 +38,12 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
             qs = qs.order_by(*ordering)
         return qs
 
-    def get_list_filter(self, request: HttpRequest) -> Tuple:
+    def get_list_filter(self, request: HttpRequest) -> tuple:
         return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
 class RdiMergeStatusAdminMixin(admin.ModelAdmin):
-    def get_list_filter(self, request: HttpRequest) -> Tuple:
+    def get_list_filter(self, request: HttpRequest) -> tuple:
         return tuple(list(super().get_list_filter(request)) + ["rdi_merge_status"])
 
 
@@ -62,7 +62,7 @@ class JSONWidgetMixin:
 
 class LastSyncDateResetMixin:
     @button(permission=is_root)
-    def reset_sync_date(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def reset_sync_date(self, request: HttpRequest) -> HttpResponse | None:
         if request.method == "POST":
             self.get_queryset(request).update(last_sync_at=None)
         else:
@@ -77,7 +77,7 @@ class LastSyncDateResetMixin:
         return None
 
     @button(label="reset sync date", permission=is_root)
-    def reset_sync_date_single(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+    def reset_sync_date_single(self, request: HttpRequest, pk: UUID) -> HttpResponse | None:
         if request.method == "POST":
             self.get_queryset(request).filter(id=pk).update(last_sync_at=None)
         else:
@@ -98,10 +98,10 @@ class HopeModelAdminMixin(ExtraButtonsMixin, SmartDisplayAllMixin, AdminActionPe
 class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin):
     list_per_page = 50
 
-    def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> Sequence[Union[str, Sequence[str]]]:
+    def get_fields(self, request: HttpRequest, obj: Any | None = None) -> Sequence[str | Sequence[str]]:
         return super().get_fields(request, obj)
 
-    def get_actions(self, request: HttpRequest) -> Dict:
+    def get_actions(self, request: HttpRequest) -> dict:
         actions = super().get_actions(request)
         if "delete_selected" in actions and not is_root(request):
             del actions["delete_selected"]
@@ -206,7 +206,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
         permission=is_root,
     )
-    def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+    def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Preparing Payment Plan"""
         from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 
@@ -236,19 +236,18 @@ class PaymentPlanCeleryTasksMixin:
             )
 
             return redirect(reverse(self.url, args=[pk]))
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.restart_preparing_payment_plan,
-                message="Do you confirm to restart preparing Payment Plan task?",
-            )
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.restart_preparing_payment_plan,
+            message="Do you confirm to restart preparing Payment Plan task?",
+        )
 
     @button(
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_locked_payment_plan(btn),
         enabled=lambda btn: is_enabled(btn),
     )
-    def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+    def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Exporting template for entitlement"""
 
         from hct_mis_api.apps.payment.celery_tasks import (
@@ -271,19 +270,18 @@ class PaymentPlanCeleryTasksMixin:
                 messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
 
             return redirect(reverse(self.url, args=[pk]))
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.restart_exporting_template_for_entitlement,
-                message="Do you confirm to restart exporting xlsx file task?",
-            )
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.restart_exporting_template_for_entitlement,
+            message="Do you confirm to restart exporting xlsx file task?",
+        )
 
     @button(
         visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_plan(btn),
         enabled=lambda btn: is_enabled(btn),
     )
-    def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+    def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Importing entitlement file"""
 
         from hct_mis_api.apps.payment.celery_tasks import (
@@ -304,19 +302,18 @@ class PaymentPlanCeleryTasksMixin:
                 messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
 
             return redirect(reverse(self.url, args=[pk]))
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.restart_importing_entitlements_xlsx_file,
-                message="Do you confirm to restart importing entitlements xlsx file task?",
-            )
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.restart_importing_entitlements_xlsx_file,
+            message="Do you confirm to restart importing entitlements xlsx file task?",
+        )
 
     @button(
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_accepted_payment_plan(btn),
         enabled=lambda btn: is_enabled(btn),
     )
-    def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+    def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Exporting payment plan list"""
 
         from hct_mis_api.apps.payment.celery_tasks import (
@@ -337,19 +334,18 @@ class PaymentPlanCeleryTasksMixin:
             else:
                 messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
             return redirect(reverse(self.url, args=[pk]))
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.restart_exporting_payment_plan_list,
-                message="Do you confirm to restart exporting xlsx file task?",
-            )
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.restart_exporting_payment_plan_list,
+            message="Do you confirm to restart exporting xlsx file task?",
+        )
 
     @button(
         visible=lambda btn: is_importing_reconciliation_xlsx_file(btn) and is_accepted_payment_plan(btn),
         enabled=lambda btn: is_enabled(btn),
     )
-    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> HttpResponse | None:
         """Importing payment plan list (from xlsx)"""
 
         from hct_mis_api.apps.payment.celery_tasks import (
@@ -371,13 +367,12 @@ class PaymentPlanCeleryTasksMixin:
                 messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
 
             return redirect(reverse(self.url, args=[pk]))
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.restart_importing_reconciliation_xlsx_file,
-                message="Do you confirm to restart importing entitlements xlsx file task?",
-            )
+        return confirm_action(
+            modeladmin=self,
+            request=request,
+            action=self.restart_importing_reconciliation_xlsx_file,
+            message="Do you confirm to restart importing entitlements xlsx file task?",
+        )
 
 
 class LinkedObjectsManagerMixin:
@@ -391,7 +386,7 @@ class LinkedObjectsManagerMixin:
     linked_objects_ignore = []
     linked_objects_link_to_changelist = True
 
-    def get_ignored_linked_objects(self, request: HttpRequest) -> List[str]:
+    def get_ignored_linked_objects(self, request: HttpRequest) -> list[str]:
         return self.linked_objects_ignore
 
     @button()
@@ -430,7 +425,7 @@ class LinkedObjectsManagerMixin:
             context,
         )
 
-    def get_related(self, user: Model, field: Field, manager: str, max_records: int = 200) -> Dict[str, Any]:
+    def get_related(self, user: Model, field: Field, manager: str, max_records: int = 200) -> dict[str, Any]:
         """
         Override 'get_related' from 'smart_admin', to take related objects with a custom manager
         """

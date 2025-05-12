@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.db.models import DateTimeField
 
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Individual
 
 
-def get_household_status(household: Optional[Household]) -> Tuple[str, Optional[DateTimeField]]:
+def get_household_status(household: Household | None) -> tuple[str, DateTimeField | None]:
     if household.rdi_merge_status == MergeStatusModel.PENDING:
         return "imported", household.updated_at
     if household.rdi_merge_status == MergeStatusModel.MERGED:
@@ -27,7 +27,7 @@ def get_household_status(household: Optional[Household]) -> Tuple[str, Optional[
     return "merged to population", household.created_at
 
 
-def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict:
+def get_individual_info(individual: "Individual", tax_id: str | None) -> dict:
     return {
         "role": individual.role,
         "relationship": individual.relationship,
@@ -36,18 +36,18 @@ def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict
 
 
 def get_household_info(
-    household: Optional[Household], individual: Optional["Individual"] = None, tax_id: Optional[str] = None
-) -> Dict[str, Any]:
+    household: Household | None, individual: Optional["Individual"] = None, tax_id: str | None = None
+) -> dict[str, Any]:
     status, date = get_household_status(household)
-    output: Dict = {"status": status, "date": date}
+    output: dict = {"status": status, "date": date}
     if individual:
         output["individual"] = get_individual_info(individual, tax_id=tax_id)
     return {"info": output}
 
 
-def serialize_by_individual(individual: "Individual", tax_id: str) -> Dict:
+def serialize_by_individual(individual: "Individual", tax_id: str) -> dict:
     return get_household_info(individual.household, individual, tax_id)
 
 
-def serialize_by_household(household: Optional[Household]) -> Dict:
+def serialize_by_household(household: Household | None) -> dict:
     return get_household_info(household)

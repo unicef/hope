@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any
 
 from django.db.models import Q
 from django.utils import timezone
@@ -16,7 +16,7 @@ from hct_mis_api.apps.account.models import User
 class HOPEAuthentication(TokenAuthentication):
     keyword = "Token"
 
-    def authenticate_credentials(self, key: str) -> Tuple[User, APIToken]:
+    def authenticate_credentials(self, key: str) -> tuple[User, APIToken]:
         try:
             token = (
                 APIToken.objects.select_related("user")
@@ -38,6 +38,6 @@ class HOPEPermission(IsAuthenticated):
         if bool(request.auth):
             if view.permission == "any":
                 return True
-            elif view.permission:
+            if view.permission:
                 return view.permission.name in request.auth.grants
         return False

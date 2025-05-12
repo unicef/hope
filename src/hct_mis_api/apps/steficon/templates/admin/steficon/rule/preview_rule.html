@@ -1,5 +1,6 @@
-{% extends "admin_extra_buttons/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
-{% block extrahead %}{{ block.super }}{{ form.media }}{% endblock extrahead %}
+{% extends "admin_extra_buttons/action_page.html" %}{% load admin_modify admin_urls engine i18n static %}
+{% block extrahead %}{{ block.super }}{{ form.media }}{% endblock %}
+
 {% block breadcrumbs-active %}
 {% if form %}
     &rsaquo; Test
@@ -40,4 +41,4 @@
         {% endif %}
     {% endif %}
 
-{% endblock %}
+{% endblock content %}

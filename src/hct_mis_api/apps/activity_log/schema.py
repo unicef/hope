@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from django.contrib.contenttypes.models import ContentType
 
@@ -39,7 +39,7 @@ class LogEntryNode(DjangoObjectType):
     def resolve_changes_display_object(self, info: Any) -> Arg:
         return self.changes
 
-    def resolve_is_user_generated(self, info: Any) -> Optional[bool]:
+    def resolve_is_user_generated(self, info: Any) -> bool | None:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
         if isinstance(self.content_object, GrievanceTicket):
@@ -55,5 +55,5 @@ class Query(graphene.ObjectType):
     )
     log_entry_action_choices = graphene.List(ChoiceObject)
 
-    def resolve_log_entry_action_choices(self, info: Any) -> List[Dict[str, Any]]:
+    def resolve_log_entry_action_choices(self, info: Any) -> list[dict[str, Any]]:
         return to_choice_object(LogEntry.LOG_ENTRY_ACTION_CHOICES)

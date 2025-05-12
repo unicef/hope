@@ -1,7 +1,7 @@
 import decimal
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.urls import reverse
@@ -57,7 +57,7 @@ class XlsxExportBaseService:
         ws.column_dimensions = dim_holder
 
     def _add_col_bgcolor(
-        self, col: Optional[List] = None, hex_code: str = "A0FDB0", no_of_columns: Optional[int] = None
+        self, col: list | None = None, hex_code: str = "A0FDB0", no_of_columns: int | None = None
     ) -> None:
         for row_index in col or []:
             fill = PatternFill(bgColor=hex_code, fgColor=hex_code, fill_type="lightUp")
@@ -71,21 +71,21 @@ class XlsxExportBaseService:
                 cell.border = Border(left=bd, top=bd, right=bd, bottom=bd)
 
     @staticmethod
-    def get_link(api_url: Optional[str] = None) -> str:
+    def get_link(api_url: str | None = None) -> str:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         link = f"{protocol}://{settings.FRONTEND_HOST}{api_url}"
         if api_url:
             return link
         return ""
 
-    def get_email_context(self, user: "User") -> Dict:
+    def get_email_context(self, user: "User") -> dict:
         payment_verification_id = encode_id_base64(self.payment_plan.id, "PaymentPlan")
         path_name = "download-payment-plan-payment-list"
         link = self.get_link(reverse(path_name, args=[payment_verification_id]))
 
         msg = "Payment Plan Payment List xlsx file(s) were generated and below You have the link to download this file."
 
-        context = {
+        return {
             "first_name": getattr(user, "first_name", ""),
             "last_name": getattr(user, "last_name", ""),
             "email": getattr(user, "email", ""),
@@ -94,12 +94,10 @@ class XlsxExportBaseService:
             "title": "Payment Plan Payment List files generated",
         }
 
-        return context
-
     def right_format_for_xlsx(self, value: Any) -> Any:
         # this function will return something that excel will accept
         if value is None:
             return ""
-        if isinstance(value, (str, int, float, decimal.Decimal, datetime)):
+        if isinstance(value, str | int | float | decimal.Decimal | datetime):
             return value
         return str(value)

@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('universal_update_script', '0001_migration'),
+        ("universal_update_script", "0001_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='universalupdate',
-            name='backup_snapshot',
-            field=models.FileField(blank=True, help_text='Backup Snapshot File, contains data before update. File updated on each start of update process.', null=True, upload_to=''),
+            model_name="universalupdate",
+            name="backup_snapshot",
+            field=models.FileField(
+                blank=True,
+                help_text="Backup Snapshot File, contains data before update. File updated on each start of update process.",
+                null=True,
+                upload_to="",
+            ),
         ),
     ]

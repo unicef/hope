@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Sequence
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -24,7 +24,7 @@ class BulkActionService:
 
     @transaction.atomic
     def bulk_assign(
-        self, tickets_ids: Sequence[str], assigned_to_id: Optional[str], business_area_slug: str
+        self, tickets_ids: Sequence[str], assigned_to_id: str | None, business_area_slug: str
     ) -> QuerySet[GrievanceTicket]:
         user = get_object_or_404(User, id=assigned_to_id)
         queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)

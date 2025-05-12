@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from rest_framework.pagination import (
     LimitOffsetPagination,
@@ -17,7 +17,7 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
     Override LimitOffsetPagination to remove count query from response.
     """
 
-    def paginate_queryset(self, queryset: Any, request: Request, view: Any = None) -> Optional[List[Any]]:
+    def paginate_queryset(self, queryset: Any, request: Request, view: Any = None) -> list[Any] | None:
         self.limit = self.get_limit(request)
         if self.limit is None:
             return None
@@ -27,17 +27,17 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
         self.display_page_controls = self.template is not None
         return list(queryset[self.offset : self.offset + self.limit])
 
-    def get_paginated_response(self, data: List[Any]) -> Response:
+    def get_paginated_response(self, data: list[Any]) -> Response:
         return Response(
             OrderedDict([("next", self.get_next_link()), ("previous", self.get_previous_link()), ("results", data)])
         )
 
-    def get_paginated_response_schema(self, schema: Dict[str, Any]) -> Dict[str, Any]:
+    def get_paginated_response_schema(self, schema: dict[str, Any]) -> dict[str, Any]:
         paginated_schema = super().get_paginated_response_schema(schema)
         paginated_schema["properties"].pop("count", None)
         return paginated_schema
 
-    def get_next_link(self) -> Optional[str]:
+    def get_next_link(self) -> str | None:
         url = self.request.build_absolute_uri()
         url = replace_query_param(url, self.limit_query_param, self.limit)
 
@@ -61,9 +61,8 @@ class NoCountLimitOffsetPagination(LimitOffsetPagination):
         def page_number_to_url(page_number: int) -> str:
             if page_number == 1:
                 return remove_query_param(base_url, self.offset_query_param)
-            else:
-                offset = self.offset + ((page_number - current) * self.limit)  # type: ignore
-                return replace_query_param(base_url, self.offset_query_param, offset)
+            offset = self.offset + ((page_number - current) * self.limit)  # type: ignore
+            return replace_query_param(base_url, self.offset_query_param, offset)
 
         page_numbers = _get_displayed_page_numbers(current, final)
         page_links = _get_page_links(page_numbers, current, page_number_to_url)

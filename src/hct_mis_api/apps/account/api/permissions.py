@@ -14,7 +14,7 @@ class BaseRestPermission(BasePermission):
         if hasattr(view, "permissions_by_action"):
             if view.action in view.permissions_by_action:
                 return view.permissions_by_action[view.action]
-            elif view.action == "count":
+            if view.action == "count":
                 return view.permissions_by_action["list"]
         return view.PERMISSIONS
 

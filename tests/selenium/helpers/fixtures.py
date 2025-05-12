@@ -14,7 +14,7 @@ def get_program_with_dct_type_and_name(
     BusinessArea.objects.filter(slug="afghanistan")
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code=programme_code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -26,4 +26,3 @@ def get_program_with_dct_type_and_name(
         cycle__end_date=(datetime.now() + relativedelta(days=10)).date(),
         beneficiary_group=beneficiary_group,
     )
-    return program

@@ -8,96 +8,144 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Feedback',
+            name="Feedback",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('unicef_id', models.CharField(blank=True, db_index=True, max_length=255, null=True)),
-                ('issue_type', models.CharField(choices=[('POSITIVE_FEEDBACK', 'Positive feedback'), ('NEGATIVE_FEEDBACK', 'Negative feedback')], max_length=20, verbose_name='Issue type')),
-                ('description', models.TextField()),
-                ('comments', models.TextField(blank=True, null=True)),
-                ('area', models.CharField(blank=True, max_length=250)),
-                ('language', models.TextField(blank=True)),
-                ('consent', models.BooleanField(default=True)),
-                ('is_original', models.BooleanField(db_index=True, default=False)),
-                ('is_migration_handled', models.BooleanField(default=False)),
-                ('migrated_at', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                (
+                    "issue_type",
+                    models.CharField(
+                        choices=[
+                            ("POSITIVE_FEEDBACK", "Positive feedback"),
+                            ("NEGATIVE_FEEDBACK", "Negative feedback"),
+                        ],
+                        max_length=20,
+                        verbose_name="Issue type",
+                    ),
+                ),
+                ("description", models.TextField()),
+                ("comments", models.TextField(blank=True, null=True)),
+                ("area", models.CharField(blank=True, max_length=250)),
+                ("language", models.TextField(blank=True)),
+                ("consent", models.BooleanField(default=True)),
+                ("is_original", models.BooleanField(db_index=True, default=False)),
+                ("is_migration_handled", models.BooleanField(default=False)),
+                ("migrated_at", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'verbose_name': 'Feedback',
-                'ordering': ('created_at',),
+                "verbose_name": "Feedback",
+                "ordering": ("created_at",),
             },
             bases=(hct_mis_api.apps.utils.models.AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='FeedbackMessage',
+            name="FeedbackMessage",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('description', models.TextField(help_text='The content of the feedback message.', verbose_name='Description')),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "description",
+                    models.TextField(help_text="The content of the feedback message.", verbose_name="Description"),
+                ),
             ],
             options={
-                'verbose_name': 'Feedback message',
-                'ordering': ('created_at',),
+                "verbose_name": "Feedback message",
+                "ordering": ("created_at",),
             },
         ),
         migrations.CreateModel(
-            name='Message',
+            name="Message",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('unicef_id', models.CharField(blank=True, db_index=True, max_length=255, null=True)),
-                ('title', models.CharField(max_length=60)),
-                ('body', models.TextField(max_length=1000)),
-                ('number_of_recipients', models.PositiveIntegerField(default=0)),
-                ('sampling_type', models.CharField(choices=[('FULL_LIST', 'Full list'), ('RANDOM', 'Random sampling')], default='FULL_LIST', max_length=50)),
-                ('full_list_arguments', models.JSONField(blank=True, null=True)),
-                ('random_sampling_arguments', models.JSONField(blank=True, null=True)),
-                ('sample_size', models.PositiveIntegerField(default=0)),
-                ('is_original', models.BooleanField(db_index=True, default=False)),
-                ('is_migration_handled', models.BooleanField(default=False)),
-                ('migrated_at', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                ("title", models.CharField(max_length=60)),
+                ("body", models.TextField(max_length=1000)),
+                ("number_of_recipients", models.PositiveIntegerField(default=0)),
+                (
+                    "sampling_type",
+                    models.CharField(
+                        choices=[("FULL_LIST", "Full list"), ("RANDOM", "Random sampling")],
+                        default="FULL_LIST",
+                        max_length=50,
+                    ),
+                ),
+                ("full_list_arguments", models.JSONField(blank=True, null=True)),
+                ("random_sampling_arguments", models.JSONField(blank=True, null=True)),
+                ("sample_size", models.PositiveIntegerField(default=0)),
+                ("is_original", models.BooleanField(db_index=True, default=False)),
+                ("is_migration_handled", models.BooleanField(default=False)),
+                ("migrated_at", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'verbose_name': 'Message',
-                'ordering': ('created_at',),
+                "verbose_name": "Message",
+                "ordering": ("created_at",),
             },
             bases=(hct_mis_api.apps.utils.models.AdminUrlMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='Survey',
+            name="Survey",
             fields=[
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('unicef_id', models.CharField(blank=True, db_index=True, max_length=255, null=True)),
-                ('title', models.CharField(max_length=60)),
-                ('body', models.TextField(blank=True, default='', max_length=1000)),
-                ('category', models.CharField(choices=[('RAPID_PRO', 'Survey with RapidPro'), ('SMS', 'Survey with SMS'), ('MANUAL', 'Survey with manual process')], max_length=16)),
-                ('number_of_recipients', models.PositiveIntegerField(default=0)),
-                ('sample_file', models.FileField(blank=True, null=True, upload_to='')),
-                ('sample_file_generated_at', models.DateTimeField(blank=True, null=True)),
-                ('sampling_type', models.CharField(choices=[('FULL_LIST', 'Full list'), ('RANDOM', 'Random')], default='FULL_LIST', max_length=50)),
-                ('full_list_arguments', models.JSONField(default=dict)),
-                ('random_sampling_arguments', models.JSONField(default=dict)),
-                ('sample_size', models.PositiveIntegerField(default=0)),
-                ('flow_id', models.CharField(blank=True, max_length=255, null=True)),
-                ('successful_rapid_pro_calls', django.contrib.postgres.fields.ArrayField(base_field=models.JSONField(), default=list, size=None)),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                ("unicef_id", models.CharField(blank=True, db_index=True, max_length=255, null=True)),
+                ("title", models.CharField(max_length=60)),
+                ("body", models.TextField(blank=True, default="", max_length=1000)),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("RAPID_PRO", "Survey with RapidPro"),
+                            ("SMS", "Survey with SMS"),
+                            ("MANUAL", "Survey with manual process"),
+                        ],
+                        max_length=16,
+                    ),
+                ),
+                ("number_of_recipients", models.PositiveIntegerField(default=0)),
+                ("sample_file", models.FileField(blank=True, null=True, upload_to="")),
+                ("sample_file_generated_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "sampling_type",
+                    models.CharField(
+                        choices=[("FULL_LIST", "Full list"), ("RANDOM", "Random")], default="FULL_LIST", max_length=50
+                    ),
+                ),
+                ("full_list_arguments", models.JSONField(default=dict)),
+                ("random_sampling_arguments", models.JSONField(default=dict)),
+                ("sample_size", models.PositiveIntegerField(default=0)),
+                ("flow_id", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "successful_rapid_pro_calls",
+                    django.contrib.postgres.fields.ArrayField(base_field=models.JSONField(), default=list, size=None),
+                ),
             ],
             options={
-                'verbose_name': 'Survey',
-                'ordering': ('created_at',),
+                "verbose_name": "Survey",
+                "ordering": ("created_at",),
             },
             bases=(hct_mis_api.apps.utils.models.AdminUrlMixin, models.Model),
         ),

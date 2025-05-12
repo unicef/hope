@@ -1,6 +1,6 @@
 import io
 from decimal import Decimal
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Union
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
     from hct_mis_api.apps.account.models import User
 
-Row = Tuple[Cell]
+Row = tuple[Cell]
 
 
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
@@ -33,10 +33,10 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
     def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
         self.file = file
-        self.payments_dict: Dict[str, Payment] = {
+        self.payments_dict: dict[str, Payment] = {
             str(x.unicef_id): x for x in payment_plan.eligible_payments.only("unicef_id", "entitlement_quantity")
         }
-        self.errors: List[XlsxError] = []
+        self.errors: list[XlsxError] = []
         self.is_updated = False
 
     def open_workbook(self) -> openpyxl.Workbook:
@@ -67,7 +67,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         if payments_to_save:
             self._save_payments(payments_to_save)
 
-    def _save_payments(self, payments_to_save: List[Payment]) -> None:
+    def _save_payments(self, payments_to_save: list[Payment]) -> None:
         Payment.objects.bulk_update(
             payments_to_save,
             fields=(
@@ -149,7 +149,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                 )
             column += 1
 
-    def _validate_payment_id(self, row: Row, payments_ids: List[str]) -> None:
+    def _validate_payment_id(self, row: Row, payments_ids: list[str]) -> None:
         cell = row[self.HEADERS.index("payment_id")]
         if cell.value not in payments_ids:
             self.errors.append(
@@ -191,7 +191,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             self._validate_payment_id(row, payments_ids)
             self._validate_entitlement(row)
 
-    def _import_row(self, row: Row, exchange_rate: float) -> Optional[Payment]:
+    def _import_row(self, row: Row, exchange_rate: float) -> Payment | None:
         payment_id = row[self.HEADERS.index("payment_id")].value
         entitlement_amount = row[self.HEADERS.index("entitlement_quantity")].value
 

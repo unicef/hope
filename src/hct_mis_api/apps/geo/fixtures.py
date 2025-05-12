@@ -1,5 +1,4 @@
 import random
-from typing import List, Optional
 
 import factory
 from factory import fuzzy
@@ -54,16 +53,15 @@ def generate_area_types() -> None:
             parent = AreaTypeFactory(parent=parent, name=area_type_name, country=country, area_level=level)
 
 
-def generate_p_code(prefix: str, count: int) -> List[str]:
+def generate_p_code(prefix: str, count: int) -> list[str]:
     """generate a list of unique random p-codes with a given prefix."""
     return [f"{prefix}{random.randint(10, 99)}" for _ in range(count)]
 
 
-def generate_areas(country_names: Optional[List[str]] = None) -> None:
+def generate_areas(country_names: list[str] | None = None) -> None:
     """create areas in every level for country in country_names or by default only for Afghanistan"""
     if country_names is None:
         country_names = ["Afghanistan"]
-    print(f"Generating Areas for {country_names}")
     for country in Country.objects.filter(short_name__in=country_names):
         p_code_prefix = country.iso_code2
         area_type_level_1 = AreaType.objects.get(country=country, area_level=1)
@@ -92,16 +90,16 @@ def generate_small_areas_for_afghanistan_only() -> None:
     country = CountryFactory()
     business_area, _ = BusinessArea.objects.get_or_create(
         code=country.iso_num,
-        defaults=dict(
-            name=country.short_name,
-            long_name=country.name,
-            region_code=country.iso_num,
-            region_name=country.iso_code3,
-            has_data_sharing_agreement=True,
-            active=True,
-            kobo_token="abc_test",
-            is_accountability_applicable=True,
-        ),
+        defaults={
+            "name": country.short_name,
+            "long_name": country.name,
+            "region_code": country.iso_num,
+            "region_name": country.iso_code3,
+            "has_data_sharing_agreement": True,
+            "active": True,
+            "kobo_token": "abc_test",
+            "is_accountability_applicable": True,
+        },
     )
     parent = None
     for area_type_name, level in [("Province", 1), ("District", 2), ("Village", 3)]:

@@ -61,8 +61,7 @@ class ADUSerMixin:
     def _get_ad_form(self, request: HttpRequest) -> Form:
         if request.method == "POST":
             return self.ad_form_class(request.POST, request=request)
-        else:
-            return self.ad_form_class(request=request)
+        return self.ad_form_class(request=request)
 
     def _sync_ad_data(self, user: User) -> None:
         ms_graph = MicrosoftGraphAPI()
@@ -123,14 +122,12 @@ class ADUSerMixin:
         ctx = self.get_common_context(
             request,
             None,
-            **{
-                "change": True,
-                "is_popup": False,
-                "save_as": False,
-                "has_delete_permission": False,
-                "has_add_permission": False,
-                "has_change_permission": True,
-            },
+            change=True,
+            is_popup=False,
+            save_as=False,
+            has_delete_permission=False,
+            has_add_permission=False,
+            has_change_permission=True,
         )
         form = self._get_ad_form(request)
         if request.method == "POST":

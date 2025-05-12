@@ -1,5 +1,4 @@
-{% load custom_tags %}
-{% load static %}
+{% load custom_tags static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -89,14 +88,14 @@
                     <h1 class="title">Please click the button below and complete the process</h1>
                     <button>ACTIVATE LINK</button>
                 </div>
-            {% endblock %}
+            {% endblock body %}
         </main>
 
         {% block footer %}
             <footer>
                 <p>If you experience any issues, don't hesitate to reach out to our customer support team</p>
             </footer>
-        {% endblock %}
+        {% endblock footer %}
     </div>
 </body>
 </html>

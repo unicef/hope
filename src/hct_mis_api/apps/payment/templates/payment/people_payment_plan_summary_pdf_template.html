@@ -78,19 +78,19 @@
     </tr>
     <tr>
       <td>Total People redeemed</td>
-      <td>{{reconciliation.reconciled|default_if_none:"0"}}</td>
+      <td>{{ reconciliation.reconciled|default_if_none:"0" }}</td>
       <td>Total amount redeemed ({{ payment_plan.currency }})</td>
-      <td>{{reconciliation.reconciled_local|default_if_none:"0"}}</td>
+      <td>{{ reconciliation.reconciled_local|default_if_none:"0" }}</td>
       <td>Total amount redeemed (USD)</td>
-      <td>{{reconciliation.reconciled_usd|default_if_none:"0"}}</td>
+      <td>{{ reconciliation.reconciled_usd|default_if_none:"0" }}</td>
     </tr>
     <tr>
       <td>Total pending People</td>
-      <td>{{reconciliation.pending|default_if_none:"0"}}</td>
+      <td>{{ reconciliation.pending|default_if_none:"0" }}</td>
       <td>Total amount unredeemed ({{ payment_plan.currency }})</td>
-      <td>{{reconciliation.pending_local|default_if_none:"0"}}</td>
+      <td>{{ reconciliation.pending_local|default_if_none:"0" }}</td>
       <td>Total amount unredeemed (USD)</td>
-      <td>{{reconciliation.pending_usd|default_if_none:"0"}}</td>
+      <td>{{ reconciliation.pending_usd|default_if_none:"0" }}</td>
     </tr>
   </tbody>
 </table>
@@ -177,4 +177,4 @@
 <p></p>
 <p>Generated on {% now "N j, Y" %}</p>
 
-{% endblock %}
+{% endblock table %}

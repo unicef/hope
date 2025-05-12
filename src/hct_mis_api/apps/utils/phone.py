@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any
 
 import phonenumbers
 
@@ -21,7 +21,7 @@ def calculate_phone_numbers_validity(obj: Any) -> Any:
     return obj
 
 
-def recalculate_phone_numbers_validity(obj: Any, model: Type) -> Any:
+def recalculate_phone_numbers_validity(obj: Any, model: type) -> Any:
     if obj._state.adding is True:
         # create
         obj = calculate_phone_numbers_validity(obj)

@@ -1,6 +1,5 @@
 import dataclasses
 from datetime import datetime
-from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.core.cache import cache
@@ -22,7 +21,7 @@ class HistoryExchangeRate:
     past_ratio: float
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "HistoryExchangeRate":
+    def from_dict(cls, data: dict) -> "HistoryExchangeRate":
         return cls(
             valid_from=parse(data["VALID_FROM"]),
             valid_to=parse(data["VALID_TO"]),
@@ -47,10 +46,10 @@ class SingleExchangeRate:
     valid_to: datetime
     ratio: float
     no_of_decimal: int
-    historical_exchange_rates: List[HistoryExchangeRate]
+    historical_exchange_rates: list[HistoryExchangeRate]
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "SingleExchangeRate":
+    def from_dict(cls, data: dict) -> "SingleExchangeRate":
         valid_to = datetime(9999, 12, 31) if data["VALID_TO"] == "31-DEC-99" else parse(data["VALID_TO"])
 
         past_xrates = data["PAST_XRATE"]["PAST_XRATE_ROW"] if data["PAST_XRATE"] is not None else []
@@ -69,7 +68,7 @@ class SingleExchangeRate:
             historical_exchange_rates=list(map(HistoryExchangeRate.from_dict, past_xrates)),
         )
 
-    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> Optional[float]:
+    def get_exchange_rate_by_dispersion_date(self, dispersion_date: datetime) -> float | None:
         if self.is_valid(dispersion_date):
             return self.calc_exchange_rate()
 
@@ -94,18 +93,18 @@ class SingleExchangeRate:
 class ExchangeRates:
     CACHE_KEY = "exchange_rates"
 
-    def __init__(self, api_client: Optional[ExchangeRateClient] = None) -> None:
+    def __init__(self, api_client: ExchangeRateClient | None = None) -> None:
         self.api_client = api_client or get_exchange_rate_client()
         self.exchange_rates_dict = self._convert_response_json_to_exchange_rates()
 
-    def _convert_response_json_to_exchange_rates(self) -> Dict[str, SingleExchangeRate]:
+    def _convert_response_json_to_exchange_rates(self) -> dict[str, SingleExchangeRate]:
         response_json = self._get_response()
         raw_exchange_rates = response_json.get("ROWSET", {}).get("ROW", [])
 
         exchange_rates = map(SingleExchangeRate.from_dict, raw_exchange_rates)
         return {exchange_rate.currency_code: exchange_rate for exchange_rate in exchange_rates}
 
-    def _get_response(self) -> Dict:
+    def _get_response(self) -> dict:
         if settings.EXCHANGE_RATE_CACHE_EXPIRY > 0:
             cached_response = cache.get(self.CACHE_KEY)
             if cached_response is not None:
@@ -116,8 +115,8 @@ class ExchangeRates:
             return response_json
         return self.api_client.fetch_exchange_rates()
 
-    def get_exchange_rate_for_currency_code(self, currency_code: str, dispersion_date: datetime) -> Optional[float]:
-        currency: Optional[SingleExchangeRate] = self.exchange_rates_dict.get(currency_code)
+    def get_exchange_rate_for_currency_code(self, currency_code: str, dispersion_date: datetime) -> float | None:
+        currency: SingleExchangeRate | None = self.exchange_rates_dict.get(currency_code)
 
         if currency is None:
             return None
