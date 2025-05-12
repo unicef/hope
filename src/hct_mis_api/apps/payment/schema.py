@@ -530,6 +530,7 @@ class FundsCommitmentItemNode(DjangoObjectType):
 class FundsCommitmentNode(graphene.ObjectType):
     funds_commitment_number = graphene.String()
     funds_commitment_items = graphene.List(FundsCommitmentItemNode)
+    insufficient_amount = graphene.Boolean()
 
 
 class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
@@ -816,7 +817,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
         return [
             FundsCommitmentNode(
-                funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
+                funds_commitment_number=group.funds_commitment_number,
+                funds_commitment_items=group.filtered_items,
+                insufficient_amount=False,
             )
             for group in groups
         ]
@@ -833,8 +836,29 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         ).first()
 
         if group:
+            totals_by_currency = available_items_qs.values("currency_code").annotate(
+                total_fc_local_currency_amount=Sum("commitment_amount_local"),
+                total_fc_usd_currency_amount=Sum("commitment_amount_usd"),
+            )
+            if len(totals_by_currency) > 1:
+                # more than 1 currency, USD calculation
+                total_fc_usd_currency_amount = sum(
+                    item["total_fc_usd_currency_amount"] or 0 for item in totals_by_currency
+                )
+                insufficient_amount = total_fc_usd_currency_amount < parent.total_entitled_quantity_usd
+            elif totals_by_currency[0]["currency_code"] != parent.currency:
+                # currency_mismatch, USD calculation
+                total_fc_usd_currency_amount = totals_by_currency[0]["total_fc_usd_currency_amount"] or 0
+                insufficient_amount = total_fc_usd_currency_amount < parent.total_entitled_quantity_usd
+            else:
+                # use local currency
+                total_fc_local_currency_amount = totals_by_currency[0]["total_fc_local_currency_amount"] or 0
+                insufficient_amount = total_fc_local_currency_amount < parent.total_entitled_quantity
+
             return FundsCommitmentNode(
-                funds_commitment_number=group.funds_commitment_number, funds_commitment_items=group.filtered_items
+                funds_commitment_number=group.funds_commitment_number,
+                funds_commitment_items=group.filtered_items,
+                insufficient_amount=insufficient_amount,
             )
         return None
 

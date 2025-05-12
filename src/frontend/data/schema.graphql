@@ -1291,6 +1291,7 @@ type FundsCommitmentItemNodeEdge {
 type FundsCommitmentNode {
   fundsCommitmentNumber: String
   fundsCommitmentItems: [FundsCommitmentItemNode]
+  insufficientAmount: Boolean
 }
 
 type GenericPaymentNode {
