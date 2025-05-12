@@ -1456,7 +1456,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 "transaction_status_blockchain_link",
             ),
             "fsp_auth_code": (payment, "fsp_auth_code"),
-            "account_data": (delivery_mechanism_data, payment.delivery_type.account_type.key),
+            "account_data": (
+                delivery_mechanism_data,
+                payment.delivery_type.account_type.key if hasattr(payment, "delivery_type") else None,
+            ),
         }
         additional_columns = {
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data]),
