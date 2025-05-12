@@ -184,6 +184,7 @@ jobs:
 
       - name: Install JS dependencies & build
         run: |
+          cd src/frontend
           yarn install --frozen-lockfile
           yarn build-for-backend
 
