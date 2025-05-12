@@ -27,9 +27,11 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     PaymentPlanFactory,
+    generate_delivery_mechanisms,
 )
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
@@ -49,6 +51,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        generate_delivery_mechanisms()
         households = []
         business_area = create_afghanistan()
         cls.user = UserFactory()
@@ -322,8 +325,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
-        DeliveryMechanismDataFactory(
-            individual=collector, is_valid=True, data={"delivery_data_field__random_name": "test123"}
+        AccountFactory(
+            individual=collector, data={"number": "test123"}, account_type=AccountType.objects.get(key="bank")
         )
         tc = TargetingCriteria()
         tc.save()
@@ -335,8 +338,8 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         rule_filter = TargetingCollectorBlockRuleFilter(
             collector_block_filters=col_block,
             comparison_method="EQUALS",
-            field_name="delivery_data_field__random_name",
-            arguments=["Yes"],
+            field_name="bank__number",
+            arguments=[True],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
@@ -350,7 +353,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
         )
         collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
-        DeliveryMechanismDataFactory(individual=collector, is_valid=True, data={"other__random_name": "test123"})
+        AccountFactory(individual=collector, data={"other__random_name": "test123"})
         # Target population
         tc = TargetingCriteria()
         tc.save()
@@ -363,7 +366,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
-            arguments=["No"],
+            arguments=[False],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()

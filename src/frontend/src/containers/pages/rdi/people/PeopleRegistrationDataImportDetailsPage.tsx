@@ -1,28 +1,28 @@
-import { Typography } from '@mui/material';
-import { ReactElement, ReactNode, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { Title } from '@components/core/Title';
+import { Tab, Tabs } from '@core/Tabs';
 import {
   RegistrationDataImportStatus,
   useHouseholdChoiceDataQuery,
   useProgramQuery,
   useRegistrationDataImportQuery,
 } from '@generated/graphql';
-import { Tabs, Tab } from '@core/Tabs';
-import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { TableWrapper } from '@components/core/TableWrapper';
-import { Title } from '@components/core/Title';
-import { RegistrationDataImportDetailsPageHeader } from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
-import { RegistrationDetails } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
-import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Typography } from '@mui/material';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ImportedPeopleTable } from '@containers/tables/rdi/ImportedPeopleTable';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ImportedPeopleTable } from '@containers/tables/rdi/ImportedPeopleTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import RegistrationDataImportDetailsPageHeader from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import RegistrationDetails from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
 
 const Container = styled.div`
   && {
@@ -57,7 +57,6 @@ const TabPanel = ({ children, index, value }: TabPanelProps): ReactElement => {
 export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const location = useLocation();
   const permissions = usePermissions();
   const { businessArea, programId } = useBaseUrl();
   const { data: programData } = useProgramQuery({
@@ -153,17 +152,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   }
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag(
-          'component',
-          'PeopleRegistrationDataImportDetailsPage.tsx',
-        );
-      }}
-      componentName="PeopleRegistrationDataImportDetailsPage"
-    >
+    <>
       <RegistrationDataImportDetailsPageHeader
         registration={data.registrationDataImport}
         canMerge={canMerge}
@@ -175,6 +164,11 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
         canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
       />
       <RegistrationContainer isErased={data.registrationDataImport.erased} />
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(
+  PeopleRegistrationDataImportDetailsPage,
+  'PeopleRegistrationDataImportDetailsPage',
+);

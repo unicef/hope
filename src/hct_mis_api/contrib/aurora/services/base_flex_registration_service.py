@@ -116,6 +116,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                         self.create_household_for_rdi_household(record, rdi)
                         imported_records_ids.append(record_id)
                     except ValidationError as e:
+                        print(e)
                         logger.exception(e)
                         records_with_error.append((record, str(e)))
 

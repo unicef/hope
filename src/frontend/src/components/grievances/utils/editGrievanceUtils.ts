@@ -5,10 +5,10 @@ import {
   camelizeArrayObjects,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { AddIndividualDataChange } from '../AddIndividualDataChange';
-import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
-import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
 import { ReactElement } from 'react';
+import AddIndividualDataChange from '../AddIndividualDataChange';
+import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
+import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
 
 interface EditValuesTypes {
   priority?: number | string;

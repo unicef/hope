@@ -195,6 +195,8 @@ export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentPlanStatus.TpOpen:
       return 'OPEN';
+    case PaymentPlanStatus.Draft:
+      return 'READY FOR PAYMENT MODULE';
     case PaymentPlanStatus.TpLocked:
       return 'LOCKED';
     case PaymentPlanStatus.Processing:
@@ -207,8 +209,7 @@ export function targetPopulationStatusDisplayMap(status: string): string {
       return 'STEFICON ERROR';
     case PaymentPlanStatus.SteficonCompleted:
       return 'STEFICON COMPLETED';
-    case PaymentPlanStatus.Draft:
-      return 'READY FOR PAYMENT MODULE';
+
     //   if other PP statuses ==> ASSIGNED
     default:
       return 'ASSIGNED';
@@ -293,6 +294,7 @@ export function paymentPlanStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
+    ['ASSIGNED']: theme.hctPalette.gray,
     [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
     [PaymentPlanStatus.Draft]: theme.hctPalette.green,
     [PaymentPlanStatus.Finished]: theme.hctPalette.gray,

@@ -1,8 +1,8 @@
 import { useRoutes } from 'react-router-dom';
-import { PaymentPlanVerificationDetailsPage } from '../pages/payments/PaymentPlanVerificationDetailsPage';
-import { PaymentVerificationPage } from '../pages/payments/PaymentVerificationPage';
-import { VerificationPaymentDetailsPage } from '../pages/payments/VerificationPaymentDetailsPage';
 import { ReactElement } from 'react';
+import PaymentPlanVerificationDetailsPage from '@containers/pages/payments/PaymentPlanVerificationDetailsPage';
+import PaymentVerificationPage from '@containers/pages/payments/PaymentVerificationPage';
+import VerificationPaymentDetailsPage from '@containers/pages/payments/VerificationPaymentDetailsPage';
 
 export const PaymentVerificationRoutes = (): ReactElement => {
   const paymentVerificationRoutes = [

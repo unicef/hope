@@ -1,13 +1,24 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+  List,
+  ListItem,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
-import { Pie } from 'react-chartjs-2';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Pointer } from '@components/core/Pointer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -15,12 +26,6 @@ const colors = {
   femaleAdult: '#DFCCF5',
   maleAdult: '#B1E3E0',
 };
-
-const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
-  margin: 0 auto;
-`;
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -50,13 +55,20 @@ interface ResultsProps {
   targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
-export function ResultsForPeople({
-  targetPopulation,
-}: ResultsProps): ReactElement {
+function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleOpen = () => {
+    if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
+      setOpenDialog(true);
+    }
+  };
+  const handleClose = () => setOpenDialog(false);
+
   if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
+
   return (
     <div>
       <PaperContainer>
@@ -67,7 +79,7 @@ export function ResultsForPeople({
           <Grid container>
             <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-start">
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
@@ -75,7 +87,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
@@ -83,7 +95,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
@@ -91,7 +103,7 @@ export function ResultsForPeople({
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
@@ -108,7 +120,47 @@ export function ResultsForPeople({
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid size={{ xs: 4 }}>
+                <Grid size={{ xs: 6 }}>
+                  <SummaryBorder>
+                    <>
+                      <LabelizedField
+                        label={t(
+                          'Collectors failed payment channel validation',
+                        )}
+                      >
+                        <SummaryValue
+                          onClick={() => handleOpen()}
+                          data-cy="total-collectors-failed-count"
+                        >
+                          <Pointer>
+                            {targetPopulation
+                              ?.failedWalletValidationCollectorsIds?.length ||
+                              '-'}
+                          </Pointer>
+                        </SummaryValue>
+                      </LabelizedField>
+                      <Dialog open={openDialog} onClose={handleClose}>
+                        <DialogTitle>View IDs</DialogTitle>
+                        <DialogContent>
+                          <List>
+                            {targetPopulation?.failedWalletValidationCollectorsIds?.map(
+                              (id, index) => (
+                                <ListItem key={index}>{id}</ListItem>
+                              ),
+                            )}
+                          </List>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose} color="primary">
+                            Close
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </>
+                  </SummaryBorder>
+                </Grid>
+
+                {/* <Grid item xs={4}>
                   <ChartContainer>
                     <Pie
                       width={100}
@@ -146,12 +198,12 @@ export function ResultsForPeople({
                       }}
                     />
                   </ChartContainer>
-                </Grid>
+                </Grid> */}
               </Grid>
             </Grid>
             <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>
@@ -168,3 +220,5 @@ export function ResultsForPeople({
     </div>
   );
 }
+
+export default withErrorBoundary(ResultsForPeople, 'ResultsForPeople');

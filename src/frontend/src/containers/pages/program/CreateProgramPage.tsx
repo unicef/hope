@@ -20,7 +20,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BaseSection } from '@components/core/BaseSection';
 import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
 import {
@@ -28,13 +28,12 @@ import {
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { omit } from 'lodash';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
   const permissions = usePermissions();
   const [step, setStep] = useState(0);
@@ -52,7 +51,7 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
     usePduSubtypeChoicesDataQuery();
 
-  const [mutate] = useCreateProgramMutation({
+  const [mutate, { loading: loadingCreate }] = useCreateProgramMutation({
     refetchQueries: () => [
       { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
     ],
@@ -225,153 +224,147 @@ export const CreateProgramPage = (): ReactElement => {
   ];
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'CreateProgramPage.tsx');
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => {
+        handleSubmit(values);
       }}
-      componentName="CreateProgramPage"
+      initialTouched={{
+        programmeCode: true,
+      }}
+      validationSchema={programValidationSchema(t)}
+      validateOnChange={true}
     >
-      <Formik
-        initialValues={initialValues}
-        onSubmit={(values) => {
-          handleSubmit(values);
-        }}
-        initialTouched={{
-          programmeCode: true,
-        }}
-        validationSchema={programValidationSchema(t)}
-        validateOnChange={true}
-      >
-        {({
-          submitForm,
-          values,
-          validateForm,
-          setFieldTouched,
-          setFieldValue,
-          errors,
-          setErrors,
-        }) => {
-          const mappedPartnerChoices = userPartnerChoices
-            .filter((partner) => partner.name !== 'UNICEF')
-            .map((partner) => ({
-              value: partner.value,
-              label: partner.name,
-              disabled: values.partners.some((p) => p.id === partner.value),
-            }));
+      {({
+        submitForm,
+        values,
+        validateForm,
+        setFieldTouched,
+        setFieldValue,
+        errors,
+        setErrors,
+      }) => {
+        const mappedPartnerChoices = userPartnerChoices
+          .filter((partner) => partner.name !== 'UNICEF')
+          .map((partner) => ({
+            value: partner.value,
+            label: partner.name,
+            disabled: values.partners.some((p) => p.id === partner.value),
+          }));
 
-          const handleNextStep = async () => {
-            await handleNext({
-              validateForm,
-              stepFields,
-              step,
-              setStep,
-              setFieldTouched,
-              values,
-              setErrors,
-            });
-          };
+        const handleNextStep = async () => {
+          await handleNext({
+            validateForm,
+            stepFields,
+            step,
+            setStep,
+            setFieldTouched,
+            values,
+            setErrors,
+          });
+        };
 
-          const stepsData = [
-            {
-              title: t('Details'),
-              description: t(
-                'To create a new Programme, please complete all required fields on the form below and save.',
-              ),
-              dataCy: 'step-button-details',
-            },
-            {
-              title: t('Programme Time Series Fields'),
-              description: t(
-                `The Time Series Fields feature allows serial updating of ${beneficiaryGroup?.memberLabel} data through an XLSX file.`,
-              ),
-              dataCy: 'step-button-time-series-fields',
-            },
-            {
-              title: t('Programme Partners'),
-              description: '',
-              dataCy: 'step-button-partners',
-            },
-          ];
+        const stepsData = [
+          {
+            title: t('Details'),
+            description: t(
+              'To create a new Programme, please complete all required fields on the form below and save.',
+            ),
+            dataCy: 'step-button-details',
+          },
+          {
+            title: t('Programme Time Series Fields'),
+            description: t(
+              `The Time Series Fields feature allows serial updating of ${beneficiaryGroup?.memberLabel} data through an XLSX file.`,
+            ),
+            dataCy: 'step-button-time-series-fields',
+          },
+          {
+            title: t('Programme Partners'),
+            description: '',
+            dataCy: 'step-button-partners',
+          },
+        ];
 
-          const title = stepsData[step].title;
-          const description = stepsData[step].description
-            ? stepsData[step].description
-            : undefined;
+        const title = stepsData[step].title;
+        const description = stepsData[step].description
+          ? stepsData[step].description
+          : undefined;
 
-          return (
-            <>
-              <PageHeader
-                title={t('New Programme')}
-                breadCrumbs={
-                  hasPermissionInModule(
-                    'PROGRAMME_VIEW_LIST_AND_DETAILS',
-                    permissions,
-                  )
-                    ? breadCrumbsItems
-                    : null
-                }
-              />
-              <BaseSection
-                title={title}
-                description={description}
-                stepper={
-                  <ProgramStepper
-                    step={step}
-                    setStep={setStep}
-                    stepsData={stepsData}
-                  />
-                }
-              >
-                <Box p={3}>
-                  <Fade in={step === 0} timeout={600}>
-                    <div>
-                      {step === 0 && (
-                        <DetailsStep
-                          values={values}
-                          handleNext={handleNextStep}
-                          errors={errors}
-                        />
-                      )}
-                    </div>
-                  </Fade>
-                  <Fade in={step === 1} timeout={600}>
-                    <div>
-                      {step === 1 && (
-                        <ProgramFieldSeriesStep
-                          values={values}
-                          handleNext={handleNextStep}
-                          step={step}
-                          setStep={setStep}
-                          pdusubtypeChoicesData={pdusubtypeChoicesData}
-                          errors={errors}
-                          setFieldValue={setFieldValue}
-                        />
-                      )}
-                    </div>
-                  </Fade>
-                  <Fade in={step === 2} timeout={600}>
-                    <div>
-                      {step === 2 && (
-                        <PartnersStep
-                          values={values}
-                          allAreasTreeData={allAreasTree}
-                          partnerChoices={mappedPartnerChoices}
-                          step={step}
-                          setStep={setStep}
-                          submitForm={submitForm}
-                          setFieldValue={setFieldValue}
-                        />
-                      )}
-                    </div>
-                  </Fade>
-                </Box>
-              </BaseSection>
-            </>
-          );
-        }}
-      </Formik>
-    </UniversalErrorBoundary>
+        return (
+          <>
+            <PageHeader
+              title={t('New Programme')}
+              breadCrumbs={
+                hasPermissionInModule(
+                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
+                  permissions,
+                )
+                  ? breadCrumbsItems
+                  : null
+              }
+            />
+            <BaseSection
+              title={title}
+              description={description}
+              stepper={
+                <ProgramStepper
+                  step={step}
+                  setStep={setStep}
+                  stepsData={stepsData}
+                />
+              }
+            >
+              <Box p={3}>
+                <Fade in={step === 0} timeout={600}>
+                  <div>
+                    {step === 0 && (
+                      <DetailsStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        errors={errors}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 1} timeout={600}>
+                  <div>
+                    {step === 1 && (
+                      <ProgramFieldSeriesStep
+                        values={values}
+                        handleNext={handleNextStep}
+                        step={step}
+                        setStep={setStep}
+                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        errors={errors}
+                        setFieldValue={setFieldValue}
+                      />
+                    )}
+                  </div>
+                </Fade>
+                <Fade in={step === 2} timeout={600}>
+                  <div>
+                    {step === 2 && (
+                      <PartnersStep
+                        values={values}
+                        allAreasTreeData={allAreasTree}
+                        partnerChoices={mappedPartnerChoices}
+                        step={step}
+                        setStep={setStep}
+                        submitForm={submitForm}
+                        setFieldValue={setFieldValue}
+                        loading={loadingCreate}
+                      />
+                    )}
+                  </div>
+                </Fade>
+              </Box>
+            </BaseSection>
+          </>
+        );
+      }}
+    </Formik>
   );
 };
+
+export default withErrorBoundary(CreateProgramPage, 'CreateProgramPage');

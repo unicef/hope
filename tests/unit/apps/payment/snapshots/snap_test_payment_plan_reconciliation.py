@@ -199,7 +199,7 @@ snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_with_auth_cod
                     'line': 3
                 }
             ],
-            'message': "Export failed: All Payments must have the status 'Sent to FSP' and FSP communication channel set to API.",
+            'message': "Export failed: There could be not Pending Payments and FSP communication channel should be set to API.",
             'path': [
                 'exportXlsxPaymentPlanPaymentListPerFsp'
             ]

@@ -1,19 +1,19 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
   PaymentPlanNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '@generated/graphql';
-import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import TableCell from '@mui/material/TableCell';
 import {
   formatCurrencyWithSymbol,
-  paymentPlanStatusToColor,
+  paymentVerificationStatusToColor,
 } from '@utils/utils';
-import { StatusBox } from '@components/core/StatusBox';
-import { UniversalMoment } from '@components/core/UniversalMoment';
-import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface PaymentVerificationTableRowProps {
   plan: PaymentPlanNode;
@@ -52,8 +52,8 @@ export function PaymentVerificationTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={plan.status}
-          statusToColor={paymentPlanStatusToColor}
+          status={plan?.paymentVerificationSummary?.status}
+          statusToColor={paymentVerificationStatusToColor}
         />
       </TableCell>
       <TableCell align="right">

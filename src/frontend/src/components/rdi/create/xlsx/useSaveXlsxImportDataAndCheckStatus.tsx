@@ -55,7 +55,6 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
     if (
       [
         ImportDataStatus.Error,
-        ImportDataStatus.DeliveryMechanismsValidationError,
         ImportDataStatus.ValidationError,
         ImportDataStatus.Finished,
       ].includes(xlsxImportData?.importData?.status)

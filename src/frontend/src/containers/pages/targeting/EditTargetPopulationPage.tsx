@@ -1,5 +1,5 @@
 import { ReactElement, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   PaymentPlanBuildStatus,
   useBusinessAreaDataQuery,
@@ -7,16 +7,15 @@ import {
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { EditTargetPopulation } from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
+import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const EditTargetPopulationPage = (): ReactElement => {
+const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const location = useLocation();
 
   const { data, loading, error, startPolling, stopPolling } =
     usePaymentPlanQuery({
@@ -52,18 +51,14 @@ export const EditTargetPopulationPage = (): ReactElement => {
   const { paymentPlan } = data;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'EditTargetPopulationPage.tsx');
-      }}
-      componentName="EditTargetPopulationPage"
-    >
-      <EditTargetPopulation
-        paymentPlan={paymentPlan}
-        screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
-      />
-    </UniversalErrorBoundary>
+    <EditTargetPopulation
+      paymentPlan={paymentPlan}
+      screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
+    />
   );
 };
+
+export default withErrorBoundary(
+  EditTargetPopulationPage,
+  'EditTargetPopulationPage',
+);

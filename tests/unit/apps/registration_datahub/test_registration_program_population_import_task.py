@@ -63,7 +63,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
                 "admin2": AreaFactory(),
                 "admin3": AreaFactory(),
                 "admin4": AreaFactory(),
-                "registration_id": "1234567890",
+                "detail_id": "1234567890",
                 "flex_fields": {"enumerator_id": "123", "some": "thing"},
             },
             individuals_data=[

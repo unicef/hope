@@ -49,7 +49,6 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
-        household_one.programs.add(program_one)
 
         individual_data = {
             "full_name": "Benjamin Butler",

@@ -1,9 +1,10 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetPopulationHouseholdTable } from '@containers/tables/targeting/TargetPopulationHouseholdTable';
 import { useAllPaymentsForTableQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
-export function TargetingHouseholds({ id, canViewDetails }): ReactElement {
+function TargetingHouseholds({ id, canViewDetails }): ReactElement {
   const { businessArea } = useBaseUrl();
 
   return (
@@ -16,3 +17,5 @@ export function TargetingHouseholds({ id, canViewDetails }): ReactElement {
     />
   );
 }
+
+export default withErrorBoundary(TargetingHouseholds, 'TargetingHouseholds');

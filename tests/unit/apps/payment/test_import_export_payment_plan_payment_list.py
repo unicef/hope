@@ -38,12 +38,12 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentPlanSplitFactory,
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
@@ -105,7 +105,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
         cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        cls.payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
         cls.fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
@@ -113,16 +112,23 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         )
         cls.fsp_1.delivery_mechanisms.add(cls.dm_cash)
         FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=cls.fsp_1, delivery_mechanism=cls.dm_cash)
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=cls.payment_plan,
+        cls.payment_plan = PaymentPlanFactory(
+            program_cycle=program.cycles.first(),
+            business_area=cls.business_area,
             financial_service_provider=cls.fsp_1,
             delivery_mechanism=cls.dm_cash,
-            delivery_mechanism_order=1,
         )
-        program.households.set(Household.objects.all().values_list("id", flat=True))
+        cls.split = PaymentPlanSplitFactory(payment_plan=cls.payment_plan)
+
+        program.households.set(Household.objects.all())
         for household in program.households.all():
             PaymentFactory(
-                parent=cls.payment_plan, household=household, financial_service_provider=cls.fsp_1, currency="PLN"
+                parent=cls.payment_plan,
+                parent_split=cls.split,
+                household=household,
+                financial_service_provider=cls.fsp_1,
+                delivery_type=cls.dm_cash,
+                currency="PLN",
             )
 
         cls.user = UserFactory()
@@ -237,26 +243,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             financial_service_provider=financial_service_provider1,
             delivery_mechanism=self.dm_cash,
         )
-        financial_service_provider2 = FinancialServiceProviderFactory()
-        financial_service_provider2.delivery_mechanisms.add(self.dm_transfer)
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=financial_service_provider2,
-            delivery_mechanism=self.dm_transfer,
-        )
-
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=self.dm_cash,
-            financial_service_provider=financial_service_provider1,
-            delivery_mechanism_order=2,
-        )
-
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=self.dm_transfer,
-            financial_service_provider=financial_service_provider2,
-            delivery_mechanism_order=3,
-        )
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
 
@@ -278,12 +264,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
             )
         )
-        fsp_ids = self.payment_plan.delivery_mechanisms.values_list("financial_service_provider_id", flat=True)
+        fsp_id = self.payment_plan.financial_service_provider_id
         with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
-            self.assertEqual(len(fsp_ids), len(file_list))
             fsp_xlsx_template_per_delivery_mechanism_list = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
-                financial_service_provider_id__in=fsp_ids,
+                financial_service_provider_id=fsp_id,
             )
             file_list_fsp = [
                 f.replace(".xlsx", "").replace(f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_", "")
@@ -298,19 +283,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_export_payment_plan_payment_list_per_split(self, min_no_of_payments_in_chunk_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
-
-        financial_service_provider1 = FinancialServiceProviderFactory()
-        financial_service_provider1.delivery_mechanisms.add(self.dm_cash)
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=financial_service_provider1,
-            delivery_mechanism=self.dm_cash,
-        )
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            delivery_mechanism=self.dm_cash,
-            financial_service_provider=financial_service_provider1,
-            delivery_mechanism_order=2,
-        )
 
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
         self.payment_plan.save()
@@ -377,7 +349,13 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             bank_account_number="362277220020615398848112903",
             debit_card_number="123",
         )
-        payment = PaymentFactory(parent=self.payment_plan, household=household, collector=primary)
+        payment = PaymentFactory(
+            parent=self.payment_plan,
+            household=household,
+            collector=primary,
+            financial_service_provider=self.fsp_1,
+            delivery_type=self.dm_cash,
+        )
         # remove old and create new snapshot with bank account info
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payment_plan)
@@ -434,7 +412,13 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             date_flexible_attribute.name: "2021-01-01",
         }
         household.save()
-        payment = PaymentFactory(parent=self.payment_plan, household=household, collector=individual)
+        payment = PaymentFactory(
+            parent=self.payment_plan,
+            household=household,
+            collector=individual,
+            financial_service_provider=self.fsp_1,
+            delivery_type=self.dm_cash,
+        )
         decimal_flexible_attribute_index = headers.index(decimal_flexible_attribute.name)
         date_flexible_attribute_index = headers.index(date_flexible_attribute.name)
 
@@ -446,35 +430,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertEqual(payment_row[decimal_flexible_attribute_index], 123.45)
         self.assertEqual(payment_row[date_flexible_attribute_index], "2021-01-01")
 
-    def test_export_per_fsp_if_no_fsp_assigned_to_payment_plan(self) -> None:
-        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
-        self.payment_plan.save()
-        self.payment_plan.delivery_mechanisms.all().delete()
-
-        self.assertEqual(self.payment_plan.delivery_mechanisms.count(), 0)
-
-        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
-        with self.assertRaises(GraphQLError) as e:
-            export_service.export_per_fsp(self.user)
-        self.assertEqual(
-            e.exception.message,
-            f"Not possible to generate export file. "
-            f"There aren't any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}.",
-        )
-
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=self.payment_plan,
-            financial_service_provider=self.fsp_1,
-            delivery_mechanism=self.dm_cash,
-            delivery_mechanism_order=1,
-        )
-        # set generate_token_and_order_numbers to False
-        export_service.payment_generate_token_and_order_numbers = False
-        export_service.export_per_fsp(self.user)
-        self.payment_plan.refresh_from_db()
-        self.assertTrue(self.payment_plan.has_export_file)
-        self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
-
     def test_export_payment_plan_per_fsp_with_people_program(self) -> None:
         # check with default program
         self.payment_plan.status = PaymentPlan.Status.ACCEPTED
@@ -483,10 +438,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         export_service.export_per_fsp(self.user)
         self.assertFalse(self.payment_plan.program.is_social_worker_program)
 
-        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.first()
-        fsp = delivery_mechanism_per_payment_plan.financial_service_provider
+        delivery_mechanism = self.payment_plan.delivery_mechanism
+        fsp = self.payment_plan.financial_service_provider
         _, ws_fsp = export_service.open_workbook(fsp.name)
-        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
+        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism)
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         self.assertEqual(
             len(template_column_list),
@@ -516,12 +471,12 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         fsp_xlsx_template.refresh_from_db()
 
         _, ws_fsp = export_service.open_workbook(fsp.name)
-        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism_per_payment_plan.delivery_mechanism)
+        fsp_xlsx_template = export_service.get_template(fsp, delivery_mechanism)
 
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         fsp_xlsx_template.refresh_from_db()
         # remove for people 'household_unicef_id' core_field
-        self.assertEqual(len(template_column_list), 29)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +3 core fields
+        self.assertEqual(len(template_column_list), 31)  # DEFAULT_COLUMNS -hh_id and -hh_size +ind_id +3 core fields
         self.assertNotIn("household_id", template_column_list)
         self.assertNotIn("household_size", template_column_list)
         self.assertIn("individual_id", template_column_list)

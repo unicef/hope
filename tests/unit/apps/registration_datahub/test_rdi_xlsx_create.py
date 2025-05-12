@@ -46,7 +46,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
 )
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -573,31 +573,31 @@ class TestRdiXlsxCreateTask(TestCase):
     def test_create_delivery_mechanism_data(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
-        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 3)
+        self.assertEqual(PendingAccount.objects.count(), 3)
 
-        dmd1 = PendingDeliveryMechanismData.objects.get(individual__detail_id=3)
-        dmd2 = PendingDeliveryMechanismData.objects.get(individual__detail_id=4)
-        dmd3 = PendingDeliveryMechanismData.objects.get(individual__detail_id=5)
+        dmd1 = PendingAccount.objects.get(individual__detail_id=3)
+        dmd2 = PendingAccount.objects.get(individual__detail_id=4)
+        dmd3 = PendingAccount.objects.get(individual__detail_id=5)
         self.assertEqual(dmd1.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(dmd2.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
             dmd1.data,
-            {"card_number__atm_card": "164260858", "card_expiry_date__atm_card": "1995-06-03T00:00:00"},
+            {"card_number": "164260858", "card_expiry_date": "1995-06-03T00:00:00"},
         )
         self.assertEqual(
             dmd2.data,
             {
-                "card_number__atm_card": "1975549730",
-                "card_expiry_date__atm_card": "2022-02-17T00:00:00",
-                "name_of_cardholder__atm_card": "Name1",
+                "card_number": "1975549730",
+                "card_expiry_date": "2022-02-17T00:00:00",
+                "name_of_cardholder": "Name1",
             },
         )
         self.assertEqual(
             dmd3.data,
             {
-                "card_number__atm_card": "870567340",
-                "card_expiry_date__atm_card": "2016-06-27T00:00:00",
-                "name_of_cardholder__atm_card": "Name2",
+                "card_number": "870567340",
+                "card_expiry_date": "2016-06-27T00:00:00",
+                "name_of_cardholder": "Name2",
             },
         )

@@ -20,6 +20,7 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
 import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -33,7 +34,7 @@ export interface EditIndividualDataChangeProps {
   field;
 }
 
-export function EditIndividualDataChange({
+function EditIndividualDataChange({
   values,
   setFieldValue,
 }: EditIndividualDataChangeProps): ReactElement {
@@ -46,7 +47,7 @@ export function EditIndividualDataChange({
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
   const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } =
-    useAllAddIndividualFieldsQuery();
+    useAllAddIndividualFieldsQuery({ fetchPolicy: 'network-only' });
 
   const [
     getIndividual,
@@ -97,43 +98,41 @@ export function EditIndividualDataChange({
           <Title>
             <Typography variant="h6">{t('Bio Data')}</Typography>
           </Title>
-          <Grid container spacing={3}>
-            <FieldArray
-              name="individualDataUpdateFields"
-              render={(arrayHelpers) => (
-                <>
-                  {values.individualDataUpdateFields.map((item, index) => (
-                    <EditIndividualDataChangeFieldRow
-                      // eslint-disable-next-line react/no-array-index-key
-                      key={`${index}-${item?.fieldName}`}
-                      itemValue={item}
-                      index={index}
-                      individual={fullIndividual.individual}
-                      fields={
-                        addIndividualFieldsData.allAddIndividualsFieldsAttributes
-                      }
-                      notAvailableFields={notAvailableItems}
-                      onDelete={() => arrayHelpers.remove(index)}
-                      values={values}
-                    />
-                  ))}
-                  <Grid size={{ xs: 4 }}>
-                    <Button
-                      color="primary"
-                      onClick={() => {
-                        arrayHelpers.push({ fieldName: null, fieldValue: '' });
-                      }}
-                      startIcon={<AddCircleOutline />}
-                      data-cy="button-add-new-field"
-                      disabled={isEditTicket}
-                    >
-                      {t('Add new field')}
-                    </Button>
-                  </Grid>
-                </>
-              )}
-            />
-          </Grid>
+          <FieldArray
+            name="individualDataUpdateFields"
+            render={(arrayHelpers) => (
+              <>
+                {values.individualDataUpdateFields.map((item, index) => (
+                  <EditIndividualDataChangeFieldRow
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${index}-${item?.fieldName}`}
+                    itemValue={item}
+                    index={index}
+                    individual={fullIndividual.individual}
+                    fields={
+                      addIndividualFieldsData.allAddIndividualsFieldsAttributes
+                    }
+                    notAvailableFields={notAvailableItems}
+                    onDelete={() => arrayHelpers.remove(index)}
+                    values={values}
+                  />
+                ))}
+                <Grid size={{ xs: 4 }}>
+                  <Button
+                    color="primary"
+                    onClick={() => {
+                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                    }}
+                    startIcon={<AddCircleOutline />}
+                    data-cy="button-add-new-field"
+                    disabled={isEditTicket}
+                  >
+                    {t('Add new field')}
+                  </Button>
+                </Grid>
+              </>
+            )}
+          />
         </BoxWithBorders>
       )}
       <BoxWithBorders>
@@ -195,3 +194,8 @@ export function EditIndividualDataChange({
     </>
   );
 }
+
+export default withErrorBoundary(
+  EditIndividualDataChange,
+  'EditIndividualDataChange',
+);

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -10,18 +10,17 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { useAccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { CommunicationDetails } from '@components/accountability/Communication/CommunicationDetails';
-import { CommunicationMessageDetails } from '@components/accountability/Communication/CommunicationMessageDetails';
-import { RecipientsTable } from '../../../tables/Communication/RecipientsTable/RecipientsTable';
+import RecipientsTable from '../../../tables/Communication/RecipientsTable/RecipientsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import CommunicationMessageDetails from '@components/accountability/Communication/CommunicationMessageDetails';
+import CommunicationDetails from '@components/accountability/Communication/CommunicationDetails';
 
-export function CommunicationDetailsPage(): ReactElement {
+function CommunicationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const location = useLocation();
   const { baseUrl } = useBaseUrl();
   const { data, loading, error } = useAccountabilityCommunicationMessageQuery({
     variables: { id },
@@ -44,14 +43,7 @@ export function CommunicationDetailsPage(): ReactElement {
     },
   ];
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'CommunicationDetailsPage.tsx');
-      }}
-      componentName="CommunicationDetailsPage"
-    >
+    <>
       <PageHeader
         title={`${message.unicefId}`}
         breadCrumbs={
@@ -79,6 +71,11 @@ export function CommunicationDetailsPage(): ReactElement {
           permissions,
         ) && <UniversalActivityLogTable objectId={id} />}
       </Box>
-    </UniversalErrorBoundary>
+    </>
   );
 }
+
+export default withErrorBoundary(
+  CommunicationDetailsPage,
+  'CommunicationDetailsPage',
+);

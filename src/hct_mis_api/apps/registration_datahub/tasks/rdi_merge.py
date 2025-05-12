@@ -1,16 +1,12 @@
 import contextlib
 import logging
-from typing import Iterable, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketIndividualDataUpdateDetails,
-)
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
@@ -29,10 +25,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanismData,
-    PendingDeliveryMechanismData,
-)
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
@@ -88,6 +81,8 @@ class RdiMergeTask:
         "male_age_group_12_17_disabled_count",
         "male_age_group_18_59_disabled_count",
         "male_age_group_60_disabled_count",
+        "other_sex_group_count",
+        "unknown_sex_group_count",
         "first_registration_date",
         "last_registration_date",
         "flex_fields",
@@ -150,84 +145,6 @@ class RdiMergeTask:
         "wallet_address",
     )
 
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if record := imported_household.flex_registrations_record:
-    #             household_data["registration_id"] = str(record.registration)
-
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if enumerator_rec_id := imported_household.enumerator_rec_id:
-    #             household_data["enumerator_rec_id"] = enumerator_rec_id
-
-    def _create_grievance_ticket_for_delivery_mechanisms_errors(
-        self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
-    ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
-        comments = f"This is a system generated ticket for RDI {obj_hct}"
-        grievance_ticket = GrievanceTicket(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=delivery_mechanism_data.individual.household.admin2,
-            business_area=obj_hct.business_area,
-            registration_data_import=obj_hct,
-            description=description,
-            comments=comments,
-        )
-        individual_data_with_approve_status = delivery_mechanism_data.get_grievance_ticket_payload_for_errors()
-        individual_data_update_ticket = TicketIndividualDataUpdateDetails(
-            individual_data={"delivery_mechanism_data_to_edit": [individual_data_with_approve_status]},
-            individual=delivery_mechanism_data.individual,
-            ticket=grievance_ticket,
-        )
-
-        return grievance_ticket, individual_data_update_ticket
-
-    def _create_grievance_tickets_for_delivery_mechanisms_errors(
-        self, delivery_mechanisms_data: Iterable[PendingDeliveryMechanismData], obj_hct: RegistrationDataImport
-    ) -> None:
-        grievance_tickets_to_create = []
-        individual_data_update_tickets_to_create = []
-        for delivery_mechanism_data in delivery_mechanisms_data:
-            delivery_mechanism_data.validate()
-            if not delivery_mechanism_data.is_valid:
-                description = (
-                    f"Missing required fields {list(delivery_mechanism_data.validation_errors.keys())}"
-                    f" values for delivery mechanism {delivery_mechanism_data.delivery_mechanism}"
-                )
-                (
-                    grievance_ticket,
-                    individual_data_update_ticket,
-                ) = self._create_grievance_ticket_for_delivery_mechanisms_errors(
-                    delivery_mechanism_data, obj_hct, description
-                )
-                grievance_tickets_to_create.append(grievance_ticket)
-                individual_data_update_tickets_to_create.append(individual_data_update_ticket)
-
-            else:
-                delivery_mechanism_data.update_unique_field()
-                if not delivery_mechanism_data.is_valid:
-                    description = (
-                        f"Fields not unique {list(delivery_mechanism_data.validation_errors.keys())} across program"
-                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism.name}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
-                    )
-                    (
-                        grievance_ticket,
-                        individual_data_update_ticket,
-                    ) = self._create_grievance_ticket_for_delivery_mechanisms_errors(
-                        delivery_mechanism_data, obj_hct, description
-                    )
-                    grievance_tickets_to_create.append(grievance_ticket)
-                    individual_data_update_tickets_to_create.append(individual_data_update_ticket)
-            delivery_mechanism_data.save()
-
-        if grievance_tickets_to_create:
-            GrievanceTicket.objects.bulk_create(grievance_tickets_to_create)
-            TicketIndividualDataUpdateDetails.objects.bulk_create(individual_data_update_tickets_to_create)
-            for grievance_ticket in grievance_tickets_to_create:
-                grievance_ticket.programs.add(obj_hct.program)
-
-            logger.info(
-                f"RDI:{obj_hct} Created {len(grievance_tickets_to_create)} delivery mechanisms error grievance tickets"
-            )
-
     def execute(self, registration_data_import_id: str) -> None:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -262,21 +179,15 @@ class RdiMergeTask:
                     if kobo_submissions:
                         KoboImportedSubmission.objects.bulk_create(kobo_submissions)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
-
-                    # DEDUPLICATION
-
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
 
-                    imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
+                    dmds = PendingAccount.objects.filter(
                         individual_id__in=individual_ids,
                     )
-                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
-                        imported_delivery_mechanism_data, obj_hct
-                    )
-
-                    imported_delivery_mechanism_data.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingAccount.validate_uniqueness(dmds)
+                    dmds.update(rdi_merge_status=MergeStatusModel.MERGED)
                     PendingIndividualRoleInHousehold.objects.filter(
                         household_id__in=household_ids, individual_id__in=individual_ids
                     ).update(rdi_merge_status=MergeStatusModel.MERGED)
@@ -308,6 +219,7 @@ class RdiMergeTask:
                     )
 
                     if not obj_hct.business_area.postpone_deduplication:
+                        # DEDUPLICATION
                         DeduplicateTask(
                             obj_hct.business_area.slug, obj_hct.program.id
                         ).deduplicate_individuals_against_population(individuals)
@@ -408,7 +320,7 @@ class RdiMergeTask:
                         cache.delete(key)
 
         except Exception as e:
-            logger.error(e)
+            logger.warning(e)
             raise
 
     def _update_household_collections(self, households: list, rdi: RegistrationDataImport) -> None:

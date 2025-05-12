@@ -4,6 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid2 as Grid,
   IconButton,
   Table,
   TableBody,
@@ -17,13 +18,18 @@ import { Delete, Edit } from '@mui/icons-material';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
-import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
+import {
+  TargetingCriteriaRuleObjectType,
+  useAvailableFspsForDeliveryMechanismsQuery,
+} from '@generated/graphql';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { LabelizedField } from '@components/core/LabelizedField';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -251,6 +257,10 @@ interface CriteriaProps {
   allCollectorFieldsChoicesDict;
   householdIds: string;
   individualIds: string;
+  deliveryMechanism;
+  financialServiceProvider;
+  criteriaIndex: number;
+  criteria;
 }
 
 export function Criteria({
@@ -266,8 +276,17 @@ export function Criteria({
   collectorsFiltersBlocks,
   householdIds,
   individualIds,
+  deliveryMechanism,
+  financialServiceProvider,
+  criteriaIndex,
+  criteria,
 }: CriteriaProps): ReactElement {
   const { selectedProgram } = useProgramContext();
+  const [deliveryMechanismToDisplay, setDeliveryMechanismToDisplay] =
+    useState('');
+  const [fspToDisplay, setFspToDisplay] = useState('');
+  const { data: availableFspsForDeliveryMechanismData } =
+    useAvailableFspsForDeliveryMechanismsQuery();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openHH, setOpenHH] = useState(false);
   const [openIND, setOpenIND] = useState(false);
@@ -279,6 +298,48 @@ export function Criteria({
   const [rowsPerPageHH, setRowsPerPageHH] = useState(5);
   const [pageIND, setPageIND] = useState(0);
   const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
+
+  useEffect(() => {
+    const mappedDeliveryMechanisms =
+      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms?.map(
+        (el) => ({
+          name: el.deliveryMechanism.name,
+          value: el.deliveryMechanism.code,
+        }),
+      );
+
+    const deliveryMechanismName =
+      deliveryMechanism?.name ||
+      mappedDeliveryMechanisms?.find(
+        (el) => el.value === criteria.deliveryMechanism,
+      )?.name;
+
+    const mappedFsps =
+      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms
+        ?.find(
+          (el) =>
+            el.deliveryMechanism.code === deliveryMechanism ||
+            el.deliveryMechanism.code ===
+              mappedDeliveryMechanisms?.find(
+                (elem) => elem.value === criteria.deliveryMechanism,
+              )?.value,
+        )
+        ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
+
+    const fspName =
+      financialServiceProvider?.name ||
+      mappedFsps?.find((el) => el.value === criteria.fsp)?.name;
+
+    setDeliveryMechanismToDisplay(deliveryMechanismName);
+    setFspToDisplay(fspName);
+  }, [
+    deliveryMechanism,
+    financialServiceProvider,
+    availableFspsForDeliveryMechanismData,
+    criteria,
+  ]);
+
+  if (!availableFspsForDeliveryMechanismData) return null;
 
   const handleChangePageHH = (_event, newPage) => {
     setPageHH(newPage);
@@ -326,6 +387,19 @@ export function Criteria({
 
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
+      {deliveryMechanismToDisplay && criteriaIndex === 0 && (
+        <Grid container>
+          <Grid size={{ xs: 6 }}>
+            <LabelizedField
+              label={t('Delivery Mechanism')}
+              value={deliveryMechanismToDisplay}
+            />
+          </Grid>
+          <Grid size={{ xs: 6 }}>
+            <LabelizedField label={t('FSP')} value={fspToDisplay} />
+          </Grid>
+        </Grid>
+      )}
       {householdIds && (
         <div>
           <Typography data-cy="household-ids-modal-title" variant="body1">
@@ -492,3 +566,5 @@ export function Criteria({
     </CriteriaElement>
   );
 }
+
+export default withErrorBoundary(Criteria, 'Criteria');

@@ -67,7 +67,7 @@ class IndividualDocument(Document):
         }
     )
     program_id = fields.KeywordField(attr="program.id")
-    registration_id = fields.TextField()
+    detail_id = fields.TextField()
     program_registration_id = fields.TextField()
     bank_account_info = fields.ObjectField(properties={"bank_account_number": fields.TextField()})
     registration_data_import_id = fields.KeywordField(attr="registration_data_import.id")
@@ -191,7 +191,7 @@ class HouseholdDocument(Document):
     admin2 = fields.TextField(index_prefixes={"min_chars": 1, "max_chars": 10})
     business_area = fields.KeywordField(similarity="boolean")
     program_id = fields.KeywordField(attr="program.id")
-    registration_id = fields.TextField()
+    detail_id = fields.TextField()
     program_registration_id = fields.TextField()
 
     def prepare_admin1(self, household: Household) -> Optional[str]:

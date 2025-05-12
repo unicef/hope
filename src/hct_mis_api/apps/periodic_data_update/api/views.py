@@ -114,7 +114,7 @@ class PeriodicDataUpdateTemplateViewSet(
         if not pdu_template.number_of_records:
             raise ValidationError("Template has no records")
         if not pdu_template.file:
-            logger.error(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
+            logger.warning(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
 
         return FileResponse(

@@ -88,6 +88,7 @@ class TargetingCreate(BaseComponents):
     programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
     selectRefugee = 'li[data-cy="select-option-REFUGEE"]'
     fieldChooser = 'data-cy="field-chooser-householdsFiltersBlocks[{}]"'
+    noValidationFspAccept = 'button[data-cy="button-confirm"]'
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -335,3 +336,6 @@ class TargetingCreate(BaseComponents):
 
     def getFieldChooser(self, num: int) -> WebElement:
         return self.wait_for(self.fieldChooser.format(str(num)))
+
+    def getNoValidationFspAccept(self) -> WebElement:
+        return self.wait_for(self.noValidationFspAccept)

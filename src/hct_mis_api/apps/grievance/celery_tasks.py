@@ -33,7 +33,7 @@ def deduplicate_and_check_against_sanctions_list_task(
 
         DeduplicateAndCheckAgainstSanctionsListTask().execute(should_populate_index, individuals_ids)
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         raise self.retry(exc=e)
 
 

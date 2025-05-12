@@ -1,4 +1,10 @@
-import { Box, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Grid2 as Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
 import { PaymentPlanQuery } from '@generated/graphql';
@@ -12,13 +18,14 @@ import { FieldBorder } from '@core/FieldBorder';
 import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 import { Info } from '@mui/icons-material';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentPlanDetailsProps {
   baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const PaymentPlanDetails = ({
+const PaymentPlanDetails = ({
   baseUrl,
   paymentPlan,
 }: PaymentPlanDetailsProps): ReactElement => {
@@ -127,3 +134,5 @@ export const PaymentPlanDetails = ({
     </Grid>
   );
 };
+
+export default withErrorBoundary(PaymentPlanDetails, 'PaymentPlanDetails');

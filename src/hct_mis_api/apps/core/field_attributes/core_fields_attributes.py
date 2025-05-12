@@ -32,7 +32,6 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
     _INDIVIDUAL,
     TEMPLATE_HOH,
@@ -1446,6 +1445,32 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
     },
     {
+        "id": "c780a74c-0242-4412-b735-768f7715dfbf",
+        "type": TYPE_INTEGER,
+        "name": "other_sex_group_count",
+        "lookup": "other_sex_group_count",
+        "required": False,
+        "label": {"English(EN)": "Gender group with other sex"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "other_sex_group_h_c",
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+    },
+    {
+        "id": "355ab713-c94f-4083-9cb8-8da4d6e6ba48",
+        "type": TYPE_INTEGER,
+        "name": "unknown_sex_group_count",
+        "lookup": "unknown_sex_group_count",
+        "required": False,
+        "label": {"English(EN)": "Gender group with unknown sex"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "unknown_sex_group_h_c",
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+    },
+    {
         "id": "b2593385-5a81-452e-ae9a-28292e35714b",
         "type": TYPE_BOOL,
         "name": "pregnant",
@@ -1959,7 +1984,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin_area_h_c",
-        "scope": [Scope.HOUSEHOLD_UPDATE],
+        "scope": [Scope.HOUSEHOLD_UPDATE, Scope.PEOPLE_UPDATE],
         "snapshot_field": "admin_area_id__p_code",
     },
     {
@@ -2158,9 +2183,7 @@ CORE_FIELDS_ATTRIBUTES = [
 
 
 def get_core_fields_attributes() -> List[Dict[str, Any]]:
-    from hct_mis_api.apps.payment.models import DeliveryMechanism
-
-    return CORE_FIELDS_ATTRIBUTES + DeliveryMechanism.get_all_core_fields_definitions()
+    return CORE_FIELDS_ATTRIBUTES
 
 
 class FieldFactory(list):
@@ -2188,7 +2211,11 @@ class FieldFactory(list):
         label_with_template = field["label"].get(language)
         if not label_with_template:
             return None
-        mapping_dict = TEMPLATE_MAPPING_NORMAL if Scope.XLSX_PEOPLE not in self.scopes else TEMPLATE_MAPPING_PEOPLE
+        mapping_dict = (
+            TEMPLATE_MAPPING_PEOPLE
+            if Scope.XLSX_PEOPLE in self.scopes or Scope.PEOPLE_UPDATE in self.scopes
+            else TEMPLATE_MAPPING_NORMAL
+        )
         for mapping in mapping_dict.items():
             label_with_template = label_with_template.replace(mapping[0], mapping[1])
         field["label"][language] = label_with_template
@@ -2254,9 +2281,6 @@ class FieldFactory(list):
 
     def associated_with_individual(self) -> "FieldFactory":
         return self._associated_with([_INDIVIDUAL])
-
-    def associated_with_individual_with_delivery_mechanism_data(self) -> "FieldFactory":
-        return self._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA])
 
     def associated_with_household(self) -> "FieldFactory":
         return self._associated_with([_HOUSEHOLD])

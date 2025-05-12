@@ -7,6 +7,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -19,12 +20,12 @@ interface CommunicationMessageDetailsProps {
   message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];
 }
 
-export const CommunicationMessageDetails = ({
+const CommunicationMessageDetails = ({
   message,
 }: CommunicationMessageDetailsProps): ReactElement => {
   const { t } = useTranslation();
   return (
-    <Grid size={{ xs:8 }} data-cy="communication-message-details">
+    <Grid size={{ xs: 8 }} data-cy="communication-message-details">
       <Box p={5}>
         <StyledBox>
           <Title>
@@ -57,3 +58,8 @@ export const CommunicationMessageDetails = ({
     </Grid>
   );
 };
+
+export default withErrorBoundary(
+  CommunicationMessageDetails,
+  'CommunicationMessageDetails',
+);

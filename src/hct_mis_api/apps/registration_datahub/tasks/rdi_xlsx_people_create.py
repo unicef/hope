@@ -23,7 +23,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
@@ -49,9 +49,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self.index_id: Optional[int] = None
         self.households_to_update = []
         self.COMBINED_FIELDS: Dict = {
-            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM])
-            .apply_business_area()
-            .to_dict_by("xlsx_field"),
+            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
             **serialize_flex_attributes()["individuals"],
         }
 
@@ -88,8 +86,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
         for cell, header_cell in zip(row, first_row):
             try:
-                if header_cell in self._pdu_column_names:
+                if header_cell.value in self._pdu_column_names:
                     continue
+                elif header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
+                    self._handle_delivery_mechanism_fields(cell.value, header_cell.value, cell.row, obj_to_create)
+                    continue
+
                 header = header_cell.value
                 combined_fields = self.COMBINED_FIELDS
                 current_field = combined_fields.get(header, {})
@@ -194,8 +196,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             self.individuals.append(obj_to_create)
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
-        delivery_mechanism_xlsx_fields = DeliveryMechanismData.get_scope_delivery_mechanisms_fields(by="xlsx_field")
-
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "pp_photo_i_c": self._handle_image_field,
@@ -226,9 +226,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 "pp_first_registration_date_i_c": self._handle_datetime,
             },
         }
-        complex_fields["individuals"].update(
-            {f"pp_{field}": self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
-        )
         document_complex_types: Dict[str, Callable] = {}
         for document_type in DocumentType.objects.all():
             document_complex_types[f"pp_{document_type.key}_i_c"] = self._handle_document_fields
@@ -284,7 +281,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_identities()
         self._create_collectors()
         self._create_bank_accounts_infos()
-        self._create_delivery_mechanisms_data()
+        self._create_accounts()
 
     @transaction.atomic()
     def execute(

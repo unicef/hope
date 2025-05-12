@@ -1,9 +1,12 @@
 import factory.fuzzy
 from factory.django import DjangoModelFactory
+from faker import Faker
 from pytz import utc
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.contrib.vision.models import FundsCommitment
+
+fake = Faker()
 
 
 class FundsCommitmentFactory(DjangoModelFactory):
@@ -11,7 +14,9 @@ class FundsCommitmentFactory(DjangoModelFactory):
         model = FundsCommitment
 
     rec_serial_number = factory.fuzzy.FuzzyInteger(1000, 99999999)
-    business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first().cash_assist_code)
+    funds_commitment_item = factory.LazyFunction(lambda: f"{fake.random_int(min=1, max=999):03d}")
+
+    office = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     document_type = "DO"
     currency_code = factory.Faker("currency_code")
 

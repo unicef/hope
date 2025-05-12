@@ -12,6 +12,7 @@ import { decodeIdString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpRegistrationDataImportTableHeadCellsCommunication';
 import { LookUpRegistrationDataImportTableRowCommunication } from './LookUpRegistrationDataImportTableRowCommunication';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpRegistrationDataImportTableCommunicationProps {
   filter;
@@ -30,7 +31,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export function LookUpRegistrationDataImportTableCommunication({
+function LookUpRegistrationDataImportTableCommunication({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -102,3 +103,8 @@ export function LookUpRegistrationDataImportTableCommunication({
     renderTable()
   );
 }
+
+export default withErrorBoundary(
+  LookUpRegistrationDataImportTableCommunication,
+  'LookUpRegistrationDataImportTableCommunication',
+);

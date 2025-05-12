@@ -171,24 +171,19 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   importedFileName: '',
   totalEntitledQuantityUsd: 424,
   paymentsConflictsCount: 0,
-  deliveryMechanisms: [
-    {
+  deliveryMechanism: {
       id: 'RGVsaXZlcnlNZWNoYW5pc21QZXJQYXltZW50UGxhbk5vZGU6Y2JjN2IyZDMtZmQ5ZC00YWE1LWFjZWMtNWU4MmEzNjU0MDdm',
       name: 'Cash',
       code: 'cash',
-      order: 1,
-      sentToPaymentGateway: false,
-      chosenConfiguration: '',
-      fsp: {
-        id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=',
-        name: 'Test FSP 1',
-        communicationChannel: 'XLSX',
-        isPaymentGateway: false,
-        __typename: 'FinancialServiceProviderNode',
-      },
-      __typename: 'DeliveryMechanismPerPaymentPlanNode',
-    },
-  ],
+      __typename: 'DeliveryMechanismNode',
+  },
+  financialServiceProvider: {
+      id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=',
+      name: 'Test FSP 1',
+      communicationChannel: 'XLSX',
+      isPaymentGateway: false,
+      __typename: 'FinancialServiceProviderNode',
+  },
   canSendToPaymentGateway: false,
   canSplit: true,
   splitChoices: [
@@ -223,7 +218,6 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
       deliveryMechanism: {
         id: 'RGVsaXZlcnlNZWNoYW5pc21QZXJQYXltZW50UGxhbk5vZGU6Y2JjN2IyZDMtZmQ5ZC00YWE1LWFjZWMtNWU4MmEzNjU0MDdm',
         name: 'Cash',
-        order: 1,
         fsp: {
           id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC1mMDAwMDAwMDAwMDE=',
           name: 'Test FSP 1',

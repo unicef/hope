@@ -62,7 +62,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             flex_fields_task.import_xls(xlsx_kobo_template_object.file)
             self._save_message_status_template_id(xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, asset_uid)
         except requests.exceptions.RequestException as e:
-            logger.exception("Import template to Kobo Exception")
+            logger.warning("Import template to Kobo Exception")
             if e.response is not None and 400 <= e.response.status_code < 500:
                 self._save_message_status_template_id(
                     xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
@@ -78,5 +78,5 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             self._save_message_status_template_id(
                 xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
             )
-            logger.exception(e)
+            logger.warning(e)
             raise e

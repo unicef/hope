@@ -82,7 +82,6 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
         household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
         household_one.program = program_one
-        household_one.programs.add(program_one)
 
         cls.individual = IndividualFactory(household=household_one, program=program_one)
         national_id_type = DocumentType.objects.get(

@@ -7,6 +7,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   getTargetingCriteriaVariables,
@@ -15,34 +16,63 @@ import {
   IndIdValidation,
 } from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import { Exclusions } from '../CreateTargetPopulation/Exclusions';
+import Exclusions from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
-import { AddFilterTargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
-import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
-import { ReactElement } from 'react';
+import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import EditTargetPopulationHeader from './EditTargetPopulationHeader';
 
 interface EditTargetPopulationProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   screenBeneficiary: boolean;
 }
 
-export const EditTargetPopulation = ({
+type TargetingCriteriaRuleNodeExtended = {
+  __typename: 'TargetingCriteriaRuleNode';
+  id: any;
+  householdIds: string;
+  individualIds: string;
+  individualsFiltersBlocks?: {
+    __typename: 'TargetingIndividualRuleFilterBlockNode';
+    individualBlockFilters?: {
+      // Define the properties of individualBlockFilters here
+    }[];
+  }[];
+  collectorsFiltersBlocks: {
+    // Define the properties of collectorsFiltersBlocks here
+  }[];
+  householdsFiltersBlocks?: {
+    // Define the properties of householdsFiltersBlocks here
+  }[];
+  deliveryMechanism?: string;
+  fsp?: string;
+};
+
+const EditTargetPopulation = ({
   paymentPlan,
   screenBeneficiary,
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  //UPDATE PP MUTATION
+  const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
+    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
+
+  if (targetingCriteriaCopy.length > 0) {
+    targetingCriteriaCopy[0].deliveryMechanism =
+      paymentPlan.deliveryMechanism?.code;
+    targetingCriteriaCopy[0].fsp = paymentPlan.financialServiceProvider?.id;
+  }
+
   const initialValues = {
     id: paymentPlan.id,
     name: paymentPlan.name || '',
     program: paymentPlan.program?.id || '',
-    targetingCriteria: paymentPlan.targetingCriteria.rules || [],
+    targetingCriteria: targetingCriteriaCopy || [],
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
@@ -92,6 +122,8 @@ export const EditTargetPopulation = ({
       await mutate({
         variables: {
           paymentPlanId: values.id,
+          fspId: values.targetingCriteria[0]?.fsp,
+          deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
           excludedIds: values.excludedIds,
           exclusionReason: values.exclusionReason,
           programCycleId: values.programCycleId.value,
@@ -136,7 +168,7 @@ export const EditTargetPopulation = ({
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
             <Grid container mb={5}>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
@@ -150,7 +182,7 @@ export const EditTargetPopulation = ({
               </Grid>
             </Grid>
             <Grid container>
-              <Grid size={{ xs:6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Field
                   name="name"
                   label={t('Target Population Name')}
@@ -176,6 +208,7 @@ export const EditTargetPopulation = ({
                   screenBeneficiary={screenBeneficiary}
                   isStandardDctType={isStandardDctType}
                   isSocialDctType={isSocialDctType}
+                  targetPopulation={paymentPlan}
                   data-cy="add-filter-targeting-criteria-display"
                 />
               )}
@@ -209,3 +242,5 @@ export const EditTargetPopulation = ({
     </Formik>
   );
 };
+
+export default withErrorBoundary(EditTargetPopulation, 'EditTargetPopulation');

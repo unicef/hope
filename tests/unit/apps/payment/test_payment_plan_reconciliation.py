@@ -43,9 +43,8 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     payment_plan_apply_engine_rule,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -57,6 +56,7 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -167,7 +167,7 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
     chooseDeliveryMechanismsForPaymentPlan(input: $input) {
         paymentPlan {
             id
-            deliveryMechanisms {
+            deliveryMechanism {
                 order
                 name
             }
@@ -177,9 +177,12 @@ mutation ChooseDeliveryMechanismsForPaymentPlan($input: ChooseDeliveryMechanisms
 """
 
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
-    availableFspsForDeliveryMechanisms(input: $input) {
-        deliveryMechanism
+query AvailableFspsForDeliveryMechanisms {
+    availableFspsForDeliveryMechanisms {
+        deliveryMechanism {
+            name
+            code
+        }
         fsps {
             id
             name
@@ -196,7 +199,7 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
     }) {
         paymentPlan {
             id
-            deliveryMechanisms {
+            deliveryMechanism {
                 name
                 order
                 fsp {
@@ -380,6 +383,47 @@ class TestPaymentPlanReconciliation(APITestCase):
         household_3, individual_3 = self.create_household_and_individual(program)
         household_3.refresh_from_db()
 
+        account_type_bank = AccountType.objects.get(key="bank")
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
+
+        for ind in [individual_1, individual_2, individual_3]:
+            AccountFactory(individual=ind, account_type=account_type_bank)
+
+        santander_fsp = FinancialServiceProviderFactory(
+            name="Santander",
+            distribution_limit=None,
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        )
+        santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
+        FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=santander_fsp, delivery_mechanism=dm_cash)
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=santander_fsp, delivery_mechanism=dm_transfer
+        )
+        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
+
+        available_fsps_query_response = self.graphql_request(
+            request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
+            context={"user": self.user},
+        )
+        assert "errors" not in available_fsps_query_response, available_fsps_query_response
+        available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
+        assert len(available_fsps_data) == 14
+
+        dm_cash_resp = next((dm for dm in available_fsps_data if dm["deliveryMechanism"]["code"] == dm_cash.code), None)
+        dm_transfer_resp = next(
+            (dm for dm in available_fsps_data if dm["deliveryMechanism"]["code"] == dm_transfer.code), None
+        )
+
+        assert dm_cash_resp is not None
+        assert dm_transfer_resp is not None
+        assert dm_cash_resp["fsps"][0]["name"] == santander_fsp.name
+        assert dm_cash_resp["deliveryMechanism"]["name"] == dm_cash.name
+        assert dm_cash_resp["deliveryMechanism"]["code"] == dm_cash.code
+        assert dm_transfer_resp["fsps"][0]["name"] == santander_fsp.name
+        assert dm_transfer_resp["deliveryMechanism"]["name"] == dm_transfer.name
+        assert dm_transfer_resp["deliveryMechanism"]["code"] == dm_transfer.code
+
         with patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
@@ -404,6 +448,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                                 }
                             ],
                         },
+                        "fspId": encoded_santander_fsp_id,
+                        "deliveryMechanismCode": dm_cash.code,
                     },
                 },
             )
@@ -465,34 +511,21 @@ class TestPaymentPlanReconciliation(APITestCase):
         # check if Cycle is active
         assert ProgramCycle.objects.filter(title="NEW NEW NAME").first().status == "ACTIVE"
 
-        dm_cash = DeliveryMechanism.objects.get(code="cash")
-        dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
-
-        santander_fsp = FinancialServiceProviderFactory(
-            name="Santander",
-            distribution_limit=None,
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        )
-        santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
-        FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=santander_fsp, delivery_mechanism=dm_cash)
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=dm_transfer
-        )
-        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
-
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         payment = PaymentFactory(
             parent=payment_plan,
+            parent_split=payment_plan.splits.first(),
             business_area=self.business_area,
             household=self.household_1,
             collector=self.individual_1,
-            delivery_type=None,
+            delivery_type=dm_cash,
             entitlement_quantity=1000,
             entitlement_quantity_usd=100,
             delivered_quantity=None,
             delivered_quantity_usd=None,
-            financial_service_provider=None,
+            financial_service_provider=santander_fsp,
             currency="PLN",
+            has_valid_wallet=True,
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
         create_payment_plan_snapshot_data(payment_plan)
@@ -537,52 +570,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         payment.refresh_from_db()
         self.assertEqual(payment.entitlement_quantity, 500)
 
-        choose_dms_response = self.graphql_request(
-            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
-            variables=dict(
-                input=dict(
-                    paymentPlanId=encoded_payment_plan_id,
-                    deliveryMechanisms=[
-                        dm_cash.code,
-                    ],
-                )
-            ),
-        )
-        assert "errors" not in choose_dms_response, choose_dms_response
-
-        available_fsps_query_response = self.graphql_request(
-            request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
-            context={"user": self.user},
-            variables=dict(
-                input={
-                    "paymentPlanId": encoded_payment_plan_id,
-                }
-            ),
-        )
-        assert "errors" not in available_fsps_query_response, available_fsps_query_response
-        available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
-        assert len(available_fsps_data) == 1
-        fsps = available_fsps_data[0]["fsps"]
-        assert len(fsps) > 0
-        assert fsps[0]["name"] == santander_fsp.name
-
-        assign_fsp_mutation_response = self.graphql_request(
-            request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": encoded_payment_plan_id,
-                "mappings": [
-                    {
-                        "deliveryMechanism": dm_cash.code,
-                        "fspId": encoded_santander_fsp_id,
-                        "order": 1,
-                    }
-                ],
-            },
-        )
-        assert "errors" not in assign_fsp_mutation_response, assign_fsp_mutation_response
-
         lock_fsp_in_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
             context={"user": self.user},
@@ -597,21 +584,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertEqual(
             lock_fsp_in_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"],
             "LOCKED_FSP",
-        )
-
-        payment_plan.refresh_from_db()
-        assert (
-            payment_plan.delivery_mechanisms.filter(
-                financial_service_provider=santander_fsp, delivery_mechanism=dm_cash
-            ).count()
-            == 1
-        )
-        assert (
-            payment_plan.eligible_payments.filter(
-                financial_service_provider__isnull=False,
-                delivery_type__isnull=False,
-            ).count()
-            == 4
         )
 
         send_for_approval_payment_plan_response = self.graphql_request(
@@ -738,27 +710,29 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(sheet.cell(row=2, column=5).value, None)
             self.assertEqual(sheet.cell(row=1, column=6).value, "alternate_collector_given_name")
             self.assertEqual(sheet.cell(row=2, column=6).value, None)
-            self.assertEqual(sheet.cell(row=1, column=7).value, "alternate_collector_middle_name")
+            self.assertEqual(sheet.cell(row=1, column=7).value, "alternate_collector_family_name")
             self.assertEqual(sheet.cell(row=2, column=7).value, None)
-            self.assertEqual(sheet.cell(row=1, column=8).value, "alternate_collector_phone_no")
+            self.assertEqual(sheet.cell(row=1, column=8).value, "alternate_collector_middle_name")
             self.assertEqual(sheet.cell(row=2, column=8).value, None)
-            self.assertEqual(sheet.cell(row=1, column=9).value, "alternate_collector_document_numbers")
+            self.assertEqual(sheet.cell(row=1, column=9).value, "alternate_collector_phone_no")
             self.assertEqual(sheet.cell(row=2, column=9).value, None)
-            self.assertEqual(sheet.cell(row=1, column=10).value, "alternate_collector_sex")
+            self.assertEqual(sheet.cell(row=1, column=10).value, "alternate_collector_document_numbers")
             self.assertEqual(sheet.cell(row=2, column=10).value, None)
-            self.assertEqual(sheet.cell(row=1, column=11).value, "payment_channel")
-            self.assertEqual(sheet.cell(row=2, column=11).value, "Cash")
-            self.assertEqual(sheet.cell(row=1, column=12).value, "fsp_name")
-            self.assertEqual(sheet.cell(row=2, column=12).value, payment.financial_service_provider.name)
-            self.assertEqual(sheet.cell(row=1, column=13).value, "currency")
-            self.assertEqual(sheet.cell(row=2, column=13).value, payment.currency)
-            self.assertEqual(sheet.cell(row=1, column=14).value, "entitlement_quantity")
-            self.assertEqual(sheet.cell(row=2, column=14).value, payment.entitlement_quantity)
-            self.assertEqual(sheet.cell(row=1, column=15).value, "entitlement_quantity_usd")
-            self.assertEqual(sheet.cell(row=2, column=15).value, payment.entitlement_quantity_usd)
-            self.assertEqual(sheet.cell(row=1, column=16).value, "delivered_quantity")
-            self.assertEqual(sheet.cell(row=2, column=16).value, None)
-            self.assertEqual(sheet.cell(row=1, column=17).value, "delivery_date")
+            self.assertEqual(sheet.cell(row=1, column=11).value, "alternate_collector_sex")
+            self.assertEqual(sheet.cell(row=2, column=11).value, None)
+            self.assertEqual(sheet.cell(row=1, column=12).value, "payment_channel")
+            self.assertEqual(sheet.cell(row=2, column=12).value, "Cash")
+            self.assertEqual(sheet.cell(row=1, column=13).value, "fsp_name")
+            self.assertEqual(sheet.cell(row=2, column=13).value, payment.financial_service_provider.name)
+            self.assertEqual(sheet.cell(row=1, column=14).value, "currency")
+            self.assertEqual(sheet.cell(row=2, column=14).value, payment.currency)
+            self.assertEqual(sheet.cell(row=1, column=15).value, "entitlement_quantity")
+            self.assertEqual(sheet.cell(row=2, column=15).value, payment.entitlement_quantity)
+            self.assertEqual(sheet.cell(row=1, column=16).value, "entitlement_quantity_usd")
+            self.assertEqual(sheet.cell(row=2, column=16).value, payment.entitlement_quantity_usd)
+            self.assertEqual(sheet.cell(row=1, column=17).value, "delivered_quantity")
+            self.assertEqual(sheet.cell(row=2, column=17).value, None)
+            self.assertEqual(sheet.cell(row=1, column=18).value, "delivery_date")
             # self.assertEqual(sheet.cell(row=2, column=17).value, str(payment.delivery_date))
 
             payment.refresh_from_db()
@@ -1160,16 +1134,18 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     def test_correct_message_displayed_when_file_is_protected(self) -> None:
         content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_protected.xlsx").read_bytes()
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        financial_service_provider1 = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        )
+        financial_service_provider1.delivery_mechanisms.add(dm_cash)
         pp = PaymentPlanFactory(
             status=PaymentPlan.Status.ACCEPTED,
             created_by=self.user,
+            financial_service_provider=financial_service_provider1,
+            delivery_mechanism=dm_cash,
         )
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-            created_by=self.user,
-            sent_by=self.user,
-        )
+
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PER_FSP_MUTATION,
             context={"user": self.user},
@@ -1195,40 +1171,19 @@ class TestPaymentPlanReconciliation(APITestCase):
             },
         )
 
-    def test_assign_fsp_mutation_payment_plan_wrong_status(self) -> None:
-        payment_plan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN,
-            created_by=self.user,
-        )
-        fsp = FinancialServiceProviderFactory()
-        encoded_santander_fsp_id = encode_id_base64(fsp.id, "FinancialServiceProvider")
-
-        self.snapshot_graphql_request(
-            request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
-                "mappings": [
-                    {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-                        "fspId": encoded_santander_fsp_id,
-                        "order": 1,
-                    }
-                ],
-            },
-        )
-
     def test_export_xlsx_per_fsp_with_auth_code(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, created_by=self.user)
-        payment_1 = PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode")
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
         fsp = FinancialServiceProviderFactory(
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_333"
         )
-        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan,
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.FINISHED,
+            created_by=self.user,
             financial_service_provider=fsp,
+            delivery_mechanism=dm_cash,
         )
+        payment_1 = PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode")
+        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
         variables = {
             "paymentPlanId": encode_id_base64_required(str(payment_plan.pk), "PaymentPlan"),
             "fspXlsxTemplateId": encode_id_base64_required(
@@ -1252,15 +1207,17 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_export_xlsx_per_fsp_error_msg(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
         fsp = FinancialServiceProviderFactory(
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_aaa"
         )
-        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan,
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.LOCKED,
+            created_by=self.user,
             financial_service_provider=fsp,
+            delivery_mechanism=dm_cash,
         )
+        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
         variables = {
             "paymentPlanId": encode_id_base64_required(str(payment_plan.pk), "PaymentPlan"),
             "fspXlsxTemplateId": encode_id_base64_required(

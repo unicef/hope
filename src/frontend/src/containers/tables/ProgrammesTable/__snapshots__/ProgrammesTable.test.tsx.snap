@@ -590,7 +590,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-fAomSb dYobaH css-1o8lslm-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-iXqmyu kRljMC css-1o8lslm-MuiTableRow-root"
                 data-cy="table-row-Notice hair fall college enough perhaps."
                 role="checkbox"
               >
@@ -598,7 +598,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   <a
-                    class="sc-fuExOL dUQjWF"
+                    class="sc-hUAZgl cuZRrl"
                     href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/details/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
                   >
                     Notice hair fall college enough perhaps.
@@ -608,10 +608,10 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
                 >
                   <div
-                    class="sc-hORkcV hYYNQS"
+                    class="sc-gQJZgv eFYWbK"
                   >
                     <div
-                      class="sc-dVupuq jmkjso status-box-container"
+                      class="sc-bCjwNj kmnTcv status-box-container"
                       data-cy="status-container"
                     >
                       ACTIVE

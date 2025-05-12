@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 import { useIndividualFlexFieldsQuery } from '@generated/graphql';
+import PhotoModal from '@components/core/PhotoModal/PhotoModal';
 
 export function ImportedIndividualFlexFieldPhotoModal({ field }): ReactElement {
   const { id } = useParams();

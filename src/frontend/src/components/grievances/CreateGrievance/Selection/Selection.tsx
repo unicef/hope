@@ -14,6 +14,7 @@ import {
   GRIEVANCE_ISSUE_TYPES_NAMES,
 } from '@utils/constants';
 import { ChangeEvent, ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export interface SelectionProps {
   handleChange: (e: ChangeEvent) => void;
@@ -24,7 +25,7 @@ export interface SelectionProps {
   redirectedFromRelatedTicket: boolean;
 }
 
-export function Selection({
+function Selection({
   handleChange,
   choicesData,
   setFieldValue,
@@ -81,9 +82,12 @@ export function Selection({
 
     return choices.map((choice) => {
       if (
-        choice.name === 'Add Individual' ||
-        choice.name === 'Household Data Update' ||
-        choice.name === 'Withdraw Household'
+        //Add individual
+        choice.value === '16' ||
+        //HH data update
+        choice.value === '13' ||
+        //Withdraw HH
+        choice.value === '17'
       ) {
         return { ...choice, disabled: true };
       }
@@ -101,7 +105,7 @@ export function Selection({
 
   return (
     <Grid container spacing={3}>
-      <Grid size={{ xs:6 }}>
+      <Grid size={{ xs: 6 }}>
         <Field
           name="category"
           label="Category"
@@ -117,7 +121,7 @@ export function Selection({
         />
       </Grid>
       {showIssueType(values) && (
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="issueType"
             label="Issue Type"
@@ -131,13 +135,13 @@ export function Selection({
       {values.category && (
         <>
           <DividerLine />
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <LabelizedField label={t('Category Description')}>
               {categoryDescription}
             </LabelizedField>
           </Grid>
           {issueTypeDescription && (
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('Issue Type Description')}>
                 {issueTypeDescription}
               </LabelizedField>
@@ -148,3 +152,5 @@ export function Selection({
     </Grid>
   );
 }
+
+export default withErrorBoundary(Selection, 'Selection');

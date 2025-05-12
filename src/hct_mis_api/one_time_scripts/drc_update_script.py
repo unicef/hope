@@ -17,10 +17,10 @@ individual_fields: Dict[str, Tuple[str, Any, Any]] = {
 }
 
 deliver_mechanism_data_fields: Dict[str, Tuple[List[str], ...]] = {
-    "mobile_money": (
-        ["service_provider_code__mobile_money_i_c", "service_provider_code__mobile_money"],
-        ["provider__mobile_money_i_c", "provider__mobile_money"],
-        ["payment_delivery_phone_no_i_c", "delivery_phone_number__mobile_money"],
+    "mobile": (
+        ["account__mobile__service_provider_code_i_c", "service_provider_code"],
+        ["account__mobile__provider_i_c", "provider"],
+        ["account__mobile__payment_delivery_phone_number_i_c", "delivery_phone_number"],
     )
 }
 

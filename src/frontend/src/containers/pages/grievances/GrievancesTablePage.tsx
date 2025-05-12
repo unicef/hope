@@ -23,7 +23,7 @@ import { Tabs, Tab } from '@core/Tabs';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 export const GrievancesTablePage = (): ReactElement => {
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
@@ -120,14 +120,7 @@ export const GrievancesTablePage = (): ReactElement => {
   if (!choicesData) return null;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'GrievancesTablePage.tsx');
-      }}
-      componentName="GrievancesTablePage"
-    >
+    <>
       <PageHeader tabs={tabs} title="Grievance Tickets">
         {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
           <ButtonTooltip
@@ -155,6 +148,7 @@ export const GrievancesTablePage = (): ReactElement => {
         selectedTab={selectedTab}
       />
       <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
-    </UniversalErrorBoundary>
+    </>
   );
 };
+export default withErrorBoundary(GrievancesTablePage, 'GrievancesTablePage');

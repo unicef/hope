@@ -90,7 +90,7 @@ try:  # pragma: no cover
                         else:
                             self.message_user(request, "No records found", messages.WARNING)
                     except Exception as e:
-                        logger.exception(e)
+                        logger.warning(e)
                         context["exception"] = e
                         context["rule_error"] = get_error_info(e)
                         context["form"] = form

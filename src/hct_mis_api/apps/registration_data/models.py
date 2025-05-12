@@ -184,7 +184,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
     erased = models.BooleanField(default=False, help_text="Abort RDI")
     refuse_reason = models.CharField(max_length=100, blank=True, null=True)
-    allow_delivery_mechanisms_validation_errors = models.BooleanField(default=False)
     error_message = models.TextField(blank=True)
     sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
 
@@ -280,7 +279,6 @@ class ImportData(TimeStampedUUIDModel):
     STATUS_FINISHED = "FINISHED"
     STATUS_ERROR = "ERROR"
     STATUS_VALIDATION_ERROR = "VALIDATION_ERROR"
-    STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR = "DELIVERY_MECHANISMS_VALIDATION_ERROR"
 
     STATUS_CHOICES = (
         (STATUS_PENDING, _("Pending")),
@@ -288,7 +286,6 @@ class ImportData(TimeStampedUUIDModel):
         (STATUS_FINISHED, _("Finished")),
         (STATUS_ERROR, _("Error")),
         (STATUS_VALIDATION_ERROR, _("Validation Error")),
-        (STATUS_DELIVERY_MECHANISMS_VALIDATION_ERROR, _("Delivery Mechanisms Validation Error")),
     )
     status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=STATUS_CHOICES)
     business_area_slug = models.CharField(max_length=200, blank=True)

@@ -1,8 +1,7 @@
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore';
-import { TargetPopulationDetails } from '@components/targeting/TargetPopulationDetails';
+import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
 import {
   PaymentPlanBuildStatus,
   useBusinessAreaDataQuery,
@@ -12,15 +11,15 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { isStandardDctType, isSocialDctType } = useProgramContext();
-  const location = useLocation();
   const permissions = usePermissions();
   const { data, loading, error, startPolling, stopPolling } =
     useTargetPopulationQuery({
@@ -61,14 +60,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
     Boolean(paymentPlan.targetingCriteria);
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'TargetPopulationDetailsPage.tsx');
-      }}
-      componentName="TargetPopulationDetailsPage"
-    >
+    <>
       <TargetPopulationPageHeader
         paymentPlan={paymentPlan}
         canEdit={hasPermissions(PERMISSIONS.TARGETING_UPDATE, permissions)}
@@ -87,6 +79,11 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         permissions={permissions}
         screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(
+  TargetPopulationDetailsPage,
+  'TargetPopulationDetailsPage',
+);
