@@ -413,6 +413,42 @@ class TestGrievanceTicketList:
         response_count = self.api_client.get(self.count_url)
         assert response_count.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_grievance_ticket_list_area_limits(
+        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            ],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
+
+        # Only grievance tickets with area1 should be returned.
+
+        response = self.api_client.get(self.list_url)
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.data["results"]
+        assert len(response_results) == 6
+
+        result_ids = [result["id"] for result in response_results]
+        assert str(self.grievance_tickets[0].id) in result_ids  # area1
+        assert str(self.grievance_tickets[1].id) in result_ids  # area1
+        assert str(self.grievance_tickets[2].id) not in result_ids  # area2
+        assert str(self.grievance_tickets[3].id) not in result_ids  # area2
+        assert str(self.grievance_tickets[4].id) in result_ids  # area1
+        assert str(self.grievance_tickets[5].id) not in result_ids  # area2
+        assert str(self.grievance_tickets[6].id) in result_ids  # area None
+        assert str(self.grievance_tickets[7].id) in result_ids  # area None
+        assert str(self.grievance_tickets[8].id) in result_ids  # area1
+
     def test_grievance_ticket_list_with_all_permissions_in_program(
         self, create_user_role_with_permissions: Any
     ) -> None:
@@ -494,4 +530,3 @@ class TestGrievanceTicketList:
         result_ids = [result["id"] for result in response_results]
         for i in expected_tickets:
             assert str(self.grievance_tickets[i].id) in result_ids
-
