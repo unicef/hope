@@ -53,7 +53,6 @@ class TestGrievanceTicketGlobalList:
         self.admin_type = AreaTypeFactory(country=self.country, area_level=1)
         self.area1 = AreaFactory(parent=None, p_code="AF01", area_type=self.admin_type)
         self.area2 = AreaFactory(parent=None, p_code="AF0101", area_type=self.admin_type)
-        self.area3 = AreaFactory(parent=None, p_code="AF010101", area_type=self.admin_type)
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: [
