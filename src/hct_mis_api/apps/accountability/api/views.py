@@ -1,6 +1,8 @@
 import logging
+from functools import partial
 from typing import Any
 
+from django.db import transaction
 from django.db.models import QuerySet
 
 from django_filters import rest_framework as filters
@@ -24,22 +26,44 @@ from hct_mis_api.apps.accountability.api.serializers import (
     MessageCreateSerializer,
     MessageDetailSerializer,
     MessageListSerializer,
+    SurveyCategoryChoiceSerializer,
+    SurveyRapidProFlowSerializer,
+    SurveySerializer,
 )
-from hct_mis_api.apps.accountability.filters import FeedbackFilter, MessagesFilter
-from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage, Message
+from hct_mis_api.apps.accountability.celery_tasks import (
+    export_survey_sample_task,
+    send_survey_to_users,
+)
+from hct_mis_api.apps.accountability.filters import (
+    FeedbackFilter,
+    MessagesFilter,
+    SurveyFilter,
+)
+from hct_mis_api.apps.accountability.models import (
+    Feedback,
+    FeedbackMessage,
+    Message,
+    Survey,
+)
 from hct_mis_api.apps.accountability.services.feedback_crud_services import (
     FeedbackCrudServices,
 )
 from hct_mis_api.apps.accountability.services.message_crud_services import (
     MessageCrudServices,
 )
+from hct_mis_api.apps.accountability.services.survey_crud_services import (
+    SurveyCrudServices,
+)
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     CountActionMixin,
+    ProgramMixin,
     SerializerActionMixin,
 )
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
@@ -239,3 +263,93 @@ class MessageViewSet(
         log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", request.user, program_id, None, message)
         headers = self.get_success_headers(serializer.data)
         return Response(MessageDetailSerializer(message).data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class SurveyViewSet(
+    ProgramMixin,
+    CountActionMixin,
+    SerializerActionMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    BaseViewSet,
+):
+    PERMISSIONS = [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS]
+    http_method_names = ["get", "post"]
+    serializer_classes_by_action = {
+        "list": SurveySerializer,
+        "retrieve": SurveySerializer,
+        "create": SurveySerializer,
+        "export_sample": SurveySerializer,
+    }
+    permissions_by_action = {
+        "list": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+        "retrieve": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+        "create": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
+        "export_sample": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+    }
+
+    serializer_class = SurveySerializer
+    filter_backends = (
+        filters.DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_class = SurveyFilter
+    search_fields = (
+        "title",
+        "unicef_id",
+        "id",
+    )
+
+    @extend_schema(
+        responses={
+            201: SurveySerializer,
+        },
+    )
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        business_area = BusinessArea.objects.get(slug=self.business_area_slug)
+        program = Program.objects.get(slug=self.program_slug)
+
+        input_data = serializer.validated_data
+        input_data["business_area"] = business_area
+        input_data["program"] = program
+
+        survey = SurveyCrudServices.create(request.user, business_area, input_data)  # type: ignore
+        transaction.on_commit(partial(send_survey_to_users.delay, survey.id))
+        log_create(
+            Survey.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            request.user,
+            program.pk,
+            None,
+            survey,
+        )
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(self.get_serializer(survey).data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @extend_schema(
+        request=None,
+        responses={202: SurveySerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="export-sample")
+    def export_sample(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        survey = self.get_object()
+        export_survey_sample_task.delay(survey.id, request.user.id)
+        serializer = self.get_serializer(survey)
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=["get"], url_path="category-choices")
+    @extend_schema(responses=SurveyCategoryChoiceSerializer(many=True))
+    def category_choices(self, request: Request) -> Response:
+        return Response(to_choice_object(Survey.CATEGORY_CHOICES))
+
+    @action(detail=False, methods=["get"], url_path="available-flows")
+    @extend_schema(responses=SurveyRapidProFlowSerializer(many=True))
+    def available_flows(self, request: Request) -> Response:
+        api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
+        return Response(api.get_flows())

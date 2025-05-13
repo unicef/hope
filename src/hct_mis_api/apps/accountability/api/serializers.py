@@ -1,13 +1,22 @@
 from typing import Optional
 
+from django.conf import settings
+
 from rest_framework import serializers
 
-from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage, Message
+from hct_mis_api.apps.accountability.models import (
+    Feedback,
+    FeedbackMessage,
+    Message,
+    SampleFileExpiredException,
+    Survey,
+)
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdSmallSerializer,
 )
 from hct_mis_api.apps.payment.api.serializers import FollowUpPaymentPlanSerializer
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
@@ -198,3 +207,70 @@ class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
 class MessageCreateSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
     body = serializers.CharField(required=True)
+
+
+class AccountabilityFullListArgumentsSerializer(serializers.Serializer):
+    excluded_admin_areas = serializers.List(serializers.CharField(required=True))
+
+
+class AccountabilityCommunicationMessageAgeInput(serializers.Serializer):
+    min = serializers.Int(required=True)
+    max = serializers.Int(required=True)
+
+
+class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgumentsSerializer):
+    confidence_interval = serializers.Float(required=True)
+    margin_of_error = serializers.Float(required=True)
+    age = AccountabilityCommunicationMessageAgeInput(required=True)
+    sex = serializers.CharField(required=True)
+
+
+class SurveySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=True)
+    body = serializers.CharField(required=False)
+    category = serializers.CharField(required=True)
+    sampling_type = serializers.CharField(required=True)
+    flow = serializers.CharField(required=True)
+    payment_plan = serializers.SlugRelatedField(
+        slug_field="id", required=True, queryset=PaymentPlan.objects.all(), write_only=True
+    )
+
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(write_only=True)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(write_only=True)
+
+    sample_file_path = serializers.SerializerMethodField()
+    has_valid_sample_file = serializers.SerializerMethodField()
+    rapid_pro_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Survey
+        fields = (
+            "id",
+            "sample_file_path",
+            "has_valid_sample_file",
+            "rapid_pro_url",
+        )
+
+    def get_sample_file_path(self, obj: Survey) -> Optional[str]:
+        try:
+            return obj.sample_file_path()
+        except SampleFileExpiredException:
+            return None
+
+    def get_has_valid_sample_file(self, obj: Survey) -> bool:
+        return obj.has_valid_sample_file()
+
+    def get_rapid_pro_url(self, obj: Survey) -> Optional[str]:
+        if not obj.flow_id:
+            return None
+        return f"{settings.RAPID_PRO_URL}/flow/results/{obj.flow_id}/"
+
+
+class SurveyCategoryChoiceSerializer(serializers.Serializer):
+    value: serializers.CharField = serializers.CharField()
+    label: serializers.CharField = serializers.CharField()  # type: ignore
+
+
+class SurveyRapidProFlowSerializer(serializers.Serializer):
+    uuid: serializers.CharField = serializers.CharField()
+    name: serializers.CharField = serializers.CharField()

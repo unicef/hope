@@ -91,12 +91,12 @@ class Query(graphene.ObjectType):
 
     feedback_issue_type_choices = graphene.List(ChoiceObject)  # DONE
 
-    survey = graphene.relay.Node.Field(SurveyNode)
+    survey = graphene.relay.Node.Field(SurveyNode)  # DONE
     all_surveys = DjangoPermissionFilterConnectionField(
         SurveyNode,
         filterset_class=SurveyFilter,
         permission_classes=(hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST),),
-    )
+    )  # DONE
     recipients = DjangoPermissionFilterConnectionField(
         RecipientNode,
         filterset_class=RecipientFilter,
@@ -106,8 +106,8 @@ class Query(graphene.ObjectType):
         AccountabilitySampleSizeNode,
         input=AccountabilitySampleSizeInput(),
     )
-    survey_category_choices = graphene.List(ChoiceObject)
-    survey_available_flows = graphene.List(RapidProFlowNode)
+    survey_category_choices = graphene.List(ChoiceObject)  # DONE
+    survey_available_flows = graphene.List(RapidProFlowNode)  # DONE
 
     def resolve_all_accountability_communication_messages(self, info: Any, **kwargs: Any) -> QuerySet[Message]:
         business_area_slug = info.context.headers.get("Business-Area")

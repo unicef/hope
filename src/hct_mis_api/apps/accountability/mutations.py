@@ -202,5 +202,5 @@ class Mutations(graphene.ObjectType):
     create_feedback = CreateFeedbackMutation.Field()  # DONE
     update_feedback = UpdateFeedbackMutation.Field()  # DONE
     create_feedback_message = CreateFeedbackMessageMutation.Field()  # DONE
-    create_survey = CreateSurveyMutation.Field()
-    export_survey_sample = ExportSurveySampleMutationMutation.Field()
+    create_survey = CreateSurveyMutation.Field()  # DONE
+    export_survey_sample = ExportSurveySampleMutationMutation.Field()  # DONE
