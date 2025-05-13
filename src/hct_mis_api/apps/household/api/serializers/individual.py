@@ -168,10 +168,10 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
 
 class DeduplicationResultSerializer(serializers.Serializer):
     unicef_id = serializers.SerializerMethodField()
-    hit_id = serializers.CharField()
-    full_name = serializers.CharField()
-    score = serializers.FloatField()
-    proximity_to_score = serializers.FloatField()
+    hit_id = serializers.CharField(required=False)
+    full_name = serializers.CharField(required=False)
+    score = serializers.FloatField(required=False)
+    proximity_to_score = serializers.FloatField(required=False)
     location = serializers.SerializerMethodField()
     age = serializers.SerializerMethodField()
     duplicate = serializers.SerializerMethodField()
@@ -420,6 +420,7 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "unicef_id",
+            "household",
             "full_name",
             "birth_date",
             "last_registration_date",
