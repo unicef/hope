@@ -1,6 +1,7 @@
 from typing import Any, List
 from unittest.mock import MagicMock, patch
 
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 
 import pytest
@@ -15,8 +16,11 @@ from hct_mis_api.apps.accountability.fixtures import (
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -512,6 +516,39 @@ class TestFeedbackViewSet:
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
+            ([Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_feedback_per_program(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.post(
+            self.url_list_per_program,
+            {
+                "issue_type": "POSITIVE_FEEDBACK",
+                "individual_lookup": str(self.individual_1.pk),
+                "description": "Description per Program Create",
+                "comments": "New comments per Program Create",
+                "admin2": str(self.area_1.pk),
+                "area": "Area new",
+                "language": "polish_english",
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["program_name"] == "Test Active Program"
+            assert resp_data["description"] == "Description per Program Create"
+            assert resp_data["comments"] == "New comments per Program Create"
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
             ([Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], status.HTTP_200_OK),
             ([], status.HTTP_403_FORBIDDEN),
         ],
@@ -838,3 +875,48 @@ class TestMessageViewSet:
             assert resp_data["title"] == "New Message for Active Program"
             assert resp_data["body"] == "Thank you for tests! Looks Good To Me!"
             assert resp_data["sample_size"] == 1
+
+    def test_create_message_validation_error(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            business_area=self.afghanistan,
+            program_cycle=self.program_active.cycles.first(),
+        )
+        rdi = RegistrationDataImportFactory(imported_by=self.user, business_area=self.afghanistan)
+
+        with pytest.raises(ValidationError) as e:
+            self.client.post(
+                self.url_list,
+                {
+                    "title": "Test Error",
+                    "body": "Thank you for tests!",
+                    "sampling_type": "FULL_LIST",
+                    "full_list_arguments": {"excluded_admin_areas": []},
+                    "random_sampling_arguments": None,
+                    "payment_plan": str(payment_plan.pk),
+                },
+                format="json",
+            )
+        assert "No recipients found for the given criteria" in str(e.value)
+
+        with pytest.raises(ValidationError) as e:
+            self.client.post(
+                self.url_list,
+                {
+                    "title": "Test Error",
+                    "body": "Thank you for tests!",
+                    "sampling_type": "FULL_LIST",
+                    "full_list_arguments": {"excluded_admin_areas": []},
+                    "random_sampling_arguments": None,
+                    "registration_data_import": str(rdi.pk),
+                },
+                format="json",
+            )
+        assert "No recipients found for the given criteria" in str(e.value)

@@ -109,6 +109,7 @@ class FeedbackViewSet(
         program_slug = self.kwargs.get("program_slug")
         program = None
         if program_slug:
+            print("GET PROGRAMMMM ")
             program = Program.objects.get(slug=program_slug)
 
         if program_id := serializer.validated_data.get("program_id"):
@@ -119,7 +120,7 @@ class FeedbackViewSet(
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
-        input_data["program"] = program
+        input_data["program"] = str(program.pk) if program else None
         feedback = FeedbackCrudServices.create(request.user, business_area, input_data)
         log_create(
             Feedback.ACTIVITY_LOG_MAPPING,

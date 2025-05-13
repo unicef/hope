@@ -68,6 +68,7 @@ export type { HouseholdDetail as HouseholdDetailCamelCase } from './models/House
 export type { HouseholdList as HouseholdListCamelCase } from './models/HouseholdList';
 export type { HouseholdMember as HouseholdMemberCamelCase } from './models/HouseholdMember';
 export type { HouseholdSimple as HouseholdSimpleCamelCase } from './models/HouseholdSimple';
+export type { HouseholdSmall as HouseholdSmallCamelCase } from './models/HouseholdSmall';
 export type { Individual as IndividualCamelCase } from './models/Individual';
 export type { IndividualChoices as IndividualChoicesCamelCase } from './models/IndividualChoices';
 export type { IndividualDetail as IndividualDetailCamelCase } from './models/IndividualDetail';
@@ -75,6 +76,11 @@ export type { IndividualList as IndividualListCamelCase } from './models/Individ
 export { IssueTypeEnum as IssueTypeEnumCamelCase } from './models/IssueTypeEnum';
 export { MaritalStatusEnum as MaritalStatusEnumCamelCase } from './models/MaritalStatusEnum';
 export { MemoryDisabilityEnum as MemoryDisabilityEnumCamelCase } from './models/MemoryDisabilityEnum';
+export type { MessageCreate as MessageCreateCamelCase } from './models/MessageCreate';
+export { MessageCreateSamplingTypeEnum as MessageCreateSamplingTypeEnumCamelCase } from './models/MessageCreateSamplingTypeEnum';
+export type { MessageDetail as MessageDetailCamelCase } from './models/MessageDetail';
+export { MessageDetailSamplingTypeEnum as MessageDetailSamplingTypeEnumCamelCase } from './models/MessageDetailSamplingTypeEnum';
+export type { MessageList as MessageListCamelCase } from './models/MessageList';
 export { ObservedDisabilityEnum as ObservedDisabilityEnumCamelCase } from './models/ObservedDisabilityEnum';
 export type { Organization as OrganizationCamelCase } from './models/Organization';
 export { OrgEnumeratorEnum as OrgEnumeratorEnumCamelCase } from './models/OrgEnumeratorEnum';
@@ -87,6 +93,7 @@ export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './mo
 export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
+export type { PaginatedMessageListList as PaginatedMessageListListCamelCase } from './models/PaginatedMessageListList';
 export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } from './models/PaginatedOrganizationList';
 export type { PaginatedPaymentListList as PaginatedPaymentListListCamelCase } from './models/PaginatedPaymentListList';
 export type { PaginatedPaymentPlanList as PaginatedPaymentPlanListCamelCase } from './models/PaginatedPaymentPlanList';
