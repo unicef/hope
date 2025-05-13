@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any, Callable, Dict
 from unicodedata import category
+from datetime import date
 
 from django.templatetags.i18n import language
 from django.utils import timezone
@@ -15,13 +16,14 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, TicketNoteFactory, GrievanceDocumentFactory, \
-    TicketHouseholdDataUpdateDetailsFactory, TicketIndividualDataUpdateDetailsFactory
+    TicketHouseholdDataUpdateDetailsFactory, TicketIndividualDataUpdateDetailsFactory, \
+    TicketAddIndividualDetailsFactory, TicketDeleteIndividualDetailsFactory, TicketDeleteHouseholdDetailsFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, SINGLE, IndividualRoleInHousehold, ROLE_PRIMARY
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -79,6 +81,18 @@ class TestGrievanceTicketDetail:
         )
 
         self.household1, self.individuals1 = create_household_and_individuals(
+            household_data={
+                "admin_area": self.area1,
+                "admin1": self.area1,
+                "admin2": self.area2,
+                "country": self.country,
+                "country_origin": self.country,
+                "program": self.program,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[{}, {}],
+        )
+        self.household2, self.individuals2 = create_household_and_individuals(
             household_data={
                 "admin_area": self.area1,
                 "admin1": self.area1,
@@ -332,7 +346,6 @@ class TestGrievanceTicketDetail:
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
             household_unicef_id=self.household1.unicef_id,
         )
-        grievance_ticket.programs.add(self.program)
         ticket_details = TicketHouseholdDataUpdateDetailsFactory(
             ticket=grievance_ticket,
             household=self.household1,
@@ -375,7 +388,6 @@ class TestGrievanceTicketDetail:
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             household_unicef_id=self.household1.unicef_id,
         )
-        grievance_ticket.programs.add(self.program)
         ticket_details = TicketIndividualDataUpdateDetailsFactory(
             ticket=grievance_ticket,
             individual=self.individuals1[0],
@@ -410,11 +422,175 @@ class TestGrievanceTicketDetail:
             "role_reassign_data": ticket_details.role_reassign_data,
         }
 
+    def test_grievance_detail_add_individual(self, create_user_role_with_permissions: Any) -> None:
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        ticket_details = TicketAddIndividualDetailsFactory(
+            ticket=grievance_ticket,
+            household=self.household1,
+            approve_status=True,
+            individual_data={
+                "given_name": "Test",
+                "full_name": "Test Example",
+                "family_name": "Example",
+                "sex": "MALE",
+                "birth_date": date(year=1980, month=2, day=1).isoformat(),
+                "marital_status": SINGLE,
+                "documents": [],
+            },
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+
+        self._assert_base_grievance_data(data, grievance_ticket)
+        assert data["payment_record"] == {}
+
+        assert data["ticket_details"] == {
+            "id": str(ticket_details.id),
+            "individual_data": ticket_details.individual_data,
+            "approve_status": ticket_details.approve_status,
+        }
+
+    def test_grievance_detail_delete_individual(self, create_user_role_with_permissions: Any) -> None:
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        role_primary = IndividualRoleInHousehold.objects.create(
+            role=ROLE_PRIMARY,
+            individual=self.individuals1[0],
+            household=self.household1,
+        )
+        ticket_details = TicketDeleteIndividualDetailsFactory(
+            ticket=grievance_ticket,
+            individual=self.individuals1[0],
+            approve_status=True,
+            role_reassign_data={
+                str(role_primary.id): {
+                    "role": ROLE_PRIMARY,
+                    "household": str(self.household1.id),
+                    "individual":  str(self.individuals1[1].id),
+                }
+            }
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+
+        self._assert_base_grievance_data(data, grievance_ticket)
+        assert data["payment_record"] == {}
+
+        assert data["ticket_details"] == {
+            "id": str(ticket_details.id),
+            "role_reassign_data": ticket_details.role_reassign_data,
+            "approve_status": ticket_details.approve_status,
+        }
+
+    def test_grievance_detail_delete_household(self, create_user_role_with_permissions: Any) -> None:
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        role_primary = IndividualRoleInHousehold.objects.create(
+            role=ROLE_PRIMARY,
+            individual=self.individuals1[0],
+            household=self.household2,
+        )
+        ticket_details = TicketDeleteHouseholdDetailsFactory(
+            ticket=grievance_ticket,
+            household=self.household1,
+            approve_status=True,
+            reason_household=self.household2,
+            role_reassign_data={
+                str(role_primary.id): {
+                    "role": ROLE_PRIMARY,
+                    "household": str(self.household2.id),
+                    "individual": str(self.individuals2[0].id),
+                }
+            }
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+
+        self._assert_base_grievance_data(data, grievance_ticket)
+        assert data["payment_record"] == {}
+
+        assert data["ticket_details"] == {
+            "id": str(ticket_details.id),
+            "role_reassign_data": ticket_details.role_reassign_data,
+            "approve_status": ticket_details.approve_status,
+            "reason_household": {
+                "id": str(ticket_details.reason_household.id),
+                "unicef_id": ticket_details.reason_household.unicef_id,
+                "admin2": ticket_details.reason_household.admin2.name,
+            },
+        }
+
     def _assign_ticket_data(self, grievance_ticket: GrievanceTicket) -> None:
         self.ticket_note.ticket = grievance_ticket
         self.ticket_note.save()
         self.grievance_document.grievance_ticket = grievance_ticket
         self.grievance_document.save()
+
+        grievance_ticket.programs.add(self.program)
 
         grievance_ticket.linked_tickets.add(self.linked_ticket)
 
