@@ -12,7 +12,6 @@ from hct_mis_api.apps.accountability.services.sampling import Sampling
 from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -46,12 +45,10 @@ class MessageCrudServices:
         message.households.set(result.households)
 
         if payment_plan_id := input_data.get("payment_plan"):
-            message.payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+            message.payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
         if registration_data_import_id := input_data.get("registration_data_import"):
-            message.registration_data_import = get_object_or_404(
-                RegistrationDataImport, id=decode_id_string(registration_data_import_id)
-            )
+            message.registration_data_import = get_object_or_404(RegistrationDataImport, id=registration_data_import_id)
 
         if message.number_of_recipients == 0:
             raise ValidationError("No recipients found for the given criteria")
@@ -66,13 +63,13 @@ class MessageCrudServices:
 
     @classmethod
     def _get_households(cls, input_data: dict) -> QuerySet[Household]:
-        if household_ids := [decode_id_string(household) for household in input_data.get("households", [])]:
+        if household_ids := input_data.get("households", []):
             return Household.objects.filter(id__in=household_ids).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
         elif payment_plan_id := input_data.get("payment_plan"):
-            payment_plan = PaymentPlan.objects.get(id=decode_id_string(payment_plan_id))
+            payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
             if payment_plan.status == PaymentPlan.Status.TP_OPEN:
                 return Household.objects.none()
             return Household.objects.filter(payment__parent=payment_plan).exclude(
@@ -82,7 +79,7 @@ class MessageCrudServices:
         elif registration_data_import_id := input_data.get("registration_data_import"):
             return Household.objects.filter(
                 registration_data_import__status=RegistrationDataImport.MERGED,
-                registration_data_import_id=decode_id_string(registration_data_import_id),
+                registration_data_import_id=registration_data_import_id,
             ).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,

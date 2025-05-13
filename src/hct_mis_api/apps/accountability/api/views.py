@@ -132,6 +132,7 @@ class FeedbackViewSet(
         program_slug = self.kwargs.get("program_slug")
         program = None
         if program_slug:
+            print("GET PROGRAMMMM ")
             program = Program.objects.get(slug=program_slug)
 
         if program_id := serializer.validated_data.get("program_id"):
@@ -142,7 +143,7 @@ class FeedbackViewSet(
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
-        input_data["program"] = program
+        input_data["program"] = str(program.pk) if program else None
         feedback = FeedbackCrudServices.create(request.user, business_area, input_data)
         log_create(
             Feedback.ACTIVITY_LOG_MAPPING,
@@ -208,11 +209,13 @@ class FeedbackViewSet(
 class MessageViewSet(
     CountActionMixin,
     SerializerActionMixin,
+    ProgramMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     BaseViewSet,
 ):
+    queryset = Message.objects.all()
     filter_backends = (
         filters.DjangoFilterBackend,
         SearchFilter,
@@ -223,7 +226,7 @@ class MessageViewSet(
         "unicef_id",
         "id",
     )
-    http_method_names = ["get", "post", "patch"]
+    http_method_names = ["get", "post"]
     serializer_classes_by_action = {
         "list": MessageListSerializer,
         "retrieve": MessageDetailSerializer,
@@ -234,15 +237,6 @@ class MessageViewSet(
         "retrieve": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
         "create": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
     }
-
-    def get_object(self) -> Message:
-        return get_object_or_404(Message, id=self.kwargs.get("pk"))
-
-    def get_queryset(self) -> QuerySet[Feedback]:
-        qs = Message.objects.filter(business_area__slug=self.kwargs.get("business_area_slug"))
-        if program_slug := self.kwargs.get("program_slug"):
-            qs = qs.filter(program__slug=program_slug)
-        return qs
 
     @extend_schema(
         responses={
@@ -255,12 +249,8 @@ class MessageViewSet(
 
         business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
         message = MessageCrudServices.create(request.user, business_area, serializer.validated_data)
-        program_id = None
-        if message.payment_plan and message.payment_plan.program_cycle.program:
-            program_id = message.payment_plan.program_cycle.program.pk
-        elif message.registration_data_import:
-            program_id = getattr(message.registration_data_import, "program_id", None)
-        log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", request.user, program_id, None, message)
+
+        log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", request.user, str(self.program.id), None, message)
         headers = self.get_success_headers(serializer.data)
         return Response(MessageDetailSerializer(message).data, status=status.HTTP_201_CREATED, headers=headers)
 

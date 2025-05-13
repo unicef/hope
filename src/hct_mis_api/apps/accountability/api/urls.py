@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from hct_mis_api.apps.accountability.api.views import FeedbackViewSet, SurveyViewSet
+from hct_mis_api.apps.accountability.api.views import FeedbackViewSet, MessageViewSet, SurveyViewSet
 from hct_mis_api.apps.core.api.urls import get_business_area_nested_router
 from hct_mis_api.apps.program.api.urls import program_base_router
 
@@ -12,17 +12,22 @@ business_area_nested_router.register(
     FeedbackViewSet,
     basename="feedbacks",
 )
-business_area_nested_router.register(
-    "surveys",
-    SurveyViewSet,
-    basename="surveys",
-)
 
 program_nested_router = program_base_router.program_nested_router
 program_nested_router.register(
     "feedbacks",
     FeedbackViewSet,
     basename="feedbacks-per-program",
+)
+program_nested_router.register(
+    "messages",
+    MessageViewSet,
+    basename="messages",
+)
+program_nested_router.register(
+    "surveys",
+    SurveyViewSet,
+    basename="surveys",
 )
 
 urlpatterns = [

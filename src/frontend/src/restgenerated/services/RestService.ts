@@ -19,6 +19,8 @@ import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { HouseholdMember } from '../models/HouseholdMember';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
+import type { MessageCreate } from '../models/MessageCreate';
+import type { MessageDetail } from '../models/MessageDetail';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
 import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
@@ -28,6 +30,7 @@ import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
+import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
 import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
@@ -2694,6 +2697,179 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedMessageListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesList({
+        businessAreaSlug,
+        programSlug,
+        body,
+        createdAtRange,
+        createdBy,
+        limit,
+        numberOfRecipients,
+        numberOfRecipientsGte,
+        numberOfRecipientsLte,
+        offset,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        samplingType,
+        search,
+        title,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        body?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        numberOfRecipients?: number,
+        numberOfRecipientsGte?: number,
+        numberOfRecipientsLte?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `number_of_recipients` - Number of recipients
+         * * `-number_of_recipients` - Number of recipients (descending)
+         * * `sampling_type` - Sampling type
+         * * `-sampling_type` - Sampling type (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-created_at' | '-created_by' | '-id' | '-number_of_recipients' | '-sampling_type' | '-title' | 'created_at' | 'created_by' | 'id' | 'number_of_recipients' | 'sampling_type' | 'title'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * * `FULL_LIST` - Full list
+         * * `RANDOM` - Random sampling
+         */
+        samplingType?: 'FULL_LIST' | 'RANDOM',
+        /**
+         * A search term.
+         */
+        search?: string,
+        title?: string,
+    }): CancelablePromise<PaginatedMessageListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'body': body,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'limit': limit,
+                'number_of_recipients': numberOfRecipients,
+                'number_of_recipients__gte': numberOfRecipientsGte,
+                'number_of_recipients__lte': numberOfRecipientsLte,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'sampling_type': samplingType,
+                'search': search,
+                'title': title,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns MessageDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: MessageCreate,
+    }): CancelablePromise<MessageDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns MessageDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Message.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<MessageDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
