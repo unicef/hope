@@ -53,7 +53,8 @@ class AddIndividualTicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketAddIndividualDetails
         fields = (
             "id",
-            "approve_status" "individual_data",
+            "approve_status",
+            "individual_data",
         )
 
 
@@ -62,7 +63,8 @@ class DeleteIndividualTicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketDeleteIndividualDetails
         fields = (
             "id",
-            "approve_status" "role_reassign_data",
+            "approve_status",
+            "role_reassign_data",
         )
 
 
@@ -73,7 +75,8 @@ class DeleteHouseholdTicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketDeleteHouseholdDetails
         fields = (
             "id",
-            "approve_status" "role_reassign_data",
+            "approve_status",
+            "role_reassign_data",
             "reason_household",
         )
 
@@ -86,7 +89,8 @@ class SystemFlaggingTicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketSystemFlaggingDetails
         fields = (
             "id",
-            "approve_status" "role_reassign_data",
+            "approve_status",
+            "role_reassign_data",
             "golden_records_individual",
             "sanction_list_individual",
         )
@@ -100,7 +104,8 @@ class PaymentVerificationTicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketPaymentVerificationDetails
         fields = (
             "id",
-            "approve_status" "new_status",
+            "approve_status",
+            "new_status",
             "old_received_amount",
             "new_received_amount",
             "payment_verification_status",
