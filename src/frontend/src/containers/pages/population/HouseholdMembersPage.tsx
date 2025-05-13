@@ -1,24 +1,24 @@
-import { Box, Fade, Tooltip } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import {
-  useHouseholdChoiceDataQuery,
-  useIndividualChoiceDataQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
 import { IndividualsFilter } from '@components/population/IndividualsFilter';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { Tab, Tabs } from '@core/Tabs';
+import { useIndividualChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Box, Fade, Tooltip } from '@mui/material';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
-import { Tabs, Tab } from '@core/Tabs';
-import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -31,8 +31,15 @@ export const HouseholdMembersPage = (): ReactElement => {
     location.state?.isNewTemplateJustCreated || false;
 
   const permissions = usePermissions();
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
+
+  const { data: householdChoicesData, isLoading: householdChoicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: individualChoicesData, loading: individualChoicesLoading } =
     useIndividualChoiceDataQuery();

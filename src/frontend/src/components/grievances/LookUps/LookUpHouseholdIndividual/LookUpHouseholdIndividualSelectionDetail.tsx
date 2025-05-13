@@ -3,7 +3,6 @@ import { TabPanel } from '@core/TabPanel';
 import { Tab, Tabs } from '@core/Tabs';
 import {
   useAllProgramsForChoicesQuery,
-  useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -20,6 +19,9 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -50,8 +52,15 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const [selectedTab, setSelectedTab] = useState(isSocialDctType ? 1 : 0);
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
+
+  const { data: householdChoicesData, isLoading: householdChoicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
   const { data: individualChoicesData, loading: individualChoicesLoading } =
     useIndividualChoiceDataQuery();
   const initialFilterHH = {

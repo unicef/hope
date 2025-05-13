@@ -10,12 +10,14 @@ import { ImportedPeopleTable } from '@containers/tables/rdi/ImportedPeopleTable'
 import { Tab, Tabs } from '@core/Tabs';
 import {
   RegistrationDataImportStatus,
-  useHouseholdChoiceDataQuery,
   useRegistrationDataImportQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -66,8 +68,15 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
       variables: { id },
       fetchPolicy: 'cache-and-network',
     });
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const [selectedTab, setSelectedTab] = useState(0);
 
