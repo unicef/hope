@@ -83,7 +83,7 @@ export function IndividualsListTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
+    queryKey: ['businessAreasProgramsIndividualsList', queryVariables],
     queryFn: () =>
       RestService.restBusinessAreasProgramsIndividualsList(queryVariables),
   });
