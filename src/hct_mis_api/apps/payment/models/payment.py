@@ -1901,6 +1901,9 @@ class FinancialInstitution(TimeStampedUUIDModel):
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
+    def __str__(self) -> str:
+        return f"{self.code} - {self.description}: {self.type}"
+
 
 class FinancialInstitutionMapping(TimeStampedUUIDModel):
     financial_service_provider = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE)
