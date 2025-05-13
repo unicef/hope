@@ -1,14 +1,14 @@
 import { Box, Grid2 as Grid } from '@mui/material';
-import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import { IndividualQuery } from '@generated/graphql';
-import { EditPaymentChannelRow } from './EditPaymentChannelRow';
 import { ReactElement } from 'react';
+import { useLocation } from 'react-router-dom';
+import { EditPaymentChannelRow } from './EditPaymentChannelRow';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 export interface ExistingPaymentChannelFieldArrayProps {
   setFieldValue;
   values;
-  individual: IndividualQuery['individual'];
+  individual: IndividualDetail;
 }
 
 export function ExistingPaymentChannelFieldArray({

@@ -4,9 +4,9 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@core/LoadingComponent';
 import {
   GrievanceTicketDocument,
-  useIndividualChoiceDataQuery,
   useReassignRoleGrievanceMutation,
 } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
@@ -16,7 +16,10 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
@@ -56,11 +59,19 @@ export function LookUpReassignRoleModal({
 }): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { businessArea } = useBaseUrl();
+
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const initialFilterIND = {
     search: '',
