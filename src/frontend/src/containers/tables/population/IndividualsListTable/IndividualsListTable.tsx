@@ -8,6 +8,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
 import { ReactElement, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
@@ -31,6 +32,7 @@ export function IndividualsListTable({
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
@@ -83,10 +85,23 @@ export function IndividualsListTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: ['businessAreasProgramsIndividualsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsIndividualsList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList(queryVariables),
+      RestService.restBusinessAreasProgramsIndividualsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
   });
+
+  //TODO: add individuals count query
 
   return (
     <TableWrapper>

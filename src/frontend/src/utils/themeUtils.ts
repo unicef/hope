@@ -5,6 +5,8 @@ import theme from '../theme';
  * @param colorName The name of the color in hctPalette
  * @returns The color value
  */
-export const getThemeColor = (colorName: keyof typeof theme.hctPalette): string => {
+export const getThemeColor = (
+  colorName: keyof typeof theme.hctPalette,
+): string => {
   return theme.hctPalette[colorName];
 };
