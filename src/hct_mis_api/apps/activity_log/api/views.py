@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from django.db.models import QuerySet
 
@@ -51,5 +52,5 @@ class LogEntryViewSet(
 
     @action(detail=False, methods=["get"], url_path="action-choices")
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
-    def log_entry_action_choices(self, request: Request) -> Response:
+    def log_entry_action_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return Response(to_choice_object(LogEntry.LOG_ENTRY_ACTION_CHOICES))

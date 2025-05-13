@@ -26,6 +26,7 @@ export { CommsDisabilityEnum as CommsDisabilityEnumCamelCase } from './models/Co
 export { CommunicationChannelEnum as CommunicationChannelEnumCamelCase } from './models/CommunicationChannelEnum';
 export { ComparisonMethod7bbEnum as ComparisonMethod7bbEnumCamelCase } from './models/ComparisonMethod7bbEnum';
 export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/ConsentSharingEnum';
+export type { ContentType as ContentTypeCamelCase } from './models/ContentType';
 export type { CountResponse as CountResponseCamelCase } from './models/CountResponse';
 export type { Country as CountryCamelCase } from './models/Country';
 export { CountryEnum as CountryEnumCamelCase } from './models/CountryEnum';
@@ -66,6 +67,7 @@ export type { Individual as IndividualCamelCase } from './models/Individual';
 export type { IndividualChoices as IndividualChoicesCamelCase } from './models/IndividualChoices';
 export type { IndividualDetail as IndividualDetailCamelCase } from './models/IndividualDetail';
 export type { IndividualList as IndividualListCamelCase } from './models/IndividualList';
+export type { LogEntry as LogEntryCamelCase } from './models/LogEntry';
 export { MaritalStatusEnum as MaritalStatusEnumCamelCase } from './models/MaritalStatusEnum';
 export { MemoryDisabilityEnum as MemoryDisabilityEnumCamelCase } from './models/MemoryDisabilityEnum';
 export { ObservedDisabilityEnum as ObservedDisabilityEnumCamelCase } from './models/ObservedDisabilityEnum';
@@ -79,6 +81,7 @@ export type { PaginatedBusinessAreaList as PaginatedBusinessAreaListCamelCase } 
 export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './models/PaginatedCountryList';
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
+export type { PaginatedLogEntryList as PaginatedLogEntryListCamelCase } from './models/PaginatedLogEntryList';
 export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } from './models/PaginatedOrganizationList';
 export type { PaginatedPaymentListList as PaginatedPaymentListListCamelCase } from './models/PaginatedPaymentListList';
 export type { PaginatedPaymentPlanList as PaginatedPaymentPlanListCamelCase } from './models/PaginatedPaymentPlanList';
