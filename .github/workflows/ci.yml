@@ -181,6 +181,8 @@ jobs:
         with:
           node-version: '18'
           cache: 'yarn'
+          cache-dependency-path: src/frontend/yarn.lock
+
 
       - name: Install JS dependencies & build
         run: |
