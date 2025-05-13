@@ -179,7 +179,7 @@ jobs:
       - name: Set up Node.js & Yarn
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'yarn'
           cache-dependency-path: src/frontend/yarn.lock
 
