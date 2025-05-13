@@ -45,7 +45,11 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
       </Title>
       <Grid container spacing={6}>
         {individual.accounts.map((mechanism, index) => {
-          const tabData = JSON.parse(mechanism.individualTabData);
+          const tabData =
+            typeof mechanism.individualTabData === 'string'
+              ? JSON.parse(mechanism.individualTabData)
+              : mechanism.individualTabData;
+
           return (
             <Grid size={{ xs: 12 }} key={index}>
               <Typography variant="h6">{mechanism.name}</Typography>

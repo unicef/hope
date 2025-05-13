@@ -1,9 +1,6 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { TableWrapper } from '@core/TableWrapper';
-import {
-  HouseholdChoiceDataQuery,
-  HouseholdRdiMergeStatus,
-} from '@generated/graphql';
+import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -14,11 +11,12 @@ import styled from 'styled-components';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
   filter;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
   setFieldValue;
   selectedHousehold?;
   setSelectedIndividual?;
