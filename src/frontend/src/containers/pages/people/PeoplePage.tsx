@@ -1,10 +1,7 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import {
-  useHouseholdChoiceDataQuery,
-  useIndividualChoiceDataQuery,
-} from '@generated/graphql';
+import { useIndividualChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -18,6 +15,9 @@ import { PeopleFilter } from '@components/people/PeopleFilter';
 import { Box, Tabs, Tab, Fade, Tooltip } from '@mui/material';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 export const PeoplePage = (): ReactElement => {
   const { t } = useTranslation();
@@ -27,8 +27,15 @@ export const PeoplePage = (): ReactElement => {
   const isNewTemplateJustCreated =
     location.state?.isNewTemplateJustCreated || false;
   const permissions = usePermissions();
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
+
+  const { data: householdChoicesData, isLoading: householdChoicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const initialFilter = {
     search: '',

@@ -14,7 +14,6 @@ import { Title } from '@core/Title';
 import {
   useAllIndividualsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
-  useHouseholdChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -29,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -72,8 +72,14 @@ const PeopleDetailsPage = (): ReactElement => {
       }),
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();

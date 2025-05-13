@@ -16,7 +16,6 @@ import { AdminButton } from '@core/AdminButton';
 import {
   useAllHouseholdsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
-  useHouseholdChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -35,6 +34,7 @@ import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTabl
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { Theme } from '@mui/material/styles';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 const Container = styled.div`
   padding: 20px;
@@ -87,13 +87,21 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllHouseholdsFlexFieldsAttributesQuery();
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+
+  const { data: householdChoicesData, isLoading: householdChoicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
   const { data: grievancesChoices, loading: grievancesChoicesLoading } =
     useGrievancesChoiceDataQuery();
 
   if (
-    choicesLoading ||
+    householdChoicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
     householdLoading
@@ -103,7 +111,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !choicesData ||
+    !householdChoicesData ||
     !grievancesChoices ||
     !flexFieldsData ||
     permissions === null ||
