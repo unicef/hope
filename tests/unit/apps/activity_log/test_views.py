@@ -11,6 +11,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -33,6 +35,12 @@ class TestLogEntryView:
         self.program_2 = ProgramFactory(
             name="Program 2", business_area=self.afghanistan, pk="c74612a1-212c-4148-be5b-4b41d20e623c"
         )
+        self.grv = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
 
         l1 = LogEntry.objects.create(
             action=LogEntry.CREATE,
@@ -54,13 +62,31 @@ class TestLogEntryView:
         l2.programs.add(self.program_2)
         l3 = LogEntry.objects.create(
             action=LogEntry.CREATE,
+            content_object=self.program_1,
+            user=self.user_without_perms,
+            business_area=self.afghanistan,
+            object_repr=str(self.program_1),
+            changes=create_diff(None, self.program_1, Program.ACTIVITY_LOG_MAPPING),
+        )
+        l3.programs.add(self.program_1)
+        l4 = LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=self.grv,
+            user=self.user,
+            business_area=self.afghanistan,
+            object_repr=str(self.grv),
+            changes=create_diff(None, self.grv, GrievanceTicket.ACTIVITY_LOG_MAPPING),
+        )
+        l4.programs.add(self.program_2)
+        l5 = LogEntry.objects.create(
+            action=LogEntry.CREATE,
             content_object=self.program_2,
             user=self.user_without_perms,
             business_area=None,
             object_repr=str(self.program_2),
             changes=create_diff(None, self.program_2, Program.ACTIVITY_LOG_MAPPING),
         )
-        l3.programs.add(self.program_2)
+        l5.programs.add(self.program_2)
 
         # per BA
         self.url_list = reverse(
@@ -113,7 +139,7 @@ class TestLogEntryView:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert len(resp_data["results"]) == 2
+            assert len(resp_data["results"]) == 4
             logs = resp_data["results"][0]
             assert "object_id" in logs
             assert "action" in logs
@@ -145,7 +171,7 @@ class TestLogEntryView:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert resp_data["count"] == 2
+            assert resp_data["count"] == 4
 
     # per Program
     @pytest.mark.parametrize(
@@ -167,13 +193,13 @@ class TestLogEntryView:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert len(resp_data["results"]) == 1
+            assert len(resp_data["results"]) == 2
             logs = resp_data["results"][0]
             assert "object_id" in logs
             assert "action" in logs
             assert "changes" in logs
             assert "user" in logs
-            assert logs["user"] == "Test User"
+            assert logs["object_repr"] == "Program 1"
             assert "object_repr" in logs
             assert "content_type" in logs
             assert "is_user_generated" in logs
@@ -199,7 +225,7 @@ class TestLogEntryView:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert resp_data["count"] == 1
+            assert resp_data["count"] == 2
 
     def test_activity_logs_filters(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_2)
@@ -218,6 +244,42 @@ class TestLogEntryView:
         assert "object_id" in log
         assert log["object_id"] == "c74612a1-212c-4148-be5b-4b41d20e623c"
         assert log["object_repr"] == "Program 2"
+
+        # user_id
+        response = self.client.get(
+            reverse(
+                "api:activity-logs:activity-logs-list",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
+            + "?"
+            + urlencode({"user_id": str(self.user_without_perms.pk)})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 1
+        log = resp_data["results"][0]
+        assert "object_id" in log
+        assert log["object_id"] == "ad17c53d-11b0-4e9b-8407-2e034f03fd31"
+        assert log["object_repr"] == "Program 1"
+        assert log["user"] == f"{self.user_without_perms.first_name} {self.user_without_perms.last_name}"
+
+        # module
+        response = self.client.get(
+            reverse(
+                "api:activity-logs:activity-logs-list",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
+            + "?"
+            + urlencode({"module": "grievanceticket"})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 1
+        log = resp_data["results"][0]
+        assert "object_id" in log
+        assert log["object_id"] == str(self.grv.pk)
+        assert log["object_repr"] == self.grv.__str__()
+        assert log["is_user_generated"] is True
 
     def test_activity_logs_choices(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_1)
