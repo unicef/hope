@@ -1,4 +1,4 @@
-import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Theme, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
@@ -14,8 +14,9 @@ import {
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 import { ReactElement } from 'react';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { Overview } from '@components/payments/Overview';
 
-const Container = styled.div`
+const Container = styled.div<{ theme?: Theme }>`
   display: flex;
   flex: 1;
   width: 100%;
@@ -31,11 +32,6 @@ const Container = styled.div`
   && > div {
     margin: 5px;
   }
-`;
-
-const OverviewPaper = styled(Paper)`
-  margin: 20px 20px 0 20px;
-  padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
 
 interface HouseholdDetailsProps {
@@ -278,7 +274,7 @@ export function HouseholdDetails({
           </Grid>
         </Grid>
       </Container>
-      <OverviewPaper>
+      <Overview>
         <Title>
           <Typography variant="h6">{t('Benefits')}</Typography>
         </Title>
@@ -328,7 +324,7 @@ export function HouseholdDetails({
             </BigValueContainer>
           </Grid>
         </Grid>
-      </OverviewPaper>
+      </Overview>
     </>
   );
 }

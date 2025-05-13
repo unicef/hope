@@ -18,7 +18,7 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -38,11 +38,11 @@ const Container = styled.div`
     width: 100%;
   }
 `;
-const OverviewPaper = styled(Paper)`
+const OverviewPaper = styled(Paper)<{ theme?: Theme }>`
   margin: 0px 0px 20px 0px;
   padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   margin: 15px 0px 20px 0px;
   padding: 20px ${({ theme }) => theme.spacing(11)};
 `;

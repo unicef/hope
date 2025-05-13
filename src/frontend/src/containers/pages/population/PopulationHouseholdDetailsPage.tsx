@@ -34,6 +34,7 @@ import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { Theme } from '@mui/material/styles';
 
 const Container = styled.div`
   padding: 20px;
@@ -44,7 +45,7 @@ const Container = styled.div`
   }
 `;
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;
@@ -82,7 +83,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         id,
         programSlug: programId,
       }),
-    enabled: Boolean(programId && businessArea),
   });
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
