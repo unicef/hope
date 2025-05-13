@@ -17,15 +17,19 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, TicketNoteFactory, GrievanceDocumentFactory, \
     TicketHouseholdDataUpdateDetailsFactory, TicketIndividualDataUpdateDetailsFactory, \
-    TicketAddIndividualDetailsFactory, TicketDeleteIndividualDetailsFactory, TicketDeleteHouseholdDetailsFactory
+    TicketAddIndividualDetailsFactory, TicketDeleteIndividualDetailsFactory, TicketDeleteHouseholdDetailsFactory, \
+    TicketSystemFlaggingDetailsFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE, SINGLE, IndividualRoleInHousehold, ROLE_PRIMARY
+from hct_mis_api.apps.household.api.serializers.individual import IndividualForTicketSerializer
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals, DocumentFactory, DocumentTypeFactory
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, SINGLE, IndividualRoleInHousehold, ROLE_PRIMARY, DUPLICATE
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
+from hct_mis_api.apps.sanction_list.models import SanctionListIndividualDocument, SanctionListIndividualDateOfBirth
 
 pytestmark = pytest.mark.django_db()
 
@@ -581,6 +585,140 @@ class TestGrievanceTicketDetail:
                 "id": str(ticket_details.reason_household.id),
                 "unicef_id": ticket_details.reason_household.unicef_id,
                 "admin2": ticket_details.reason_household.admin2.name,
+            },
+        }
+
+    def test_grievance_detail_system_flagging(self, create_user_role_with_permissions: Any) -> None:
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        sanction_list_individual = SanctionListIndividualFactory(
+            full_name="Sanction Individual"
+        )
+        sanction_list_individual_document = SanctionListIndividualDocument.objects.create(
+            individual=sanction_list_individual,
+            document_number="123-456-789",
+            type_of_document="DOC",
+        )
+        sanction_list_date_of_birth = SanctionListIndividualDateOfBirth.objects.create(
+            individual=sanction_list_individual,
+            date=date(year=1980, month=2, day=1),
+        )
+        golden_records_individual = self.individuals1[0]
+        golden_records_individual.deduplication_golden_record_status = DUPLICATE
+        golden_records_individual.deduplication_golden_record_results = {
+            "duplicates": [
+                {
+                    "hit_id": str(golden_records_individual.pk),
+                    "score": 9.0,
+                    "proximity_to_score": 3.0,
+                }
+            ],
+            "possible_duplicates": [{"hit_id": str(golden_records_individual.pk)}],
+        }
+        golden_records_individual.save()
+        document_type = DocumentTypeFactory()
+        document = DocumentFactory(
+            document_number="123-456-789",
+            type=document_type,
+            individual=golden_records_individual,
+            program=self.program,
+            country=self.country,
+        )
+        ticket_details = TicketSystemFlaggingDetailsFactory(
+            ticket=grievance_ticket,
+            golden_records_individual=golden_records_individual,
+            sanction_list_individual=sanction_list_individual,
+            approve_status=True,
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+
+        self._assert_base_grievance_data(data, grievance_ticket)
+        assert data["payment_record"] == {}
+
+        assert data["ticket_details"] == {
+            "id": str(ticket_details.id),
+            "role_reassign_data": ticket_details.role_reassign_data,
+            "approve_status": ticket_details.approve_status,
+            "golden_records_individual": {
+                "id": str(golden_records_individual.id),
+                "unicef_id": golden_records_individual.unicef_id,
+                "full_name": golden_records_individual.full_name,
+                "birth_date": f"{golden_records_individual.birth_date:%Y-%m-%d}",
+                "last_registration_date":  f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
+                "sex": golden_records_individual.sex,
+                "duplicate": golden_records_individual.duplicate,
+                "household": {
+                    "id": str(golden_records_individual.household.id),
+                    "unicef_id": golden_records_individual.household.unicef_id,
+                    "admin2": golden_records_individual.household.admin2.name,
+                },
+                "deduplication_golden_record_results": [
+                    {
+                        "hit_id": str(golden_records_individual.pk),
+                        "unicef_id": golden_records_individual.unicef_id,
+                        "score": 9.0,
+                        "proximity_to_score": 3.0,
+                        "location": "Not provided",
+                        "age": None,
+                        "duplicate": False,
+                        "distinct": False,
+                    }
+                ],
+                "documents": [
+                    {
+                        "id": str(document.id),
+                        "type": {
+                            "id": str(document.type.id),
+                            "label": document.type.label,
+                            "key": document.type.key,
+                        },
+                        "country": {
+                            "id": str(document.country.id),
+                            "name": document.country.name,
+                            "iso_code3": document.country.iso_code3,
+                        },
+                        "document_number": document.document_number,
+                    },
+                ],
+            },
+            "sanction_list_individual": {
+                "id": str(sanction_list_individual.id),
+                "full_name": sanction_list_individual.full_name,
+                "reference_number": sanction_list_individual.reference_number,
+                "documents": [
+                    {
+                        "id": str(sanction_list_individual_document.id),
+                        "document_number": sanction_list_individual_document.document_number,
+                        "type_of_document": sanction_list_individual_document.type_of_document,
+                    }
+                ],
+                "dates_of_birth": [
+                    {
+                        "id": str(sanction_list_date_of_birth.id),
+                        "date": f"{sanction_list_date_of_birth.date:%Y-%m-%d}",
+                    }
+                ],
             },
         }
 
