@@ -1,5 +1,4 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import { IndividualList } from '@restgenerated/models/IndividualList';
@@ -10,6 +9,7 @@ import { ReactElement, useState } from 'react';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface ImportedPeopleTableProps {
   rdi;
@@ -20,7 +20,7 @@ interface ImportedPeopleTableProps {
   rowsPerPageOptions?: number[];
   isOnPaper?: boolean;
   businessArea: string;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
   isMerged: boolean;
 }
 

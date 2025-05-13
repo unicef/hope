@@ -28,7 +28,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -72,11 +72,11 @@ const PeopleDetailsPage = (): ReactElement => {
       }),
   });
 
-  const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
       queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });
@@ -100,7 +100,7 @@ const PeopleDetailsPage = (): ReactElement => {
 
   if (
     loadingIndividual ||
-    choicesLoading ||
+    individualChoicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
     periodicFieldsLoading
@@ -111,7 +111,7 @@ const PeopleDetailsPage = (): ReactElement => {
 
   if (
     !individual ||
-    !choicesData ||
+    !individualChoicesLoading ||
     !flexFieldsData ||
     !grievancesChoices ||
     permissions === null
@@ -158,7 +158,7 @@ const PeopleDetailsPage = (): ReactElement => {
           baseUrl={baseUrl}
           businessArea={businessArea}
           individual={individual}
-          choicesData={choicesData}
+          choicesData={individualChoicesData}
           grievancesChoices={grievancesChoices}
         />
         <IndividualAccounts individual={individual} />
