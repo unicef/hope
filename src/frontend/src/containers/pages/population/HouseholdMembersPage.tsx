@@ -5,11 +5,11 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
 import { IndividualsFilter } from '@components/population/IndividualsFilter';
 import { Tab, Tabs } from '@core/Tabs';
-import { useIndividualChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box, Fade, Tooltip } from '@mui/material';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
@@ -41,8 +41,14 @@ export const HouseholdMembersPage = (): ReactElement => {
         }),
     });
 
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const initialFilter = {
     search: '',

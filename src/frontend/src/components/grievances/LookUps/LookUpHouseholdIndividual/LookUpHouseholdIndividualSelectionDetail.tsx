@@ -1,13 +1,14 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { TabPanel } from '@core/TabPanel';
 import { Tab, Tabs } from '@core/Tabs';
-import {
-  useAllProgramsForChoicesQuery,
-  useIndividualChoiceDataQuery,
-} from '@generated/graphql';
+import { useAllProgramsForChoicesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import get from 'lodash/get';
@@ -19,9 +20,6 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -61,8 +59,16 @@ export function LookUpHouseholdIndividualSelectionDetail({
           businessAreaSlug: businessArea,
         }),
     });
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
   const initialFilterHH = {
     program: isAllPrograms ? '' : programId,
     search: '',

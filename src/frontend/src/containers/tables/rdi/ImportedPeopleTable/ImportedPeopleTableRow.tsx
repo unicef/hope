@@ -13,9 +13,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
 import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 interface ImportedIndividualsTableRowProps {
-  individual;
+  individual: IndividualList;
   choices: HouseholdChoiceDataQuery;
   rdi;
 }
