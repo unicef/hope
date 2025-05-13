@@ -141,6 +141,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "comments",
             "documentation",
             "ticket_notes",
+            "ticket_details",
         )
 
     def get_payment_record(self, obj: GrievanceTicket) -> Dict:
