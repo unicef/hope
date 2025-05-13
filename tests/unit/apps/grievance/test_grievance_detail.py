@@ -244,3 +244,77 @@ class TestGrievanceTicketDetail:
         )
         assert response.status_code == status.HTTP_200_OK
 
+    @pytest.mark.parametrize(
+        "permissions, area_limit, expected_status_1, expected_status_2",
+        [
+            ([Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE], False, status.HTTP_200_OK, status.HTTP_404_NOT_FOUND),
+            ([Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR], False, status.HTTP_200_OK, status.HTTP_404_NOT_FOUND),
+            ([Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER], False, status.HTTP_404_NOT_FOUND, status.HTTP_404_NOT_FOUND),
+            ([Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE], False, status.HTTP_404_NOT_FOUND, status.HTTP_200_OK),
+            ([Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR], False, status.HTTP_404_NOT_FOUND, status.HTTP_404_NOT_FOUND),
+            ([Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER], False, status.HTTP_404_NOT_FOUND, status.HTTP_200_OK),
+            (
+                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE],
+                False, status.HTTP_200_OK, status.HTTP_200_OK,
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE],
+                True, status.HTTP_404_NOT_FOUND, status.HTTP_200_OK,
+            ),
+        ],
+    )
+    def test_grievance_ticket_detail_access_based_on_permissions(
+        self,
+        permissions: list,
+        area_limit: bool,
+        expected_status_1: status,
+        expected_status_2: status,
+        create_user_role_with_permissions: Callable,
+        set_admin_area_limits_in_program: Callable,
+    ) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=permissions,
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        grievance_ticket_non_sensitive_with_creator = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+            issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+        )
+        grievance_ticket_non_sensitive_with_creator.programs.add(self.program)
+        grievance_ticket_sensitive_with_owner = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE,
+        )
+        grievance_ticket_sensitive_with_owner.created_by = self.user2
+        grievance_ticket_sensitive_with_owner.assigned_to = self.user
+        grievance_ticket_sensitive_with_owner.admin2 = None
+        grievance_ticket_sensitive_with_owner.save()
+        grievance_ticket_sensitive_with_owner.programs.add(self.program)
+        if area_limit:
+            set_admin_area_limits_in_program(self.partner, self.program, [self.area2])
+
+        response_1 = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket_non_sensitive_with_creator.id),
+                },
+            )
+        )
+        assert response_1.status_code == expected_status_1
+
+        response_2 = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket_sensitive_with_owner.id),
+                },
+            )
+        )
+        assert response_2.status_code == expected_status_2
