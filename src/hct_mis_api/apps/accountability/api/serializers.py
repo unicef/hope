@@ -220,17 +220,17 @@ class MessageCreateSerializer(serializers.Serializer):
 
 
 class AccountabilityFullListArgumentsSerializer(serializers.Serializer):
-    excluded_admin_areas = serializers.List(serializers.CharField(required=True))
+    excluded_admin_areas = serializers.ListField(child=serializers.CharField(required=True))
 
 
 class AccountabilityCommunicationMessageAgeInput(serializers.Serializer):
-    min = serializers.Int(required=True)
-    max = serializers.Int(required=True)
+    min = serializers.IntegerField(required=True)
+    max = serializers.IntegerField(required=True)
 
 
 class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgumentsSerializer):
-    confidence_interval = serializers.Float(required=True)
-    margin_of_error = serializers.Float(required=True)
+    confidence_interval = serializers.FloatField(required=True)
+    margin_of_error = serializers.FloatField(required=True)
     age = AccountabilityCommunicationMessageAgeInput(required=True)
     sex = serializers.CharField(required=True)
 
