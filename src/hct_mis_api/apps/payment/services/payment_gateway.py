@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Optional, Union
 from django.utils.timezone import now
 
 from _decimal import Decimal
-from apps.payment.models.payment import FinancialInstitutionMapping
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
@@ -21,6 +20,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
+from hct_mis_api.apps.payment.models.payment import FinancialInstitutionMapping
 from hct_mis_api.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,

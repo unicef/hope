@@ -5,6 +5,8 @@ from unittest import mock
 from unittest.mock import Mock
 
 import pytest
+from apps.payment.models import FinancialInstitution
+from apps.payment.models.payment import FinancialInstitutionMapping
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -613,14 +615,18 @@ class TestPaymentGatewayService(APITestCase):
         }, 200
 
         primary_collector = self.payments[0].collector
+        fi = FinancialInstitution.objects.create(type=FinancialInstitution.FinancialInstitutionType.TELCO, code="ABC")
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=fi, financial_service_provider=self.payments[0].financial_service_provider, code="CBA"
+        ).first()
         AccountFactory(
             individual=primary_collector,
             data={
-                "service_provider_code": "ABC",
                 "number": "123456789",
                 "provider": "Provider",
             },
             account_type=AccountType.objects.get(key="mobile"),
+            financial_institution=fi,
         )
         self.payments[0].delivery_type = self.dm_mobile_money
         self.payments[0].save()
@@ -651,7 +657,7 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": "mobile_money",
                         "account_type": "mobile",
                         "account": {
-                            "service_provider_code": "ABC",
+                            "service_provider_code": "CBA",
                             "number": "123456789",
                             "provider": "Provider",
                         },
