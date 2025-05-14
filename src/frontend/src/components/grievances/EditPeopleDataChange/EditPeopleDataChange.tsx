@@ -18,8 +18,6 @@ import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { ExistingPaymentChannelFieldArray } from '../EditIndividualDataChange/ExistingPaymentChannelFieldArray';
-import { NewPaymentChannelFieldArray } from '../EditIndividualDataChange/NewPaymentChannelFieldArray';
 import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 
 const BoxWithBorders = styled.div`
@@ -156,7 +154,8 @@ function EditPeopleDataChange({
           )}
         </Box>
       </BoxWithBorders>
-      <BoxWithBorders>
+      {/* //TODO: Uncomment and implement the logic for rendering payment channels */}
+      {/* <BoxWithBorders>
         <Box mt={3}>
           <Title>
             <Typography variant="h6">{t('Payment Channels')}</Typography>
@@ -168,7 +167,7 @@ function EditPeopleDataChange({
           />
           {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
         </Box>
-      </BoxWithBorders>
+      </BoxWithBorders> */}
     </>
   );
 }

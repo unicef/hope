@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentsPeopleTableHeadCells';
 import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { createApiParams } from '@utils/apiUtils';
 
 interface PaymentsPeopleTableProps {
   household?: HouseholdDetail;
@@ -37,10 +38,24 @@ function PaymentsPeopleTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      queryVariables,
+      businessArea,
+      household.id,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsHouseholdsPaymentsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household.id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

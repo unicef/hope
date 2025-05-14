@@ -1,9 +1,6 @@
-import { Box, Grid2 as Grid } from '@mui/material';
-import { FieldArray } from 'formik';
-import { ReactElement } from 'react';
-import { useLocation } from 'react-router-dom';
-import { EditPaymentChannelRow } from './EditPaymentChannelRow';
+import { Grid2 as Grid } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { ReactElement } from 'react';
 
 export interface ExistingPaymentChannelFieldArrayProps {
   setFieldValue;
@@ -11,16 +8,14 @@ export interface ExistingPaymentChannelFieldArrayProps {
   individual: IndividualDetail;
 }
 
-export function ExistingPaymentChannelFieldArray({
-  setFieldValue,
-  values,
-  individual,
-}: ExistingPaymentChannelFieldArrayProps): ReactElement {
-  const location = useLocation();
-  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+export function ExistingPaymentChannelFieldArray(): ReactElement {
+  //TODO: Uncomment and implement the logic for rendering payment channels
+
+  // const location = useLocation();
+  // const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <Grid container spacing={3}>
-      <FieldArray
+      {/* <FieldArray
         name="individualDataUpdatePaymentChannelsToEdit"
         render={(arrayHelpers) =>
           individual?.paymentChannels?.length > 0 ? (
@@ -40,7 +35,7 @@ export function ExistingPaymentChannelFieldArray({
             isEditTicket && <Box ml={2}>-</Box>
           )
         }
-      />
+      /> */}
     </Grid>
   );
 }

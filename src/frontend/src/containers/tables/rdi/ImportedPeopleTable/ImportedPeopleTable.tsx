@@ -5,6 +5,7 @@ import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useState } from 'react';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
@@ -50,9 +51,20 @@ export function ImportedPeopleTable({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
-    queryKey: ['businessAreasProgramsIndividualsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsIndividualsList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList(queryVariables),
+      RestService.restBusinessAreasProgramsIndividualsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
   });
 
   return (
