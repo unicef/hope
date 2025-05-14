@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-
  * * `AF1746` - Lake Ariel
  * * `AF1775` - Port Reginamouth
  * * `AF1752` - West Miguelville
