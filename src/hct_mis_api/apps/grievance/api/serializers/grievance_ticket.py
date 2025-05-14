@@ -17,7 +17,7 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
 )
-from hct_mis_api.apps.payment.services.payment_gateway import PaymentSerializer
+from hct_mis_api.apps.payment.api.serializers import PaymentSmallSerializer
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 
 
@@ -144,13 +144,13 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
             "ticket_details",
         )
 
-    def get_payment_record(self, obj: GrievanceTicket) -> Dict:
+    def get_payment_record(self, obj: GrievanceTicket) -> Optional[Dict]:
         payment_verification = getattr(obj.ticket_details, "payment_verification", None)
         if payment_verification:
             payment_record = getattr(payment_verification, "payment", None)
         else:
             payment_record = getattr(obj.ticket_details, "payment", None)
-        return PaymentSerializer(payment_record).data
+        return PaymentSmallSerializer(payment_record).data if payment_record else None
 
     def get_linked_tickets(self, obj: GrievanceTicket) -> Dict:
         return GrievanceTicketSimpleSerializer(obj._linked_tickets.order_by("created_at"), many=True).data
