@@ -164,7 +164,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     def get_ticket_details(self, obj: GrievanceTicket) -> Optional[Dict]:
         ticket_details = obj.ticket_details
         serializer = TICKET_DETAILS_SERIALIZER_MAPPING.get(type(ticket_details))
-        return serializer(ticket_details).data if serializer else None
+        return serializer(ticket_details, context=self.context).data if serializer else None
 
 
 class GrievanceChoicesSerializer(serializers.Serializer):

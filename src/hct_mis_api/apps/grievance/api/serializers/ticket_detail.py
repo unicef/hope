@@ -145,9 +145,6 @@ class DeduplicationEngineSimilarityPairIndividualSerializer(serializers.Serializ
     photo = serializers.SerializerMethodField()
     full_name = serializers.CharField()
     unicef_id = serializers.CharField()
-    similarity_score = serializers.FloatField()
-    age = serializers.IntegerField()
-    location = serializers.CharField()
 
     def get_photo(self, obj: Any) -> Optional[str]:
         individual = Individual.all_objects.filter(id=obj.get("id")).first()
@@ -181,20 +178,25 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
     has_duplicated_document = serializers.SerializerMethodField()
     golden_records_individual = IndividualForTicketSerializer()
     extra_data = serializers.SerializerMethodField()
+    possible_duplicate = IndividualForTicketSerializer()
     possible_duplicates = IndividualForTicketSerializer(many=True)
     selected_duplicates = IndividualForTicketSerializer(source="selected_individuals", many=True)
+    selected_individual = IndividualForTicketSerializer()
     selected_distinct = IndividualForTicketSerializer(many=True)
 
     class Meta:
         model = TicketNeedsAdjudicationDetails
         fields = (
             "id",
-            "has_duplicated_document" "golden_records_individual",
-            "extra_data",
+            "has_duplicated_document",
+            "is_multiple_duplicates_version",
+            "golden_records_individual",
+            "possible_duplicate",
             "possible_duplicates",
             "selected_duplicates",
+            "selected_individual",
             "selected_distinct",
-            "is_multiple_duplicates_version",
+            "extra_data",
             "role_reassign_data",
         )
 
@@ -207,7 +209,7 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
                 "golden_records": obj.extra_data.get("golden_records"),
                 "possible_duplicate": obj.extra_data.get("possible_duplicate"),
                 "dedup_engine_similarity_pair": obj.extra_data.get("dedup_engine_similarity_pair"),
-            }
+            }, context=self.context
         ).data
 
 
