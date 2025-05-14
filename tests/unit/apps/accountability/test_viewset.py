@@ -1,5 +1,6 @@
 from typing import Any, List
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlencode
 
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -726,6 +727,12 @@ class TestMessageViewSet:
             body="MSG body",
             created_by=self.user,
             sampling_type="FULL_LIST",
+            payment_plan=PaymentPlanFactory(
+                status=PaymentPlan.Status.TP_LOCKED,
+                created_by=self.user,
+                business_area=self.afghanistan,
+                program_cycle=self.program_active.cycles.first(),
+            ),
         )
         # Message without Program
         CommunicationMessageFactory(
@@ -787,6 +794,23 @@ class TestMessageViewSet:
             assert "number_of_recipients" in msg
             assert "created_by" in msg
             assert "created_at" in msg
+
+    def test_msg_filter_by_program(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+            self.afghanistan,
+            self.program_active,
+        )
+        response = self.client.get(self.url_list + "?" + urlencode({"program": str(self.program_active.pk)}))
+
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 1
+        msg = resp_data["results"][0]
+        assert "id" in msg
+        assert "unicef_id" in msg
+        assert msg["title"] == "MSG title"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",

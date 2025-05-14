@@ -132,7 +132,6 @@ class FeedbackViewSet(
         program_slug = self.kwargs.get("program_slug")
         program = None
         if program_slug:
-            print("GET PROGRAMMMM ")
             program = Program.objects.get(slug=program_slug)
 
         if program_id := serializer.validated_data.get("program_id"):
