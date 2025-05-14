@@ -33,7 +33,12 @@ class TestMessageArgumentVerifier:
         assert "Must provide full_list_arguments for FULL_LIST" in str(e.value)
 
         service = MessageArgumentVerifier(
-            {"households": "1", "sampling_type": Message.SamplingChoices.RANDOM, "full_list_arguments": "abc", "random_sampling_arguments": "a"}
+            {
+                "households": "1",
+                "sampling_type": Message.SamplingChoices.RANDOM,
+                "full_list_arguments": "abc",
+                "random_sampling_arguments": "a",
+            }
         )
         with pytest.raises(ValidationError) as e:
             service.verify()
