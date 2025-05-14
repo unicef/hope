@@ -5,8 +5,6 @@ from unittest import mock
 from unittest.mock import Mock
 
 import pytest
-from apps.payment.models import FinancialInstitution
-from apps.payment.models.payment import FinancialInstitutionMapping
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -31,6 +29,8 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
+    FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FspNameMapping,
     Payment,
