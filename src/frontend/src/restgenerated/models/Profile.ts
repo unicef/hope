@@ -21,5 +21,11 @@ export type Profile = {
     readonly permissionsInScope: string;
     readonly userRoles: Record<string, any>;
     readonly partnerRoles: Record<string, any>;
+    /**
+     * Check if the cross area filter is available for the user.
+     * Access to the cross-area filter, in addition to the standard permissions check,
+     * is available only if user does not have ANY area limits in the program (has full-area-access)
+     */
+    readonly crossAreaFilterAvailable: boolean;
 };
 

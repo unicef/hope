@@ -22,7 +22,7 @@ import {
 } from '@utils/constants';
 import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
 import get from 'lodash/get';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import {
@@ -38,6 +38,8 @@ import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface GrievancesTableProps {
   filter;
@@ -47,7 +49,8 @@ interface GrievancesTableProps {
 export const GrievancesTable = ({
   filter,
 }: GrievancesTableProps): ReactElement => {
-  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
+  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } =
+    useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
@@ -63,36 +66,68 @@ export const GrievancesTable = ({
     replacements,
   );
 
-  const initialVariables: AllGrievanceTicketQueryVariables = {
-    businessArea,
-    search: filter.search.trim(),
-    documentType: filter.documentType,
-    documentNumber: filter.documentNumber.trim(),
-    status: [filter.status],
-    fsp: filter.fsp,
-    createdAtRange: JSON.stringify({
-      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+  const initialVariables = useMemo(
+    () => ({
+      businessArea,
+      search: filter.search.trim(),
+      documentType: filter.documentType,
+      documentNumber: filter.documentNumber.trim(),
+      status: [filter.status],
+      fsp: filter.fsp,
+      createdAtRange: JSON.stringify({
+        min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+        max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+      }),
+      category: filter.category,
+      issueType: filter.issueType,
+      assignedTo: filter.assignedTo,
+      createdBy: filter.createdBy,
+      admin1: filter.admin1,
+      admin2: filter.admin2,
+      registrationDataImport: filter.registrationDataImport,
+      cashPlan: filter.cashPlan,
+      scoreMin: filter.scoreMin,
+      scoreMax: filter.scoreMax,
+      grievanceType: filter.grievanceType,
+      grievanceStatus: filter.grievanceStatus,
+      priority: filter.priority === 'Not Set' ? 0 : filter.priority,
+      urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
+      preferredLanguage: filter.preferredLanguage,
+      program: isAllPrograms ? filter.program : programSlug,
+      isActiveProgram: filter.programState === 'active' ? true : null,
+      isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
-    category: filter.category,
-    issueType: filter.issueType,
-    assignedTo: filter.assignedTo,
-    createdBy: filter.createdBy,
-    admin1: filter.admin1,
-    admin2: filter.admin2,
-    registrationDataImport: filter.registrationDataImport,
-    cashPlan: filter.cashPlan,
-    scoreMin: filter.scoreMin,
-    scoreMax: filter.scoreMax,
-    grievanceType: filter.grievanceType,
-    grievanceStatus: filter.grievanceStatus,
-    priority: filter.priority === 'Not Set' ? 0 : filter.priority,
-    urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
-    preferredLanguage: filter.preferredLanguage,
-    program: isAllPrograms ? filter.program : programSlug,
-    isActiveProgram: filter.programState === 'active' ? true : null,
-    isCrossArea: filter.areaScope === 'cross-area' ? true : null,
-  };
+    [
+      businessArea,
+      filter.search,
+      filter.documentType,
+      filter.documentNumber,
+      filter.status,
+      filter.fsp,
+      filter.createdAtRangeMin,
+      filter.createdAtRangeMax,
+      filter.category,
+      filter.issueType,
+      filter.assignedTo,
+      filter.createdBy,
+      filter.admin1,
+      filter.admin2,
+      filter.registrationDataImport,
+      filter.cashPlan,
+      filter.scoreMin,
+      filter.scoreMax,
+      filter.grievanceType,
+      filter.grievanceStatus,
+      filter.priority,
+      filter.urgency,
+      filter.preferredLanguage,
+      filter.program,
+      filter.programState,
+      filter.areaScope,
+      isAllPrograms,
+      programSlug,
+    ],
+  );
 
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
@@ -148,6 +183,24 @@ export const GrievancesTable = ({
       },
     },
   );
+
+  const { data, isLoading, error } = useQuery<PaginatedGrievanceTicketListList>(
+    {
+      queryKey: ['businessAreasGrievanceTicketsList', queryVariables],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsGrievanceTicketsList(
+          queryVariables,
+        ),
+    },
+  );
+
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: ['businessAreasGrievanceTicketsCount', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const permissions = usePermissions();
 
