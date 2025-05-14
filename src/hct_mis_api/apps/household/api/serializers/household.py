@@ -238,7 +238,7 @@ class IndividualChoicesSerializer(serializers.Serializer):
     # choices for grievance tickets
     relationship_choices = serializers.SerializerMethodField()
     role_choices = serializers.SerializerMethodField()
-    martial_status_choices = serializers.SerializerMethodField()
+    marital_status_choices = serializers.SerializerMethodField()
     identity_type_choices = serializers.SerializerMethodField()
     observed_disability_choices = serializers.SerializerMethodField()
     severity_of_disability_choices = serializers.SerializerMethodField()
@@ -262,7 +262,7 @@ class IndividualChoicesSerializer(serializers.Serializer):
     def get_role_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(ROLE_CHOICE)
 
-    def get_martial_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    def get_marital_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(MARITAL_STATUS_CHOICE)
 
     def get_identity_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:

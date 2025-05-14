@@ -3,6 +3,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { IconButton, TableCell } from '@mui/material';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
+import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
@@ -66,8 +67,6 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUploadId, setSelectedUploadId] = useState<number | null>(null);
   const initialQueryVariables = {
-    page: 1,
-    page_size: 10,
     ordering: 'created_at',
     businessAreaSlug,
     programSlug: programId,
@@ -80,10 +79,19 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     isLoading,
     error,
   } = useQuery<PaginatedPeriodicDataUpdateUploadListList>({
-    queryKey: ['periodicDataUpdateUploads', queryVariables],
+    queryKey: [
+      'periodicDataUpdateUploads',
+      queryVariables,
+      businessAreaSlug,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
-        queryVariables,
+        createApiParams(
+          { businessAreaSlug, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

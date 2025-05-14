@@ -9,6 +9,7 @@ import { WarningTooltip } from '@components/core/WarningTooltip';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { createApiParams } from '@utils/apiUtils';
 import { TableCell } from '@mui/material';
 import { Box } from '@mui/system';
 import { RestService } from '@restgenerated/services/RestService';
@@ -86,9 +87,20 @@ export const HouseholdTable = ({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
-    queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsHouseholdsList',
+      queryVariables,
+      programId,
+      businessArea,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
+      RestService.restBusinessAreasProgramsHouseholdsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
   });
 
   const { data: countData } = useQuery<CountResponse>({

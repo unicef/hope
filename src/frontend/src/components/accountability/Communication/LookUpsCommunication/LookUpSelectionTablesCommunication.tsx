@@ -1,4 +1,3 @@
-import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import LookUpHouseholdTableCommunication from '@containers/tables/Communication/LookUpHouseholdTableCommunication/LookUpHouseholdTableCommunication';
 import { usePermissions } from '@hooks/usePermissions';
@@ -6,10 +5,11 @@ import { CommunicationTabsValues } from '@utils/constants';
 import { ReactElement } from 'react';
 import LookUpTargetPopulationTableCommunication from '@containers/tables/Communication/LookUpTargetPopulationTableCommunication/LookUpTargetPopulationTableCommunication';
 import LookUpRegistrationDataImportTableCommunication from '@containers/tables/Communication/LookUpRegistrationDataImportTableCommunication/LookUpRegistrationDataImportTableCommunication';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface LookUpSelectionTablesCommunicationProps {
   selectedTab: number;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
   values;
   filtersHouseholdApplied;
   filtersTargetPopulationApplied;

@@ -9,6 +9,7 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './TargetPopulationPeopleHeadCells';
 import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
+import { createApiParams } from '@utils/apiUtils';
 
 interface TargetPopulationPeopleTableProps {
   id?: string;
@@ -36,10 +37,24 @@ export function TargetPopulationPeopleTable({
     isLoading,
     error,
   } = useQuery<PaginatedTPHouseholdListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      businessArea,
+      programId,
+      queryVariables,
+      id,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            targetPopulationId: id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

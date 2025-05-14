@@ -7,6 +7,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { createApiParams } from '@utils/apiUtils';
 import { PeoplePaymentPlanTableRow } from './PeoplePaymentPlanTableRow';
 import { headCells } from './PeoplePaymentPlansHeadCells';
 import { CountResponse } from '@restgenerated/models/CountResponse';
@@ -42,10 +43,19 @@ export const PeoplePaymentPlansTable = ({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansList(
-        queryVariables,
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

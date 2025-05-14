@@ -1,6 +1,7 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { PaymentPlanStatus } from '@generated/graphql';
+import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
@@ -64,10 +65,19 @@ export function LookUpTargetPopulationTableSurveys({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansList(
-        queryVariables,
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

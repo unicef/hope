@@ -1133,7 +1133,7 @@ class TestIndividualChoices:
             "status_choices": to_choice_object(INDIVIDUAL_STATUS_CHOICES),
             "relationship_choices": to_choice_object(RELATIONSHIP_CHOICE),
             "role_choices": to_choice_object(ROLE_CHOICE),
-            "martial_status_choices": to_choice_object(MARITAL_STATUS_CHOICE),
+            "marital_status_choices": to_choice_object(MARITAL_STATUS_CHOICE),
             "identity_type_choices": to_choice_object(AGENCY_TYPE_CHOICES),
             "observed_disability_choices": to_choice_object(OBSERVED_DISABILITY_CHOICE),
             "severity_of_disability_choices": to_choice_object(SEVERITY_OF_DISABILITY_CHOICES),
