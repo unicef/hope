@@ -46,7 +46,7 @@ export function OtherRelatedTickets({
             </Box>
           );
         })
-      : <span>-</span>;   // '-'
+      : <>-</>;
 
   const openExistingTickets =
     ticket.household?.id && existingTickets.length
