@@ -618,7 +618,7 @@ class TestPaymentGatewayService(APITestCase):
         fi = FinancialInstitution.objects.create(type=FinancialInstitution.FinancialInstitutionType.TELCO, code="ABC")
         FinancialInstitutionMapping.objects.create(
             financial_institution=fi, financial_service_provider=self.payments[0].financial_service_provider, code="CBA"
-        ).first()
+        )
         AccountFactory(
             individual=primary_collector,
             data={
@@ -660,6 +660,7 @@ class TestPaymentGatewayService(APITestCase):
                             "service_provider_code": "CBA",
                             "number": "123456789",
                             "provider": "Provider",
+                            "financial_institution": "ABC",
                         },
                     },
                     "extra_data": {},
