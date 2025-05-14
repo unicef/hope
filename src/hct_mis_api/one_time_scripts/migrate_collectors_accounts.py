@@ -31,6 +31,7 @@ def migrate_bank_account_info() -> None:
         dmd, _ = Account.get_or_create(
             individual_id=bai.individual_id,
             account_type=bank_account_type,
+            number=bai.bank_account_number or "",
         )
         dmd.data.update(
             dict(
@@ -39,7 +40,7 @@ def migrate_bank_account_info() -> None:
                 debit_card_number=bai.debit_card_number or "",
                 branch_name=bai.bank_branch_name or "",
                 account_holder_name=bai.account_holder_name or "",
-            )  # TODO field names?
+            )
         )
         dmd.save()
         dmd_ids.append(dmd.id)

@@ -340,7 +340,7 @@ class GenericRegistrationService(BaseRegistrationService):
                     self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
             if account_data:
-                financial_institution_code = account_data["data"].get("code", None)
+                financial_institution_code = account_data["data"].get("uba_code", None)
                 PendingAccount.objects.create(
                     individual_id=individual.id,
                     account_type=AccountType.objects.get(key="bank"),

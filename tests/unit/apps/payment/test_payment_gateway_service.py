@@ -29,6 +29,8 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
+    FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FspNameMapping,
     Payment,
@@ -613,14 +615,18 @@ class TestPaymentGatewayService(APITestCase):
         }, 200
 
         primary_collector = self.payments[0].collector
+        fi = FinancialInstitution.objects.create(type=FinancialInstitution.FinancialInstitutionType.TELCO, code="ABC")
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=fi, financial_service_provider=self.payments[0].financial_service_provider, code="CBA"
+        )
         AccountFactory(
             individual=primary_collector,
             data={
-                "service_provider_code": "ABC",
                 "number": "123456789",
                 "provider": "Provider",
             },
             account_type=AccountType.objects.get(key="mobile"),
+            financial_institution=fi,
         )
         self.payments[0].delivery_type = self.dm_mobile_money
         self.payments[0].save()
@@ -651,9 +657,10 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": "mobile_money",
                         "account_type": "mobile",
                         "account": {
-                            "service_provider_code": "ABC",
+                            "service_provider_code": "CBA",
                             "number": "123456789",
                             "provider": "Provider",
+                            "financial_institution": "ABC",
                         },
                     },
                     "extra_data": {},

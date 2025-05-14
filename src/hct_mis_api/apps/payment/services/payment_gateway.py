@@ -20,6 +20,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
     PaymentPlanSplit,
 )
+from hct_mis_api.apps.payment.models.payment import FinancialInstitutionMapping
 from hct_mis_api.apps.payment.utils import (
     get_payment_delivered_quantity_status_and_value,
     get_quantity_in_usd,
@@ -140,6 +141,15 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         payload_data = payload.data
 
         if delivery_mech_data:
+            financial_institution_code = delivery_mech_data.get("financial_institution") or delivery_mech_data.get(
+                "code"
+            )
+            mapping = FinancialInstitutionMapping.objects.filter(
+                financial_institution__code=financial_institution_code,
+                financial_service_provider=obj.financial_service_provider,
+            ).first()
+            if financial_institution_code and mapping:
+                delivery_mech_data["service_provider_code"] = mapping.code
             payload_data["account"] = delivery_mech_data
 
         return payload_data
