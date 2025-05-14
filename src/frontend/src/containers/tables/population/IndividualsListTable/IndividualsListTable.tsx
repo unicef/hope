@@ -101,8 +101,6 @@ export function IndividualsListTable({
       ),
   });
 
-  //TODO: add individuals count query
-
   return (
     <TableWrapper>
       <UniversalRestTable
