@@ -1,9 +1,11 @@
+import datetime
 import json
 from typing import Any
 
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 
 import pytest
 from rest_framework import status
@@ -73,7 +75,9 @@ class TestUserProfile:
             },
         )
 
-        self.user = UserFactory(partner=self.partner)
+        self.user = UserFactory(
+            partner=self.partner, last_login=timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d"))
+        )
         self.api_client = api_client(self.user)
 
         self.role1 = RoleFactory(
@@ -166,6 +170,9 @@ class TestUserProfile:
                 *self.role_p3.permissions,
             ]
         }
+
+        assert profile_data["status"] == self.user.status
+        assert profile_data["last_login"] == f"{self.user.last_login:%Y-%m-%dT%H:%M:%SZ}"
 
     def test_user_profile_in_scope_program(self) -> None:
         response = self.api_client.get(self.user_profile_url, {"program": self.program1.slug})
@@ -438,7 +445,11 @@ class TestProgramUsers:
         )
         self.role_p2 = RoleFactory(name="TestRoleP2", permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE.value])
 
-        self.user1 = UserFactory(partner=self.partner, first_name="Bob")
+        self.user1 = UserFactory(
+            partner=self.partner,
+            first_name="Bob",
+            last_login=timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
+        )
         RoleAssignmentFactory(user=self.user1, business_area=self.afghanistan, role=self.role1)
 
         self.user2 = UserFactory(partner=self.partner, first_name="Carol")
@@ -509,6 +520,8 @@ class TestProgramUsers:
                 "id": user.partner.id,
                 "name": user.partner.name,
             }
+            assert user_result["status"] == user.status
+            assert user_result["last_login"] == (f"{user.last_login:%Y-%m-%dT%H:%M:%SZ}" if user.last_login else None)
 
         # self.user
         response_results[0]["partner_roles"] = []

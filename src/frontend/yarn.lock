@@ -3271,6 +3271,7 @@
   dependencies:
     "@typescript-eslint/utils" "^8.18.1"
 
+
 "@tanstack/query-core@5.76.0":
   version "5.76.0"
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.76.0.tgz#3b4d5d34ce307ba0cf7d1a3e90d7adcdc6c46be0"
@@ -3288,12 +3289,12 @@
   dependencies:
     "@tanstack/query-devtools" "5.65.0"
 
-"@tanstack/react-query@^5.68.0":
-  version "5.76.1"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.76.1.tgz#ac8a19f99dfec1452a44fe22d46680c396c21152"
-  integrity sha512-YxdLZVGN4QkT5YT1HKZQWiIlcgauIXEIsMOTSjvyD5wLYK8YVvKZUPAysMqossFJJfDpJW3pFn7WNZuPOqq+fw==
+"@tanstack/react-query@^5.75.7":
+  version "5.75.7"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.75.7.tgz#5984900369365614edb4a0ed16c1cb521d9fb5ee"
+  integrity sha512-JYcH1g5pNjKXNQcvvnCU/PueaYg05uKBDHlWIyApspv7r5C0BM12n6ysa2QF2T+1tlPnNXOob8vr8o96Nx0GxQ==
   dependencies:
-    "@tanstack/query-core" "5.76.0"
+    "@tanstack/query-core" "5.75.7"
 
 "@testing-library/dom@^10.4.0":
   version "10.4.0"
@@ -8354,10 +8355,10 @@ strip-json-comments@^3.1.1:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
 
-styled-components@^6.1.8:
-  version "6.1.15"
-  resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-6.1.15.tgz#7651904d5424d08c1046056eb39024cc23c72ab7"
-  integrity sha512-PpOTEztW87Ua2xbmLa7yssjNyUF9vE7wdldRfn1I2E6RTkqknkBYpj771OxM/xrvRGinLy2oysa7GOd7NcZZIA==
+styled-components@^6.1.18:
+  version "6.1.18"
+  resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-6.1.18.tgz#9647497a92326ba9d758051c914f15004d524bb9"
+  integrity sha512-Mvf3gJFzZCkhjY2Y/Fx9z1m3dxbza0uI9H1CbNZm/jSHCojzJhQ0R7bByrlFJINnMzz/gPulpoFFGymNwrsMcw==
   dependencies:
     "@emotion/is-prop-valid" "1.2.2"
     "@emotion/unitless" "0.8.1"

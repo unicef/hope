@@ -5456,6 +5456,7 @@ export class RestService {
         program,
         roles,
         search,
+        serializer,
         status,
     }: {
         businessAreaSlug: string,
@@ -5496,6 +5497,7 @@ export class RestService {
         program?: string,
         roles?: Array<string>,
         search?: string,
+        serializer?: string,
         /**
          * * `ACTIVE` - Active
          * * `INACTIVE` - Inactive
@@ -5522,6 +5524,7 @@ export class RestService {
                 'program': program,
                 'roles': roles,
                 'search': search,
+                'serializer': serializer,
                 'status': status,
             },
         });
