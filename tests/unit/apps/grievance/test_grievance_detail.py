@@ -18,7 +18,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryF
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, TicketNoteFactory, GrievanceDocumentFactory, \
     TicketHouseholdDataUpdateDetailsFactory, TicketIndividualDataUpdateDetailsFactory, \
     TicketAddIndividualDetailsFactory, TicketDeleteIndividualDetailsFactory, TicketDeleteHouseholdDetailsFactory, \
-    TicketSystemFlaggingDetailsFactory
+    TicketSystemFlaggingDetailsFactory, TicketPaymentVerificationDetailsFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
@@ -26,6 +26,9 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.household.api.serializers.individual import IndividualForTicketSerializer
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals, DocumentFactory, DocumentTypeFactory
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, SINGLE, IndividualRoleInHousehold, ROLE_PRIMARY, DUPLICATE
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentVerificationPlanFactory, \
+    PaymentVerificationFactory, PaymentFactory, PaymentVerificationSummaryFactory
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
@@ -378,7 +381,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == {}
+        assert data["payment_record"] == None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -418,7 +421,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == {}
+        assert data["payment_record"] == None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -468,7 +471,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == {}
+        assert data["payment_record"] == None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -521,7 +524,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == {}
+        assert data["payment_record"] == None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -575,7 +578,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == {}
+        assert data["payment_record"] == None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -654,7 +657,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == {}
+        assert data["payment_record"] == None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -720,6 +723,87 @@ class TestGrievanceTicketDetail:
                     }
                 ],
             },
+        }
+
+    def test_grievance_detail_payment_verification(self, create_user_role_with_permissions: Any) -> None:
+        grievance_ticket = GrievanceTicketFactory(
+            **self.grievance_ticket_base_data,
+            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+            household_unicef_id=self.household1.unicef_id,
+        )
+        payment_plan = PaymentPlanFactory(
+            name="TEST",
+            business_area=self.afghanistan,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan=payment_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+        )
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=self.household1,
+            currency="PLN",
+        )
+        payment_verification = PaymentVerificationFactory(
+            payment_verification_plan=payment_verification_plan,
+            payment=payment,
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            received_amount=10,
+        )
+        ticket_details = TicketPaymentVerificationDetailsFactory(
+            ticket=grievance_ticket,
+            approve_status=True,
+            new_status=PaymentVerification.STATUS_RECEIVED,
+            old_received_amount=0,
+            new_received_amount=20,
+            payment_verification_status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            payment_verification=payment_verification,
+        )
+        self._assign_ticket_data(grievance_ticket)
+
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                self.detail_url_name,
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "pk": str(grievance_ticket.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.data
+
+        self._assert_base_grievance_data(data, grievance_ticket)
+
+        assert data["payment_record"] == {
+            "id": str(payment.id),
+            "unicef_id": payment.unicef_id,
+            "parent_id": payment_plan.id,
+            "delivered_quantity": f"{payment.delivered_quantity:.2f}",
+            "entitlement_quantity": f"{payment.entitlement_quantity:.2f}",
+            "verification": payment_verification.id,
+        }
+
+        assert data["ticket_details"] == {
+            "id": str(ticket_details.id),
+            "approve_status": ticket_details.approve_status,
+            "new_status": ticket_details.new_status,
+            "old_received_amount": f"{ticket_details.old_received_amount:.2f}",
+            "new_received_amount": f"{ticket_details.new_received_amount:.2f}",
+            "payment_verification_status": ticket_details.payment_verification_status,
+            "has_multiple_payment_verifications": False,
+            "payment_verification": {
+                "id": str(payment_verification.id),
+                "status": payment_verification.status,
+                "status_date": f"{payment_verification.status_date:%Y-%m-%dT%H:%M:%SZ}",
+                "received_amount": f"{payment_verification.received_amount:.2f}",
+            }
         }
 
     def _assign_ticket_data(self, grievance_ticket: GrievanceTicket) -> None:
