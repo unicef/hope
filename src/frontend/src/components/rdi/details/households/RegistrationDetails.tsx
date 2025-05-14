@@ -1,4 +1,4 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Theme, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -8,7 +8,7 @@ import { useRegistrationDataImportQuery } from '@generated/graphql';
 import { Title } from '@core/Title';
 import { ReactElement } from 'react';
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;

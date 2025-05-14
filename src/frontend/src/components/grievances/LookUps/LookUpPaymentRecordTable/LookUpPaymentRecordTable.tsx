@@ -7,6 +7,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 
 interface LookUpPaymentRecordTableProps {
@@ -34,9 +35,25 @@ export function LookUpPaymentRecordTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: ['businessAreasProgramsPaymentsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentsList',
+      queryVariables,
+      initialValues?.selectedHousehold?.id,
+      businessArea,
+      programId,
+    ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentsList(queryVariables);
+      return RestService.restBusinessAreasProgramsPaymentsList(
+        createApiParams(
+          {
+            householdId: initialValues?.selectedHousehold?.id,
+            businessAreaSlug: businessArea,
+            slug: programId === 'all' ? null : programId,
+          },
+          {},
+          { withPagination: true },
+        ),
+      );
     },
   });
   const [selected, setSelected] = useState(

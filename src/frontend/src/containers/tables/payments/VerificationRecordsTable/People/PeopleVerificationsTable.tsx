@@ -3,6 +3,7 @@ import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/V
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,10 +43,21 @@ export function PeopleVerificationsTable({
     queryKey: [
       'businessAreasProgramsPaymentVerificationsVerificationsList',
       queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentVerificationPk: paymentPlanId,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

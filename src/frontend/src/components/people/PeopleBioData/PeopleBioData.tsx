@@ -1,11 +1,8 @@
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  GrievancesChoiceDataQuery,
-  HouseholdChoiceDataQuery,
-} from '@generated/graphql';
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { GrievancesChoiceDataQuery } from '@generated/graphql';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
@@ -21,11 +18,8 @@ import { useProgramContext } from '../../../programContext';
 import { DocumentPopulationPhotoModal } from '../../population/DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/LinkedGrievancesModal';
 import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
-
-const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
+import { Overview } from '@components/payments/Overview';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 const BorderBox = styled.div`
   border-bottom: 1px solid #e1e1e1;
@@ -35,7 +29,7 @@ interface PeopleBioDataProps {
   individual: IndividualDetail;
   baseUrl: string;
   businessArea: string;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: IndividualChoices;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
 export const PeopleBioData = ({

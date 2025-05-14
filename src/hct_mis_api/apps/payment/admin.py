@@ -715,23 +715,8 @@ class FinancialInstitutionAdmin(HOPEModelAdminBase):
     raw_id_fields = ("country",)
 
 
-class DeliveryMechanismConfigForm(forms.ModelForm):
-    required_fields = CommaSeparatedArrayField(required=False)
-
-    class Meta:
-        model = DeliveryMechanismConfig
-        fields = [
-            "required_fields",
-            "delivery_mechanism",
-            "fsp",
-            "country",
-        ]  # Add all fields you want to display in the admin
-
-
 @admin.register(DeliveryMechanismConfig)
 class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
-    form = DeliveryMechanismConfigForm
-
     list_display = (
         "id",
         "delivery_mechanism",
@@ -745,6 +730,7 @@ class DeliveryMechanismConfigAdmin(HOPEModelAdminBase):
         ("country", AutoCompleteFilter),
     )
     raw_id_fields = ("delivery_mechanism", "fsp", "country")
+    readonly_fields = ("required_fields", "fsp", "delivery_mechanism", "country")
 
 
 @admin.register(FinancialInstitutionMapping)
