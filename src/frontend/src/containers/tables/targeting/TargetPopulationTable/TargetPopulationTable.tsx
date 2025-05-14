@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { headCells } from './TargetPopulationTableHeadCells';
@@ -63,10 +64,22 @@ export function TargetPopulationTable({
     isLoading,
     error,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: ['businessAreasProgramsTargetPopulationsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

@@ -2,6 +2,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
+import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
@@ -69,10 +70,21 @@ function ProgrammesTable({
     isLoading: isLoadingPrograms,
     error: errorPrograms,
   } = useQuery<PaginatedProgramListList>({
-    queryKey: ['businessAreasProgramsList', initialQueryVariables],
+    queryKey: [
+      'businessAreasProgramsList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsList(initialQueryVariables),
-    enabled: !!initialQueryVariables.businessAreaSlug,
+      RestService.restBusinessAreasProgramsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+    enabled: !!queryVariables.businessAreaSlug,
   });
 
   const { data: dataProgramsCount } = useQuery<CountResponse>({

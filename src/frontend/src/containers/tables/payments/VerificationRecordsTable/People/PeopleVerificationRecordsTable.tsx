@@ -1,5 +1,6 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { createApiParams } from '@utils/apiUtils';
 import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTableRow';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
@@ -39,10 +40,24 @@ export function PeopleVerificationRecordsTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentVerificationPlanListList>({
-    queryKey: ['businessAreasProgramsPaymentVerificationsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentVerificationsList',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentPlanId,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

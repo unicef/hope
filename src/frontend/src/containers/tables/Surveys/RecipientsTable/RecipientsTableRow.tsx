@@ -7,13 +7,12 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { choicesToDict, householdStatusToColor } from '@utils/utils';
-import {
-  HouseholdNode,
-  IndividualNode,
-  useHouseholdChoiceDataQuery,
-} from '@generated/graphql';
+import { HouseholdNode, IndividualNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 interface RecipientsTableRowProps {
   household: HouseholdNode;
@@ -27,10 +26,15 @@ export const RecipientsTableRow = ({
   canViewDetails,
 }: RecipientsTableRowProps): ReactElement => {
   const navigate = useNavigate();
-  const { baseUrl } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery({
-      fetchPolicy: 'cache-first',
+  const { baseUrl, businessArea } = useBaseUrl();
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
     });
   const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {

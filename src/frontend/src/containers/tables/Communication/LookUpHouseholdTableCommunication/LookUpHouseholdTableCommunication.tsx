@@ -5,6 +5,7 @@ import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
+import { createApiParams } from '@utils/apiUtils';
 import { MouseEvent, ReactElement, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -95,9 +96,20 @@ function LookUpHouseholdTableCommunication({
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
 
   const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
-    queryKey: ['businessAreasProgramsHouseholdsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsHouseholdsList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
+      RestService.restBusinessAreasProgramsHouseholdsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
   });
 
   const [selected, setSelected] = useState<string[]>(

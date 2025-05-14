@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, decodeIdString } from '@utils/utils';
 import { ReactElement, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
+import { createApiParams } from '@utils/apiUtils';
 import styled from 'styled-components';
 import {
   headCellsSocialProgram,
@@ -128,10 +129,13 @@ export function LookUpIndividualTable({
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsList({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
+      RestService.restBusinessAreasProgramsIndividualsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
     enabled: !!businessArea && !!programId,
   });
 
