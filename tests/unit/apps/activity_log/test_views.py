@@ -72,7 +72,7 @@ class TestLogEntryView:
         l4 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=self.grv,
-            user=self.user,
+            user=None,
             business_area=self.afghanistan,
             object_repr=str(self.grv),
             changes=create_diff(None, self.grv, GrievanceTicket.ACTIVITY_LOG_MAPPING),
@@ -145,7 +145,7 @@ class TestLogEntryView:
             assert "action" in logs
             assert "changes" in logs
             assert "user" in logs
-            assert logs["user"] == "Test User"
+            assert logs["user"] == "-"
             assert "object_repr" in logs
             assert "content_type" in logs
             assert "is_user_generated" in logs
@@ -244,7 +244,6 @@ class TestLogEntryView:
         assert "object_id" in log
         assert log["object_id"] == "c74612a1-212c-4148-be5b-4b41d20e623c"
         assert log["object_repr"] == "Program 2"
-
         # user_id
         response = self.client.get(
             reverse(
@@ -262,7 +261,6 @@ class TestLogEntryView:
         assert log["object_id"] == "ad17c53d-11b0-4e9b-8407-2e034f03fd31"
         assert log["object_repr"] == "Program 1"
         assert log["user"] == f"{self.user_without_perms.first_name} {self.user_without_perms.last_name}"
-
         # module
         response = self.client.get(
             reverse(
@@ -275,6 +273,23 @@ class TestLogEntryView:
         assert response.status_code == status.HTTP_200_OK
         resp_data = response.json()
         assert len(resp_data["results"]) == 1
+        log = resp_data["results"][0]
+        assert "object_id" in log
+        assert log["object_id"] == str(self.grv.pk)
+        assert log["object_repr"] == self.grv.__str__()
+        assert log["is_user_generated"] is True
+        # program
+        response = self.client.get(
+            reverse(
+                "api:activity-logs:activity-logs-list",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
+            + "?"
+            + urlencode({"program_id": str(self.program_2.pk)})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data["results"]) == 2
         log = resp_data["results"][0]
         assert "object_id" in log
         assert log["object_id"] == str(self.grv.pk)
