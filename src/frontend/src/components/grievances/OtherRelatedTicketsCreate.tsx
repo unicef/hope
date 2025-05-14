@@ -53,7 +53,7 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
             </Box>
           );
         })
-      : '-';
+      : <span>-</span>;  // '-'
 
   const openExistingTickets = existingTickets.length
     ? existingTickets.filter(
