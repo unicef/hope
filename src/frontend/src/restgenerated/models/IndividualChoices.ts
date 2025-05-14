@@ -9,7 +9,7 @@ export type IndividualChoices = {
     readonly statusChoices: Array<Record<string, any>>;
     readonly relationshipChoices: Array<Record<string, any>>;
     readonly roleChoices: Array<Record<string, any>>;
-    readonly martialStatusChoices: Array<Record<string, any>>;
+    readonly maritalStatusChoices: Array<Record<string, any>>;
     readonly identityTypeChoices: Array<Record<string, any>>;
     readonly observedDisabilityChoices: Array<Record<string, any>>;
     readonly severityOfDisabilityChoices: Array<Record<string, any>>;
