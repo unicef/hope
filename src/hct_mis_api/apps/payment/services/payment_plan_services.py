@@ -52,6 +52,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
@@ -400,7 +401,9 @@ class PaymentPlanService:
                 ).first()
                 if not wallet:
                     wallet = Account.objects.create(
-                        individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
+                        individual_id=collector_id,
+                        account_type=payment_plan.delivery_mechanism.account_type,
+                        rdi_merge_status=MergeStatusModel.MERGED,
                     )
                 has_valid_wallet = wallet.validate(
                     payment_plan.financial_service_provider, payment_plan.delivery_mechanism
