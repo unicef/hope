@@ -1,6 +1,5 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
@@ -10,12 +9,13 @@ import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { HouseholdList } from '@restgenerated/models/HouseholdList';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface LookUpHouseholdTableRowProps {
   household: HouseholdList;
   radioChangeHandler: (household) => void;
   selectedHousehold: HouseholdDetail;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
   checkboxClickHandler?: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     number,

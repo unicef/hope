@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import { headCells } from './PeoplePaymentsTableHeadCells';
 import { PeoplePaymentsTableRow } from './PeoplePaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
+import { createApiParams } from '@utils/apiUtils';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
@@ -49,10 +50,24 @@ const PeoplePaymentsTable = ({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlan.id,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentPlanId: paymentPlan.id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

@@ -1,6 +1,5 @@
-import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { PaymentStatus, PaymentVerificationStatus } from '@generated/graphql';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { useBusinessArea } from '@hooks/useBusinessArea';
@@ -22,12 +21,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
-
-const Overview = styled(Paper)`
-  margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
+import { Overview } from '@components/payments/Overview';
 
 interface PaymentDetailsProps {
   payment: PaymentDetail;

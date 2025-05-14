@@ -2,7 +2,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import { Typography } from '@mui/material';
+import { Theme, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Paper from '@mui/material/Paper';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ImportedIndividualFlexFieldPhotoModal } from '../ImportedIndividualFlexFieldPhotoModal';
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
   margin-top: ${({ theme }) => theme.spacing(6)};

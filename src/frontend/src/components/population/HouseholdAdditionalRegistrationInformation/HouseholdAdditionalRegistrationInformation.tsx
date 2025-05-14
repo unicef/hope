@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Theme, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,7 @@ import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
 import { ReactElement } from 'react';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;
