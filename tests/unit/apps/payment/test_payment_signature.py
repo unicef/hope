@@ -20,7 +20,7 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -127,6 +127,10 @@ class TestPaymentSignature(APITestCase):
         hoh2 = IndividualFactory(household=None, program=program)
         hh1 = HouseholdFactory(head_of_household=hoh1, program=program)
         hh2 = HouseholdFactory(head_of_household=hoh2, program=program)
+        hoh1.household = hh1
+        hoh1.save()
+        hoh2.household = hh2
+        hoh2.save()
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
@@ -134,7 +138,7 @@ class TestPaymentSignature(APITestCase):
         dm_cash = DeliveryMechanism.objects.get(code="cash")
 
         for ind in [hoh1, hoh2]:
-            DeliveryMechanismDataFactory(individual=ind)
+            AccountFactory(individual=ind)
 
         fsp = FinancialServiceProviderFactory()
 

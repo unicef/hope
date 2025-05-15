@@ -161,7 +161,7 @@
                         .brushOn(false)
                         .elasticY(true)
                         .renderHorizontalGridLines(true)
-                        .yAxisLabel("{% translate 'Amount Paid (USD) ' %}", 30)
+                        .yAxisLabel("{% translate 'Amount Paid (USD) ' %}", 18)
                         .barPadding(0.5)
                         .margins({ top: 30, right: 25, bottom: 95, left: 90 })
                         .outerPadding(0.5)
@@ -180,30 +180,12 @@
                             .attr("dx", "2");
                             });
                         function updateTopMetrics() {
+                        const totalReconciledCount = ndx.groupAll().reduceSum(d => d.reconciled || 0).value();
                         const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
-                        const reconciliationData = ndx.groupAll().reduce(
-                            (p, v) => {
-                                if (v.payment_status !== "Pending") {
-                                    p.reconciled += 1;
-                                }
-                                p.total += 1;
-                                return p;
-                            },
-                            (p, v) => {
-                                if (v.payment_status !== "Pending") {
-                                    p.reconciled -= 1;
-                                }
-                                p.total -= 1;
-                                return p;
-                            },
-                            () => ({
-                                reconciled: 0,
-                                total: 0,
-                            })
-                        ).value();
-                        const reconciliationPercentage = reconciliationData.total > 0
-                                ? (reconciliationData.reconciled / reconciliationData.total) * 100
+                        const reconciliationPercentage = totalPaymentsCount > 0
+                                ? (totalReconciledCount / totalPaymentsCount) * 100
                                 : 0;
+
                         const paymentPlanMetrics = ndx.groupAll().reduce(
                                     (p, v) => {
                                         p.finished += v.finished_payment_plans || 0;
@@ -219,7 +201,6 @@
                                 ).value();
                         const finishedPaymentPlans = paymentPlanMetrics.finished;
                         const totalPaymentPlans = paymentPlanMetrics.total;
-                        
                         const verificationPercentage = totalPaymentPlans > 0 
                             ? (finishedPaymentPlans / totalPaymentPlans) * 100 
                             : 0;

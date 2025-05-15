@@ -5,7 +5,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PeopleBioData } from '@components/people/PeopleBioData/PeopleBioData';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
-import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
+import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import { BigValueContainer } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
@@ -14,11 +14,10 @@ import { Title } from '@core/Title';
 import {
   useAllIndividualsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
-  useHouseholdChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -29,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -38,11 +38,11 @@ const Container = styled.div`
     width: 100%;
   }
 `;
-const OverviewPaper = styled(Paper)`
+const OverviewPaper = styled(Paper)<{ theme?: Theme }>`
   margin: 0px 0px 20px 0px;
   padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   margin: 15px 0px 20px 0px;
   padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
@@ -72,8 +72,14 @@ const PeopleDetailsPage = (): ReactElement => {
       }),
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
@@ -94,7 +100,7 @@ const PeopleDetailsPage = (): ReactElement => {
 
   if (
     loadingIndividual ||
-    choicesLoading ||
+    individualChoicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
     periodicFieldsLoading
@@ -105,7 +111,7 @@ const PeopleDetailsPage = (): ReactElement => {
 
   if (
     !individual ||
-    !choicesData ||
+    !individualChoicesLoading ||
     !flexFieldsData ||
     !grievancesChoices ||
     permissions === null
@@ -152,10 +158,10 @@ const PeopleDetailsPage = (): ReactElement => {
           baseUrl={baseUrl}
           businessArea={businessArea}
           individual={individual}
-          choicesData={choicesData}
+          choicesData={individualChoicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualDeliveryMechanisms individual={individual} />
+        <IndividualAccounts individual={individual} />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
           individual={individual}

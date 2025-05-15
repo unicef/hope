@@ -11,6 +11,7 @@ from hct_mis_api.apps.household.models import (
     BankAccountInfo,
     Household,
     Individual,
+    PendingDocument,
     PendingHousehold,
     PendingIndividual,
     XlsxUpdateFile,
@@ -278,7 +279,7 @@ class BankAccountInfoForm(forms.ModelForm):
 # used in UkraineBaseRegistrationService
 class DocumentForm(forms.ModelForm):
     class Meta:
-        model = BankAccountInfo
+        model = PendingDocument
         fields = []  # dynamically set in __init__
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:

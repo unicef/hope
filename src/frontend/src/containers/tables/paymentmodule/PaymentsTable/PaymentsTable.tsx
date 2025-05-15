@@ -5,6 +5,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { PaymentPlanStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Paper, Typography } from '@mui/material';
+import { createApiParams } from '@utils/apiUtils';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
@@ -53,10 +54,24 @@ function PaymentsTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlan.id,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentPlanId: paymentPlan.id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

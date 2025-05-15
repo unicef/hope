@@ -135,12 +135,10 @@ DEFAULTS = {
     ),
     "SOCIAL_AUTH_REDIRECT_IS_HTTPS": (bool, True),
     "LOG_LEVEL": (str, "ERROR"),
-    "POSTGRES_SSL": (bool, False),
     "GIT_VERSION": (str, "UNKNOWN"),
     "EXCHANGE_RATE_CACHE_EXPIRY": (int, 60 * 60 * 24),
     "USE_DUMMY_EXCHANGE_RATES": (str, "no"),
     "PROFILING": (str, "off"),
-    "LIBRARY_PATHS": (bool, False),
     "STATIC_URL": (str, "/static/"),
     "MEDIA_URL": (str, "/media/"),
     "FILE_STORAGE_STATIC": (
@@ -161,6 +159,8 @@ DEFAULTS = {
     "MEDIA_LOCATION": (str, "media"),
     "AZURE_ACCOUNT_NAME": (str, ""),
     "AZURE_ACCOUNT_KEY": (str, ""),
+    "GDAL_LIBRARY_PATH": (str, None),
+    "GEOS_LIBRARY_PATH": (str, None),
 }
 
 env = SmartEnv(**DEFAULTS)

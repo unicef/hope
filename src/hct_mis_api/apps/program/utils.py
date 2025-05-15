@@ -26,7 +26,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
@@ -247,7 +247,7 @@ class CopyProgramPopulation:
             )
             delivery_mechanism_data_to_create.extend(
                 self.copy_delivery_mechanism_data_per_individual(
-                    list(new_individual.copied_from.delivery_mechanisms_data.all()),
+                    list(new_individual.copied_from.accounts.all()),
                     new_individual,
                     self.rdi_merge_status,
                 )
@@ -257,7 +257,7 @@ class CopyProgramPopulation:
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(individual_identities_to_create)
         BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
-        DeliveryMechanismData.objects.bulk_create(delivery_mechanism_data_to_create)
+        Account.objects.bulk_create(delivery_mechanism_data_to_create)
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
         if new_individual.household:
@@ -328,20 +328,21 @@ class CopyProgramPopulation:
 
     @staticmethod
     def copy_delivery_mechanism_data_per_individual(
-        delivery_mechanisms_data: List[DeliveryMechanismData],
+        accounts: List[Account],
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
-    ) -> List[DeliveryMechanismData]:
+    ) -> List[Account]:
         """
         Clone bank_account_info for individual if new individual_representation has been created.
         """
-        delivery_mechanisms_data_list = []
-        for delivery_mechanism_data in delivery_mechanisms_data:
-            delivery_mechanism_data.pk = None
-            delivery_mechanism_data.individual = individual_representation
-            delivery_mechanism_data.rdi_merge_status = rdi_merge_status
-            delivery_mechanisms_data_list.append(delivery_mechanism_data)
-        return delivery_mechanisms_data_list
+        accounts_list = []
+        for account in accounts:
+            account.pk = None
+            account.individual = individual_representation
+            account.rdi_merge_status = rdi_merge_status
+            account.unique_key = None
+            accounts_list.append(account)
+        return accounts_list
 
 
 def copy_program_related_data(copy_from_program_id: str, new_program: Program, user_id: str) -> None:

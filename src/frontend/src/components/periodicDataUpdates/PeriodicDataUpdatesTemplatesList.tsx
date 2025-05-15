@@ -15,6 +15,7 @@ import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDa
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
+import { createApiParams } from '@utils/apiUtils';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
@@ -128,8 +129,6 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   };
 
   const initialQueryVariables = {
-    page: 1,
-    page_size: 10,
     ordering: 'created_at',
     businessAreaSlug,
     programSlug: programId,
@@ -142,10 +141,19 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     isLoading,
     error,
   } = useQuery<PaginatedPeriodicDataUpdateTemplateListList>({
-    queryKey: ['periodicDataUpdateTemplates', queryVariables],
+    queryKey: [
+      'periodicDataUpdateTemplates',
+      queryVariables,
+      businessAreaSlug,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList(
-        queryVariables,
+        createApiParams(
+          { businessAreaSlug, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

@@ -1,4 +1,5 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Overview } from '@components/payments/Overview';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -9,7 +10,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { PaymentStatus, PaymentVerificationStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 import {
   formatCurrencyWithSymbol,
@@ -21,13 +22,6 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import styled from 'styled-components';
-
-const Overview = styled(Paper)`
-  margin: 20px;
-  padding: ${({ theme }) => theme.spacing(8)}
-    ${({ theme }) => theme.spacing(11)};
-`;
 
 interface PaymentDetailsProps {
   payment: PaymentDetail;

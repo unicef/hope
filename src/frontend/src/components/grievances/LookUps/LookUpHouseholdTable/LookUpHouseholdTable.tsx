@@ -1,9 +1,6 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { TableWrapper } from '@core/TableWrapper';
-import {
-  HouseholdChoiceDataQuery,
-  HouseholdRdiMergeStatus,
-} from '@generated/graphql';
+import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -11,14 +8,16 @@ import { adjustHeadCells } from '@utils/utils';
 import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
+import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
   filter;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
   setFieldValue;
   selectedHousehold?;
   setSelectedIndividual?;
@@ -110,7 +109,13 @@ export function LookUpHouseholdTable({
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsList(queryVariables),
+      RestService.restBusinessAreasProgramsHouseholdsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
     enabled: !!businessArea && !!programId,
   });
 
@@ -128,10 +133,13 @@ export function LookUpHouseholdTable({
     queryFn: () => {
       // eslint-disable-next-line no-unused-vars
       const { programSlug, ...restQueryVariables } = queryVariables;
-      return RestService.restBusinessAreasHouseholdsList({
-        businessAreaSlug: businessArea,
-        ...restQueryVariables,
-      });
+      return RestService.restBusinessAreasHouseholdsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          restQueryVariables,
+          { withPagination: true },
+        ),
+      );
     },
     enabled: !!businessArea && isAllPrograms,
   });

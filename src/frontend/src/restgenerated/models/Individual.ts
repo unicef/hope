@@ -29,7 +29,8 @@ export type Individual = {
     maritalStatus?: string;
     documents?: Array<Document>;
     birthDate: string;
-    deliveryMechanismsData?: Array<Account>;
+    accounts?: Array<Account>;
+    photo?: string;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;
@@ -39,10 +40,6 @@ export type Individual = {
      * Individual ID
      */
     individualId?: string;
-    /**
-     * Photo
-     */
-    photo?: string;
     /**
      * Full Name of the Beneficiary
      */

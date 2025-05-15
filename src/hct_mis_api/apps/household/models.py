@@ -1347,6 +1347,7 @@ class Individual(
 
     def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
+        self.accounts.update(active=False)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.save()
@@ -1354,6 +1355,7 @@ class Individual(
 
     def unwithdraw(self) -> None:
         self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
+        self.accounts.update(active=True)
         self.withdrawn = False
         self.withdrawn_date = None
         self.save()
@@ -1362,12 +1364,14 @@ class Individual(
         if original_individual is not None:
             self.unicef_id = str(original_individual.unicef_id)
         self.documents.update(status=Document.STATUS_INVALID)
+        self.accounts.update(active=False)
         self.duplicate = True
         self.duplicate_date = timezone.now()
         self.save()
 
     def mark_as_distinct(self) -> None:
         self.documents.update(status=Document.STATUS_VALID)
+        self.accounts.update(active=True)
         self.duplicate = False
         self.duplicate_date = timezone.now()
         self.save()

@@ -1,6 +1,7 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { createApiParams } from '@utils/apiUtils';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -69,10 +70,19 @@ export function TargetPopulationForPeopleTable({
     isLoading,
     error: targetPopulationsError,
   } = useQuery<PaginatedTargetPopulationListList>({
-    queryKey: ['businessAreasProgramsTargetPopulationsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsList(
-        queryVariables,
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

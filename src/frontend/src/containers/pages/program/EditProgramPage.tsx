@@ -145,9 +145,9 @@ const EditProgramPage = (): ReactElement => {
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
       : 0;
-    const population_goalValue = parseInt(values.population_goal, 10) ?? 0;
-    const population_goalParsed = !Number.isNaN(population_goalValue)
-      ? population_goalValue
+    const populationGoalValue = parseInt(values.population_goal, 10) ?? 0;
+    const populationGoalParsed = !Number.isNaN(populationGoalValue)
+      ? populationGoalValue
       : 0;
 
     const pduFieldsToSend = values.pduFields
@@ -186,14 +186,17 @@ const EditProgramPage = (): ReactElement => {
         'partnerAccess',
         'pduFields',
       ]);
+      const pduFieldsToSendWithoutTypename = pduFieldsToSend.map((pduField) =>
+        omit(pduField, ['__typename']),
+      );
       const response = await updateProgramDetails({
         variables: {
           programData: {
             id,
             ...requestValuesDetails,
             budget: budgetToFixed,
-            populationGoal: population_goalParsed,
-            pduFields: pduFieldsToSend,
+            populationGoal: populationGoalParsed,
+            pduFields: pduFieldsToSendWithoutTypename,
           },
           version,
         },
@@ -284,7 +287,7 @@ const EditProgramPage = (): ReactElement => {
       'description',
       'budget',
       'administrativeAreasOfImplementation',
-      'population_goal',
+      'populationGoal',
       'cashPlus',
       'frequencyOfPayments',
     ],

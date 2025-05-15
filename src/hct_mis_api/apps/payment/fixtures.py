@@ -29,12 +29,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hct_mis_api.apps.payment.models import (
+    Account,
     AccountType,
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
     DeliveryMechanismConfig,
-    DeliveryMechanismData,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -263,13 +263,8 @@ class PaymentPlanFactory(DjangoModelFactory):
     targeting_criteria = factory.SubFactory(TargetingCriteriaFactory)
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
-    dispersion_start_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=False,
-        after_now=True,
-        tzinfo=utc,
-    )
-    dispersion_end_date = factory.LazyAttribute(lambda o: o.dispersion_start_date + timedelta(days=randint(60, 1000)))
+    dispersion_start_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    dispersion_end_date = factory.LazyAttribute(lambda o: o.dispersion_start_date + timedelta(days=randint(365, 1000)))
     female_children_count = factory.fuzzy.FuzzyInteger(2, 4)
     male_children_count = factory.fuzzy.FuzzyInteger(2, 4)
     female_adults_count = factory.fuzzy.FuzzyInteger(2, 4)
@@ -364,20 +359,20 @@ class AccountTypeFactory(DjangoModelFactory):
         model = AccountType
 
 
-class DeliveryMechanismDataFactory(DjangoModelFactory):
+class AccountFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
     account_type = factory.SubFactory(AccountTypeFactory)
     rdi_merge_status = MergeStatusModel.MERGED
 
     class Meta:
-        model = DeliveryMechanismData
+        model = Account
 
 
-class PendingDeliveryMechanismDataFactory(DeliveryMechanismDataFactory):
+class PendingAccountFactory(AccountFactory):
     rdi_merge_status = MergeStatusModel.PENDING
 
     class Meta:
-        model = DeliveryMechanismData
+        model = Account
 
 
 def create_payment_verification_plan_with_status(

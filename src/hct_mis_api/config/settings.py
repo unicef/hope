@@ -123,12 +123,6 @@ DATABASES = {
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
-if env("POSTGRES_SSL"):
-    DATABASES["default"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-    }
-
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {}
 
@@ -499,7 +493,5 @@ from hct_mis_api.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.storages import *  # noqa: F403, F401, E402
 
-LIBRARY_PATHS: bool = env("LIBRARY_PATHS")
-if LIBRARY_PATHS:
-    GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"
-    GEOS_LIBRARY_PATH = "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"
+GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH")
+GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH")

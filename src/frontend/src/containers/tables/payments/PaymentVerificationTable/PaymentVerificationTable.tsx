@@ -3,6 +3,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedPaymentVerificationPlanListList } from '@restgenerated/models/PaginatedPaymentVerificationPlanListList';
 import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 import { dateToIsoString } from '@utils/utils';
 import { ReactElement, useState } from 'react';
@@ -40,10 +41,19 @@ function PaymentVerificationTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentVerificationPlanListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsList(
-        queryVariables,
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });
