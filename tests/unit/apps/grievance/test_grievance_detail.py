@@ -1,14 +1,11 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Callable, Dict
-from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
-from unicodedata import category
-from datetime import date
 
-from django.templatetags.i18n import language
 from django.utils import timezone
 
 import pytest
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -17,25 +14,48 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, TicketNoteFactory, GrievanceDocumentFactory, \
-    TicketHouseholdDataUpdateDetailsFactory, TicketIndividualDataUpdateDetailsFactory, \
-    TicketAddIndividualDetailsFactory, TicketDeleteIndividualDetailsFactory, TicketDeleteHouseholdDetailsFactory, \
-    TicketSystemFlaggingDetailsFactory, TicketPaymentVerificationDetailsFactory, TicketNeedsAdjudicationDetailsFactory
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceDocumentFactory,
+    GrievanceTicketFactory,
+    TicketAddIndividualDetailsFactory,
+    TicketDeleteHouseholdDetailsFactory,
+    TicketDeleteIndividualDetailsFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+    TicketNoteFactory,
+    TicketPaymentVerificationDetailsFactory,
+    TicketSystemFlaggingDetailsFactory,
 )
-from hct_mis_api.apps.household.api.serializers.individual import IndividualForTicketSerializer
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals, DocumentFactory, DocumentTypeFactory
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE, SINGLE, IndividualRoleInHousehold, ROLE_PRIMARY, DUPLICATE
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentVerificationPlanFactory, \
-    PaymentVerificationFactory, PaymentFactory, PaymentVerificationSummaryFactory
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    SINGLE,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
-from hct_mis_api.apps.sanction_list.models import SanctionListIndividualDocument, SanctionListIndividualDateOfBirth
+from hct_mis_api.apps.sanction_list.models import (
+    SanctionListIndividualDateOfBirth,
+    SanctionListIndividualDocument,
+)
 
 pytestmark = pytest.mark.django_db()
 
@@ -183,7 +203,9 @@ class TestGrievanceTicketDetail:
             (Permissions.PROGRAMME_ACTIVATE,),
         ],
     )
-    def test_grievance_detail_without_permissions(self, permissions:list, create_user_role_with_permissions: Any) -> None:
+    def test_grievance_detail_without_permissions(
+        self, permissions: list, create_user_role_with_permissions: Any
+    ) -> None:
         grievance_ticket = GrievanceTicketFactory(
             **self.grievance_ticket_base_data,
             category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
@@ -208,7 +230,9 @@ class TestGrievanceTicketDetail:
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_grievance_detail_area_limits(self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any) -> None:
+    def test_grievance_detail_area_limits(
+        self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
+    ) -> None:
         grievance_ticket = GrievanceTicketFactory(
             **self.grievance_ticket_base_data,
             category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
@@ -277,19 +301,54 @@ class TestGrievanceTicketDetail:
     @pytest.mark.parametrize(
         "permissions, area_limit, expected_status_1, expected_status_2",
         [
-            ([Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE], False, status.HTTP_200_OK, status.HTTP_404_NOT_FOUND),
-            ([Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR], False, status.HTTP_200_OK, status.HTTP_404_NOT_FOUND),
-            ([Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER], False, status.HTTP_404_NOT_FOUND, status.HTTP_404_NOT_FOUND),
-            ([Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE], False, status.HTTP_404_NOT_FOUND, status.HTTP_200_OK),
-            ([Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR], False, status.HTTP_404_NOT_FOUND, status.HTTP_404_NOT_FOUND),
-            ([Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER], False, status.HTTP_404_NOT_FOUND, status.HTTP_200_OK),
             (
-                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE],
-                False, status.HTTP_200_OK, status.HTTP_200_OK,
+                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE],
+                False,
+                status.HTTP_200_OK,
+                status.HTTP_404_NOT_FOUND,
             ),
             (
-                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE],
-                True, status.HTTP_404_NOT_FOUND, status.HTTP_200_OK,
+                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR],
+                False,
+                status.HTTP_200_OK,
+                status.HTTP_404_NOT_FOUND,
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER],
+                False,
+                status.HTTP_404_NOT_FOUND,
+                status.HTTP_404_NOT_FOUND,
+            ),
+            ([Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE], False, status.HTTP_404_NOT_FOUND, status.HTTP_200_OK),
+            (
+                [Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR],
+                False,
+                status.HTTP_404_NOT_FOUND,
+                status.HTTP_404_NOT_FOUND,
+            ),
+            (
+                [Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER],
+                False,
+                status.HTTP_404_NOT_FOUND,
+                status.HTTP_200_OK,
+            ),
+            (
+                [
+                    Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+                ],
+                False,
+                status.HTTP_200_OK,
+                status.HTTP_200_OK,
+            ),
+            (
+                [
+                    Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+                ],
+                True,
+                status.HTTP_404_NOT_FOUND,
+                status.HTTP_200_OK,
             ),
         ],
     )
@@ -297,8 +356,8 @@ class TestGrievanceTicketDetail:
         self,
         permissions: list,
         area_limit: bool,
-        expected_status_1: status,
-        expected_status_2: status,
+        expected_status_1: int,
+        expected_status_2: int,
         create_user_role_with_permissions: Callable,
         set_admin_area_limits_in_program: Callable,
     ) -> None:
@@ -359,9 +418,7 @@ class TestGrievanceTicketDetail:
         ticket_details = TicketHouseholdDataUpdateDetailsFactory(
             ticket=grievance_ticket,
             household=self.household1,
-            household_data={
-                "village": {"value": "Test Village", "approve_status": True}
-            }
+            household_data={"village": {"value": "Test Village", "approve_status": True}},
         )
         self._assign_ticket_data(grievance_ticket)
 
@@ -384,7 +441,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == None
+        assert data["payment_record"] is None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -424,7 +481,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == None
+        assert data["payment_record"] is None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -474,7 +531,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == None
+        assert data["payment_record"] is None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -502,9 +559,9 @@ class TestGrievanceTicketDetail:
                 str(role_primary.id): {
                     "role": ROLE_PRIMARY,
                     "household": str(self.household1.id),
-                    "individual":  str(self.individuals1[1].id),
+                    "individual": str(self.individuals1[1].id),
                 }
-            }
+            },
         )
         self._assign_ticket_data(grievance_ticket)
 
@@ -527,7 +584,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == None
+        assert data["payment_record"] is None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -558,7 +615,7 @@ class TestGrievanceTicketDetail:
                     "household": str(self.household2.id),
                     "individual": str(self.individuals2[0].id),
                 }
-            }
+            },
         )
         self._assign_ticket_data(grievance_ticket)
 
@@ -581,7 +638,7 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == None
+        assert data["payment_record"] is None
 
         assert data["ticket_details"] == {
             "id": str(ticket_details.id),
@@ -600,9 +657,7 @@ class TestGrievanceTicketDetail:
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             household_unicef_id=self.household1.unicef_id,
         )
-        sanction_list_individual = SanctionListIndividualFactory(
-            full_name="Sanction Individual"
-        )
+        sanction_list_individual = SanctionListIndividualFactory(full_name="Sanction Individual")
         sanction_list_individual_document = SanctionListIndividualDocument.objects.create(
             individual=sanction_list_individual,
             document_number="123-456-789",
@@ -660,75 +715,75 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == None
-
+        assert data["payment_record"] is None
 
         ticket_details = data["ticket_details"]
         assert ticket_details["id"] == str(ticket_details.id)
         assert ticket_details["approve_status"] == ticket_details.approve_status
         assert ticket_details["role_reassign_data"] == ticket_details.role_reassign_data
-        assert ticket_details["golden_records_individual"] ==  {
-                "id": str(golden_records_individual.id),
-                "unicef_id": golden_records_individual.unicef_id,
-                "full_name": golden_records_individual.full_name,
-                "birth_date": f"{golden_records_individual.birth_date:%Y-%m-%d}",
-                "last_registration_date":  f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
-                "sex": golden_records_individual.sex,
-                "duplicate": golden_records_individual.duplicate,
-                "household": {
-                    "id": str(golden_records_individual.household.id),
-                    "unicef_id": golden_records_individual.household.unicef_id,
-                    "admin2": golden_records_individual.household.admin2.name,
-                },
-                "deduplication_golden_record_results": [
-                    {
-                        "hit_id": str(golden_records_individual.pk),
-                        "unicef_id": golden_records_individual.unicef_id,
-                        "score": golden_records_individual.deduplication_golden_record_results["duplicates"][0]["score"],
-                        "proximity_to_score": golden_records_individual.deduplication_golden_record_results["duplicates"][0]["proximity_to_score"],
-                        "location": "Not provided",
-                        "age": None,
-                        "duplicate": False,
-                        "distinct": False,
-                    }
-                ],
-                "documents": [
-                    {
-                        "id": str(document.id),
-                        "type": {
-                            "id": str(document.type.id),
-                            "label": document.type.label,
-                            "key": document.type.key,
-                        },
-                        "country": {
-                            "id": str(document.country.id),
-                            "name": document.country.name,
-                            "iso_code3": document.country.iso_code3,
-                        },
-                        "document_number": document.document_number,
+        assert ticket_details["golden_records_individual"] == {
+            "id": str(golden_records_individual.id),
+            "unicef_id": golden_records_individual.unicef_id,
+            "full_name": golden_records_individual.full_name,
+            "birth_date": f"{golden_records_individual.birth_date:%Y-%m-%d}",
+            "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
+            "sex": golden_records_individual.sex,
+            "duplicate": golden_records_individual.duplicate,
+            "household": {
+                "id": str(golden_records_individual.household.id),
+                "unicef_id": golden_records_individual.household.unicef_id,
+                "admin2": golden_records_individual.household.admin2.name,
+            },
+            "deduplication_golden_record_results": [
+                {
+                    "hit_id": str(golden_records_individual.pk),
+                    "unicef_id": golden_records_individual.unicef_id,
+                    "score": golden_records_individual.deduplication_golden_record_results["duplicates"][0]["score"],
+                    "proximity_to_score": golden_records_individual.deduplication_golden_record_results["duplicates"][
+                        0
+                    ]["proximity_to_score"],
+                    "location": "Not provided",
+                    "age": None,
+                    "duplicate": False,
+                    "distinct": False,
+                }
+            ],
+            "documents": [
+                {
+                    "id": str(document.id),
+                    "type": {
+                        "id": str(document.type.id),
+                        "label": document.type.label,
+                        "key": document.type.key,
                     },
-                ],
-            }
+                    "country": {
+                        "id": str(document.country.id),
+                        "name": document.country.name,
+                        "iso_code3": document.country.iso_code3,
+                    },
+                    "document_number": document.document_number,
+                },
+            ],
+        }
 
         assert ticket_details["sanction_list_individual"] == {
-                "id": str(sanction_list_individual.id),
-                "full_name": sanction_list_individual.full_name,
-                "reference_number": sanction_list_individual.reference_number,
-                "documents": [
-                    {
-                        "id": str(sanction_list_individual_document.id),
-                        "document_number": sanction_list_individual_document.document_number,
-                        "type_of_document": sanction_list_individual_document.type_of_document,
-                    }
-                ],
-                "dates_of_birth": [
-                    {
-                        "id": str(sanction_list_date_of_birth.id),
-                        "date": f"{sanction_list_date_of_birth.date:%Y-%m-%d}",
-                    }
-                ],
-            }
-
+            "id": str(sanction_list_individual.id),
+            "full_name": sanction_list_individual.full_name,
+            "reference_number": sanction_list_individual.reference_number,
+            "documents": [
+                {
+                    "id": str(sanction_list_individual_document.id),
+                    "document_number": sanction_list_individual_document.document_number,
+                    "type_of_document": sanction_list_individual_document.type_of_document,
+                }
+            ],
+            "dates_of_birth": [
+                {
+                    "id": str(sanction_list_date_of_birth.id),
+                    "date": f"{sanction_list_date_of_birth.date:%Y-%m-%d}",
+                }
+            ],
+        }
 
     def test_grievance_detail_payment_verification(self, create_user_role_with_permissions: Any) -> None:
         grievance_ticket = GrievanceTicketFactory(
@@ -808,7 +863,7 @@ class TestGrievanceTicketDetail:
                 "status": payment_verification.status,
                 "status_date": f"{payment_verification.status_date:%Y-%m-%dT%H:%M:%SZ}",
                 "received_amount": f"{payment_verification.received_amount:.2f}",
-            }
+            },
         }
 
     def test_grievance_detail_needs_adjudication(self, create_user_role_with_permissions: Any) -> None:
@@ -841,7 +896,13 @@ class TestGrievanceTicketDetail:
             country=self.country,
         )
 
-        dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(program=self.program, individual1=golden_records_individual, individual2=duplicate, similarity_score=0.0, status_code="429",)
+        dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
+            program=self.program,
+            individual1=golden_records_individual,
+            individual2=duplicate,
+            similarity_score=0.0,
+            status_code="429",
+        )
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
             ticket=grievance_ticket,
             golden_records_individual=golden_records_individual,
@@ -890,7 +951,7 @@ class TestGrievanceTicketDetail:
                         "photo_name": None,
                     },
                 },
-            }
+            },
         )
         ticket_details.possible_duplicates.set([self.individuals2[0]])
         ticket_details.selected_individuals.set([duplicate])
@@ -915,59 +976,78 @@ class TestGrievanceTicketDetail:
         data = response.data
 
         self._assert_base_grievance_data(data, grievance_ticket)
-        assert data["payment_record"] == None
+        assert data["payment_record"] is None
 
         ticket_details_data = data["ticket_details"]
         assert ticket_details_data["id"] == str(ticket_details.id)
         assert ticket_details_data["is_multiple_duplicates_version"] == ticket_details.is_multiple_duplicates_version
         assert ticket_details_data["golden_records_individual"] == {
-                "id": str(golden_records_individual.id),
-                "unicef_id": golden_records_individual.unicef_id,
-                "full_name": golden_records_individual.full_name,
-                "birth_date": f"{golden_records_individual.birth_date:%Y-%m-%d}",
-                "last_registration_date":  f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
-                "sex": golden_records_individual.sex,
-                "duplicate": golden_records_individual.duplicate,
-                "household": {
-                    "id": str(golden_records_individual.household.id),
-                    "unicef_id": golden_records_individual.household.unicef_id,
-                    "admin2": golden_records_individual.household.admin2.name,
-                },
-                "deduplication_golden_record_results": [
-                    {
-                        "hit_id": str(golden_records_individual.pk),
-                        "unicef_id": golden_records_individual.unicef_id,
-                        "score": golden_records_individual.deduplication_golden_record_results["duplicates"][0]["score"],
-                        "proximity_to_score": golden_records_individual.deduplication_golden_record_results["duplicates"][0]["proximity_to_score"],
-                        "location": "Not provided",
-                        "age": None,
-                        "duplicate": False,
-                        "distinct": False,
-                    }
-                ],
-                "documents": [
-                    {
-                        "id": str(document.id),
-                        "type": {
-                            "id": str(document.type.id),
-                            "label": document.type.label,
-                            "key": document.type.key,
-                        },
-                        "country": {
-                            "id": str(document.country.id),
-                            "name": document.country.name,
-                            "iso_code3": document.country.iso_code3,
-                        },
-                        "document_number": document.document_number,
+            "id": str(golden_records_individual.id),
+            "unicef_id": golden_records_individual.unicef_id,
+            "full_name": golden_records_individual.full_name,
+            "birth_date": f"{golden_records_individual.birth_date:%Y-%m-%d}",
+            "last_registration_date": f"{golden_records_individual.last_registration_date:%Y-%m-%d}",
+            "sex": golden_records_individual.sex,
+            "duplicate": golden_records_individual.duplicate,
+            "household": {
+                "id": str(golden_records_individual.household.id),
+                "unicef_id": golden_records_individual.household.unicef_id,
+                "admin2": golden_records_individual.household.admin2.name,
+            },
+            "deduplication_golden_record_results": [
+                {
+                    "hit_id": str(golden_records_individual.pk),
+                    "unicef_id": golden_records_individual.unicef_id,
+                    "score": golden_records_individual.deduplication_golden_record_results["duplicates"][0]["score"],
+                    "proximity_to_score": golden_records_individual.deduplication_golden_record_results["duplicates"][
+                        0
+                    ]["proximity_to_score"],
+                    "location": "Not provided",
+                    "age": None,
+                    "duplicate": False,
+                    "distinct": False,
+                }
+            ],
+            "documents": [
+                {
+                    "id": str(document.id),
+                    "type": {
+                        "id": str(document.type.id),
+                        "label": document.type.label,
+                        "key": document.type.key,
                     },
-                ],
-            }
+                    "country": {
+                        "id": str(document.country.id),
+                        "name": document.country.name,
+                        "iso_code3": document.country.iso_code3,
+                    },
+                    "document_number": document.document_number,
+                },
+            ],
+        }
         assert ticket_details_data["possible_duplicate"] == {
+            "id": str(self.individuals2[0].id),
+            "unicef_id": self.individuals2[0].unicef_id,
+            "full_name": self.individuals2[0].full_name,
+            "birth_date": f"{self.individuals2[0].birth_date:%Y-%m-%d}",
+            "last_registration_date": f"{self.individuals2[0].last_registration_date:%Y-%m-%d}",
+            "sex": self.individuals2[0].sex,
+            "duplicate": self.individuals2[0].duplicate,
+            "household": {
+                "id": str(self.individuals2[0].household.id),
+                "unicef_id": self.individuals2[0].household.unicef_id,
+                "admin2": self.individuals2[0].household.admin2.name,
+            },
+            "deduplication_golden_record_results": [],
+            "documents": [],
+        }
+        assert ticket_details_data["possible_duplicates"] == [
+            {
                 "id": str(self.individuals2[0].id),
                 "unicef_id": self.individuals2[0].unicef_id,
                 "full_name": self.individuals2[0].full_name,
                 "birth_date": f"{self.individuals2[0].birth_date:%Y-%m-%d}",
-                "last_registration_date":  f"{self.individuals2[0].last_registration_date:%Y-%m-%d}",
+                "last_registration_date": f"{self.individuals2[0].last_registration_date:%Y-%m-%d}",
                 "sex": self.individuals2[0].sex,
                 "duplicate": self.individuals2[0].duplicate,
                 "household": {
@@ -977,77 +1057,63 @@ class TestGrievanceTicketDetail:
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
-            }
-        assert ticket_details_data["possible_duplicates"] == [
-                {
-                    "id": str(self.individuals2[0].id),
-                    "unicef_id": self.individuals2[0].unicef_id,
-                    "full_name": self.individuals2[0].full_name,
-                    "birth_date": f"{self.individuals2[0].birth_date:%Y-%m-%d}",
-                    "last_registration_date": f"{self.individuals2[0].last_registration_date:%Y-%m-%d}",
-                    "sex": self.individuals2[0].sex,
-                    "duplicate": self.individuals2[0].duplicate,
-                    "household": {
-                        "id": str(self.individuals2[0].household.id),
-                        "unicef_id": self.individuals2[0].household.unicef_id,
-                        "admin2": self.individuals2[0].household.admin2.name,
-                    },
-                    "deduplication_golden_record_results": [],
-                    "documents": [],
-                },
-            ]
+            },
+        ]
         assert ticket_details_data["selected_duplicates"] == [
-                {
-                    "id": str(duplicate.id),
-                    "unicef_id":duplicate.unicef_id,
-                    "full_name":duplicate.full_name,
-                    "birth_date": f"{duplicate.birth_date:%Y-%m-%d}",
-                    "last_registration_date": f"{duplicate.last_registration_date:%Y-%m-%d}",
-                    "sex":duplicate.sex,
-                    "duplicate":duplicate.duplicate,
-                    "household": {
-                        "id": str(duplicate.household.id),
-                        "unicef_id":duplicate.household.unicef_id,
-                        "admin2":duplicate.household.admin2.name,
-                    },
-                    "deduplication_golden_record_results": [],
-                    "documents": [],
+            {
+                "id": str(duplicate.id),
+                "unicef_id": duplicate.unicef_id,
+                "full_name": duplicate.full_name,
+                "birth_date": f"{duplicate.birth_date:%Y-%m-%d}",
+                "last_registration_date": f"{duplicate.last_registration_date:%Y-%m-%d}",
+                "sex": duplicate.sex,
+                "duplicate": duplicate.duplicate,
+                "household": {
+                    "id": str(duplicate.household.id),
+                    "unicef_id": duplicate.household.unicef_id,
+                    "admin2": duplicate.household.admin2.name,
                 },
-            ]
-        assert ticket_details_data["selected_individual"] == None
+                "deduplication_golden_record_results": [],
+                "documents": [],
+            },
+        ]
+        assert ticket_details_data["selected_individual"] is None
         assert ticket_details_data["selected_distinct"] == []
         assert ticket_details_data["role_reassign_data"] == ticket_details.role_reassign_data
 
         assert ticket_details_data["extra_data"] == {
-                "golden_records": [
-                    {
-                        "unicef_id": golden_records_individual.unicef_id,
-                        "full_name": ticket_details.extra_data["golden_records"][0]["full_name"],
-                        "hit_id": ticket_details.extra_data["golden_records"][0]["hit_id"],
-                        "score": ticket_details.extra_data["golden_records"][0]["score"],
-                        "proximity_to_score": ticket_details.extra_data["golden_records"][0]["proximity_to_score"],
-                        "location": ticket_details.extra_data["golden_records"][0]["location"],
-                        "age": relativedelta(date.today(), parse(ticket_details.extra_data["golden_records"][0]["dob"])).years,
-                        "duplicate": ticket_details.extra_data["golden_records"][0]["duplicate"],
-                        "distinct": ticket_details.extra_data["golden_records"][0]["distinct"],
-                    }
-                ],
-                "possible_duplicate": [
-                    {
-                        "unicef_id": self.individuals2[0].unicef_id,
-                        "full_name": ticket_details.extra_data["possible_duplicate"][0]["full_name"],
-                        "hit_id": ticket_details.extra_data["possible_duplicate"][0]["hit_id"],
-                        "score": ticket_details.extra_data["possible_duplicate"][0]["score"],
-                        "proximity_to_score": ticket_details.extra_data["possible_duplicate"][0]["proximity_to_score"],
-                        "location": ticket_details.extra_data["possible_duplicate"][0]["location"],
-                        "age": relativedelta(date.today(), parse(ticket_details.extra_data["possible_duplicate"][0]["dob"])).years,
-                        "duplicate": ticket_details.extra_data["possible_duplicate"][0]["duplicate"],
-                        "distinct": ticket_details.extra_data["possible_duplicate"][0]["distinct"],
-                    },
-                ],
-                "dedup_engine_similarity_pair": {}  # No permissions
-            }
-
+            "golden_records": [
+                {
+                    "unicef_id": golden_records_individual.unicef_id,
+                    "full_name": ticket_details.extra_data["golden_records"][0]["full_name"],
+                    "hit_id": ticket_details.extra_data["golden_records"][0]["hit_id"],
+                    "score": ticket_details.extra_data["golden_records"][0]["score"],
+                    "proximity_to_score": ticket_details.extra_data["golden_records"][0]["proximity_to_score"],
+                    "location": ticket_details.extra_data["golden_records"][0]["location"],
+                    "age": relativedelta(
+                        date.today(), parse(ticket_details.extra_data["golden_records"][0]["dob"])
+                    ).years,
+                    "duplicate": ticket_details.extra_data["golden_records"][0]["duplicate"],
+                    "distinct": ticket_details.extra_data["golden_records"][0]["distinct"],
+                }
+            ],
+            "possible_duplicate": [
+                {
+                    "unicef_id": self.individuals2[0].unicef_id,
+                    "full_name": ticket_details.extra_data["possible_duplicate"][0]["full_name"],
+                    "hit_id": ticket_details.extra_data["possible_duplicate"][0]["hit_id"],
+                    "score": ticket_details.extra_data["possible_duplicate"][0]["score"],
+                    "proximity_to_score": ticket_details.extra_data["possible_duplicate"][0]["proximity_to_score"],
+                    "location": ticket_details.extra_data["possible_duplicate"][0]["location"],
+                    "age": relativedelta(
+                        date.today(), parse(ticket_details.extra_data["possible_duplicate"][0]["dob"])
+                    ).years,
+                    "duplicate": ticket_details.extra_data["possible_duplicate"][0]["duplicate"],
+                    "distinct": ticket_details.extra_data["possible_duplicate"][0]["distinct"],
+                },
+            ],
+            "dedup_engine_similarity_pair": {},  # No permissions
+        }
 
         create_user_role_with_permissions(
             user=self.user,
@@ -1075,12 +1141,12 @@ class TestGrievanceTicketDetail:
                 "full_name": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual1"]["full_name"],
                 "photo": None,
             },
-            "individual2":{
+            "individual2": {
                 "id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual2"]["id"],
                 "unicef_id": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual2"]["unicef_id"],
                 "full_name": ticket_details.extra_data["dedup_engine_similarity_pair"]["individual2"]["full_name"],
                 "photo": None,
-            }
+            },
         }
 
     def _assign_ticket_data(self, grievance_ticket: GrievanceTicket) -> None:
@@ -1162,7 +1228,10 @@ class TestGrievanceTicketDetail:
             {
                 "id": str(grievance_ticket.partner.id),
                 "name": grievance_ticket.partner.name,
-            } if grievance_ticket.partner else None)
+            }
+            if grievance_ticket.partner
+            else None
+        )
         assert data["postpone_deduplication"] == self.afghanistan.postpone_deduplication
         individual = getattr(getattr(grievance_ticket, "ticket_details", None), "individual", None)
         expected_individual = (
@@ -1182,14 +1251,14 @@ class TestGrievanceTicketDetail:
         assert data["individual"] == expected_individual
 
         related_tickets = data["related_tickets"]
-        assert             {
-                "id": str(self.existing_ticket.id),
-                "unicef_id": self.existing_ticket.unicef_id,
-            } in related_tickets
         assert {
-                "id": str(self.linked_ticket.id),
-                "unicef_id": self.linked_ticket.unicef_id,
-            } in related_tickets
+            "id": str(self.existing_ticket.id),
+            "unicef_id": self.existing_ticket.unicef_id,
+        } in related_tickets
+        assert {
+            "id": str(self.linked_ticket.id),
+            "unicef_id": self.linked_ticket.unicef_id,
+        } in related_tickets
         assert data["linked_tickets"] == [
             {
                 "id": str(self.linked_ticket.id),

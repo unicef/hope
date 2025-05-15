@@ -424,7 +424,6 @@ class TestGrievanceTicketGlobalList:
         )
         assert response_count.status_code == status.HTTP_403_FORBIDDEN
 
-
     def test_grievance_ticket_global_list_area_limits(
         self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
     ) -> None:

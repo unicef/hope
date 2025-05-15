@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import Case, DateField, F, QuerySet, When, OuterRef, Prefetch
+from django.db.models import Case, DateField, F, QuerySet, When
 from django.utils import timezone
 
 from constance import config
