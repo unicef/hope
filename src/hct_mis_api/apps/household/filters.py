@@ -367,7 +367,7 @@ class IndividualFilter(FilterSet):
             filters.append({"term": {"program_id": program_id}})
 
         return {
-            "size": 100,  # size can be int
+            "size": 100,
             "_source": False,
             "query": {
                 "bool": {
