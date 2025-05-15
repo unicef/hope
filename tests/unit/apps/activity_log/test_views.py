@@ -134,6 +134,7 @@ class TestLogEntryView:
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_1)
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_2)
         response = self.client.get(self.url_list)
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
@@ -165,6 +166,7 @@ class TestLogEntryView:
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_1)
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_2)
         response = self.client.get(self.url_count)
 
         assert response.status_code == expected_status
@@ -229,6 +231,7 @@ class TestLogEntryView:
 
     def test_activity_logs_filters(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_2)
+        create_user_role_with_permissions(self.user, [Permissions.ACTIVITY_LOG_VIEW], self.afghanistan, self.program_1)
         response = self.client.get(
             reverse(
                 "api:activity-logs:activity-logs-list",

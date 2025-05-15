@@ -17,6 +17,7 @@ from hct_mis_api.apps.activity_log.filters import LogEntryFilter
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     SerializerActionMixin,
 )
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class LogEntryViewSet(
+    BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     SerializerActionMixin,
     mixins.ListModelMixin,
@@ -40,15 +42,17 @@ class LogEntryViewSet(
     filterset_class = LogEntryFilter
     search_fields = ("object_id",)
     PERMISSIONS = [Permissions.ACTIVITY_LOG_VIEW]
+    queryset = LogEntry.objects.all()
     serializer_classes_by_action = {
         "list": LogEntrySerializer,
     }
+    program_model_field = "programs"
 
     def get_queryset(self) -> QuerySet[LogEntry]:
-        qs = LogEntry.objects.filter(business_area__slug=self.kwargs.get("business_area_slug"))
+        queryset = super().get_queryset()
         if program_slug := self.kwargs.get("program_slug"):
-            qs = qs.filter(programs__slug=program_slug)
-        return qs
+            queryset = queryset.filter(programs__slug=program_slug)
+        return queryset
 
     @action(detail=False, methods=["get"], url_path="action-choices")
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
