@@ -8,17 +8,26 @@ from django.utils import timezone
 
 import pytest
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.dashboard.services import (
+    DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
+    get_pwd_count_expression,
 )
+from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    create_payment_verification_plan_with_status,
 )
 from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
@@ -310,14 +319,8 @@ def test_dashboard_reconciliation_verification_consistency(
     country_data_current_year = [item for item in country_data if item.get("year") == CURRENT_YEAR]
     assert country_data_current_year, f"No country-specific dashboard data found for {country_name} in {CURRENT_YEAR}"
 
-    sum_finished_plans_country = sum(
-        item.get("finished_payment_plans", 0) for item in country_data_current_year
-    )
-    sum_total_plans_country = sum(
-        item.get("total_payment_plans", 0) for item in country_data_current_year
-    )
-
-    # global_data_filtered_for_country is already filtered by country and year.
+    sum_finished_plans_country = sum(item.get("finished_payment_plans", 0) for item in country_data_current_year)
+    sum_total_plans_country = sum(item.get("total_payment_plans", 0) for item in country_data_current_year)
     sum_finished_plans_global = sum(item.get("finished_payment_plans", 0) for item in global_data_filtered_for_country)
     sum_total_plans_global = sum(item.get("total_payment_plans", 0) for item in global_data_filtered_for_country)
 
@@ -329,3 +332,194 @@ def test_dashboard_reconciliation_verification_consistency(
         "Sum of 'total_payment_plans' should be consistent between country and filtered global dashboards "
         f"(Country: {sum_total_plans_country}, Global: {sum_total_plans_global})"
     )
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_data_cache_refresh_data_non_existent_business_area() -> None:
+    """Test refresh_data for DashboardDataCache with a non-existent business area slug."""
+    slug = "non-existent-slug"
+    cache_key = DashboardDataCache.get_cache_key(slug)
+    cache.delete(cache_key)
+
+    BusinessArea.objects.filter(slug=slug).delete()
+
+    result = DashboardDataCache.refresh_data(slug)
+    assert result == []
+    cached_data = cache.get(cache_key)
+    assert cached_data is not None
+    assert json.loads(cached_data) == []
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_get_pwd_count_expression_logic() -> None:
+    """Test the get_pwd_count_expression for various PWD count scenarios."""
+    ba = BusinessAreaFactory()
+    hh1 = HouseholdFactory(
+        business_area=ba,
+        female_age_group_0_5_disabled_count=0,
+        female_age_group_6_11_disabled_count=0,
+        female_age_group_12_17_disabled_count=0,
+        female_age_group_18_59_disabled_count=0,
+        female_age_group_60_disabled_count=0,
+        male_age_group_0_5_disabled_count=0,
+        male_age_group_6_11_disabled_count=0,
+        male_age_group_12_17_disabled_count=0,
+        male_age_group_18_59_disabled_count=0,
+        male_age_group_60_disabled_count=0,
+    )
+
+    hh2 = HouseholdFactory(
+        business_area=ba,
+        female_age_group_0_5_disabled_count=1,
+        female_age_group_6_11_disabled_count=None,
+        female_age_group_12_17_disabled_count=2,
+        male_age_group_18_59_disabled_count=3,
+        male_age_group_60_disabled_count=None,
+    )
+
+    hh3 = HouseholdFactory(
+        business_area=ba,
+        female_age_group_0_5_disabled_count=None,
+        female_age_group_6_11_disabled_count=None,
+        female_age_group_12_17_disabled_count=None,
+        female_age_group_18_59_disabled_count=None,
+        female_age_group_60_disabled_count=None,
+        male_age_group_0_5_disabled_count=None,
+        male_age_group_6_11_disabled_count=None,
+        male_age_group_12_17_disabled_count=None,
+        male_age_group_18_59_disabled_count=None,
+        male_age_group_60_disabled_count=None,
+    )
+
+    households_with_pwd_counts = Household.objects.filter(id__in=[hh1.id, hh2.id, hh3.id]).annotate(
+        calculated_pwd_count=get_pwd_count_expression()
+    )
+
+    for hh_annotated in households_with_pwd_counts:
+        if hh_annotated.id == hh1.id:
+            assert hh_annotated.calculated_pwd_count == 0, "PWD count mismatch for hh1 (zero PWDs)"
+        elif hh_annotated.id == hh2.id:
+            assert hh_annotated.calculated_pwd_count == 1 + 2 + 3, "PWD count mismatch for hh2 (some PWDs)"
+        elif hh_annotated.id == hh3.id:
+            assert hh_annotated.calculated_pwd_count == 0, "PWD count mismatch for hh3 (all PWD fields None)"
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_get_payment_plan_counts_logic() -> None:
+    """Test _get_payment_plan_counts with different grouping criteria."""
+    ba = BusinessAreaFactory()
+    prog_a_sector_x = ProgramFactory(business_area=ba, sector="SectorX", name="ProgramA")
+    prog_b_sector_y = ProgramFactory(business_area=ba, sector="SectorY", name="ProgramB")
+
+    pp1 = PaymentPlanFactory(program_cycle__program=prog_a_sector_x)
+    pp2 = PaymentPlanFactory(program_cycle__program=prog_a_sector_x)
+    pp3 = PaymentPlanFactory(program_cycle__program=prog_b_sector_y)
+    pp4 = PaymentPlanFactory(program_cycle__program=prog_a_sector_x)
+    pp5 = PaymentPlanFactory(program_cycle__program=prog_a_sector_x)
+
+    user = UserFactory()
+
+    create_payment_verification_plan_with_status(
+        payment_plan=pp2, user=user, business_area=ba, program=prog_a_sector_x, status="FINISHED"
+    )
+    create_payment_verification_plan_with_status(
+        payment_plan=pp4, user=user, business_area=ba, program=prog_a_sector_x, status="FINISHED"
+    )
+
+    PaymentFactory(
+        parent=pp1, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
+    )
+    PaymentFactory(
+        parent=pp3, program=prog_b_sector_y, delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc)
+    )
+    PaymentFactory(
+        parent=pp5, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc)
+    )
+    Payment.objects.filter(parent=pp1, business_area=ba).update(delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc))
+    Payment.objects.filter(parent=pp2, business_area=ba).update(delivery_date=timezone.datetime(2023, 6, 1, tzinfo=timezone.utc)) # pp2 is FINISHED, expected in 2023
+    Payment.objects.filter(parent=pp3, business_area=ba).update(delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc))
+    Payment.objects.filter(parent=pp4, business_area=ba).update(delivery_date=timezone.datetime(2024, 6, 1, tzinfo=timezone.utc)) # pp4 is FINISHED, expected in 2024
+    Payment.objects.filter(parent=pp5, business_area=ba).update(delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc))
+
+    base_payments_qs = Payment.objects.filter(business_area=ba)
+    group_by_fields = ["year", "sector_name"]
+
+    result = DashboardCacheBase._get_payment_plan_counts(base_payments_qs, group_by_fields)
+
+    expected_total_counts = {
+        (2023, "SectorX"): 3,
+        (2023, "SectorY"): 1,
+        (2024, "SectorX"): 1,
+    }
+    expected_finished_counts = {
+        (2023, "SectorX"): 1,
+        (2024, "SectorX"): 1,
+    }
+
+    assert result["total"] == expected_total_counts, "Total payment plan counts mismatch"
+    assert result["finished"] == expected_finished_counts, "Finished payment plan counts mismatch"
+
+    group_by_fields_program = ["year", "program_name"]
+    result_program_grouping = DashboardCacheBase._get_payment_plan_counts(base_payments_qs, group_by_fields_program)
+
+    expected_total_program = {
+        (2023, "ProgramA"): 3,
+        (2023, "ProgramB"): 1,
+        (2024, "ProgramA"): 1,
+    }
+    expected_finished_program = {
+        (2023, "ProgramA"): 1,
+        (2024, "ProgramA"): 1,
+    }
+    assert result_program_grouping["total"] == expected_total_program, "Total plan counts mismatch (program grouping)"
+    assert result_program_grouping["finished"] == expected_finished_program, "Finished plan counts (program grouping)"
+
+    empty_plan_qs = Payment.objects.filter(pk__in=[])
+    result_empty = DashboardCacheBase._get_payment_plan_counts(empty_plan_qs, group_by_fields)
+    assert result_empty["total"] == {}, "Expected empty total counts for no plans"
+    assert result_empty["finished"] == {}, "Expected empty finished counts for no plans"
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_data_cache_refresh_data_no_payments(afghanistan: BusinessArea) -> None:
+    """Test refresh_data for DashboardDataCache when a business area has no payments."""
+    Payment.objects.filter(
+        program__business_area=afghanistan,
+        parent__status__in=["ACCEPTED", "FINISHED"],
+        program__is_visible=True,
+        parent__is_removed=False,
+        is_removed=False,
+        conflicted=False,
+        excluded=False,
+    ).exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]).delete()
+
+    cache_key = DashboardDataCache.get_cache_key(afghanistan.slug)
+    cache.delete(cache_key)
+
+    result = DashboardDataCache.refresh_data(afghanistan.slug)
+    assert result == []
+    cached_data = cache.get(cache_key)
+    assert cached_data is not None
+    assert json.loads(cached_data) == []
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_global_data_cache_refresh_data_no_payments() -> None:
+    """Test refresh_data for DashboardGlobalDataCache when there are no payments globally."""
+    Payment.objects.filter(
+        parent__status__in=["ACCEPTED", "FINISHED"],
+        program__is_visible=True,
+        parent__is_removed=False,
+        is_removed=False,
+        conflicted=False,
+        excluded=False,
+    ).exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"]).delete()
+
+    cache_key = DashboardGlobalDataCache.get_cache_key("global")
+    cache.delete(cache_key)
+
+    result = DashboardGlobalDataCache.refresh_data()
+    assert result == []
+    cached_data = cache.get(cache_key)
+    assert cached_data is not None
+    assert json.loads(cached_data) == []

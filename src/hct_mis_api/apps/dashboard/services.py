@@ -193,9 +193,8 @@ class DashboardCacheBase(Protocol):
 
             for hh in households_qs:
                 size_value = hh.get("size")
-                final_size = 1 if size_value is None else size_value
                 household_map[hh["id"]] = {
-                    "size": final_size,
+                    "size": 1 if size_value is None else size_value,
                     "children_count": hh.get("children_count") or 0,
                     "pwd_count": hh.get("pwd_count_calc") or 0,
                     "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
@@ -304,7 +303,6 @@ class DashboardDataCache(DashboardCacheBase):
         )
 
         for payment in payment_data_iter:
-            # Construct the main summary key
             key = (
                 payment.get("year"),
                 payment.get("month"),
@@ -319,11 +317,9 @@ class DashboardDataCache(DashboardCacheBase):
 
             current_summary = summary[key]
 
-            # Construct the plan_key for fetching plan counts.
-            # Values must align with plan_group_fields and defaults in _get_payment_plan_counts.
             plan_key_values = [
-                payment.get("year"),  # Year from payment data
-                payment.get("month"), # Month from payment data
+                payment.get("year"),
+                payment.get("month"),
                 payment.get("admin1_name", "Unknown Admin1"),
                 payment.get("program_name", "Unknown Program"),
                 payment.get("sector_name", "Unknown Sector"),
@@ -334,7 +330,6 @@ class DashboardDataCache(DashboardCacheBase):
             ]
             plan_key = tuple(plan_key_values)
 
-            # Assign plan counts only once per summary slice
             if current_summary["total_payments"] == 0:
                 current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
                 current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
@@ -432,7 +427,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         )
 
         for payment in payment_data_iter:
-            # Construct the main summary key
             key = (
                 payment.get("year"),
                 payment.get("business_area_name", "Unknown Country"),
@@ -443,7 +437,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             )
             current_summary = summary[key]
 
-            # Construct the plan_key for fetching plan counts.
             plan_key_values = [
                 payment.get("year"),
                 payment.get("business_area_name", "Unknown Country"),
@@ -454,7 +447,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             ]
             plan_key = tuple(plan_key_values)
 
-            # Assign plan counts only once per summary slice
             if current_summary["total_payments"] == 0:
                 current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
                 current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
