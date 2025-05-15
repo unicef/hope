@@ -286,10 +286,36 @@
                         .ticks(3);
 
                     function updateTopMetrics() {
-                        const totalReconciledCount = ndx.groupAll().reduceSum(d => d.reconciled || 0).value();
                         const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
+
+                        const pendingPaymentsGroupUSD = ndx
+                            .groupAll()
+                            .reduce(
+                                (p, v) => {
+                                    if (pendingList.includes(v.payment_status)) {
+                                        p.count += 1;
+                                        p.sum += v.delivered_quantity_usd || 0;
+                                    }
+                                    return p;
+                                },
+                                (p, v) => {
+                                    if (pendingList.includes(v.payment_status)) {
+                                        p.count -= 1;
+                                        p.sum -= v.delivered_quantity_usd || 0;
+                                    }
+                                    return p;
+                                },
+                                () => ({
+                                    count: 0,
+                                    sum: 0,
+                                }),
+                            )
+                            .value();
+
+                        const numberOfPendingPayments = pendingPaymentsGroupUSD.count;
+                        const numberOfNonPendingPayments = totalPaymentsCount - numberOfPendingPayments;
                         const reconciliationPercentage = totalPaymentsCount > 0
-                                ? (totalReconciledCount / totalPaymentsCount) * 100
+                                ? (numberOfNonPendingPayments / totalPaymentsCount) * 100
                                 : 0;
 
                         const paymentPlanMetrics = ndx.groupAll().reduce(
@@ -335,29 +361,6 @@
                             .value();
                         const totalSuccessfulUSD = successfulPaymentsGroupUSD.sum;
                         const successfulPaymentsCountUSD = successfulPaymentsGroupUSD.count;
-                        const pendingPaymentsGroupUSD = ndx
-                            .groupAll()
-                            .reduce(
-                                (p, v) => {
-                                    if (pendingList.includes(v.payment_status)) {
-                                        p.count += 1;
-                                        p.sum += v.delivered_quantity_usd || 0;
-                                    }
-                                    return p;
-                                },
-                                (p, v) => {
-                                    if (pendingList.includes(v.payment_status)) {
-                                        p.count -= 1;
-                                        p.sum -= v.delivered_quantity_usd || 0;
-                                    }
-                                    return p;
-                                },
-                                () => ({
-                                    count: 0,
-                                    sum: 0,
-                                }),
-                            )
-                            .value();
                         const pendingPaymentsGroup = ndx
                             .groupAll()
                             .reduce(

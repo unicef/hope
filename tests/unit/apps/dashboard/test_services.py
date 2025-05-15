@@ -273,3 +273,59 @@ def test_global_dashboard_unique_household_metrics(
     assert target_group_data["children_counts"] == expected_children, "Children count mismatch"
     assert target_group_data["pwd_counts"] == expected_pwd, "PWD count mismatch"
     assert target_group_data["payments"] == expected_payment_count, "Payment count mismatch"
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_dashboard_reconciliation_verification_consistency(
+    populate_dashboard_cache: Callable, afghanistan: BusinessAreaFactory
+) -> None:
+    country_slug = afghanistan.slug
+    country_name = afghanistan.name
+
+    cache.delete(DashboardDataCache.get_cache_key(country_slug))
+    cache.delete(DashboardGlobalDataCache.get_cache_key("global"))
+
+    household = populate_dashboard_cache(afghanistan)
+    Payment.objects.filter(household=household).update(delivery_date=TEST_DATE)
+
+    country_data = DashboardDataCache.refresh_data(country_slug)
+    assert country_data, "Country dashboard data should not be empty"
+
+    global_data_all = DashboardGlobalDataCache.refresh_data()
+    assert global_data_all, "Global dashboard data should not be empty"
+
+    global_data_filtered_for_country = [
+        item
+        for item in global_data_all
+        if item.get("country") == country_name and item.get("year") == CURRENT_YEAR
+    ]
+    assert global_data_filtered_for_country, f"No global data found for {country_name} in {CURRENT_YEAR}"
+
+    sum_reconciled_country = sum(item.get("reconciled", 0) for item in country_data if item.get("year") == CURRENT_YEAR)
+    sum_reconciled_global = sum(item.get("reconciled", 0) for item in global_data_filtered_for_country)
+
+    assert sum_reconciled_country == sum_reconciled_global, (
+        "Sum of 'reconciled' counts should be consistent between country and filtered global dashboards "
+        f"(Country: {sum_reconciled_country}, Global: {sum_reconciled_global})"
+    )
+
+    sum_finished_plans_country = sum(
+        item.get("finished_payment_plans", 0) for item in country_data if item.get("year") == CURRENT_YEAR
+    )
+    sum_total_plans_country = sum(
+        item.get("total_payment_plans", 0) for item in country_data if item.get("year") == CURRENT_YEAR
+    )
+
+    sum_finished_plans_global = sum(
+        item.get("finished_payment_plans", 0) for item in global_data_filtered_for_country
+    )
+    sum_total_plans_global = sum(item.get("total_payment_plans", 0) for item in global_data_filtered_for_country)
+
+    assert sum_finished_plans_country >= sum_finished_plans_global, (
+        "Sum of 'finished_payment_plans' from country dashboard output should be >= sum from filtered global. "
+        f"(Country: {sum_finished_plans_country}, Global: {sum_finished_plans_global})"
+    )
+    assert sum_total_plans_country >= sum_total_plans_global, (
+        "Sum of 'total_payment_plans' from country dashboard output should be >= sum from filtered global. "
+        f"(Country: {sum_total_plans_country}, Global: {sum_total_plans_global})"
+    )

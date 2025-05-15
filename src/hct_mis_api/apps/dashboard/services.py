@@ -208,6 +208,7 @@ class DashboardCacheBase(Protocol):
             "program_name": Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
             "sector_name": Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
             "payment_status": Coalesce(F("status"), Value("Unknown Status")),
+            "business_area_name": Coalesce(F("business_area__name"), Value("Unknown Country")),
         }
 
         relevant_annotations = {
@@ -365,7 +366,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
 
         household_map = cls._get_household_data(household_ids)
 
-        plan_group_fields = ["sector_name"]
+        plan_group_fields = ["business_area_name", "sector_name"]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
         payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
