@@ -15,8 +15,8 @@ export type MessageDetail = {
     readonly createdAt: string;
     body: string;
     readonly households: Array<HouseholdSmall>;
-    readonly paymentPlan: Array<FollowUpPaymentPlan>;
-    readonly registrationDataImport: Array<RegistrationDataImportList>;
+    readonly paymentPlan: FollowUpPaymentPlan;
+    readonly registrationDataImport: RegistrationDataImportList;
     samplingType?: MessageDetailSamplingTypeEnum;
     fullListArguments?: any;
     randomSamplingArguments?: any;

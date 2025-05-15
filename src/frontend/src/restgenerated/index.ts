@@ -5,6 +5,9 @@
 
 export type { AcceptanceProcess as AcceptanceProcessCamelCase } from './models/AcceptanceProcess';
 export type { Account as AccountCamelCase } from './models/Account';
+export type { AccountabilityCommunicationMessageAgeInput as AccountabilityCommunicationMessageAgeInputCamelCase } from './models/AccountabilityCommunicationMessageAgeInput';
+export type { AccountabilityFullListArguments as AccountabilityFullListArgumentsCamelCase } from './models/AccountabilityFullListArguments';
+export type { AccountabilityRandomSamplingArguments as AccountabilityRandomSamplingArgumentsCamelCase } from './models/AccountabilityRandomSamplingArguments';
 export { ActionEnum as ActionEnumCamelCase } from './models/ActionEnum';
 export type { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
 export type { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
@@ -109,6 +112,7 @@ export type { PaginatedProjectList as PaginatedProjectListCamelCase } from './mo
 export type { PaginatedRegistrationDataImportListList as PaginatedRegistrationDataImportListListCamelCase } from './models/PaginatedRegistrationDataImportListList';
 export type { PaginatedRegistrationList as PaginatedRegistrationListCamelCase } from './models/PaginatedRegistrationList';
 export type { PaginatedRuleList as PaginatedRuleListCamelCase } from './models/PaginatedRuleList';
+export type { PaginatedSurveyList as PaginatedSurveyListCamelCase } from './models/PaginatedSurveyList';
 export type { PaginatedTargetPopulationListList as PaginatedTargetPopulationListListCamelCase } from './models/PaginatedTargetPopulationListList';
 export type { PaginatedTPHouseholdListList as PaginatedTPHouseholdListListCamelCase } from './models/PaginatedTPHouseholdListList';
 export type { PaginatedUserList as PaginatedUserListCamelCase } from './models/PaginatedUserList';
@@ -192,6 +196,7 @@ export type { SplitPaymentPlan as SplitPaymentPlanCamelCase } from './models/Spl
 export { SplitTypeEnum as SplitTypeEnumCamelCase } from './models/SplitTypeEnum';
 export { Status791Enum as Status791EnumCamelCase } from './models/Status791Enum';
 export { SubtypeEnum as SubtypeEnumCamelCase } from './models/SubtypeEnum';
+export type { Survey as SurveyCamelCase } from './models/Survey';
 export type { TargetingCollectorBlockRuleFilter as TargetingCollectorBlockRuleFilterCamelCase } from './models/TargetingCollectorBlockRuleFilter';
 export { TargetingCollectorBlockRuleFilterComparisonMethodEnum as TargetingCollectorBlockRuleFilterComparisonMethodEnumCamelCase } from './models/TargetingCollectorBlockRuleFilterComparisonMethodEnum';
 export type { TargetingCollectorRuleFilterBlock as TargetingCollectorRuleFilterBlockCamelCase } from './models/TargetingCollectorRuleFilterBlock';

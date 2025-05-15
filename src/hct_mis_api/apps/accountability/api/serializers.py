@@ -256,6 +256,14 @@ class SurveySerializer(serializers.ModelSerializer):
         model = Survey
         fields = (
             "id",
+            "title",
+            "body",
+            "category",
+            "sampling_type",
+            "flow",
+            "payment_plan",
+            "full_list_arguments",
+            "random_sampling_arguments",
             "sample_file_path",
             "has_valid_sample_file",
             "rapid_pro_url",
