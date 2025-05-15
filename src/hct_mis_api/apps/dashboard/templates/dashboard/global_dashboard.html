@@ -206,11 +206,10 @@
                             )
                             .value();
 
-                        const numberOfPendingPayments = pendingPaymentsGroupUSD.count;
-                        const numberOfNonPendingPayments = totalPaymentsCount - numberOfPendingPayments;
-                        const reconciliationPercentage = totalPaymentsCount > 0
-                                ? (numberOfNonPendingPayments / totalPaymentsCount) * 100
-                                : 0;
+                        const totalReconciledPaymentsCount = ndx.groupAll().reduceSum(d => d.reconciled || 0).value();
+                        const reconciliationPercentage = totalPaymentsCount > 0 ?
+                            (totalReconciledPaymentsCount / totalPaymentsCount) * 100 :
+                            0;
 
                         const paymentPlanMetrics = ndx.groupAll().reduce(
                                     (p, v) => {
