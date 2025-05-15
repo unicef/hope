@@ -64,7 +64,8 @@ class TestFeedbackViewSet:
             comments="test comments",
             admin2=self.area_1,
         )
-        self.feedback_3 = FeedbackFactory(program=ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE))
+        self.program_2 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
+        self.feedback_3 = FeedbackFactory(program=self.program_2)
 
         # per BA
         self.url_list = reverse(
@@ -136,13 +137,14 @@ class TestFeedbackViewSet:
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_2)
         response = self.client.get(self.url_list)
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert len(resp_data["results"]) == 3
+            assert len(resp_data["results"]) == 2
             feedback = resp_data["results"][0]
             assert "id" in feedback
             assert "issue_type" in feedback
@@ -179,7 +181,13 @@ class TestFeedbackViewSet:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert resp_data["count"] == 3
+            assert resp_data["count"] == 1
+
+            # add permissions to second program
+            create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_2)
+            response = self.client.get(self.url_count)
+            resp_data = response.json()
+            assert resp_data["count"] == 2
 
     @pytest.mark.parametrize(
         "permissions, expected_status",

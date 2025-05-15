@@ -57,6 +57,7 @@ from hct_mis_api.apps.accountability.services.survey_crud_services import (
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
+    BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     ProgramMixin,
     SerializerActionMixin,
@@ -84,6 +85,7 @@ class FeedbackMixin:
 
 
 class FeedbackViewSet(
+    BusinessAreaProgramsAccessMixin,
     CountActionMixin,
     SerializerActionMixin,
     FeedbackMixin,
@@ -94,6 +96,7 @@ class FeedbackViewSet(
     BaseViewSet,
 ):
     PERMISSIONS = [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST, Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS]
+    queryset = Feedback.objects.all()
     http_method_names = ["get", "post", "patch"]
     serializer_classes_by_action = {
         "list": FeedbackListSerializer,
@@ -109,15 +112,16 @@ class FeedbackViewSet(
         "partial_update": [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE],
         "message": [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE],
     }
+    program_model_field = "program"
 
     def get_object(self) -> Feedback:
         return get_object_or_404(Feedback, id=self.kwargs.get("pk"))
 
     def get_queryset(self) -> QuerySet[Feedback]:
-        qs = Feedback.objects.filter(business_area__slug=self.kwargs.get("business_area_slug"))
+        queryset = super().get_queryset()
         if program_slug := self.kwargs.get("program_slug"):
-            qs = qs.filter(program__slug=program_slug)
-        return qs
+            queryset = queryset.filter(program__slug=program_slug)
+        return queryset
 
     @extend_schema(
         responses={
