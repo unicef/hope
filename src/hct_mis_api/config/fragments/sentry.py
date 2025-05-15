@@ -22,7 +22,11 @@ if SENTRY_DSN:
     )
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
+        integrations=[
+            DjangoIntegration(transaction_style="url"),
+            sentry_logging,
+            CeleryIntegration(),
+        ],
         release=get_full_version(),
         enable_tracing=SENTRY_ENABLE_TRACING,
         traces_sample_rate=1.0,

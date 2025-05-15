@@ -1,6 +1,19 @@
 from smart_env import SmartEnv
 
 DEFAULTS = {
+    "ALLOWED_IFRAME_DOMAINS": (
+        list,
+        [
+            "https://localhost:3000",
+            "https://dev-hope.unitst.org",
+            "https://trn-hope.unitst.org",
+            "https://stg-hope.unitst.org",
+            "https://hope.unitst.org",
+        ],
+        "",
+        "",
+        "List of sites where iframe is allowed",
+    ),
     "AURORA_SERVER": (str, ""),
     "AURORA_TOKEN": (str, ""),
     "AURORA_USER": (str, ""),
@@ -51,9 +64,6 @@ DEFAULTS = {
     "ELASTICSEARCH_INDEX_PREFIX": (str, ""),
     "ELASTICSEARCH_SYNONYMS_FILE": (str, "/app/data/synonyms.txt"),
     "RAPID_PRO_URL": (str, "https://rapidpro.io"),
-    "DATAMART_USER": (str, ""),
-    "DATAMART_URL": (str, "https://datamart-dev.unicef.io"),
-    "DATAMART_PASSWORD": (str, ""),
     "POWER_QUERY_DB_ALIAS": (str, "read_only"),
     "ROOT_ACCESS_TOKEN": (str, ""),
     "SENTRY_DSN": (str, ""),

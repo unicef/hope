@@ -3,6 +3,8 @@ from typing import Tuple
 from hct_mis_api.config.env import env
 from hct_mis_api.config.settings import ALLOWED_HOSTS, DEBUG, FRONTEND_HOST
 
+CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
+
 CSP_REPORT_URI = env.tuple("CSP_REPORT_URI")
 CSP_REPORT_ONLY = env("CSP_REPORT_ONLY")
 CSP_REPORT_PERCENTAGE = env("CSP_REPORT_PERCENTAGE")
