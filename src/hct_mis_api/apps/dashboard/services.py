@@ -127,6 +127,7 @@ class DashboardCacheBase(Protocol):
             year=ExtractYear(date_field),
             month=ExtractMonth(date_field),
             business_area_name=Coalesce(F("business_area__name"), Value("Unknown Country")),
+            region_name=Coalesce(F("business_area__region_name"), Value("Unknown Region")),
             currency_code=Coalesce(F("currency"), Value("UNK")),
             admin1_name=Coalesce(
                 F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown Admin1")
@@ -145,6 +146,7 @@ class DashboardCacheBase(Protocol):
             "year",
             "month",
             "business_area_name",
+            "region_name",
             "currency_code",
             "admin1_name",
             "program_name",
@@ -190,8 +192,9 @@ class DashboardCacheBase(Protocol):
             )
 
             for hh in households_qs:
+                size_value = hh.get("size")
                 household_map[hh["id"]] = {
-                    "size": hh.get("size") or 0,
+                    "size": 1 if size_value is None else size_value,
                     "children_count": hh.get("children_count") or 0,
                     "pwd_count": hh.get("pwd_count_calc") or 0,
                     "admin1": hh.get("admin1_name_hh", "Unknown Admin1"),
@@ -203,10 +206,20 @@ class DashboardCacheBase(Protocol):
     def _get_payment_plan_counts(
         cls, base_queryset: models.QuerySet, group_by_annotated_names: List[str]
     ) -> Dict[str, Dict[Tuple, int]]:
+        date_field = Coalesce("delivery_date", "entitlement_date", "status_date")
         potential_annotations = {
+            "year": ExtractYear(date_field),
+            "month": ExtractMonth(date_field),
+            "business_area_name": Coalesce(F("business_area__name"), Value("Unknown Country")),
+            "region_name": Coalesce(F("business_area__region_name"), Value("Unknown Region")),
             "currency_code": Coalesce(F("currency"), Value("UNK")),
+            "admin1_name": Coalesce(
+                F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown Admin1")
+            ),
             "program_name": Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
             "sector_name": Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
+            "fsp_name": Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
+            "delivery_type_name": Coalesce(F("delivery_type__name"), Value("Unknown Delivery Type")),
             "payment_status": Coalesce(F("status"), Value("Unknown Status")),
         }
 
@@ -259,7 +272,17 @@ class DashboardDataCache(DashboardCacheBase):
 
         household_map = cls._get_household_data(household_ids)
 
-        plan_group_fields = ["currency_code", "program_name", "sector_name"]
+        plan_group_fields = [
+            "year",
+            "month",
+            "admin1_name",
+            "program_name",
+            "sector_name",
+            "fsp_name",
+            "delivery_type_name",
+            "payment_status",
+            "currency_code",
+        ]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
         payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
@@ -280,11 +303,9 @@ class DashboardDataCache(DashboardCacheBase):
         )
 
         for payment in payment_data_iter:
-            year = payment.get("year")
-            month = payment.get("month")
             key = (
-                year,
-                month,
+                payment.get("year"),
+                payment.get("month"),
                 payment.get("admin1_name", "Unknown Admin1"),
                 payment.get("program_name", "Unknown Program"),
                 payment.get("sector_name", "Unknown Sector"),
@@ -294,10 +315,24 @@ class DashboardDataCache(DashboardCacheBase):
                 payment.get("currency_code", "UNK"),
             )
 
-            plan_key = tuple(payment.get(field, None) for field in plan_group_fields)
             current_summary = summary[key]
-            current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-            current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+
+            plan_key_values = [
+                payment.get("year"),
+                payment.get("month"),
+                payment.get("admin1_name", "Unknown Admin1"),
+                payment.get("program_name", "Unknown Program"),
+                payment.get("sector_name", "Unknown Sector"),
+                payment.get("fsp_name", "Unknown FSP"),
+                payment.get("delivery_type_name", "Unknown Delivery Type"),
+                payment.get("payment_status", "Unknown Status"),
+                payment.get("currency_code", "UNK"),
+            ]
+            plan_key = tuple(plan_key_values)
+
+            if current_summary["total_payments"] == 0:
+                current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
+                current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
 
             current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
             current_summary["total_quantity"] += float(payment.get("payment_quantity") or 0.0)
@@ -365,7 +400,14 @@ class DashboardGlobalDataCache(DashboardCacheBase):
 
         household_map = cls._get_household_data(household_ids)
 
-        plan_group_fields = ["sector_name"]
+        plan_group_fields = [
+            "year",
+            "business_area_name",
+            "region_name",
+            "sector_name",
+            "delivery_type_name",
+            "payment_status",
+        ]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
         payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
@@ -385,19 +427,30 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         )
 
         for payment in payment_data_iter:
-            year = payment.get("year")
             key = (
-                year,
+                payment.get("year"),
                 payment.get("business_area_name", "Unknown Country"),
+                payment.get("region_name", "Unknown Region"),
                 payment.get("sector_name", "Unknown Sector"),
                 payment.get("delivery_type_name", "Unknown Delivery Type"),
                 payment.get("payment_status", "Unknown Status"),
             )
-
-            plan_key = tuple(payment.get(field, None) for field in plan_group_fields)
             current_summary = summary[key]
-            current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-            current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+
+            plan_key_values = [
+                payment.get("year"),
+                payment.get("business_area_name", "Unknown Country"),
+                payment.get("region_name", "Unknown Region"),
+                payment.get("sector_name", "Unknown Sector"),
+                payment.get("delivery_type_name", "Unknown Delivery Type"),
+                payment.get("payment_status", "Unknown Status"),
+            ]
+            plan_key = tuple(plan_key_values)
+
+            if current_summary["total_payments"] == 0:
+                current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
+                current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+
             current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
             current_summary["total_payments"] += 1
             current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
@@ -415,11 +468,12 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                 current_summary["_seen_households"].add(household_id)
 
         result_list = []
-        for (year, country, sector, delivery_type, status), totals in summary.items():
+        for (year, country, region, sector, delivery_type, status), totals in summary.items():
             result_list.append(
                 {
                     "year": year,
                     "country": country,
+                    "region": region,
                     "sector": sector,
                     "delivery_types": delivery_type,
                     "status": status,
