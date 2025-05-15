@@ -3,12 +3,14 @@ from typing import Any
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.dashboard.services import DashboardDataCache, DashboardGlobalDataCache
+from hct_mis_api.apps.dashboard.services import (
+    DashboardDataCache,
+    DashboardGlobalDataCache,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
-
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)

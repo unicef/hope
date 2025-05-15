@@ -295,9 +295,7 @@ def test_dashboard_reconciliation_verification_consistency(
     assert global_data_all, "Global dashboard data should not be empty"
 
     global_data_filtered_for_country = [
-        item
-        for item in global_data_all
-        if item.get("country") == country_name and item.get("year") == CURRENT_YEAR
+        item for item in global_data_all if item.get("country") == country_name and item.get("year") == CURRENT_YEAR
     ]
     assert global_data_filtered_for_country, f"No global data found for {country_name} in {CURRENT_YEAR}"
 
@@ -316,9 +314,7 @@ def test_dashboard_reconciliation_verification_consistency(
         item.get("total_payment_plans", 0) for item in country_data if item.get("year") == CURRENT_YEAR
     )
 
-    sum_finished_plans_global = sum(
-        item.get("finished_payment_plans", 0) for item in global_data_filtered_for_country
-    )
+    sum_finished_plans_global = sum(item.get("finished_payment_plans", 0) for item in global_data_filtered_for_country)
     sum_total_plans_global = sum(item.get("total_payment_plans", 0) for item in global_data_filtered_for_country)
 
     assert sum_finished_plans_country >= sum_finished_plans_global, (
