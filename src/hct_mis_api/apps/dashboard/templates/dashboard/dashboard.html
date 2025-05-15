@@ -505,6 +505,38 @@
             createDashboard();
         }
         fetchDataForCountry();
+
+        // Tooltip toggle logic
+        function setupTooltipToggle(iconId, tooltipId) {
+            const icon = document.getElementById(iconId);
+            const tooltip = document.getElementById(tooltipId);
+            if (icon && tooltip) {
+                icon.addEventListener('click', function(event) {
+                    event.stopPropagation(); // Prevent click from bubbling up to document
+                    const isActive = icon.classList.contains('active');
+                    // Hide all other active tooltips
+                    document.querySelectorAll('.info-icon.active').forEach(activeIcon => {
+                        if (activeIcon !== icon) {
+                            activeIcon.classList.remove('active');
+                        }
+                    });
+                    // Toggle current tooltip
+                    icon.classList.toggle('active', !isActive);
+                });
+            }
+        }
+
+        setupTooltipToggle('info-icon-total-amount-paid', 'tooltip-total-amount-paid');
+        setupTooltipToggle('info-icon-outstanding-payment', 'tooltip-outstanding-payment');
+        setupTooltipToggle('info-icon-reconciliation', 'tooltip-reconciliation');
+        setupTooltipToggle('info-icon-verification', 'tooltip-verification');
+
+        // Hide tooltips when clicking anywhere else on the document
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.info-icon.active').forEach(icon => {
+                icon.classList.remove('active');
+            });
+        });
     });
     </script>
 {% endblock %}
