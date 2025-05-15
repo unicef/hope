@@ -52,40 +52,6 @@ class GrievancePermissionsMixin:
             can_view_sensitive_creator = permissions_map[action][4].value in permissions_in_program
             can_view_sensitive_owner = permissions_map[action][5].value in permissions_in_program
 
-            # if can_view_ex_sensitive_all and can_view_sensitive_all:
-            #     return Q()
-            #
-            # filters_1 = {}
-            # filters_1_exclude = {}
-            # filters_2 = {}
-            # filters_2_exclude = {}
-            #
-            # if can_view_ex_sensitive_all or can_view_sensitive_all:
-            #     if can_view_sensitive_creator or can_view_ex_sensitive_creator:
-            #         filters_1.update(created_by_filter)
-            #     if can_view_sensitive_owner or can_view_ex_sensitive_owner:
-            #         filters_2.update(assigned_to_filter)
-            #
-            #     if can_view_ex_sensitive_all:
-            #         return ~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2)
-            #     else:
-            #         return Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2)
-            #
-            # else:
-            #     if can_view_ex_sensitive_creator:
-            #         filters_1.update(created_by_filter)
-            #         if not can_view_sensitive_creator:
-            #             filters_1_exclude.update(sensitive_category_filter)
-            #     if can_view_ex_sensitive_owner:
-            #         filters_2.update(assigned_to_filter)
-            #         if not can_view_sensitive_owner:
-            #             filters_2_exclude.update(sensitive_category_filter)
-            #     if filters_1 or filters_2:
-            #         return Q(Q(**filters_1), ~Q(**filters_1_exclude)) | Q(Q(**filters_2), ~Q(**filters_2_exclude))
-            #     else:
-            #         # return empty queryset if user does not have any permissions
-            #         return Q(pk__in=[])
-
             if can_view_ex_sensitive_all:
                 filters |= ~Q(**sensitive_category_filter)
             if can_view_sensitive_all:
@@ -131,50 +97,6 @@ class GrievancePermissionsMixin:
                     self.business_area.id, [permissions_map[action][5]]
                 )
             )
-
-            # only_ex_sensitive = programs_can_view_ex_sensitive_all - programs_can_view_sensitive_all
-            # if only_ex_sensitive:
-            #     filters |= Q(program_id__in=only_ex_sensitive) & ~Q(**sensitive_category_filter)
-            #
-            # only_sensitive = programs_can_view_sensitive_all - programs_can_view_ex_sensitive_all
-            # if only_sensitive:
-            #     filters |= Q(program_id__in=only_sensitive, **sensitive_category_filter)
-            #
-            # all = programs_can_view_ex_sensitive_all & programs_can_view_sensitive_all
-            # if all:
-            #     filters |= Q(program_id__in=all)
-            #
-            # ex_sensitive_creator = programs_can_view_ex_sensitive_all & programs_can_view_ex_sensitive_creator
-            # if ex_sensitive_creator:
-            #     filters |= Q(program_id__in=ex_sensitive_creator) & Q(**created_by_filter) & ~Q(**sensitive_category_filter)
-            #
-            # ex_sensitive_owner = programs_can_view_ex_sensitive_all & programs_can_view_ex_sensitive_owner
-            # if ex_sensitive_owner:
-            #     filters |= Q(program_id__in=ex_sensitive_owner) & Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
-            #
-            # sensitive_creator = programs_can_view_sensitive_all & programs_can_view_sensitive_creator
-            # if sensitive_creator:
-            #     filters |= Q(program_id__in=sensitive_creator) & Q(**created_by_filter) & Q(**sensitive_category_filter)
-            #
-            # sensitive_owner = programs_can_view_sensitive_all & programs_can_view_sensitive_owner
-            # if sensitive_owner:
-            #     filters |= Q(program_id__in=sensitive_owner) & Q(**assigned_to_filter) & Q(**sensitive_category_filter)
-            #
-            # creator_ex_sensitive = programs_can_view_ex_sensitive_creator - programs_can_view_sensitive_creator
-            # if creator_ex_sensitive:
-            #     filters |= Q(program_id__in=creator_ex_sensitive) & Q(**created_by_filter) & ~Q(**sensitive_category_filter)
-            #
-            # owner_ex_sensitive = programs_can_view_ex_sensitive_owner - programs_can_view_sensitive_owner
-            # if owner_ex_sensitive:
-            #     filters |= Q(program_id__in=owner_ex_sensitive) & Q(**assigned_to_filter) & ~Q(**sensitive_category_filter)
-            #
-            # creator_sensitive = programs_can_view_sensitive_creator - programs_can_view_ex_sensitive_creator
-            # if creator_sensitive:
-            #     filters |= Q(program_id__in=creator_sensitive) & Q(**created_by_filter) & Q(**sensitive_category_filter)
-            #
-            # owner_sensitive = programs_can_view_sensitive_owner - programs_can_view_ex_sensitive_owner
-            # if owner_sensitive:
-            #     filters |= Q(program_id__in=owner_sensitive) & Q(**assigned_to_filter) & Q(**sensitive_category_filter)
 
             if programs_can_view_ex_sensitive_all:
                 filters |= Q(programs__id__in=programs_can_view_ex_sensitive_all) & ~Q(**sensitive_category_filter)
