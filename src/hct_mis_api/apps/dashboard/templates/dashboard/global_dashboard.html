@@ -33,6 +33,14 @@
             </h3>
             <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
         </div>
+        <!-- Payments by Region -->
+        <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-sm font-semibold">
+                <span class="icon icon-map icon-blue"></span> {# Using a map icon as an example #}
+                {% translate "Payments by Region" %}
+            </h3>
+            <div id="payments-by-region" class="dc-chart w-full h-full"></div>
+        </div>
     </div>
 {% endblock %}
 {% block scripts %}
@@ -74,6 +82,7 @@
                     "payments-by-delivery",
                     "payments-by-sector",
                     "payments-by-country",
+                    "payments-by-region",
                 ].forEach(showSpinner);
 
                 d3.json(url).then((data) => {
@@ -96,6 +105,7 @@
                         sector: item.sector || "Unknown sector",
                         payment_status: item.status || "Unknown status",
                         country: item.country || "Unknown Country",
+                        region: item.region || "Unknown Region",
                         fsp: item.fsp || "Unknown fsp",
                         delivery_types: item.delivery_types || "Unknown delivery type",
                         pwd_counts: item.pwd_counts || 0,
@@ -109,6 +119,7 @@
                     const deliveryDim = ndx.dimension((d) => d.delivery_types);
                     const sectorDim = ndx.dimension((d) => d.sector);
                     const countryDim = ndx.dimension((d) => d.country);
+                    const regionDim = ndx.dimension((d) => d.region);
 
                     const deliveryGroup = deliveryDim
                         .group()
@@ -118,6 +129,10 @@
                         .reduceSum((d) => d.delivered_quantity_usd);
                   
                     const countryGroup = countryDim
+                        .group()
+                        .reduceSum((d) => d.delivered_quantity_usd);
+                    
+                    const regionGroup = regionDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
 
@@ -179,6 +194,22 @@
                             .style("text-anchor", "start")
                             .attr("dx", "2");
                             });
+                    
+                    const regionChart = dc
+                        .rowChart("#payments-by-region")
+                        .dimension(regionDim)
+                        .group(regionGroup)
+                        .elasticX(true)
+                        .height(400)
+                        .margins({ top: 10, right: 5, bottom: 30, left: 4 })
+                        .label(
+                            (d) =>
+                            `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / regionGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
+                        )
+                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .xAxis()
+                        .ticks(3);
+
                         function updateTopMetrics() {
                         const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
 
@@ -354,6 +385,7 @@
                     hideSpinner("payments-by-delivery");
                     hideSpinner("payments-by-sector");
                     hideSpinner("payments-by-country");
+                    hideSpinner("payments-by-region");
                     dc.renderAll();
                     isChartsInitialized = true;
                 });
@@ -362,21 +394,18 @@
         }
         fetchDataForCountry();
 
-        // Tooltip toggle logic
         function setupTooltipToggle(iconId, tooltipId) {
             const icon = document.getElementById(iconId);
             const tooltip = document.getElementById(tooltipId);
             if (icon && tooltip) {
                 icon.addEventListener('click', function(event) {
-                    event.stopPropagation(); // Prevent click from bubbling up to document
+                    event.stopPropagation();
                     const isActive = icon.classList.contains('active');
-                    // Hide all other active tooltips
                     document.querySelectorAll('.info-icon.active').forEach(activeIcon => {
                         if (activeIcon !== icon) {
                             activeIcon.classList.remove('active');
                         }
                     });
-                    // Toggle current tooltip
                     icon.classList.toggle('active', !isActive);
                 });
             }

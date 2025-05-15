@@ -127,6 +127,7 @@ class DashboardCacheBase(Protocol):
             year=ExtractYear(date_field),
             month=ExtractMonth(date_field),
             business_area_name=Coalesce(F("business_area__name"), Value("Unknown Country")),
+            region_name=Coalesce(F("business_area__region_name"), Value("Unknown Region")),
             currency_code=Coalesce(F("currency"), Value("UNK")),
             admin1_name=Coalesce(
                 F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown Admin1")
@@ -145,6 +146,7 @@ class DashboardCacheBase(Protocol):
             "year",
             "month",
             "business_area_name",
+            "region_name",
             "currency_code",
             "admin1_name",
             "program_name",
@@ -390,6 +392,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             key = (
                 year,
                 payment.get("business_area_name", "Unknown Country"),
+                payment.get("region_name", "Unknown Region"),
                 payment.get("sector_name", "Unknown Sector"),
                 payment.get("delivery_type_name", "Unknown Delivery Type"),
                 payment.get("payment_status", "Unknown Status"),
@@ -416,11 +419,12 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                 current_summary["_seen_households"].add(household_id)
 
         result_list = []
-        for (year, country, sector, delivery_type, status), totals in summary.items():
+        for (year, country, region, sector, delivery_type, status), totals in summary.items():
             result_list.append(
                 {
                     "year": year,
                     "country": country,
+                    "region": region,
                     "sector": sector,
                     "delivery_types": delivery_type,
                     "status": status,
