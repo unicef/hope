@@ -151,6 +151,7 @@ export type { PeriodicFieldData as PeriodicFieldDataCamelCase } from './models/P
 export { PhysicalDisabilityEnum as PhysicalDisabilityEnumCamelCase } from './models/PhysicalDisabilityEnum';
 export { PreferredLanguageEnum as PreferredLanguageEnumCamelCase } from './models/PreferredLanguageEnum';
 export type { Profile as ProfileCamelCase } from './models/Profile';
+export { ProfileStatusEnum as ProfileStatusEnumCamelCase } from './models/ProfileStatusEnum';
 export type { ProgramAPI as ProgramAPICamelCase } from './models/ProgramAPI';
 export type { ProgramCycleCreate as ProgramCycleCreateCamelCase } from './models/ProgramCycleCreate';
 export type { ProgramCycleList as ProgramCycleListCamelCase } from './models/ProgramCycleList';

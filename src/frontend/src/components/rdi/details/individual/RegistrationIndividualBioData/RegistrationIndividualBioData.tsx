@@ -2,7 +2,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { HouseholdChoiceDataQuery } from '@generated/graphql';
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 import {
@@ -17,7 +17,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
 `;
