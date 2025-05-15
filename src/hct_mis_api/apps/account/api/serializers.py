@@ -74,6 +74,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "user_roles",
             "partner_roles",
             "cross_area_filter_available",
+            "status",
+            "last_login",
         )
 
     @staticmethod

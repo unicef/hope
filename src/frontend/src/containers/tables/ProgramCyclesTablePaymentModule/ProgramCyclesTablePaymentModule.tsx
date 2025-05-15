@@ -5,6 +5,7 @@ import {
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
+import { createApiParams } from '@utils/apiUtils';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -47,9 +48,15 @@ export const ProgramCyclesTablePaymentModule = ({
 
   const { data, refetch, error, isLoading } =
     useQuery<PaginatedProgramCycleListList>({
-      queryKey: ['programCycles', queryVariables],
+      queryKey: ['programCycles', queryVariables, businessArea, programId],
       queryFn: () => {
-        return RestService.restBusinessAreasProgramsCyclesList(queryVariables);
+        return RestService.restBusinessAreasProgramsCyclesList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programSlug: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
+        );
       },
     });
 

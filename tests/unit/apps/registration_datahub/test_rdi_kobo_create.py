@@ -30,7 +30,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
 )
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
@@ -164,8 +164,8 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(str(pending_household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
         self.assertEqual(pending_household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
 
-        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 2)
-        dmd = PendingDeliveryMechanismData.objects.get(individual__full_name="Tesa Testowski")
+        self.assertEqual(PendingAccount.objects.count(), 2)
+        dmd = PendingAccount.objects.get(individual__full_name="Tesa Testowski")
         self.assertEqual(dmd.account_type.key, "mobile")
         self.assertEqual(
             dmd.data,

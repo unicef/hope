@@ -6,6 +6,7 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
+import { createApiParams } from '@utils/apiUtils';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
@@ -68,11 +69,20 @@ const NewReportForm = (): ReactElement => {
 
   const { data: allProgramsData, isLoading: loadingPrograms } =
     useQuery<PaginatedProgramListList>({
-      queryKey: ['businessAreasProgramsList', queryVariables, businessArea],
+      queryKey: [
+        'businessAreasProgramsList',
+        queryVariables,
+        businessArea,
+        programId,
+      ],
       queryFn: () =>
-        RestService.restBusinessAreasProgramsList({
-          businessAreaSlug: businessArea,
-        }),
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programSlug: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
+        ),
     });
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();

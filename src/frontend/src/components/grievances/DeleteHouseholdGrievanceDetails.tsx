@@ -2,10 +2,7 @@ import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  GrievanceTicketQuery,
-  useHouseholdChoiceDataQuery,
-} from '@generated/graphql';
+import { GrievanceTicketQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
@@ -17,6 +14,9 @@ import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHousehold
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 const Info = styled(InfoIcon)`
   color: ${({ theme }) => theme.hctPalette.gray};
@@ -31,12 +31,18 @@ export function DeleteHouseholdGrievanceDetails({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   if (choicesLoading) return <LoadingComponent />;
   if (!choicesData) return null;

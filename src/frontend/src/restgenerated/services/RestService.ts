@@ -588,8 +588,7 @@ export class RestService {
         name,
         offset,
         ordering,
-        updatedAtAfter,
-        updatedAtBefore,
+        updatedAt,
     }: {
         businessAreaSlug: string,
         level?: number,
@@ -606,8 +605,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        updatedAtAfter?: string,
-        updatedAtBefore?: string,
+        updatedAt?: string,
     }): CancelablePromise<PaginatedAreaListList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -621,8 +619,7 @@ export class RestService {
                 'name': name,
                 'offset': offset,
                 'ordering': ordering,
-                'updated_at_after': updatedAtAfter,
-                'updated_at_before': updatedAtBefore,
+                'updated_at': updatedAt,
             },
         });
     }
@@ -5459,6 +5456,7 @@ export class RestService {
         program,
         roles,
         search,
+        serializer,
         status,
     }: {
         businessAreaSlug: string,
@@ -5499,6 +5497,7 @@ export class RestService {
         program?: string,
         roles?: Array<string>,
         search?: string,
+        serializer?: string,
         /**
          * * `ACTIVE` - Active
          * * `INACTIVE` - Inactive
@@ -5525,6 +5524,7 @@ export class RestService {
                 'program': program,
                 'roles': roles,
                 'search': search,
+                'serializer': serializer,
                 'status': status,
             },
         });

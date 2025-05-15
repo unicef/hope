@@ -42,7 +42,8 @@ class ProgramValidator(BaseValidator):
             if (
                 PaymentPlan.objects.filter(program_cycle__in=program.cycles.all())
                 .exclude(
-                    status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+                    status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+                    + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
                 )
                 .exists()
             ):

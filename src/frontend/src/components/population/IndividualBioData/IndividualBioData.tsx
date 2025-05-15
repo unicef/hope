@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -23,7 +23,7 @@ import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
 `;

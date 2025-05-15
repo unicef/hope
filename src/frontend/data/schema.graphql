@@ -3,6 +3,11 @@ schema {
   mutation: Mutations
 }
 
+enum AccountRdiMergeStatus {
+  PENDING
+  MERGED
+}
+
 input AccountabilityCommunicationMessageAgeInput {
   min: Int
   max: Int
@@ -31,6 +36,20 @@ input AccountabilitySampleSizeInput {
 type AccountabilitySampleSizeNode {
   numberOfRecipients: Int
   sampleSize: Int
+}
+
+type AccountsNode implements Node {
+  id: ID!
+  rdiMergeStatus: AccountRdiMergeStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode!
+  number: String
+  data: JSONString!
+  isUnique: Boolean!
+  active: Boolean!
+  name: String
+  individualTabData: JSONString
 }
 
 enum Action {
@@ -244,10 +263,11 @@ type AssignFundsCommitmentsMutation {
 type BankAccountInfoNode implements Node {
   id: ID!
   rdiMergeStatus: BankAccountInfoRdiMergeStatus!
-  isRemoved: Boolean!
-  removedDate: DateTime
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
   lastSyncAt: DateTime
   individual: IndividualNode!
   bankName: String!
@@ -350,10 +370,11 @@ type BusinessAreaNode implements Node {
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
   customFields: JSONString!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNode!]!
-  roleAssignments: [UserRoleNode!]!
+  userRoles: [UserRoleNode!]!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   registrationdataimportSet(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
@@ -449,6 +470,7 @@ type CommunicationMessageNode implements Node {
   randomSamplingArguments: JSONString
   sampleSize: Int!
   program: ProgramNode
+  isOriginal: Boolean!
   copiedFrom: CommunicationMessageNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   adminUrl: String
@@ -511,7 +533,7 @@ input CopyProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
-  partners: [ProgramPartnerAccessInput]
+  partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
   pduFields: [PDUFieldInput]
@@ -652,7 +674,7 @@ input CreateProgramInput {
   businessAreaSlug: String
   dataCollectingTypeCode: String
   beneficiaryGroup: String
-  partners: [ProgramPartnerAccessInput]
+  partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
   pduFields: [PDUFieldInput]
@@ -808,23 +830,6 @@ type DeliveryMechanismChoice {
   code: String
 }
 
-type DeliveryMechanismDataNode implements Node {
-  id: ID!
-  rdiMergeStatus: DeliveryMechanismDataRdiMergeStatus!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  individual: IndividualNode!
-  data: JSONString!
-  isUnique: Boolean!
-  name: String
-  individualTabData: JSONString
-}
-
-enum DeliveryMechanismDataRdiMergeStatus {
-  PENDING
-  MERGED
-}
-
 type DeliveryMechanismNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -952,7 +957,7 @@ type DocumentNode implements Node {
   id: ID!
   rdiMergeStatus: DocumentRdiMergeStatus!
   isRemoved: Boolean!
-  removedDate: DateTime
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
@@ -968,6 +973,7 @@ type DocumentNode implements Node {
   clearedBy: UserNode
   issuanceDate: DateTime
   expiryDate: DateTime
+  isMigrationHandled: Boolean!
   copiedFrom: DocumentNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   countryIso3: String
@@ -1107,6 +1113,7 @@ type FeedbackNode implements Node {
   createdBy: UserNode
   linkedGrievance: GrievanceTicketNode
   consent: Boolean!
+  isOriginal: Boolean!
   copiedFrom: FeedbackNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
@@ -1284,6 +1291,7 @@ type FundsCommitmentItemNodeEdge {
 type FundsCommitmentNode {
   fundsCommitmentNumber: String
   fundsCommitmentItems: [FundsCommitmentItemNode]
+  insufficientAmount: Boolean
 }
 
 type GenericPaymentNode {
@@ -1414,6 +1422,9 @@ type GrievanceTicketNode implements Node {
   ignored: Boolean!
   extras: JSONString!
   comments: String
+  isOriginal: Boolean!
+  isMigrationHandled: Boolean!
+  migratedAt: DateTime
   copiedFrom: GrievanceTicketNode
   userModified: DateTime
   lastNotificationSent: DateTime
@@ -1491,10 +1502,11 @@ type HouseholdNode implements Node {
   headOfHousehold: IndividualNode
   size: Int
   rdiMergeStatus: HouseholdRdiMergeStatus!
-  isRemoved: Boolean!
-  removedDate: DateTime
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
   lastSyncAt: DateTime
   version: BigInt!
   unicefId: String
@@ -1805,11 +1817,12 @@ type IndividualIdentityNode implements Node {
   modified: DateTime!
   rdiMergeStatus: IndividualIdentityRdiMergeStatus!
   isRemoved: Boolean!
-  removedDate: DateTime
+  isOriginal: Boolean!
   individual: IndividualNode!
   partner: String
   country: String
   number: String!
+  isMigrationHandled: Boolean!
   copiedFrom: IndividualIdentityNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   countryIso3: String
@@ -1850,10 +1863,11 @@ enum IndividualMaritalStatus {
 type IndividualNode implements Node {
   id: ID!
   rdiMergeStatus: IndividualRdiMergeStatus!
-  isRemoved: Boolean!
-  removedDate: DateTime
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
   lastSyncAt: DateTime
   version: BigInt!
   unicefId: String
@@ -1934,7 +1948,7 @@ type IndividualNode implements Node {
   bankAccountInfo: BankAccountInfoNode
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  deliveryMechanismsData: [DeliveryMechanismDataNode]
+  accounts: [AccountsNode]
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
@@ -1999,13 +2013,15 @@ type IndividualRoleInHouseholdNode {
   id: UUID!
   rdiMergeStatus: IndividualRoleInHouseholdRdiMergeStatus!
   isRemoved: Boolean!
-  removedDate: DateTime
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
   individual: IndividualNode!
   household: HouseholdNode!
   role: IndividualRoleInHouseholdRole
+  isMigrationHandled: Boolean!
+  migratedAt: DateTime
   copiedFrom: IndividualRoleInHouseholdNode
   copiedTo: [IndividualRoleInHouseholdNode!]!
 }
@@ -2348,10 +2364,10 @@ type PartnerNode {
   rght: Int!
   treeId: Int!
   level: Int!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   partnerSet: [PartnerNode!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
-  roleAssignments: [UserRoleNode!]!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
@@ -2363,11 +2379,8 @@ type PartnerRoleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
-  partner: PartnerNode
-  role: RoleNode
-  program: ProgramNode
-  expiryDate: Date
-  user: UserNode
+  partner: PartnerNode!
+  roles: [RoleNode!]!
 }
 
 type PartnerType {
@@ -2380,10 +2393,10 @@ type PartnerType {
   rght: Int!
   treeId: Int!
   level: Int!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   partnerSet: [PartnerNode!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
-  roleAssignments: [UserRoleNode!]!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
@@ -3072,7 +3085,6 @@ type ProgramNode implements Node {
   name: String!
   programmeCode: String
   status: ProgramStatus!
-  slug: String!
   description: String!
   startDate: Date!
   endDate: Date
@@ -3090,7 +3102,6 @@ type ProgramNode implements Node {
   individualCount: Int!
   deduplicationSetId: UUID
   pduFields: [PeriodicFieldNode]
-  roleAssignments: [UserRoleNode!]!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   registrationImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
@@ -3131,7 +3142,7 @@ enum ProgramPartnerAccess {
   SELECTED_PARTNERS_ACCESS
 }
 
-input ProgramPartnerAccessInput {
+input ProgramPartnerThroughInput {
   partner: String
   areas: [String]
   areaAccess: String
@@ -3254,7 +3265,7 @@ type Query {
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
   pduSubtypeChoices: [PDUSubtypeChoiceObject]
   program(id: ID!): ProgramNode
-  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: ID, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, beneficiaryGroupMatch: Boolean, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
+  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, beneficiaryGroupMatch: Boolean, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   programStatusChoices: [ChoiceObject]
@@ -3264,12 +3275,12 @@ type Query {
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
   dataCollectingTypeChoices: [ChoiceObject]
-  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: ID, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, beneficiaryGroupMatch: Boolean, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
+  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, beneficiaryGroupMatch: Boolean, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   programCycle(id: ID!): ProgramCycleNode
   canRunDeduplication: Boolean
   isDeduplicationDisabled: Boolean
   household(id: ID!): HouseholdNode
-  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: String, admin1: String, admin2: String, residenceStatus: String, withdrawn: Boolean, program: ID, firstRegistrationDate: DateTime, rdiId: String, size: String, search: String, documentType: String, documentNumber: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, isActiveProgram: Boolean, rdiMergeStatus: String, orderBy: String): HouseholdNodeConnection
+  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin1: ID, admin2: ID, residenceStatus: String, withdrawn: Boolean, program: ID, firstRegistrationDate: DateTime, rdiId: String, size: String, search: String, documentType: String, documentNumber: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, isActiveProgram: Boolean, rdiMergeStatus: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
   allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, rdiId: String, duplicatesOnly: Boolean, rdiMergeStatus: String, orderBy: String): IndividualNodeConnection
   allMergedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, rdiId: String, orderBy: String): HouseholdNodeConnection
@@ -3613,9 +3624,8 @@ type RoleNode {
   name: String!
   subsystem: RoleSubsystem!
   permissions: [String!]
-  isVisibleOnUi: Boolean!
-  isAvailableForPartner: Boolean!
-  roleAssignments: [UserRoleNode!]!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
+  userRoles: [UserRoleNode!]!
 }
 
 enum RoleSubsystem {
@@ -4557,7 +4567,7 @@ type UpdateProgramPartners {
 
 input UpdateProgramPartnersInput {
   id: String!
-  partners: [ProgramPartnerAccessInput]
+  partners: [ProgramPartnerThroughInput]
   partnerAccess: String
 }
 
@@ -4603,10 +4613,11 @@ type UserBusinessAreaNode implements Node {
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
   customFields: JSONString!
+  businessAreaPartnerThrough: [PartnerRoleNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNode!]!
-  roleAssignments: [UserRoleNode!]!
+  userRoles: [UserRoleNode!]!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   registrationdataimportSet(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
@@ -4654,7 +4665,7 @@ type UserNode implements Node {
   jobTitle: String!
   adUuid: String
   lastModifyDate: DateTime
-  roleAssignments: [UserRoleNode!]!
+  userRoles: [UserRoleNode!]!
   documentSet(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   approvalSet: [ApprovalNode!]!
   registrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
@@ -4671,9 +4682,7 @@ type UserNode implements Node {
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
-  permissionsInScope: [String]
   partnerRoles: [PartnerRoleNode]
-  userRoles: [UserRoleNode]
 }
 
 type UserNodeConnection {
@@ -4691,12 +4700,9 @@ type UserNodeEdge {
 type UserRoleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
+  role: RoleNode!
   businessArea: UserBusinessAreaNode!
-  partner: PartnerNode
-  role: RoleNode
-  program: ProgramNode
   expiryDate: Date
-  user: UserNode
 }
 
 enum UserStatus {

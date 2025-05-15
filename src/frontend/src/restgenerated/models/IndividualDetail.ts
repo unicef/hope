@@ -204,7 +204,7 @@ export type IndividualDetail = {
     readonly documents: Record<string, any>;
     readonly identities: Record<string, any>;
     readonly bankAccountInfo: Record<string, any>;
-    readonly deliveryMechanismsData: Record<string, any>;
+    readonly accounts: Record<string, any>;
     /**
      * Beneficiary email address
      */

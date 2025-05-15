@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -49,8 +50,16 @@ class HouseholdUploadMixin:
             program=member.program,
         )
 
+    def save_account(self, member: PendingIndividual, doc: Dict) -> None:
+        PendingAccount.objects.create(individual=member, **doc)
+
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: Dict) -> PendingIndividual:
+        photo = member_data.pop("photo", None)
+        if photo:
+            data = photo.removeprefix("data:image/png;base64,")
+            photo = get_photo_from_stream(data)
         documents = member_data.pop("documents", [])
+        accounts = member_data.pop("accounts", [])
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
             member_of = hh
@@ -61,10 +70,13 @@ class HouseholdUploadMixin:
             program=rdi.program,
             registration_data_import=rdi,
             business_area=rdi.business_area,
+            photo=photo,
             **member_data,
         )
         for doc in documents:
             self.save_document(ind, doc)
+        for account in accounts:
+            self.save_account(ind, account)
         if member_data["relationship"] == HEAD:
             hh.head_of_household = ind
             hh.save()

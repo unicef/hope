@@ -6,6 +6,7 @@ import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPayment
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,10 +40,24 @@ function PaymentsHouseholdTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansPaymentsList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      queryVariables,
+      household?.id,
+      businessArea,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsHouseholdsPaymentsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household?.id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

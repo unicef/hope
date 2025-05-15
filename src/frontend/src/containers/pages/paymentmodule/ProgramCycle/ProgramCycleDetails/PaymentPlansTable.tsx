@@ -8,6 +8,7 @@ import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import React, { ReactElement, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
@@ -70,7 +71,13 @@ export const PaymentPlansTable = ({
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansList(queryVariables),
+      RestService.restBusinessAreasProgramsPaymentPlansList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
     enabled: !!businessArea && !!programId,
   });
 

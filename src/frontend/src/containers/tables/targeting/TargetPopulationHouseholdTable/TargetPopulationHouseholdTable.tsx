@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './TargetPopulationHouseholdHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationHouseholdRow';
@@ -47,7 +48,15 @@ export function TargetPopulationHouseholdTable({
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsTargetPopulationsHouseholdsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            targetPopulationId: id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });
