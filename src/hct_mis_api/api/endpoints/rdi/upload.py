@@ -125,6 +125,7 @@ class IndividualSerializer(serializers.ModelSerializer):
     documents = DocumentSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     accounts = AccountSerializer(many=True, required=False)
+    photo = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
         model = PendingIndividual

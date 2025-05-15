@@ -91,6 +91,7 @@ class PushToRDITests(HOPEApiTestCase):
                         "full_name": "James Head #1",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
+                        "photo": base64_encoded_data,
                         "role": "",
                         "documents": [
                             {
@@ -136,6 +137,7 @@ class PushToRDITests(HOPEApiTestCase):
 
         self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
+        self.assertIsNotNone(hh.head_of_household.photo)
         account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
         self.assertIsNotNone(account)
         self.assertEqual(account.account_type.key, "bank")
