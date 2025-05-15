@@ -162,11 +162,6 @@ Clear Cache,clear-cache/
         "Use elastic search for households search",
         bool,
     ),
-    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA": (
-        False,
-        "Use business area during elastic search for households search",
-        bool,
-    ),
     "AUTO_MERGE_AFTER_AUTO_RDI_IMPORT": (
         False,
         "Automatically merge the population after server-triggered RDI import",

@@ -409,7 +409,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "Jenna Franklin"},
+            variables={"search": "Jenna Franklin", "program": self.id_to_base64(self.program.id, "ProgramNode")},
         )
 
     def test_individual_query_draft(self) -> None:
