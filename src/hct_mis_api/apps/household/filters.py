@@ -171,12 +171,18 @@ class HouseholdFilter(FilterSet):
 
     def _get_elasticsearch_query_for_households(self, search: str) -> Dict:
         business_area = self.data["business_area"]
+        encoded_program_id = self.data.get("program")
+        filters = [{"term": {"business_area": business_area}}]
+        if encoded_program_id is not None:
+            program_id = decode_id_string(encoded_program_id)
+            filters.append({"term": {"program_id": program_id}})
         query: Dict[str, Any] = {
             "size": "100",
             "_source": False,
             "query": {
                 "bool": {
                     "minimum_should_match": 1,
+                    "filter": filters,
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
@@ -194,8 +200,6 @@ class HouseholdFilter(FilterSet):
                 }
             },
         }
-        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:  # pragma: no cover
-            query["query"]["bool"]["filter"] = [{"term": {"business_area": business_area}}]
         return query
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
