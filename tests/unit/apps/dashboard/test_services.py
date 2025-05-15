@@ -435,11 +435,21 @@ def test_get_payment_plan_counts_logic() -> None:
     PaymentFactory(
         parent=pp5, program=prog_a_sector_x, delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc)
     )
-    Payment.objects.filter(parent=pp1, business_area=ba).update(delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc))
-    Payment.objects.filter(parent=pp2, business_area=ba).update(delivery_date=timezone.datetime(2023, 6, 1, tzinfo=timezone.utc)) # pp2 is FINISHED, expected in 2023
-    Payment.objects.filter(parent=pp3, business_area=ba).update(delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc))
-    Payment.objects.filter(parent=pp4, business_area=ba).update(delivery_date=timezone.datetime(2024, 6, 1, tzinfo=timezone.utc)) # pp4 is FINISHED, expected in 2024
-    Payment.objects.filter(parent=pp5, business_area=ba).update(delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc))
+    Payment.objects.filter(parent=pp1, business_area=ba).update(
+        delivery_date=timezone.datetime(2023, 1, 10, tzinfo=timezone.utc)
+    )
+    Payment.objects.filter(parent=pp2, business_area=ba).update(
+        delivery_date=timezone.datetime(2023, 6, 1, tzinfo=timezone.utc)
+    )  # pp2 is FINISHED, expected in 2023
+    Payment.objects.filter(parent=pp3, business_area=ba).update(
+        delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc)
+    )
+    Payment.objects.filter(parent=pp4, business_area=ba).update(
+        delivery_date=timezone.datetime(2024, 6, 1, tzinfo=timezone.utc)
+    )  # pp4 is FINISHED, expected in 2024
+    Payment.objects.filter(parent=pp5, business_area=ba).update(
+        delivery_date=timezone.datetime(2023, 1, 15, tzinfo=timezone.utc)
+    )
 
     base_payments_qs = Payment.objects.filter(business_area=ba)
     group_by_fields = ["year", "sector_name"]
