@@ -307,21 +307,25 @@ def test_dashboard_reconciliation_verification_consistency(
         f"(Country: {sum_reconciled_country}, Global: {sum_reconciled_global})"
     )
 
+    country_data_current_year = [item for item in country_data if item.get("year") == CURRENT_YEAR]
+    assert country_data_current_year, f"No country-specific dashboard data found for {country_name} in {CURRENT_YEAR}"
+
     sum_finished_plans_country = sum(
-        item.get("finished_payment_plans", 0) for item in country_data if item.get("year") == CURRENT_YEAR
+        item.get("finished_payment_plans", 0) for item in country_data_current_year
     )
     sum_total_plans_country = sum(
-        item.get("total_payment_plans", 0) for item in country_data if item.get("year") == CURRENT_YEAR
+        item.get("total_payment_plans", 0) for item in country_data_current_year
     )
 
+    # global_data_filtered_for_country is already filtered by country and year.
     sum_finished_plans_global = sum(item.get("finished_payment_plans", 0) for item in global_data_filtered_for_country)
     sum_total_plans_global = sum(item.get("total_payment_plans", 0) for item in global_data_filtered_for_country)
 
-    assert sum_finished_plans_country >= sum_finished_plans_global, (
-        "Sum of 'finished_payment_plans' from country dashboard output should be >= sum from filtered global. "
+    assert sum_finished_plans_country == sum_finished_plans_global, (
+        "Sum of 'finished_payment_plans' should be consistent between country and filtered global dashboards "
         f"(Country: {sum_finished_plans_country}, Global: {sum_finished_plans_global})"
     )
-    assert sum_total_plans_country >= sum_total_plans_global, (
-        "Sum of 'total_payment_plans' from country dashboard output should be >= sum from filtered global. "
+    assert sum_total_plans_country == sum_total_plans_global, (
+        "Sum of 'total_payment_plans' should be consistent between country and filtered global dashboards "
         f"(Country: {sum_total_plans_country}, Global: {sum_total_plans_global})"
     )
