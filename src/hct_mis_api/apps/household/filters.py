@@ -360,12 +360,18 @@ class IndividualFilter(FilterSet):
 
     def _get_elasticsearch_query_for_individuals(self, search: str) -> Dict:
         business_area = self.data["business_area"]
+        encoded_program_id = self.data.get("program")
+        filters = [{"term": {"business_area": business_area}}]
+        if encoded_program_id is not None:
+            program_id = decode_id_string(encoded_program_id)
+            filters.append({"term": {"program_id": program_id}})
+
         return {
-            "size": "100",
+            "size": 100,  # size can be int
             "_source": False,
             "query": {
                 "bool": {
-                    "filter": {"term": {"business_area": business_area}},
+                    "filter": filters,
                     "minimum_should_match": 1,
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
