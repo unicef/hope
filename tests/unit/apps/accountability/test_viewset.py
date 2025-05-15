@@ -855,7 +855,7 @@ class TestMessageViewSet:
             assert "id" in resp_data
             assert resp_data["body"] == "MSG body"
             assert resp_data["households"] is not None
-            assert resp_data["payment_plan"] is None
+            assert resp_data["payment_plan"] is not None
             assert resp_data["registration_data_import"] is None
             assert resp_data["sampling_type"] == "FULL_LIST"
             assert resp_data["full_list_arguments"]["excluded_admin_areas"] == []

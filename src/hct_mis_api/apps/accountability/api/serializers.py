@@ -191,8 +191,8 @@ class MessageListSerializer(serializers.ModelSerializer):
 
 class MessageDetailSerializer(AdminUrlSerializerMixin, MessageListSerializer):
     households = HouseholdSmallSerializer(many=True, read_only=True)
-    payment_plan = FollowUpPaymentPlanSerializer(many=True, read_only=True)
-    registration_data_import = RegistrationDataImportListSerializer(many=True, read_only=True)
+    payment_plan = FollowUpPaymentPlanSerializer(read_only=True)
+    registration_data_import = RegistrationDataImportListSerializer(read_only=True)
 
     class Meta(MessageListSerializer.Meta):
         fields = MessageListSerializer.Meta.fields + (  # type: ignore
