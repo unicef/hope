@@ -8,7 +8,7 @@ import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
@@ -64,6 +64,9 @@ function ProgrammesTable({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: dataPrograms,
