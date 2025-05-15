@@ -16,7 +16,6 @@ import { AdminButton } from '@core/AdminButton';
 import {
   useAllHouseholdsFlexFieldsAttributesQuery,
   useGrievancesChoiceDataQuery,
-  useHouseholdChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -34,6 +33,8 @@ import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { Theme } from '@mui/material/styles';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 const Container = styled.div`
   padding: 20px;
@@ -44,7 +45,7 @@ const Container = styled.div`
   }
 `;
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;
@@ -82,18 +83,25 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         id,
         programSlug: programId,
       }),
-    enabled: Boolean(programId && businessArea),
   });
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllHouseholdsFlexFieldsAttributesQuery();
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+
+  const { data: householdChoicesData, isLoading: householdChoicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
   const { data: grievancesChoices, loading: grievancesChoicesLoading } =
     useGrievancesChoiceDataQuery();
 
   if (
-    choicesLoading ||
+    householdChoicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
     householdLoading
@@ -103,7 +111,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !choicesData ||
+    !householdChoicesData ||
     !grievancesChoices ||
     !flexFieldsData ||
     permissions === null ||

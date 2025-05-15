@@ -1,18 +1,14 @@
-import {
-  AllIndividualsQueryVariables,
-  IndividualMinimalFragment,
-  IndividualRdiMergeStatus,
-} from '@generated/graphql';
-import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
-import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
-import { useProgramContext } from 'src/programContext';
-import { adjustHeadCells } from '@utils/utils';
-import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { IndividualRdiMergeStatus } from '@generated/graphql';
+import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
+import { adjustHeadCells } from '@utils/utils';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useProgramContext } from 'src/programContext';
+import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
+import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
+import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 
 interface ImportedIndividualsTableProps {
   rdi;
@@ -97,10 +93,7 @@ function ImportedIndividualsTable({
       )}
 
       {isMerged ? (
-        <UniversalRestQueryTable<
-          IndividualMinimalFragment,
-          AllIndividualsQueryVariables
-        >
+        <UniversalRestQueryTable
           title={title}
           headCells={adjustedMergedIndividualsHeadCells}
           query={RestService.restBusinessAreasProgramsIndividualsList}

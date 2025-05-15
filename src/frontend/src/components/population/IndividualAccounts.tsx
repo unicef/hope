@@ -2,7 +2,7 @@ import { DividerLine } from '@components/core/DividerLine';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { Title } from '@core/Title';
 import { usePermissions } from '@hooks/usePermissions';
-import { Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { renderSomethingOrDash } from '@utils/utils';
 import { t } from 'i18next';
@@ -15,7 +15,7 @@ interface IndividualAccountsProps {
   individual: IndividualDetail;
 }
 
-const Overview = styled(Paper)`
+const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
     ${({ theme }) => theme.spacing(11)};
   margin-top: ${({ theme }) => theme.spacing(6)};
@@ -45,7 +45,11 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
       </Title>
       <Grid container spacing={6}>
         {individual.accounts.map((mechanism, index) => {
-          const tabData = JSON.parse(mechanism.individualTabData);
+          const tabData =
+            typeof mechanism.individualTabData === 'string'
+              ? JSON.parse(mechanism.individualTabData)
+              : mechanism.individualTabData;
+
           return (
             <Grid size={{ xs: 12 }} key={index}>
               <Typography variant="h6">{mechanism.name}</Typography>

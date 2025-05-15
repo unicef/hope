@@ -4,6 +4,7 @@ import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPayment
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -61,10 +62,21 @@ export function VerificationRecordsTable({
     queryKey: [
       'businessAreasProgramsPaymentVerificationsVerificationsList',
       queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentVerificationPk: paymentPlanId,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

@@ -30,23 +30,25 @@ export function OtherRelatedTickets({
   const { existingTickets, linkedTickets } = ticket;
 
   const renderIds = (tickets): ReactElement =>
-    tickets.length
-      ? tickets.map((edge) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            edge.id,
-            edge.category,
-            baseUrl,
-          );
+    tickets.length ? (
+      tickets.map((edge) => {
+        const grievanceDetailsPath = getGrievanceDetailsPath(
+          edge.id,
+          edge.category,
+          baseUrl,
+        );
 
-          return (
-            <Box key={edge.id} mb={1}>
-              <ContentLink href={grievanceDetailsPath}>
-                {edge.unicefId}
-              </ContentLink>
-            </Box>
-          );
-        })
-      : <>-</>;
+        return (
+          <Box key={edge.id} mb={1}>
+            <ContentLink href={grievanceDetailsPath}>
+              {edge.unicefId}
+            </ContentLink>
+          </Box>
+        );
+      })
+    ) : (
+      <>-</>
+    );
 
   const openExistingTickets =
     ticket.household?.id && existingTickets.length

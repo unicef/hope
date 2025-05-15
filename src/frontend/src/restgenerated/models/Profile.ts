@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Partner } from './Partner';
+import type { ProfileStatusEnum } from './ProfileStatusEnum';
 export type Profile = {
     readonly id: string;
     /**
@@ -21,5 +22,7 @@ export type Profile = {
     readonly permissionsInScope: string;
     readonly userRoles: Record<string, any>;
     readonly partnerRoles: Record<string, any>;
+    status?: ProfileStatusEnum;
+    lastLogin?: string | null;
 };
 

@@ -6,6 +6,7 @@ import { headCells } from './PaymentPlansHeadCells';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { createApiParams } from '@utils/apiUtils';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
@@ -46,10 +47,19 @@ function PaymentPlansTable({
     isLoading,
     error,
   } = useQuery<PaginatedPaymentPlanListList>({
-    queryKey: ['businessAreasProgramsPaymentPlansList', queryVariables],
+    queryKey: [
+      'businessAreasProgramsPaymentPlansList',
+      queryVariables,
+      businessArea,
+      programId,
+    ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentPlansList(
-        queryVariables,
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });

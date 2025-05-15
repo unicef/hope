@@ -1,5 +1,6 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { createApiParams } from '@utils/apiUtils';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
 import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -44,10 +45,21 @@ export function VerificationsTable({
     queryKey: [
       'businessAreasProgramsPaymentVerificationsVerificationsList',
       queryVariables,
+      businessArea,
+      programId,
+      paymentPlanId,
     ],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsList(
-        queryVariables,
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentVerificationPk: paymentPlanId,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
       );
     },
   });
