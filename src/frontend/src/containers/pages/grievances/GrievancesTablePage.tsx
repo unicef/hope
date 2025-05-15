@@ -54,7 +54,7 @@ export const GrievancesTablePage = (): ReactElement => {
     cashPlan: cashPlanId,
     scoreMin: '',
     scoreMax: '',
-    grievanceType: isUserGenerated ? GrievanceTypes[0] : GrievanceTypes[1],
+    grievanceType: isUserGenerated ? 'user' : 'system',
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',

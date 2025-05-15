@@ -1,4 +1,4 @@
-import { MouseEvent, ReactElement, useState } from 'react';
+import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
@@ -23,12 +23,19 @@ export function LookUpPaymentRecordTable({
   const { businessArea, programId } = useBaseUrl();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const initialQueryVariables = {
-    householdId: initialValues?.selectedHousehold?.id,
-    businessAreaSlug: businessArea,
-    slug: programId === 'all' ? null : programId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      householdId: initialValues?.selectedHousehold?.id,
+      businessAreaSlug: businessArea,
+      slug: programId === 'all' ? null : programId,
+    }),
+    [initialValues?.selectedHousehold?.id, businessArea, programId],
+  );
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentsData,

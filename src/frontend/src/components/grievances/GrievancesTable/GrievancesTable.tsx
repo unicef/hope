@@ -1,11 +1,8 @@
-import { UniversalTable } from '@containers/tables/UniversalTable';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { EnhancedTableToolbar } from '@core/Table/EnhancedTableToolbar';
 import { TableWrapper } from '@core/TableWrapper';
 import {
-  AllGrievanceTicketQuery,
-  AllGrievanceTicketQueryVariables,
-  useAllGrievanceTicketQuery,
   useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
 } from '@generated/graphql';
@@ -14,15 +11,18 @@ import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
 import get from 'lodash/get';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import {
@@ -47,9 +47,11 @@ interface GrievancesTableProps {
 export const GrievancesTable = ({
   filter,
 }: GrievancesTableProps): ReactElement => {
-  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
+  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } =
+    useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { programId } = useBaseUrl();
   const { t } = useTranslation();
 
   const replacements = {
@@ -63,41 +65,80 @@ export const GrievancesTable = ({
     replacements,
   );
 
-  const initialVariables: AllGrievanceTicketQueryVariables = {
-    businessArea,
-    search: filter.search.trim(),
-    documentType: filter.documentType,
-    documentNumber: filter.documentNumber.trim(),
-    status: [filter.status],
-    fsp: filter.fsp,
-    createdAtRange: JSON.stringify({
-      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+  console.log('filter.grievanceType', filter.grievanceType);
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessArea,
+      search: filter.search.trim(),
+      documentType: filter.documentType,
+      documentNumber: filter.documentNumber.trim(),
+      status: [filter.status],
+      fsp: filter.fsp,
+      createdAtRange: JSON.stringify({
+        min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+        max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+      }),
+      category: filter.category,
+      issueType: filter.issueType,
+      assignedTo: filter.assignedTo,
+      createdBy: filter.createdBy,
+      admin1: filter.admin1,
+      admin2: filter.admin2,
+      registrationDataImport: filter.registrationDataImport,
+      cashPlan: filter.cashPlan,
+      scoreMin: filter.scoreMin,
+      scoreMax: filter.scoreMax,
+      grievanceType: filter.grievanceType,
+      grievanceStatus: filter.grievanceStatus,
+      priority: filter.priority === 'Not Set' ? 0 : filter.priority,
+      urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
+      preferredLanguage: filter.preferredLanguage,
+      program: isAllPrograms ? filter.program : programSlug,
+      isActiveProgram: filter.programState === 'active' ? true : null,
+      isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
-    category: filter.category,
-    issueType: filter.issueType,
-    assignedTo: filter.assignedTo,
-    createdBy: filter.createdBy,
-    admin1: filter.admin1,
-    admin2: filter.admin2,
-    registrationDataImport: filter.registrationDataImport,
-    cashPlan: filter.cashPlan,
-    scoreMin: filter.scoreMin,
-    scoreMax: filter.scoreMax,
-    grievanceType: filter.grievanceType,
-    grievanceStatus: filter.grievanceStatus,
-    priority: filter.priority === 'Not Set' ? 0 : filter.priority,
-    urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
-    preferredLanguage: filter.preferredLanguage,
-    program: isAllPrograms ? filter.program : programSlug,
-    isActiveProgram: filter.programState === 'active' ? true : null,
-    isCrossArea: filter.areaScope === 'cross-area' ? true : null,
-  };
+    [
+      businessArea,
+      filter.search,
+      filter.documentType,
+      filter.documentNumber,
+      filter.status,
+      filter.fsp,
+      filter.createdAtRangeMin,
+      filter.createdAtRangeMax,
+      filter.category,
+      filter.issueType,
+      filter.assignedTo,
+      filter.createdBy,
+      filter.admin1,
+      filter.admin2,
+      filter.registrationDataImport,
+      filter.cashPlan,
+      filter.scoreMin,
+      filter.scoreMax,
+      filter.grievanceType,
+      filter.grievanceStatus,
+      filter.priority,
+      filter.urgency,
+      filter.preferredLanguage,
+      filter.program,
+      filter.programState,
+      filter.areaScope,
+      isAllPrograms,
+      programSlug,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [page, setPage] = useState<number>(0);
-  const [loadData, { data }] = useAllUsersForFiltersLazyQuery({
+  const [loadData, { data: usersData }] = useAllUsersForFiltersLazyQuery({
     variables: {
       businessArea,
       first: 20,
@@ -111,24 +152,64 @@ export const GrievancesTable = ({
     loadData();
   }, [loadData]);
 
-  const optionsData = get(data, 'allUsers.edges', []);
+  //ALL PROGRAMS
+  const {
+    data: allProgramsGrievanceTicketsData,
+    isLoading: isLoadingAll,
+    error: errorAll,
+  } = useQuery<PaginatedGrievanceTicketListList>({
+    queryKey: [
+      'businessAreasGrievanceTicketsList',
+      queryVariables,
+      businessArea,
+      filter.grievanceType,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsList(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
+          withPagination: true,
+        }),
+      ),
+    enabled: isAllPrograms,
+  });
+
+  // SELECTED PROGRAM
+  const {
+    data: selectedProgramGrievanceTicketsData,
+    isLoading: isLoadingSelected,
+    error: errorSelected,
+  } = useQuery<PaginatedGrievanceTicketListList>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsList',
+      queryVariables,
+      programId,
+      businessArea,
+      filter.grievanceType,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsGrievanceTicketsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+    enabled: !isAllPrograms,
+  });
+
+  const optionsData = get(usersData, 'allUsers.edges', []);
 
   const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
-    [
-      key: number
-    ]: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+    [key: number]: GrievanceTicketList[];
   }>({ 0: [] });
 
-  const selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][] =
-    [];
+  const selectedTickets: GrievanceTicketList[] = [];
   const currentSelectedTickets = selectedTicketsPerPage[page];
   for (const pageKey of Object.keys(selectedTicketsPerPage)) {
     selectedTickets.push(...selectedTicketsPerPage[pageKey]);
   }
 
-  const setSelectedTickets = (
-    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
-  ): void => {
+  const setSelectedTickets = (tickets: GrievanceTicketList[]): void => {
     const newSelectedTicketsPerPage = { ...selectedTicketsPerPage };
     newSelectedTicketsPerPage[page] = tickets;
     setSelectedTicketsPerPage(newSelectedTicketsPerPage);
@@ -167,9 +248,7 @@ export const GrievancesTable = ({
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
   const currentUserId = currentUserData.id;
 
-  const getCanViewDetailsOfTicket = (
-    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-  ): boolean => {
+  const getCanViewDetailsOfTicket = (ticket: GrievanceTicketList): boolean => {
     const isTicketCreator = currentUserId === ticket.createdBy?.id;
     const isTicketOwner = currentUserId === ticket.assignedTo?.id;
     if (
@@ -194,9 +273,7 @@ export const GrievancesTable = ({
     );
   };
 
-  const handleCheckboxClick = (
-    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-  ): void => {
+  const handleCheckboxClick = (ticket: GrievanceTicketList): void => {
     const index =
       currentSelectedTickets?.findIndex(
         (ticketItem) => ticketItem.id === ticket.id,
@@ -312,22 +389,25 @@ export const GrievancesTable = ({
               setSelected={setSelectedTickets}
             />
           </Box>
-          <UniversalTable<
-            AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-            AllGrievanceTicketQueryVariables
-          >
+          <UniversalRestTable
             isOnPaper={false}
             headCells={headCells}
             rowsPerPageOptions={[10, 15, 20, 40]}
-            query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}
             numSelected={currentSelectedTickets?.length || 0}
-            queriedObjectName="allGrievanceTicket"
-            initialVariables={initialVariables}
+            data={
+              isAllPrograms
+                ? allProgramsGrievanceTicketsData
+                : selectedProgramGrievanceTicketsData
+            }
+            error={isAllPrograms ? errorAll : errorSelected}
+            isLoading={isAllPrograms ? isLoadingAll : isLoadingSelected}
+            queryVariables={queryVariables}
+            setQueryVariables={setQueryVariables}
             defaultOrderBy="created_at"
             defaultOrderDirection="desc"
             onPageChanged={setPage}
-            renderRow={(row) => (
+            renderRow={(row: GrievanceTicketList) => (
               <GrievancesTableRow
                 key={row.id}
                 ticket={row}
@@ -343,7 +423,7 @@ export const GrievancesTable = ({
                 )}
                 optionsData={optionsData}
                 setInputValue={setInputValue}
-                initialVariables={initialVariables}
+                initialVariables={initialQueryVariables}
               />
             )}
           />

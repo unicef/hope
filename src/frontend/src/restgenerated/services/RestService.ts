@@ -9,6 +9,7 @@ import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { FspChoices } from '../models/FspChoices';
+import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { HouseholdMember } from '../models/HouseholdMember';
@@ -20,6 +21,7 @@ import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
+import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
@@ -620,6 +622,457 @@ export class RestService {
                 'offset': offset,
                 'ordering': ordering,
                 'updated_at': updatedAt,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns PaginatedGrievanceTicketListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsList({
+        businessAreaSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtRange,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        permissions,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        totalDays,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtRange?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `RDI_VIEW_LIST` - RDI VIEW LIST
+         * * `RDI_VIEW_DETAILS` - RDI VIEW DETAILS
+         * * `RDI_IMPORT_DATA` - RDI IMPORT DATA
+         * * `RDI_RERUN_DEDUPE` - RDI RERUN DEDUPE
+         * * `RDI_MERGE_IMPORT` - RDI MERGE IMPORT
+         * * `RDI_REFUSE_IMPORT` - RDI REFUSE IMPORT
+         * * `POPULATION_VIEW_HOUSEHOLDS_LIST` - POPULATION VIEW HOUSEHOLDS LIST
+         * * `POPULATION_VIEW_HOUSEHOLDS_DETAILS` - POPULATION VIEW HOUSEHOLDS DETAILS
+         * * `POPULATION_VIEW_INDIVIDUALS_LIST` - POPULATION VIEW INDIVIDUALS LIST
+         * * `POPULATION_VIEW_INDIVIDUALS_DETAILS` - POPULATION VIEW INDIVIDUALS DETAILS
+         * * `POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION` - POPULATION VIEW INDIVIDUAL DELIVERY MECHANISMS SECTION
+         * * `PROGRAMME_VIEW_LIST_AND_DETAILS` - PROGRAMME VIEW LIST AND DETAILS
+         * * `PROGRAMME_MANAGEMENT_VIEW` - PROGRAMME MANAGEMENT VIEW
+         * * `PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS` - PROGRAMME VIEW PAYMENT RECORD DETAILS
+         * * `PROGRAMME_CREATE` - PROGRAMME CREATE
+         * * `PROGRAMME_UPDATE` - PROGRAMME UPDATE
+         * * `PROGRAMME_REMOVE` - PROGRAMME REMOVE
+         * * `PROGRAMME_ACTIVATE` - PROGRAMME ACTIVATE
+         * * `PROGRAMME_FINISH` - PROGRAMME FINISH
+         * * `PROGRAMME_DUPLICATE` - PROGRAMME DUPLICATE
+         * * `TARGETING_VIEW_LIST` - TARGETING VIEW LIST
+         * * `TARGETING_VIEW_DETAILS` - TARGETING VIEW DETAILS
+         * * `TARGETING_CREATE` - TARGETING CREATE
+         * * `TARGETING_UPDATE` - TARGETING UPDATE
+         * * `TARGETING_DUPLICATE` - TARGETING DUPLICATE
+         * * `TARGETING_REMOVE` - TARGETING REMOVE
+         * * `TARGETING_LOCK` - TARGETING LOCK
+         * * `TARGETING_UNLOCK` - TARGETING UNLOCK
+         * * `TARGETING_SEND` - TARGETING SEND
+         * * `PAYMENT_VIEW_LIST_MANAGERIAL` - PAYMENT VIEW LIST MANAGERIAL
+         * * `PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED` - PAYMENT VIEW LIST MANAGERIAL RELEASED
+         * * `PAYMENT_VERIFICATION_VIEW_LIST` - PAYMENT VERIFICATION VIEW LIST
+         * * `PAYMENT_VERIFICATION_VIEW_DETAILS` - PAYMENT VERIFICATION VIEW DETAILS
+         * * `PAYMENT_VERIFICATION_CREATE` - PAYMENT VERIFICATION CREATE
+         * * `PAYMENT_VERIFICATION_UPDATE` - PAYMENT VERIFICATION UPDATE
+         * * `PAYMENT_VERIFICATION_ACTIVATE` - PAYMENT VERIFICATION ACTIVATE
+         * * `PAYMENT_VERIFICATION_DISCARD` - PAYMENT VERIFICATION DISCARD
+         * * `PAYMENT_VERIFICATION_FINISH` - PAYMENT VERIFICATION FINISH
+         * * `PAYMENT_VERIFICATION_EXPORT` - PAYMENT VERIFICATION EXPORT
+         * * `PAYMENT_VERIFICATION_IMPORT` - PAYMENT VERIFICATION IMPORT
+         * * `PAYMENT_VERIFICATION_VERIFY` - PAYMENT VERIFICATION VERIFY
+         * * `PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS` - PAYMENT VERIFICATION VIEW PAYMENT RECORD DETAILS
+         * * `PAYMENT_VERIFICATION_DELETE` - PAYMENT VERIFICATION DELETE
+         * * `PAYMENT_VERIFICATION_INVALID` - PAYMENT VERIFICATION INVALID
+         * * `PAYMENT_VERIFICATION_MARK_AS_FAILED` - PAYMENT VERIFICATION MARK AS FAILED
+         * * `PM_VIEW_LIST` - PM VIEW LIST
+         * * `PM_CREATE` - PM CREATE
+         * * `PM_VIEW_DETAILS` - PM VIEW DETAILS
+         * * `PM_IMPORT_XLSX_WITH_ENTITLEMENTS` - PM IMPORT XLSX WITH ENTITLEMENTS
+         * * `PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS` - PM APPLY RULE ENGINE FORMULA WITH ENTITLEMENTS
+         * * `PM_SPLIT` - PM SPLIT
+         * * `PM_VIEW_PAYMENT_LIST` - PM VIEW PAYMENT LIST
+         * * `PM_LOCK_AND_UNLOCK` - PM LOCK AND UNLOCK
+         * * `PM_LOCK_AND_UNLOCK_FSP` - PM LOCK AND UNLOCK FSP
+         * * `PM_SEND_FOR_APPROVAL` - PM SEND FOR APPROVAL
+         * * `PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP` - PM EXCLUDE BENEFICIARIES FROM FOLLOW UP PP
+         * * `PM_ACCEPTANCE_PROCESS_APPROVE` - PM ACCEPTANCE PROCESS APPROVE
+         * * `PM_ACCEPTANCE_PROCESS_AUTHORIZE` - PM ACCEPTANCE PROCESS AUTHORIZE
+         * * `PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW` - PM ACCEPTANCE PROCESS FINANCIAL REVIEW
+         * * `PM_IMPORT_XLSX_WITH_RECONCILIATION` - PM IMPORT XLSX WITH RECONCILIATION
+         * * `PM_EXPORT_XLSX_FOR_FSP` - PM EXPORT XLSX FOR FSP
+         * * `PM_DOWNLOAD_XLSX_FOR_FSP` - PM DOWNLOAD XLSX FOR FSP
+         * * `PM_MARK_PAYMENT_AS_FAILED` - PM MARK PAYMENT AS FAILED
+         * * `PM_EXPORT_PDF_SUMMARY` - PM EXPORT PDF SUMMARY
+         * * `PM_SEND_TO_PAYMENT_GATEWAY` - PM SEND TO PAYMENT GATEWAY
+         * * `PM_VIEW_FSP_AUTH_CODE` - PM VIEW FSP AUTH CODE
+         * * `PM_DOWNLOAD_FSP_AUTH_CODE` - PM DOWNLOAD FSP AUTH CODE
+         * * `PM_SEND_XLSX_PASSWORD` - PM SEND XLSX PASSWORD
+         * * `PM_ASSIGN_FUNDS_COMMITMENTS` - PM ASSIGN FUNDS COMMITMENTS
+         * * `PM_SYNC_PAYMENT_PLAN_WITH_PG` - PM SYNC PAYMENT PLAN WITH PG
+         * * `PM_SYNC_PAYMENT_WITH_PG` - PM SYNC PAYMENT WITH PG
+         * * `PM_DOWNLOAD_SUPPORTING_DOCUMENT` - PM DOWNLOAD SUPPORTING DOCUMENT
+         * * `PM_UPLOAD_SUPPORTING_DOCUMENT` - PM UPLOAD SUPPORTING DOCUMENT
+         * * `PM_DELETE_SUPPORTING_DOCUMENT` - PM DELETE SUPPORTING DOCUMENT
+         * * `PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE` - PM ADMIN FINANCIAL SERVICE PROVIDER UPDATE
+         * * `PM_PROGRAMME_CYCLE_VIEW_LIST` - PM PROGRAMME CYCLE VIEW LIST
+         * * `PM_PROGRAMME_CYCLE_VIEW_DETAILS` - PM PROGRAMME CYCLE VIEW DETAILS
+         * * `PM_PROGRAMME_CYCLE_CREATE` - PM PROGRAMME CYCLE CREATE
+         * * `PM_PROGRAMME_CYCLE_UPDATE` - PM PROGRAMME CYCLE UPDATE
+         * * `PM_PROGRAMME_CYCLE_DELETE` - PM PROGRAMME CYCLE DELETE
+         * * `USER_MANAGEMENT_VIEW_LIST` - USER MANAGEMENT VIEW LIST
+         * * `DASHBOARD_VIEW_COUNTRY` - DASHBOARD VIEW COUNTRY
+         * * `DASHBOARD_EXPORT` - DASHBOARD EXPORT
+         * * `GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE` - GRIEVANCES VIEW LIST EXCLUDING SENSITIVE
+         * * `GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR` - GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS CREATOR
+         * * `GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER` - GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS OWNER
+         * * `GRIEVANCES_VIEW_LIST_SENSITIVE` - GRIEVANCES VIEW LIST SENSITIVE
+         * * `GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR` - GRIEVANCES VIEW LIST SENSITIVE AS CREATOR
+         * * `GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER` - GRIEVANCES VIEW LIST SENSITIVE AS OWNER
+         * * `GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE` - GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE
+         * * `GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR` - GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS CREATOR
+         * * `GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER` - GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS OWNER
+         * * `GRIEVANCES_VIEW_DETAILS_SENSITIVE` - GRIEVANCES VIEW DETAILS SENSITIVE
+         * * `GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR` - GRIEVANCES VIEW DETAILS SENSITIVE AS CREATOR
+         * * `GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER` - GRIEVANCES VIEW DETAILS SENSITIVE AS OWNER
+         * * `GRIEVANCES_VIEW_HOUSEHOLD_DETAILS` - GRIEVANCES VIEW HOUSEHOLD DETAILS
+         * * `GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR` - GRIEVANCES VIEW HOUSEHOLD DETAILS AS CREATOR
+         * * `GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER` - GRIEVANCES VIEW HOUSEHOLD DETAILS AS OWNER
+         * * `GRIEVANCES_VIEW_INDIVIDUALS_DETAILS` - GRIEVANCES VIEW INDIVIDUALS DETAILS
+         * * `GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR` - GRIEVANCES VIEW INDIVIDUALS DETAILS AS CREATOR
+         * * `GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER` - GRIEVANCES VIEW INDIVIDUALS DETAILS AS OWNER
+         * * `GRIEVANCES_CREATE` - GRIEVANCES CREATE
+         * * `GRIEVANCES_UPDATE` - GRIEVANCES UPDATE
+         * * `GRIEVANCES_UPDATE_AS_CREATOR` - GRIEVANCES UPDATE AS CREATOR
+         * * `GRIEVANCES_UPDATE_AS_OWNER` - GRIEVANCES UPDATE AS OWNER
+         * * `GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE` - GRIEVANCES UPDATE REQUESTED DATA CHANGE
+         * * `GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR` - GRIEVANCES UPDATE REQUESTED DATA CHANGE AS CREATOR
+         * * `GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER` - GRIEVANCES UPDATE REQUESTED DATA CHANGE AS OWNER
+         * * `GRIEVANCES_ADD_NOTE` - GRIEVANCES ADD NOTE
+         * * `GRIEVANCES_ADD_NOTE_AS_CREATOR` - GRIEVANCES ADD NOTE AS CREATOR
+         * * `GRIEVANCES_ADD_NOTE_AS_OWNER` - GRIEVANCES ADD NOTE AS OWNER
+         * * `GRIEVANCES_SET_IN_PROGRESS` - GRIEVANCES SET IN PROGRESS
+         * * `GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR` - GRIEVANCES SET IN PROGRESS AS CREATOR
+         * * `GRIEVANCES_SET_IN_PROGRESS_AS_OWNER` - GRIEVANCES SET IN PROGRESS AS OWNER
+         * * `GRIEVANCES_SET_ON_HOLD` - GRIEVANCES SET ON HOLD
+         * * `GRIEVANCES_SET_ON_HOLD_AS_CREATOR` - GRIEVANCES SET ON HOLD AS CREATOR
+         * * `GRIEVANCES_SET_ON_HOLD_AS_OWNER` - GRIEVANCES SET ON HOLD AS OWNER
+         * * `GRIEVANCES_SEND_FOR_APPROVAL` - GRIEVANCES SEND FOR APPROVAL
+         * * `GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR` - GRIEVANCES SEND FOR APPROVAL AS CREATOR
+         * * `GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER` - GRIEVANCES SEND FOR APPROVAL AS OWNER
+         * * `GRIEVANCES_SEND_BACK` - GRIEVANCES SEND BACK
+         * * `GRIEVANCES_SEND_BACK_AS_CREATOR` - GRIEVANCES SEND BACK AS CREATOR
+         * * `GRIEVANCES_SEND_BACK_AS_OWNER` - GRIEVANCES SEND BACK AS OWNER
+         * * `GRIEVANCES_APPROVE_DATA_CHANGE` - GRIEVANCES APPROVE DATA CHANGE
+         * * `GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR` - GRIEVANCES APPROVE DATA CHANGE AS CREATOR
+         * * `GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER` - GRIEVANCES APPROVE DATA CHANGE AS OWNER
+         * * `GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK` - GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK
+         * * `GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR` - GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS CREATOR
+         * * `GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER` - GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS OWNER
+         * * `GRIEVANCES_CLOSE_TICKET_FEEDBACK` - GRIEVANCES CLOSE TICKET FEEDBACK
+         * * `GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR` - GRIEVANCES CLOSE TICKET FEEDBACK AS CREATOR
+         * * `GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER` - GRIEVANCES CLOSE TICKET FEEDBACK AS OWNER
+         * * `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE` - GRIEVANCES APPROVE FLAG AND DEDUPE
+         * * `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR` - GRIEVANCES APPROVE FLAG AND DEDUPE AS CREATOR
+         * * `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER` - GRIEVANCES APPROVE FLAG AND DEDUPE AS OWNER
+         * * `GRIEVANCES_APPROVE_PAYMENT_VERIFICATION` - GRIEVANCES APPROVE PAYMENT VERIFICATION
+         * * `GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR` - GRIEVANCES APPROVE PAYMENT VERIFICATION AS CREATOR
+         * * `GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER` - GRIEVANCES APPROVE PAYMENT VERIFICATION AS OWNER
+         * * `GRIEVANCE_ASSIGN` - GRIEVANCE ASSIGN
+         * * `GRIEVANCE_DOCUMENTS_UPLOAD` - GRIEVANCE DOCUMENTS UPLOAD
+         * * `GRIEVANCES_CROSS_AREA_FILTER` - GRIEVANCES CROSS AREA FILTER
+         * * `GRIEVANCES_VIEW_BIOMETRIC_RESULTS` - GRIEVANCES VIEW BIOMETRIC RESULTS
+         * * `GRIEVANCES_FEEDBACK_VIEW_CREATE` - GRIEVANCES FEEDBACK VIEW CREATE
+         * * `GRIEVANCES_FEEDBACK_VIEW_LIST` - GRIEVANCES FEEDBACK VIEW LIST
+         * * `GRIEVANCES_FEEDBACK_VIEW_DETAILS` - GRIEVANCES FEEDBACK VIEW DETAILS
+         * * `GRIEVANCES_FEEDBACK_VIEW_UPDATE` - GRIEVANCES FEEDBACK VIEW UPDATE
+         * * `GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE` - GRIEVANCES FEEDBACK MESSAGE VIEW CREATE
+         * * `REPORTING_EXPORT` - REPORTING EXPORT
+         * * `PDU_VIEW_LIST_AND_DETAILS` - PDU VIEW LIST AND DETAILS
+         * * `PDU_TEMPLATE_CREATE` - PDU TEMPLATE CREATE
+         * * `PDU_TEMPLATE_DOWNLOAD` - PDU TEMPLATE DOWNLOAD
+         * * `PDU_UPLOAD` - PDU UPLOAD
+         * * `ALL_VIEW_PII_DATA_ON_LISTS` - ALL VIEW PII DATA ON LISTS
+         * * `ACTIVITY_LOG_VIEW` - ACTIVITY LOG VIEW
+         * * `ACTIVITY_LOG_DOWNLOAD` - ACTIVITY LOG DOWNLOAD
+         * * `UPLOAD_STORAGE_FILE` - UPLOAD STORAGE FILE
+         * * `DOWNLOAD_STORAGE_FILE` - DOWNLOAD STORAGE FILE
+         * * `BENEFICIARY_GROUP_VIEW_LIST` - BENEFICIARY GROUP VIEW LIST
+         * * `ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST` - ACCOUNTABILITY COMMUNICATION MESSAGE VIEW LIST
+         * * `ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS` - ACCOUNTABILITY COMMUNICATION MESSAGE VIEW DETAILS
+         * * `ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE` - ACCOUNTABILITY COMMUNICATION MESSAGE VIEW CREATE
+         * * `ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR` - ACCOUNTABILITY COMMUNICATION MESSAGE VIEW DETAILS AS CREATOR
+         * * `ACCOUNTABILITY_SURVEY_VIEW_CREATE` - ACCOUNTABILITY SURVEY VIEW CREATE
+         * * `ACCOUNTABILITY_SURVEY_VIEW_LIST` - ACCOUNTABILITY SURVEY VIEW LIST
+         * * `ACCOUNTABILITY_SURVEY_VIEW_DETAILS` - ACCOUNTABILITY SURVEY VIEW DETAILS
+         * * `GEO_VIEW_LIST` - GEO VIEW LIST
+         * * `CAN_ADD_BUSINESS_AREA_TO_PARTNER` - CAN ADD BUSINESS AREA TO PARTNER
+         */
+        permissions?: Array<'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE' | 'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS' | 'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR' | 'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST' | 'ACCOUNTABILITY_SURVEY_VIEW_CREATE' | 'ACCOUNTABILITY_SURVEY_VIEW_DETAILS' | 'ACCOUNTABILITY_SURVEY_VIEW_LIST' | 'ACTIVITY_LOG_DOWNLOAD' | 'ACTIVITY_LOG_VIEW' | 'ALL_VIEW_PII_DATA_ON_LISTS' | 'BENEFICIARY_GROUP_VIEW_LIST' | 'CAN_ADD_BUSINESS_AREA_TO_PARTNER' | 'DASHBOARD_EXPORT' | 'DASHBOARD_VIEW_COUNTRY' | 'DOWNLOAD_STORAGE_FILE' | 'GEO_VIEW_LIST' | 'GRIEVANCES_ADD_NOTE' | 'GRIEVANCES_ADD_NOTE_AS_CREATOR' | 'GRIEVANCES_ADD_NOTE_AS_OWNER' | 'GRIEVANCES_APPROVE_DATA_CHANGE' | 'GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR' | 'GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER' | 'GRIEVANCES_APPROVE_FLAG_AND_DEDUPE' | 'GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR' | 'GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER' | 'GRIEVANCES_APPROVE_PAYMENT_VERIFICATION' | 'GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR' | 'GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER' | 'GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK' | 'GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR' | 'GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER' | 'GRIEVANCES_CLOSE_TICKET_FEEDBACK' | 'GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR' | 'GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER' | 'GRIEVANCES_CREATE' | 'GRIEVANCES_CROSS_AREA_FILTER' | 'GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE' | 'GRIEVANCES_FEEDBACK_VIEW_CREATE' | 'GRIEVANCES_FEEDBACK_VIEW_DETAILS' | 'GRIEVANCES_FEEDBACK_VIEW_LIST' | 'GRIEVANCES_FEEDBACK_VIEW_UPDATE' | 'GRIEVANCES_SEND_BACK' | 'GRIEVANCES_SEND_BACK_AS_CREATOR' | 'GRIEVANCES_SEND_BACK_AS_OWNER' | 'GRIEVANCES_SEND_FOR_APPROVAL' | 'GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR' | 'GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER' | 'GRIEVANCES_SET_IN_PROGRESS' | 'GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR' | 'GRIEVANCES_SET_IN_PROGRESS_AS_OWNER' | 'GRIEVANCES_SET_ON_HOLD' | 'GRIEVANCES_SET_ON_HOLD_AS_CREATOR' | 'GRIEVANCES_SET_ON_HOLD_AS_OWNER' | 'GRIEVANCES_UPDATE' | 'GRIEVANCES_UPDATE_AS_CREATOR' | 'GRIEVANCES_UPDATE_AS_OWNER' | 'GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE' | 'GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR' | 'GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER' | 'GRIEVANCES_VIEW_BIOMETRIC_RESULTS' | 'GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE' | 'GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR' | 'GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER' | 'GRIEVANCES_VIEW_DETAILS_SENSITIVE' | 'GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR' | 'GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER' | 'GRIEVANCES_VIEW_HOUSEHOLD_DETAILS' | 'GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR' | 'GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER' | 'GRIEVANCES_VIEW_INDIVIDUALS_DETAILS' | 'GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR' | 'GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER' | 'GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE' | 'GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR' | 'GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER' | 'GRIEVANCES_VIEW_LIST_SENSITIVE' | 'GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR' | 'GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER' | 'GRIEVANCE_ASSIGN' | 'GRIEVANCE_DOCUMENTS_UPLOAD' | 'PAYMENT_VERIFICATION_ACTIVATE' | 'PAYMENT_VERIFICATION_CREATE' | 'PAYMENT_VERIFICATION_DELETE' | 'PAYMENT_VERIFICATION_DISCARD' | 'PAYMENT_VERIFICATION_EXPORT' | 'PAYMENT_VERIFICATION_FINISH' | 'PAYMENT_VERIFICATION_IMPORT' | 'PAYMENT_VERIFICATION_INVALID' | 'PAYMENT_VERIFICATION_MARK_AS_FAILED' | 'PAYMENT_VERIFICATION_UPDATE' | 'PAYMENT_VERIFICATION_VERIFY' | 'PAYMENT_VERIFICATION_VIEW_DETAILS' | 'PAYMENT_VERIFICATION_VIEW_LIST' | 'PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS' | 'PAYMENT_VIEW_LIST_MANAGERIAL' | 'PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED' | 'PDU_TEMPLATE_CREATE' | 'PDU_TEMPLATE_DOWNLOAD' | 'PDU_UPLOAD' | 'PDU_VIEW_LIST_AND_DETAILS' | 'PM_ACCEPTANCE_PROCESS_APPROVE' | 'PM_ACCEPTANCE_PROCESS_AUTHORIZE' | 'PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW' | 'PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE' | 'PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS' | 'PM_ASSIGN_FUNDS_COMMITMENTS' | 'PM_CREATE' | 'PM_DELETE_SUPPORTING_DOCUMENT' | 'PM_DOWNLOAD_FSP_AUTH_CODE' | 'PM_DOWNLOAD_SUPPORTING_DOCUMENT' | 'PM_DOWNLOAD_XLSX_FOR_FSP' | 'PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP' | 'PM_EXPORT_PDF_SUMMARY' | 'PM_EXPORT_XLSX_FOR_FSP' | 'PM_IMPORT_XLSX_WITH_ENTITLEMENTS' | 'PM_IMPORT_XLSX_WITH_RECONCILIATION' | 'PM_LOCK_AND_UNLOCK' | 'PM_LOCK_AND_UNLOCK_FSP' | 'PM_MARK_PAYMENT_AS_FAILED' | 'PM_PROGRAMME_CYCLE_CREATE' | 'PM_PROGRAMME_CYCLE_DELETE' | 'PM_PROGRAMME_CYCLE_UPDATE' | 'PM_PROGRAMME_CYCLE_VIEW_DETAILS' | 'PM_PROGRAMME_CYCLE_VIEW_LIST' | 'PM_SEND_FOR_APPROVAL' | 'PM_SEND_TO_PAYMENT_GATEWAY' | 'PM_SEND_XLSX_PASSWORD' | 'PM_SPLIT' | 'PM_SYNC_PAYMENT_PLAN_WITH_PG' | 'PM_SYNC_PAYMENT_WITH_PG' | 'PM_UPLOAD_SUPPORTING_DOCUMENT' | 'PM_VIEW_DETAILS' | 'PM_VIEW_FSP_AUTH_CODE' | 'PM_VIEW_LIST' | 'PM_VIEW_PAYMENT_LIST' | 'POPULATION_VIEW_HOUSEHOLDS_DETAILS' | 'POPULATION_VIEW_HOUSEHOLDS_LIST' | 'POPULATION_VIEW_INDIVIDUALS_DETAILS' | 'POPULATION_VIEW_INDIVIDUALS_LIST' | 'POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION' | 'PROGRAMME_ACTIVATE' | 'PROGRAMME_CREATE' | 'PROGRAMME_DUPLICATE' | 'PROGRAMME_FINISH' | 'PROGRAMME_MANAGEMENT_VIEW' | 'PROGRAMME_REMOVE' | 'PROGRAMME_UPDATE' | 'PROGRAMME_VIEW_LIST_AND_DETAILS' | 'PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS' | 'RDI_IMPORT_DATA' | 'RDI_MERGE_IMPORT' | 'RDI_REFUSE_IMPORT' | 'RDI_RERUN_DEDUPE' | 'RDI_VIEW_DETAILS' | 'RDI_VIEW_LIST' | 'REPORTING_EXPORT' | 'TARGETING_CREATE' | 'TARGETING_DUPLICATE' | 'TARGETING_LOCK' | 'TARGETING_REMOVE' | 'TARGETING_SEND' | 'TARGETING_UNLOCK' | 'TARGETING_UPDATE' | 'TARGETING_VIEW_DETAILS' | 'TARGETING_VIEW_LIST' | 'UPLOAD_STORAGE_FILE' | 'USER_MANAGEMENT_VIEW_LIST'>,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        totalDays?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedGrievanceTicketListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'permissions': permissions,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'total_days': totalDays,
+                'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }
@@ -1593,6 +2046,421 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/cycles/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns PaginatedGrievanceTicketListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsGrievanceTicketsList({
+        businessAreaSlug,
+        programSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtRange,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        permissions,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        totalDays,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtRange?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `RDI_VIEW_LIST` - RDI VIEW LIST
+         * * `RDI_VIEW_DETAILS` - RDI VIEW DETAILS
+         * * `RDI_IMPORT_DATA` - RDI IMPORT DATA
+         * * `RDI_RERUN_DEDUPE` - RDI RERUN DEDUPE
+         * * `RDI_MERGE_IMPORT` - RDI MERGE IMPORT
+         * * `RDI_REFUSE_IMPORT` - RDI REFUSE IMPORT
+         * * `POPULATION_VIEW_HOUSEHOLDS_LIST` - POPULATION VIEW HOUSEHOLDS LIST
+         * * `POPULATION_VIEW_HOUSEHOLDS_DETAILS` - POPULATION VIEW HOUSEHOLDS DETAILS
+         * * `POPULATION_VIEW_INDIVIDUALS_LIST` - POPULATION VIEW INDIVIDUALS LIST
+         * * `POPULATION_VIEW_INDIVIDUALS_DETAILS` - POPULATION VIEW INDIVIDUALS DETAILS
+         * * `POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION` - POPULATION VIEW INDIVIDUAL DELIVERY MECHANISMS SECTION
+         * * `PROGRAMME_VIEW_LIST_AND_DETAILS` - PROGRAMME VIEW LIST AND DETAILS
+         * * `PROGRAMME_MANAGEMENT_VIEW` - PROGRAMME MANAGEMENT VIEW
+         * * `PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS` - PROGRAMME VIEW PAYMENT RECORD DETAILS
+         * * `PROGRAMME_CREATE` - PROGRAMME CREATE
+         * * `PROGRAMME_UPDATE` - PROGRAMME UPDATE
+         * * `PROGRAMME_REMOVE` - PROGRAMME REMOVE
+         * * `PROGRAMME_ACTIVATE` - PROGRAMME ACTIVATE
+         * * `PROGRAMME_FINISH` - PROGRAMME FINISH
+         * * `PROGRAMME_DUPLICATE` - PROGRAMME DUPLICATE
+         * * `TARGETING_VIEW_LIST` - TARGETING VIEW LIST
+         * * `TARGETING_VIEW_DETAILS` - TARGETING VIEW DETAILS
+         * * `TARGETING_CREATE` - TARGETING CREATE
+         * * `TARGETING_UPDATE` - TARGETING UPDATE
+         * * `TARGETING_DUPLICATE` - TARGETING DUPLICATE
+         * * `TARGETING_REMOVE` - TARGETING REMOVE
+         * * `TARGETING_LOCK` - TARGETING LOCK
+         * * `TARGETING_UNLOCK` - TARGETING UNLOCK
+         * * `TARGETING_SEND` - TARGETING SEND
+         * * `PAYMENT_VIEW_LIST_MANAGERIAL` - PAYMENT VIEW LIST MANAGERIAL
+         * * `PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED` - PAYMENT VIEW LIST MANAGERIAL RELEASED
+         * * `PAYMENT_VERIFICATION_VIEW_LIST` - PAYMENT VERIFICATION VIEW LIST
+         * * `PAYMENT_VERIFICATION_VIEW_DETAILS` - PAYMENT VERIFICATION VIEW DETAILS
+         * * `PAYMENT_VERIFICATION_CREATE` - PAYMENT VERIFICATION CREATE
+         * * `PAYMENT_VERIFICATION_UPDATE` - PAYMENT VERIFICATION UPDATE
+         * * `PAYMENT_VERIFICATION_ACTIVATE` - PAYMENT VERIFICATION ACTIVATE
+         * * `PAYMENT_VERIFICATION_DISCARD` - PAYMENT VERIFICATION DISCARD
+         * * `PAYMENT_VERIFICATION_FINISH` - PAYMENT VERIFICATION FINISH
+         * * `PAYMENT_VERIFICATION_EXPORT` - PAYMENT VERIFICATION EXPORT
+         * * `PAYMENT_VERIFICATION_IMPORT` - PAYMENT VERIFICATION IMPORT
+         * * `PAYMENT_VERIFICATION_VERIFY` - PAYMENT VERIFICATION VERIFY
+         * * `PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS` - PAYMENT VERIFICATION VIEW PAYMENT RECORD DETAILS
+         * * `PAYMENT_VERIFICATION_DELETE` - PAYMENT VERIFICATION DELETE
+         * * `PAYMENT_VERIFICATION_INVALID` - PAYMENT VERIFICATION INVALID
+         * * `PAYMENT_VERIFICATION_MARK_AS_FAILED` - PAYMENT VERIFICATION MARK AS FAILED
+         * * `PM_VIEW_LIST` - PM VIEW LIST
+         * * `PM_CREATE` - PM CREATE
+         * * `PM_VIEW_DETAILS` - PM VIEW DETAILS
+         * * `PM_IMPORT_XLSX_WITH_ENTITLEMENTS` - PM IMPORT XLSX WITH ENTITLEMENTS
+         * * `PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS` - PM APPLY RULE ENGINE FORMULA WITH ENTITLEMENTS
+         * * `PM_SPLIT` - PM SPLIT
+         * * `PM_VIEW_PAYMENT_LIST` - PM VIEW PAYMENT LIST
+         * * `PM_LOCK_AND_UNLOCK` - PM LOCK AND UNLOCK
+         * * `PM_LOCK_AND_UNLOCK_FSP` - PM LOCK AND UNLOCK FSP
+         * * `PM_SEND_FOR_APPROVAL` - PM SEND FOR APPROVAL
+         * * `PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP` - PM EXCLUDE BENEFICIARIES FROM FOLLOW UP PP
+         * * `PM_ACCEPTANCE_PROCESS_APPROVE` - PM ACCEPTANCE PROCESS APPROVE
+         * * `PM_ACCEPTANCE_PROCESS_AUTHORIZE` - PM ACCEPTANCE PROCESS AUTHORIZE
+         * * `PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW` - PM ACCEPTANCE PROCESS FINANCIAL REVIEW
+         * * `PM_IMPORT_XLSX_WITH_RECONCILIATION` - PM IMPORT XLSX WITH RECONCILIATION
+         * * `PM_EXPORT_XLSX_FOR_FSP` - PM EXPORT XLSX FOR FSP
+         * * `PM_DOWNLOAD_XLSX_FOR_FSP` - PM DOWNLOAD XLSX FOR FSP
+         * * `PM_MARK_PAYMENT_AS_FAILED` - PM MARK PAYMENT AS FAILED
+         * * `PM_EXPORT_PDF_SUMMARY` - PM EXPORT PDF SUMMARY
+         * * `PM_SEND_TO_PAYMENT_GATEWAY` - PM SEND TO PAYMENT GATEWAY
+         * * `PM_VIEW_FSP_AUTH_CODE` - PM VIEW FSP AUTH CODE
+         * * `PM_DOWNLOAD_FSP_AUTH_CODE` - PM DOWNLOAD FSP AUTH CODE
+         * * `PM_SEND_XLSX_PASSWORD` - PM SEND XLSX PASSWORD
+         * * `PM_ASSIGN_FUNDS_COMMITMENTS` - PM ASSIGN FUNDS COMMITMENTS
+         * * `PM_SYNC_PAYMENT_PLAN_WITH_PG` - PM SYNC PAYMENT PLAN WITH PG
+         * * `PM_SYNC_PAYMENT_WITH_PG` - PM SYNC PAYMENT WITH PG
+         * * `PM_DOWNLOAD_SUPPORTING_DOCUMENT` - PM DOWNLOAD SUPPORTING DOCUMENT
+         * * `PM_UPLOAD_SUPPORTING_DOCUMENT` - PM UPLOAD SUPPORTING DOCUMENT
+         * * `PM_DELETE_SUPPORTING_DOCUMENT` - PM DELETE SUPPORTING DOCUMENT
+         * * `PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE` - PM ADMIN FINANCIAL SERVICE PROVIDER UPDATE
+         * * `PM_PROGRAMME_CYCLE_VIEW_LIST` - PM PROGRAMME CYCLE VIEW LIST
+         * * `PM_PROGRAMME_CYCLE_VIEW_DETAILS` - PM PROGRAMME CYCLE VIEW DETAILS
+         * * `PM_PROGRAMME_CYCLE_CREATE` - PM PROGRAMME CYCLE CREATE
+         * * `PM_PROGRAMME_CYCLE_UPDATE` - PM PROGRAMME CYCLE UPDATE
+         * * `PM_PROGRAMME_CYCLE_DELETE` - PM PROGRAMME CYCLE DELETE
+         * * `USER_MANAGEMENT_VIEW_LIST` - USER MANAGEMENT VIEW LIST
+         * * `DASHBOARD_VIEW_COUNTRY` - DASHBOARD VIEW COUNTRY
+         * * `DASHBOARD_EXPORT` - DASHBOARD EXPORT
+         * * `GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE` - GRIEVANCES VIEW LIST EXCLUDING SENSITIVE
+         * * `GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR` - GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS CREATOR
+         * * `GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER` - GRIEVANCES VIEW LIST EXCLUDING SENSITIVE AS OWNER
+         * * `GRIEVANCES_VIEW_LIST_SENSITIVE` - GRIEVANCES VIEW LIST SENSITIVE
+         * * `GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR` - GRIEVANCES VIEW LIST SENSITIVE AS CREATOR
+         * * `GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER` - GRIEVANCES VIEW LIST SENSITIVE AS OWNER
+         * * `GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE` - GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE
+         * * `GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR` - GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS CREATOR
+         * * `GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER` - GRIEVANCES VIEW DETAILS EXCLUDING SENSITIVE AS OWNER
+         * * `GRIEVANCES_VIEW_DETAILS_SENSITIVE` - GRIEVANCES VIEW DETAILS SENSITIVE
+         * * `GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR` - GRIEVANCES VIEW DETAILS SENSITIVE AS CREATOR
+         * * `GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER` - GRIEVANCES VIEW DETAILS SENSITIVE AS OWNER
+         * * `GRIEVANCES_VIEW_HOUSEHOLD_DETAILS` - GRIEVANCES VIEW HOUSEHOLD DETAILS
+         * * `GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR` - GRIEVANCES VIEW HOUSEHOLD DETAILS AS CREATOR
+         * * `GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER` - GRIEVANCES VIEW HOUSEHOLD DETAILS AS OWNER
+         * * `GRIEVANCES_VIEW_INDIVIDUALS_DETAILS` - GRIEVANCES VIEW INDIVIDUALS DETAILS
+         * * `GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR` - GRIEVANCES VIEW INDIVIDUALS DETAILS AS CREATOR
+         * * `GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER` - GRIEVANCES VIEW INDIVIDUALS DETAILS AS OWNER
+         * * `GRIEVANCES_CREATE` - GRIEVANCES CREATE
+         * * `GRIEVANCES_UPDATE` - GRIEVANCES UPDATE
+         * * `GRIEVANCES_UPDATE_AS_CREATOR` - GRIEVANCES UPDATE AS CREATOR
+         * * `GRIEVANCES_UPDATE_AS_OWNER` - GRIEVANCES UPDATE AS OWNER
+         * * `GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE` - GRIEVANCES UPDATE REQUESTED DATA CHANGE
+         * * `GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR` - GRIEVANCES UPDATE REQUESTED DATA CHANGE AS CREATOR
+         * * `GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER` - GRIEVANCES UPDATE REQUESTED DATA CHANGE AS OWNER
+         * * `GRIEVANCES_ADD_NOTE` - GRIEVANCES ADD NOTE
+         * * `GRIEVANCES_ADD_NOTE_AS_CREATOR` - GRIEVANCES ADD NOTE AS CREATOR
+         * * `GRIEVANCES_ADD_NOTE_AS_OWNER` - GRIEVANCES ADD NOTE AS OWNER
+         * * `GRIEVANCES_SET_IN_PROGRESS` - GRIEVANCES SET IN PROGRESS
+         * * `GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR` - GRIEVANCES SET IN PROGRESS AS CREATOR
+         * * `GRIEVANCES_SET_IN_PROGRESS_AS_OWNER` - GRIEVANCES SET IN PROGRESS AS OWNER
+         * * `GRIEVANCES_SET_ON_HOLD` - GRIEVANCES SET ON HOLD
+         * * `GRIEVANCES_SET_ON_HOLD_AS_CREATOR` - GRIEVANCES SET ON HOLD AS CREATOR
+         * * `GRIEVANCES_SET_ON_HOLD_AS_OWNER` - GRIEVANCES SET ON HOLD AS OWNER
+         * * `GRIEVANCES_SEND_FOR_APPROVAL` - GRIEVANCES SEND FOR APPROVAL
+         * * `GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR` - GRIEVANCES SEND FOR APPROVAL AS CREATOR
+         * * `GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER` - GRIEVANCES SEND FOR APPROVAL AS OWNER
+         * * `GRIEVANCES_SEND_BACK` - GRIEVANCES SEND BACK
+         * * `GRIEVANCES_SEND_BACK_AS_CREATOR` - GRIEVANCES SEND BACK AS CREATOR
+         * * `GRIEVANCES_SEND_BACK_AS_OWNER` - GRIEVANCES SEND BACK AS OWNER
+         * * `GRIEVANCES_APPROVE_DATA_CHANGE` - GRIEVANCES APPROVE DATA CHANGE
+         * * `GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR` - GRIEVANCES APPROVE DATA CHANGE AS CREATOR
+         * * `GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER` - GRIEVANCES APPROVE DATA CHANGE AS OWNER
+         * * `GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK` - GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK
+         * * `GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR` - GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS CREATOR
+         * * `GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER` - GRIEVANCES CLOSE TICKET EXCLUDING FEEDBACK AS OWNER
+         * * `GRIEVANCES_CLOSE_TICKET_FEEDBACK` - GRIEVANCES CLOSE TICKET FEEDBACK
+         * * `GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR` - GRIEVANCES CLOSE TICKET FEEDBACK AS CREATOR
+         * * `GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER` - GRIEVANCES CLOSE TICKET FEEDBACK AS OWNER
+         * * `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE` - GRIEVANCES APPROVE FLAG AND DEDUPE
+         * * `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR` - GRIEVANCES APPROVE FLAG AND DEDUPE AS CREATOR
+         * * `GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER` - GRIEVANCES APPROVE FLAG AND DEDUPE AS OWNER
+         * * `GRIEVANCES_APPROVE_PAYMENT_VERIFICATION` - GRIEVANCES APPROVE PAYMENT VERIFICATION
+         * * `GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR` - GRIEVANCES APPROVE PAYMENT VERIFICATION AS CREATOR
+         * * `GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER` - GRIEVANCES APPROVE PAYMENT VERIFICATION AS OWNER
+         * * `GRIEVANCE_ASSIGN` - GRIEVANCE ASSIGN
+         * * `GRIEVANCE_DOCUMENTS_UPLOAD` - GRIEVANCE DOCUMENTS UPLOAD
+         * * `GRIEVANCES_CROSS_AREA_FILTER` - GRIEVANCES CROSS AREA FILTER
+         * * `GRIEVANCES_VIEW_BIOMETRIC_RESULTS` - GRIEVANCES VIEW BIOMETRIC RESULTS
+         * * `GRIEVANCES_FEEDBACK_VIEW_CREATE` - GRIEVANCES FEEDBACK VIEW CREATE
+         * * `GRIEVANCES_FEEDBACK_VIEW_LIST` - GRIEVANCES FEEDBACK VIEW LIST
+         * * `GRIEVANCES_FEEDBACK_VIEW_DETAILS` - GRIEVANCES FEEDBACK VIEW DETAILS
+         * * `GRIEVANCES_FEEDBACK_VIEW_UPDATE` - GRIEVANCES FEEDBACK VIEW UPDATE
+         * * `GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE` - GRIEVANCES FEEDBACK MESSAGE VIEW CREATE
+         * * `REPORTING_EXPORT` - REPORTING EXPORT
+         * * `PDU_VIEW_LIST_AND_DETAILS` - PDU VIEW LIST AND DETAILS
+         * * `PDU_TEMPLATE_CREATE` - PDU TEMPLATE CREATE
+         * * `PDU_TEMPLATE_DOWNLOAD` - PDU TEMPLATE DOWNLOAD
+         * * `PDU_UPLOAD` - PDU UPLOAD
+         * * `ALL_VIEW_PII_DATA_ON_LISTS` - ALL VIEW PII DATA ON LISTS
+         * * `ACTIVITY_LOG_VIEW` - ACTIVITY LOG VIEW
+         * * `ACTIVITY_LOG_DOWNLOAD` - ACTIVITY LOG DOWNLOAD
+         * * `UPLOAD_STORAGE_FILE` - UPLOAD STORAGE FILE
+         * * `DOWNLOAD_STORAGE_FILE` - DOWNLOAD STORAGE FILE
+         * * `BENEFICIARY_GROUP_VIEW_LIST` - BENEFICIARY GROUP VIEW LIST
+         * * `ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST` - ACCOUNTABILITY COMMUNICATION MESSAGE VIEW LIST
+         * * `ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS` - ACCOUNTABILITY COMMUNICATION MESSAGE VIEW DETAILS
+         * * `ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE` - ACCOUNTABILITY COMMUNICATION MESSAGE VIEW CREATE
+         * * `ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR` - ACCOUNTABILITY COMMUNICATION MESSAGE VIEW DETAILS AS CREATOR
+         * * `ACCOUNTABILITY_SURVEY_VIEW_CREATE` - ACCOUNTABILITY SURVEY VIEW CREATE
+         * * `ACCOUNTABILITY_SURVEY_VIEW_LIST` - ACCOUNTABILITY SURVEY VIEW LIST
+         * * `ACCOUNTABILITY_SURVEY_VIEW_DETAILS` - ACCOUNTABILITY SURVEY VIEW DETAILS
+         * * `GEO_VIEW_LIST` - GEO VIEW LIST
+         * * `CAN_ADD_BUSINESS_AREA_TO_PARTNER` - CAN ADD BUSINESS AREA TO PARTNER
+         */
+        permissions?: Array<'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE' | 'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS' | 'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR' | 'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST' | 'ACCOUNTABILITY_SURVEY_VIEW_CREATE' | 'ACCOUNTABILITY_SURVEY_VIEW_DETAILS' | 'ACCOUNTABILITY_SURVEY_VIEW_LIST' | 'ACTIVITY_LOG_DOWNLOAD' | 'ACTIVITY_LOG_VIEW' | 'ALL_VIEW_PII_DATA_ON_LISTS' | 'BENEFICIARY_GROUP_VIEW_LIST' | 'CAN_ADD_BUSINESS_AREA_TO_PARTNER' | 'DASHBOARD_EXPORT' | 'DASHBOARD_VIEW_COUNTRY' | 'DOWNLOAD_STORAGE_FILE' | 'GEO_VIEW_LIST' | 'GRIEVANCES_ADD_NOTE' | 'GRIEVANCES_ADD_NOTE_AS_CREATOR' | 'GRIEVANCES_ADD_NOTE_AS_OWNER' | 'GRIEVANCES_APPROVE_DATA_CHANGE' | 'GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR' | 'GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER' | 'GRIEVANCES_APPROVE_FLAG_AND_DEDUPE' | 'GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR' | 'GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER' | 'GRIEVANCES_APPROVE_PAYMENT_VERIFICATION' | 'GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR' | 'GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER' | 'GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK' | 'GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR' | 'GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER' | 'GRIEVANCES_CLOSE_TICKET_FEEDBACK' | 'GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR' | 'GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER' | 'GRIEVANCES_CREATE' | 'GRIEVANCES_CROSS_AREA_FILTER' | 'GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE' | 'GRIEVANCES_FEEDBACK_VIEW_CREATE' | 'GRIEVANCES_FEEDBACK_VIEW_DETAILS' | 'GRIEVANCES_FEEDBACK_VIEW_LIST' | 'GRIEVANCES_FEEDBACK_VIEW_UPDATE' | 'GRIEVANCES_SEND_BACK' | 'GRIEVANCES_SEND_BACK_AS_CREATOR' | 'GRIEVANCES_SEND_BACK_AS_OWNER' | 'GRIEVANCES_SEND_FOR_APPROVAL' | 'GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR' | 'GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER' | 'GRIEVANCES_SET_IN_PROGRESS' | 'GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR' | 'GRIEVANCES_SET_IN_PROGRESS_AS_OWNER' | 'GRIEVANCES_SET_ON_HOLD' | 'GRIEVANCES_SET_ON_HOLD_AS_CREATOR' | 'GRIEVANCES_SET_ON_HOLD_AS_OWNER' | 'GRIEVANCES_UPDATE' | 'GRIEVANCES_UPDATE_AS_CREATOR' | 'GRIEVANCES_UPDATE_AS_OWNER' | 'GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE' | 'GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR' | 'GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER' | 'GRIEVANCES_VIEW_BIOMETRIC_RESULTS' | 'GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE' | 'GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR' | 'GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER' | 'GRIEVANCES_VIEW_DETAILS_SENSITIVE' | 'GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR' | 'GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER' | 'GRIEVANCES_VIEW_HOUSEHOLD_DETAILS' | 'GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR' | 'GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER' | 'GRIEVANCES_VIEW_INDIVIDUALS_DETAILS' | 'GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR' | 'GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER' | 'GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE' | 'GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR' | 'GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER' | 'GRIEVANCES_VIEW_LIST_SENSITIVE' | 'GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR' | 'GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER' | 'GRIEVANCE_ASSIGN' | 'GRIEVANCE_DOCUMENTS_UPLOAD' | 'PAYMENT_VERIFICATION_ACTIVATE' | 'PAYMENT_VERIFICATION_CREATE' | 'PAYMENT_VERIFICATION_DELETE' | 'PAYMENT_VERIFICATION_DISCARD' | 'PAYMENT_VERIFICATION_EXPORT' | 'PAYMENT_VERIFICATION_FINISH' | 'PAYMENT_VERIFICATION_IMPORT' | 'PAYMENT_VERIFICATION_INVALID' | 'PAYMENT_VERIFICATION_MARK_AS_FAILED' | 'PAYMENT_VERIFICATION_UPDATE' | 'PAYMENT_VERIFICATION_VERIFY' | 'PAYMENT_VERIFICATION_VIEW_DETAILS' | 'PAYMENT_VERIFICATION_VIEW_LIST' | 'PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS' | 'PAYMENT_VIEW_LIST_MANAGERIAL' | 'PAYMENT_VIEW_LIST_MANAGERIAL_RELEASED' | 'PDU_TEMPLATE_CREATE' | 'PDU_TEMPLATE_DOWNLOAD' | 'PDU_UPLOAD' | 'PDU_VIEW_LIST_AND_DETAILS' | 'PM_ACCEPTANCE_PROCESS_APPROVE' | 'PM_ACCEPTANCE_PROCESS_AUTHORIZE' | 'PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW' | 'PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE' | 'PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS' | 'PM_ASSIGN_FUNDS_COMMITMENTS' | 'PM_CREATE' | 'PM_DELETE_SUPPORTING_DOCUMENT' | 'PM_DOWNLOAD_FSP_AUTH_CODE' | 'PM_DOWNLOAD_SUPPORTING_DOCUMENT' | 'PM_DOWNLOAD_XLSX_FOR_FSP' | 'PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP' | 'PM_EXPORT_PDF_SUMMARY' | 'PM_EXPORT_XLSX_FOR_FSP' | 'PM_IMPORT_XLSX_WITH_ENTITLEMENTS' | 'PM_IMPORT_XLSX_WITH_RECONCILIATION' | 'PM_LOCK_AND_UNLOCK' | 'PM_LOCK_AND_UNLOCK_FSP' | 'PM_MARK_PAYMENT_AS_FAILED' | 'PM_PROGRAMME_CYCLE_CREATE' | 'PM_PROGRAMME_CYCLE_DELETE' | 'PM_PROGRAMME_CYCLE_UPDATE' | 'PM_PROGRAMME_CYCLE_VIEW_DETAILS' | 'PM_PROGRAMME_CYCLE_VIEW_LIST' | 'PM_SEND_FOR_APPROVAL' | 'PM_SEND_TO_PAYMENT_GATEWAY' | 'PM_SEND_XLSX_PASSWORD' | 'PM_SPLIT' | 'PM_SYNC_PAYMENT_PLAN_WITH_PG' | 'PM_SYNC_PAYMENT_WITH_PG' | 'PM_UPLOAD_SUPPORTING_DOCUMENT' | 'PM_VIEW_DETAILS' | 'PM_VIEW_FSP_AUTH_CODE' | 'PM_VIEW_LIST' | 'PM_VIEW_PAYMENT_LIST' | 'POPULATION_VIEW_HOUSEHOLDS_DETAILS' | 'POPULATION_VIEW_HOUSEHOLDS_LIST' | 'POPULATION_VIEW_INDIVIDUALS_DETAILS' | 'POPULATION_VIEW_INDIVIDUALS_LIST' | 'POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION' | 'PROGRAMME_ACTIVATE' | 'PROGRAMME_CREATE' | 'PROGRAMME_DUPLICATE' | 'PROGRAMME_FINISH' | 'PROGRAMME_MANAGEMENT_VIEW' | 'PROGRAMME_REMOVE' | 'PROGRAMME_UPDATE' | 'PROGRAMME_VIEW_LIST_AND_DETAILS' | 'PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS' | 'RDI_IMPORT_DATA' | 'RDI_MERGE_IMPORT' | 'RDI_REFUSE_IMPORT' | 'RDI_RERUN_DEDUPE' | 'RDI_VIEW_DETAILS' | 'RDI_VIEW_LIST' | 'REPORTING_EXPORT' | 'TARGETING_CREATE' | 'TARGETING_DUPLICATE' | 'TARGETING_LOCK' | 'TARGETING_REMOVE' | 'TARGETING_SEND' | 'TARGETING_UNLOCK' | 'TARGETING_UPDATE' | 'TARGETING_VIEW_DETAILS' | 'TARGETING_VIEW_LIST' | 'UPLOAD_STORAGE_FILE' | 'USER_MANAGEMENT_VIEW_LIST'>,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        totalDays?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedGrievanceTicketListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/grievance-tickets/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'permissions': permissions,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'total_days': totalDays,
+                'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsGrievanceTicketsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/grievance-tickets/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,

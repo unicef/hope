@@ -6,7 +6,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 import { dateToIsoString } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
@@ -23,18 +23,33 @@ function PaymentVerificationTable({
 }: PaymentVerificationTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const initialQueryVariables = {
-    programSlug: programId,
-    businessAreaSlug: businessArea,
-    search: filter.search,
-    verificationStatus: filter.verificationStatus,
-    serviceProvider: filter.serviceProvider,
-    deliveryTypes: filter.deliveryTypes,
-    startDate: dateToIsoString(filter.startDate, 'startOfDay'),
-    endDate: dateToIsoString(filter.endDate, 'endOfDay'),
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      programSlug: programId,
+      businessAreaSlug: businessArea,
+      search: filter.search,
+      verificationStatus: filter.verificationStatus,
+      serviceProvider: filter.serviceProvider,
+      deliveryTypes: filter.deliveryTypes,
+      startDate: dateToIsoString(filter.startDate, 'startOfDay'),
+      endDate: dateToIsoString(filter.endDate, 'endOfDay'),
+    }),
+    [
+      programId,
+      businessArea,
+      filter.search,
+      filter.verificationStatus,
+      filter.serviceProvider,
+      filter.deliveryTypes,
+      filter.startDate,
+      filter.endDate,
+    ],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentPlansData,

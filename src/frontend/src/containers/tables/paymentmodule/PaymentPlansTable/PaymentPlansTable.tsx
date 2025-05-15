@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
@@ -27,20 +27,37 @@ function PaymentPlansTable({
   const { programId, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const initialQueryVariables = {
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-    search: filter.search,
-    status: filter.status,
-    totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
-    totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
-    dispersionStartDate: filter.dispersionStartDate || null,
-    dispersionEndDate: filter.dispersionEndDate || null,
-    isFollowUp: filter.isFollowUp ? true : null,
-    isPaymentPlan: true,
-  };
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      search: filter.search,
+      status: filter.status,
+      totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
+      totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
+      dispersionStartDate: filter.dispersionStartDate || null,
+      dispersionEndDate: filter.dispersionEndDate || null,
+      isFollowUp: filter.isFollowUp ? true : null,
+      isPaymentPlan: true,
+    }),
+    [
+      businessArea,
+      programId,
+      filter.search,
+      filter.status,
+      filter.totalEntitledQuantityFrom,
+      filter.totalEntitledQuantityTo,
+      filter.dispersionStartDate,
+      filter.dispersionEndDate,
+      filter.isFollowUp,
+    ],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentPlansData,
