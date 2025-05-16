@@ -1,20 +1,23 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
-import { AccountBalance } from '@mui/icons-material';
-import { ReactElement, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { DocumentSearchField } from '@core/DocumentSearchField';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 import {
   GrievancesChoiceDataQuery,
   useGrievanceTicketAreaScopeQuery,
 } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { AccountBalance } from '@mui/icons-material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
-import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
-import { LanguageAutocomplete } from '@shared/autocompletes/LanguageAutocomplete';
-import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
-import { RdiAutocomplete } from '@shared/autocompletes/RdiAutocomplete';
+import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
+import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
+import { LanguageAutocompleteRestFilter } from '@shared/autocompletes/LanguageAutocompleteRestFilter';
+import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
+import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
@@ -22,12 +25,9 @@ import {
   GrievanceTypes,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { DatePickerFilter } from '@core/DatePickerFilter';
-import { FiltersSection } from '@core/FiltersSection';
-import { NumberTextField } from '@core/NumberTextField';
-import { SearchTextField } from '@core/SearchTextField';
-import { SelectFilter } from '@core/SelectFilter';
-import { DocumentSearchField } from '@core/DocumentSearchField';
+import { ReactElement, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface GrievancesFiltersProps {
   filter;
@@ -140,7 +140,7 @@ export const GrievancesFilters = ({
         />
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>
-            <ProgramAutocomplete
+            <ProgramAutocompleteRestFilter
               filter={filter}
               name="program"
               value={filter.program}
@@ -166,7 +166,7 @@ export const GrievancesFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <SearchTextField
             value={filter.fsp}
             label="FSP"
@@ -176,7 +176,7 @@ export const GrievancesFilters = ({
             data-cy="filters-fsp"
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder="From"
@@ -186,7 +186,7 @@ export const GrievancesFilters = ({
             dataCy="filters-creation-date-from"
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             placeholder="To"
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
@@ -211,7 +211,7 @@ export const GrievancesFilters = ({
           </SelectFilter>
         </Grid>
         {showIssueType && (
-          <Grid size={{ xs:2 }}>
+          <Grid size={{ xs: 2 }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label="Issue Type"
@@ -227,7 +227,7 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid size={{ xs: 3 }}>
-          <AssigneeAutocomplete
+          <AssigneeAutocompleteRestFilter
             filter={filter}
             label={t('Assigned To')}
             name="assignedTo"
@@ -241,7 +241,7 @@ export const GrievancesFilters = ({
         </Grid>
         {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated && (
           <Grid size={{ xs: 3 }}>
-            <CreatedByAutocomplete
+            <CreatedByAutocompleteRestFilter
               filter={filter}
               name="createdBy"
               value={filter.createdBy}
@@ -255,7 +255,7 @@ export const GrievancesFilters = ({
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
           <Grid container size={{ xs: 6 }} spacing={3} alignItems="flex-end">
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <NumberTextField
                 topLabel={t('Similarity Score')}
                 value={filter.scoreMin}
@@ -265,7 +265,7 @@ export const GrievancesFilters = ({
                 fullWidth
               />
             </Grid>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <NumberTextField
                 value={filter.scoreMax}
                 placeholder="To"
@@ -277,7 +277,7 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid size={{ xs: 3 }}>
-          <RdiAutocomplete
+          <RdiAutocompleteRestFilter
             filter={filter}
             name="registrationDataImport"
             value={filter.registrationDataImport}
@@ -288,7 +288,7 @@ export const GrievancesFilters = ({
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <LanguageAutocomplete
+          <LanguageAutocompleteRestFilter
             filter={filter}
             name="preferredLanguage"
             value={filter.preferredLanguage}
@@ -349,7 +349,7 @@ export const GrievancesFilters = ({
           </SelectFilter>
         </Grid>
         {isAllPrograms && (
-          <Grid size={{ xs:2 }}>
+          <Grid size={{ xs: 2 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -367,7 +367,7 @@ export const GrievancesFilters = ({
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated &&
           areaScopeData?.crossAreaFilterAvailable && (
-            <Grid size={{ xs:2 }}>
+            <Grid size={{ xs: 2 }}>
               <SelectFilter
                 onChange={(e) =>
                   handleFilterChange('areaScope', e.target.value)

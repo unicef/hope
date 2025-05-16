@@ -65,8 +65,6 @@ export const GrievancesTable = ({
     replacements,
   );
 
-  console.log('filter.grievanceType', filter.grievanceType);
-
   const initialQueryVariables = useMemo(
     () => ({
       businessArea,

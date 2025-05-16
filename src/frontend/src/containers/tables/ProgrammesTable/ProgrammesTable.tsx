@@ -30,7 +30,6 @@ function ProgrammesTable({
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
-      programSlug: programId,
       beneficiaryGroupMatch: isAllPrograms ? '' : programId,
       compatibleDct: isAllPrograms ? '' : programId,
       search: filter.search,
@@ -38,11 +37,10 @@ function ProgrammesTable({
       endDate: filter.endDate || null,
       status: filter.status !== '' ? filter.status : undefined,
       sector: filter.sector,
-      numberOfHouseholds: JSON.stringify({
-        before: filter.numberOfHouseholdsMin,
-        after: filter.numberOfHouseholdsMax,
-      }),
-      budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
+      numberOfHouseholdsMax: filter.numberOfHouseholdsMax,
+      numberOfHouseholdsMin: filter.numberOfHouseholdsMin,
+      budgetMax: filter.budgetMax,
+      budgetMin: filter.budgetMin,
       dataCollectingType: filter.dataCollectingType,
       ordering: 'startDate',
     }),
@@ -81,11 +79,9 @@ function ProgrammesTable({
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
+          withPagination: true,
+        }),
       ),
     enabled: !!queryVariables.businessAreaSlug,
   });
