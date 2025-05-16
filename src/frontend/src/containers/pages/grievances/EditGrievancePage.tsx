@@ -18,7 +18,6 @@ import {
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
   useGrievancesChoiceDataQuery,
-  useMeQuery,
   useUpdateGrievanceMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
@@ -80,6 +79,8 @@ import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissio
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -96,7 +97,7 @@ const BoxWithBottomBorders = styled.div`
 const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -114,8 +115,17 @@ const EditGrievancePage = (): ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryFn: () => {
+        return RestService.restBusinessAreasUsersProfileRetrieve({
+          businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
+        });
+      },
+    },
+  );
 
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
@@ -135,7 +145,7 @@ const EditGrievancePage = (): ReactElement => {
     useAllProgramsForChoicesQuery({
       variables: {
         first: 100,
-        businessArea,
+        businessArea:businessAreaSlug,
       },
     });
   const individualFieldsDict = useArrayToDict(
@@ -183,7 +193,7 @@ const EditGrievancePage = (): ReactElement => {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const currentUserId = currentUserData.me.id;
+  const currentUserId = currentUserData.id;
   const ticket = ticketData.grievanceTicket;
 
   const isCreator = ticket.createdBy?.id === currentUserId;
@@ -270,7 +280,7 @@ const EditGrievancePage = (): ReactElement => {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const { variables } = prepareVariables(businessArea, values, ticket);
+          const { variables } = prepareVariables(businessAreaSlug, values, ticket);
           await mutate({
             variables,
             refetchQueries: () => [

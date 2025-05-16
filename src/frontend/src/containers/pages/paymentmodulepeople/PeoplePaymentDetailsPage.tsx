@@ -1,38 +1,53 @@
-import { Box } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
+import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
+import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
+import { AdminButton } from '@core/AdminButton';
 import {
   PaymentPlanStatus,
   PaymentStatus,
   useCashAssistUrlPrefixQuery,
-  usePaymentQuery,
 } from '@generated/graphql';
-import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
-import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { AdminButton } from '@core/AdminButton';
+import { usePermissions } from '@hooks/usePermissions';
+import { Box } from '@mui/material';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 export const PeoplePaymentDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
-  const { paymentId } = useParams();
+  const { paymentPlanId, paymentId } = useParams();
+  const { businessArea, programId } = useBaseUrl();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const { data, loading } = usePaymentQuery({
-    variables: { id: paymentId },
-    fetchPolicy: 'cache-and-network',
+  const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
+    queryKey: [
+      'paymentPlan',
+      businessArea,
+      paymentId,
+      programId,
+      paymentPlanId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
+        businessAreaSlug: businessArea,
+        paymentId: paymentId,
+        programSlug: programId,
+        paymentPlanId,
+      }),
   });
-  const paymentPlanStatus = data?.payment?.parent?.status;
-  const paymentPlanIsFollowUp = data?.payment?.parent?.isFollowUp;
+  const paymentPlanStatus = payment?.parent?.status;
+  const paymentPlanIsFollowUp = payment?.parent?.isFollowUp;
   const permissions = usePermissions();
   const { baseUrl } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;
@@ -40,8 +55,7 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
   if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
 
-  if (!data || !caData) return null;
-  const { payment } = data;
+  if (!payment || !caData) return null;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
@@ -53,7 +67,7 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
       }`,
       to: `/${baseUrl}/payment-module/${
         paymentPlanIsFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${data.payment.parent.id}/`,
+      }/${payment.parent.id}/`,
     },
   ];
 

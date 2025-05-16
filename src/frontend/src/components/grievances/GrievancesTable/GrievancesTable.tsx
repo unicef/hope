@@ -8,13 +8,14 @@ import {
   useAllGrievanceTicketQuery,
   useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
-  useMeQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
@@ -23,20 +24,20 @@ import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
 import get from 'lodash/get';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
 } from '../../../config/permissions';
 import {
-  headCellsStandardProgram,
   headCellsSocialProgram,
+  headCellsStandardProgram,
 } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import { useProgramContext } from 'src/programContext';
 
 interface GrievancesTableProps {
   filter;
@@ -46,7 +47,7 @@ interface GrievancesTableProps {
 export const GrievancesTable = ({
   filter,
 }: GrievancesTableProps): ReactElement => {
-  const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
@@ -88,7 +89,7 @@ export const GrievancesTable = ({
     priority: filter.priority === 'Not Set' ? 0 : filter.priority,
     urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
     preferredLanguage: filter.preferredLanguage,
-    program: isAllPrograms ? filter.program : programId,
+    program: isAllPrograms ? filter.program : programSlug,
     isActiveProgram: filter.programState === 'active' ? true : null,
     isCrossArea: filter.areaScope === 'cross-area' ? true : null,
   };
@@ -135,8 +136,19 @@ export const GrievancesTable = ({
 
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryFn: () => {
+        return RestService.restBusinessAreasUsersProfileRetrieve({
+          businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
+        });
+      },
+    },
+  );
+
   const permissions = usePermissions();
 
   if (choicesLoading || currentUserDataLoading) return <LoadingComponent />;
@@ -153,7 +165,7 @@ export const GrievancesTable = ({
   const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
-  const currentUserId = currentUserData.me.id;
+  const currentUserId = currentUserData.id;
 
   const getCanViewDetailsOfTicket = (
     ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],

@@ -4,8 +4,7 @@ import { render, RenderOptions } from '@testing-library/react';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
-import { ProgramStatus } from '@generated/graphql';
-import { MockLink } from '@apollo/client/testing';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 const customRender = (
   ui: ReactElement,
@@ -13,7 +12,11 @@ const customRender = (
 ) =>
   render(
     <>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+        }}
+      >
         <Formik initialValues={{}} onSubmit={noop}>
           {ui}
         </Formik>
@@ -26,7 +29,7 @@ const customRender = (
   );
 
 export * from '@testing-library/react';
-export { customRender as render };
+export { customRender as renderWithProviders };
 
 let m_w = 123456789;
 let m_z = 987654321;
@@ -48,24 +51,16 @@ export const random = () => {
   return result;
 };
 
-export class ApolloLoadingLink extends MockLink {
-  constructor() {
-    super([]);
-  }
-
-  request() {
-    return null;
-  }
-}
-
 export const fakeContextProgram = {
   selectedProgram: {
     id: '1',
     name: 'someName',
-    status: ProgramStatus.Active,
+    programme_code: 'A123',
+    status: 'ACTIVE' as Status791Enum,
     pduFields: null,
+    program_code: 'A123',
     dataCollectingType: {
-      id: '1',
+      id: 1,
       householdFiltersAvailable: true,
       individualFiltersAvailable: true,
       label: 'data collecting type',

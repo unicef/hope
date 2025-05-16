@@ -2,7 +2,6 @@ import GroupIcon from '@mui/icons-material/Group';
 import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useRegistrationChoicesQuery } from '@generated/graphql';
 import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
@@ -48,10 +47,6 @@ export function LookUpRegistrationFiltersCommunication({
   };
 
   const { t } = useTranslation();
-  const { data: registrationChoicesData } = useRegistrationChoicesQuery();
-  if (!registrationChoicesData) {
-    return null;
-  }
 
   return (
     <FiltersSection

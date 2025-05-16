@@ -95,7 +95,19 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_0_valid 1'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     },
                     {
                         'areaAccess': 'ADMIN_AREA',
@@ -196,7 +208,31 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_all_partners_access 
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'WFP'
                     }
                 ],
                 'pduFields': [
@@ -233,7 +269,19 @@ snapshots['TestCopyProgram::test_copy_program_with_partners_none_partners_access
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ],
                 'pduFields': [
@@ -270,7 +318,19 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields 1'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ],
                 'pduFields': [
@@ -377,7 +437,19 @@ snapshots['TestCopyProgram::test_copy_program_with_pdu_fields_existing_field_nam
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ],
                 'pduFields': [
@@ -467,7 +539,19 @@ snapshots['TestCopyProgram::test_copy_with_permissions 1'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ],
                 'pduFields': [

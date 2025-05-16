@@ -88,7 +88,7 @@ export const ProgramCyclesFilters = ({
           <NumberTextField
             id="totalEntitledQuantityUsdFromFilter"
             topLabel={t('Total Entitled Quantity')}
-            value={filter.total_entitled_quantity_usd_from}
+            value={filter.totalEntitledQuantityUsd_from}
             placeholder={t('From')}
             onChange={(e) =>
               handleFilterChange(
@@ -101,7 +101,7 @@ export const ProgramCyclesFilters = ({
         <Grid size={{ xs: 3 }}>
           <NumberTextField
             id="totalEntitledQuantityUsdToFilter"
-            value={filter.total_entitled_quantity_usd_to}
+            value={filter.totalEntitledQuantityUsd_to}
             placeholder={t('To')}
             onChange={(e) =>
               handleFilterChange(
@@ -110,10 +110,10 @@ export const ProgramCyclesFilters = ({
               )
             }
             error={
-              filter.total_entitled_quantity_usd_from &&
-              filter.total_entitled_quantity_usd_to &&
-              filter.total_entitled_quantity_usd_from >
-                filter.total_entitled_quantity_usd_to
+              filter.totalEntitledQuantityUsd_from &&
+              filter.totalEntitledQuantityUsd_to &&
+              filter.totalEntitledQuantityUsd_from >
+                filter.totalEntitledQuantityUsd_to
             }
           />
         </Grid>
@@ -122,7 +122,7 @@ export const ProgramCyclesFilters = ({
             topLabel="Date"
             onChange={(date) =>
               handleFilterChange(
-                'start_date',
+                'startDate',
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
@@ -137,7 +137,7 @@ export const ProgramCyclesFilters = ({
                 date ? moment(date).format('YYYY-MM-DD') : '',
               )
             }
-            value={filter.end_date}
+            value={filter.endDate}
           />
         </Grid>
       </Grid>

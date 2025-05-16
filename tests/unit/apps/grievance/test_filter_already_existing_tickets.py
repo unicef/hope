@@ -150,7 +150,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     @pytest.mark.skip("This test has never worked with pytest")
     def test_filter_existing_tickets_by_payment_record_with_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area, whole_business_area_access=True
         )
 
         self.snapshot_graphql_request(
@@ -168,7 +168,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
 
     def test_filter_existing_tickets_by_payment_record_without_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         self.snapshot_graphql_request(
@@ -194,7 +197,9 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         ]
     )
     def test_filter_existing_tickets_by_two_payment_records(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
@@ -211,7 +216,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
 
     def test_filter_existing_tickets_by_household_with_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area, whole_business_area_access=True
         )
 
         self.snapshot_graphql_request(
@@ -228,7 +233,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
 
     def test_filter_existing_tickets_by_household_without_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         self.snapshot_graphql_request(
@@ -246,7 +254,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     @pytest.mark.skip(reason="This test has never worked with pytest")
     def test_filter_existing_tickets_by_individual_with_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area, whole_business_area_access=True
         )
 
         self.snapshot_graphql_request(
@@ -263,7 +271,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     @flaky(max_runs=3, min_passes=1)
     def test_filter_existing_tickets_by_individual_without_permission(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            self.business_area,
+            whole_business_area_access=True,
         )
 
         self.snapshot_graphql_request(

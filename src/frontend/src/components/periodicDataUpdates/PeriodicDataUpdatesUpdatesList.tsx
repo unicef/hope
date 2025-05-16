@@ -3,15 +3,17 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { IconButton, TableCell } from '@mui/material';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
+import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
 import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedPeriodicDataUpdateUploadListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateUploadListList';
 
 const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
   {
@@ -65,9 +67,9 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUploadId, setSelectedUploadId] = useState<number | null>(null);
   const initialQueryVariables = {
-    page: 1,
-    page_size: 10,
     ordering: 'created_at',
+    businessAreaSlug,
+    programSlug: programId,
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -76,20 +78,24 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     data: updatesData,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<PaginatedPeriodicDataUpdateUploadListList>({
     queryKey: [
       'periodicDataUpdateUploads',
+      queryVariables,
       businessAreaSlug,
       programId,
-      queryVariables,
     ],
-    queryFn: () =>
-      fetchPeriodicDataUpdateUpdates(
-        businessAreaSlug,
-        programId,
-        queryVariables,
-      ),
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsList(
+        createApiParams(
+          { businessAreaSlug, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
   });
+
   const handleDialogOpen = (uploadId) => {
     setSelectedUploadId(uploadId);
     setIsDialogOpen(true);
@@ -107,10 +113,10 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
         {row.template}
       </TableCell>
       <TableCell data-cy={`update-created-at-${row.id}`}>
-        <UniversalMoment>{row.created_at}</UniversalMoment>
+        <UniversalMoment>{row.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell data-cy={`update-created-by-${row.id}`}>
-        {row.created_by}
+        {row.createdBy}
       </TableCell>
       <TableCell data-cy={`update-details-${row.id}`}>
         {row.status === 'FAILED' ? (

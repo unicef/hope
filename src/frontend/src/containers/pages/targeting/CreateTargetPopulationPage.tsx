@@ -1,19 +1,19 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
 import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
-import {
-  useBusinessAreaDataQuery,
-  useCreateTpMutation,
-} from '@generated/graphql';
+import { useBusinessAreaDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
+import { useMutation } from '@tanstack/react-query';
 import {
   getTargetingCriteriaVariables,
   HhIndIdValidation,
@@ -24,8 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -48,7 +47,23 @@ const CreateTargetPopulationPage = (): ReactElement => {
     deliveryMechanism: '',
     fsp: '',
   };
-  const [mutate, { loading }] = useCreateTpMutation();
+  const { mutateAsync: createTargetPopulation, isPending: loadingCreate } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+      }: {
+        businessAreaSlug: string;
+        programSlug: string;
+        requestBody;
+      }) =>
+        RestService.restBusinessAreasProgramsTargetPopulationsCreate({
+          businessAreaSlug,
+          programSlug,
+          requestBody,
+        }),
+    });
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -79,26 +94,26 @@ const CreateTargetPopulationPage = (): ReactElement => {
   const handleSubmit = async (values): Promise<void> => {
     const fsp = values.criterias[0]?.fsp || null;
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
+    const requestBody = {
+      programCycleId: values.programCycleId.value,
+      name: values.name,
+      excludedIds: values.excludedIds,
+      exclusionReason: values.exclusionReason,
+      fspId: fsp,
+      deliveryMechanismCode: deliveryMechanism,
+      ...getTargetingCriteriaVariables(values),
+    };
+
     try {
-      const res = await mutate({
-        variables: {
-          input: {
-            programCycleId: values.programCycleId.value,
-            name: values.name,
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
-            fspId: fsp,
-            deliveryMechanismCode: deliveryMechanism,
-            ...getTargetingCriteriaVariables(values),
-          },
-        },
+      const res = await createTargetPopulation({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        requestBody,
       });
       showMessage(t('Target Population Created'));
-      navigate(
-        `/${baseUrl}/target-population/${res.data.createPaymentPlan.paymentPlan.id}`,
-      );
+      navigate(`/${baseUrl}/target-population/${res.id}`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e.message);
     }
   };
 
@@ -114,7 +129,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
             <AutoSubmitFormOnEnter />
             <CreateTargetPopulationHeader
               handleSubmit={submitForm}
-              loading={loading}
+              loading={loadingCreate}
               values={values}
               baseUrl={baseUrl}
               permissions={permissions}

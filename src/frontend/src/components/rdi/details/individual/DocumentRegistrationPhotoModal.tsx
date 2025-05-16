@@ -1,12 +1,10 @@
 import PhotoModal from '@core/PhotoModal/PhotoModal';
-import {
-  IndividualDetailedFragment,
-  useIndividualPhotosQuery,
-} from '@generated/graphql';
+import { useIndividualPhotosQuery } from '@generated/graphql';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { ReactElement } from 'react';
 
 interface DocumentRegistrationPhotoModalProps {
-  individual: IndividualDetailedFragment;
+  individual: IndividualDetail;
   documentNumber: string;
   documentId: string;
 }

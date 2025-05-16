@@ -108,8 +108,8 @@ export const GrievanceDetailsToolbar = ({
       const allData = {
         ...householdData,
         ...individualData,
-        ...householdData?.flex_fields,
-        ...individualData?.flex_fields,
+        ...householdData?.flexFields,
+        ...individualData?.flexFields,
       };
       const filterData = (data: any) => {
         const excludedKeys = [

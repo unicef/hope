@@ -12,7 +12,7 @@ from hct_mis_api.apps.core.utils import decode_id_string
 def download_cash_plan_payment_verification(request: HttpRequest, survey_id: str) -> HttpResponse:
     survey = get_object_or_404(Survey, id=decode_id_string(survey_id))
 
-    if not request.user.has_permission(Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS.name, survey.business_area):
+    if not request.user.has_perm(Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS.name, survey.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     try:

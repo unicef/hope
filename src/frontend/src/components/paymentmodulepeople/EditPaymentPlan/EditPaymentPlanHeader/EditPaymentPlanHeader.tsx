@@ -7,11 +7,11 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -21,7 +21,7 @@ interface EditPaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
   baseUrl: string;
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function EditPaymentPlanHeader({

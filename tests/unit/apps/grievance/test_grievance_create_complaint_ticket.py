@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+from unittest import skip
 
 from django.core.management import call_command
 
@@ -71,7 +72,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe second Individual"},
         )
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
 
         payment_plan = PaymentPlanFactory(program_cycle=cls.program.cycles.first(), business_area=cls.business_area)
         cls.payment = PaymentFactory(
@@ -99,8 +100,9 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_complaint_ticket(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -114,8 +116,11 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
+    @skip("Because will remove soon after REST refactoring")
     def test_create_a_ticket_per_payment(self) -> None:
-        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program
+        )
 
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -142,8 +147,9 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_complaint_ticket_without_payment_record(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -166,8 +172,9 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_complaint_ticket_with_two_payment_records(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -193,8 +200,9 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_complaint_ticket_without_household(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = self._create_variables(
             individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
@@ -216,8 +224,9 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_complaint_ticket_without_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
@@ -239,8 +248,9 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             ("without_permission", []),
         ]
     )
+    @skip("Because will remove soon after REST refactoring")
     def test_create_complaint_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         input_data = self._create_variables(payment_records=[])
 

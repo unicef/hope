@@ -13,7 +13,6 @@ import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
   usePduSubtypeChoicesDataQuery,
-  useProgramQuery,
   useUpdateProgramMutation,
   useUpdateProgramPartnersMutation,
   useUserPartnerChoicesQuery,
@@ -22,7 +21,11 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { decodeIdString } from '@utils/utils';
+import {
+  decodeIdString,
+  mapPartnerChoicesWithoutUnicef,
+  isPartnerVisible,
+} from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +38,9 @@ import {
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
 import { omit } from 'lodash';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -50,10 +56,16 @@ const EditProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const { data, loading: loadingProgram } = useProgramQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
+
+  const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
+    queryKey: ['businessAreaProgram', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
   });
+
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
@@ -95,7 +107,12 @@ const EditProgramPage = (): ReactElement => {
   )
     return <LoadingComponent />;
 
-  if (!data || !treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
+  if (
+    !program ||
+    !treeData ||
+    !userPartnerChoicesData ||
+    !pdusubtypeChoicesData
+  )
     return null;
 
   const {
@@ -115,12 +132,12 @@ const EditProgramPage = (): ReactElement => {
     version,
     partners,
     partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
-    registrationImports,
+    registrationImportsTotalCount,
     pduFields,
     targetPopulationsCount,
-  } = data.program;
+  } = program;
 
-  const programHasRdi = registrationImports?.totalCount > 0;
+  const programHasRdi = registrationImportsTotalCount > 0;
   const programHasTp = targetPopulationsCount > 0;
 
   const handleSubmitProgramDetails = async (values): Promise<void> => {
@@ -128,7 +145,7 @@ const EditProgramPage = (): ReactElement => {
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
       : 0;
-    const populationGoalValue = parseInt(values.populationGoal, 10) ?? 0;
+    const populationGoalValue = parseInt(values.population_goal, 10) ?? 0;
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
@@ -221,42 +238,34 @@ const EditProgramPage = (): ReactElement => {
     }
   };
 
-  const mappedPduFields = Object.entries(pduFields).map(([, field]) => {
-    const { ...rest } = field;
-    return {
-      ...rest,
-      label: JSON.parse(field.label)['English(EN)'],
-    };
-  });
-
   const initialValuesProgramDetails = {
     editMode: true,
     name,
-    programmeCode,
-    startDate,
-    endDate,
+    programmeCode: programmeCode,
+    startDate: startDate,
+    endDate: endDate,
     sector,
-    dataCollectingTypeCode: dataCollectingType?.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
+    dataCollectingTypeCode: dataCollectingType.code,
+    beneficiaryGroup: decodeIdString(beneficiaryGroup.id),
     description,
     budget,
-    administrativeAreasOfImplementation,
-    populationGoal,
-    cashPlus,
-    frequencyOfPayments,
-    pduFields: mappedPduFields,
+    administrativeAreasOfImplementation: administrativeAreasOfImplementation,
+    populationGoal: populationGoal,
+    cashPlus: cashPlus,
+    frequencyOfPayments: frequencyOfPayments,
+    pduFields: pduFields,
   };
 
   initialValuesProgramDetails.budget =
-    data.program.budget === '0.00' ? '' : data.program.budget;
+    program.budget === '0.00' ? '' : program.budget;
   initialValuesProgramDetails.populationGoal =
-    data.program.populationGoal === 0 ? '' : data.program.populationGoal;
+    program.populationGoal === 0 ? '' : program.populationGoal;
 
   const initialValuesPartners = {
     partners:
       partners.length > 0
         ? partners
-            .filter((partner) => partner.name !== 'UNICEF')
+            .filter((partner) => isPartnerVisible(partner.name))
             .map((partner) => ({
               id: partner.id,
               areas: partner.areas.map((area) => decodeIdString(area.id)),
@@ -391,7 +400,7 @@ const EditProgramPage = (): ReactElement => {
                             programHasRdi={programHasRdi}
                             programHasTp={programHasTp}
                             programId={id}
-                            program={data.program}
+                            program={program}
                             setFieldValue={setFieldValue}
                             submitForm={submitForm}
                           />
@@ -414,13 +423,10 @@ const EditProgramPage = (): ReactElement => {
           validationSchema={editPartnersValidationSchema(t)}
         >
           {({ submitForm, values, setFieldValue }) => {
-            const mappedPartnerChoices = userPartnerChoices
-              .filter((partner) => partner.name !== 'UNICEF')
-              .map((partner) => ({
-                value: partner.value,
-                label: partner.name,
-                disabled: values.partners.some((p) => p.id === partner.value),
-              }));
+            const mappedPartnerChoices = mapPartnerChoicesWithoutUnicef(
+              userPartnerChoices,
+              values.partners,
+            );
 
             return (
               <BaseSection title={t('Programme Partners')}>

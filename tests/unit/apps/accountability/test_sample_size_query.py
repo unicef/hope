@@ -36,7 +36,7 @@ class TestSampleSizeQuery(APITestCase):
         for household in cls.households:
             PaymentFactory(household=household, parent=cls.pp)
 
-        cls.rdi_id = RegistrationDataImport.objects.order_by("?").first().id
+        cls.rdi_id = str(RegistrationDataImport.objects.order_by("?").first().id)
 
         cls.sampling_data = {
             Message.SamplingChoices.FULL_LIST: {
@@ -74,11 +74,13 @@ class TestSampleSizeQuery(APITestCase):
     def test_get_communication_message_sample_size_for_target_population(
         self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         data = {
             "input": {
-                "paymentPlan": self.id_to_base64(self.pp.id, "PaymentPlanNode"),
+                "paymentPlan": str(self.pp.id),
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
@@ -107,11 +109,13 @@ class TestSampleSizeQuery(APITestCase):
     def test_get_communication_message_sample_size_for_households(
         self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         data = {
             "input": {
-                "households": [self.id_to_base64(household.id, "HouseholdNode") for household in self.households],
+                "households": [str(household.id) for household in self.households],
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },
@@ -141,11 +145,13 @@ class TestSampleSizeQuery(APITestCase):
     def test_get_communication_message_sample_size_for_rdi(
         self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(
+            self.user, permissions, self.business_area, whole_business_area_access=True
+        )
 
         data = {
             "input": {
-                "registrationDataImport": self.id_to_base64(self.rdi_id, "RegistrationDataImportNode"),
+                "registrationDataImport": self.rdi_id,
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },

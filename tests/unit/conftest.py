@@ -3,8 +3,10 @@ import os
 import re
 import sys
 from time import sleep
+from typing import Any
 
 from django.conf import settings
+from django.core.cache import cache
 
 import pytest
 from _pytest.config import Config
@@ -13,7 +15,33 @@ from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
 
+from hct_mis_api.apps.account.models import Partner, Role
+
 from .fixtures import *  # noqa: ABS101, F403, F401
+
+
+@pytest.fixture(autouse=True)
+def create_unicef_partner() -> None:
+    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+    yield Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+
+
+@pytest.fixture(scope="class", autouse=True)
+def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) -> None:
+    with django_db_blocker.unblock():
+        unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+        Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+
+
+@pytest.fixture(autouse=True)
+def create_role_with_all_permissions() -> None:
+    yield Role.objects.get_or_create(name="Role with all permissions")
+
+
+@pytest.fixture(scope="class", autouse=True)
+def create_role_with_all_permissions_session(django_db_setup: Any, django_db_blocker: Any) -> None:
+    with django_db_blocker.unblock():
+        Role.objects.get_or_create(name="Role with all permissions")
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -161,3 +189,8 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
     for doc in registry.get_documents():
         doc._index._name = pattern.sub("", doc._index._name)
+
+
+@pytest.fixture(autouse=True)
+def clear_cache_before_each_test() -> None:
+    cache.clear()

@@ -1,4 +1,9 @@
-import { Button, DialogContent, DialogTitle, Grid2 as Grid } from '@mui/material';
+import {
+  Button,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+} from '@mui/material';
 import { Field, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
@@ -15,7 +20,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { ReactElement } from 'react';
-import { useCopyCriteriaMutation } from '@generated/graphql';
+import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
@@ -37,9 +44,29 @@ export const DuplicateTargetPopulation = ({
 }: DuplicateTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [mutate, { loading }] = useCopyCriteriaMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      programSlug,
+      id,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      programSlug: string;
+      id: string;
+      requestBody: TargetPopulationCopy;
+    }) =>
+      RestService.restBusinessAreasProgramsTargetPopulationsCopyCreate({
+        businessAreaSlug,
+        programSlug,
+        id,
+        requestBody,
+      }),
+  });
+
   const initialValues = {
     name: '',
     id: targetPopulationId,
@@ -63,19 +90,20 @@ export const DuplicateTargetPopulation = ({
           try {
             const programCycleId = values.programCycleId.value;
             const res = await mutate({
-              variables: {
+              id: targetPopulationId,
+              businessAreaSlug: businessArea,
+              programSlug: programId,
+              requestBody: {
                 name: values.name,
-                paymentPlanId: targetPopulationId,
+                targetPopulationId,
                 programCycleId,
               },
             });
             setOpen(false);
             showMessage(t('Target Population Duplicated'));
-            navigate(
-              `/${baseUrl}/target-population/${res.data.copyTargetingCriteria.paymentPlan.id}`,
-            );
+            navigate(`/${baseUrl}/target-population/${res.targetPopulationId}`);
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            showMessage(e.message);
           }
         }}
       >

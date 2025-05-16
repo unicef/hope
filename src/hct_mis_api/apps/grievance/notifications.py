@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from constance import config
 
-from hct_mis_api.apps.account.models import User, UserRole
+from hct_mis_api.apps.account.models import RoleAssignment, User
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.utils.mailjet import MailjetClient
@@ -95,21 +95,21 @@ class GrievanceNotification:
             GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED: "Releaser",
             GrievanceNotification.ACTION_SENSITIVE_CREATED: "Senior Management",
         }
-        user_roles = UserRole.objects.filter(
+        user_roles = RoleAssignment.objects.filter(
             role__name=action_roles_dict[self.action],
             business_area=self.grievance_ticket.business_area,
         ).exclude(expiry_date__lt=timezone.now())
-        queryset = User.objects.filter(user_roles__in=user_roles).distinct()
+        queryset = User.objects.filter(role_assignments__in=user_roles).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
-        user_roles = UserRole.objects.filter(
+        user_roles = RoleAssignment.objects.filter(
             role__name="Approver",
             business_area=self.grievance_ticket.business_area,
         ).exclude(expiry_date__lt=timezone.now())
-        queryset = User.objects.filter(user_roles__in=user_roles).distinct()
+        queryset = User.objects.filter(role_assignments__in=user_roles).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
