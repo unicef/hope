@@ -988,6 +988,20 @@ class TestSurveyViewSet:
             category="SMS",
             payment_plan=self.payment_plan,
         )
+        SurveyFactory(
+            program=self.program_active,
+            business_area=self.afghanistan,
+            created_by=self.user,
+            title="Survey 22",
+            body="Survey 22 body",
+        )
+        SurveyFactory(
+            program=ProgramFactory(name="Other", business_area=self.afghanistan, status=Program.ACTIVE),
+            business_area=self.afghanistan,
+            created_by=self.user,
+            title="Survey from Other program",
+            body="Survey Other program body",
+        )
         self.url_list = reverse(
             "api:accountability:surveys-list",
             kwargs={
@@ -1051,7 +1065,7 @@ class TestSurveyViewSet:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert len(resp_data["results"]) == 1
+            assert len(resp_data["results"]) == 2
             srv = resp_data["results"][0]
             assert "id" in srv
             assert "unicef_id" in srv
@@ -1064,6 +1078,9 @@ class TestSurveyViewSet:
             assert "has_valid_sample_file" in srv
             assert "sample_file_path" in srv
             assert "created_at" in srv
+            # check survey #2
+            srv_2 = resp_data["results"][1]
+            assert srv_2["flow_id"] is None
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
