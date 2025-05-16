@@ -23,6 +23,7 @@ exclude =
     snapshots,
     __pypackages__,
     frontend,
+    uv-cache,
 
 ignore =
     # black formatting related

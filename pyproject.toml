@@ -17,6 +17,7 @@ exclude = '''
   | snapshots
   | __pypackages__
   | frontend
+  | uv-cache
 )/
 '''
 # TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop
@@ -55,7 +56,8 @@ exclude = [
     "venv",
     "snapshots",
     "__pypackages__",
-    "build"
+    "build",
+    "uv-cache"
 ]
 
 strict = true
