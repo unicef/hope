@@ -13,11 +13,13 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.fixtures import (
     CommunicationMessageFactory,
     FeedbackFactory,
+    SurveyFactory,
 )
+from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -952,3 +954,267 @@ class TestMessageViewSet:
                 format="json",
             )
         assert "No recipients found for the given criteria" in str(e.value)
+
+
+class TestSurveyViewSet:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.afghanistan = create_afghanistan()
+        self.partner = PartnerFactory(name="unittest")
+        self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
+        self.client = api_client(self.user)
+        self.program_active = ProgramFactory(
+            name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
+        )
+        hoh1 = IndividualFactory(household=None)
+        self.hh_1 = HouseholdFactory(program=self.program_active, head_of_household=hoh1)
+        self.payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            business_area=self.afghanistan,
+            program_cycle=self.program_active.cycles.first(),
+        )
+        self.payment = PaymentFactory(parent=self.payment_plan, program=self.program_active, household=self.hh_1)
+        self.srv = SurveyFactory(
+            program=self.program_active,
+            business_area=self.afghanistan,
+            created_by=self.user,
+            title="Survey 1",
+            body="Survey 1 body",
+            flow_id="id123",
+            sample_file=None,
+            sample_file_generated_at=None,
+            sampling_type="FULL_LIST",
+            category="SMS",
+            payment_plan=self.payment_plan,
+        )
+        self.url_list = reverse(
+            "api:accountability:surveys-list",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+        self.url_count = reverse(
+            "api:accountability:surveys-count",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+        self.url_details = reverse(
+            "api:accountability:surveys-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": str(self.srv.pk),
+            },
+        )
+        self.url_export_sample = reverse(
+            "api:accountability:surveys-export-sample",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+                "pk": str(self.srv.pk),
+            },
+        )
+        self.url_flows = reverse(
+            "api:accountability:surveys-available-flows",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+        self.url_category_choices = reverse(
+            "api:accountability:surveys-category-choices",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+                status.HTTP_200_OK,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_survey_list(self, permissions: List, expected_status: int, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(self.url_list)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert len(resp_data["results"]) == 1
+            srv = resp_data["results"][0]
+            assert "id" in srv
+            assert "unicef_id" in srv
+            assert srv["title"] == "Survey 1"
+            assert srv["body"] == "Survey 1 body"
+            assert srv["category"] == "SMS"
+            assert srv["flow_id"] == "id123"
+            assert srv["rapid_pro_url"] == "https://rapidpro.io/flow/results/id123/"
+            assert srv["created_by"] == "Test User"
+            assert "has_valid_sample_file" in srv
+            assert "sample_file_path" in srv
+            assert "created_at" in srv
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+                status.HTTP_200_OK,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_survey_get_count(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(self.url_count)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert resp_data["count"] == 1
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [
+                    Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+                    Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST,
+                ],
+                status.HTTP_200_OK,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_survey_details(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(self.url_details)
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_200_OK
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["title"] == "Survey 1"
+            assert resp_data["body"] == "Survey 1 body"
+            assert resp_data["category"] == "SMS"
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], status.HTTP_201_CREATED),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_survey(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.post(
+            self.url_list,
+            {
+                "title": "New SRV",
+                "body": "LGTM",
+                "category": "MANUAL",
+                "sampling_type": "FULL_LIST",
+                "full_list_arguments": {"excluded_admin_areas": []},
+                "random_sampling_arguments": None,
+            },
+            format="json",
+        )
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_201_CREATED:
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["title"] == "New SRV"
+            assert resp_data["body"] == "LGTM"
+
+            # create new one with PaymentPlan (TP)
+            response = self.client.post(
+                self.url_list,
+                {
+                    "title": "New SRV with TP",
+                    "body": "LGTM",
+                    "category": "MANUAL",
+                    "sampling_type": "FULL_LIST",
+                    "full_list_arguments": {"excluded_admin_areas": []},
+                    "random_sampling_arguments": None,
+                    "payment_plan": str(self.payment_plan.pk),
+                },
+                format="json",
+            )
+            assert response.status_code == status.HTTP_201_CREATED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["title"] == "New SRV with TP"
+            assert Survey.objects.get(title="New SRV with TP").payment_plan_id == self.payment_plan.pk
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            (
+                [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+                status.HTTP_202_ACCEPTED,
+            ),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_survey_export_sample(
+        self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        response = self.client.get(self.url_export_sample)
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_202_ACCEPTED:
+            assert response.status_code == status.HTTP_202_ACCEPTED
+            resp_data = response.json()
+            assert "id" in resp_data
+            assert resp_data["title"] == "Survey 1"
+
+    def test_get_category_choices(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        response = self.client.get(self.url_category_choices)
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data) == 3
+        assert resp_data[0]["name"] == "Survey with RapidPro"
+        assert resp_data[0]["value"] == "RAPID_PRO"
+        assert resp_data[1]["name"] == "Survey with SMS"
+        assert resp_data[1]["value"] == "SMS"
+        assert resp_data[2]["name"] == "Survey with manual process"
+        assert resp_data[2]["value"] == "MANUAL"
+
+    def test_get_available_flows(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS], self.afghanistan, self.program_active
+        )
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch(
+                "hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flows",
+                MagicMock(return_value=[{"uuid": 123, "name": "flow2"}, {"uuid": 234, "name": "flow2"}]),
+            ),
+        ):
+            response = self.client.get(self.url_flows)
+        assert response.status_code == status.HTTP_200_OK
+        resp_data = response.json()
+        assert len(resp_data) == 2

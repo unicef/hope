@@ -240,33 +240,37 @@ class SurveySerializer(serializers.ModelSerializer):
     body = serializers.CharField(required=False)
     category = serializers.CharField(required=True)
     sampling_type = serializers.CharField(required=True)
-    flow = serializers.CharField(required=True)
+    flow = serializers.CharField(required=False, write_only=True)
     payment_plan = serializers.SlugRelatedField(
-        slug_field="id", required=True, queryset=PaymentPlan.objects.all(), write_only=True
+        slug_field="id", required=False, queryset=PaymentPlan.objects.all(), write_only=True
     )
-
     full_list_arguments = AccountabilityFullListArgumentsSerializer(write_only=True)
-    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(write_only=True)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(write_only=True, allow_null=True)
 
     sample_file_path = serializers.SerializerMethodField()
     has_valid_sample_file = serializers.SerializerMethodField()
     rapid_pro_url = serializers.SerializerMethodField()
+    created_by = serializers.SerializerMethodField()
 
     class Meta:
         model = Survey
         fields = (
             "id",
+            "unicef_id",
             "title",
             "body",
             "category",
             "sampling_type",
             "flow",
+            "flow_id",
             "payment_plan",
             "full_list_arguments",
             "random_sampling_arguments",
             "sample_file_path",
             "has_valid_sample_file",
             "rapid_pro_url",
+            "created_at",
+            "created_by",
         )
 
     def get_sample_file_path(self, obj: Survey) -> Optional[str]:
@@ -282,6 +286,9 @@ class SurveySerializer(serializers.ModelSerializer):
         if not obj.flow_id:
             return None
         return f"{settings.RAPID_PRO_URL}/flow/results/{obj.flow_id}/"
+
+    def get_created_by(self, obj: Feedback) -> str:
+        return f"{obj.created_by.first_name} {obj.created_by.last_name}"
 
 
 class SurveyCategoryChoiceSerializer(serializers.Serializer):

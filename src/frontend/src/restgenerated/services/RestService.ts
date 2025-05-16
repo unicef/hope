@@ -587,7 +587,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -675,7 +675,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -697,7 +697,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -721,7 +721,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -749,7 +749,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -777,7 +777,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -1820,7 +1820,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -1911,7 +1911,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -1936,7 +1936,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -1963,7 +1963,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -1994,7 +1994,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -2025,7 +2025,7 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -5312,13 +5312,22 @@ export class RestService {
     public static restBusinessAreasProgramsSurveysList({
         businessAreaSlug,
         programSlug,
+        businessArea,
+        createdAtRange,
+        createdBy,
         limit,
         offset,
+        orderBy,
         ordering,
+        paymentPlan,
+        program,
         search,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        businessArea?: string,
+        createdAtRange?: string,
+        createdBy?: string,
         /**
          * Number of results to return per page.
          */
@@ -5328,9 +5337,28 @@ export class RestService {
          */
         offset?: number,
         /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `number_of_recipient` - Number of recipient
+         * * `-number_of_recipient` - Number of recipient (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-category' | '-created_at' | '-created_by' | '-number_of_recipient' | '-title' | '-unicef_id' | 'category' | 'created_at' | 'created_by' | 'number_of_recipient' | 'title' | 'unicef_id'>,
+        /**
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        paymentPlan?: string,
+        program?: string,
         /**
          * A search term.
          */
@@ -5344,9 +5372,15 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
+                'business_area': businessArea,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
                 'limit': limit,
                 'offset': offset,
+                'order_by': orderBy,
                 'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
                 'search': search,
             },
         });
@@ -5387,6 +5421,9 @@ export class RestService {
         programSlug,
     }: {
         businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Survey.
+         */
         id: string,
         programSlug: string,
     }): CancelablePromise<Survey> {
@@ -5405,17 +5442,20 @@ export class RestService {
      * @returns Survey
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsSurveysExportSampleCreate({
+    public static restBusinessAreasProgramsSurveysExportSampleRetrieve({
         businessAreaSlug,
         id,
         programSlug,
     }: {
         businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Survey.
+         */
         id: string,
         programSlug: string,
     }): CancelablePromise<Survey> {
         return __request(OpenAPI, {
-            method: 'POST',
+            method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/{id}/export-sample/',
             path: {
                 'business_area_slug': businessAreaSlug,

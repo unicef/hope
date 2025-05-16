@@ -189,7 +189,7 @@ class FeedbackViewSet(
             old_feedback,
             updated_feedback,
         )
-        return Response(FeedbackDetailSerializer(feedback).data, status=status.HTTP_200_OK)
+        return Response(FeedbackDetailSerializer(updated_feedback).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=FeedbackMessageCreateSerializer,
@@ -254,8 +254,9 @@ class MessageViewSet(
         message = MessageCrudServices.create(request.user, business_area, serializer.validated_data)
 
         log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", request.user, str(self.program.id), None, message)
+        serializer = MessageDetailSerializer(instance=message)
         headers = self.get_success_headers(serializer.data)
-        return Response(MessageDetailSerializer(message).data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class SurveyViewSet(
@@ -276,12 +277,12 @@ class SurveyViewSet(
         "export_sample": SurveySerializer,
     }
     permissions_by_action = {
-        "list": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+        "list": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
         "retrieve": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
         "create": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
         "export_sample": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
     }
-
+    queryset = Survey.objects.all()
     serializer_class = SurveySerializer
     filter_backends = (
         filters.DjangoFilterBackend,
@@ -309,7 +310,7 @@ class SurveyViewSet(
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
-        input_data["program"] = program
+        input_data["program"] = str(program.pk)
 
         survey = SurveyCrudServices.create(request.user, business_area, input_data)  # type: ignore
         transaction.on_commit(partial(send_survey_to_users.delay, survey.id))
@@ -321,15 +322,16 @@ class SurveyViewSet(
             None,
             survey,
         )
+        serializer = self.get_serializer(instance=survey)
         headers = self.get_success_headers(serializer.data)
 
-        return Response(self.get_serializer(survey).data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @extend_schema(
         request=None,
         responses={202: SurveySerializer},
     )
-    @action(detail=True, methods=["post"], url_path="export-sample")
+    @action(detail=True, methods=["get"], url_path="export-sample")
     def export_sample(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         survey = self.get_object()
         export_survey_sample_task.delay(survey.id, request.user.id)
@@ -338,11 +340,11 @@ class SurveyViewSet(
 
     @action(detail=False, methods=["get"], url_path="category-choices")
     @extend_schema(responses=SurveyCategoryChoiceSerializer(many=True))
-    def category_choices(self, request: Request) -> Response:
+    def category_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return Response(to_choice_object(Survey.CATEGORY_CHOICES))
 
     @action(detail=False, methods=["get"], url_path="available-flows")
     @extend_schema(responses=SurveyRapidProFlowSerializer(many=True))
-    def available_flows(self, request: Request) -> Response:
+    def available_flows(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
         return Response(api.get_flows())
