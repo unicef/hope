@@ -353,6 +353,8 @@ class TestGrievanceTicketGlobalList:
                     "id": str(grievance_ticket.admin2.id),
                     "name": grievance_ticket.admin2.name,
                     "p_code": grievance_ticket.admin2.p_code,
+                    "area_type": grievance_ticket.admin2.area_type.id,
+                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
                 }
                 if grievance_ticket.admin2
                 else None
