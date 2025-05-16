@@ -273,8 +273,11 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         return self.sample_file.url
 
     def has_valid_sample_file(self) -> bool:
-        return self.sample_file and self.sample_file_generated_at >= timezone.now() - timedelta(
-            days=self.SAMPLE_FILE_EXPIRATION_IN_DAYS
+        expiration_date = timezone.now() - timedelta(days=self.SAMPLE_FILE_EXPIRATION_IN_DAYS)
+        return (
+            self.sample_file is not None
+            and self.sample_file_generated_at
+            and self.sample_file_generated_at >= expiration_date
         )
 
     def store_sample_file(self, filename: str, file: File) -> None:
