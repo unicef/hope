@@ -108,7 +108,7 @@ dev = [
     "responses<1.0,>=0.22",
     "snapshottest<2.0.0,>=1.0.0a0",
     "types-freezegun<2.0.0,>=1.1.10",
-    "types-requests<3.0.0.0,>=2.28.11.2",
+    "types-requests==2.31.0.6",
     "types-python-dateutil<3.0.0.0,>=2.8.19.2",
     "types-pytz<2023.0.0.0,>=2022.4.0.0",
     "types-redis<5.0.0.0,>=4.3.21.2",
@@ -127,6 +127,7 @@ dev = [
     "flaky<4.0.0,>=3.8.1",
     "coverage<8.0.0,>=7.3.2",
     "tox>=4.25.0",
+    "tox-uv>=1.25.0",
 ]
 
 [tool.pdm]
