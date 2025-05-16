@@ -717,11 +717,11 @@ class TestGrievanceTicketDetail:
         self._assert_base_grievance_data(data, grievance_ticket)
         assert data["payment_record"] is None
 
-        ticket_details = data["ticket_details"]
-        assert ticket_details["id"] == str(ticket_details.id)
-        assert ticket_details["approve_status"] == ticket_details.approve_status
-        assert ticket_details["role_reassign_data"] == ticket_details.role_reassign_data
-        assert ticket_details["golden_records_individual"] == {
+        ticket_details_data = data["ticket_details"]
+        assert ticket_details_data["id"] == str(ticket_details.id)
+        assert ticket_details_data["approve_status"] == ticket_details.approve_status
+        assert ticket_details_data["role_reassign_data"] == ticket_details.role_reassign_data
+        assert ticket_details_data["golden_records_individual"] == {
             "id": str(golden_records_individual.id),
             "unicef_id": golden_records_individual.unicef_id,
             "full_name": golden_records_individual.full_name,
@@ -766,7 +766,7 @@ class TestGrievanceTicketDetail:
             ],
         }
 
-        assert ticket_details["sanction_list_individual"] == {
+        assert ticket_details_data["sanction_list_individual"] == {
             "id": str(sanction_list_individual.id),
             "full_name": sanction_list_individual.full_name,
             "reference_number": sanction_list_individual.reference_number,
@@ -1189,6 +1189,8 @@ class TestGrievanceTicketDetail:
                 "id": str(grievance_ticket.admin2.id),
                 "name": grievance_ticket.admin2.name,
                 "p_code": grievance_ticket.admin2.p_code,
+                "area_type": grievance_ticket.admin2.area_type.id,
+                "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
             }
             if grievance_ticket.admin2
             else None
