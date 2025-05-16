@@ -9,10 +9,10 @@ export type { AccountabilityCommunicationMessageAgeInput as AccountabilityCommun
 export type { AccountabilityFullListArguments as AccountabilityFullListArgumentsCamelCase } from './models/AccountabilityFullListArguments';
 export type { AccountabilityRandomSamplingArguments as AccountabilityRandomSamplingArgumentsCamelCase } from './models/AccountabilityRandomSamplingArguments';
 export { ActionEnum as ActionEnumCamelCase } from './models/ActionEnum';
-export { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
-export { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
-export { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
-export { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
+export type { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
+export type { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
+export type { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
+export type { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
 export type { Age as AgeCamelCase } from './models/Age';
 export type { ApplyEngineFormula as ApplyEngineFormulaCamelCase } from './models/ApplyEngineFormula';
 export type { ApprovalProcess as ApprovalProcessCamelCase } from './models/ApprovalProcess';
@@ -29,6 +29,7 @@ export { CommsDisabilityEnum as CommsDisabilityEnumCamelCase } from './models/Co
 export { CommunicationChannelEnum as CommunicationChannelEnumCamelCase } from './models/CommunicationChannelEnum';
 export { ComparisonMethod7bbEnum as ComparisonMethod7bbEnumCamelCase } from './models/ComparisonMethod7bbEnum';
 export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/ConsentSharingEnum';
+export type { ContentType as ContentTypeCamelCase } from './models/ContentType';
 export type { CountResponse as CountResponseCamelCase } from './models/CountResponse';
 export type { Country as CountryCamelCase } from './models/Country';
 export { CountryEnum as CountryEnumCamelCase } from './models/CountryEnum';
@@ -77,6 +78,7 @@ export type { IndividualChoices as IndividualChoicesCamelCase } from './models/I
 export type { IndividualDetail as IndividualDetailCamelCase } from './models/IndividualDetail';
 export type { IndividualList as IndividualListCamelCase } from './models/IndividualList';
 export { IssueTypeEnum as IssueTypeEnumCamelCase } from './models/IssueTypeEnum';
+export type { LogEntry as LogEntryCamelCase } from './models/LogEntry';
 export { MaritalStatusEnum as MaritalStatusEnumCamelCase } from './models/MaritalStatusEnum';
 export { MemoryDisabilityEnum as MemoryDisabilityEnumCamelCase } from './models/MemoryDisabilityEnum';
 export type { MessageCreate as MessageCreateCamelCase } from './models/MessageCreate';
@@ -96,6 +98,7 @@ export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './mo
 export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
+export type { PaginatedLogEntryList as PaginatedLogEntryListCamelCase } from './models/PaginatedLogEntryList';
 export type { PaginatedMessageListList as PaginatedMessageListListCamelCase } from './models/PaginatedMessageListList';
 export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } from './models/PaginatedOrganizationList';
 export type { PaginatedPaymentListList as PaginatedPaymentListListCamelCase } from './models/PaginatedPaymentListList';
