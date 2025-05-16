@@ -3,22 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF17` - Bryanburgh
- * * `UA25` - East Dustin
- * * `UA65` - Lewishaven
- * * `HR31` - New Casey
- * * `AF85` - New Juan
- * * `UA47` - North Jeffrey
- * * `HR72` - Port Christopherton
- * * `AF96` - South Jeremiahview
+ * * `AF99` - East Margaret
+ * * `HR55` - East Matthew
+ * * `AF10` - Garnerberg
+ * * `HR29` - Lake Saraberg
+ * * `AF85` - Lopezville
+ * * `UA83` - Melissaville
+ * * `UA84` - New Robin
+ * * `UA60` - North Barbara
+ * * `HR32` - Traciberg
  */
 export enum Admin1Enum {
-    AF17 = 'AF17',
-    UA25 = 'UA25',
-    UA65 = 'UA65',
-    HR31 = 'HR31',
+    AF99 = 'AF99',
+    HR55 = 'HR55',
+    AF10 = 'AF10',
+    HR29 = 'HR29',
     AF85 = 'AF85',
-    UA47 = 'UA47',
-    HR72 = 'HR72',
-    AF96 = 'AF96',
+    UA83 = 'UA83',
+    UA84 = 'UA84',
+    UA60 = 'UA60',
+    HR32 = 'HR32',
 }

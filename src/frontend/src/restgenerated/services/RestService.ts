@@ -8,6 +8,11 @@ import type { BusinessArea } from '../models/BusinessArea';
 import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
 import type { DelegatePeople } from '../models/DelegatePeople';
+import type { FeedbackCreate } from '../models/FeedbackCreate';
+import type { FeedbackDetail } from '../models/FeedbackDetail';
+import type { FeedbackMessage } from '../models/FeedbackMessage';
+import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
+import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FspChoices } from '../models/FspChoices';
 import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
@@ -15,15 +20,19 @@ import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { HouseholdMember } from '../models/HouseholdMember';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
+import type { MessageCreate } from '../models/MessageCreate';
+import type { MessageDetail } from '../models/MessageDetail';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
 import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
+import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
+import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
 import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListList';
 import type { PaginatedPaymentPlanList } from '../models/PaginatedPaymentPlanList';
@@ -39,9 +48,11 @@ import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
 import type { PaginatedRuleList } from '../models/PaginatedRuleList';
+import type { PaginatedSurveyList } from '../models/PaginatedSurveyList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
 import type { PaginatedUserList } from '../models/PaginatedUserList';
+import type { PatchedFeedbackUpdate } from '../models/PatchedFeedbackUpdate';
 import type { PatchedPaymentPlanCreateUpdate } from '../models/PatchedPaymentPlanCreateUpdate';
 import type { PatchedPaymentVerificationPlanCreate } from '../models/PatchedPaymentVerificationPlanCreate';
 import type { PatchedPaymentVerificationUpdate } from '../models/PatchedPaymentVerificationUpdate';
@@ -80,6 +91,7 @@ import type { RegistrationDataImportCreate } from '../models/RegistrationDataImp
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
+import type { Survey } from '../models/Survey';
 import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
@@ -571,6 +583,214 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/available-fsps-for-delivery-mechanisms/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns PaginatedFeedbackListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasFeedbacksList({
+        businessAreaSlug,
+        businessArea,
+        createdAtRange,
+        createdBy,
+        feedbackId,
+        isActiveProgram,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        search,
+    }: {
+        businessAreaSlug: string,
+        businessArea?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        feedbackId?: string,
+        isActiveProgram?: string,
+        /**
+         * * `POSITIVE_FEEDBACK` - Positive feedback
+         * * `NEGATIVE_FEEDBACK` - Negative feedback
+         */
+        issueType?: 'NEGATIVE_FEEDBACK' | 'POSITIVE_FEEDBACK',
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `household_lookup` - Household lookup
+         * * `-household_lookup` - Household lookup (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `linked_grievance` - Linked grievance
+         * * `-linked_grievance` - Linked grievance (descending)
+         */
+        orderBy?: Array<'-created_at' | '-created_by' | '-household_lookup' | '-issue_type' | '-linked_grievance' | '-unicef_id' | 'created_at' | 'created_by' | 'household_lookup' | 'issue_type' | 'linked_grievance' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedFeedbackListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/feedbacks/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'feedback_id': feedbackId,
+                'is_active_program': isActiveProgram,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'search': search,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns FeedbackDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasFeedbacksCreate({
+        businessAreaSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        requestBody: FeedbackCreate,
+    }): CancelablePromise<FeedbackDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/feedbacks/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns FeedbackDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasFeedbacksRetrieve({
+        businessAreaSlug,
+        id,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Feedback.
+         */
+        id: string,
+    }): CancelablePromise<FeedbackDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/feedbacks/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns FeedbackUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasFeedbacksPartialUpdate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Feedback.
+         */
+        id: string,
+        requestBody?: PatchedFeedbackUpdate,
+    }): CancelablePromise<FeedbackUpdate> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/feedbacks/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns FeedbackMessage
+     * @throws ApiError
+     */
+    public static restBusinessAreasFeedbacksMessageCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Feedback.
+         */
+        id: string,
+        requestBody: FeedbackMessageCreate,
+    }): CancelablePromise<FeedbackMessage> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/feedbacks/{id}/message/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasFeedbacksCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/feedbacks/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
             },
@@ -2053,6 +2273,232 @@ export class RestService {
         });
     }
     /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns PaginatedFeedbackListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFeedbacksList({
+        businessAreaSlug,
+        programSlug,
+        businessArea,
+        createdAtRange,
+        createdBy,
+        feedbackId,
+        isActiveProgram,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        search,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        businessArea?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        feedbackId?: string,
+        isActiveProgram?: string,
+        /**
+         * * `POSITIVE_FEEDBACK` - Positive feedback
+         * * `NEGATIVE_FEEDBACK` - Negative feedback
+         */
+        issueType?: 'NEGATIVE_FEEDBACK' | 'POSITIVE_FEEDBACK',
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `household_lookup` - Household lookup
+         * * `-household_lookup` - Household lookup (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `linked_grievance` - Linked grievance
+         * * `-linked_grievance` - Linked grievance (descending)
+         */
+        orderBy?: Array<'-created_at' | '-created_by' | '-household_lookup' | '-issue_type' | '-linked_grievance' | '-unicef_id' | 'created_at' | 'created_by' | 'household_lookup' | 'issue_type' | 'linked_grievance' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedFeedbackListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'feedback_id': feedbackId,
+                'is_active_program': isActiveProgram,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'search': search,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns FeedbackDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFeedbacksCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: FeedbackCreate,
+    }): CancelablePromise<FeedbackDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns FeedbackDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFeedbacksRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Feedback.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<FeedbackDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns FeedbackUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFeedbacksPartialUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Feedback.
+         */
+        id: string,
+        programSlug: string,
+        requestBody?: PatchedFeedbackUpdate,
+    }): CancelablePromise<FeedbackUpdate> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns FeedbackMessage
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFeedbacksMessageCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Feedback.
+         */
+        id: string,
+        programSlug: string,
+        requestBody: FeedbackMessageCreate,
+    }): CancelablePromise<FeedbackMessage> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/{id}/message/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFeedbacksCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/feedbacks/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
      * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
@@ -3121,6 +3567,179 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedMessageListList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesList({
+        businessAreaSlug,
+        programSlug,
+        body,
+        createdAtRange,
+        createdBy,
+        limit,
+        numberOfRecipients,
+        numberOfRecipientsGte,
+        numberOfRecipientsLte,
+        offset,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        samplingType,
+        search,
+        title,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        body?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        numberOfRecipients?: number,
+        numberOfRecipientsGte?: number,
+        numberOfRecipientsLte?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `number_of_recipients` - Number of recipients
+         * * `-number_of_recipients` - Number of recipients (descending)
+         * * `sampling_type` - Sampling type
+         * * `-sampling_type` - Sampling type (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-created_at' | '-created_by' | '-id' | '-number_of_recipients' | '-sampling_type' | '-title' | 'created_at' | 'created_by' | 'id' | 'number_of_recipients' | 'sampling_type' | 'title'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * * `FULL_LIST` - Full list
+         * * `RANDOM` - Random sampling
+         */
+        samplingType?: 'FULL_LIST' | 'RANDOM',
+        /**
+         * A search term.
+         */
+        search?: string,
+        title?: string,
+    }): CancelablePromise<PaginatedMessageListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'body': body,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'limit': limit,
+                'number_of_recipients': numberOfRecipients,
+                'number_of_recipients__gte': numberOfRecipientsGte,
+                'number_of_recipients__lte': numberOfRecipientsLte,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'sampling_type': samplingType,
+                'search': search,
+                'title': title,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns MessageDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: MessageCreate,
+    }): CancelablePromise<MessageDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns MessageDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Message.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<MessageDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
@@ -5555,6 +6174,229 @@ export class RestService {
     }
     /**
      * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns PaginatedSurveyList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysList({
+        businessAreaSlug,
+        programSlug,
+        businessArea,
+        createdAtRange,
+        createdBy,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        search,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        businessArea?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `number_of_recipient` - Number of recipient
+         * * `-number_of_recipient` - Number of recipient (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-category' | '-created_at' | '-created_by' | '-number_of_recipient' | '-title' | '-unicef_id' | 'category' | 'created_at' | 'created_by' | 'number_of_recipient' | 'title' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedSurveyList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'search': search,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Survey
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: Survey,
+    }): CancelablePromise<Survey> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Survey
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Survey.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<Survey> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Survey
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysExportSampleRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Survey.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<Survey> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/{id}/export-sample/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Survey
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysAvailableFlowsRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<Survey> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/available-flows/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns Survey
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysCategoryChoicesRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<Survey> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/category-choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedTargetPopulationListList
      * @throws ApiError
      */
@@ -6495,6 +7337,18 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/currencies/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesFeedbackIssueTypeList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/feedback-issue-type/',
         });
     }
     /**
