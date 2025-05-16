@@ -312,6 +312,8 @@ class ProgramSmallSerializer(serializers.ModelSerializer):
         model = Program
         fields = (
             "id",
+            "programme_code",
+            "slug",
             "name",
             "status",
         )
