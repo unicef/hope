@@ -21,7 +21,6 @@ export function RdiAutocompleteRestFilter({
   appliedFilter,
   setAppliedFilter,
   setFilter,
-  programSlug,
   onChange,
 }: {
   disabled?: boolean;
@@ -32,7 +31,6 @@ export function RdiAutocompleteRestFilter({
   appliedFilter?: any;
   setAppliedFilter?: (filter: any) => void;
   setFilter?: (filter: any) => void;
-  programSlug?: string;
   onChange?: (selectedItem: string | null) => void;
 }): ReactElement {
   const { t } = useTranslation();
@@ -43,13 +41,10 @@ export function RdiAutocompleteRestFilter({
   const debouncedInputText = useDebounce(inputValue, 800);
   const { businessArea, programId } = useBaseUrl();
 
-  // Use provided programSlug or fall back to programId from the route
-  const effectiveProgramSlug = programSlug || programId;
-
   const [queryVariables, setQueryVariables] = useState({
     limit: 20,
     businessAreaSlug: businessArea,
-    programSlug: effectiveProgramSlug || '',
+    programSlug: programId || '',
     search: debouncedInputText || undefined,
     ordering: 'name',
   });
@@ -63,13 +58,13 @@ export function RdiAutocompleteRestFilter({
       'businessAreasProgramsRegistrationDataImportsList',
       queryVariables,
       businessArea,
-      effectiveProgramSlug,
+      programId,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsList(
         queryVariables,
       ),
-    enabled: !!effectiveProgramSlug && !!businessArea,
+    enabled: !!programId && !!businessArea,
   });
 
   useEffect(() => {
@@ -79,19 +74,18 @@ export function RdiAutocompleteRestFilter({
     }));
   }, [debouncedInputText]);
 
-  // Update program slug in queryVariables when it changes
   useEffect(() => {
     setQueryVariables((prev) => ({
       ...prev,
-      programSlug: effectiveProgramSlug || '',
+      programSlug: programId || '',
     }));
-  }, [effectiveProgramSlug]);
+  }, [programId]);
 
   const loadData = useCallback(() => {
-    if (businessArea && effectiveProgramSlug) {
+    if (businessArea && programId) {
       refetch();
     }
-  }, [businessArea, effectiveProgramSlug, refetch]);
+  }, [businessArea, programId, refetch]);
 
   // Create handleFilterChange only if filter-related props are provided
   const handleFilterChange =
