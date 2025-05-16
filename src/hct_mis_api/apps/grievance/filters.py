@@ -105,7 +105,7 @@ class GrievanceTicketFilter(FilterSet):
         lookup_expr="payment_verification__payment_verification_plan__payment_plan_id",
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
-    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
+
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
@@ -156,7 +156,6 @@ class GrievanceTicketFilter(FilterSet):
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
-        # TODO: test needed
         q_obj = Q()
         for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
             for field, lookups in ticket_fields.items():
@@ -229,55 +228,6 @@ class GrievanceTicketFilter(FilterSet):
 
             return qs.filter(q_obj)
         return qs
-
-    def permissions_filter(self, qs: QuerySet, name: str, values: List[str]) -> QuerySet:
-        can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in values
-        can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in values
-        can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in values
-        can_view_ex_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in values
-        can_view_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in values
-        can_view_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in values
-
-        # can view all
-        if can_view_ex_sensitive_all and can_view_sensitive_all:
-            return qs
-
-        filters_1 = {}
-        filters_1_exclude = {}
-        filters_2 = {}
-        filters_2_exclude = {}
-        sensitive_category_filter = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
-        created_by_filter = {"created_by": self.request.user}
-        assigned_to_filter = {"assigned_to": self.request.user}
-
-        # can view one group full and potentially some of other group
-        if can_view_ex_sensitive_all or can_view_sensitive_all:
-            if can_view_sensitive_creator or can_view_ex_sensitive_creator:
-                filters_1.update(created_by_filter)
-            if can_view_sensitive_owner or can_view_ex_sensitive_owner:
-                filters_2.update(assigned_to_filter)
-
-            if can_view_ex_sensitive_all:
-                return qs.filter(~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2))
-            else:
-                return qs.filter(Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1))
-
-        else:
-            # no full lists so only creator and/or owner lists
-            if can_view_ex_sensitive_creator:
-                filters_1.update(created_by_filter)
-                if not can_view_sensitive_creator:
-                    filters_1_exclude.update(sensitive_category_filter)
-            if can_view_ex_sensitive_owner:
-                filters_2.update(assigned_to_filter)
-                if not can_view_sensitive_owner:
-                    filters_2_exclude.update(sensitive_category_filter)
-            if filters_1 or filters_2:
-                return qs.filter(
-                    Q(Q(**filters_1), ~Q(**filters_1_exclude)) | Q(Q(**filters_2), ~Q(**filters_2_exclude))
-                )
-            else:
-                return GrievanceTicket.objects.none()
 
     def filter_grievance_type(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
         choices = dict(GrievanceTicket.CATEGORY_CHOICES)
