@@ -5,14 +5,14 @@ import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type OptionType = any;
 
-export function BaseAutocomplete({
+export function BaseAutocompleteFilterRest({
   value,
   disabled,
   label,
   dataCy,
   loadData,
   loading,
-  allEdges,
+  options,
   handleChange,
   handleClose,
   handleOptionSelected,
@@ -31,7 +31,7 @@ export function BaseAutocomplete({
   dataCy?: string;
   loadData;
   loading: boolean;
-  allEdges;
+  options;
   handleChange: (event, newValue) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleClose: (_: any, reason: string) => void;
@@ -76,7 +76,7 @@ export function BaseAutocomplete({
       value={value}
       data-cy={dataCy}
       open={open}
-      options={allEdges}
+      options={options}
       onChange={handleChange}
       onOpen={handleOpen}
       onClose={handleClose}
