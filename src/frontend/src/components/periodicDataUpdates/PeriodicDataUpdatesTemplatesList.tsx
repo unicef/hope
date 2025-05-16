@@ -200,9 +200,10 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
               <ButtonTooltip
                 variant="contained"
                 color="primary"
-                onClick={() => handleDownloadClick(row.id)}
+                // onClick={() => handleDownloadClick(row.id)}
                 startIcon={<GetAppIcon />}
                 data-cy={`download-btn-${row.id}`}
+                href={`/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${row.id}/download/`}
                 disabled={
                   row?.number_of_records === 0 || !canExportOrDownloadTemplate
                 }
