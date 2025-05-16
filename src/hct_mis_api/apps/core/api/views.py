@@ -17,6 +17,7 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.models import RoleAssignment
+from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.api.caches import BusinessAreaKeyConstructor
 from hct_mis_api.apps.core.api.filters import BusinessAreaFilter
 from hct_mis_api.apps.core.api.mixins import BaseViewSet, CountActionMixin
@@ -93,4 +94,10 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="payment-record-delivery-type")
     def payment_record_delivery_type(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(DeliveryMechanism.get_choices()), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="feedback-issue-type")
+    def feedback_issue_type(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(Feedback.ISSUE_TYPE_CHOICES), many=True).data
         return Response(resp)

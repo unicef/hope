@@ -29,6 +29,7 @@ urlpatterns = [
     re_path("^$", SpectacularAPIView.as_view(), name="schema"),
     re_path("^swagger/$", SpectacularSwaggerView.as_view(url_name="api:schema"), name="swagger-ui"),
     re_path("^redoc/$", SpectacularRedocView.as_view(url_name="api:schema"), name="redoc"),
+    path("", include("hct_mis_api.apps.accountability.api.urls", namespace="accountability")),
     path("", include("hct_mis_api.apps.core.api.urls", namespace="core")),
     path("", include("hct_mis_api.apps.payment.api.urls", namespace="payments")),
     path("", include("hct_mis_api.apps.program.api.urls", namespace="programs")),
