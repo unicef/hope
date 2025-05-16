@@ -88,7 +88,7 @@ class CommunicationMessageFactory(DjangoModelFactory):
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     sampling_type = factory.Faker("random_element", elements=Message.SamplingChoices.choices)
     full_list_arguments = factory.LazyAttribute(
-        lambda o: {"excludedAdminAreas": []} if o.sampling_type == Message.SamplingChoices.FULL_LIST else None
+        lambda o: {"excluded_admin_areas": []} if o.sampling_type == Message.SamplingChoices.FULL_LIST else None
     )
     random_sampling_arguments = factory.LazyAttribute(
         lambda o: (
