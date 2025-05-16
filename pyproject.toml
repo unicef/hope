@@ -45,7 +45,7 @@ known_first_party = [
 known_django = "django"
 sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 include_trailing_comma = true
-skip = ["migrations", "snapshots", "venv", ".venv", "__pypackages__", "frontend"]
+skip = ["migrations", "snapshots", "venv", ".venv", "__pypackages__", "frontend",".tox"]
 
 [tool.mypy]
 python_version = 3.12

@@ -111,6 +111,12 @@ jobs:
             ./tox
           key: ${{ runner.os }}-venv
 
+      - name: Run Lint
+        run: uv run tox -e lint
+
+      - name: Run Mypy
+        run: uv run tox -e mypy
+
       - name: Run Test suite
         run: uv run tox -e unit
 
