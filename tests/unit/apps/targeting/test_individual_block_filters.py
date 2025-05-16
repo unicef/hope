@@ -395,7 +395,7 @@ class TestIndividualBlockFilter(TestCase):
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="mobile__phone_number",
-            arguments=["Yes"],
+            arguments=[True],
         )
         collectors_filters_block = TargetingCollectorRuleFilterBlockBase(collector_block_filters=[collector_filter])
         tcr = TargetingCriteriaRuleQueryingBase(

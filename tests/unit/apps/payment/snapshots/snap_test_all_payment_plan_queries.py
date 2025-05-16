@@ -674,17 +674,18 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 3'] = {
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments 1'] = {
+snapshots['TestPaymentPlanQueries::test_payment_plan_funds_commitments 1'] = {
     'data': {
         'paymentPlan': {
             'availableFundsCommitments': [
             ],
+            'fundsCommitments': None,
             'status': 'IN_REVIEW'
         }
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments 2'] = {
+snapshots['TestPaymentPlanQueries::test_payment_plan_funds_commitments 2'] = {
     'data': {
         'paymentPlan': {
             'availableFundsCommitments': [
@@ -717,14 +718,30 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments
                         }
                     ],
                     'fundsCommitmentNumber': '345'
+                },
+                {
+                    'fundsCommitmentItems': [
+                        {
+                            'fundsCommitmentItem': '001',
+                            'paymentPlan': None,
+                            'recSerialNumber': 5
+                        },
+                        {
+                            'fundsCommitmentItem': '002',
+                            'paymentPlan': None,
+                            'recSerialNumber': 6
+                        }
+                    ],
+                    'fundsCommitmentNumber': '678'
                 }
             ],
+            'fundsCommitments': None,
             'status': 'IN_REVIEW'
         }
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments 3'] = {
+snapshots['TestPaymentPlanQueries::test_payment_plan_funds_commitments 3'] = {
     'data': {
         'paymentPlan': {
             'availableFundsCommitments': [
@@ -759,14 +776,33 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments
                         }
                     ],
                     'fundsCommitmentNumber': '345'
+                },
+                {
+                    'fundsCommitmentItems': [
+                        {
+                            'fundsCommitmentItem': '001',
+                            'paymentPlan': None,
+                            'recSerialNumber': 5
+                        },
+                        {
+                            'fundsCommitmentItem': '002',
+                            'paymentPlan': None,
+                            'recSerialNumber': 6
+                        }
+                    ],
+                    'fundsCommitmentNumber': '678'
                 }
             ],
+            'fundsCommitments': {
+                'fundsCommitmentNumber': '123',
+                'insufficientAmount': True
+            },
             'status': 'IN_REVIEW'
         }
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments 4'] = {
+snapshots['TestPaymentPlanQueries::test_payment_plan_funds_commitments 4'] = {
     'data': {
         'paymentPlan': {
             'availableFundsCommitments': [
@@ -803,53 +839,79 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments
                         }
                     ],
                     'fundsCommitmentNumber': '345'
+                },
+                {
+                    'fundsCommitmentItems': [
+                        {
+                            'fundsCommitmentItem': '001',
+                            'paymentPlan': None,
+                            'recSerialNumber': 5
+                        },
+                        {
+                            'fundsCommitmentItem': '002',
+                            'paymentPlan': None,
+                            'recSerialNumber': 6
+                        }
+                    ],
+                    'fundsCommitmentNumber': '678'
                 }
             ],
+            'fundsCommitments': {
+                'fundsCommitmentNumber': '123',
+                'insufficientAmount': False
+            },
             'status': 'IN_REVIEW'
         }
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments 5'] = {
+snapshots['TestPaymentPlanQueries::test_payment_plan_funds_commitments 5'] = {
     'data': {
         'paymentPlan': {
             'availableFundsCommitments': [
-                {
-                    'fundsCommitmentItems': [
-                        {
-                            'fundsCommitmentItem': '001',
-                            'paymentPlan': {
-                                'name': 'FC TEST'
-                            },
-                            'recSerialNumber': 1
-                        },
-                        {
-                            'fundsCommitmentItem': '002',
-                            'paymentPlan': {
-                                'name': 'FC TEST'
-                            },
-                            'recSerialNumber': 2
-                        }
-                    ],
-                    'fundsCommitmentNumber': '123'
-                },
                 {
                     'fundsCommitmentItems': [
                         {
                             'fundsCommitmentItem': '002',
                             'paymentPlan': None,
                             'recSerialNumber': 4
+                        },
+                        {
+                            'fundsCommitmentItem': '001',
+                            'paymentPlan': {
+                                'name': 'FC TEST2'
+                            },
+                            'recSerialNumber': 3
                         }
                     ],
                     'fundsCommitmentNumber': '345'
+                },
+                {
+                    'fundsCommitmentItems': [
+                        {
+                            'fundsCommitmentItem': '001',
+                            'paymentPlan': None,
+                            'recSerialNumber': 5
+                        },
+                        {
+                            'fundsCommitmentItem': '002',
+                            'paymentPlan': None,
+                            'recSerialNumber': 6
+                        }
+                    ],
+                    'fundsCommitmentNumber': '678'
                 }
             ],
+            'fundsCommitments': {
+                'fundsCommitmentNumber': '345',
+                'insufficientAmount': True
+            },
             'status': 'IN_REVIEW'
         }
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments 6'] = {
+snapshots['TestPaymentPlanQueries::test_payment_plan_funds_commitments 6'] = {
     'data': {
         'paymentPlan': {
             'availableFundsCommitments': [
@@ -858,21 +920,104 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_available_funds_commitments
                         {
                             'fundsCommitmentItem': '001',
                             'paymentPlan': {
-                                'name': 'FC TEST'
+                                'name': 'FC TEST2'
                             },
-                            'recSerialNumber': 1
+                            'recSerialNumber': 3
                         },
                         {
                             'fundsCommitmentItem': '002',
                             'paymentPlan': {
-                                'name': 'FC TEST'
+                                'name': 'FC TEST2'
                             },
-                            'recSerialNumber': 2
+                            'recSerialNumber': 4
                         }
                     ],
-                    'fundsCommitmentNumber': '123'
+                    'fundsCommitmentNumber': '345'
+                },
+                {
+                    'fundsCommitmentItems': [
+                        {
+                            'fundsCommitmentItem': '001',
+                            'paymentPlan': None,
+                            'recSerialNumber': 5
+                        },
+                        {
+                            'fundsCommitmentItem': '002',
+                            'paymentPlan': None,
+                            'recSerialNumber': 6
+                        }
+                    ],
+                    'fundsCommitmentNumber': '678'
                 }
             ],
+            'fundsCommitments': {
+                'fundsCommitmentNumber': '345',
+                'insufficientAmount': False
+            },
+            'status': 'IN_REVIEW'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_funds_commitments 7'] = {
+    'data': {
+        'paymentPlan': {
+            'availableFundsCommitments': [
+                {
+                    'fundsCommitmentItems': [
+                        {
+                            'fundsCommitmentItem': '002',
+                            'paymentPlan': None,
+                            'recSerialNumber': 6
+                        },
+                        {
+                            'fundsCommitmentItem': '001',
+                            'paymentPlan': {
+                                'name': 'FC TEST3'
+                            },
+                            'recSerialNumber': 5
+                        }
+                    ],
+                    'fundsCommitmentNumber': '678'
+                }
+            ],
+            'fundsCommitments': {
+                'fundsCommitmentNumber': '678',
+                'insufficientAmount': True
+            },
+            'status': 'IN_REVIEW'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_funds_commitments 8'] = {
+    'data': {
+        'paymentPlan': {
+            'availableFundsCommitments': [
+                {
+                    'fundsCommitmentItems': [
+                        {
+                            'fundsCommitmentItem': '001',
+                            'paymentPlan': {
+                                'name': 'FC TEST3'
+                            },
+                            'recSerialNumber': 5
+                        },
+                        {
+                            'fundsCommitmentItem': '002',
+                            'paymentPlan': {
+                                'name': 'FC TEST3'
+                            },
+                            'recSerialNumber': 6
+                        }
+                    ],
+                    'fundsCommitmentNumber': '678'
+                }
+            ],
+            'fundsCommitments': {
+                'fundsCommitmentNumber': '678',
+                'insufficientAmount': False
+            },
             'status': 'IN_REVIEW'
         }
     }

@@ -30,7 +30,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      valkey:
+      redis:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
@@ -64,7 +64,7 @@ services:
         condition: service_started
       db:
         condition: service_healthy
-      valkey:
+      redis:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
@@ -89,7 +89,7 @@ services:
         condition: service_started
       db:
         condition: service_healthy
-      valkey:
+      redis:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
@@ -114,4 +114,4 @@ services:
       - PYTHONUNBUFFERED=1
     depends_on:
       - celery-worker
-      - valkey
+      - redis
