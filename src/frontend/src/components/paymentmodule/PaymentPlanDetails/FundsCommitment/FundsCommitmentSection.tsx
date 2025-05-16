@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import {
+  Autocomplete,
+  TextField,
   Box,
   Typography,
   Select,
@@ -19,6 +21,7 @@ import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithB
 import { Title } from '@components/core/Title';
 import { t } from 'i18next';
 import {
+  FundsCommitmentNode,
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
@@ -30,7 +33,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { Close } from '@mui/icons-material';
 import { LabelizedField } from '@components/core/LabelizedField';
-import { UniversalMoment } from '@components/core/UniversalMoment';
+import { WarningTooltip } from '@core/WarningTooltip';
 
 const EndInputAdornment = styled(InputAdornment)`
   margin-right: 10px;
@@ -47,8 +50,7 @@ interface FundsCommitmentSectionProps {
 const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   paymentPlan,
 }) => {
-  const initialFundsCommitment =
-    paymentPlan?.fundsCommitments?.fundsCommitmentNumber || '';
+  const initialFundsCommitment = paymentPlan?.fundsCommitments as FundsCommitmentNode | null;
   const initialFundsCommitmentItems =
     paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
       (el) => el.recSerialNumber,
@@ -58,7 +60,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     useAssignFundsCommitmentsPaymentPlanMutation();
 
   const [selectedFundsCommitment, setSelectedFundsCommitment] =
-    useState<string>(initialFundsCommitment);
+    useState<FundsCommitmentNode | null>(initialFundsCommitment ?? null);
   const [selectedItems, setSelectedItems] = useState<number[]>(
     initialFundsCommitmentItems,
   );
@@ -71,8 +73,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     permissions,
   );
 
-  const handleFundsCommitmentChange = (event: SelectChangeEvent<string>) => {
-    setSelectedFundsCommitment(event.target.value);
+  const handleFundsCommitmentChange = (newValue: FundsCommitmentNode | null) => {
+    setSelectedFundsCommitment(newValue);
     setSelectedItems([]);
   };
 
@@ -80,7 +82,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     paymentPlan?.availableFundsCommitments || [];
   const selectedCommitment = availableFundsCommitments.find(
     (commitment) =>
-      commitment.fundsCommitmentNumber === String(selectedFundsCommitment),
+      commitment.fundsCommitmentNumber === selectedFundsCommitment?.fundsCommitmentNumber,
   );
 
   const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
@@ -151,25 +153,23 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
           <>
             <Box mt={2}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('Funds Commitment')}</InputLabel>
-                <Select
-                  size="small"
+                <Autocomplete
                   value={selectedFundsCommitment}
-                  onChange={handleFundsCommitmentChange}
-                  label={t('Funds Commitment')}
-                >
-                  <MenuItem value="">
-                    <em>{t('None')}</em>
-                  </MenuItem>
-                  {availableFundsCommitments.map((commitment) => (
-                    <MenuItem
-                      key={commitment.fundsCommitmentNumber}
-                      value={commitment.fundsCommitmentNumber}
-                    >
-                      {commitment.fundsCommitmentNumber}
+                  onChange={(event, newValue) => handleFundsCommitmentChange(newValue as FundsCommitmentNode | null)}
+                  options={availableFundsCommitments}
+                  getOptionLabel={(option) => option.fundsCommitmentNumber || ''}
+                  renderInput={(params) => (
+                    <TextField {...params} label={t('Funds Commitment')} /> // The label is handled here
+                  )}
+                  renderOption={(props, option) => (
+                    <MenuItem {...props} value={option.fundsCommitmentNumber}>
+                      {option.fundsCommitmentNumber}
                     </MenuItem>
-                  ))}
-                </Select>
+                  )}
+                  isOptionEqualToValue={(option, value) => option.fundsCommitmentNumber === value?.fundsCommitmentNumber}
+                  noOptionsText={t('No options')}
+                  clearOnEscape
+                />
               </FormControl>
             </Box>
             {selectedCommitment && (
@@ -261,54 +261,22 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
         ) : (
           <>
             <Box mt={2}>
+              {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
+                  <Typography variant="h6" fontWeight="bold" mb={2}>
+                    {t('Funds Commitment Number')}: {selectedCommitment.fundsCommitmentNumber} {paymentPlan.fundsCommitments.insufficientAmount && <WarningTooltip
+                      message={t(
+                        'Insufficient Commitment Amount',
+                      )}
+                    />}
+                  </Typography>
+              )}
               {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
                 (item, index) => (
                   <Box key={index} mb={4}>
                     <Typography variant="subtitle1" fontWeight="bold" mb={2}>
-                      {t('Funds Commitment Item')} #{item.fundsCommitmentItem}
+                      {t('Item')} #{item.fundsCommitmentItem}
                     </Typography>
                     <Grid container spacing={3}>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Rec Serial Number')}
-                          value={item.recSerialNumber}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Vendor ID')}
-                          value={item.vendorId}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Business Area')}
-                          value={item.businessArea}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField label={t('Posting Date')}>
-                          <UniversalMoment>{item.postingDate}</UniversalMoment>
-                        </LabelizedField>
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Vision Approval')}
-                          value={item.visionApproval}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Document Reference')}
-                          value={item.documentReference}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('FC Status')}
-                          value={item.fcStatus}
-                        />
-                      </Grid>
                       <Grid size={3}>
                         <LabelizedField
                           label={t('WBS Element')}
@@ -323,26 +291,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                       </Grid>
                       <Grid size={3}>
                         <LabelizedField
-                          label={t('Document Type')}
-                          value={item.documentType}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Document Text')}
-                          value={item.documentText}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
                           label={t('Currency Code')}
                           value={item.currencyCode}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('GL Account')}
-                          value={item.glAccount}
                         />
                       </Grid>
                       <Grid size={3}>
@@ -372,56 +322,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                       <Grid size={3}>
                         <LabelizedField
                           label={t('Sponsor')}
-                          value={item.sponsor}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Sponsor Name')}
-                          value={item.sponsorName}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField label={t('Fund')} value={item.fund} />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Funds Center')}
-                          value={item.fundsCenter}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Percentage')}
-                          value={item.percentage}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField label={t('Create Date')}>
-                          <UniversalMoment>{item.createDate}</UniversalMoment>
-                        </LabelizedField>
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Created By')}
-                          value={item.createdBy}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField label={t('Update Date')}>
-                          <UniversalMoment>{item.updateDate}</UniversalMoment>
-                        </LabelizedField>
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Updated By')}
-                          value={item.updatedBy}
-                        />
-                      </Grid>
-                      <Grid size={3}>
-                        <LabelizedField
-                          label={t('Office ID')}
-                          value={item.office?.id}
+                          value={`${item.sponsor ?? '-'} ${item.sponsorName ?? '-'}`}
                         />
                       </Grid>
                     </Grid>

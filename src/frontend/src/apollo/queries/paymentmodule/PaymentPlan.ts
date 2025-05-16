@@ -36,6 +36,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       availableFundsCommitments {
         fundsCommitmentNumber
         fundsCommitmentItems {
+          id
           paymentPlan {
             id
             name
@@ -46,21 +47,14 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       fundsCommitments {
         fundsCommitmentNumber
+        insufficientAmount
         fundsCommitmentItems {
+          id
           fundsCommitmentItem
           recSerialNumber
-          vendorId
-          businessArea
-          postingDate
-          visionApproval
-          documentReference
-          fcStatus
           wbsElement
           grantNumber
-          documentType
-          documentText
           currencyCode
-          glAccount
           commitmentAmountLocal
           commitmentAmountUsd
           totalOpenAmountLocal
@@ -69,14 +63,6 @@ export const PAYMENT_PLAN_QUERY = gql`
           sponsorName
           fund
           fundsCenter
-          percentage
-          createDate
-          createdBy
-          updateDate
-          updatedBy
-          office {
-            id
-          }
         }
       }
       deliveryMechanism {

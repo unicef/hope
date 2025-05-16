@@ -41,7 +41,7 @@ function EditPeopleDataChange({
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
   const { data: editPeopleFieldsData, loading: editPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery();
+    useAllEditPeopleFieldsQuery({ fetchPolicy: 'network-only' });
 
   const [
     getIndividual,
