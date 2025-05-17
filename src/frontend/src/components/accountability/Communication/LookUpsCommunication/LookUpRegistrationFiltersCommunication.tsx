@@ -2,7 +2,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
+import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -64,7 +64,7 @@ export function LookUpRegistrationFiltersCommunication({
           />
         </Grid>
         <Grid size={{ xs: 4 }}>
-          <AssigneeAutocomplete
+          <AssigneeAutocompleteRestFilter
             name="importedBy"
             label={t('Imported By')}
             filter={filter}

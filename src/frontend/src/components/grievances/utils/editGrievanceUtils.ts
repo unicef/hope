@@ -41,7 +41,7 @@ interface EditValuesTypes {
 
 function prepareInitialValueAddIndividual(
   initialValuesArg: EditValuesTypes,
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
@@ -135,7 +135,7 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
 
 function prepareInitialValueEditHousehold(
   initialValuesArg,
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
@@ -172,7 +172,7 @@ const prepareInitialValueDict = {
 };
 
 export function prepareInitialValues(
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {

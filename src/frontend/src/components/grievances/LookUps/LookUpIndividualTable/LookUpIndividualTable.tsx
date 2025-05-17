@@ -8,7 +8,7 @@ import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndi
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, decodeIdString } from '@utils/utils';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { createApiParams } from '@utils/apiUtils';
 import styled from 'styled-components';
@@ -120,6 +120,9 @@ export function LookUpIndividualTable({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [

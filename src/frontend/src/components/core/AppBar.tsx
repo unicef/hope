@@ -73,6 +73,9 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
         program: programSlug === 'all' ? undefined : programSlug,
       });
     },
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${

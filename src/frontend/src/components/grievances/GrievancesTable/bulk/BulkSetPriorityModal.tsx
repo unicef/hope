@@ -4,12 +4,12 @@ import styled from 'styled-components';
 import AlarmAddIcon from '@mui/icons-material/AlarmAdd';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
-  AllGrievanceTicketQuery,
   useBulkUpdateGrievancePriorityMutation,
   useGrievancesChoiceDataQuery,
 } from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -20,7 +20,7 @@ export const StyledLink = styled.div`
 `;
 
 interface BulkSetPriorityModalProps {
-  selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+  selectedTickets: GrievanceTicketList[];
   businessArea: string;
   setSelected;
 }

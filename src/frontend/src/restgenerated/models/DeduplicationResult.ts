@@ -4,10 +4,10 @@
 /* eslint-disable */
 export type DeduplicationResult = {
     readonly unicefId: string;
-    hitId: string;
-    fullName: string;
-    score: number;
-    proximityToScore: number;
+    hitId?: string;
+    fullName?: string;
+    score?: number;
+    proximityToScore?: number;
     readonly location: string;
     readonly age: number | null;
     readonly duplicate: boolean;

@@ -94,8 +94,9 @@ export function LookUpHouseholdTable({
   ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
-
-  useEffect(() => {}, [initialQueryVariables]);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: dataHouseholdsProgram,

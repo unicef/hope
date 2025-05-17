@@ -32,7 +32,7 @@ export const NeedsAdjudicationDetailsOld = ({
   ticket,
   canApprove,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApprove: boolean;
 }): ReactElement => {
   const { t } = useTranslation();

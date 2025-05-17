@@ -5,7 +5,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
@@ -20,6 +19,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export type RoleReassignData = {
   role: IndividualRoleInHouseholdRole | string;
@@ -31,7 +31,7 @@ export function DeleteIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();

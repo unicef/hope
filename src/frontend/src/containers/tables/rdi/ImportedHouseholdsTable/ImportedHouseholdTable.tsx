@@ -2,7 +2,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
@@ -28,6 +28,9 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 

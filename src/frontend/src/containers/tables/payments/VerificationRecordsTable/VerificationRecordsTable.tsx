@@ -6,7 +6,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { headCells } from './VerificationRecordsHeadCells';
@@ -45,14 +45,20 @@ export function VerificationRecordsTable({
     replacements,
   );
 
-  const initialQueryVariables = {
-    ...filter,
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-    paymentVerificationPk: paymentPlanId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      ...filter,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      paymentVerificationPk: paymentPlanId,
+    }),
+    [filter, businessArea, programId, paymentPlanId],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentsData,

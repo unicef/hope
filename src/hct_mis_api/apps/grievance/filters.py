@@ -21,7 +21,7 @@ from graphene_django.filter import GlobalIDFilter
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
+from hct_mis_api.apps.core.utils import get_program_id_from_headers
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, Household, Individual
@@ -94,7 +94,6 @@ class GrievanceTicketFilter(FilterSet):
             "payment_verification__payment_record__service_provider__full_name",
         ),
     )
-    business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
@@ -153,7 +152,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
-            return qs.filter(programs__in=[decode_id_string(value)])
+            return qs.filter(programs__in=[value])
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover

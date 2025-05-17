@@ -5,7 +5,7 @@ import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPay
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { PeoplePaymentPlanTableRow } from './PeoplePaymentPlanTableRow';
@@ -23,20 +23,37 @@ export const PeoplePaymentPlansTable = ({
 }: PeoplePaymentPlansTableProps): ReactElement => {
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
-  const initialQueryVariables = {
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-    search: filter.search,
-    status: filter.status,
-    totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
-    totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
-    dispersionStartDate: filter.dispersionStartDate || null,
-    dispersionEndDate: filter.dispersionEndDate || null,
-    isFollowUp: filter.isFollowUp ? true : null,
-    isPaymentPlan: true,
-  };
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      search: filter.search,
+      status: filter.status,
+      totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
+      totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
+      dispersionStartDate: filter.dispersionStartDate || null,
+      dispersionEndDate: filter.dispersionEndDate || null,
+      isFollowUp: filter.isFollowUp ? true : null,
+      isPaymentPlan: true,
+    }),
+    [
+      businessArea,
+      programId,
+      filter.search,
+      filter.status,
+      filter.totalEntitledQuantityFrom,
+      filter.totalEntitledQuantityTo,
+      filter.dispersionStartDate,
+      filter.dispersionEndDate,
+      filter.isFollowUp,
+    ],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentPlansData,

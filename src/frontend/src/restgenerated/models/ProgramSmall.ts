@@ -6,6 +6,14 @@ import type { Status791Enum } from './Status791Enum';
 export type ProgramSmall = {
     readonly id: string;
     /**
+     * Program code
+     */
+    programmeCode?: string | null;
+    /**
+     * Program slug [sys]
+     */
+    slug: string;
+    /**
      * Program name
      */
     name: string;

@@ -1,4 +1,4 @@
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -39,7 +39,11 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
       programId,
     ],
   );
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const filteredQueryVariables = useMemo(() => {
     const filtered = filterEmptyParams(initialQueryVariables);

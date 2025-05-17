@@ -97,7 +97,8 @@ const BoxWithBottomBorders = styled.div`
 const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessAreaSlug, programSlug, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessAreaSlug, programSlug, isAllPrograms } =
+    useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -124,6 +125,9 @@ const EditGrievancePage = (): ReactElement => {
           program: programSlug === 'all' ? undefined : programSlug,
         });
       },
+      staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+      gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
     },
   );
 
@@ -145,7 +149,7 @@ const EditGrievancePage = (): ReactElement => {
     useAllProgramsForChoicesQuery({
       variables: {
         first: 100,
-        businessArea:businessAreaSlug,
+        businessArea: businessAreaSlug,
       },
     });
   const individualFieldsDict = useArrayToDict(
@@ -280,7 +284,11 @@ const EditGrievancePage = (): ReactElement => {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const { variables } = prepareVariables(businessAreaSlug, values, ticket);
+          const { variables } = prepareVariables(
+            businessAreaSlug,
+            values,
+            ticket,
+          );
           await mutate({
             variables,
             refetchQueries: () => [

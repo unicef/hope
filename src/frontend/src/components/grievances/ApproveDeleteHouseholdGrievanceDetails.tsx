@@ -24,16 +24,16 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useApproveDeleteHouseholdDataChangeMutation,
 } from '@generated/graphql';
 import { useProgramContext } from 'src/programContext';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const EditIcon = styled(Edit)`
   color: ${({ theme }) => theme.hctPalette.darkerBlue};
 `;
 export interface ApproveDeleteHouseholdGrievanceDetailsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   type: 'edit' | 'button';
 }
 

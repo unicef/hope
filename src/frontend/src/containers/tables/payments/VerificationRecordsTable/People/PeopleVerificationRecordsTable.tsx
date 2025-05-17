@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { PeopleVerificationRecordsTableRow } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTableRow';
@@ -26,14 +26,20 @@ export function PeopleVerificationRecordsTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
-  const initialQueryVariables = {
-    ...filter,
-    paymentPlanId,
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      ...filter,
+      paymentPlanId,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+    }),
+    [filter, paymentPlanId, businessArea, programId],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentsData,

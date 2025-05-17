@@ -6,7 +6,7 @@ import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndi
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
@@ -40,15 +40,21 @@ export function ImportedPeopleTable({
   const [showDuplicates, setShowDuplicates] = useState(false);
   const { programId } = useBaseUrl();
 
-  const initialQueryVariables = {
-    rdiId,
-    household,
-    duplicatesOnly: showDuplicates,
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      rdiId,
+      household,
+      duplicatesOnly: showDuplicates,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+    }),
+    [rdiId, household, showDuplicates, businessArea, programId],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
     queryKey: [

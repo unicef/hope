@@ -37,7 +37,7 @@ const WarnIcon = styled(WarningIcon)`
 export function ReassignMultipleRoleBox({
   ticket,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
 }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();

@@ -41,7 +41,7 @@ export function PaymentGrievanceDetails({
   ticket,
   canApprovePaymentVerification,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApprovePaymentVerification: boolean;
 }): ReactElement {
   const { t } = useTranslation();

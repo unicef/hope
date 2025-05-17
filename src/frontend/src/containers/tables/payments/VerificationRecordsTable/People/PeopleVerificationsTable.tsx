@@ -5,7 +5,7 @@ import { PaymentList } from '@restgenerated/models/PaymentList';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './PeopleVerificationsHeadCells';
 import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
@@ -26,14 +26,20 @@ export function PeopleVerificationsTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
-  const initialQueryVariables = {
-    ...filter,
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-    paymentVerificationPk: paymentPlanId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      ...filter,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      paymentVerificationPk: paymentPlanId,
+    }),
+    [filter, businessArea, programId, paymentPlanId],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentsData,

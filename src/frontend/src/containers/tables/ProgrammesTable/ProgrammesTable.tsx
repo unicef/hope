@@ -8,7 +8,7 @@ import { CountResponse } from '@restgenerated/models/CountResponse';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
@@ -30,7 +30,6 @@ function ProgrammesTable({
   const initialQueryVariables = useMemo(
     () => ({
       businessAreaSlug: businessArea,
-      programSlug: programId,
       beneficiaryGroupMatch: isAllPrograms ? '' : programId,
       compatibleDct: isAllPrograms ? '' : programId,
       search: filter.search,
@@ -38,11 +37,10 @@ function ProgrammesTable({
       endDate: filter.endDate || null,
       status: filter.status !== '' ? filter.status : undefined,
       sector: filter.sector,
-      numberOfHouseholds: JSON.stringify({
-        before: filter.numberOfHouseholdsMin,
-        after: filter.numberOfHouseholdsMax,
-      }),
-      budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
+      numberOfHouseholdsMax: filter.numberOfHouseholdsMax,
+      numberOfHouseholdsMin: filter.numberOfHouseholdsMin,
+      budgetMax: filter.budgetMax,
+      budgetMin: filter.budgetMin,
       dataCollectingType: filter.dataCollectingType,
       ordering: 'startDate',
     }),
@@ -64,6 +62,9 @@ function ProgrammesTable({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: dataPrograms,
@@ -78,11 +79,9 @@ function ProgrammesTable({
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsList(
-        createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
-          queryVariables,
-          { withPagination: true },
-        ),
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
+          withPagination: true,
+        }),
       ),
     enabled: !!queryVariables.businessAreaSlug,
   });

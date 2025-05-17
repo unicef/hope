@@ -6,7 +6,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -44,26 +44,42 @@ export function TargetPopulationForPeopleTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessArea, programId } = useBaseUrl();
-  const initialQueryVariables = {
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-    name: filter.name,
-    totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
-    totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
-    status: filter.status,
-    businessArea,
-    program: programId,
-    createdAtRange: JSON.stringify({
-      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      name: filter.name,
+      totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
+      totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
+      status: filter.status,
+      businessArea,
+      program: programId,
+      createdAtRange: JSON.stringify({
+        min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+        max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+      }),
     }),
-  };
+    [
+      businessArea,
+      programId,
+      filter.name,
+      filter.totalHouseholdsCountMin,
+      filter.totalHouseholdsCountMax,
+      filter.status,
+      filter.createdAtRangeMin,
+      filter.createdAtRangeMax,
+    ],
+  );
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: targetPopulationsData,

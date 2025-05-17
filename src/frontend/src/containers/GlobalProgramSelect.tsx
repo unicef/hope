@@ -410,7 +410,7 @@ export const GlobalProgramSelect = () => {
                     ...params.InputProps,
                     endAdornment: (
                       <>
-                        {params.InputProps.endAdornment}
+                        {params.InputProps?.endAdornment}
                         <InputAdornment position="end">
                           {loadingPrograms && <CircularProgress />}
                           {inputValue && (

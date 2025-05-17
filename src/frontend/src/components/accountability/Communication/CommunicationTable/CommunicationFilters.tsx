@@ -1,12 +1,12 @@
-import { Grid2 as Grid } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
-import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
+import { Grid2 as Grid } from '@mui/material';
+import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
+import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface CommunicationFiltersProps {
   filter;
@@ -51,7 +51,7 @@ export function CommunicationFilters({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid size={{ xs: 4 }} >
+        <Grid size={{ xs: 4 }}>
           <TargetPopulationAutocomplete
             name="targetPopulation"
             value={filter.targetPopulation}
@@ -62,8 +62,8 @@ export function CommunicationFilters({
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
-          <CreatedByAutocomplete
+        <Grid size={{ xs: 2 }}>
+          <CreatedByAutocompleteRestFilter
             label={t('Created by')}
             filter={filter}
             name="createdBy"
@@ -76,7 +76,7 @@ export function CommunicationFilters({
           />
         </Grid>
         <Grid container size={{ xs: 6 }} spacing={3} alignItems="flex-end">
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <DatePickerFilter
               topLabel={t('Creation Date')}
               label="From"
@@ -85,7 +85,7 @@ export function CommunicationFilters({
               dataCy="filters-creation-date-from"
             />
           </Grid>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <DatePickerFilter
               label={t('To')}
               onChange={(date) => handleFilterChange('createdAtRangeMax', date)}

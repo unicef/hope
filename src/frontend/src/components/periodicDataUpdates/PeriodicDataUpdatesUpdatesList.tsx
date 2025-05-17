@@ -2,7 +2,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { IconButton, TableCell } from '@mui/material';
 import { periodicDataUpdatesUpdatesStatusToColor } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { createApiParams } from '@utils/apiUtils';
 import { useQuery } from '@tanstack/react-query';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -66,13 +66,19 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUploadId, setSelectedUploadId] = useState<number | null>(null);
-  const initialQueryVariables = {
-    ordering: 'created_at',
-    businessAreaSlug,
-    programSlug: programId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      ordering: 'created_at',
+      businessAreaSlug,
+      programSlug: programId,
+    }),
+    [businessAreaSlug, programId],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: updatesData,

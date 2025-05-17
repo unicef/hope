@@ -6,7 +6,7 @@ import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiParams } from '@utils/apiUtils';
 import { useProgramContext } from 'src/programContext';
@@ -26,13 +26,21 @@ export function TargetPopulationHouseholdTable({
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const initialQueryVariables = {
-    ...variables,
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-    targetPopulationId: id,
-  };
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      ...variables,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      targetPopulationId: id,
+    }),
+    [variables, businessArea, programId, id],
+  );
+
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: householdsData,

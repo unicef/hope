@@ -88,12 +88,14 @@ export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
       size="small"
       onChange={(e) => setSearchText(e.target.value)}
       data-cy="search-released"
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <SearchIcon />
-          </InputAdornment>
-        ),
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        },
       }}
     />
   );

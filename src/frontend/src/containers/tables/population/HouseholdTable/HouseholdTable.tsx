@@ -19,7 +19,7 @@ import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
 } from '@utils/utils';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -85,6 +85,9 @@ export const HouseholdTable = ({
   ]);
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const { data, isLoading, error } = useQuery<PaginatedHouseholdListList>({
     queryKey: [
