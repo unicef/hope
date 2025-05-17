@@ -41,7 +41,7 @@ export function Notes({
   notes,
   canAddNote,
 }: {
-  notes: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
+  notes: GrievanceDetail['ticketNotes'];
   canAddNote: boolean;
 }): ReactElement {
   const { t } = useTranslation();

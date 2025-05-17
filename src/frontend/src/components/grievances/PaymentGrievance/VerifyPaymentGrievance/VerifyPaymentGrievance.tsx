@@ -1,4 +1,10 @@
-import { Box, Button, DialogContent, DialogTitle, Grid2 as Grid } from '@mui/material';
+import {
+  Box,
+  Button,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +24,7 @@ import {
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 
 export interface VerifyPaymentGrievanceProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
 }
 export function VerifyPaymentGrievance({
   ticket,
@@ -105,7 +111,7 @@ export function VerifyPaymentGrievance({
                       component={FormikRadioGroup}
                     />
                   </Grid>
-                  <Grid size={{ xs:6 }}>
+                  <Grid size={{ xs: 6 }}>
                     {values.newStatus === 'RECEIVED' && (
                       <Field
                         name="newReceivedAmount"

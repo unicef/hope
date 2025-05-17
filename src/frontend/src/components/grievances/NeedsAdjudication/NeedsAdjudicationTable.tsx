@@ -16,10 +16,10 @@ import { StyledTable } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import { GrievanceTicketQuery } from '@generated/graphql';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface NeedsAdjudicationTableProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   isEditable: boolean;
   selectedIndividualIds: string[];
   setSelectedIndividualIds: (

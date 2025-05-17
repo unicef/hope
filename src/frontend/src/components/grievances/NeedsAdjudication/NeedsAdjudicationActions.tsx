@@ -16,7 +16,7 @@ import {
 } from '@generated/graphql';
 
 interface NeedsAdjudicationActionsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   isEditable: boolean;
   canApprove: boolean;
   isTicketForApproval: boolean;

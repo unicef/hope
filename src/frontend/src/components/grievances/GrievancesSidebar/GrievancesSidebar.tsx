@@ -9,14 +9,14 @@ import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function GrievancesSidebar({
   ticket,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
 }): ReactElement {
   const { isSocialDctType } = useProgramContext();
   const shouldShowReassignBoxDataChange = (): boolean => {
@@ -155,9 +155,5 @@ export function GrievancesSidebar({
     );
   };
 
-  return (
-    <Grid size={{ xs: 4 }}>
-      {renderRightSection()}
-    </Grid>
-  );
+  return <Grid size={{ xs: 4 }}>{renderRightSection()}</Grid>;
 }

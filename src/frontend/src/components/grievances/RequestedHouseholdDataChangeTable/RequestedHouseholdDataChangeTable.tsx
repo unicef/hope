@@ -18,7 +18,7 @@ import { handleSelected } from '../utils/helpers';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface RequestedHouseholdDataChangeTableProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   setFieldValue;
   isEdit;
   values;

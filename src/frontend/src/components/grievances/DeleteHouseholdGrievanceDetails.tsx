@@ -2,7 +2,6 @@ import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
@@ -17,6 +16,7 @@ import { ReactElement } from 'react';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const Info = styled(InfoIcon)`
   color: ${({ theme }) => theme.hctPalette.gray};
@@ -27,7 +27,7 @@ export function DeleteHouseholdGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
