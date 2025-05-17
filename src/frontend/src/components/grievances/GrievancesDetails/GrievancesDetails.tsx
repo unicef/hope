@@ -27,7 +27,7 @@ import { replaceLabels } from '../utils/createGrievanceUtils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface GrievancesDetailsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   choicesData: GrievancesChoiceDataQuery;
   baseUrl: string;
   canViewHouseholdDetails: boolean;

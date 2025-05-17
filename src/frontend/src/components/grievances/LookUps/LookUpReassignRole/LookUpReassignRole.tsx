@@ -1,5 +1,4 @@
 import { LoadingComponent } from '@core/LoadingComponent';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
@@ -11,14 +10,15 @@ import { useTranslation } from 'react-i18next';
 import { LookUpButton } from '../../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
 import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface LookUpReassignRoleProps {
   household?:
-    | GrievanceTicketQuery['grievanceTicket']['household']
-    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
-  individualToReassign: GrievanceTicketQuery['grievanceTicket']['individual'];
+    | GrievanceDetail['household']
+    | GrievanceDetail['individual']['householdsAndRoles'][number]['household'];
+  individualToReassign: GrievanceDetail['individual'];
   initialSelectedIndividualId: string;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
 }

@@ -3,10 +3,7 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  GrievanceTicketQuery,
-  useGrievanceTicketStatusChangeMutation,
-} from '@generated/graphql';
+import { useGrievanceTicketStatusChangeMutation } from '@generated/graphql';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 import {
@@ -24,6 +21,7 @@ import { useProgramContext } from '../../programContext';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const Separator = styled.div`
   width: 1px;
@@ -60,7 +58,7 @@ export const GrievanceDetailsToolbar = ({
   canClose,
   canAssign,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canEdit: boolean;
   canSetInProgress: boolean;
   canSetOnHold: boolean;

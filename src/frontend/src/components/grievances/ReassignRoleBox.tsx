@@ -4,7 +4,6 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { ContentLink } from '@core/ContentLink';
@@ -39,7 +38,7 @@ export const ReassignRoleBox = ({
   shouldDisplayButton,
   shouldDisableButton,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
 }): ReactElement => {

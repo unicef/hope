@@ -22,6 +22,7 @@ import {
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -40,7 +41,7 @@ export function RequestedIndividualDataChange({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();

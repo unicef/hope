@@ -6,7 +6,6 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { getFlexFieldTextValue, renderBoolean } from '@utils/utils';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
 } from '@generated/graphql';
@@ -18,12 +17,13 @@ import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 function AddIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
