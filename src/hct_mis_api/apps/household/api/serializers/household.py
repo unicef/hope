@@ -223,7 +223,7 @@ class HouseholdForTicketSerializer(serializers.ModelSerializer):
     admin2 = serializers.CharField(source="admin2.name", default="")
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
-    head_of_household = serializers.CharField(source="head_of_household.full_name")
+    head_of_household = HeadOfHouseholdSerializer()
     active_individuals_count = serializers.SerializerMethodField()
 
     class Meta:

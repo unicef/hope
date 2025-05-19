@@ -1187,7 +1187,10 @@ class TestGrievanceTicketDetail:
                 "geopoint": household.geopoint,
                 "size": household.size,
                 "residence_status": household.residence_status,
-                "head_of_household": household.head_of_household.full_name,
+                "head_of_household": {
+                    "id": str(household.head_of_household.id),
+                    "full_name": household.head_of_household.full_name,
+                },
                 "active_individuals_count": household.active_individuals.count(),
             }
             if household
@@ -1247,6 +1250,11 @@ class TestGrievanceTicketDetail:
         )
         assert data["postpone_deduplication"] == self.afghanistan.postpone_deduplication
         individual = getattr(getattr(grievance_ticket, "ticket_details", None), "individual", None)
+        expected_role = (
+            individual.households_and_roles(manager="all_objects")
+            .filter(household=individual.household)
+            .first()
+        ) if individual else None
         expected_individual = (
             {
                 "id": str(individual.id),
@@ -1257,6 +1265,8 @@ class TestGrievanceTicketDetail:
                     "unicef_id": individual.household.unicef_id,
                     "admin2": individual.household.admin2.name,
                 },
+                "relationship": individual.relationship,
+                "role": (expected_role.get_role_display() if expected_role else "-"),
                 "roles_in_households": [
                     {
                         "id": str(role.id),
