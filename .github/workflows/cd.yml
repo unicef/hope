@@ -1,19 +1,11 @@
 name: CD
 run-name: CD RUN ${{ github.ref_name }}
 on:
-  workflow_run:
-    workflows: ["CI_NEW"]
-    types: [completed]
-    branches:
-      - develop
-      - staging
-      - master
-      - ephemeral-*
-      - feature/development-improvements
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+        AZURE_PIPELINE_ID:
+            required: true
+            description: 'Comma-separated list of Azure DevOps pipeline IDs to trigger'
 
 jobs:
   deploy:
