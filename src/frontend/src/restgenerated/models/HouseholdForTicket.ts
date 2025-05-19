@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { HeadOfHousehold } from './HeadOfHousehold';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdForTicket = {
     readonly id: string;
@@ -23,7 +24,7 @@ export type HouseholdForTicket = {
     country?: string;
     countryOrigin?: string;
     readonly geopoint: string | null;
-    headOfHousehold: string;
+    headOfHousehold: HeadOfHousehold;
     /**
      * Household residence status
      *
