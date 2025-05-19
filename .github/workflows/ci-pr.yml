@@ -12,7 +12,7 @@ on:
 
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: CI-PR-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
