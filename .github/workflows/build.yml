@@ -13,20 +13,6 @@ jobs:
   build_and_push_dist:
     runs-on: ubuntu-latest
     steps:
-      - name: Check secret in Bash
-        env:
-          BLA_BLA: ${{ secrets.bla_bla }}
-        run: |
-          echo "BLA_BLA: $BLA_BLA"
-          if [ "$BLA_BLA" = "super bla bla" ]; then
-            echo OK
-          fi
-      - name: Print
-        run: |
-          if [ -z "${{ secrets.docker_username }}" ]; then
-            echo "❌ ERROR: docker_username must be set" >&2
-            exit 1
-          fi
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Checkout code
