@@ -21,7 +21,6 @@ from graphene_django.filter import GlobalIDFilter
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import get_program_id_from_headers
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, Household, Individual
@@ -254,15 +253,15 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         user = self.request.user
-        business_area = BusinessArea.objects.get(slug=self.request.headers.get("Business-Area"))
-        program_id = get_program_id_from_headers(self.request.headers)
-        program = Program.objects.filter(id=program_id).first()
+        business_area = BusinessArea.objects.get(slug=self.request.parser_context["kwargs"]["business_area_slug"])
+        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
         if (
             value is True
             and user.has_perm(perm, program or business_area)
-            and (not user.partner.has_area_limits_in_program(program_id) or not program_id)
+            and (not program or not user.partner.has_area_limits_in_program(program.id))
         ):
             return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)
         else:

@@ -177,6 +177,7 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     """
     Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
     """
+    program_model_field = "program"
 
     def get_queryset(self) -> QuerySet:
         from hct_mis_api.apps.program.models import Program
