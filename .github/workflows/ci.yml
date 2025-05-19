@@ -26,6 +26,5 @@ jobs:
   build:
     uses: ./.github/workflows/build.yml
     secrets:
-      docker_username: ${{ secrets.DOCKER_USERNAME }}
-      docker_password: ${{ secrets.DOCKER_PASSWORD }}
-      bla_bla: "super bla bla"
+      docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_password: ${{ secrets.DOCKERHUB_TOKEN }}
