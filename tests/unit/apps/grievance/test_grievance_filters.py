@@ -343,6 +343,55 @@ class TestGrievanceTicketGlobalList:
             grievance_ticket.linked_tickets.add(self.grievance_tickets[-1])
 
     @pytest.mark.parametrize(
+        "filter_value, expected_count",
+        [
+            ("system", 4),
+            ("user", 5),
+            ("", 9),
+        ],
+    )
+    def test_filter_grievance_type(
+        self,
+        filter_value: bool,
+        expected_count: int,
+    ) -> None:
+        response = self.api_client.get(self.list_global_url, {"grievance_type": filter_value})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == expected_count
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count",
+        [
+            ("active", 7),
+            ("", 9),
+        ],
+    )
+    def test_filter_grievance_status(
+        self,
+        filter_value: bool,
+        expected_count: int,
+    ) -> None:
+        response = self.api_client.get(self.list_global_url, {"grievance_status": filter_value})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == expected_count
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count",
+        [
+            (True, 6),
+            (False, 3),
+        ],
+    )
+    def test_filter_program_status(
+        self,
+        filter_value: bool,
+        expected_count: int,
+    ) -> None:
+        response = self.api_client.get(self.list_global_url, {"is_active_program": filter_value})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == expected_count
+
+    @pytest.mark.parametrize(
         "has_cross_area_filter_permission, has_full_area_access, filter_value, is_filtered_for_program, is_filtered_for_global",
         [
             (False, False, False, False, False),
