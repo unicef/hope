@@ -30,6 +30,7 @@ import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
+import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
 import type { PaginatedPaymentListList } from '../models/PaginatedPaymentListList';
@@ -566,6 +567,104 @@ export class RestService {
                 'limit': limit,
                 'offset': offset,
                 'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns PaginatedLogEntryList
+     * @throws ApiError
+     */
+    public static restBusinessAreasActivityLogsList({
+        businessAreaSlug,
+        businessArea,
+        limit,
+        module,
+        objectId,
+        offset,
+        ordering,
+        programId,
+        search,
+        user,
+        userId,
+    }: {
+        businessAreaSlug: string,
+        businessArea?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        module?: string,
+        objectId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        user?: string,
+        userId?: string,
+    }): CancelablePromise<PaginatedLogEntryList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/activity-logs/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'limit': limit,
+                'module': module,
+                'object_id': objectId,
+                'offset': offset,
+                'ordering': ordering,
+                'program_id': programId,
+                'search': search,
+                'user': user,
+                'user_id': userId,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasActivityLogsActionChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/activity-logs/action-choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasActivityLogsCountRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/activity-logs/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
             },
         });
     }
@@ -1524,6 +1623,113 @@ export class RestService {
                 'status': status,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns PaginatedLogEntryList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsActivityLogsList({
+        businessAreaSlug,
+        programSlug,
+        businessArea,
+        limit,
+        module,
+        objectId,
+        offset,
+        ordering,
+        programId,
+        search,
+        user,
+        userId,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        businessArea?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        module?: string,
+        objectId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        user?: string,
+        userId?: string,
+    }): CancelablePromise<PaginatedLogEntryList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/activity-logs/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'limit': limit,
+                'module': module,
+                'object_id': objectId,
+                'offset': offset,
+                'ordering': ordering,
+                'program_id': programId,
+                'search': search,
+                'user': user,
+                'user_id': userId,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsActivityLogsActionChoicesRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/activity-logs/action-choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsActivityLogsCountRetrieve({
+        businessAreaSlug,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/activity-logs/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
             },
         });
     }
