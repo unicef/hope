@@ -528,6 +528,7 @@ class TestPaymentPlanList:
             assert response.has_header("etag")
             get_etag = response.headers["etag"]
             assert get_etag == last_etag_second_call
+
             assert len(ctx.captured_queries) == 6
 
 
