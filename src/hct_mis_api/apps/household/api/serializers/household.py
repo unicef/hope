@@ -121,7 +121,6 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     linked_grievances = serializers.SerializerMethodField()
     admin_area_title = serializers.SerializerMethodField()
     active_individuals_count = serializers.SerializerMethodField()
-    geopoint = serializers.CharField()
     import_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -217,6 +216,37 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
         if obj.enumerator_rec_id:
             return f"{obj.unicef_id} (Enumerator ID {obj.enumerator_rec_id})"
         return obj.unicef_id
+
+
+class HouseholdForTicketSerializer(serializers.ModelSerializer):
+    admin1 = serializers.CharField(source="admin1.name", default="")
+    admin2 = serializers.CharField(source="admin2.name", default="")
+    country = serializers.CharField(source="country.name", default="")
+    country_origin = serializers.CharField(source="country_origin.name", default="")
+    head_of_household = serializers.CharField(source="head_of_household.full_name")
+    active_individuals_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Household
+        fields = (
+            "id",
+            "unicef_id",
+            "unhcr_id",
+            "village",
+            "address",
+            "admin1",
+            "admin2",
+            "country",
+            "country_origin",
+            "geopoint",
+            "head_of_household",
+            "residence_status",
+            "size",
+            "active_individuals_count",
+        )
+
+    def get_active_individuals_count(self, obj: Household) -> int:
+        return obj.active_individuals.count()
 
 
 class HouseholdChoicesSerializer(serializers.Serializer):
