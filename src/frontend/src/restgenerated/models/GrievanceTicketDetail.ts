@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { AreaList } from './AreaList';
 import type { CategoryEnum } from './CategoryEnum';
-import type { HouseholdSimple } from './HouseholdSimple';
+import type { HouseholdForTicket } from './HouseholdForTicket';
 import type { IndividualSimple } from './IndividualSimple';
 import type { Partner } from './Partner';
 import type { PriorityEnum } from './PriorityEnum';
@@ -17,7 +17,7 @@ export type GrievanceTicketDetail = {
     unicefId?: string | null;
     status?: StatusEbbEnum;
     readonly programs: Record<string, any>;
-    household: HouseholdSimple | null;
+    household: HouseholdForTicket | null;
     admin?: string;
     admin2: AreaList;
     assignedTo: User;

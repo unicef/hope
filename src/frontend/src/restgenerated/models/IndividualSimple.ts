@@ -11,5 +11,6 @@ export type IndividualSimple = {
      */
     fullName: string;
     household: HouseholdSimple;
+    readonly rolesInHouseholds: Record<string, any>;
 };
 

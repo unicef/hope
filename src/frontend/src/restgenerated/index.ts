@@ -71,6 +71,7 @@ export { HearingDisabilityEnum as HearingDisabilityEnumCamelCase } from './model
 export type { Household as HouseholdCamelCase } from './models/Household';
 export type { HouseholdChoices as HouseholdChoicesCamelCase } from './models/HouseholdChoices';
 export type { HouseholdDetail as HouseholdDetailCamelCase } from './models/HouseholdDetail';
+export type { HouseholdForTicket as HouseholdForTicketCamelCase } from './models/HouseholdForTicket';
 export type { HouseholdList as HouseholdListCamelCase } from './models/HouseholdList';
 export type { HouseholdMember as HouseholdMemberCamelCase } from './models/HouseholdMember';
 export type { HouseholdSimple as HouseholdSimpleCamelCase } from './models/HouseholdSimple';
