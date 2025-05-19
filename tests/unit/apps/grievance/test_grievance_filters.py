@@ -12,12 +12,15 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
+from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, TicketPaymentVerificationDetailsFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentVerificationSummaryFactory, \
+    PaymentVerificationPlanFactory, PaymentFactory, PaymentVerificationFactory, FinancialServiceProviderFactory
+from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentVerification
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -25,7 +28,7 @@ pytestmark = pytest.mark.django_db()
 
 
 @freeze_time("2024-08-25 12:00:00")
-class TestGrievanceTicketGlobalList:
+class TestGrievanceTicketFilters:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Callable) -> None:
         self.afghanistan = create_afghanistan()
@@ -94,7 +97,7 @@ class TestGrievanceTicketGlobalList:
                     "admin2": self.area2,
                     "language": "Polish",
                     "consent": True,
-                    "description": "Needs Adjudication ticket, not cross area",
+                    "description": "Needs Adjudication ticket, not cross area, program1",
                     "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
                     "status": GrievanceTicket.STATUS_NEW,
                     "created_by": self.user,
@@ -109,7 +112,7 @@ class TestGrievanceTicketGlobalList:
                     "admin2": self.area2_2,
                     "language": "Polish",
                     "consent": True,
-                    "description": "Needs Adjudication ticket, cross area",
+                    "description": "Needs Adjudication ticket, cross area, program1",
                     "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
                     "status": GrievanceTicket.STATUS_CLOSED,
                     "created_by": self.user,
@@ -121,10 +124,38 @@ class TestGrievanceTicketGlobalList:
             GrievanceTicket(
                 **{
                     "business_area": self.afghanistan,
+                    "admin2": None,
+                    "language": "Polish, English",
+                    "consent": True,
+                    "description": "Payment Verification ticket 1, program1",
+                    "category": GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
+                    "created_by": self.user,
+                    "assigned_to": self.user,
+                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                }
+            ),
+            GrievanceTicket(
+                **{
+                    "business_area": self.afghanistan,
+                    "admin2": None,
+                    "language": "Polish, English",
+                    "consent": True,
+                    "description": "Payment Verification ticket 2, program1",
+                    "category": GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
+                    "created_by": self.user,
+                    "assigned_to": self.user,
+                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                }
+            ),
+            GrievanceTicket(
+                **{
+                    "business_area": self.afghanistan,
                     "admin2": self.area2,
                     "language": "Polish",
                     "consent": True,
-                    "description": "Non-sensitive ticket with program, in admin area 1, owner",
+                    "description": "Data Change ticket, program2",
                     "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
                     "status": GrievanceTicket.STATUS_NEW,
                     "created_by": self.user2,
@@ -139,7 +170,7 @@ class TestGrievanceTicketGlobalList:
                     "admin2": self.area2,
                     "language": "English",
                     "consent": True,
-                    "description": "Sensitive ticket with program, in admin area 2, on hold, owner and creator",
+                    "description": "Sensitive ticket, program1",
                     "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
                     "status": GrievanceTicket.STATUS_ON_HOLD,
                     "created_by": self.user,
@@ -151,25 +182,10 @@ class TestGrievanceTicketGlobalList:
             GrievanceTicket(
                 **{
                     "business_area": self.afghanistan,
-                    "admin2": self.area1,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Sensitive ticket with program, in admin area 2, in progress, owner",
-                    "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": self.user2,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE,
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
                     "admin2": self.area2,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Sensitive ticket with program, in admin area 2, in progress, creator",
+                    "description": "Sensitive ticket, program2",
                     "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": self.user,
@@ -184,21 +200,7 @@ class TestGrievanceTicketGlobalList:
                     "admin2": None,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Non-sensitive ticket with program, without admin area, creator and owner",
-                    "category": GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
-                    "admin2": None,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Non-sensitive ticket without program, without admin area, creator and owner",
+                    "description": "Complaint ticket, program1",
                     "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": self.user,
@@ -213,7 +215,7 @@ class TestGrievanceTicketGlobalList:
                     "admin2": self.area1,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Non-sensitive ticket without program, in admin area 1, creator and owner",
+                    "description": "System Flagging ticket, program2",
                     "category": GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                     "status": GrievanceTicket.STATUS_CLOSED,
                     "created_by": self.user,
@@ -326,6 +328,64 @@ class TestGrievanceTicketGlobalList:
         self.needs_adjudication_ticket_cross_area.populate_cross_area_flag()
         self.needs_adjudication_ticket_not_cross_area.populate_cross_area_flag()
 
+        payment_plan = PaymentPlanFactory(
+            name="TEST",
+            business_area=self.afghanistan,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan=payment_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+        )
+        self.financial_service_provider1 = FinancialServiceProviderFactory(
+            name="Filter Value"
+        )
+        payment1 = PaymentFactory(
+            parent=payment_plan,
+            household=self.household1,
+            currency="PLN",
+            financial_service_provider=self.financial_service_provider1,
+        )
+        payment_verification = PaymentVerificationFactory(
+            payment_verification_plan=payment_verification_plan,
+            payment=payment1,
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            received_amount=10,
+        )
+        self.payment_verification_ticket_1 = TicketPaymentVerificationDetailsFactory(
+            ticket=self.grievance_tickets[2],
+            approve_status=True,
+            new_status=PaymentVerification.STATUS_RECEIVED,
+            old_received_amount=0,
+            new_received_amount=20,
+            payment_verification_status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            payment_verification=payment_verification,
+        )
+
+        self.financial_service_provider2 = FinancialServiceProviderFactory(
+            name="Value"
+        )
+        payment2 = PaymentFactory(
+            parent=payment_plan,
+            household=self.household2,
+            currency="PLN",
+        )
+        payment_verification = PaymentVerificationFactory(
+            payment_verification_plan=payment_verification_plan,
+            payment=payment2,
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            received_amount=10,
+        )
+
+        self.payment_verification_ticket_2 = TicketPaymentVerificationDetailsFactory(
+            ticket=self.grievance_tickets[3],
+            approve_status=True,
+            new_status=PaymentVerification.STATUS_RECEIVED,
+            old_received_amount=0,
+            new_received_amount=20,
+            payment_verification_status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            payment_verification=payment_verification,
+        )
+
         self.grievance_tickets[0].programs.add(self.program_afghanistan1)
         self.grievance_tickets[1].programs.add(self.program_afghanistan1)
         self.grievance_tickets[2].programs.add(self.program_afghanistan1)
@@ -343,37 +403,67 @@ class TestGrievanceTicketGlobalList:
             grievance_ticket.linked_tickets.add(self.grievance_tickets[-1])
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count",
+        "filter_value, expected_count_for_program, expected_count_for_global",
         [
-            ("system", 4),
-            ("user", 5),
-            ("", 9),
+            ("Filter", 1, 1),
+            ("Not", 0, 0),
+            ("", 6, 9),
         ],
     )
-    def test_filter_grievance_type(
+    def test_filter_by_fsp(
         self,
         filter_value: bool,
-        expected_count: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
     ) -> None:
-        response = self.api_client.get(self.list_global_url, {"grievance_type": filter_value})
-        assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == expected_count
+        self._test_filter(
+            "fsp",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
 
     @pytest.mark.parametrize(
-        "filter_value, expected_count",
+        "filter_value, expected_count_for_program, expected_count_for_global",
         [
-            ("active", 7),
-            ("", 9),
+            ("system", 4, 5),
+            ("user", 2, 4),
+            ("", 6, 9),
         ],
     )
-    def test_filter_grievance_status(
+    def test_filter_by_grievance_type(
         self,
         filter_value: bool,
-        expected_count: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
     ) -> None:
-        response = self.api_client.get(self.list_global_url, {"grievance_status": filter_value})
-        assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == expected_count
+        self._test_filter(
+            "grievance_type",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("active", 4, 7),
+            ("", 6, 9),
+        ],
+    )
+    def test_filter_by_grievance_status(
+        self,
+        filter_value: bool,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "grievance_status",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
 
     @pytest.mark.parametrize(
         "filter_value, expected_count",
@@ -382,7 +472,7 @@ class TestGrievanceTicketGlobalList:
             (False, 3),
         ],
     )
-    def test_filter_program_status(
+    def test_filter_by_program_status(
         self,
         filter_value: bool,
         expected_count: int,
@@ -444,3 +534,13 @@ class TestGrievanceTicketGlobalList:
                 assert len(response.data["results"]) == 2
                 assert response.data["results"][0]["id"] == str(self.grievance_tickets[0].id)
                 assert response.data["results"][1]["id"] == str(self.grievance_tickets[1].id)
+
+    def _test_filter(self, filter_name: str,filter_value: Any, expected_count_for_program: int, expected_count_for_global) -> None:
+        response_for_global = self.api_client.get(self.list_global_url, {filter_name: filter_value})
+        response_for_program = self.api_client.get(self.list_url, {filter_name: filter_value})
+        for response, expected_count in [
+            (response_for_program, expected_count_for_program),
+            (response_for_global, expected_count_for_global),
+        ]:
+            assert response.status_code == status.HTTP_200_OK
+            assert len(response.data["results"]) == expected_count

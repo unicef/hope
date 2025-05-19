@@ -1251,10 +1251,10 @@ class TestGrievanceTicketDetail:
         assert data["postpone_deduplication"] == self.afghanistan.postpone_deduplication
         individual = getattr(getattr(grievance_ticket, "ticket_details", None), "individual", None)
         expected_role = (
-            individual.households_and_roles(manager="all_objects")
-            .filter(household=individual.household)
-            .first()
-        ) if individual else None
+            (individual.households_and_roles(manager="all_objects").filter(household=individual.household).first())
+            if individual
+            else None
+        )
         expected_individual = (
             {
                 "id": str(individual.id),
@@ -1278,6 +1278,23 @@ class TestGrievanceTicketDetail:
                         },
                     }
                     for role in individual.households_and_roles(manager="all_merge_status_objects").all()
+                ],
+                "documents": [
+                    {
+                        "id": str(document.id),
+                        "type": {
+                            "id": str(document.type.id),
+                            "label": document.type.label,
+                            "key": document.type.key,
+                        },
+                        "country": {
+                            "id": str(document.country.id),
+                            "name": document.country.name,
+                            "iso_code3": document.country.iso_code3,
+                        },
+                        "document_number": document.document_number,
+                    }
+                    for document in individual.documents.all()
                 ],
             }
             if individual
