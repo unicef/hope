@@ -7,13 +7,13 @@ on:
     - master
     - ephemeral-*
     - feature/development-improvements
-  pull_request:
-    branches:
-    - develop
-    - staging
-    - master
-    - ephemeral-*
-    - long-term/*
+#  pull_request:
+#    branches:
+#    - develop
+#    - staging
+#    - master
+#    - ephemeral-*
+#    - long-term/*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
