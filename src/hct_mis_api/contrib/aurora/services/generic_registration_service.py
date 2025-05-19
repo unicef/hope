@@ -2,8 +2,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 
-from apps.payment.models import FinancialInstitutionMapping
-
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.forms import (
     BankAccountInfoForm,
@@ -23,7 +21,11 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import AccountType, PendingAccount
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitutionMapping,
+    PendingAccount,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
