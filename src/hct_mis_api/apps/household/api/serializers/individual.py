@@ -133,6 +133,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
 
 class IndividualSimpleSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
+    roles_in_households = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
@@ -141,7 +142,13 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
             "unicef_id",
             "full_name",
             "household",
+            "roles_in_households",
         )
+
+    def get_roles_in_households(self, obj: Individual) -> Dict:
+        return IndividualRoleInHouseholdSerializer(
+            obj.households_and_roles(manager="all_merge_status_objects"), many=True
+        ).data
 
 
 class IndividualRoleInHouseholdSerializer(serializers.ModelSerializer):

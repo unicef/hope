@@ -150,7 +150,9 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
             self.PERMISSIONS,
         )
 
-        return queryset.filter(Q(**{f"{self.program_model_field}__in": program_ids}) | Q(**{f"{self.program_model_field}__isnull": True}))
+        return queryset.filter(
+            Q(**{f"{self.program_model_field}__in": program_ids}) | Q(**{f"{self.program_model_field}__isnull": True})
+        )
 
 
 class ProgramVisibilityMixin(ProgramMixin):
