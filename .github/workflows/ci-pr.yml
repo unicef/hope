@@ -1,0 +1,41 @@
+name: CI-PR
+run-name: PR CHECK \#${{ github.event.pull_request.number }}- ${{ github.event.pull_request.name }}
+on:
+  pull_request:
+    branches:
+    - develop
+    - staging
+    - master
+    - ephemeral-*
+    - long-term/*
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
+  tests:
+    uses: ./.github/workflows/tests.yml
+  build:
+    needs:
+      - lint
+      - tests
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+  deploy:
+    uses: ./.github/workflows/cd.yml
+    secrets: inherit
+    needs: build
+    if: |
+      github.event_name == 'push' &&
+      (
+        github.ref == 'refs/heads/develop' ||
+        github.ref == 'refs/heads/staging' ||
+        github.ref == 'refs/heads/master' ||
+        github.ref == 'refs/heads/ephemeral-1' ||
+        github.ref == 'refs/heads/ephemeral-2' ||
+        github.ref == 'refs/heads/ephemeral-3' ||
+        github.ref == 'refs/heads/feature/development-improvements'
+      )
