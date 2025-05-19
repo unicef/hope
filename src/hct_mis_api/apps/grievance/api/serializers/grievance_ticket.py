@@ -13,6 +13,9 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNote,
 )
+from hct_mis_api.apps.household.api.serializers.household import (
+    HouseholdForTicketSerializer,
+)
 from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
@@ -124,6 +127,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     documentation = serializers.SerializerMethodField()
     ticket_notes = TicketNoteSerializer(many=True)
     ticket_details = serializers.SerializerMethodField()
+    household = HouseholdForTicketSerializer(source="ticket_details.household", allow_null=True)  # type: ignore
 
     class Meta(GrievanceTicketListSerializer.Meta):
         fields = GrievanceTicketListSerializer.Meta.fields + (  # type: ignore

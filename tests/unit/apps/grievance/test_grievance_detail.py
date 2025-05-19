@@ -1177,7 +1177,18 @@ class TestGrievanceTicketDetail:
             {
                 "id": str(household.id),
                 "unicef_id": household.unicef_id,
+                "unhcr_id": household.unhcr_id,
+                "village": household.village,
+                "address": household.address,
+                "admin1": household.admin1.name,
                 "admin2": household.admin2.name,
+                "country": household.country.name,
+                "country_origin": household.country_origin.name,
+                "geopoint": household.geopoint,
+                "size": household.size,
+                "residence_status": household.residence_status,
+                "head_of_household": household.head_of_household.full_name,
+                "active_individuals_count": household.active_individuals.count(),
             }
             if household
             else None
@@ -1246,6 +1257,18 @@ class TestGrievanceTicketDetail:
                     "unicef_id": individual.household.unicef_id,
                     "admin2": individual.household.admin2.name,
                 },
+                "roles_in_households": [
+                    {
+                        "id": str(role.id),
+                        "role": role.role,
+                        "household": {
+                            "id": str(role.household.id),
+                            "unicef_id": role.household.unicef_id,
+                            "admin2": role.household.admin2.name,
+                        },
+                    }
+                    for role in individual.households_and_roles(manager="all_merge_status_objects").all()
+                ],
             }
             if individual
             else None
