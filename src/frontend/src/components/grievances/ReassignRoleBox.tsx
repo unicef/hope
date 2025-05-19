@@ -66,7 +66,7 @@ export const ReassignRoleBox = ({
   ) {
     reassignData = JSON.parse(ticket.ticketDetails.roleReassignData);
   }
-  let householdsAndRoles = individual?.householdsAndRoles || [];
+  let householdsAndRoles = individual?.rolesInHouseholds || [];
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
 
   if (
@@ -139,12 +139,10 @@ export const ReassignRoleBox = ({
         (ticket.individual?.role === 'PRIMARY' ||
           ticket.individual?.relationship === 'HEAD')) ||
       (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
-        ticket.individualDataUpdateTicketDetails?.individualData?.role
-          ?.previous_value === 'PRIMARY' &&
-        (ticket.individualDataUpdateTicketDetails?.individualData?.role
-          ?.value === 'ALTERNATE' ||
-          ticket.individualDataUpdateTicketDetails?.individualData?.role
-            ?.value === 'NO_ROLE'))
+        ticket.ticketDetails?.individualData?.role?.previous_value ===
+          'PRIMARY' &&
+        (ticket.ticketDetails?.individualData?.role?.value === 'ALTERNATE' ||
+          ticket.ticketDetails?.individualData?.role?.value === 'NO_ROLE'))
     ) {
       return (
         <Typography variant="body2">

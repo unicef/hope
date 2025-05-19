@@ -45,7 +45,7 @@ export function DeleteIndividualGrievanceDetails({
     ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
   const isOneIndividual = ticket?.household?.activeIndividualsCount === 1;
   const primaryCollectorRolesCount =
-    ticket?.individual?.householdsAndRoles.filter(
+    ticket?.individual?.rolesInHouseholds.filter(
       (el) => el.role === IndividualRoleInHouseholdRole.Primary,
     ).length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
