@@ -12,7 +12,6 @@ import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useState } from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import {
-  useDownloadPeriodicDataUpdateTemplate,
   useExportPeriodicDataUpdateTemplate,
 } from './PeriodicDataUpdatesTemplatesListActions';
 import { StatusBox } from '@core/StatusBox';
