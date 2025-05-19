@@ -27,7 +27,7 @@ services:
 
   redis:
     restart: unless-stopped
-    image: redis:4.0.11-alpine3.8
+    image: valkey/valkey:8.0.2-alpine
 
   elasticsearch:
     image: unicef/hct-elasticsearch
