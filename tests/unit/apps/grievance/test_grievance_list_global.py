@@ -353,6 +353,8 @@ class TestGrievanceTicketGlobalList:
                     "id": str(grievance_ticket.admin2.id),
                     "name": grievance_ticket.admin2.name,
                     "p_code": grievance_ticket.admin2.p_code,
+                    "area_type": grievance_ticket.admin2.area_type.id,
+                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
                 }
                 if grievance_ticket.admin2
                 else None
@@ -423,7 +425,6 @@ class TestGrievanceTicketGlobalList:
             reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
         )
         assert response_count.status_code == status.HTTP_403_FORBIDDEN
-
 
     def test_grievance_ticket_global_list_area_limits(
         self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any

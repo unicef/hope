@@ -209,7 +209,8 @@ class NeedsAdjudicationTicketDetailsSerializer(serializers.ModelSerializer):
                 "golden_records": obj.extra_data.get("golden_records"),
                 "possible_duplicate": obj.extra_data.get("possible_duplicate"),
                 "dedup_engine_similarity_pair": obj.extra_data.get("dedup_engine_similarity_pair"),
-            }, context=self.context
+            },
+            context=self.context,
         ).data
 
 

@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from typing import Any, Callable
+
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -346,6 +347,8 @@ class TestGrievanceTicketList:
                     "id": str(grievance_ticket.admin2.id),
                     "name": grievance_ticket.admin2.name,
                     "p_code": grievance_ticket.admin2.p_code,
+                    "area_type": grievance_ticket.admin2.area_type.id,
+                    "updated_at": f"{grievance_ticket.admin2.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
                 }
                 if grievance_ticket.admin2
                 else None
@@ -482,7 +485,7 @@ class TestGrievanceTicketList:
         "permissions, area_limit, expected_tickets",
         [
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], False, [0, 1, 2, 6, 7, 8]),
-            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR],False, [0, 1, 6, 7, 8]),
+            ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR], False, [0, 1, 6, 7, 8]),
             ([Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER], False, [0, 2, 6, 7, 8]),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], False, [3, 4, 5]),
             ([Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR], False, [3, 5]),
