@@ -1151,6 +1151,7 @@ class PaymentSmallSerializer(serializers.ModelSerializer):
         verification = obj.payment_verifications.first()
         return getattr(verification, "id", None)
 
+
 class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     payment_verification_plan = PaymentVerificationPlanSerializer()
