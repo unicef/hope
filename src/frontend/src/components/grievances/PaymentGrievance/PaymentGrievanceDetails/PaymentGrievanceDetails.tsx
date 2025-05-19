@@ -23,6 +23,7 @@ import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { VerifyPaymentGrievance } from '../VerifyPaymentGrievance/VerifyPaymentGrievance';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledBox = styled(Paper)`
   display: flex;

@@ -8,14 +8,12 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import {
-  GrievanceTicketQuery,
-  useAllEditHouseholdFieldsQuery,
-} from '@generated/graphql';
+import { useAllEditHouseholdFieldsQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { householdDataRow } from './householdDataRow';
 import { handleSelected } from '../utils/helpers';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketDetail;

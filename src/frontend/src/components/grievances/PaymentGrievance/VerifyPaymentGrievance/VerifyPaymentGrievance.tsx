@@ -18,10 +18,10 @@ import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useUpdateGrievanceMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketDetail;

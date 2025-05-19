@@ -1,9 +1,6 @@
 import { ReactElement } from 'react';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import {
-  GrievanceTicketQuery,
-  useAllAddIndividualFieldsQuery,
-} from '@generated/graphql';
+import { useAllAddIndividualFieldsQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { DocumentsTable } from './DocumentsTable';
 import { DocumentsToEditTable } from './DocumentsToEditTable';
@@ -15,6 +12,7 @@ import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { PaymentChannelsTable } from './PaymentChannelsTable';
 import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
 import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketDetail;

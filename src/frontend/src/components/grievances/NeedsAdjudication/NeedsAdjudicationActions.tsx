@@ -10,10 +10,10 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BiometricsResults } from './BiometricsResults';
 import {
-  GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
   GrievanceTicketDocument,
 } from '@generated/graphql';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface NeedsAdjudicationActionsProps {
   ticket: GrievanceTicketDetail;

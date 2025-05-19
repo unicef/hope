@@ -14,9 +14,9 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 
 interface LookUpReassignRoleProps {
   household?:
-    | GrievanceDetail['household']
-    | GrievanceDetail['individual']['householdsAndRoles'][number]['household'];
-  individualToReassign: GrievanceDetail['individual'];
+    | GrievanceTicketDetail['household']
+    | GrievanceTicketDetail['individual']['householdsAndRoles'][number]['household'];
+  individualToReassign: GrievanceTicketDetail['individual'];
   initialSelectedIndividualId: string;
   ticket: GrievanceTicketDetail;
   individualRole: { role: string; id: string };

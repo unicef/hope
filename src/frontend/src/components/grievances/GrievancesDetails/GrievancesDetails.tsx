@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import { replaceLabels } from '../utils/createGrievanceUtils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketDetail;
