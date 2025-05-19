@@ -42,12 +42,11 @@ export function GrievancesSidebar({
       {
         category: GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
         issueType: undefined,
-        approveStatus: ticket?.systemFlaggingTicketDetails?.approveStatus,
+        approveStatus: ticket?.ticketDetails?.approveStatus,
       },
       {
         category: GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION,
-        selectedIndividual:
-          ticket?.needsAdjudicationTicketDetails?.selectedIndividual,
+        selectedIndividual: ticket?.ticketDetails?.selectedIndividual,
       },
     ].some(
       (condition) =>

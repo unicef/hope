@@ -49,7 +49,7 @@ export function DeleteIndividualGrievanceDetails({
       (el) => el.role === IndividualRoleInHouseholdRole.Primary,
     ).length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
+    JSON.parse(ticket.ticketDetails.roleReassignData),
   )?.filter(
     (el: RoleReassignData) =>
       el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
@@ -128,7 +128,7 @@ export function DeleteIndividualGrievanceDetails({
           }
         }
         if (fieldAttribute?.type === 'DATE') {
-          textValue = <UniversalMoment>{textValue}</UniversalMoment>;
+          textValue = <UniversalMoment>{textValue as string}</UniversalMoment>;
         }
         return (
           <Grid key={key} size={{ xs: 6 }}>
@@ -136,7 +136,7 @@ export function DeleteIndividualGrievanceDetails({
               label={
                 snakeKey === 'sex' ? t('GENDER') : snakeKey.replace(/_/g, ' ')
               }
-              value={textValue}
+              value={<>{textValue}</>}
             />
           </Grid>
         );
