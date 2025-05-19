@@ -61,9 +61,9 @@ export function GrievancesSidebar({
     const isRightStatus = status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
     if (!isRightStatus) return false;
 
-    const householdsAndRoles = individual?.householdsAndRoles || [];
+    const rolesInHouseholds = individual?.rolesInHouseholds || [];
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
-    const hasRolesToReassign = householdsAndRoles.some(
+    const hasRolesToReassign = rolesInHouseholds.some(
       (el) => el.role !== 'NO_ROLE',
     );
 
@@ -72,8 +72,7 @@ export function GrievancesSidebar({
       category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
       issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
     ) {
-      const { role, relationship } =
-        ticket.individualDataUpdateTicketDetails.individualData;
+      const { role, relationship } = ticket.ticketDetails.individualData;
       if (isEmpty(role) && isEmpty(relationship)) {
         isProperDataChange = false;
       }
@@ -88,7 +87,7 @@ export function GrievancesSidebar({
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-    ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion &&
+    ticket.ticketDetails.isMultipleDuplicatesVersion &&
     !isSocialDctType;
 
   const renderRightSection = (): ReactElement => {
@@ -98,16 +97,13 @@ export function GrievancesSidebar({
       return (
         <Box display="flex" flexDirection="column">
           <Box mt={3}>
-            {ticket.paymentVerificationTicketDetails
-              ?.hasMultiplePaymentVerifications ? (
+            {ticket.ticketDetails?.hasMultiplePaymentVerifications ? (
               <PaymentIds
                 verifications={
-                  ticket.paymentVerificationTicketDetails?.paymentVerifications?.edges.map(
-                    (edge) => ({
-                      id: edge.node.id,
-                      paymentId: ticket.paymentRecord.unicefId,
-                    }),
-                  ) || []
+                  ticket.ticketDetails?.paymentVerifications.map((edge) => ({
+                    id: edge.id,
+                    paymentId: ticket.paymentRecord.unicefId,
+                  })) || []
                 }
               />
             ) : null}
@@ -124,9 +120,7 @@ export function GrievancesSidebar({
           <Box display="flex" flexDirection="column">
             <ReassignRoleBox
               shouldDisplayButton
-              shouldDisableButton={
-                ticket.deleteIndividualTicketDetails?.approveStatus
-              }
+              shouldDisableButton={ticket.ticketDetails?.approveStatus}
               ticket={ticket}
             />
           </Box>

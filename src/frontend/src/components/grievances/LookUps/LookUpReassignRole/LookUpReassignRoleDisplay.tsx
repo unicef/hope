@@ -13,7 +13,7 @@ export function LookUpReassignRoleDisplay({
 }: {
   selectedHousehold?:
     | GrievanceTicketDetail['household']
-    | GrievanceTicketDetail['individual']['householdsAndRoles'][number]['household'];
+    | GrievanceTicketDetail['individual']['rolesInHouseholds'][number]['household'];
   selectedIndividual;
   setLookUpDialogOpen;
   disabled?: boolean;

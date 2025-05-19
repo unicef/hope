@@ -58,13 +58,13 @@ export function ReassignMultipleRoleBox({
       {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
         const { household } = selectedIndividualToReassign;
 
-        const householdsAndRoles =
-          selectedIndividualToReassign?.householdsAndRoles || [];
+        const rolesInHouseholds =
+          selectedIndividualToReassign?.rolesInHouseholds || [];
 
         const shouldShowReassignHoH =
           selectedIndividualToReassign?.id === household?.headOfHousehold?.id;
 
-        const mappedLookUpsForExternalHouseholds = householdsAndRoles
+        const mappedLookUpsForExternalHouseholds = rolesInHouseholds
           .filter((element) => element.role !== 'NO_ROLE')
           .map((householdAndRole) => (
             <Box mb={2} mt={2} key={householdAndRole.id}>

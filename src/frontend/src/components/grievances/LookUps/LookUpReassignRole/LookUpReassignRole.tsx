@@ -15,7 +15,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 interface LookUpReassignRoleProps {
   household?:
     | GrievanceTicketDetail['household']
-    | GrievanceTicketDetail['individual']['householdsAndRoles'][number]['household'];
+    | GrievanceTicketDetail['individual']['rolesInHouseholds'][number]['household'];
   individualToReassign: GrievanceTicketDetail['individual'];
   initialSelectedIndividualId: string;
   ticket: GrievanceTicketDetail;
@@ -93,11 +93,9 @@ export function LookUpReassignRole({
     switch (category) {
       case GRIEVANCE_CATEGORIES.DATA_CHANGE:
         if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-          roleReassignData =
-            ticket?.deleteIndividualTicketDetails?.roleReassignData;
+          roleReassignData = ticket?.ticketDetails?.roleReassignData;
         } else if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-          roleReassignData =
-            ticket?.individualDataUpdateTicketDetails?.roleReassignData;
+          roleReassignData = ticket?.ticketDetails?.roleReassignData;
         }
         break;
       case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
