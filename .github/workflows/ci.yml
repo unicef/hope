@@ -33,8 +33,6 @@ jobs:
   deploy:
     uses: ./.github/workflows/cd.yml
     secrets: inherit
-    with:
-      AZURE_PIPELINE_ID: ${{ vars.AZURE_PIPELINE_ID }}
     needs: build
     if: |
       github.event_name == 'push' &&
