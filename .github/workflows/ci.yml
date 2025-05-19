@@ -44,5 +44,6 @@ jobs:
         github.ref == 'refs/heads/master' ||
         github.ref == 'refs/heads/ephemeral-1' ||
         github.ref == 'refs/heads/ephemeral-2' ||
-        github.ref == 'refs/heads/ephemeral-3'
+        github.ref == 'refs/heads/ephemeral-3' ||
+        github.ref == 'feature/development-improvements'
       )
