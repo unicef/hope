@@ -6,7 +6,6 @@ from uuid import UUID
 from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
 
-from apps.payment.models import PaymentDataCollector
 from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.geo.models import Country
@@ -21,6 +20,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     Payment,
+    PaymentDataCollector,
     PaymentHouseholdSnapshot,
     PaymentPlan,
 )
