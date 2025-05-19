@@ -6,8 +6,6 @@ on:
         required: true
       docker_password:
         required: true
-      bla_bla:
-        required: true
 
 jobs:
   build_and_push_dist:
