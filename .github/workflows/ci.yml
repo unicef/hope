@@ -1,5 +1,5 @@
 name: CI_NEW
-run-name: NEW CI RUN ${{ github.ref_name }} by @${{ github.actor }}
+run-name: NEW CI RUN ${{ github.ref_name }}
 on:
   push:
     branches:
