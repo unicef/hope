@@ -141,7 +141,7 @@ class TestGrievanceTicketFilters:
                     "admin2": None,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Payment Verification ticket 2, program2",
+                    "description": "Payment Verification ticket 2, program1",
                     "category": GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": self.user,
@@ -155,7 +155,7 @@ class TestGrievanceTicketFilters:
                     "admin2": self.area2,
                     "language": "Polish",
                     "consent": True,
-                    "description": "Data Change ticket, program1",
+                    "description": "Data Change ticket, program2",
                     "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
                     "status": GrievanceTicket.STATUS_NEW,
                     "created_by": self.user2,
@@ -170,7 +170,7 @@ class TestGrievanceTicketFilters:
                     "admin2": self.area2,
                     "language": "English",
                     "consent": True,
-                    "description": "Sensitive ticket, program2",
+                    "description": "Sensitive ticket, program1",
                     "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
                     "status": GrievanceTicket.STATUS_ON_HOLD,
                     "created_by": self.user,
@@ -185,7 +185,7 @@ class TestGrievanceTicketFilters:
                     "admin2": self.area2,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Sensitive ticket, program1",
+                    "description": "Sensitive ticket, program2",
                     "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": self.user,
@@ -200,7 +200,7 @@ class TestGrievanceTicketFilters:
                     "admin2": None,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Complaint ticket, program2",
+                    "description": "Complaint ticket, program1",
                     "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": self.user,
@@ -215,7 +215,7 @@ class TestGrievanceTicketFilters:
                     "admin2": self.area1,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "System Flagging ticket, program1",
+                    "description": "System Flagging ticket, program2",
                     "category": GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                     "status": GrievanceTicket.STATUS_CLOSED,
                     "created_by": self.user,
@@ -401,6 +401,28 @@ class TestGrievanceTicketFilters:
 
         for grievance_ticket in self.grievance_tickets[:-1]:
             grievance_ticket.linked_tickets.add(self.grievance_tickets[-1])
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("Filter", 1, 1),
+            ("Not", 0, 0),
+            ("", 6, 9),
+        ],
+    )
+    def test_filter_by_fsp(
+        self,
+        filter_value: bool,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "fsp",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
 
     @pytest.mark.parametrize(
         "filter_value, expected_count_for_program, expected_count_for_global",

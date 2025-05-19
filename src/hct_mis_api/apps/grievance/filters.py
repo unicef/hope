@@ -80,17 +80,11 @@ class GrievanceTicketFilter(FilterSet):
         "needs_adjudication_ticket_details": {"golden_records_individual": ("preferred_language",)},
     }
     TICKET_TYPES_WITH_FSP = (
-        ("complaint_ticket_details", "payment_record__service_provider__full_name"),
         ("complaint_ticket_details", "payment__financial_service_provider__name"),
-        ("sensitive_ticket_details", "payment_record__service_provider__full_name"),
         ("sensitive_ticket_details", "payment__financial_service_provider__name"),
         (
             "payment_verification_ticket_details",
             "payment_verification__payment__financial_service_provider__name",
-        ),
-        (
-            "payment_verification_ticket_details",
-            "payment_verification__payment_record__service_provider__full_name",
         ),
     )
     search = CharFilter(method="search_filter")
