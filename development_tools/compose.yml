@@ -36,23 +36,21 @@ services:
       retries: 5
 
   elasticsearch:
-    image: unicef/hct-elasticsearch
-    build:
-      context: elasticsearch
-      dockerfile: ./Dockerfile
+    image: bitnami/elasticsearch:8.14.0
     environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=es01
-      - bootstrap.memory_lock=true
+#      - node.name=es01
+#      - cluster.name=es-docker-cluster
+#      - cluster.initial_master_nodes=es01
+#      - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-      - xpack.security.enabled=false
+#      - xpack.security.enabled=false
+      - ELASTICSEARCH_PLUGINS=analysis-phonetic
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - data_es:/usr/share/elasticsearch/data
+      - data_es:/bitnami/elasticsearch/data
     ports:
       - "9200:9200"
     healthcheck:
