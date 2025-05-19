@@ -1,5 +1,5 @@
 name: CI-PR
-run-name: PR CHECK ##${{ github.event.pull_request.number }}- ${{ github.event.pull_request.title }}
+run-name: "PR CHECK #${{ github.event.pull_request.number }}- ${{ github.event.pull_request.title }}"
 on:
   pull_request:
     branches:
