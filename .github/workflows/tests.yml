@@ -4,6 +4,7 @@ on:
   workflow_call:
 jobs:
   unit:
+    name: Unit tests
     runs-on: ubuntu-latest
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
