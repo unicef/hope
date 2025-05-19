@@ -7,7 +7,6 @@ on:
     - staging
     - master
     - ephemeral-*
-    - feature/development-improvements
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,6 +19,7 @@ jobs:
     uses: ./.github/workflows/lint.yml
   tests:
     uses: ./.github/workflows/tests.yml
+    secrets: inherit
   build:
     needs:
       - lint
