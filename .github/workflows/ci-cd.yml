@@ -1,5 +1,5 @@
 name: CI
-run-name: CI RUN ${{ github.ref_name }}
+run-name: CI/CD RUN ${{ github.ref_name }}
 on:
   push:
     branches:
@@ -14,17 +14,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    uses: ./.github/workflows/lint.yml
-  tests:
-    uses: ./.github/workflows/tests.yml
-  build:
-    needs:
-      - lint
-      - tests
-    uses: ./.github/workflows/build.yml
+  checks:
+    uses: ./.github/workflows/ci-pr.yml
     secrets: inherit
   deploy:
     uses: ./.github/workflows/cd.yml
     secrets: inherit
-    needs: build
+    needs: checks
