@@ -27,6 +27,7 @@ import {
   ApproveBox,
   StyledTable,
 } from '../GrievancesApproveSection/ApproveSectionStyles';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export const NeedsAdjudicationDetailsOld = ({
   ticket,
