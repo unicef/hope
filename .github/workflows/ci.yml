@@ -1,5 +1,5 @@
-name: CI_NEW
-run-name: NEW CI RUN ${{ github.ref_name }}
+name: CI
+run-name: CI RUN ${{ github.ref_name }}
 on:
   push:
     branches:
@@ -8,24 +8,27 @@ on:
     - master
     - ephemeral-*
     - feature/development-improvements
-#  pull_request:
-#    branches:
-#    - develop
-#    - staging
-#    - master
-#    - ephemeral-*
-#    - long-term/*
+  pull_request:
+    branches:
+    - develop
+    - staging
+    - master
+    - ephemeral-*
+    - long-term/*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-#  lint:
-#    uses: ./.github/workflows/lint.yml
-#  tests:
-#    uses: ./.github/workflows/tests.yml
+  lint:
+    uses: ./.github/workflows/lint.yml
+  tests:
+    uses: ./.github/workflows/tests.yml
   build:
+    needs:
+      - lint
+      - tests
     uses: ./.github/workflows/build.yml
     secrets:
       docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
