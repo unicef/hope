@@ -99,15 +99,12 @@ export function LookUpReassignRole({
         }
         break;
       case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
-        roleReassignData =
-          ticket?.systemFlaggingTicketDetails?.roleReassignData;
+        roleReassignData = ticket?.ticketDetails?.roleReassignData;
         break;
       case GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION:
-        roleReassignData =
-          ticket?.needsAdjudicationTicketDetails?.roleReassignData;
+        roleReassignData = ticket?.ticketDetails?.roleReassignData;
         setShouldUseMultiple(
-          ticket?.needsAdjudicationTicketDetails?.selectedDuplicates?.length >
-            0,
+          ticket?.ticketDetails?.selectedDuplicates?.length > 0,
         );
         break;
       default:

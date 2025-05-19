@@ -135,12 +135,12 @@ export function DeleteHouseholdGrievanceDetails({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 1')}>
-            {ticket.household.admin1?.name}
+            {ticket.household.admin1}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 2')}>
-            {ticket.household.admin2?.name}
+            {ticket.household.admin2}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

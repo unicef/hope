@@ -159,7 +159,7 @@ export function DeleteIndividualGrievanceDetails({
   let dialogText = t(
     `You did not approve the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
   );
-  if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+  if (!ticket.ticketDetails.approveStatus) {
     dialogText = t(
       `You are approving the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
     );
@@ -183,8 +183,7 @@ export function DeleteIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus:
-                          !ticket.deleteIndividualTicketDetails?.approveStatus,
+                        approveStatus: !ticket.ticketDetails?.approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -193,10 +192,10 @@ export function DeleteIndividualGrievanceDetails({
                         },
                       ],
                     });
-                    if (ticket.deleteIndividualTicketDetails.approveStatus) {
+                    if (ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Disapproved'));
                     }
-                    if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+                    if (!ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
@@ -205,14 +204,12 @@ export function DeleteIndividualGrievanceDetails({
                 })
               }
               variant={
-                ticket.deleteIndividualTicketDetails?.approveStatus
-                  ? 'outlined'
-                  : 'contained'
+                ticket.ticketDetails?.approveStatus ? 'outlined' : 'contained'
               }
               color="primary"
               disabled={!approveEnabled}
             >
-              {ticket.deleteIndividualTicketDetails?.approveStatus
+              {ticket.ticketDetails?.approveStatus
                 ? t('Disapprove')
                 : t('Approve')}
             </Button>
