@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -52,7 +51,7 @@ export const NeedsAdjudicationDetailsOld = ({
       },
     ],
   });
-  const details = ticket.needsAdjudicationTicketDetails;
+  const details = ticket.ticketDetails;
   const [selectedDuplicate, setSelectedDuplicate] = useState(
     details?.selectedIndividual?.id,
   );

@@ -29,7 +29,7 @@ export function RequestedIndividualDataChangeTable({
 }: RequestedIndividualDataChangeTableProps): ReactElement {
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
+    ...ticket.ticketDetails.individualData,
   };
   const {
     documents,

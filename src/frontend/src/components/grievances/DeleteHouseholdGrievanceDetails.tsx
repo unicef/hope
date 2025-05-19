@@ -51,48 +51,39 @@ export function DeleteHouseholdGrievanceDetails({
     choicesData.residenceStatusChoices,
   );
 
-  const { approveStatus } = ticket.deleteHouseholdTicketDetails;
+  const { approveStatus } = ticket.ticketDetails;
 
   return (
     <ApproveBox>
       <Title>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} to be withdrawn`}</Typography>
-          {approveStatus &&
-            ticket.deleteHouseholdTicketDetails.reasonHousehold && (
-              <Box display="flex" alignItems="center">
-                <Info />
-                <Box mr={2}>
-                  <p>
-                    This {beneficiaryGroup?.groupLabel} is a duplicate of a{' '}
-                    {beneficiaryGroup?.groupLabel} ID:
-                  </p>
-                </Box>
-                {!isAllPrograms ? (
-                  <BlackLink
-                    to={`/${baseUrl}/population/household/${ticket.deleteHouseholdTicketDetails.reasonHousehold.id}`}
-                  >
-                    {
-                      ticket.deleteHouseholdTicketDetails.reasonHousehold
-                        .unicefId
-                    }
-                  </BlackLink>
-                ) : (
-                  <span>
-                    {
-                      ticket.deleteHouseholdTicketDetails.reasonHousehold
-                        .unicefId
-                    }
-                  </span>
-                )}
-                {canApproveDataChange && (
-                  <ApproveDeleteHouseholdGrievanceDetails
-                    type="edit"
-                    ticket={ticket}
-                  />
-                )}
+          {approveStatus && ticket.ticketDetails.reasonHousehold && (
+            <Box display="flex" alignItems="center">
+              <Info />
+              <Box mr={2}>
+                <p>
+                  This {beneficiaryGroup?.groupLabel} is a duplicate of a{' '}
+                  {beneficiaryGroup?.groupLabel} ID:
+                </p>
               </Box>
-            )}
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${ticket.ticketDetails.reasonHousehold.id}`}
+                >
+                  {ticket.ticketDetails.reasonHousehold.unicefId}
+                </BlackLink>
+              ) : (
+                <span>{ticket.ticketDetails.reasonHousehold.unicefId}</span>
+              )}
+              {canApproveDataChange && (
+                <ApproveDeleteHouseholdGrievanceDetails
+                  type="edit"
+                  ticket={ticket}
+                />
+              )}
+            </Box>
+          )}
           {canApproveDataChange && (
             <ApproveDeleteHouseholdGrievanceDetails
               type="button"

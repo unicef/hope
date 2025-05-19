@@ -46,8 +46,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
   const { showMessage } = useSnackbar();
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const { approveStatus, reasonHousehold } =
-    ticket.deleteHouseholdTicketDetails;
+  const { approveStatus, reasonHousehold } = ticket.ticketDetails;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 

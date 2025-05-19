@@ -13,7 +13,6 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import {
-  GrievanceTicketQuery,
   HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
@@ -48,7 +47,7 @@ export function RequestedIndividualDataChange({
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
   const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
+    ...ticket.ticketDetails.individualData,
   };
   let allApprovedCount = 0;
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;

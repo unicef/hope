@@ -47,7 +47,7 @@ export const NeedsAdjudicationTable = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const details = ticket?.needsAdjudicationTicketDetails;
+  const details = ticket?.ticketDetails;
 
   const handleSelect = (id: string) => {
     setSelectedIndividualIds((prevSelected: string[]) => {

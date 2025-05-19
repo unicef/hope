@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { LabelizedField } from '@core/LabelizedField';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentationField } from './DocumentationField';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -19,7 +20,7 @@ const DisabledDiv = styled.div<DisabledDivProps>`
 export interface EditDocumentationRowProps {
   setFieldValue;
   values;
-  document: GrievanceDetail['documentation'][number];
+  document: GrievanceTicketDetail['documentation'][number];
   arrayHelpers;
   index;
 }

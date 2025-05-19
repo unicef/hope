@@ -2,10 +2,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  GrievanceTicketQuery,
-  useApproveHouseholdDataChangeMutation,
-} from '@generated/graphql';
+import { useApproveHouseholdDataChangeMutation } from '@generated/graphql';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -36,7 +33,7 @@ export function RequestedHouseholdDataChange({
   };
   const [mutate] = useApproveHouseholdDataChangeMutation();
   const householdData = {
-    ...ticket.householdDataUpdateTicketDetails.householdData,
+    ...ticket.ticketDetails.householdData,
   };
   let allApprovedCount = 0;
   const flexFields = householdData?.flexFields || {};

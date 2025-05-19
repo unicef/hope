@@ -54,23 +54,17 @@ export const ReassignRoleBox = ({
   let uniqueIndividual;
 
   if (ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
-    individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
-    household =
-      ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
-    reassignData = JSON.parse(
-      ticket.needsAdjudicationTicketDetails.roleReassignData,
-    );
+    individual = ticket.ticketDetails.selectedIndividual;
+    household = ticket.ticketDetails.selectedIndividual?.household;
+    reassignData = JSON.parse(ticket.ticketDetails.roleReassignData);
     uniqueIndividual =
-      ticket.needsAdjudicationTicketDetails.possibleDuplicate.id ===
-      individual.id
-        ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
-        : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
+      ticket.ticketDetails.possibleDuplicate.id === individual.id
+        ? ticket.ticketDetails.goldenRecordsIndividual
+        : ticket.ticketDetails.possibleDuplicate;
   } else if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
   ) {
-    reassignData = JSON.parse(
-      ticket.systemFlaggingTicketDetails.roleReassignData,
-    );
+    reassignData = JSON.parse(ticket.ticketDetails.roleReassignData);
   }
   let householdsAndRoles = individual?.householdsAndRoles || [];
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
@@ -79,14 +73,10 @@ export const ReassignRoleBox = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
     ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
   ) {
-    if (isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)) {
+    if (isEmpty(ticket.ticketDetails.individualData.role)) {
       householdsAndRoles = [];
     }
-    if (
-      isEmpty(
-        ticket.individualDataUpdateTicketDetails.individualData.relationship,
-      )
-    ) {
+    if (isEmpty(ticket.ticketDetails.individualData.relationship)) {
       shouldShowReassignHoH = false;
     }
   }
