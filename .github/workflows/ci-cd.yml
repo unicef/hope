@@ -14,10 +14,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
-    uses: ./.github/workflows/ci-pr.yml
+  frontend:
+    uses: ./.github/workflows/frontend-checks.yml
+  lint:
+    uses: ./.github/workflows/lint.yml
+  tests:
+    uses: ./.github/workflows/tests.yml
+  build:
+    needs:
+      - lint
+      - tests
+      - frontend
+    uses: ./.github/workflows/build-and-push.yml
     secrets: inherit
   deploy:
     uses: ./.github/workflows/cd.yml
     secrets: inherit
-    needs: checks
+    needs:
+      - build

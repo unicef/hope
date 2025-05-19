@@ -16,13 +16,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  frontend:
+    uses: ./.github/workflows/frontend-checks.yml
   lint:
     uses: ./.github/workflows/lint.yml
   tests:
     uses: ./.github/workflows/tests.yml
   build:
-    needs:
-      - lint
-      - tests
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/build-and-push.yml
     secrets: inherit
