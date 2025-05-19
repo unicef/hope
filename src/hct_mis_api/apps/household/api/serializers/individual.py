@@ -135,6 +135,7 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
     roles_in_households = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
+    documents = serializers.SerializerMethodField()
 
     class Meta:
         model = Individual
@@ -146,6 +147,7 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
             "roles_in_households",
             "relationship",
             "role",
+            "documents",
         )
 
     def get_roles_in_households(self, obj: Individual) -> Dict:
@@ -158,6 +160,9 @@ class IndividualSimpleSerializer(serializers.ModelSerializer):
         if role:
             return role.get_role_display()
         return "-"
+
+    def get_documents(self, obj: Individual) -> Dict:
+        return DocumentSerializer(obj.documents(manager="all_merge_status_objects").all(), many=True).data
 
 
 class IndividualRoleInHouseholdSerializer(serializers.ModelSerializer):
