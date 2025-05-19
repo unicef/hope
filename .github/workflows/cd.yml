@@ -1,12 +1,7 @@
 on:
   workflow_run:
-    workflows: [CI]
-    branches:
-      - develop
-      - staging
-      - master
-      - ephemeral-*
-      - feature/development-improvements
+    workflows: [ci]
+    types: [completed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
