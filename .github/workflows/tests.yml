@@ -1,0 +1,259 @@
+name: TESTS
+
+on:
+  workflow_call:
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python & UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+          prune-cache: false
+          cache-local-path: ./uv-cache
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+          python-version: 3.12
+
+      - name: Restore cached vEnv
+        id: cache-venv-restore
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./venv
+            ./tox
+          key: ${{ runner.os }}-venv
+
+      - name: Install dependencies
+        run: uv sync --cache-dir ./uv-cache --frozen
+
+      - name: Save vEnv cache
+        id: cache-venv-save
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./venv
+            ./tox
+          key: ${{ runner.os }}-venv
+
+      - name: Run Lint
+        run: uv run tox -e lint
+
+      - name: Run Mypy
+        run: uv run tox -e mypy
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_DEFAULT_PLATFORM: linux/amd64
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      CACHE_DEFAULT: redis://localhost:6379/0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libjpeg-dev \
+            zlib1g-dev \
+            postgresql-client \
+            libpq-dev \
+            python3-psycopg2 \
+            python3-gdal \
+            gdal-bin \
+            libcairo2 \
+            libcairo2-dev \
+            libffi-dev \
+            libgdk-pixbuf2.0-0 \
+            libpango-1.0-0 \
+            libpangocairo-1.0-0 \
+            shared-mime-info \
+            wkhtmltopdf
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Launch services with Docker Compose
+        run: |
+          docker-compose -f development_tools/compose.yml up -d
+
+      - name: Wait for Postgres to be ready
+        run: |
+          until docker exec $(docker-compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
+      - name: Wait for Redis to be ready
+        run: |
+          until docker exec $(docker-compose -f development_tools/compose.yml  ps -q redis) redis-cli ping | grep PONG; do
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+
+      - name: Install Python & UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+          prune-cache: false
+          cache-local-path: ./uv-cache
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+          python-version: 3.12
+
+      - name: Restore cached vEnv
+        id: cache-venv-restore
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./venv
+            ./tox
+          key: ${{ runner.os }}-venv
+
+      - name: Install dependencies
+        run: uv sync --cache-dir ./uv-cache --frozen
+
+      - name: Save vEnv cache
+        id: cache-venv-save
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./venv
+            ./tox
+          key: ${{ runner.os }}-venv
+
+
+      - name: Run Test suite
+        run: uv run tox -e unit
+
+      - name: Tear down Docker Compose
+        if: always()
+        run: docker-compose -f development_tools/compose.yml down --volumes
+  selenium:
+    name: Selenium tests
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_DEFAULT_PLATFORM: linux/amd64
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/aurora
+      CACHE_DEFAULT: redis://localhost:6379/0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libjpeg-dev \
+            zlib1g-dev \
+            postgresql-client \
+            libpq-dev \
+            python3-psycopg2 \
+            python3-gdal \
+            gdal-bin \
+            libcairo2 \
+            libcairo2-dev \
+            libffi-dev \
+            libgdk-pixbuf2.0-0 \
+            libpango-1.0-0 \
+            libpangocairo-1.0-0 \
+            shared-mime-info \
+            wkhtmltopdf
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Launch services with Docker Compose
+        run: |
+          docker-compose -f development_tools/compose.yml up -d
+
+      - name: Wait for Postgres to be ready
+        run: |
+          until docker exec $(docker-compose -f development_tools/compose.yml ps -q db) pg_isready -U postgres; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
+      - name: Wait for Redis to be ready
+        run: |
+          until docker exec $(docker-compose -f development_tools/compose.yml ps -q redis) redis-cli ping | grep PONG; do
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+
+      - name: Set up Node.js & Yarn
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: src/frontend/yarn.lock
+
+
+      - name: Install JS dependencies & build
+        run: |
+          cd src/frontend
+          yarn install --frozen-lockfile
+          yarn build-for-backend
+
+      - name: Install Python & UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+          prune-cache: false
+          cache-local-path: ./uv-cache
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+          python-version: 3.12
+
+      - name: Restore cached vEnv
+        id: cache-venv-restore
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./venv
+            ./tox
+          key: ${{ runner.os }}-venv
+
+      - name: Install dependencies
+        run: uv sync --cache-dir ./uv-cache --frozen
+
+      - name: Save vEnv cache
+        id: cache-venv-save
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./venv
+            ./tox
+          key: ${{ runner.os }}-venv
+
+      - name: Run Selenium suite
+        run: uv run tox -e selenium
+
+      - name: Tear down Docker Compose
+        if: always()
+        run: docker-compose -f development_tools/compose.yml down --volumes
