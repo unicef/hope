@@ -23,35 +23,35 @@ jobs:
             echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
           fi
 
-      - name: Push dist
-        run: |
-          docker buildx create --use
-
-          tags="-t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}"
-
-          if [ -n "${{ env.BRANCH_NAME }}" ]; then
-            tags="$tags -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dist"
-          fi
-
-          # Base part of the command
-          build_command="docker buildx build \
-            --progress=plain \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
-            $tags \
-            -f ./docker/Dockerfile \
-            --target dist \
-            --push ./"
-
-          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-            version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
-            tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$version
-            build_command="$build_command -t $tagged_image"
-          fi
-
-          eval $build_command
+#      - name: Push dist
+#        run: |
+#          docker buildx create --use
+#
+#          tags="-t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist \
+#            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}"
+#
+#          if [ -n "${{ env.BRANCH_NAME }}" ]; then
+#            tags="$tags -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dist"
+#          fi
+#
+#          # Base part of the command
+#          build_command="docker buildx build \
+#            --progress=plain \
+#            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
+#            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
+#            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
+#            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
+#            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
+#            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
+#            $tags \
+#            -f ./docker/Dockerfile \
+#            --target dist \
+#            --push ./"
+#
+#          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+#            version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
+#            tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$version
+#            build_command="$build_command -t $tagged_image"
+#          fi
+#
+#          eval $build_command
