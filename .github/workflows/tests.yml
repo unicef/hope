@@ -3,51 +3,7 @@ name: TESTS
 on:
   workflow_call:
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Python & UV
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: latest
-          enable-cache: true
-          prune-cache: false
-          cache-local-path: ./uv-cache
-          cache-dependency-glob: |
-            **/pyproject.toml
-            **/uv.lock
-          python-version: 3.12
-
-      - name: Restore cached vEnv
-        id: cache-venv-restore
-        uses: actions/cache@v4
-        with:
-          path: |
-            ./venv
-            ./tox
-          key: ${{ runner.os }}-venv
-
-      - name: Install dependencies
-        run: uv sync --cache-dir ./uv-cache --frozen
-
-      - name: Save vEnv cache
-        id: cache-venv-save
-        uses: actions/cache@v4
-        with:
-          path: |
-            ./venv
-            ./tox
-          key: ${{ runner.os }}-venv
-
-      - name: Run Lint
-        run: uv run tox -e lint
-
-      - name: Run Mypy
-        run: uv run tox -e mypy
-  test:
+  unit:
     runs-on: ubuntu-latest
     env:
       DOCKER_DEFAULT_PLATFORM: linux/amd64
