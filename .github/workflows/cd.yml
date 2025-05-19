@@ -1,5 +1,4 @@
 name: CD
-run-name: CD RUN ${{ github.ref_name }}
 on:
   workflow_call:
 
