@@ -26,3 +26,6 @@ jobs:
   build:
     needs: [lint, tests]
     uses: ./.github/workflows/build.yml
+    secrets:
+      docker_username: ${{ secrets.DOCKER_USERNAME }}
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
