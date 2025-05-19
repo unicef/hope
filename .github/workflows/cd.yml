@@ -3,9 +3,10 @@ run-name: CD RUN ${{ github.ref_name }}
 on:
   workflow_call:
     inputs:
-        AZURE_PIPELINE_ID:
-            required: true
-            description: 'Comma-separated list of Azure DevOps pipeline IDs to trigger'
+      AZURE_PIPELINE_ID:
+        required: true
+        type: string
+        description: 'Comma-separated list of Azure DevOps pipeline IDs to trigger'
 
 jobs:
   deploy:
