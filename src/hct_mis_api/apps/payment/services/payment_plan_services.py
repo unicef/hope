@@ -17,7 +17,11 @@ from psycopg2._psycopg import IntegrityError
 from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import chunks, decode_id_string
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -37,6 +41,7 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
+    PaymentDataCollector,
     PaymentPlan,
     PaymentPlanSplit,
 )
@@ -52,7 +57,6 @@ from hct_mis_api.apps.targeting.models import (
 )
 from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
-from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
@@ -393,20 +397,15 @@ class PaymentPlanService:
                 msg = f"Couldn't find a primary collector in {household['unicef_id']}"
                 logging.exception(msg)
                 raise GraphQLError(msg)
+            collector = Individual.objects.get(id=collector_id)
 
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
-                wallet = Account.objects.filter(
-                    individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
+                account = Account.objects.filter(
+                    individual=collector, account_type=payment_plan.delivery_mechanism.account_type
                 ).first()
-                if not wallet:
-                    wallet = Account.objects.create(
-                        individual_id=collector_id,
-                        account_type=payment_plan.delivery_mechanism.account_type,
-                        rdi_merge_status=MergeStatusModel.MERGED,
-                    )
-                has_valid_wallet = wallet.validate(
-                    payment_plan.financial_service_provider, payment_plan.delivery_mechanism
+                has_valid_wallet = PaymentDataCollector.validate_account(
+                    payment_plan.financial_service_provider, payment_plan.delivery_mechanism, collector, account
                 )
 
             payments_to_create.append(
@@ -419,7 +418,7 @@ class PaymentPlanService:
                     status_date=timezone.now(),
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
-                    collector_id=collector_id,
+                    collector=collector,
                     financial_service_provider=payment_plan.financial_service_provider,
                     delivery_type=payment_plan.delivery_mechanism,
                     has_valid_wallet=has_valid_wallet,

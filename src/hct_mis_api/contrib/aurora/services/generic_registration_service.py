@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 
+from apps.payment.models import FinancialInstitutionMapping
+
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.forms import (
     BankAccountInfoForm,
@@ -21,11 +23,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
+from hct_mis_api.apps.payment.models import AccountType, PendingAccount
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -340,14 +338,17 @@ class GenericRegistrationService(BaseRegistrationService):
                     self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
             if account_data:
-                financial_institution_code = account_data["data"].get("uba_code", None)
+                financial_institution = None
+                if financial_institution_code := account_data["data"].get("uba_code", None):
+                    if financial_institution_mapping := FinancialInstitutionMapping.objects.filter(
+                        code=financial_institution_code,
+                    ).first():
+                        financial_institution = financial_institution_mapping.financial_institution
                 PendingAccount.objects.create(
                     individual_id=individual.id,
                     account_type=AccountType.objects.get(key="bank"),
                     number=account_data["data"].get("number", None),
-                    financial_institution=FinancialInstitution.objects.filter(code=financial_institution_code).first()
-                    if financial_institution_code
-                    else None,
+                    financial_institution=financial_institution,
                     **account_data,
                 )
 

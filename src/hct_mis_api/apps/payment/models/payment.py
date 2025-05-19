@@ -1963,14 +1963,6 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
 
-    def get_associated_object(self, associated_with: str) -> Any:
-        associated_objects = {
-            FspNameMapping.SourceModel.INDIVIDUAL.value: self.individual,
-            FspNameMapping.SourceModel.HOUSEHOLD.value: self.individual.household,
-            FspNameMapping.SourceModel.ACCOUNT.value: self.data,
-        }
-        return associated_objects.get(associated_with)
-
     @cached_property
     def unique_delivery_data_for_account_type(self) -> Dict:
         delivery_data = {}
@@ -1984,71 +1976,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
         return delivery_data
 
-    def delivery_data(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> Dict:
-        delivery_data = {}
-
-        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
-        collector_country = self.individual.household.country
-        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
-            dm_config = country_config
-        else:
-            dm_config = dm_configs.first()
-        if not dm_config:
-            return {}
-
-        for field in dm_config.required_fields:
-            if fsp_name_mapping := fsp_names_mappings.get(field, None):
-                internal_field = fsp_name_mapping.hope_name
-                associated_object = self.get_associated_object(fsp_name_mapping.source)
-            else:
-                internal_field = field
-                associated_object = self.data
-            if isinstance(associated_object, dict):
-                value = associated_object.get(internal_field, None)
-                delivery_data[field] = value and str(value)
-            else:
-                delivery_data[field] = getattr(associated_object, internal_field, None)
-
-        if self.number:
-            delivery_data["number"] = self.number
-        if self.financial_institution:
-            delivery_data["financial_institution"] = self.financial_institution.code
-
-        return delivery_data
-
-    def validate(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> bool:
-        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
-        collector_country = self.individual.household.country
-        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
-            dm_config = country_config
-        else:
-            dm_config = dm_configs.first()
-        if not dm_config:
-            logger.error(f"DeliveryMechanismConfig not found for {fsp}, {delivery_mechanism}")
-            return True
-
-        for field in dm_config.required_fields:
-            if fsp_name_mapping := fsp_names_mappings.get(field, None):
-                field = fsp_name_mapping.hope_name
-                associated_object = self.get_associated_object(fsp_name_mapping.source)
-            else:
-                associated_object = self.data
-            if isinstance(associated_object, dict):
-                value = associated_object.get(field, None)
-            else:
-                value = getattr(associated_object, field, None)
-
-            if value in [None, ""]:
-                return False
-
-        return True
-
-    @classmethod
-    def validate_uniqueness(cls, qs: QuerySet["Account"]) -> None:
-        for dmd in qs:
-            dmd.update_unique_field()
+    @property
+    def unique_fields(self) -> List[str]:
+        return self.account_type.unique_fields
 
     def update_unique_field(self) -> None:
         if hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
@@ -2076,9 +2006,107 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
                     self.is_unique = False
                     self.save(update_fields=["unique_key", "is_unique"])
 
-    @property
-    def unique_fields(self) -> List[str]:
-        return self.account_type.unique_fields
+    @classmethod
+    def validate_uniqueness(cls, qs: QuerySet["Account"]) -> None:
+        for dmd in qs:
+            dmd.update_unique_field()
+
+
+class PaymentDataCollector(Account):
+    @classmethod
+    def get_associated_object(
+        cls,
+        associated_with: str,
+        collector: Individual,
+        account: Optional[Account] = None,
+    ) -> Any:
+        associated_objects = {
+            FspNameMapping.SourceModel.INDIVIDUAL.value: collector,
+            FspNameMapping.SourceModel.HOUSEHOLD.value: collector.household,
+            FspNameMapping.SourceModel.ACCOUNT.value: account.data if account else {},
+        }
+        return associated_objects.get(associated_with)
+
+    @classmethod
+    def delivery_data(
+        cls,
+        fsp: "FinancialServiceProvider",
+        delivery_mechanism: "DeliveryMechanism",
+        collector: "Individual",
+        account: Optional["Account"] = None,
+    ) -> Dict:
+        delivery_data = {}
+        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
+
+        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
+        collector_country = collector.household.country
+        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
+            dm_config = country_config
+        else:
+            dm_config = dm_configs.first()
+        if not dm_config:
+            return account.data if account else {}
+
+        for field in dm_config.required_fields:
+            if fsp_name_mapping := fsp_names_mappings.get(field, None):
+                internal_field = fsp_name_mapping.hope_name
+                associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
+            else:
+                internal_field = field
+                associated_object = account.data if account else {}
+            if isinstance(associated_object, dict):
+                value = associated_object.get(internal_field, None)
+                delivery_data[field] = value and str(value)
+            else:
+                delivery_data[field] = getattr(associated_object, internal_field, None)
+
+        if account:
+            if account.number:
+                delivery_data["number"] = account.number
+            if account.financial_institution:
+                delivery_data["financial_institution"] = account.financial_institution.code
+
+        return delivery_data
+
+    @classmethod
+    def validate_account(
+        cls,
+        fsp: "FinancialServiceProvider",
+        delivery_mechanism: "DeliveryMechanism",
+        collector: Individual,
+        account: Optional["Account"] = None,
+    ) -> bool:
+        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
+        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
+
+        collector_country = collector.household.country
+        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
+            dm_config = country_config
+        else:
+            dm_config = dm_configs.first()
+        if not dm_config:
+            return True
+
+        for field in dm_config.required_fields:
+            if fsp_name_mapping := fsp_names_mappings.get(field, None):
+                field = fsp_name_mapping.hope_name
+                associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
+            else:
+                associated_object = account.data if account else {}
+            if isinstance(associated_object, dict):
+                value = associated_object.get(field, None)
+            else:
+                value = getattr(associated_object, field, None)
+
+            if value in [None, ""]:
+                return False
+
+        return True
+
+    class Meta:
+        proxy = True
+        verbose_name = "Payment Data Collector"
+        verbose_name_plural = "Payment Data Collectors"
 
 
 class PendingAccount(Account):

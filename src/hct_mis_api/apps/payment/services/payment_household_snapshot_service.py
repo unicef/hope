@@ -6,6 +6,7 @@ from uuid import UUID
 from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
 
+from apps.payment.models import PaymentDataCollector
 from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.geo.models import Country
@@ -164,8 +165,10 @@ def get_individual_snapshot(individual: Individual, payment: Optional[Payment] =
 
     if is_hh_collector and payment:
         individual_data["accounts_data"] = {
-            dmd.account_type.key: dmd.delivery_data(payment.financial_service_provider, payment.delivery_type)
-            for dmd in individual.accounts.all()
+            account.account_type.key: PaymentDataCollector.delivery_data(
+                payment.financial_service_provider, payment.delivery_type, individual, account
+            )
+            for account in individual.accounts.all()
         }
 
     return individual_data
