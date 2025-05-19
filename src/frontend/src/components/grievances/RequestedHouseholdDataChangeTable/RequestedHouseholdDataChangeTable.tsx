@@ -37,7 +37,7 @@ function RequestedHouseholdDataChangeTable({
   const selectedBioData = values.selected;
   const { selectedFlexFields } = values;
   const householdData = {
-    ...ticket.householdDataUpdateTicketDetails.householdData,
+    ...ticket.ticketDetails.householdData,
   };
   const flexFields = householdData.flexFields || {};
   delete householdData.flexFields;

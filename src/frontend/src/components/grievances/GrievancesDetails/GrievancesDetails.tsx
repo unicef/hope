@@ -7,10 +7,7 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  GrievanceTicketQuery,
-  GrievancesChoiceDataQuery,
-} from '@generated/graphql';
+import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Grid2 as Grid, GridSize, Typography } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';

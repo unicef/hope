@@ -50,8 +50,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
-  const { dedupEngineSimilarityPair } =
-    ticket.needsAdjudicationTicketDetails.extraData;
+  const { dedupEngineSimilarityPair } = ticket.ticketDetails.extraData;
 
   return (
     <Box

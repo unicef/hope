@@ -39,7 +39,7 @@ function GrievancesApproveSection({
     if (
       ticket?.category?.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION
     ) {
-      if (ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion) {
+      if (ticket.ticketDetails.isMultipleDuplicatesVersion) {
         return (
           <NeedsAdjudicationDetailsNew
             ticket={ticket}
@@ -107,10 +107,7 @@ function GrievancesApproveSection({
     if (
       ticket?.category?.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     ) {
-      if (
-        ticket.paymentVerificationTicketDetails
-          .hasMultiplePaymentVerifications === false
-      ) {
+      if (ticket.ticketDetails.hasMultiplePaymentVerifications === false) {
         return (
           <PaymentGrievanceDetails
             ticket={ticket}

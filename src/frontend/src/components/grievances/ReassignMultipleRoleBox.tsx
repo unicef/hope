@@ -3,10 +3,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  GrievanceTicketQuery,
-  IndividualRoleInHouseholdRole,
-} from '@generated/graphql';
+import { IndividualRoleInHouseholdRole } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -45,16 +42,14 @@ export function ReassignMultipleRoleBox({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const reassignData = JSON.parse(
-    ticket.needsAdjudicationTicketDetails.roleReassignData,
-  );
+  const reassignData = JSON.parse(ticket.ticketDetails.roleReassignData);
   const reassignDataDictByIndividualId = {};
   for (const key of Object.keys(reassignData)) {
     reassignDataDictByIndividualId[reassignData[key].individual] =
       reassignData[key];
   }
   const selectedIndividualsToReassign =
-    ticket.needsAdjudicationTicketDetails.selectedDuplicates?.filter(
+    ticket.ticketDetails.selectedDuplicates?.filter(
       (el) =>
         el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
     );

@@ -16,7 +16,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useApprovePaymentDetailsMutation,
 } from '@generated/graphql';
 import { useConfirmation } from '@core/ConfirmationDialog';
@@ -50,14 +49,11 @@ export function PaymentGrievanceDetails({
   const [mutate] = useApprovePaymentDetailsMutation();
   const confirm = useConfirmation();
 
-  const approveStatus = ticket.paymentVerificationTicketDetails?.approveStatus;
-  const oldReceivedAmount =
-    ticket.paymentVerificationTicketDetails?.oldReceivedAmount;
-  const newReceivedAmount =
-    ticket.paymentVerificationTicketDetails?.newReceivedAmount;
+  const approveStatus = ticket.ticketDetails?.approveStatus;
+  const oldReceivedAmount = ticket.ticketDetails?.oldReceivedAmount;
+  const newReceivedAmount = ticket.ticketDetails?.newReceivedAmount;
   const receivedAmount =
-    ticket.paymentVerificationTicketDetails?.paymentVerification
-      ?.receivedAmount;
+    ticket.ticketDetails?.paymentVerification?.receivedAmount;
   const deliveredQuantity = ticket.paymentRecord?.deliveredQuantity;
   const entitlementQuantity = ticket.paymentRecord?.entitlementQuantity;
 

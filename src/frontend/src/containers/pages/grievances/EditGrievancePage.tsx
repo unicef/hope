@@ -15,7 +15,6 @@ import {
   useAllEditHouseholdFieldsQuery,
   useAllEditPeopleFieldsQuery,
   useAllProgramsForChoicesQuery,
-  useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
   useGrievancesChoiceDataQuery,
   useUpdateGrievanceMutation,
@@ -81,6 +80,7 @@ import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -107,13 +107,15 @@ const EditGrievancePage = (): ReactElement => {
 
   const {
     data: ticketData,
-    loading: ticketLoading,
+    isLoading: ticketLoading,
     error,
-  } = useGrievanceTicketQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
+  } = useQuery<GrievanceTicketDetail>({
+    queryKey: ['businessAreaProgram', businessAreaSlug, id],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id: id,
+      }),
   });
 
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
@@ -198,7 +200,7 @@ const EditGrievancePage = (): ReactElement => {
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const currentUserId = currentUserData.id;
-  const ticket = ticketData.grievanceTicket;
+  const ticket = ticketData;
 
   const isCreator = ticket.createdBy?.id === currentUserId;
   const isOwner = ticket.assignedTo?.id === currentUserId;

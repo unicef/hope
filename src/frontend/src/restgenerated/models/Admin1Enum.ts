@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF99` - East Margaret
- * * `HR55` - East Matthew
- * * `AF10` - Garnerberg
- * * `HR29` - Lake Saraberg
- * * `AF85` - Lopezville
- * * `UA83` - Melissaville
- * * `UA84` - New Robin
- * * `UA60` - North Barbara
- * * `HR32` - Traciberg
+ * * `HR73` - East Kaitlynberg
+ * * `AF42` - East Leeborough
+ * * `UA10` - Lake Bryanside
+ * * `HR79` - Marshallport
+ * * `AF74` - New David
+ * * `HR19` - New Walterfurt
+ * * `UA53` - North Patriciashire
+ * * `UA63` - Port Dianetown
+ * * `AF12` - Solomonborough
  */
 export enum Admin1Enum {
-    AF99 = 'AF99',
-    HR55 = 'HR55',
-    AF10 = 'AF10',
-    HR29 = 'HR29',
-    AF85 = 'AF85',
-    UA83 = 'UA83',
-    UA84 = 'UA84',
-    UA60 = 'UA60',
-    HR32 = 'HR32',
+    HR73 = 'HR73',
+    AF42 = 'AF42',
+    UA10 = 'UA10',
+    HR79 = 'HR79',
+    AF74 = 'AF74',
+    HR19 = 'HR19',
+    UA53 = 'UA53',
+    UA63 = 'UA63',
+    AF12 = 'AF12',
 }

@@ -52,7 +52,7 @@ export const FlagDetails = ({
     'Are you sure you want to confirm flag (sanction list match) ?',
   );
   const removalText = t('Are you sure you want to remove the flag ?');
-  const details = ticket.systemFlaggingTicketDetails;
+  const details = ticket.ticketDetails;
   const isFlagConfirmed = details.approveStatus;
   return (
     <ApproveBox>

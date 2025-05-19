@@ -24,9 +24,8 @@ export function GrievancesSidebar({
     const { category, issueType, status } = ticket;
 
     if (category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
-      individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
-      household =
-        ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
+      individual = ticket.ticketDetails.selectedIndividual;
+      household = ticket.ticketDetails.selectedIndividual?.household;
     }
     const isOneIndividual = household?.activeIndividualsCount === 1;
     if (isOneIndividual) return false;
