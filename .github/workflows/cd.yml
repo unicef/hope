@@ -1,7 +1,5 @@
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
+  push:
     branches:
       - develop
       - staging
