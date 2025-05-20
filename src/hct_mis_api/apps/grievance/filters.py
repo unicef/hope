@@ -16,6 +16,7 @@ from django_filters import (
     TypedMultipleChoiceFilter,
     UUIDFilter,
 )
+from django_filters import rest_framework as filters
 from graphene_django.filter import GlobalIDFilter
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -91,13 +92,13 @@ class GrievanceTicketFilter(FilterSet):
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
 
-    status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
+    status = MultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES)
     fsp = CharFilter(method="fsp_filter")
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
         lookup_expr="payment_verification__payment_verification_plan__payment_plan_id",
     )
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
 
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
@@ -108,11 +109,10 @@ class GrievanceTicketFilter(FilterSet):
     urgency = ChoiceFilter(field_name="urgency", choices=URGENCY_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
-    total_days = IntegerFilter(field_name="total_days")
     program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     is_cross_area = BooleanFilter(method="filter_is_cross_area")
-    admin1 = GlobalIDFilter(field_name="admin2__parent")
+    admin1 = CharFilter(field_name="admin2__parent_id")
 
     class Meta:
         fields = {
@@ -145,7 +145,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
-            return qs.filter(programs__in=[value])
+            return qs.filter(programs__slug=value)
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
