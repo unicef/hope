@@ -12,6 +12,7 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.grievance.constants import PRIORITY_HIGH, PRIORITY_MEDIUM
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketPaymentVerificationDetailsFactory,
@@ -96,17 +97,50 @@ class TestGrievanceTicketFilters:
         self.area2_2 = AreaFactory(parent=None, p_code="AF010101", area_type=self.admin_type)
         self.area_other = AreaFactory(parent=None, p_code="AF02", area_type=self.admin_type)
 
-        created_at_dates_to_set = [
-            timezone.make_aware(datetime(year=2020, month=3, day=12)),
-            timezone.make_aware(datetime(year=2020, month=3, day=13)),
-            timezone.make_aware(datetime(year=2020, month=3, day=14)),
-            timezone.make_aware(datetime(year=2020, month=7, day=12)),
-            timezone.make_aware(datetime(year=2020, month=8, day=22)),
-            timezone.make_aware(datetime(year=2020, month=8, day=23)),
-            timezone.make_aware(datetime(year=2020, month=8, day=24)),
-            timezone.make_aware(datetime(year=2020, month=8, day=25)),
-            timezone.make_aware(datetime(year=2020, month=8, day=26)),
-        ]
+        self.household1, self.individuals1 = create_household_and_individuals(
+            household_data={
+                "admin_area": self.area1,
+                "admin1": self.area1,
+                "admin2": self.area2,
+                "country": self.country,
+                "country_origin": self.country,
+                "program": self.program_afghanistan1,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "preferred_language": "pl",
+                    "full_name": "Tom Smith",
+                },
+                {
+                    "preferred_language": "pl",
+                },
+            ],
+        )
+        self.household2, self.individuals2 = create_household_and_individuals(
+            household_data={
+                "admin_area": self.area1,
+                "admin1": self.area1,
+                "admin2": self.area2_2,
+                "country": self.country,
+                "country_origin": self.country,
+                "program": self.program_afghanistan1,
+                "business_area": self.afghanistan,
+            },
+            individuals_data=[
+                {
+                    "preferred_language": "en",
+                },
+                {
+                    "preferred_language": "en",
+                },
+            ],
+        )
+
+        self.household1.unicef_id = "HH-0001"
+        self.individuals2[0].unicef_id = "IND-0002"
+        self.household1.save()
+        self.individuals2[0].save()
 
         grievances_to_create = (
             GrievanceTicket(
@@ -122,6 +156,7 @@ class TestGrievanceTicketFilters:
                     "assigned_to": self.user,
                     "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
                     "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+                    "priority": PRIORITY_HIGH,
                 }
             ),
             GrievanceTicket(
@@ -137,6 +172,7 @@ class TestGrievanceTicketFilters:
                     "assigned_to": self.user,
                     "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
                     "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+                    "priority": PRIORITY_MEDIUM,
                 }
             ),
             GrievanceTicket(
@@ -225,6 +261,7 @@ class TestGrievanceTicketFilters:
                     "assigned_to": self.user2,
                     "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
                     "issue_type": GrievanceTicket.ISSUE_TYPE_HARASSMENT,
+                    "priority": PRIORITY_MEDIUM,
                 }
             ),
             GrievanceTicket(
@@ -243,51 +280,22 @@ class TestGrievanceTicketFilters:
             ),
         )
         self.grievance_tickets = GrievanceTicket.objects.bulk_create(grievances_to_create)
-
+        created_at_dates_to_set = [
+            timezone.make_aware(datetime(year=2020, month=3, day=12)),
+            timezone.make_aware(datetime(year=2020, month=3, day=13)),
+            timezone.make_aware(datetime(year=2020, month=3, day=14)),
+            timezone.make_aware(datetime(year=2020, month=7, day=12)),
+            timezone.make_aware(datetime(year=2020, month=8, day=22)),
+            timezone.make_aware(datetime(year=2020, month=8, day=23)),
+            timezone.make_aware(datetime(year=2020, month=8, day=24)),
+            timezone.make_aware(datetime(year=2020, month=8, day=25)),
+            timezone.make_aware(datetime(year=2020, month=8, day=26)),
+        ]
         for date in created_at_dates_to_set:
             gts = GrievanceTicket.objects.all()
             for gt in gts:
                 gt.created_at = date
                 gt.save(update_fields=("created_at",))
-
-        self.household1, self.individuals1 = create_household_and_individuals(
-            household_data={
-                "admin_area": self.area1,
-                "admin1": self.area1,
-                "admin2": self.area2,
-                "country": self.country,
-                "country_origin": self.country,
-                "program": self.program_afghanistan1,
-                "business_area": self.afghanistan,
-            },
-            individuals_data=[
-                {
-                    "preferred_language": "pl",
-                },
-                {
-                    "preferred_language": "pl",
-                },
-            ],
-        )
-        self.household2, self.individuals2 = create_household_and_individuals(
-            household_data={
-                "admin_area": self.area1,
-                "admin1": self.area1,
-                "admin2": self.area2_2,
-                "country": self.country,
-                "country_origin": self.country,
-                "program": self.program_afghanistan1,
-                "business_area": self.afghanistan,
-            },
-            individuals_data=[
-                {
-                    "preferred_language": "en",
-                },
-                {
-                    "preferred_language": "en",
-                },
-            ],
-        )
 
         DocumentFactory(
             document_number="111222333",
@@ -471,11 +479,11 @@ class TestGrievanceTicketFilters:
         self.grievance_tickets[7].programs.add(self.program_afghanistan2)
         self.grievance_tickets[8].programs.add(self.program_afghanistan1)
 
+        self.grievance_tickets[0].unicef_id = "GRV-0001"
+        self.grievance_tickets[0].save()
+
         for grievance_ticket in self.grievance_tickets:
             grievance_ticket.refresh_from_db()
-
-        for grievance_ticket in self.grievance_tickets[:-1]:
-            grievance_ticket.linked_tickets.add(self.grievance_tickets[-1])
 
     @pytest.mark.parametrize(
         "filter_value, expected_count_for_program, expected_count_for_global",
@@ -685,6 +693,32 @@ class TestGrievanceTicketFilters:
     ) -> None:
         response_for_global = self.api_client.get(self.list_global_url, {filter_name: filter_value})
         response_for_program = self.api_client.get(self.list_url, {filter_name: filter_value})
+        for response, expected_count in [
+            (response_for_program, expected_count_for_program),
+            (response_for_global, expected_count_for_global),
+        ]:
+            assert response.status_code == status.HTTP_200_OK
+            assert len(response.data["results"]) == expected_count
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("GRV-0001", 1, 1),
+            ("HH-0001", 4, 4),
+            ("IND-0002", 2, 5),
+            ("Tom", 4, 4),
+            ("GRV-9918515", 0, 0),
+            ("", 6, 9),
+        ],
+    )
+    def test_search(
+        self,
+        filter_value: str,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        response_for_global = self.api_client.get(self.list_global_url, {"search": filter_value})
+        response_for_program = self.api_client.get(self.list_url, {"search": filter_value})
         for response, expected_count in [
             (response_for_program, expected_count_for_program),
             (response_for_global, expected_count_for_global),
