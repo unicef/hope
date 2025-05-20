@@ -1419,7 +1419,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
         collector_data = primary_collector or alternate_collector or dict()
-        delivery_mechanism_data = collector_data.get("accounts_data", {})
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
@@ -1456,10 +1455,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 "transaction_status_blockchain_link",
             ),
             "fsp_auth_code": (payment, "fsp_auth_code"),
-            "account_data": (
-                delivery_mechanism_data,
-                payment.delivery_type.account_type.key if hasattr(payment, "delivery_type") else None,
-            ),
+            "account_data": (collector_data, "account_data"),
         }
         additional_columns = {
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data]),
@@ -2033,9 +2029,10 @@ class PaymentDataCollector(Account):
         fsp: "FinancialServiceProvider",
         delivery_mechanism: "DeliveryMechanism",
         collector: "Individual",
-        account: Optional["Account"] = None,
     ) -> Dict:
         delivery_data = {}
+        account = collector.accounts.filter(account_type=delivery_mechanism.account_type).first()
+
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
 
         dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
@@ -2074,8 +2071,9 @@ class PaymentDataCollector(Account):
         fsp: "FinancialServiceProvider",
         delivery_mechanism: "DeliveryMechanism",
         collector: Individual,
-        account: Optional["Account"] = None,
     ) -> bool:
+        account = collector.accounts.filter(account_type=delivery_mechanism.account_type).first()
+
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
         dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
 
@@ -2133,7 +2131,7 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         "payment.AccountType",
         on_delete=models.PROTECT,
         related_name="delivery_mechanisms",
-        null=True,  # TODO MB make not nullable after migrations
+        null=True,
         blank=True,
     )
 
