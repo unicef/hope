@@ -599,6 +599,88 @@ class TestGrievanceTicketFilters:
             assert len(response.data["results"]) == expected_count
 
     @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            (0, 4, 6),
+            (1, 1, 1),
+            (2, 1, 2),
+            (3, 0, 0),
+        ],
+    )
+    def test_filter_by_priority(
+        self,
+        filter_value: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "priority",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("HH-0001", 4, 4),
+            ("HH-990808", 0, 0),
+        ],
+    )
+    def test_filter_by_household_unicef_id(
+        self,
+        filter_value: bool,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "household",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            (8, 2, 2),
+            (3, 1, 2)
+        ],
+    )
+    def test_filter_by_category(
+        self,
+        filter_value: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "category",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            (24, 2, 2),
+            (1, 1, 1)
+        ],
+    )
+    def test_filter_by_issue_type(
+        self,
+        filter_value: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "issue_type",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
         "is_filtered, expected_count",
         [
             (True, 6),
