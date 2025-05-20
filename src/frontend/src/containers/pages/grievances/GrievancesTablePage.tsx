@@ -1,6 +1,5 @@
 import { ReactElement, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -20,15 +19,22 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 export const GrievancesTablePage = (): ReactElement => {
-  const { baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 

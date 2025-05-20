@@ -2,10 +2,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { LoadingComponent } from '@core/LoadingComponent';
 import { EnhancedTableToolbar } from '@core/Table/EnhancedTableToolbar';
 import { TableWrapper } from '@core/TableWrapper';
-import {
-  useAllUsersForFiltersLazyQuery,
-  useGrievancesChoiceDataQuery,
-} from '@generated/graphql';
+import { useAllUsersForFiltersLazyQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
@@ -213,8 +210,13 @@ export const GrievancesTable = ({
     setSelectedTicketsPerPage(newSelectedTicketsPerPage);
   };
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+      }),
+  });
 
   const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
     {
