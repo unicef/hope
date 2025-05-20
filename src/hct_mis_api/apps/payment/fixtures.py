@@ -783,7 +783,7 @@ def generate_delivery_mechanisms() -> None:
             "name": "Transfer to Account",
             "transfer_type": "CASH",
             "account_type": account_types["bank"],
-            "required_fields": ["name", "number"],
+            "required_fields": ["name", "number", "code"],
         },
         {"code": "voucher", "name": "Voucher", "transfer_type": "VOUCHER", "account_type": account_types["bank"]},
         {

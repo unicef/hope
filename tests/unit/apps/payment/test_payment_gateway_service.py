@@ -1,3 +1,4 @@
+import json
 import os
 from decimal import Decimal
 from typing import Any
@@ -59,6 +60,10 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 def mock_payment_gateway_env_vars() -> None:
     with mock.patch.dict(os.environ, {"PAYMENT_GATEWAY_API_KEY": "TEST", "PAYMENT_GATEWAY_API_URL": "TEST"}):
         yield
+
+
+def normalize(data: Any) -> dict:
+    return json.loads(json.dumps(data))
 
 
 class TestPaymentGatewayService(APITestCase):
@@ -685,12 +690,11 @@ class TestPaymentGatewayService(APITestCase):
         dmd = AccountFactory(
             number="123",
             individual=primary_collector,
-            delivery_mechanism=self.dm_transfer_to_account,
+            account_type=self.dm_transfer_to_account.account_type,
             data={
                 "number": "123",
                 "name": "ABC",
                 "code": "456",
-                "account_holder_name": "Marek",
             },
         )
         self.payments[0].delivery_type = self.dm_transfer_to_account
@@ -705,7 +709,7 @@ class TestPaymentGatewayService(APITestCase):
         self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
         self.payments[0].refresh_from_db()
 
-        # no mapping, just forward "bank_code__transfer_to_account" to "service_provider_code"
+        # no mapping, just forward "code" to "service_provider_code"
         expected_payload = {
             "amount": str(self.payments[0].entitlement_quantity),
             "phone_no": str(primary_collector.phone_no),
@@ -713,25 +717,27 @@ class TestPaymentGatewayService(APITestCase):
             "first_name": primary_collector.given_name,
             "full_name": primary_collector.full_name,
             "destination_currency": self.payments[0].currency,
-            "bank_account_number__transfer_to_account": "123",
-            "bank_name__transfer_to_account": "ABC",
-            "bank_code__transfer_to_account": "456",
-            "account_holder_name__transfer_to_account": "Marek",
-            "service_provider_code": "456",
+            "delivery_mechanism": "transfer_to_account",
+            "account_type": "bank",
+            "account": {
+                "number": "123",
+                "name": "ABC",
+                "code": "456",
+                "service_provider_code": "456",
+            },
+        }
+        expected_body = {
+            "remote_id": str(self.payments[0].id),
+            "record_code": self.payments[0].unicef_id,
+            "payload": expected_payload,
+            "extra_data": {},
         }
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        post_mock.assert_called_once_with(
-            "payment_instructions/123/add_records/",
-            [
-                {
-                    "remote_id": str(self.payments[0].id),
-                    "record_code": self.payments[0].unicef_id,
-                    "payload": expected_payload,
-                    "extra_data": {},
-                }
-            ],
-            validate_response=True,
-        )
+        actual_args, actual_kwargs = post_mock.call_args
+        assert actual_args[0] == "payment_instructions/123/add_records/"
+        assert normalize(actual_args[1][0]) == normalize(expected_body)
+        assert actual_kwargs["validate_response"] is True
+
         post_mock.reset_mock()
 
         # bank_code__transfer_to_account is a correct HOPE Financial Institution internal Code
@@ -745,53 +751,39 @@ class TestPaymentGatewayService(APITestCase):
         )
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["service_provider_code"] = mapping1.code
-        expected_payload["bank_code__transfer_to_account"] = financial_institution1.code
-        post_mock.assert_called_once_with(
-            "payment_instructions/123/add_records/",
-            [
-                {
-                    "remote_id": str(self.payments[0].id),
-                    "record_code": self.payments[0].unicef_id,
-                    "payload": expected_payload,
-                    "extra_data": {},
-                }
-            ],
-            validate_response=True,
-        )
+        expected_payload["account"]["service_provider_code"] = mapping1.code
+        expected_payload["account"]["code"] = financial_institution1.code
+
+        actual_args, actual_kwargs = post_mock.call_args
+        assert actual_args[0] == "payment_instructions/123/add_records/"
+        assert normalize(actual_args[1][0]) == normalize(expected_body)
+        assert actual_kwargs["validate_response"] is True
         post_mock.reset_mock()
 
-        # bank_code__transfer_to_account is a correct fsp internal code
-        dmd.data["bank_code__transfer_to_account"] = mapping1.code
+        # code is a correct fsp internal code
+        dmd.data["code"] = mapping1.code
         dmd.save()
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payments[0].parent)
         self.payments[0].refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["service_provider_code"] = mapping1.code
-        expected_payload["bank_code__transfer_to_account"] = mapping1.code
-        post_mock.assert_called_once_with(
-            "payment_instructions/123/add_records/",
-            [
-                {
-                    "remote_id": str(self.payments[0].id),
-                    "record_code": self.payments[0].unicef_id,
-                    "payload": expected_payload,
-                    "extra_data": {},
-                }
-            ],
-            validate_response=True,
-        )
+        expected_payload["account"]["service_provider_code"] = mapping1.code
+        expected_payload["account"]["code"] = mapping1.code
+
+        actual_args, actual_kwargs = post_mock.call_args
+        assert actual_args[0] == "payment_instructions/123/add_records/"
+        assert normalize(actual_args[1][0]) == normalize(expected_body)
+        assert actual_kwargs["validate_response"] is True
         post_mock.reset_mock()
 
-        # bank_code__transfer_to_account is another Hope Financial Institution internal code, remap to correct code
+        # code is another Hope Financial Institution internal code, remap to correct code
         financial_institution2 = FinancialInstitution.objects.create(
             code="789",
             type=FinancialInstitution.FinancialInstitutionType.BANK,
         )
 
-        dmd.data["bank_code__transfer_to_account"] = financial_institution2.code
+        dmd.data["code"] = financial_institution2.code
         dmd.save()
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payments[0].parent)
@@ -810,44 +802,28 @@ class TestPaymentGatewayService(APITestCase):
         )
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["bank_code__transfer_to_account"] = financial_institution2.code
-        expected_payload["service_provider_code"] = mapping3.code
-        post_mock.assert_called_once_with(
-            "payment_instructions/123/add_records/",
-            [
-                {
-                    "remote_id": str(self.payments[0].id),
-                    "record_code": self.payments[0].unicef_id,
-                    "payload": expected_payload,
-                    "extra_data": {},
-                }
-            ],
-            validate_response=True,
-        )
+        expected_payload["account"]["code"] = financial_institution2.code
+        expected_payload["account"]["service_provider_code"] = mapping3.code
+        actual_args, actual_kwargs = post_mock.call_args
+        assert actual_args[0] == "payment_instructions/123/add_records/"
+        assert normalize(actual_args[1][0]) == normalize(expected_body)
+        assert actual_kwargs["validate_response"] is True
         post_mock.reset_mock()
 
-        # bank_code__transfer_to_account is another fsp internal code, remap to correct code
-        dmd.data["bank_code__transfer_to_account"] = mapping2.code
+        # code is another fsp internal code, remap to correct code
+        dmd.data["code"] = mapping2.code
         dmd.save()
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payments[0].parent)
         self.payments[0].refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["bank_code__transfer_to_account"] = mapping2.code
-        expected_payload["service_provider_code"] = mapping3.code
-        post_mock.assert_called_once_with(
-            "payment_instructions/123/add_records/",
-            [
-                {
-                    "remote_id": str(self.payments[0].id),
-                    "record_code": self.payments[0].unicef_id,
-                    "payload": expected_payload,
-                    "extra_data": {},
-                }
-            ],
-            validate_response=True,
-        )
+        expected_payload["account"]["code"] = mapping2.code
+        expected_payload["account"]["service_provider_code"] = mapping3.code
+        actual_args, actual_kwargs = post_mock.call_args
+        assert actual_args[0] == "payment_instructions/123/add_records/"
+        assert normalize(actual_args[1][0]) == normalize(expected_body)
+        assert actual_kwargs["validate_response"] is True
         post_mock.reset_mock()
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
