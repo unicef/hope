@@ -182,7 +182,7 @@ export function RequestedIndividualDataChange({
       (el) => el.role === IndividualRoleInHouseholdRole.Primary,
     ).length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    JSON.parse(ticket.ticketDetails.roleReassignData),
+    ticket.ticketDetails.roleReassignData,
   )?.filter(
     (el: RoleReassignData) =>
       el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
