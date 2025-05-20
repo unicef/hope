@@ -42,7 +42,7 @@ export function ReassignMultipleRoleBox({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const reassignData = JSON.parse(ticket.ticketDetails.roleReassignData);
+  const reassignData = ticket.ticketDetails.roleReassignData;
   const reassignDataDictByIndividualId = {};
   for (const key of Object.keys(reassignData)) {
     reassignDataDictByIndividualId[reassignData[key].individual] =

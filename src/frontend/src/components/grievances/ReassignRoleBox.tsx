@@ -56,7 +56,7 @@ export const ReassignRoleBox = ({
   if (ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
     individual = ticket.ticketDetails.selectedIndividual;
     household = ticket.ticketDetails.selectedIndividual?.household;
-    reassignData = JSON.parse(ticket.ticketDetails.roleReassignData);
+    reassignData = ticket.ticketDetails.roleReassignData;
     uniqueIndividual =
       ticket.ticketDetails.possibleDuplicate.id === individual.id
         ? ticket.ticketDetails.goldenRecordsIndividual
@@ -64,7 +64,7 @@ export const ReassignRoleBox = ({
   } else if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
   ) {
-    reassignData = JSON.parse(ticket.ticketDetails.roleReassignData);
+    reassignData = ticket.ticketDetails.roleReassignData;
   }
   let householdsAndRoles = individual?.rolesInHouseholds || [];
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;

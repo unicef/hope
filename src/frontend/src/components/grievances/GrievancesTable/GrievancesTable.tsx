@@ -92,7 +92,7 @@ export const GrievancesTable = ({
       priority: filter.priority === 'Not Set' ? 0 : filter.priority,
       urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
       preferredLanguage: filter.preferredLanguage,
-      program: isAllPrograms ? filter.program : programSlug,
+      programSlug: isAllPrograms ? filter.program : programSlug,
       isActiveProgram: filter.programState === 'active' ? true : null,
       isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
