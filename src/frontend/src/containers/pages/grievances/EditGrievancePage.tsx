@@ -1,24 +1,3 @@
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
-  Typography,
-} from '@mui/material';
-import { Field, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  GrievanceTicketDocument,
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllEditPeopleFieldsQuery,
-  useAllProgramsForChoicesQuery,
-  useGrievanceTicketStatusChangeMutation,
-  useGrievancesChoiceDataQuery,
-  useUpdateGrievanceMutation,
-} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { BlackLink } from '@components/core/BlackLink';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -30,6 +9,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { Title } from '@components/core/Title';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ExistingDocumentationFieldArray } from '@components/grievances/Documentation/ExistingDocumentationFieldArray';
 import { NewDocumentationFieldArray } from '@components/grievances/Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '@components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
@@ -48,25 +28,39 @@ import {
 import { validate } from '@components/grievances/utils/validateGrievance';
 import { validationSchema } from '@components/grievances/utils/validationSchema';
 import {
-  PERMISSIONS,
-  hasCreatorOrOwnerPermissions,
-  hasPermissions,
-} from '../../../config/permissions';
+  GrievanceTicketDocument,
+  useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
+  useAllProgramsForChoicesQuery,
+  useGrievanceTicketStatusChangeMutation,
+  useUpdateGrievanceMutation,
+} from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid2 as Grid,
+  Typography,
+} from '@mui/material';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useQuery } from '@tanstack/react-query';
 import {
-  getGrievanceCategoryDescriptions,
-  getGrievanceIssueTypeDescriptions,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
   GRIEVANCE_TICKET_STATES,
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
 } from '@utils/constants';
 import {
   choicesToDict,
@@ -74,13 +68,18 @@ import {
   isPermissionDeniedError,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
-import { useProgramContext } from 'src/programContext';
+import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import {
+  PERMISSIONS,
+  hasCreatorOrOwnerPermissions,
+  hasPermissions,
+} from '../../../config/permissions';
+import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -133,8 +132,13 @@ const EditGrievancePage = (): ReactElement => {
     },
   );
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+      }),
+  });
 
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();

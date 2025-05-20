@@ -5,11 +5,13 @@ import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
   useAllGrievanceTicketQuery,
-  useGrievancesChoiceDataQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@core/TableWrapper';
 import { headCells } from './LookUpLinkedTicketsHeadCells';
 import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 interface LookUpLinkedTicketsTableProps {
   businessArea: string;
@@ -24,8 +26,15 @@ export function LookUpLinkedTicketsTable({
   setFieldValue,
   initialValues,
 }: LookUpLinkedTicketsTableProps): ReactElement {
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<GrievanceTicketDetail>({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search.trim(),

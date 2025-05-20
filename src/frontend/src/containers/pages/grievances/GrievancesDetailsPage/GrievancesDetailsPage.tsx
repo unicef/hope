@@ -1,6 +1,5 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
@@ -53,8 +52,15 @@ const GrievancesDetailsPage = (): ReactElement => {
   });
 
   const { baseUrl } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<GrievanceTicketDetail>({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug,
+        }),
+    });
 
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;

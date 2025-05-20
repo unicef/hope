@@ -11,10 +11,7 @@ import { BigValueContainer } from '@components/rdi/details/RegistrationDetails/R
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
-import {
-  useAllIndividualsFlexFieldsAttributesQuery,
-  useGrievancesChoiceDataQuery,
-} from '@generated/graphql';
+import { useAllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
@@ -84,8 +81,14 @@ const PeopleDetailsPage = (): ReactElement => {
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
 
-  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
+    useQuery({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
