@@ -145,7 +145,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
-            return qs.filter(programs__in=[value])
+            return qs.filter(programs__slug=value)
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover

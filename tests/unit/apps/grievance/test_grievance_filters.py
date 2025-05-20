@@ -12,17 +12,35 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, TicketPaymentVerificationDetailsFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceTicketFactory,
+    TicketPaymentVerificationDetailsFactory,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
+    TicketComplaintDetails,
+    TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentVerificationSummaryFactory, \
-    PaymentVerificationPlanFactory, PaymentFactory, PaymentVerificationFactory, FinancialServiceProviderFactory
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan, PaymentVerification
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 
 pytestmark = pytest.mark.django_db()
 
@@ -152,6 +170,21 @@ class TestGrievanceTicketFilters:
             GrievanceTicket(
                 **{
                     "business_area": self.afghanistan,
+                    "admin2": None,
+                    "language": "Polish, English",
+                    "consent": True,
+                    "description": "Complaint ticket, program1",
+                    "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
+                    "created_by": self.user,
+                    "assigned_to": self.user,
+                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
+                    "issue_type": GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+                }
+            ),
+            GrievanceTicket(
+                **{
+                    "business_area": self.afghanistan,
                     "admin2": self.area2,
                     "language": "Polish",
                     "consent": True,
@@ -197,25 +230,10 @@ class TestGrievanceTicketFilters:
             GrievanceTicket(
                 **{
                     "business_area": self.afghanistan,
-                    "admin2": None,
-                    "language": "Polish, English",
-                    "consent": True,
-                    "description": "Complaint ticket, program1",
-                    "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
-                    "status": GrievanceTicket.STATUS_IN_PROGRESS,
-                    "created_by": self.user,
-                    "assigned_to": self.user,
-                    "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
-                    "issue_type": GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
-                }
-            ),
-            GrievanceTicket(
-                **{
-                    "business_area": self.afghanistan,
                     "admin2": self.area1,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "System Flagging ticket, program2",
+                    "description": "System Flagging ticket, program1",
                     "category": GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                     "status": GrievanceTicket.STATUS_CLOSED,
                     "created_by": self.user,
@@ -242,7 +260,14 @@ class TestGrievanceTicketFilters:
                 "program": self.program_afghanistan1,
                 "business_area": self.afghanistan,
             },
-            individuals_data=[{}, {}],
+            individuals_data=[
+                {
+                    "preferred_language": "pl",
+                },
+                {
+                    "preferred_language": "pl",
+                },
+            ],
         )
         self.household2, self.individuals2 = create_household_and_individuals(
             household_data={
@@ -254,7 +279,35 @@ class TestGrievanceTicketFilters:
                 "program": self.program_afghanistan1,
                 "business_area": self.afghanistan,
             },
-            individuals_data=[{}, {}],
+            individuals_data=[
+                {
+                    "preferred_language": "en",
+                },
+                {
+                    "preferred_language": "en",
+                },
+            ],
+        )
+
+        DocumentFactory(
+            document_number="111222333",
+            type=DocumentTypeFactory(key="birth_certificate"),
+            individual=self.individuals1[0],
+        )
+        DocumentFactory(
+            document_number="55555555",
+            type=DocumentTypeFactory(key="drivers_license"),
+            individual=self.individuals1[0],
+        )
+        DocumentFactory(
+            document_number="55555555",
+            type=DocumentTypeFactory(key="birth_certificate"),
+            individual=self.individuals2[0],
+        )
+        DocumentFactory(
+            document_number="111222333",
+            type=DocumentTypeFactory(key="drivers_license"),
+            individual=self.individuals2[0],
         )
 
         self.needs_adjudication_ticket_not_cross_area = TicketNeedsAdjudicationDetails.objects.create(
@@ -336,9 +389,7 @@ class TestGrievanceTicketFilters:
         payment_verification_plan = PaymentVerificationPlanFactory(
             payment_plan=payment_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
-        self.financial_service_provider1 = FinancialServiceProviderFactory(
-            name="Filter Value"
-        )
+        self.financial_service_provider1 = FinancialServiceProviderFactory(name="Filter Value")
         payment1 = PaymentFactory(
             parent=payment_plan,
             household=self.household1,
@@ -361,9 +412,7 @@ class TestGrievanceTicketFilters:
             payment_verification=payment_verification,
         )
 
-        self.financial_service_provider2 = FinancialServiceProviderFactory(
-            name="Value"
-        )
+        self.financial_service_provider2 = FinancialServiceProviderFactory(name="Value")
         payment2 = PaymentFactory(
             parent=payment_plan,
             household=self.household2,
@@ -384,6 +433,32 @@ class TestGrievanceTicketFilters:
             new_received_amount=20,
             payment_verification_status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
             payment_verification=payment_verification,
+        )
+
+        self.complaint_ticket = TicketComplaintDetails.objects.create(
+            ticket=self.grievance_tickets[4],
+            household=self.household2,
+            individual=self.individuals2[0],
+        )
+        self.individual_data_update_ticket = TicketIndividualDataUpdateDetails.objects.create(
+            ticket=self.grievance_tickets[5],
+            individual=self.individuals2[0],
+        )
+        self.sensitive_ticket1 = TicketSensitiveDetails.objects.create(
+            ticket=self.grievance_tickets[6],
+            household=self.household1,
+            individual=self.individuals1[0],
+        )
+        self.sensitive_ticket2 = TicketSensitiveDetails.objects.create(
+            ticket=self.grievance_tickets[7],
+            household=self.household2,
+            individual=self.individuals2[0],
+        )
+        sanction_list_individual = SanctionListIndividualFactory(full_name="Sanction Individual")
+        self.system_flagging_ticket = TicketSystemFlaggingDetails.objects.create(
+            ticket=self.grievance_tickets[8],
+            golden_records_individual=self.individuals2[0],
+            sanction_list_individual=sanction_list_individual,
         )
 
         self.grievance_tickets[0].programs.add(self.program_afghanistan1)
@@ -423,6 +498,26 @@ class TestGrievanceTicketFilters:
             expected_count_for_global,
         )
 
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("pl", 3, 3),
+            ("en", 2, 4),
+            ("", 6, 9),
+        ],
+    )
+    def test_filter_by_preferred_language(
+        self,
+        filter_value: bool,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "preferred_language",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
 
     @pytest.mark.parametrize(
         "filter_value, expected_count_for_program, expected_count_for_global",
@@ -464,6 +559,53 @@ class TestGrievanceTicketFilters:
             expected_count_for_program,
             expected_count_for_global,
         )
+
+    @pytest.mark.parametrize(
+        "filter_value1, filter_value2, expected_count_for_program, expected_count_for_global",
+        [
+            ("drivers_license", "111222333", 2, 5),
+            ("birth_certificate", "55555555", 2, 5),
+            ("birth_certificate", "111222333", 4, 4),
+            ("drivers_license", "55555555", 4, 4),
+            ("", "111222333", 0, 0),
+        ],
+    )
+    def test_filter_by_document_number_and_document_type(
+        self,
+        filter_value1: str,
+        filter_value2: str,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        response_for_global = self.api_client.get(
+            self.list_global_url, {"document_type": filter_value1, "document_number": filter_value2}
+        )
+        response_for_program = self.api_client.get(
+            self.list_url, {"document_type": filter_value1, "document_number": filter_value2}
+        )
+        for response, expected_count in [
+            (response_for_program, expected_count_for_program),
+            (response_for_global, expected_count_for_global),
+        ]:
+            assert response.status_code == status.HTTP_200_OK
+            assert len(response.data["results"]) == expected_count
+
+    @pytest.mark.parametrize(
+        "is_filtered, expected_count",
+        [
+            (True, 6),
+            (False, 9),
+        ],
+    )
+    def test_filter_by_program(
+        self,
+        is_filtered: bool,
+        expected_count: int,
+    ) -> None:
+        filter_value = self.program_afghanistan1.slug if is_filtered else ""
+        response = self.api_client.get(self.list_global_url, {"program": filter_value})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == expected_count
 
     @pytest.mark.parametrize(
         "filter_value, expected_count",
@@ -528,14 +670,19 @@ class TestGrievanceTicketFilters:
         ]:
             assert response.status_code == status.HTTP_200_OK
             if is_filtered:
-                assert len(response.data["results"]) == 1
-                assert response.data["results"][0]["id"] == str(self.grievance_tickets[1].id)
+                response_results = response.data["results"]
+                assert len(response_results) == 1
+                assert response_results[0]["id"] == str(self.grievance_tickets[1].id)
             else:
-                assert len(response.data["results"]) == 2
-                assert response.data["results"][0]["id"] == str(self.grievance_tickets[0].id)
-                assert response.data["results"][1]["id"] == str(self.grievance_tickets[1].id)
+                response_results = response.data["results"]
+                assert len(response_results) == 2
+                result_ids = [result["id"] for result in response_results]
+                assert str(self.grievance_tickets[0].id) in result_ids
+                assert str(self.grievance_tickets[1].id) in result_ids
 
-    def _test_filter(self, filter_name: str,filter_value: Any, expected_count_for_program: int, expected_count_for_global) -> None:
+    def _test_filter(
+        self, filter_name: str, filter_value: Any, expected_count_for_program: int, expected_count_for_global
+    ) -> None:
         response_for_global = self.api_client.get(self.list_global_url, {filter_name: filter_value})
         response_for_program = self.api_client.get(self.list_url, {filter_name: filter_value})
         for response, expected_count in [
