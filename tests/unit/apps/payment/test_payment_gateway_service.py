@@ -77,6 +77,7 @@ class TestPaymentGatewayService(APITestCase):
         cls.dm_cash_over_the_counter = DeliveryMechanism.objects.get(code="cash_over_the_counter")
         cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
         cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
+        cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.pg_fsp.delivery_mechanisms.add(cls.dm_cash_over_the_counter)
