@@ -1,5 +1,6 @@
 name: TESTS
-
+permissions:
+  contents: read
 on:
   workflow_call:
 jobs:

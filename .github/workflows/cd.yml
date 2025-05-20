@@ -1,6 +1,8 @@
 name: CD
 on:
-  workflow_call:
+  workflow_call
+
+permissions:
 
 jobs:
   deploy:
