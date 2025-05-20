@@ -180,8 +180,8 @@ export const GrievancesFilters = ({
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder="From"
-            onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
-            value={filter.createdAtRangeMin}
+            onChange={(date) => handleFilterChange('createdAtBefore', date)}
+            value={filter.createdAtBefore}
             fullWidth
             dataCy="filters-creation-date-from"
           />
@@ -189,8 +189,8 @@ export const GrievancesFilters = ({
         <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             placeholder="To"
-            onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
-            value={filter.createdAtRangeMax}
+            onChange={(date) => handleFilterChange('createdAtAfter', date)}
+            value={filter.createdAtAfter}
             fullWidth
             dataCy="filters-creation-date-to"
           />
