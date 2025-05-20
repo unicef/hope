@@ -1,5 +1,6 @@
 name: LINT
-
+permissions:
+  contents: read
 on:
   workflow_call:
 jobs:

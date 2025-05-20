@@ -10,6 +10,8 @@ on:
     - long-term/*
   workflow_call:
 
+permissions:
+  contents: read
 
 concurrency:
   group: CI-PR-${{ github.ref }}
