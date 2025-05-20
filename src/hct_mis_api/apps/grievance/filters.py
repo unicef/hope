@@ -1,5 +1,6 @@
 import logging
 from typing import Any, List
+from django_filters import rest_framework as filters
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
@@ -91,13 +92,13 @@ class GrievanceTicketFilter(FilterSet):
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
 
-    status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
+    status = MultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES)
     fsp = CharFilter(method="fsp_filter")
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
         lookup_expr="payment_verification__payment_verification_plan__payment_plan_id",
     )
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
 
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")

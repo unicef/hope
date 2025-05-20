@@ -46,7 +46,6 @@ from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactor
 pytestmark = pytest.mark.django_db()
 
 
-@freeze_time("2024-08-25 12:00:00")
 class TestGrievanceTicketFilters:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any, create_user_role_with_permissions: Callable) -> None:
@@ -195,7 +194,7 @@ class TestGrievanceTicketFilters:
                     "admin2": None,
                     "language": "Polish, English",
                     "consent": True,
-                    "description": "Payment Verification ticket 2, program1",
+                    "description": "Payment Verification ticket 2, program2",
                     "category": GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
                     "status": GrievanceTicket.STATUS_IN_PROGRESS,
                     "created_by": self.user,
@@ -291,11 +290,9 @@ class TestGrievanceTicketFilters:
             timezone.make_aware(datetime(year=2020, month=8, day=25)),
             timezone.make_aware(datetime(year=2020, month=8, day=26)),
         ]
-        for date in created_at_dates_to_set:
-            gts = GrievanceTicket.objects.all()
-            for gt in gts:
-                gt.created_at = date
-                gt.save(update_fields=("created_at",))
+        for ticket, date in zip(self.grievance_tickets, created_at_dates_to_set):
+            ticket.created_at = date
+            ticket.save(update_fields=("created_at",))
 
         DocumentFactory(
             document_number="111222333",
@@ -675,6 +672,48 @@ class TestGrievanceTicketFilters:
     ) -> None:
         self._test_filter(
             "issue_type",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            (3, 2, 4),
+            (6, 2, 2),
+            ([3, 6], 4, 6),
+        ],
+    )
+    def test_filter_by_status(
+        self,
+        filter_value: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "status",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_expression, filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("created_at_after", "2020-07-15", 3, 5),
+            ("created_at_before", "2020-07-15", 3, 4),
+        ],
+    )
+    def test_filter_by_created_at(
+            self,
+            filter_expression: str,
+            filter_value: int,
+            expected_count_for_program: int,
+            expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            filter_expression,
             filter_value,
             expected_count_for_program,
             expected_count_for_global,
