@@ -12,7 +12,12 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.constants import PRIORITY_HIGH, PRIORITY_MEDIUM, URGENCY_URGENT, URGENCY_VERY_URGENT
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_HIGH,
+    PRIORITY_MEDIUM,
+    URGENCY_URGENT,
+    URGENCY_VERY_URGENT,
+)
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketPaymentVerificationDetailsFactory,
@@ -71,8 +76,8 @@ class TestGrievanceTicketFilters:
         )
 
         self.partner = PartnerFactory(name="TestPartner")
-        self.user = UserFactory(partner=self.partner)
-        self.user2 = UserFactory(partner=self.partner)
+        self.user = UserFactory(partner=self.partner, id="45e3ffde-6a75-4799-a036-e2b00b93e94a")
+        self.user2 = UserFactory(partner=self.partner, id="a6f4652c-7ade-4b51-b1f2-0d28cfc08346")
         self.api_client = api_client(self.user)
 
         create_user_role_with_permissions(
@@ -91,8 +96,10 @@ class TestGrievanceTicketFilters:
 
         self.country = CountryFactory()
         self.admin_type = AreaTypeFactory(country=self.country, area_level=1)
-        self.area1 = AreaFactory(parent=None, p_code="AF01", area_type=self.admin_type)
-        self.area2 = AreaFactory(parent=None, p_code="AF0101", area_type=self.admin_type)
+        self.area1 = AreaFactory(
+            parent=None, p_code="AF01", area_type=self.admin_type, id="d19f0e24-a411-4f0e-9404-3d54b5a5c578"
+        )
+        self.area2 = AreaFactory(parent=self.area1, p_code="AF0101", area_type=self.admin_type)
         self.area2_2 = AreaFactory(parent=None, p_code="AF010101", area_type=self.admin_type)
         self.area_other = AreaFactory(parent=None, p_code="AF02", area_type=self.admin_type)
 
@@ -673,10 +680,7 @@ class TestGrievanceTicketFilters:
 
     @pytest.mark.parametrize(
         "filter_value, expected_count_for_program, expected_count_for_global",
-        [
-            (8, 2, 2),
-            (3, 1, 2)
-        ],
+        [(8, 2, 2), (3, 1, 2)],
     )
     def test_filter_by_category(
         self,
@@ -693,10 +697,7 @@ class TestGrievanceTicketFilters:
 
     @pytest.mark.parametrize(
         "filter_value, expected_count_for_program, expected_count_for_global",
-        [
-            (24, 2, 2),
-            (1, 1, 1)
-        ],
+        [(24, 2, 2), (1, 1, 1)],
     )
     def test_filter_by_issue_type(
         self,
@@ -775,6 +776,46 @@ class TestGrievanceTicketFilters:
     @pytest.mark.parametrize(
         "filter_value, expected_count_for_program, expected_count_for_global",
         [
+            ("d19f0e24-a411-4f0e-9404-3d54b5a5c578", 2, 4),
+            ("d19f0e24-a411-4f0e-9404-3d54b5a5c579", 0, 0),
+        ],
+    )
+    def test_filter_by_admin1(
+        self,
+        filter_value: str,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "admin1",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("45e3ffde-6a75-4799-a036-e2b00b93e94a", 6, 8),
+            ("a6f4652c-7ade-4b51-b1f2-0d28cfc08346", 0, 1),
+        ],
+    )
+    def test_filter_by_assigned_to(
+        self,
+        filter_value: str,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "assigned_to",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
             ("689ba2ea-8ffb-4787-98e4-ae12797ee4da", 1, 1),
             ("689ba2ea-8ffb-4787-98e4-ae12797ee4d1", 0, 0),
         ],
@@ -800,11 +841,11 @@ class TestGrievanceTicketFilters:
         ],
     )
     def test_filter_by_created_at(
-            self,
-            filter_expression: str,
-            filter_value: int,
-            expected_count_for_program: int,
-            expected_count_for_global: int,
+        self,
+        filter_expression: str,
+        filter_value: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
     ) -> None:
         self._test_filter(
             filter_expression,

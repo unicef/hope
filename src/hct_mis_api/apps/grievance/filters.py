@@ -1,6 +1,5 @@
 import logging
 from typing import Any, List
-from django_filters import rest_framework as filters
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
@@ -17,6 +16,7 @@ from django_filters import (
     TypedMultipleChoiceFilter,
     UUIDFilter,
 )
+from django_filters import rest_framework as filters
 from graphene_django.filter import GlobalIDFilter
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -109,11 +109,10 @@ class GrievanceTicketFilter(FilterSet):
     urgency = ChoiceFilter(field_name="urgency", choices=URGENCY_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
-    total_days = IntegerFilter(field_name="total_days")
     program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     is_cross_area = BooleanFilter(method="filter_is_cross_area")
-    admin1 = GlobalIDFilter(field_name="admin2__parent")
+    admin1 = CharFilter(field_name="admin2__parent_id")
 
     class Meta:
         fields = {
