@@ -12,7 +12,7 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.grievance.constants import PRIORITY_HIGH, PRIORITY_MEDIUM
+from hct_mis_api.apps.grievance.constants import PRIORITY_HIGH, PRIORITY_MEDIUM, URGENCY_URGENT, URGENCY_VERY_URGENT
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketPaymentVerificationDetailsFactory,
@@ -156,6 +156,7 @@ class TestGrievanceTicketFilters:
                     "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
                     "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                     "priority": PRIORITY_HIGH,
+                    "urgency": URGENCY_URGENT,
                 }
             ),
             GrievanceTicket(
@@ -172,6 +173,7 @@ class TestGrievanceTicketFilters:
                     "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
                     "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                     "priority": PRIORITY_MEDIUM,
+                    "urgency": URGENCY_URGENT,
                 }
             ),
             GrievanceTicket(
@@ -230,6 +232,7 @@ class TestGrievanceTicketFilters:
                     "assigned_to": self.user,
                     "user_modified": timezone.make_aware(datetime(year=2021, month=8, day=22)),
                     "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
+                    "urgency": URGENCY_VERY_URGENT,
                 }
             ),
             GrievanceTicket(
@@ -320,7 +323,7 @@ class TestGrievanceTicketFilters:
             golden_records_individual=self.individuals1[0],
             possible_duplicate=self.individuals1[1],
             score_min=100,
-            score_max=150,
+            score_max=200,
             extra_data={
                 "golden_records": [
                     {
@@ -352,7 +355,7 @@ class TestGrievanceTicketFilters:
             ticket=self.grievance_tickets[1],
             golden_records_individual=self.individuals1[0],
             possible_duplicate=self.individuals2[0],
-            score_min=100,
+            score_min=50,
             score_max=150,
             extra_data={
                 "golden_records": [
@@ -387,6 +390,7 @@ class TestGrievanceTicketFilters:
         self.needs_adjudication_ticket_not_cross_area.populate_cross_area_flag()
 
         payment_plan = PaymentPlanFactory(
+            id="689ba2ea-8ffb-4787-98e4-ae12797ee4da",
             name="TEST",
             business_area=self.afghanistan,
         )
@@ -417,6 +421,14 @@ class TestGrievanceTicketFilters:
             payment_verification=payment_verification,
         )
 
+        payment_plan2 = PaymentPlanFactory(
+            name="TEST2",
+            business_area=self.afghanistan,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan2)
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan=payment_plan2, status=PaymentVerificationPlan.STATUS_ACTIVE
+        )
         self.financial_service_provider2 = FinancialServiceProviderFactory(name="Value")
         payment2 = PaymentFactory(
             parent=payment_plan,
@@ -620,6 +632,28 @@ class TestGrievanceTicketFilters:
     @pytest.mark.parametrize(
         "filter_value, expected_count_for_program, expected_count_for_global",
         [
+            (0, 4, 6),
+            (1, 0, 1),
+            (2, 2, 2),
+            (3, 0, 0),
+        ],
+    )
+    def test_filter_by_urgency(
+        self,
+        filter_value: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "urgency",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
             ("HH-0001", 4, 4),
             ("HH-990808", 0, 0),
         ],
@@ -693,6 +727,66 @@ class TestGrievanceTicketFilters:
     ) -> None:
         self._test_filter(
             "status",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            (50, 2, 2),
+            (80, 1, 1),
+        ],
+    )
+    def test_filter_by_score_min(
+        self,
+        filter_value: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "score_min",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            (200, 2, 2),
+            (180, 1, 1),
+        ],
+    )
+    def test_filter_by_score_max(
+        self,
+        filter_value: int,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "score_max",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("689ba2ea-8ffb-4787-98e4-ae12797ee4da", 1, 1),
+            ("689ba2ea-8ffb-4787-98e4-ae12797ee4d1", 0, 0),
+        ],
+    )
+    def test_filter_by_cash_plan(
+        self,
+        filter_value: str,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "cash_plan",
             filter_value,
             expected_count_for_program,
             expected_count_for_global,
