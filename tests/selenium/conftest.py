@@ -738,3 +738,56 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.migrations.loader import MigrationLoader
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    orig = getattr(settings, "MIGRATION_MODULES", None)
+    settings.MIGRATION_MODULES = {}
+
+    loader = MigrationLoader(None, load=False)
+    loader.load_disk()
+    all_migrations = loader.disk_migrations
+    if orig is not None:
+        settings.MIGRATION_MODULES = orig
+    apps = set()
+    all_sqls = []
+    for (app_label, _), migration in all_migrations.items():
+        apps.add(app_label)
+
+        for operation in migration.operations:
+            from django.db.migrations.operations.special import RunSQL
+
+            if isinstance(operation, RunSQL):
+                sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
+                for stmt in sql_statements:
+                    all_sqls.append(stmt)
+
+    def pre_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
+        with open(filename, "r") as file:
+            pre_sql = file.read()
+        conn = connections[using]
+        conn.cursor().execute(pre_sql)
+
+    def post_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        app_label = app_config.label
+        if app_label not in apps:
+            return
+        apps.remove(app_label)
+        if apps:
+            return
+        conn = connections[using]
+        for stmt in all_sqls:
+            conn.cursor().execute(stmt)
+
+    pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
+    post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)
