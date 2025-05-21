@@ -16,6 +16,7 @@ from hct_mis_api.apps.payment.models.payment import (
     FspNameMapping,
     FspXlsxTemplatePerDeliveryMechanism,
     Payment,
+    PaymentDataCollector,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
@@ -54,4 +55,5 @@ __all__ = [
     "DeliveryMechanismConfig",
     "FinancialInstitution",
     "FinancialInstitutionMapping",
+    "PaymentDataCollector",
 ]

@@ -250,6 +250,15 @@ def create_targeting() -> PaymentPlan:
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     business_area = BusinessArea.objects.get(slug="afghanistan")
 
+    fsp_1 = FinancialServiceProviderFactory(
+        name="FSP_1",
+        vision_vendor_number="149-69-3686",
+        distribution_limit=10_000,
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    fsp_1.delivery_mechanisms.set([dm_cash])
+    fsp_1.allowed_business_areas.add(business_area)
+
     targeting_criteria = TargetingCriteriaFactory()
     pp = PaymentPlanFactory(
         name="Test Target Population",
@@ -259,6 +268,8 @@ def create_targeting() -> PaymentPlan:
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         created_by=User.objects.filter(email="test@example.com").first(),
         updated_at=datetime.now(),
+        delivery_mechanism=dm_cash,
+        financial_service_provider=fsp_1,
     )
 
     hoh1 = IndividualFactory(household=None)
@@ -359,14 +370,6 @@ def create_targeting() -> PaymentPlan:
 
     fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
 
-    fsp_1 = FinancialServiceProviderFactory(
-        name="FSP_1",
-        vision_vendor_number="149-69-3686",
-        distribution_limit=10_000,
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-    )
-    fsp_1.delivery_mechanisms.set([dm_cash])
-    fsp_1.allowed_business_areas.add(business_area)
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=fsp_1,
         xlsx_template=fsp_xlsx_template,

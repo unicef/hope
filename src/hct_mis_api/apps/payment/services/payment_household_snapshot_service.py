@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     Payment,
+    PaymentDataCollector,
     PaymentHouseholdSnapshot,
     PaymentPlan,
 )
@@ -163,10 +164,11 @@ def get_individual_snapshot(individual: Individual, payment: Optional[Payment] =
     ).exists()
 
     if is_hh_collector and payment:
-        individual_data["accounts_data"] = {
-            dmd.account_type.key: dmd.delivery_data(payment.financial_service_provider, payment.delivery_type)
-            for dmd in individual.accounts.all()
-        }
+        individual_data["account_data"] = PaymentDataCollector.delivery_data(
+            payment.financial_service_provider,
+            payment.delivery_type,
+            individual,
+        )
 
     return individual_data
 

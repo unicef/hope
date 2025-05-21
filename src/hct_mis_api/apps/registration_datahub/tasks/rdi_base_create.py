@@ -8,11 +8,7 @@ from hct_mis_api.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.household.models import PendingIndividual
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
+from hct_mis_api.apps.payment.models import AccountType, PendingAccount
 from hct_mis_api.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,
@@ -83,17 +79,11 @@ class RdiBaseCreateTask:
         for _, data in self.accounts.items():
             individual = data.pop("individual")
             for account_type, values in data.items():
-                financial_institution_code = values.get("code", None)
                 imported_delivery_mechanism_data.append(
                     PendingAccount(
                         individual=individual,
                         account_type=account_types_dict[account_type],
                         number=values.get("number", None),
-                        financial_institution=FinancialInstitution.objects.filter(
-                            code=financial_institution_code
-                        ).first()
-                        if financial_institution_code
-                        else None,
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
