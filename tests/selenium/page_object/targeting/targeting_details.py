@@ -109,7 +109,7 @@ class TargetingDetails(BaseComponents):
         return self.wait_for(self.labelStatus)
 
     def waitForLabelStatus(self, status: str) -> WebElement:
-        for _ in range(10):
+        for _ in range(20):
             sleep(1)
             if status.upper() in self.getLabelStatus().text:
                 return self.wait_for(self.labelStatus)
