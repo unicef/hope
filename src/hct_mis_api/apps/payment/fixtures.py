@@ -750,7 +750,7 @@ def generate_delivery_mechanisms() -> None:
             "transfer_type": "CASH",
             "account_type": account_types["bank"],
         },
-        {"code": "cash", "name": "Cash", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {"code": "cash", "name": "Cash", "transfer_type": "CASH", "account_type": None},
         {"code": "cash_by_fsp", "name": "Cash by FSP", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {"code": "cheque", "name": "Cheque", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {
