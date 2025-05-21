@@ -10,9 +10,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.AlterField(
             model_name='financialinstitution',
             name='code',
+            field=models.BigIntegerField(unique=True),
+        ),
+        migrations.RunSQL(
+            sql="""
+                    CREATE SEQUENCE financialinstitution_code_seq OWNED BY payment_financialinstitution.code;
+                    ALTER TABLE payment_financialinstitution
+                    ALTER COLUMN code SET DEFAULT nextval('financialinstitution_code_seq');
+                """,
+            reverse_sql="""
+                    ALTER TABLE payment_financialinstitution
+                    ALTER COLUMN code DROP DEFAULT;
+                    DROP SEQUENCE IF EXISTS financialinstitution_code_seq;
+                """
         ),
         migrations.RenameField(
             model_name="financialinstitution",
@@ -23,10 +36,5 @@ class Migration(migrations.Migration):
             model_name='financialinstitution',
             name='name',
             field=models.CharField(max_length=255),
-        ),
-        migrations.AlterField(
-            model_name='financialinstitution',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
         ),
     ]
