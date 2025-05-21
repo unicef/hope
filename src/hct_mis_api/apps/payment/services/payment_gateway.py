@@ -161,7 +161,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
                 service_provider_code = None
 
-                uba_fsp = FinancialServiceProvider.objects.filter(name="UBA").first()
+                uba_fsp = FinancialServiceProvider.objects.filter(name="United Bank for Africa - Nigeria").first()
                 if obj.financial_service_provider == uba_fsp:
                     service_provider_code = financial_institution_code
 

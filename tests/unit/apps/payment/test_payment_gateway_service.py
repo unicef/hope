@@ -708,7 +708,7 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_wallet_integration_bank(self, post_mock: Any) -> None:
-        uba_fsp = FinancialServiceProvider.objects.get(name="UBA")
+        uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
         post_mock.return_value = {
             "remote_id": "123",
             "records": {
