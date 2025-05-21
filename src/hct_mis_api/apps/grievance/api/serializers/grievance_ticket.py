@@ -1,13 +1,16 @@
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from rest_framework import serializers
 
 from hct_mis_api.apps.account.api.serializers import PartnerSerializer, UserSerializer
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
+from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
 from hct_mis_api.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
+
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -20,6 +23,8 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
 )
+
+from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.api.serializers import PaymentSmallSerializer
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 
@@ -172,4 +177,39 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
 
 
 class GrievanceChoicesSerializer(serializers.Serializer):
-    pass
+    grievance_ticket_status_choices = serializers.SerializerMethodField()
+    grievance_ticket_category_choices = serializers.SerializerMethodField()
+    grievance_ticket_manual_category_choices = serializers.SerializerMethodField()
+    grievance_ticket_system_category_choices = serializers.SerializerMethodField()
+    grievance_ticket_priority_choices = serializers.SerializerMethodField()
+    grievance_ticket_urgency_choices = serializers.SerializerMethodField()
+    grievance_ticket_issue_type_choices = serializers.SerializerMethodField()
+    document_type_choices = serializers.SerializerMethodField()
+
+    def get_document_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
+
+    def get_grievance_ticket_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(GrievanceTicket.STATUS_CHOICES)
+
+    def get_grievance_ticket_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
+
+    def get_grievance_ticket_manual_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(GrievanceTicket.CREATE_CATEGORY_CHOICES)
+
+    def get_grievance_ticket_system_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(GrievanceTicket.SYSTEM_CATEGORIES)
+
+    def get_grievance_ticket_priority_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(PRIORITY_CHOICES)
+
+    def get_grievance_ticket_urgency_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(URGENCY_CHOICES)
+
+    def get_grievance_ticket_issue_type_choices(self, info: Any, **kwargs: Any) -> List[Dict]:
+        categories = dict(GrievanceTicket.CATEGORY_CHOICES)
+        return [
+            {"category": key, "label": categories[key], "sub_categories": value}
+            for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
+        ]

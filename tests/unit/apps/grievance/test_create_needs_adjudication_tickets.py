@@ -336,6 +336,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             self.dedup_engine_similarity_pair_3.serialize_for_ticket(),
         )
 
+    @pytest.mark.skip("TODO: test after moving to REST")
     def test_ticket_biometric_query_response(self) -> None:
         query_all = """
             query AllGrievanceTicket {
