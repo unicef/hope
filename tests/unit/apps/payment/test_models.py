@@ -879,7 +879,7 @@ class TestAccountModel(TestCase):
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.financial_institution = FinancialInstitution.objects.create(
-            code="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+            name="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
         )
 
     def test_str(self) -> None:

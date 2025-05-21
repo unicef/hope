@@ -1889,10 +1889,16 @@ class FinancialInstitution(TimeStampedUUIDModel):
         TELCO = "telco", "Telco"
         OTHER = "other", "Other"
 
-    code = models.BigIntegerField(unique=True, null=False)
+    code = models.BigIntegerField(unique=True, null=True, editable=False)
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        super().save(*args, **kwargs)
+        if self._state.adding or self.code is None:
+            # due to existence of "CREATE TRIGGER" in migrations
+            self.refresh_from_db(fields=["code"])
 
     def __str__(self) -> str:
         return f"{self.code} - {self.name}: {self.type}"  # pragma: no cover

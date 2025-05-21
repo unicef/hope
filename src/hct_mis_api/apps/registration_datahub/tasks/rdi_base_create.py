@@ -8,10 +8,7 @@ from hct_mis_api.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.household.models import PendingIndividual
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    PendingAccount,
-)
+from hct_mis_api.apps.payment.models import AccountType, PendingAccount
 from hct_mis_api.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,

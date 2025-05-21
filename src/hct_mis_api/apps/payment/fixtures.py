@@ -824,3 +824,8 @@ def generate_delivery_mechanisms() -> None:
             DeliveryMechanismConfig.objects.get_or_create(
                 fsp=fsp, delivery_mechanism=delivery_mechanism, required_fields=dm.get("required_fields", [])
             )
+        FinancialServiceProvider.objects.get_or_create(
+            name="United Bank for Africa - Nigeria",
+            vision_vendor_number="2300117733",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        )
