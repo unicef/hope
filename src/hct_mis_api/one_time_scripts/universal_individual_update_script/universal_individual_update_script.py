@@ -30,7 +30,6 @@ class UniversalIndividualUpdateScript:
         household_fields: Optional[Dict[str, Tuple[str, Any, Any]]] = None,
         individual_fields: Optional[Dict[str, Tuple[str, Any, Any]]] = None,
         individual_flex_fields: Optional[Dict[str, Tuple[str, Any, Any]]] = None,
-        household_flex_fields: Optional[Dict[str, Tuple[str, Any, Any]]] = None,
         document_fields: Optional[List[Tuple[str, str]]] = None,
         deliver_mechanism_data_fields: Optional[Dict[str, Tuple[List[str], ...]]] = None,
         ignore_empty_values: bool = True,
@@ -44,7 +43,6 @@ class UniversalIndividualUpdateScript:
         self.household_fields = household_fields
         self.individual_fields = individual_fields
         self.individual_flex_fields = individual_flex_fields
-        self.household_flex_fields = household_flex_fields
         self.document_fields = document_fields
         self.deliver_mechanism_data_fields = deliver_mechanism_data_fields
         self.ignore_empty_values = ignore_empty_values
@@ -100,19 +98,6 @@ class UniversalIndividualUpdateScript:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_household_flex_fields(
-        self, row: Tuple[Any, ...], headers: List[str], household: Household, row_index: int
-    ) -> List[str]:
-        errors = []
-        if self.household_flex_fields is None:
-            return []
-        for field, (name, validator, _handler) in self.household_flex_fields.items():
-            value = row[headers.index(field)]
-            error = validator(value, name, row, self.business_area, self.program)
-            if error:  # pragma: no cover
-                errors.append(f"Row: {row_index} - {error}")
-        return errors
-
     def validate_documents(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
     ) -> List[str]:
@@ -159,7 +144,6 @@ class UniversalIndividualUpdateScript:
                 errors.append(f"Row: {row_index} - Household not found for individual with unicef_id {unicef_id}")
                 continue
             errors.extend(self.validate_household_fields(row, headers, household, row_index))
-            errors.extend(self.validate_household_flex_fields(row, headers, household, row_index))
             errors.extend(self.validate_individual_fields(row, headers, individual, row_index))
             errors.extend(self.validate_individual_flex_fields(row, headers, individual, row_index))
             errors.extend(self.validate_documents(row, headers, individual, row_index))
@@ -194,16 +178,6 @@ class UniversalIndividualUpdateScript:
             if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
                 continue
             individual.flex_fields[name] = handled_value
-
-    def handle_household_flex_update(self, row: Tuple[Any, ...], headers: List[str], household: Household) -> None:
-        if self.household_flex_fields is None:
-            return
-        for field, (name, _validator, handler) in self.household_flex_fields.items():
-            value = row[headers.index(field)]
-            handled_value = handler(value, field, household, self.business_area, self.program)
-            if self.ignore_empty_values and (handled_value is None or handled_value == ""):  # pragma: no cover
-                continue
-            household.flex_fields[name] = handled_value
 
     def handle_documents_update(
         self, row: Tuple[Any, ...], headers: List[str], individual: Individual
@@ -297,7 +271,6 @@ class UniversalIndividualUpdateScript:
             individual_ids.append(str(individual.id))
             household = individual.household
             self.handle_household_update(row, headers, household)
-            self.handle_household_flex_update(row, headers, household)
             self.handle_individual_update(row, headers, individual)
             self.handle_individual_flex_update(row, headers, individual)
             documents_to_update_part, documents_to_create_part = self.handle_documents_update(row, headers, individual)

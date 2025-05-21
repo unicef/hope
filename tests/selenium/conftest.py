@@ -182,6 +182,7 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.CACHE_ENABLED = False
+    settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
 
     settings.LOGGING["loggers"].update(
         {
