@@ -2228,7 +2228,7 @@ class FinancialInstitution(TimeStampedUUIDModel):
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self) -> str:
-        return f"{self.name}: {self.type}"  # pragma: no cover
+        return f"{self.code} {self.name}: {self.type}"  # pragma: no cover
 
 
 class FinancialInstitutionMapping(TimeStampedUUIDModel):
