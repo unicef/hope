@@ -7,7 +7,7 @@ services:
       - ./dev.sh:/app/dev.sh
     depends_on:
       - db
-      - valkey
+      - redis
       - elasticsearch
     env_file:
       - .env-unit
@@ -25,9 +25,9 @@ services:
     ports:
       - "5433:5432"
 
-  valkey:
+  redis:
     restart: unless-stopped
-    image: valkey/valkey:8.0.2-alpine
+    image: redis:4.0.11-alpine3.8
 
   elasticsearch:
     image: unicef/hct-elasticsearch

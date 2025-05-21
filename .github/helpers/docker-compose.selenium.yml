@@ -14,7 +14,7 @@ services:
     depends_on:
       db:
         condition: service_started
-      valkey:
+      redis:
         condition: service_started
       elasticsearch:
         condition: service_started
@@ -41,7 +41,7 @@ services:
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
       - db
-      - valkey
+      - redis
       - elasticsearch
     env_file:
       - .env-selenium
