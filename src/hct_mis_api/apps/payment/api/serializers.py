@@ -1133,6 +1133,25 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
         return None
 
 
+class PaymentSmallSerializer(serializers.ModelSerializer):
+    verification = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = (
+            "id",
+            "unicef_id",
+            "entitlement_quantity",
+            "delivered_quantity",
+            "parent_id",
+            "verification",
+        )
+
+    def get_verification(self, obj: Payment) -> Optional[str]:
+        verification = obj.payment_verifications.first()
+        return getattr(verification, "id", None)
+
+
 class VerificationDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     status = serializers.CharField(source="get_status_display")
     payment_verification_plan = PaymentVerificationPlanSerializer()

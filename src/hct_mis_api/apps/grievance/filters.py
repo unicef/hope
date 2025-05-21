@@ -13,15 +13,12 @@ from django_filters import (
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
     OrderingFilter,
-    TypedMultipleChoiceFilter,
     UUIDFilter,
 )
-from graphene_django.filter import GlobalIDFilter
+from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, Household, Individual
@@ -81,32 +78,25 @@ class GrievanceTicketFilter(FilterSet):
         "needs_adjudication_ticket_details": {"golden_records_individual": ("preferred_language",)},
     }
     TICKET_TYPES_WITH_FSP = (
-        ("complaint_ticket_details", "payment_record__service_provider__full_name"),
         ("complaint_ticket_details", "payment__financial_service_provider__name"),
-        ("sensitive_ticket_details", "payment_record__service_provider__full_name"),
         ("sensitive_ticket_details", "payment__financial_service_provider__name"),
         (
             "payment_verification_ticket_details",
             "payment_verification__payment__financial_service_provider__name",
         ),
-        (
-            "payment_verification_ticket_details",
-            "payment_verification__payment_record__service_provider__full_name",
-        ),
     )
-    business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     document_type = CharFilter(method="document_type_filter")
     document_number = CharFilter(method="document_number_filter")
 
-    status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
+    status = MultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES)
     fsp = CharFilter(method="fsp_filter")
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
         lookup_expr="payment_verification__payment_verification_plan__payment_plan_id",
     )
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
-    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
+
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     score_min = CharFilter(field_name="needs_adjudication_ticket_details__score_min", lookup_expr="gte")
     score_max = CharFilter(field_name="needs_adjudication_ticket_details__score_max", lookup_expr="lte")
@@ -116,11 +106,10 @@ class GrievanceTicketFilter(FilterSet):
     urgency = ChoiceFilter(field_name="urgency", choices=URGENCY_CHOICES)
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
-    total_days = IntegerFilter(field_name="total_days")
     program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     is_cross_area = BooleanFilter(method="filter_is_cross_area")
-    admin1 = GlobalIDFilter(field_name="admin2__parent")
+    admin1 = CharFilter(field_name="admin2__parent_id")
 
     class Meta:
         fields = {
@@ -153,11 +142,10 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         if value:
-            return qs.filter(programs__in=[decode_id_string(value)])
+            return qs.filter(programs__slug=value)
         return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:  # pragma: no cover
-        # TODO: test needed
         q_obj = Q()
         for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
             for field, lookups in ticket_fields.items():
@@ -231,55 +219,6 @@ class GrievanceTicketFilter(FilterSet):
             return qs.filter(q_obj)
         return qs
 
-    def permissions_filter(self, qs: QuerySet, name: str, values: List[str]) -> QuerySet:
-        can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in values
-        can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in values
-        can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in values
-        can_view_ex_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in values
-        can_view_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in values
-        can_view_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in values
-
-        # can view all
-        if can_view_ex_sensitive_all and can_view_sensitive_all:
-            return qs
-
-        filters_1 = {}
-        filters_1_exclude = {}
-        filters_2 = {}
-        filters_2_exclude = {}
-        sensitive_category_filter = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
-        created_by_filter = {"created_by": self.request.user}
-        assigned_to_filter = {"assigned_to": self.request.user}
-
-        # can view one group full and potentially some of other group
-        if can_view_ex_sensitive_all or can_view_sensitive_all:
-            if can_view_sensitive_creator or can_view_ex_sensitive_creator:
-                filters_1.update(created_by_filter)
-            if can_view_sensitive_owner or can_view_ex_sensitive_owner:
-                filters_2.update(assigned_to_filter)
-
-            if can_view_ex_sensitive_all:
-                return qs.filter(~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2))
-            else:
-                return qs.filter(Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1))
-
-        else:
-            # no full lists so only creator and/or owner lists
-            if can_view_ex_sensitive_creator:
-                filters_1.update(created_by_filter)
-                if not can_view_sensitive_creator:
-                    filters_1_exclude.update(sensitive_category_filter)
-            if can_view_ex_sensitive_owner:
-                filters_2.update(assigned_to_filter)
-                if not can_view_sensitive_owner:
-                    filters_2_exclude.update(sensitive_category_filter)
-            if filters_1 or filters_2:
-                return qs.filter(
-                    Q(Q(**filters_1), ~Q(**filters_1_exclude)) | Q(Q(**filters_2), ~Q(**filters_2_exclude))
-                )
-            else:
-                return GrievanceTicket.objects.none()
-
     def filter_grievance_type(self, qs: QuerySet, name: Any, val: str) -> QuerySet:
         choices = dict(GrievanceTicket.CATEGORY_CHOICES)
         user_generated = [value for value in choices if value in dict(GrievanceTicket.MANUAL_CATEGORIES)]
@@ -305,15 +244,15 @@ class GrievanceTicketFilter(FilterSet):
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         user = self.request.user
-        business_area = BusinessArea.objects.get(slug=self.request.headers.get("Business-Area"))
-        program_id = get_program_id_from_headers(self.request.headers)
-        program = Program.objects.filter(id=program_id).first()
+        business_area = BusinessArea.objects.get(slug=self.request.parser_context["kwargs"]["business_area_slug"])
+        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        program = Program.objects.filter(slug=program_slug, business_area=business_area).first()
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
         if (
             value is True
             and user.has_perm(perm, program or business_area)
-            and (not user.partner.has_area_limits_in_program(program_id) or not program_id)
+            and (not program or not user.partner.has_area_limits_in_program(program.id))
         ):
             return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)
         else:

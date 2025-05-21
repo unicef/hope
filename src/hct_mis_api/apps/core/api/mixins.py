@@ -130,7 +130,7 @@ class ProgramMixin:
             .get_queryset()
             .filter(
                 **{
-                    f"{self.program_model_field}__slug": self.program_slug,
+                    f"{self.program_model_field}__slug__in": [self.program_slug],
                     f"{self.program_model_field}__business_area__slug": self.business_area_slug,
                 }
             )
@@ -150,7 +150,9 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
             self.PERMISSIONS,
         )
 
-        return queryset.filter(**{f"{self.program_model_field}__in": program_ids})
+        return queryset.filter(
+            Q(**{f"{self.program_model_field}__in": program_ids}) | Q(**{f"{self.program_model_field}__isnull": True})
+        )
 
 
 class ProgramVisibilityMixin(ProgramMixin):
@@ -176,6 +178,8 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
     Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
     """
 
+    program_model_field = "program"
+
     def get_queryset(self) -> QuerySet:
         from hct_mis_api.apps.program.models import Program
 
@@ -183,14 +187,12 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
         user = self.request.user
         program_ids = user.get_program_ids_for_permissions_in_business_area(
             self.business_area.id,
-            self.PERMISSIONS,
+            self.get_permissions_for_action(),
         )
 
         filter_q = Q()
-        for program_id in (
-            Program.objects.filter(id__in=program_ids).exclude(status=Program.DRAFT).values_list("id", flat=True)
-        ):
-            program_q = Q(program_id=program_id)
+        for program_id in Program.objects.filter(id__in=program_ids).values_list("id", flat=True):
+            program_q = Q(**{f"{self.program_model_field}__id__in": [program_id]})
             areas_null = Q(**{f"{field}__isnull": True for field in self.admin_area_model_fields})
             # apply admin area limits if partner has restrictions
             areas_query = Q()
@@ -240,6 +242,14 @@ class CustomSerializerMixin:
 class BaseViewSet(GenericViewSet):
     permission_classes: list = [BaseRestPermission]
     PERMISSIONS: list = []
+
+    def get_permissions_for_action(self) -> Any:
+        if hasattr(self, "permissions_by_action"):
+            if self.action in self.permissions_by_action:
+                return self.permissions_by_action[self.action]
+            elif self.action == "count":
+                return self.permissions_by_action["list"]
+        return self.PERMISSIONS
 
 
 class AdminUrlSerializerMixin:
