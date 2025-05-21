@@ -584,6 +584,7 @@ class PaymentGatewayService:
                 if payment_plan.is_reconciled:
                     payment_plan.status_finished()
                     payment_plan.save()
+                    payment_plan.update_money_fields()
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
