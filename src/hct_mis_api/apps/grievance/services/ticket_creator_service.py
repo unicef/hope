@@ -1,19 +1,13 @@
 import abc
 from typing import Dict, List, Optional
 
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import (
-    decode_and_get_object,
-)
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,

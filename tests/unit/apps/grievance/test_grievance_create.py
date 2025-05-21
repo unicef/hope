@@ -1,14 +1,13 @@
 from datetime import date
 from typing import Any
 
-from django.core.files.uploadedfile import SimpleUploadedFile
+# from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
@@ -36,6 +35,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.django_db()
 
@@ -201,12 +201,7 @@ class TestGrievanceTicketCreate:
         )
 
     def test_create_grievance_ticket_add_individual(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(
-            self.user,
-            [Permissions.GRIEVANCES_CREATE],
-            self.afghanistan,
-            self.program
-        )
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
         data = {
             "description": "Test",
             "assigned_to": str(self.user.id),

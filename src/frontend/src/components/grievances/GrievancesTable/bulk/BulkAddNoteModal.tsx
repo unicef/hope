@@ -3,12 +3,10 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import CommentIcon from '@mui/icons-material/Comment';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  AllGrievanceTicketQuery,
-  useBulkUpdateGrievanceAddNoteMutation,
-} from '@generated/graphql';
+import { useBulkUpdateGrievanceAddNoteMutation } from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -19,7 +17,7 @@ export const StyledLink = styled.div`
 `;
 
 interface BulkAddNoteModalProps {
-  selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+  selectedTickets: GrievanceTicketList[];
   businessArea: string;
   setSelected;
 }

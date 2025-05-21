@@ -15,7 +15,6 @@ import { DATE_FORMAT } from '../../config';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useApproveSystemFlaggingMutation,
 } from '@generated/graphql';
 import { useConfirmation } from '@core/ConfirmationDialog';
@@ -25,6 +24,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -34,7 +34,7 @@ export const FlagDetails = ({
   ticket,
   canApproveFlag,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveFlag: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
@@ -52,7 +52,7 @@ export const FlagDetails = ({
     'Are you sure you want to confirm flag (sanction list match) ?',
   );
   const removalText = t('Are you sure you want to remove the flag ?');
-  const details = ticket.systemFlaggingTicketDetails;
+  const details = ticket.ticketDetails;
   const isFlagConfirmed = details.approveStatus;
   return (
     <ApproveBox>

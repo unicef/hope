@@ -7,10 +7,7 @@ import { IndividualAdditionalRegistrationInformation } from '@components/populat
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
-import {
-  useAllIndividualsFlexFieldsAttributesQuery,
-  useGrievancesChoiceDataQuery,
-} from '@generated/graphql';
+import { useAllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -72,8 +69,14 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
 
-  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
+    useQuery({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
