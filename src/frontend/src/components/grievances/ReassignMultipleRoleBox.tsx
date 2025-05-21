@@ -3,16 +3,14 @@ import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  GrievanceTicketQuery,
-  IndividualRoleInHouseholdRole,
-} from '@generated/graphql';
+import { IndividualRoleInHouseholdRole } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -37,23 +35,21 @@ const WarnIcon = styled(WarningIcon)`
 export function ReassignMultipleRoleBox({
   ticket,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
 }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const reassignData = JSON.parse(
-    ticket.needsAdjudicationTicketDetails.roleReassignData,
-  );
+  const reassignData = ticket.ticketDetails.roleReassignData;
   const reassignDataDictByIndividualId = {};
   for (const key of Object.keys(reassignData)) {
     reassignDataDictByIndividualId[reassignData[key].individual] =
       reassignData[key];
   }
   const selectedIndividualsToReassign =
-    ticket.needsAdjudicationTicketDetails.selectedDuplicates?.filter(
+    ticket.ticketDetails.selectedDuplicates?.filter(
       (el) =>
         el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
     );
@@ -62,13 +58,13 @@ export function ReassignMultipleRoleBox({
       {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
         const { household } = selectedIndividualToReassign;
 
-        const householdsAndRoles =
-          selectedIndividualToReassign?.householdsAndRoles || [];
+        const rolesInHouseholds =
+          selectedIndividualToReassign?.rolesInHouseholds || [];
 
         const shouldShowReassignHoH =
           selectedIndividualToReassign?.id === household?.headOfHousehold?.id;
 
-        const mappedLookUpsForExternalHouseholds = householdsAndRoles
+        const mappedLookUpsForExternalHouseholds = rolesInHouseholds
           .filter((element) => element.role !== 'NO_ROLE')
           .map((householdAndRole) => (
             <Box mb={2} mt={2} key={householdAndRole.id}>

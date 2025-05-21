@@ -13,7 +13,6 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import {
-  GrievanceTicketQuery,
   HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
@@ -22,6 +21,7 @@ import {
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -40,14 +40,14 @@ export function RequestedIndividualDataChange({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
   const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
+    ...ticket.ticketDetails.individualData,
   };
   let allApprovedCount = 0;
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
@@ -178,11 +178,11 @@ export function RequestedIndividualDataChange({
     ticket.individual?.id === ticket.household?.headOfHousehold?.id;
 
   const primaryCollectorRolesCount =
-    ticket?.individual?.householdsAndRoles.filter(
+    ticket?.individual?.rolesInHouseholds.filter(
       (el) => el.role === IndividualRoleInHouseholdRole.Primary,
     ).length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    JSON.parse(ticket.individualDataUpdateTicketDetails.roleReassignData),
+    ticket.ticketDetails.roleReassignData,
   )?.filter(
     (el: RoleReassignData) =>
       el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
