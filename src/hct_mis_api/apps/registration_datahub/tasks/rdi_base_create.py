@@ -10,7 +10,6 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.household.models import PendingIndividual
 from hct_mis_api.apps.payment.models import (
     AccountType,
-    FinancialInstitution,
     PendingAccount,
 )
 from hct_mis_api.apps.registration_datahub.value_caster import (

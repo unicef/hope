@@ -23,7 +23,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     AccountType,
-    FinancialInstitutionMapping,
     PendingAccount,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
