@@ -56,6 +56,9 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
+import { first } from 'lodash';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { createApiParams } from '@utils/apiUtils';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -144,12 +147,19 @@ const CreateGrievancePage = (): ReactElement => {
     });
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
+
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
 
   const {
