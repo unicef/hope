@@ -859,7 +859,8 @@ export class RestService {
         assignedTo,
         cashPlan,
         category,
-        createdAtRange,
+        createdAtAfter,
+        createdAtBefore,
         createdBy,
         documentNumber,
         documentType,
@@ -884,7 +885,6 @@ export class RestService {
         scoreMin,
         search,
         status,
-        totalDays,
         urgency,
     }: {
         businessAreaSlug: string,
@@ -906,7 +906,8 @@ export class RestService {
          * * `3` - Sensitive Grievance
          */
         category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-        createdAtRange?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
         createdBy?: string,
         documentNumber?: string,
         documentType?: string,
@@ -1011,7 +1012,6 @@ export class RestService {
          * * `4` - On Hold
          */
         status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
-        totalDays?: string,
         /**
          * * `0` - Not set
          * * `1` - Very urgent
@@ -1034,7 +1034,8 @@ export class RestService {
                 'assigned_to': assignedTo,
                 'cash_plan': cashPlan,
                 'category': category,
-                'created_at_range': createdAtRange,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
                 'created_by': createdBy,
                 'document_number': documentNumber,
                 'document_type': documentType,
@@ -1059,7 +1060,6 @@ export class RestService {
                 'score_min': scoreMin,
                 'search': search,
                 'status': status,
-                'total_days': totalDays,
                 'urgency': urgency,
             },
         });
@@ -2341,7 +2341,8 @@ export class RestService {
         assignedTo,
         cashPlan,
         category,
-        createdAtRange,
+        createdAtAfter,
+        createdAtBefore,
         createdBy,
         documentNumber,
         documentType,
@@ -2366,7 +2367,6 @@ export class RestService {
         scoreMin,
         search,
         status,
-        totalDays,
         urgency,
     }: {
         businessAreaSlug: string,
@@ -2389,7 +2389,8 @@ export class RestService {
          * * `3` - Sensitive Grievance
          */
         category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-        createdAtRange?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
         createdBy?: string,
         documentNumber?: string,
         documentType?: string,
@@ -2494,7 +2495,6 @@ export class RestService {
          * * `4` - On Hold
          */
         status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
-        totalDays?: string,
         /**
          * * `0` - Not set
          * * `1` - Very urgent
@@ -2518,7 +2518,8 @@ export class RestService {
                 'assigned_to': assignedTo,
                 'cash_plan': cashPlan,
                 'category': category,
-                'created_at_range': createdAtRange,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
                 'created_by': createdBy,
                 'document_number': documentNumber,
                 'document_type': documentType,
@@ -2543,7 +2544,6 @@ export class RestService {
                 'score_min': scoreMin,
                 'search': search,
                 'status': status,
-                'total_days': totalDays,
                 'urgency': urgency,
             },
         });
