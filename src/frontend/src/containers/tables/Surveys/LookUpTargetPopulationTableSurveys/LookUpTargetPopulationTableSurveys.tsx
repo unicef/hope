@@ -7,7 +7,7 @@ import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPay
 import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
@@ -41,24 +41,39 @@ export function LookUpTargetPopulationTableSurveys({
 }: LookUpTargetPopulationTableSurveysProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const initialQueryVariables = {
-    totalHouseholdsCountWithValidPhoneNoMin:
-      filter.totalHouseholdsCountMin || 0,
-    totalHouseholdsCountWithValidPhoneNoMax:
-      filter.totalHouseholdsCountMax || null,
-    status: filter.status,
-    businessArea,
-    createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin || null,
-      max: filter.createdAtRangeMax || null,
+
+  const initialQueryVariables = useMemo(
+    () => ({
+      totalHouseholdsCountWithValidPhoneNoMin:
+        filter.totalHouseholdsCountMin || 0,
+      totalHouseholdsCountWithValidPhoneNoMax:
+        filter.totalHouseholdsCountMax || null,
+      status: filter.status,
+      businessArea,
+      createdAtRange: JSON.stringify({
+        min: filter.createdAtRangeMin || null,
+        max: filter.createdAtRangeMax || null,
+      }),
+      statusNot: PaymentPlanStatus.Open,
+      isTargetPopulation: true,
+      businessAreaSlug: businessArea,
+      programSlug: programId,
     }),
-    statusNot: PaymentPlanStatus.Open,
-    isTargetPopulation: true,
-    businessAreaSlug: businessArea,
-    programSlug: programId,
-  };
+    [
+      filter.totalHouseholdsCountMin,
+      filter.totalHouseholdsCountMax,
+      filter.status,
+      businessArea,
+      filter.createdAtRangeMin,
+      filter.createdAtRangeMax,
+      programId,
+    ],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: paymentPlansData,

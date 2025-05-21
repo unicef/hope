@@ -6,7 +6,6 @@ from hct_mis_api.apps.account.api.serializers import PartnerSerializer, UserSeri
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
 from hct_mis_api.apps.geo.models import Area

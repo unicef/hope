@@ -16,7 +16,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 import { createApiParams } from '@utils/apiUtils';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
@@ -128,13 +128,19 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     setSelectedTemplateId(null);
   };
 
-  const initialQueryVariables = {
-    ordering: 'created_at',
-    businessAreaSlug,
-    programSlug: programId,
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      ordering: 'created_at',
+      businessAreaSlug,
+      programSlug: programId,
+    }),
+    [businessAreaSlug, programId],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: templatesData,

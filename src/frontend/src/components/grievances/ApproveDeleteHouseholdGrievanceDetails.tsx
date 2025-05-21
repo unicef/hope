@@ -24,16 +24,16 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useApproveDeleteHouseholdDataChangeMutation,
 } from '@generated/graphql';
 import { useProgramContext } from 'src/programContext';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const EditIcon = styled(Edit)`
   color: ${({ theme }) => theme.hctPalette.darkerBlue};
 `;
 export interface ApproveDeleteHouseholdGrievanceDetailsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   type: 'edit' | 'button';
 }
 
@@ -46,8 +46,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
   const { showMessage } = useSnackbar();
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const { approveStatus, reasonHousehold } =
-    ticket.deleteHouseholdTicketDetails;
+  const { approveStatus, reasonHousehold } = ticket.ticketDetails;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 

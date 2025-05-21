@@ -1,5 +1,4 @@
 import { LoadingComponent } from '@core/LoadingComponent';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
@@ -11,14 +10,15 @@ import { useTranslation } from 'react-i18next';
 import { LookUpButton } from '../../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
 import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface LookUpReassignRoleProps {
   household?:
-    | GrievanceTicketQuery['grievanceTicket']['household']
-    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
-  individualToReassign: GrievanceTicketQuery['grievanceTicket']['individual'];
+    | GrievanceTicketDetail['household']
+    | GrievanceTicketDetail['individual']['rolesInHouseholds'][number]['household'];
+  individualToReassign: GrievanceTicketDetail['individual'];
   initialSelectedIndividualId: string;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
 }
@@ -93,23 +93,18 @@ export function LookUpReassignRole({
     switch (category) {
       case GRIEVANCE_CATEGORIES.DATA_CHANGE:
         if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-          roleReassignData =
-            ticket?.deleteIndividualTicketDetails?.roleReassignData;
+          roleReassignData = ticket?.ticketDetails?.roleReassignData;
         } else if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-          roleReassignData =
-            ticket?.individualDataUpdateTicketDetails?.roleReassignData;
+          roleReassignData = ticket?.ticketDetails?.roleReassignData;
         }
         break;
       case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
-        roleReassignData =
-          ticket?.systemFlaggingTicketDetails?.roleReassignData;
+        roleReassignData = ticket?.ticketDetails?.roleReassignData;
         break;
       case GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION:
-        roleReassignData =
-          ticket?.needsAdjudicationTicketDetails?.roleReassignData;
+        roleReassignData = ticket?.ticketDetails?.roleReassignData;
         setShouldUseMultiple(
-          ticket?.needsAdjudicationTicketDetails?.selectedDuplicates?.length >
-            0,
+          ticket?.ticketDetails?.selectedDuplicates?.length > 0,
         );
         break;
       default:

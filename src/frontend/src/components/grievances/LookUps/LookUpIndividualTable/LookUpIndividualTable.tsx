@@ -8,7 +8,7 @@ import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndi
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, decodeIdString } from '@utils/utils';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { createApiParams } from '@utils/apiUtils';
 import styled from 'styled-components';
@@ -17,6 +17,7 @@ import {
   headCellsStandardProgram,
 } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -120,10 +121,18 @@ export function LookUpIndividualTable({
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery<PaginatedIndividualListList>({
+  // Selected Program Individuals
+  const {
+    data: selectedProgramIndividualsData,
+    isLoading: isLoadingSelectedProgram,
+    error: errorSelectedProgram,
+  } = useQuery<PaginatedIndividualListList>({
     queryKey: [
-      'businessAreasProgramsHouseholdsList',
+      'businessAreasProgramsIndividualsList',
       queryVariables,
       programId,
       businessArea,
@@ -136,7 +145,49 @@ export function LookUpIndividualTable({
           { withPagination: true },
         ),
       ),
-    enabled: !!businessArea && !!programId,
+    enabled: !!businessArea && !!programId && !isAllPrograms,
+  });
+
+  // Selected Program Count
+  const { data: selectedProgramIndividualsCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsIndividualsCountRetrieve',
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+    enabled: !!businessArea && !!programId && !isAllPrograms,
+  });
+
+  // All Programs Individuals
+  const {
+    data: allProgramsIndividualsData,
+    isLoading: isLoadingAllPrograms,
+    error: errorAllPrograms,
+  } = useQuery<PaginatedIndividualListList>({
+    queryKey: ['businessAreasIndividualsList', queryVariables, businessArea],
+    queryFn: () => {
+      return RestService.restBusinessAreasIndividualsList(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
+          withPagination: true,
+        }),
+      );
+    },
+    enabled: !!businessArea && isAllPrograms,
+  });
+
+  // All Programs Count
+  const { data: allProgramsIndividualsCount } = useQuery<CountResponse>({
+    queryKey: ['businessAreasIndividualsCountRetrieve', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasIndividualsCountRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+    enabled: !!businessArea && isAllPrograms,
   });
 
   const replacements = {
@@ -177,9 +228,20 @@ export function LookUpIndividualTable({
       filterOrderBy={filter.orderBy}
       queryVariables={queryVariables}
       setQueryVariables={setQueryVariables}
-      data={data}
-      error={error}
-      isLoading={isLoading}
+      data={
+        isAllPrograms
+          ? allProgramsIndividualsData
+          : selectedProgramIndividualsData
+      }
+      error={isAllPrograms ? errorAllPrograms : errorSelectedProgram}
+      isLoading={
+        isAllPrograms ? isLoadingAllPrograms : isLoadingSelectedProgram
+      }
+      itemsCount={
+        isAllPrograms
+          ? allProgramsIndividualsCount?.count
+          : selectedProgramIndividualsCount?.count
+      }
       renderRow={(row: IndividualList) => (
         <LookUpIndividualTableRow
           radioChangeHandler={handleRadioChange}

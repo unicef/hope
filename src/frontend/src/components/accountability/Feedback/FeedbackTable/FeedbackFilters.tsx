@@ -1,18 +1,18 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useFeedbackIssueTypeChoicesQuery } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
-import { createHandleApplyFilterChange } from '@utils/utils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
+import { useFeedbackIssueTypeChoicesQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
+import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -71,7 +71,7 @@ const FeedbackFilters = ({
         </Grid>
         {isAllPrograms && (
           <Grid size={{ xs: 3 }}>
-            <ProgramAutocomplete
+            <ProgramAutocompleteRestFilter
               filter={filter}
               name="program"
               value={filter.program}
@@ -97,7 +97,7 @@ const FeedbackFilters = ({
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <CreatedByAutocomplete
+          <CreatedByAutocompleteRestFilter
             name="createdBy"
             filter={filter}
             value={filter.createdBy}

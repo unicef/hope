@@ -3,10 +3,7 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  GrievanceTicketQuery,
-  useGrievanceTicketStatusChangeMutation,
-} from '@generated/graphql';
+import { useGrievanceTicketStatusChangeMutation } from '@generated/graphql';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 import {
@@ -24,6 +21,7 @@ import { useProgramContext } from '../../programContext';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const Separator = styled.div`
   width: 1px;
@@ -60,7 +58,7 @@ export const GrievanceDetailsToolbar = ({
   canClose,
   canAssign,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canEdit: boolean;
   canSetInProgress: boolean;
   canSetOnHold: boolean;
@@ -100,10 +98,8 @@ export const GrievanceDetailsToolbar = ({
 
   const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
     (): string => {
-      const householdData =
-        ticket.householdDataUpdateTicketDetails?.householdData || {};
-      const individualData =
-        ticket.individualDataUpdateTicketDetails?.individualData || {};
+      const householdData = ticket.ticketDetails?.householdData || {};
+      const individualData = ticket.ticketDetails?.individualData || {};
 
       const allData = {
         ...householdData,
@@ -174,14 +170,11 @@ export const GrievanceDetailsToolbar = ({
       ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
 
     const notApprovedDeleteIndividualChanges =
-      isDeleteIndividualIssue &&
-      ticket.deleteIndividualTicketDetails?.approveStatus === false;
+      isDeleteIndividualIssue && ticket.ticketDetails?.approveStatus === false;
     const notApprovedAddIndividualChanges =
-      isAddIndividualIssue &&
-      ticket.addIndividualTicketDetails?.approveStatus === false;
+      isAddIndividualIssue && ticket.ticketDetails?.approveStatus === false;
     const notApprovedSystemFlaggingChanges =
-      isSystemFlaggingCategory &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+      isSystemFlaggingCategory && ticket.ticketDetails?.approveStatus === false;
 
     let confirmationMessage = '';
     if (notApprovedDeleteIndividualChanges) {
@@ -217,7 +210,7 @@ export const GrievanceDetailsToolbar = ({
   );
 
   const closingWarningText =
-    ticket?.businessArea.postponeDeduplication === true
+    ticket?.postponeDeduplication === true
       ? t(
           'This ticket will be closed without running the deduplication process.',
         )
@@ -244,8 +237,7 @@ export const GrievanceDetailsToolbar = ({
 
     let additionalContent = '';
     const notApprovedSystemFlaggingChanges =
-      isSystemFlaggingCategory &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+      isSystemFlaggingCategory && ticket.ticketDetails?.approveStatus === false;
 
     if (notApprovedSystemFlaggingChanges) {
       additionalContent = t(
@@ -273,14 +265,12 @@ export const GrievanceDetailsToolbar = ({
 
   const isDeduplicationCategory =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
-  const hasDuplicatedDocument =
-    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument;
+  const hasDuplicatedDocument = ticket?.ticketDetails?.hasDuplicatedDocument;
   const isMultipleDuplicatesVersion =
-    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
-  const selectedIndividual =
-    ticket?.needsAdjudicationTicketDetails?.selectedIndividual;
+    ticket?.ticketDetails?.isMultipleDuplicatesVersion;
+  const selectedIndividual = ticket?.ticketDetails?.selectedIndividual;
   const selectedIndividualsLength =
-    ticket?.needsAdjudicationTicketDetails?.selectedDuplicates.length;
+    ticket?.ticketDetails?.selectedDuplicates.length;
 
   const shouldShowButtonDialog =
     isDeduplicationCategory &&

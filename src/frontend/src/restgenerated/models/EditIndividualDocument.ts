@@ -1,0 +1,13 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export type EditIndividualDocument = {
+    id?: Array<string>;
+    country: string;
+    key: string;
+    number: string;
+    photo?: string;
+    photoraw?: string;
+};
+
