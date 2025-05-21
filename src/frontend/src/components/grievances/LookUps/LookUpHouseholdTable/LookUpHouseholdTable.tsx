@@ -13,6 +13,7 @@ import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -98,6 +99,7 @@ export function LookUpHouseholdTable({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
+  //selectedProgram
   const {
     data: dataHouseholdsProgram,
     isLoading: isLoadingHouseholdsProgram,
@@ -120,6 +122,21 @@ export function LookUpHouseholdTable({
     enabled: !!businessArea && !!programId,
   });
 
+  //selectedProgram
+  const { data: dataHouseholdsProgramCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsCountRetrieve',
+      businessArea,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+  });
+
+  //allPrograms
   const {
     data: dataHouseholdsAllPrograms,
     isLoading: isLoadingHouseholdsAllPrograms,
@@ -143,6 +160,15 @@ export function LookUpHouseholdTable({
       );
     },
     enabled: !!businessArea && isAllPrograms,
+  });
+  //allPrograms
+
+  const { data: dataHouseholdsAllProgramsCount } = useQuery<CountResponse>({
+    queryKey: ['businessAreasHouseholdsCountRetrieve', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasHouseholdsCountRetrieve({
+        businessAreaSlug: businessArea,
+      }),
   });
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
@@ -238,6 +264,11 @@ export function LookUpHouseholdTable({
         ) : (
           <></>
         )
+      }
+      itemsCount={
+        isAllPrograms
+          ? dataHouseholdsAllProgramsCount?.count
+          : dataHouseholdsProgramCount?.count
       }
       headCells={
         householdMultiSelect ? preparedHeadcells.slice(1) : preparedHeadcells

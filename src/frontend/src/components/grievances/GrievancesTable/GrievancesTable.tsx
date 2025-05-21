@@ -2,7 +2,6 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { LoadingComponent } from '@core/LoadingComponent';
 import { EnhancedTableToolbar } from '@core/Table/EnhancedTableToolbar';
 import { TableWrapper } from '@core/TableWrapper';
-import { useAllUsersForFiltersLazyQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
@@ -10,6 +9,7 @@ import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
@@ -18,7 +18,6 @@ import {
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
-import get from 'lodash/get';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
@@ -35,6 +34,7 @@ import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface GrievancesTableProps {
   filter;
@@ -133,19 +133,33 @@ export const GrievancesTable = ({
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [page, setPage] = useState<number>(0);
-  const [loadData, { data: usersData }] = useAllUsersForFiltersLazyQuery({
-    variables: {
-      businessArea,
-      first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: debouncedInputText,
+
+  const { data: usersListData } = useQuery<PaginatedUserList>({
+    queryKey: [
+      'businessAreasUsersList',
+      {
+        businessAreaSlug: businessArea,
+        limit: 20,
+        ordering: 'first_name,last_name,email',
+        search: debouncedInputText || undefined,
+      },
+    ],
+    queryFn: ({ queryKey }) => {
+      const [, params] = queryKey;
+      return RestService.restBusinessAreasUsersList(params as any);
     },
-    fetchPolicy: 'cache-and-network',
   });
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const usersData = useMemo(() => {
+    if (!usersListData?.results) return [];
+
+    return usersListData.results.map((user) => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    }));
+  }, [usersListData]);
 
   //ALL PROGRAMS
   const {
@@ -166,6 +180,15 @@ export const GrievancesTable = ({
         }),
       ),
     enabled: isAllPrograms,
+  });
+
+  //ALL PROGRAMS COUNT
+  const { data: allProgramsGrievanceTicketsCount } = useQuery<CountResponse>({
+    queryKey: ['businessAreasGrievanceTicketsCount', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve({
+        businessAreaSlug: businessArea,
+      }),
   });
 
   // SELECTED PROGRAM
@@ -191,8 +214,22 @@ export const GrievancesTable = ({
       ),
     enabled: !isAllPrograms,
   });
+  //SELECTED PROGRAM COUNT
+  const { data: selectedProgramGrievanceTicketsCount } =
+    useQuery<CountResponse>({
+      queryKey: [
+        'businessAreasProgramsGrievanceTicketsCount',
+        businessArea,
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        }),
+    });
 
-  const optionsData = get(usersData, 'allUsers.edges', []);
+  const optionsData = usersData;
 
   const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
     [key: number]: GrievanceTicketList[];
@@ -410,6 +447,11 @@ export const GrievancesTable = ({
             defaultOrderBy="created_at"
             defaultOrderDirection="desc"
             onPageChanged={setPage}
+            itemsCount={
+              isAllPrograms
+                ? allProgramsGrievanceTicketsCount?.count
+                : selectedProgramGrievanceTicketsCount?.count
+            }
             renderRow={(row: GrievanceTicketList) => (
               <GrievancesTableRow
                 key={row.id}
