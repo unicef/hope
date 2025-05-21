@@ -42,7 +42,7 @@ class TestLogEntryView:
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
 
-        l1 = LogEntry.objects.create(
+        self.l1 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=self.program_1,
             user=self.user,
@@ -50,8 +50,8 @@ class TestLogEntryView:
             object_repr=str(self.program_1),
             changes=create_diff(None, self.program_1, Program.ACTIVITY_LOG_MAPPING),
         )
-        l1.programs.add(self.program_1)
-        l2 = LogEntry.objects.create(
+        self.l1.programs.add(self.program_1)
+        self.l2 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=self.program_2,
             user=self.user,
@@ -59,8 +59,8 @@ class TestLogEntryView:
             object_repr=str(self.program_2),
             changes=create_diff(None, self.program_2, Program.ACTIVITY_LOG_MAPPING),
         )
-        l2.programs.add(self.program_2)
-        l3 = LogEntry.objects.create(
+        self.l2.programs.add(self.program_2)
+        self.l3 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=self.program_1,
             user=self.user_without_perms,
@@ -68,8 +68,8 @@ class TestLogEntryView:
             object_repr=str(self.program_1),
             changes=create_diff(None, self.program_1, Program.ACTIVITY_LOG_MAPPING),
         )
-        l3.programs.add(self.program_1)
-        l4 = LogEntry.objects.create(
+        self.l3.programs.add(self.program_1)
+        self.l4 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=self.grv,
             user=None,
@@ -77,8 +77,8 @@ class TestLogEntryView:
             object_repr=str(self.grv),
             changes=create_diff(None, self.grv, GrievanceTicket.ACTIVITY_LOG_MAPPING),
         )
-        l4.programs.add(self.program_2)
-        l5 = LogEntry.objects.create(
+        self.l4.programs.add(self.program_2)
+        self.l5 = LogEntry.objects.create(
             action=LogEntry.CREATE,
             content_object=self.program_2,
             user=self.user_without_perms,
@@ -86,7 +86,7 @@ class TestLogEntryView:
             object_repr=str(self.program_2),
             changes=create_diff(None, self.program_2, Program.ACTIVITY_LOG_MAPPING),
         )
-        l5.programs.add(self.program_2)
+        self.l5.programs.add(self.program_2)
 
         # per BA
         self.url_list = reverse(
@@ -138,19 +138,23 @@ class TestLogEntryView:
         response = self.client.get(self.url_list)
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.status_code == status.HTTP_200_OK
-            resp_data = response.json()
-            assert len(resp_data["results"]) == 4
-            logs = resp_data["results"][0]
-            assert "object_id" in logs
-            assert "action" in logs
-            assert "changes" in logs
-            assert "user" in logs
-            assert logs["user"] == "-"
-            assert "object_repr" in logs
-            assert "content_type" in logs
-            assert "is_user_generated" in logs
-            assert "timestamp" in logs
+            response_results = response.json()["results"]
+            assert len(response_results) == 4
+            for i, log in enumerate([self.l4, self.l3, self.l2, self.l1]):
+                log_result = response_results[i]
+                assert log_result["object_id"] == str(log.object_id)
+                assert log_result["action"] == log.get_action_display()
+                assert log_result["changes"] == log.changes
+                assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
+                assert log_result["object_repr"] == log.object_repr
+                assert log_result["content_type"]["model"] == log.content_type.model
+                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
+
+                if isinstance(log.content_object, GrievanceTicket):
+                    expected_is_user_generated = log.content_object.grievance_type_to_string() == "user"
+                else:
+                    expected_is_user_generated = None
+                assert log_result["is_user_generated"] == expected_is_user_generated
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -193,19 +197,23 @@ class TestLogEntryView:
         response = self.client.get(self.url_list_per_program)
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.status_code == status.HTTP_200_OK
-            resp_data = response.json()
-            assert len(resp_data["results"]) == 2
-            logs = resp_data["results"][0]
-            assert "object_id" in logs
-            assert "action" in logs
-            assert "changes" in logs
-            assert "user" in logs
-            assert logs["object_repr"] == "Program 1"
-            assert "object_repr" in logs
-            assert "content_type" in logs
-            assert "is_user_generated" in logs
-            assert "timestamp" in logs
+            response_results = response.json()["results"]
+            assert len(response_results) == 2
+            for i, log in enumerate([self.l3, self.l1]):
+                log_result = response_results[i]
+                assert log_result["object_id"] == str(log.object_id)
+                assert log_result["action"] == log.get_action_display()
+                assert log_result["changes"] == log.changes
+                assert log_result["user"] == (f"{log.user.first_name} {log.user.last_name}" if log.user else "-")
+                assert log_result["object_repr"] == log.object_repr
+                assert log_result["content_type"]["model"] == log.content_type.model
+                assert log_result["timestamp"] == f"{log.timestamp:%Y-%m-%dT%H:%M:%S.%fZ}"
+
+                if isinstance(log.content_object, GrievanceTicket):
+                    expected_is_user_generated = log.content_object.grievance_type_to_string() == "user"
+                else:
+                    expected_is_user_generated = None
+                assert log_result["is_user_generated"] == expected_is_user_generated
 
     @pytest.mark.parametrize(
         "permissions, expected_status",

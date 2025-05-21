@@ -8,6 +8,7 @@ from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role, User
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.api.serializers import AreaLevelSerializer
@@ -56,6 +57,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     user_roles = serializers.SerializerMethodField()
     business_areas = serializers.SerializerMethodField()
     permissions_in_scope = serializers.SerializerMethodField()
+    cross_area_filter_available = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
@@ -71,6 +73,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "permissions_in_scope",
             "user_roles",
             "partner_roles",
+            "cross_area_filter_available",
             "status",
             "last_login",
         )
@@ -98,6 +101,22 @@ class ProfileSerializer(serializers.ModelSerializer):
             return set()
 
         return user.permissions_in_business_area(business_area_slug)
+
+    def get_cross_area_filter_available(self, user: User) -> bool:
+        """
+        Check if the cross area filter is available for the user.
+        Access to the cross-area filter, in addition to the standard permissions check,
+        is available only if user does not have ANY area limits in the program (has full-area-access)
+        """
+        perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
+
+        request = self.context.get("request", {})
+        business_area = BusinessArea.objects.get(slug=request.parser_context["kwargs"]["business_area_slug"])
+        if program_slug := request.query_params.get("program"):  # scope program
+            if program := Program.objects.filter(slug=program_slug).first():
+                return user.has_perm(perm, program) and not user.partner.has_area_limits_in_program(program.id)
+
+        return user.has_perm(perm, business_area)
 
 
 class UserSerializer(serializers.ModelSerializer):

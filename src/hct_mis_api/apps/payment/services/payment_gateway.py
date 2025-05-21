@@ -108,6 +108,15 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Payment
+        fields = (
+            "remote_id",
+            "record_code",
+            "payload",
+            "extra_data",
+        )
+
     def get_extra_data(self, obj: Payment) -> Dict:
         return {}
 
@@ -143,15 +152,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             payload_data["account"] = delivery_mech_data
 
         return payload_data
-
-    class Meta:
-        model = Payment
-        fields = [
-            "remote_id",
-            "record_code",
-            "payload",
-            "extra_data",
-        ]
 
 
 @dataclasses.dataclass()
