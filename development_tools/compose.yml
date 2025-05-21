@@ -35,7 +35,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      valkey:
+      redis:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
@@ -71,7 +71,7 @@ services:
         condition: service_started
       db:
         condition: service_healthy
-      valkey:
+      redis:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
@@ -98,7 +98,7 @@ services:
         condition: service_started
       db:
         condition: service_healthy
-      valkey:
+      redis:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
@@ -130,8 +130,8 @@ services:
       timeout: 10s
       retries: 5
 
-  valkey:
-    image: valkey/valkey:8.0.2-alpine
+  redis:
+    image: redis:4.0.11-alpine3.8
     profiles:
       - default
       - services
@@ -189,4 +189,4 @@ services:
       - PYTHONUNBUFFERED=1
     depends_on:
       - celery-worker
-      - valkey
+      - redis
