@@ -25,6 +25,8 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
+    FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -575,3 +577,40 @@ class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
         "payment_plan",
         "created_by",
     )
+
+
+@admin.register(FinancialInstitutionMapping)
+class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
+    list_display = (
+        "financial_institution",
+        "financial_service_provider",
+        "code",
+    )
+    search_fields = (
+        "code",
+        "finanacial_institution____code",
+        "finanacial_institution__description",
+        "financial_service_provider__name",
+        "financial_service_provider__vision_vendor_number",
+    )
+    list_filter = (
+        ("financial_institution", AutoCompleteFilter),
+        ("financial_service_provider", AutoCompleteFilter),
+    )
+    raw_id_fields = ("financial_institution", "financial_service_provider")
+
+
+@admin.register(FinancialInstitution)
+class FinancialInstitutionAdmin(HOPEModelAdminBase):
+    list_display = (
+        "code",
+        "description",
+        "type",
+        "country",
+    )
+    search_fields = ("code",)
+    list_filter = (
+        ("country", AutoCompleteFilter),
+        "type",
+    )
+    raw_id_fields = ("country",)
