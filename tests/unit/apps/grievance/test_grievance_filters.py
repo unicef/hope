@@ -4,7 +4,6 @@ from typing import Any, Callable
 from django.utils import timezone
 
 import pytest
-from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -18,10 +17,7 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_URGENT,
     URGENCY_VERY_URGENT,
 )
-from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory,
-    TicketPaymentVerificationDetailsFactory,
-)
+from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetailsFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -945,7 +941,7 @@ class TestGrievanceTicketFilters:
                 assert str(self.grievance_tickets[1].id) in result_ids
 
     def _test_filter(
-        self, filter_name: str, filter_value: Any, expected_count_for_program: int, expected_count_for_global
+        self, filter_name: str, filter_value: Any, expected_count_for_program: int, expected_count_for_global: int
     ) -> None:
         response_for_global = self.api_client.get(self.list_global_url, {filter_name: filter_value})
         response_for_program = self.api_client.get(self.list_url, {filter_name: filter_value})
