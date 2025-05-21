@@ -709,7 +709,7 @@ class TestPaymentGatewayService(APITestCase):
         self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
         self.payments[0].refresh_from_db()
 
-        # no mapping, just forward "code" to "service_provider_code"
+        # no mapping
         expected_payload = {
             "amount": str(self.payments[0].entitlement_quantity),
             "phone_no": str(primary_collector.phone_no),
@@ -723,7 +723,6 @@ class TestPaymentGatewayService(APITestCase):
                 "number": "123",
                 "name": "ABC",
                 "code": "456",
-                "service_provider_code": "456",
             },
         }
         expected_body = {
@@ -751,8 +750,7 @@ class TestPaymentGatewayService(APITestCase):
         )
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["account"]["service_provider_code"] = mapping1.code
-        expected_payload["account"]["code"] = financial_institution1.code
+        expected_payload["account"]["code"] = mapping1.code
 
         actual_args, actual_kwargs = post_mock.call_args
         assert actual_args[0] == "payment_instructions/123/add_records/"
@@ -768,7 +766,6 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["account"]["service_provider_code"] = mapping1.code
         expected_payload["account"]["code"] = mapping1.code
 
         actual_args, actual_kwargs = post_mock.call_args
@@ -802,8 +799,7 @@ class TestPaymentGatewayService(APITestCase):
         )
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["account"]["code"] = financial_institution2.code
-        expected_payload["account"]["service_provider_code"] = mapping3.code
+        expected_payload["account"]["code"] = mapping3.code
         actual_args, actual_kwargs = post_mock.call_args
         assert actual_args[0] == "payment_instructions/123/add_records/"
         assert normalize(actual_args[1][0]) == normalize(expected_body)
@@ -818,8 +814,7 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["account"]["code"] = mapping2.code
-        expected_payload["account"]["service_provider_code"] = mapping3.code
+        expected_payload["account"]["code"] = mapping3.code
         actual_args, actual_kwargs = post_mock.call_args
         assert actual_args[0] == "payment_instructions/123/add_records/"
         assert normalize(actual_args[1][0]) == normalize(expected_body)

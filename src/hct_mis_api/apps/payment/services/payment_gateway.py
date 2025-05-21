@@ -142,43 +142,36 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         payload_data = payload.data
 
         if account_data:
-            service_provider_code = account_data.get("code")
-            financial_institution_code = account_data.get("financial_institution") or service_provider_code
-            if financial_institution_code:
+            if financial_institution_code := account_data.get("code"):
                 """
-                financial_institution_code is now collected as a specific fsp code (ex. uba_code),
-                but 'tomorrow' will be collected as a HOPE internal code.
-                This implementation handles both cases and performs remap when needed.
-                Data forwarded to PG:
-                 - initially collected bank_code
-                 - fsp specific Financial Institution code (service_provider_code)
+                financial_institution_code is now collected as a specific fsp code (uba_code),
                 """
 
-                # Check if it's a correct code for chosen FSP
-                if fsp_mapping := FinancialInstitutionMapping.objects.filter(
-                    Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    financial_service_provider=obj.financial_service_provider,
+                service_provider_code = None
+
+                uba_fsp = FinancialServiceProvider.objects.filter(name="United Bank for Africa - Nigeria").first()
+                if obj.financial_service_provider == uba_fsp:
+                    service_provider_code = financial_institution_code
+
+                elif uba_mapping := FinancialInstitutionMapping.objects.filter(
+                    Q(code=financial_institution_code),
+                    financial_service_provider=uba_fsp,
                 ).first():
-                    service_provider_code = fsp_mapping.code
+                    if fsp_mapping := FinancialInstitutionMapping.objects.filter(
+                        financial_institution=uba_mapping.financial_institution,
+                        financial_service_provider=obj.financial_service_provider,
+                    ).first():
+                        service_provider_code = fsp_mapping.code
 
-                # Check if it's valid for the current FSP
-                elif not FinancialInstitutionMapping.objects.filter(
-                    Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    financial_service_provider=obj.financial_service_provider,
-                ).exists():
-                    # Try to remap based on the provided financial institution code
-                    mapping = FinancialInstitutionMapping.objects.filter(
-                        Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    ).first()
-                    if mapping:
-                        fsp_mapping = FinancialInstitutionMapping.objects.filter(
-                            financial_service_provider=obj.financial_service_provider,
-                            financial_institution__code=mapping.financial_institution.code,  # hope code
-                        ).first()
-                        if fsp_mapping:
-                            service_provider_code = fsp_mapping.code
-
-                account_data["service_provider_code"] = service_provider_code
+                if service_provider_code:
+                    account_data["code"] = service_provider_code
+                else:
+                    logger.error(
+                        f"No service provider code found for"
+                        f" financial_institution_code {financial_institution_code}"
+                        f" payment {obj.id}"
+                        f" collector {obj.collector}"
+                    )
 
             payload_data["account"] = account_data
 

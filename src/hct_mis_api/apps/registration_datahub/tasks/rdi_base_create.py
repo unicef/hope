@@ -83,17 +83,11 @@ class RdiBaseCreateTask:
         for _, data in self.accounts.items():
             individual = data.pop("individual")
             for account_type, values in data.items():
-                financial_institution_code = values.get("code", None)
                 imported_delivery_mechanism_data.append(
                     PendingAccount(
                         individual=individual,
                         account_type=account_types_dict[account_type],
                         number=values.get("number", None),
-                        financial_institution=FinancialInstitution.objects.filter(
-                            code=financial_institution_code
-                        ).first()
-                        if financial_institution_code
-                        else None,
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
