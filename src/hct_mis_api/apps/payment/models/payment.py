@@ -2222,16 +2222,12 @@ class FinancialInstitution(TimeStampedUUIDModel):
         TELCO = "telco", "Telco"
         OTHER = "other", "Other"
 
-    code = models.CharField(
-        max_length=30,
-        unique=True,
-    )
-    description = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self) -> str:
-        return f"{self.code} - {self.description}: {self.type}"  # pragma: no cover
+        return f"{self.name}: {self.type}"  # pragma: no cover
 
 
 class FinancialInstitutionMapping(TimeStampedUUIDModel):

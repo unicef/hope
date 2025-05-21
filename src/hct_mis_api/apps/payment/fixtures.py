@@ -946,3 +946,6 @@ def generate_delivery_mechanisms() -> None:
                 "is_active": True,
             },
         )
+    FinancialServiceProvider.objects.get_or_create(
+        name="UBA", vision_vendor_number="321", communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+    )

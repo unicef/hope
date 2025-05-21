@@ -156,40 +156,32 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         if delivery_mech_data:
             if financial_institution_code := delivery_mech_data.get("bank_code__transfer_to_account"):
                 """
-                financial_institution_code is now collected as a specific fsp code (ex. uba_code),
-                but 'tomorrow' will be collected as a HOPE internal code.
-                This implementation handles both cases and performs remap when needed.
-                Data forwarded to PG:
-                 - initially collected bank_code
-                 - fsp specific Financial Institution code (service_provider_code)
+                financial_institution_code is now collected as a specific fsp code (uba_code),
                 """
 
-                # Assume it's valid code unless proven otherwise
-                service_provider_code = financial_institution_code
+                service_provider_code = None
 
-                # Check if it's a correct code for chosen FSP
-                if fsp_mapping := FinancialInstitutionMapping.objects.filter(
-                    Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    financial_service_provider=obj.financial_service_provider,
+                uba_fsp = FinancialServiceProvider.objects.filter(name="UBA").first()
+                if obj.financial_service_provider == uba_fsp:
+                    service_provider_code = financial_institution_code
+
+                elif uba_mapping := FinancialInstitutionMapping.objects.filter(
+                    Q(code=financial_institution_code),
+                    financial_service_provider=uba_fsp,
                 ).first():
-                    service_provider_code = fsp_mapping.code
+                    if fsp_mapping := FinancialInstitutionMapping.objects.filter(
+                        financial_institution=uba_mapping.financial_institution,
+                        financial_service_provider=obj.financial_service_provider,
+                    ).first():
+                        service_provider_code = fsp_mapping.code
 
-                # Check if it's valid for the current FSP
-                elif not FinancialInstitutionMapping.objects.filter(
-                    Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    financial_service_provider=obj.financial_service_provider,
-                ).exists():
-                    # Try to remap based on the provided financial institution code
-                    mapping = FinancialInstitutionMapping.objects.filter(
-                        Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    ).first()
-                    if mapping:
-                        fsp_mapping = FinancialInstitutionMapping.objects.filter(
-                            financial_service_provider=obj.financial_service_provider,
-                            financial_institution__code=mapping.financial_institution.code,  # hope code
-                        ).first()
-                        if fsp_mapping:
-                            service_provider_code = fsp_mapping.code
+                if not service_provider_code:
+                    logger.error(
+                        f"No service provider code found for"
+                        f" financial_institution_code {financial_institution_code}"
+                        f" payment {obj.id}"
+                        f" collector {obj.collector}"
+                    )
 
                 delivery_mech_data["service_provider_code"] = service_provider_code
 
