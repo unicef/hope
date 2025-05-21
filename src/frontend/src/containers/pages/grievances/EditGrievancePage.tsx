@@ -80,6 +80,8 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { createApiParams } from '@utils/apiUtils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -151,12 +153,18 @@ const EditGrievancePage = (): ReactElement => {
   const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
     useAllEditPeopleFieldsQuery();
 
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea: businessAreaSlug,
-      },
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
