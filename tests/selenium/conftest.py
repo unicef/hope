@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 from datetime import datetime
 from typing import Any
 
@@ -8,7 +7,6 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
-import redis
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
@@ -32,7 +30,6 @@ from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
-from hct_mis_api.config.env import env
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,
 )
@@ -118,34 +115,11 @@ def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
-def get_redis_host() -> str:
-    regex = "\\/\\/(.*):"
-    redis_host = re.search(regex, env("CACHE_LOCATION")).group(1)
-    return redis_host
-
-
 @pytest.fixture(autouse=True)
-def configure_cache_for_tests(worker_id: str, settings: Any) -> None:
-    """
-    Dynamically configure Django's cache backend for each pytest-xdist worker.
-    """
-    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
-    settings.CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://{get_redis_host()}:6379/{redis_db}",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            },
-        }
-    }
+def clear_default_cache() -> None:
+    from django.core.cache import cache
 
-
-@pytest.fixture(autouse=True)
-def flush_redis(worker_id: str) -> None:
-    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
-    redis_client = redis.StrictRedis(host=get_redis_host(), port=6379, db=redis_db)
-    redis_client.flushdb()
+    cache.clear()
 
 
 def pytest_configure(config) -> None:  # type: ignore
