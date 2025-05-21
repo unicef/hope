@@ -73,6 +73,7 @@ from hct_mis_api.apps.utils.models import (
     MergeStatusModel,
     PendingManager,
     SignatureMixin,
+    TimeStampedModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -2216,7 +2217,7 @@ class PaymentPlanSupportingDocument(models.Model):
         return self.title
 
 
-class FinancialInstitution(TimeStampedUUIDModel):
+class FinancialInstitution(TimeStampedModel):
     class FinancialInstitutionType(models.TextChoices):
         BANK = "bank", "Bank"
         TELCO = "telco", "Telco"

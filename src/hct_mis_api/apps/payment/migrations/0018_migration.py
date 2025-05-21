@@ -24,4 +24,9 @@ class Migration(migrations.Migration):
             name='name',
             field=models.CharField(max_length=255),
         ),
+        migrations.AlterField(
+            model_name='financialinstitution',
+            name='id',
+            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+        ),
     ]
