@@ -13,14 +13,11 @@ from django_filters import (
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
     OrderingFilter,
-    TypedMultipleChoiceFilter,
     UUIDFilter,
 )
 from django_filters import rest_framework as filters
-from graphene_django.filter import GlobalIDFilter
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
