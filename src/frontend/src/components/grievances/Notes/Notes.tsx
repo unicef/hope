@@ -8,7 +8,6 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { renderUserName } from '@utils/utils';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useCreateGrievanceTicketNoteMutation,
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
@@ -19,6 +18,7 @@ import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const Name = styled.span`
   font-size: 16px;
@@ -41,7 +41,7 @@ export function Notes({
   notes,
   canAddNote,
 }: {
-  notes: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
+  notes: GrievanceTicketDetail['ticketNotes'];
   canAddNote: boolean;
 }): ReactElement {
   const { t } = useTranslation();
@@ -55,6 +55,9 @@ export function Notes({
         program: programSlug === 'all' ? undefined : programSlug,
       });
     },
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   const { id } = useParams();
@@ -97,13 +100,8 @@ export function Notes({
     </Grid>
   );
 
-  const mappedNotes = notes?.edges?.map((el) =>
-    note(
-      renderUserName(el.node.createdBy),
-      el.node.createdAt,
-      el.node.description,
-      el.node.id,
-    ),
+  const mappedNotes = notes?.map((el) =>
+    note(renderUserName(el.createdBy), el.createdAt, el.description, el.id),
   );
 
   const initialValues: { [key: string]: string } = {

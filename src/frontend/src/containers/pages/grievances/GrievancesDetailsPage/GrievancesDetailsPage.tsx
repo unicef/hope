@@ -1,9 +1,5 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import {
-  useGrievancesChoiceDataQuery,
-  useGrievanceTicketQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
@@ -21,6 +17,7 @@ import GrievancesApproveSection from '@components/grievances/GrievancesApproveSe
 import GrievancesDetails from '@components/grievances/GrievancesDetails/GrievancesDetails';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
@@ -35,31 +32,49 @@ const GrievancesDetailsPage = (): ReactElement => {
           program: programSlug === 'all' ? undefined : programSlug,
         });
       },
+      staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+      gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
     },
   );
 
-  const { data, loading, error } = useGrievanceTicketQuery({
-    variables: { id },
-    fetchPolicy: 'network-only',
+  const {
+    data: grievanceTicket,
+    isLoading: loading,
+    error,
+  } = useQuery<GrievanceTicketDetail>({
+    queryKey: ['businessAreaProgram', businessAreaSlug, id],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id: id,
+      }),
   });
 
   const { baseUrl } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<GrievanceTicketDetail>({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug,
+        }),
+    });
 
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data?.grievanceTicket ||
+    !grievanceTicket ||
     !choicesData ||
     !currentUserData ||
     permissions === null
   )
     return null;
 
-  const ticket = data?.grievanceTicket;
+  const ticket = grievanceTicket;
   const currentUserId = currentUserData?.id;
   const isCreator = currentUserId === ticket?.createdBy?.id;
   const isOwner = currentUserId === ticket?.assignedTo?.id;

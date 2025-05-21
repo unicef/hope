@@ -6,7 +6,6 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { getFlexFieldTextValue, renderBoolean } from '@utils/utils';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
 } from '@generated/graphql';
@@ -18,12 +17,13 @@ import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 function AddIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
@@ -49,7 +49,7 @@ function AddIndividualGrievanceDetails({
   );
 
   const individualData = {
-    ...ticket.addIndividualTicketDetails?.individualData,
+    ...ticket.ticketDetails?.individualData,
   };
   const documents = individualData?.documents;
   const identities = individualData?.identities;
@@ -124,7 +124,7 @@ function AddIndividualGrievanceDetails({
   let dialogText = t(
     `You did not approve the following add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
   );
-  if (!ticket.addIndividualTicketDetails.approveStatus) {
+  if (!ticket.ticketDetails.approveStatus) {
     dialogText = t(
       `You are approving the following Add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
     );
@@ -149,8 +149,7 @@ function AddIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus:
-                          !ticket.addIndividualTicketDetails.approveStatus,
+                        approveStatus: !ticket.ticketDetails.approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -159,10 +158,10 @@ function AddIndividualGrievanceDetails({
                         },
                       ],
                     });
-                    if (ticket.addIndividualTicketDetails.approveStatus) {
+                    if (ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Disapproved'));
                     }
-                    if (!ticket.addIndividualTicketDetails.approveStatus) {
+                    if (!ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
@@ -171,14 +170,12 @@ function AddIndividualGrievanceDetails({
                 })
               }
               variant={
-                ticket.addIndividualTicketDetails?.approveStatus
-                  ? 'outlined'
-                  : 'contained'
+                ticket.ticketDetails?.approveStatus ? 'outlined' : 'contained'
               }
               color="primary"
               disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             >
-              {ticket.addIndividualTicketDetails.approveStatus
+              {ticket.ticketDetails.approveStatus
                 ? t('Disapprove')
                 : t('Approve')}
             </Button>

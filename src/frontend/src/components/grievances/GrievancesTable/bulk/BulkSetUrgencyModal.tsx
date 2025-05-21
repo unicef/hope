@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  AllGrievanceTicketQuery,
-  useBulkUpdateGrievanceUrgencyMutation,
-  useGrievancesChoiceDataQuery,
-} from '@generated/graphql';
+import { useBulkUpdateGrievanceUrgencyMutation } from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -20,7 +20,7 @@ export const StyledLink = styled.div`
 `;
 
 interface BulkSetUrgencyModalProps {
-  selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+  selectedTickets: GrievanceTicketList[];
   businessArea: string;
   setSelected;
 }
@@ -32,9 +32,16 @@ export function BulkSetUrgencyModal({
 }: BulkSetUrgencyModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { businessAreaSlug } = useBaseUrl();
   const [value, setValue] = useState<number>(0);
   const [mutate] = useBulkUpdateGrievanceUrgencyMutation();
-  const { data: choices } = useGrievancesChoiceDataQuery();
+  const { data: choices } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+      }),
+  });
   const urgencyChoices = choices.grievanceTicketUrgencyChoices;
   const onSave = async (): Promise<void> => {
     try {

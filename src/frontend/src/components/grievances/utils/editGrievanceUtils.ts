@@ -1,5 +1,5 @@
 import camelCase from 'lodash/camelCase';
-import { GrievanceTicketQuery, PaymentNode } from '@generated/graphql';
+import { PaymentNode } from '@generated/graphql';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   camelizeArrayObjects,
@@ -9,6 +9,7 @@ import { ReactElement } from 'react';
 import AddIndividualDataChange from '../AddIndividualDataChange';
 import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -41,12 +42,12 @@ interface EditValuesTypes {
 
 function prepareInitialValueAddIndividual(
   initialValuesArg: EditValuesTypes,
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const individualData = {
-    ...ticket.addIndividualTicketDetails.individualData,
+    ...ticket.ticketDetails.individualData,
   };
   const flexFields = individualData.flexFields;
   delete individualData.flexFields;
@@ -135,12 +136,12 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
 
 function prepareInitialValueEditHousehold(
   initialValuesArg,
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const householdData = {
-    ...ticket.householdDataUpdateTicketDetails.householdData,
+    ...ticket.ticketDetails.householdData,
   };
   const flexFields = householdData.flexFields;
   delete householdData.flexFields;
@@ -172,7 +173,7 @@ const prepareInitialValueDict = {
 };
 
 export function prepareInitialValues(
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
@@ -192,7 +193,12 @@ export function prepareInitialValues(
     issueType: ticket.issueType || '',
     paymentRecord: ticket?.paymentRecord?.id || null,
     selectedPaymentRecords: ticket?.paymentRecord?.id
-      ? [ticket.paymentRecord]
+      ? [
+          ticket.paymentRecord as Pick<
+            PaymentNode,
+            'id' | 'deliveredQuantity' | 'entitlementQuantity'
+          >,
+        ]
       : [],
     selectedLinkedTickets: ticket.linkedTickets.map(
       (linkedTicket) => linkedTicket.id,

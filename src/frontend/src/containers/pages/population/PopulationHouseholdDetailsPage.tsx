@@ -13,14 +13,14 @@ import { HouseholdAdditionalRegistrationInformation } from '@components/populati
 import { HouseholdDetails } from '@components/population/HouseholdDetails';
 import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
 import { AdminButton } from '@core/AdminButton';
-import {
-  useAllHouseholdsFlexFieldsAttributesQuery,
-  useGrievancesChoiceDataQuery,
-} from '@generated/graphql';
+import { useAllHouseholdsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
+import { Theme } from '@mui/material/styles';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
@@ -32,9 +32,6 @@ import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { Theme } from '@mui/material/styles';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 const Container = styled.div`
   padding: 20px;
@@ -97,8 +94,14 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
         }),
     });
 
-  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
+    useQuery({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   if (
     householdChoicesLoading ||
