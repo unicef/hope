@@ -33,7 +33,7 @@ def migrate_delivery_mechanism_data(apps, schema_editor):  # pragma: no cover
             "service_provider_code": data.get("service_provider_code__mobile_money", ""),
             "number": data.get("delivery_phone_number__mobile_money", ""),
             "provider": data.get("provider__mobile_money", ""),
-        } # TODO field names???
+        }
         dmd.account_type = account_type_mobile
         dmd_to_update.append(dmd)
 
@@ -45,9 +45,11 @@ def migrate_delivery_mechanism_data(apps, schema_editor):  # pragma: no cover
             "name": data.get("bank_name__transfer_to_account", ""),
             "number": data.get("bank_account_number__transfer_to_account", ""),
             "code": data.get("bank_code__transfer_to_account", ""),
+            "eco_bank_code": data.get("bank_code_eco__transfer_to_account", ""),
             "account_holder_name": data.get("account_holder_name__transfer_to_account", ""),
-        } # TODO field names???
+        }
         dmd.account_type = account_type_bank
+        dmd_to_update.append(dmd)
     if dmd_to_update:
         DeliveryMechanismData.objects.bulk_update(dmd_to_update, ["data", "account_type"])
 
