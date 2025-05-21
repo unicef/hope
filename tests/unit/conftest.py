@@ -26,6 +26,13 @@ def pytest_addoption(parser: Parser) -> None:
     )
 
 
+@pytest.fixture(autouse=True)
+def clear_default_cache() -> None:
+    from django.core.cache import cache
+
+    cache.clear()
+
+
 def pytest_configure(config: Config) -> None:
     pytest.localhost = True if config.getoption("--localhost") else False
 

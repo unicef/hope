@@ -36,7 +36,7 @@ snapshots['TestCreateNeedsAdjudicationTicketsBiometrics::test_ticket_biometric_q
                     }
                 }
             ],
-            'totalCount': 2
+            'totalCount': 1
         }
     }
 }
