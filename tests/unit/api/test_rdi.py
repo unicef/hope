@@ -17,7 +17,11 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
-from hct_mis_api.apps.payment.models import FinancialInstitution, PendingAccount
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
+)
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
@@ -75,6 +79,7 @@ class PushToRDITests(HOPEApiTestCase):
             status=RegistrationDataImport.LOADING,
             program=cls.program,
         )
+        AccountType.objects.get_or_create(key="bank", defaults=dict(label="Bank", unique_fields=["number"]))
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
     def test_push(self) -> None:

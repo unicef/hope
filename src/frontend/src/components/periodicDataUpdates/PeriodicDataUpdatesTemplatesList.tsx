@@ -12,7 +12,6 @@ import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useState } from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import {
-  useDownloadPeriodicDataUpdateTemplate,
   useExportPeriodicDataUpdateTemplate,
 } from './PeriodicDataUpdatesTemplatesListActions';
 import { StatusBox } from '@core/StatusBox';
@@ -87,7 +86,6 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     null,
   );
 
-  const { mutate: downloadTemplate } = useDownloadPeriodicDataUpdateTemplate();
   const { mutate: exportTemplate, error: exportError } =
     useExportPeriodicDataUpdateTemplate();
   const { showMessage } = useSnackbar();
@@ -99,14 +97,6 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
       showMessage(message);
     }
   }, [exportError, showMessage]);
-
-  const handleDownloadClick = (templateId: number) => {
-    downloadTemplate({
-      businessAreaSlug,
-      programId,
-      templateId: templateId.toString(),
-    });
-  };
 
   const handleExportClick = (templateId: number) => {
     exportTemplate({
@@ -200,9 +190,9 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
               <ButtonTooltip
                 variant="contained"
                 color="primary"
-                onClick={() => handleDownloadClick(row.id)}
                 startIcon={<GetAppIcon />}
                 data-cy={`download-btn-${row.id}`}
+                href={`/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${row.id}/download/`}
                 disabled={
                   row?.number_of_records === 0 || !canExportOrDownloadTemplate
                 }
