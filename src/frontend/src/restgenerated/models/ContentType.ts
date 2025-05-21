@@ -2,5 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+export type ContentType = {
+    model: string;
+};
 
-export type Admin4Enum = string;

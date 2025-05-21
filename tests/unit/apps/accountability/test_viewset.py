@@ -144,24 +144,38 @@ class TestFeedbackViewSet:
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.status_code == status.HTTP_200_OK
-            resp_data = response.json()
-            assert len(resp_data["results"]) == 2
-            feedback = resp_data["results"][0]
-            assert "id" in feedback
-            assert "issue_type" in feedback
-            assert "unicef_id" in feedback
-            assert "household_unicef_id" in feedback
-            assert "household_id" in feedback
-            assert "individual_unicef_id" in feedback
-            assert "individual_id" in feedback
-            assert "linked_grievance_id" in feedback
-            assert "linked_grievance_unicef_id" in feedback
-            assert "program_name" in feedback
-            assert "program_id" in feedback
-            assert "created_by" in feedback
-            assert "created_at" in feedback
-            assert "feedback_messages" in feedback
+            response_results = response.json()["results"]
+            assert len(response_results) == 3
+            for i, feedback in enumerate([self.feedback_1, self.feedback_2, self.feedback_3]):
+                feedback_result = response_results[i]
+                assert feedback_result["id"] == str(feedback.id)
+                assert feedback_result["issue_type"] == feedback.get_issue_type_display()
+                assert feedback_result["unicef_id"] == str(feedback.unicef_id)
+                assert feedback_result["household_unicef_id"] == (
+                    str(feedback.household_lookup.unicef_id) if feedback.household_lookup else None
+                )
+                assert feedback_result["household_id"] == (
+                    str(feedback.household_lookup.id) if feedback.household_lookup else None
+                )
+                assert feedback_result["individual_unicef_id"] == (
+                    str(feedback.individual_lookup.unicef_id) if feedback.individual_lookup else None
+                )
+                assert feedback_result["individual_id"] == (
+                    str(feedback.individual_lookup.id) if feedback.individual_lookup else None
+                )
+                assert feedback_result["linked_grievance_id"] == (
+                    str(feedback.linked_grievance.id) if feedback.linked_grievance else None
+                )
+                assert feedback_result["linked_grievance_unicef_id"] == (
+                    str(feedback.linked_grievance.unicef_id) if feedback.linked_grievance else None
+                )
+                assert feedback_result["program_name"] == (feedback.program.name if feedback.program else None)
+                assert feedback_result["program_id"] == (str(feedback.program.id) if feedback.program else None)
+                assert (
+                    feedback_result["created_by"] == f"{feedback.created_by.first_name} {feedback.created_by.last_name}"
+                )
+                assert feedback_result["created_at"] == f"{feedback.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert feedback_result["feedback_messages"] == []
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -183,13 +197,13 @@ class TestFeedbackViewSet:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert resp_data["count"] == 1
+            assert resp_data["count"] == 2
 
             # add permissions to second program
             create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_2)
             response = self.client.get(self.url_count)
             resp_data = response.json()
-            assert resp_data["count"] == 2
+            assert resp_data["count"] == 3
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -449,24 +463,26 @@ class TestFeedbackViewSet:
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.status_code == status.HTTP_200_OK
-            resp_data = response.json()
-            assert len(resp_data["results"]) == 1
-            feedback = resp_data["results"][0]
-            assert "id" in feedback
-            assert "issue_type" in feedback
-            assert "unicef_id" in feedback
-            assert "household_unicef_id" in feedback
-            assert "household_id" in feedback
-            assert "individual_unicef_id" in feedback
-            assert "individual_id" in feedback
-            assert "linked_grievance_id" in feedback
-            assert "linked_grievance_unicef_id" in feedback
-            assert "program_name" in feedback
-            assert "program_id" in feedback
-            assert "created_by" in feedback
-            assert "created_at" in feedback
-            assert "feedback_messages" in feedback
+            response_results = response.json()["results"]
+            assert len(response_results) == 1
+            feedback_result = response_results[0]
+            assert feedback_result["id"] == str(self.feedback_1.id)
+            assert feedback_result["issue_type"] == self.feedback_1.get_issue_type_display()
+            assert feedback_result["unicef_id"] == str(self.feedback_1.unicef_id)
+            assert feedback_result["household_unicef_id"] == str(self.feedback_1.household_lookup.unicef_id)
+            assert feedback_result["household_id"] == str(self.feedback_1.household_lookup.id)
+            assert feedback_result["individual_unicef_id"] == str(self.feedback_1.individual_lookup.unicef_id)
+            assert feedback_result["individual_id"] == str(self.feedback_1.individual_lookup.id)
+            assert feedback_result["linked_grievance_id"] is None
+            assert feedback_result["linked_grievance_unicef_id"] is None
+            assert feedback_result["program_name"] == self.feedback_1.program.name
+            assert feedback_result["program_id"] == str(self.feedback_1.program.id)
+            assert (
+                feedback_result["created_by"]
+                == f"{self.feedback_1.created_by.first_name} {self.feedback_1.created_by.last_name}"
+            )
+            assert feedback_result["created_at"] == f"{self.feedback_1.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+            assert feedback_result["feedback_messages"] == []
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
