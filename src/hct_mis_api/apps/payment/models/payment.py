@@ -2222,7 +2222,7 @@ class FinancialInstitution(TimeStampedUUIDModel):
         TELCO = "telco", "Telco"
         OTHER = "other", "Other"
 
-    code = models.BigIntegerField(unique=True, null=False)
+    code = models.BigIntegerField(unique=True, null=True, editable=False)
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)

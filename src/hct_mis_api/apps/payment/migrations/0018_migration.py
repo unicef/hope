@@ -13,19 +13,38 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='financialinstitution',
             name='code',
-            field=models.BigIntegerField(unique=True),
+            field=models.BigIntegerField(null=True, blank=True, editable=False, unique=True),
         ),
         migrations.RunSQL(
             sql="""
-                    CREATE SEQUENCE financialinstitution_code_seq OWNED BY payment_financialinstitution.code;
-                    ALTER TABLE payment_financialinstitution
-                    ALTER COLUMN code SET DEFAULT nextval('financialinstitution_code_seq');
-                """,
+                                -- Create sequence if not exists
+                                CREATE SEQUENCE IF NOT EXISTS payment_financialinstitution_code_seq OWNED BY payment_financialinstitution.code;
+                                -- Set default at DB level (optional, not relied on by trigger)
+                                ALTER TABLE payment_financialinstitution
+                                ALTER COLUMN code DROP DEFAULT;
+                                -- Create or replace trigger function
+                                CREATE OR REPLACE FUNCTION set_financialinstitution_code() RETURNS trigger
+                                LANGUAGE plpgsql AS $$
+                                BEGIN
+                                    IF NEW.code IS NULL THEN
+                                        NEW.code := nextval('payment_financialinstitution_code_seq');
+                                    END IF;
+                                    RETURN NEW;
+                                END;
+                                $$;
+                                -- Drop existing trigger if any
+                                DROP TRIGGER IF EXISTS trg_set_financialinstitution_code ON payment_financialinstitution;
+                                -- Create BEFORE INSERT trigger
+                                CREATE TRIGGER trg_set_financialinstitution_code
+                                BEFORE INSERT ON payment_financialinstitution
+                                FOR EACH ROW
+                                EXECUTE FUNCTION set_financialinstitution_code();
+                            """,
             reverse_sql="""
-                    ALTER TABLE payment_financialinstitution
-                    ALTER COLUMN code DROP DEFAULT;
-                    DROP SEQUENCE IF EXISTS financialinstitution_code_seq;
-                """
+                                DROP TRIGGER IF EXISTS trg_set_financialinstitution_code ON payment_financialinstitution;
+                                DROP FUNCTION IF EXISTS set_financialinstitution_code();
+                                DROP SEQUENCE IF EXISTS payment_financialinstitution_code_seq;
+                            """,
         ),
         migrations.RenameField(
             model_name="financialinstitution",
