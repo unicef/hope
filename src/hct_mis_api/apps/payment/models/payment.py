@@ -2036,7 +2036,7 @@ class PaymentDataCollector(Account):
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
 
         dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
-        collector_country = collector.household.country
+        collector_country = collector.household and collector.household.country
         if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
             dm_config = country_config
         else:
@@ -2077,7 +2077,7 @@ class PaymentDataCollector(Account):
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
         dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
 
-        collector_country = collector.household.country
+        collector_country = collector.household and collector.household.country
         if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
             dm_config = country_config
         else:
