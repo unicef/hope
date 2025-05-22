@@ -18,6 +18,11 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
+    TicketComplaintDetails,
+    TicketDeleteHouseholdDetails,
+    TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
 )
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -36,6 +41,7 @@ from hct_mis_api.apps.household.models import (
     WIDOWED,
     DocumentType,
 )
+from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -73,8 +79,8 @@ class TestGrievanceTicketCreate:
             country=country,
             area_level=2,
         )
-        AreaFactory(name="City Test", area_type=area_type, p_code="dffgh565556")
-        AreaFactory(name="City Example", area_type=area_type, p_code="fggtyjyj")
+        self.area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="dffgh565556")
+        self.area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="fggtyjyj")
 
         self.program = ProgramFactory(
             status=Program.ACTIVE,
@@ -263,3 +269,150 @@ class TestGrievanceTicketCreate:
         assert len(resp_data) == 1
         assert GrievanceTicket.objects.all().count() == 1
         assert TicketAddIndividualDetails.objects.all().count() == 1
+
+    def test_create_grievance_ticket_update_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        data = {
+            "description": "Description upd HH",
+            "language": "Polish",
+            "area": str(self.area_1.pk),
+            "issue_type": 13,
+            "category": 2,
+            "consent": True,
+            "extras": {
+                "issue_type": {
+                    "household_data_update_issue_type_extras": {
+                        "household": str(self.household_one.id),
+                        "household_data": {
+                            "village": "Test Town",
+                            "size": 3,
+                            "country": "AFG",
+                        },
+                    }
+                },
+            },
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketHouseholdDataUpdateDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="json")
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_201_CREATED
+        assert len(resp_data) == 1
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketHouseholdDataUpdateDetails.objects.all().count() == 1
+
+    def test_create_grievance_ticket_update_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        data = {
+            "description": "Upd Ind",
+            "language": "Polish",
+            "area": str(self.area_1.pk),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "extras": {
+                "issue_type": {
+                    "individual_data_update_issue_type_extras": {
+                        "individual": str(self.individuals[0].pk),
+                        "individual_data": {
+                            "full_name": "New full_name",
+                        },
+                    }
+                },
+            },
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketIndividualDataUpdateDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="json")
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_201_CREATED
+        assert len(resp_data) == 1
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketIndividualDataUpdateDetails.objects.all().count() == 1
+
+    def test_create_grievance_ticket_delete_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        data = {
+            "description": "Delete Ind",
+            "language": "Polish",
+            "area": str(self.area_1.pk),
+            "issue_type": 15,
+            "category": 2,
+            "consent": True,
+            "extras": {
+                "issue_type": {
+                    "individual_delete_issue_type_extras": {
+                        "individual": str(self.individuals[0].pk),
+                    }
+                },
+            },
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketDeleteIndividualDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="json")
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_201_CREATED
+        assert len(resp_data) == 1
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketDeleteIndividualDetails.objects.all().count() == 1
+
+    def test_create_grievance_ticket_delete_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        data = {
+            "description": "Remove HH",
+            "language": "Polish",
+            "area": str(self.area_1.pk),
+            "issue_type": 17,
+            "category": 2,
+            "consent": True,
+            "extras": {
+                "issue_type": {
+                    "household_delete_issue_type_extras": {
+                        "household": str(self.household_one.pk),
+                    }
+                },
+            },
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketDeleteHouseholdDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="json")
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_201_CREATED
+        assert len(resp_data) == 1
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketDeleteHouseholdDetails.objects.all().count() == 1
+
+    def test_create_grievance_ticket_complaint(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        payment = PaymentFactory(
+            household=self.household_one,
+            collector=self.individuals[0],
+            business_area=self.afghanistan,
+            currency="PLN",
+            parent__created_by=self.user,
+        )
+        data = {
+            "description": "Test Feedback",
+            "category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_FSP_COMPLAINT,
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {
+                "category": {
+                    "grievance_complaint_ticket_extras": {
+                        "household": str(self.household_one.pk),
+                        "individual": str(self.individuals[0].pk),
+                        "payment_record": [str(payment.pk)],
+                    }
+                }
+            },
+        }
+
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketComplaintDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="json")
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_201_CREATED
+        assert len(resp_data) == 1
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketComplaintDetails.objects.all().count() == 1

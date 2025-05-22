@@ -6,7 +6,7 @@ export type HouseholdUpdateData = {
     adminAreaTitle?: string;
     status?: string;
     consent?: boolean;
-    consentSharing: Array<string>;
+    consentSharing?: Array<string>;
     residenceStatus?: string;
     countryOrigin?: string;
     country?: string;

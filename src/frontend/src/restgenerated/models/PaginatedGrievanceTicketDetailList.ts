@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CreateGrievanceTicket } from './CreateGrievanceTicket';
-export type PaginatedCreateGrievanceTicketList = {
+import type { GrievanceTicketDetail } from './GrievanceTicketDetail';
+export type PaginatedGrievanceTicketDetailList = {
     next?: string | null;
     previous?: string | null;
-    results: Array<CreateGrievanceTicket>;
+    results: Array<GrievanceTicketDetail>;
 };
 

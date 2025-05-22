@@ -8,10 +8,10 @@ import type { PositiveFeedbackTicketExtras } from './PositiveFeedbackTicketExtra
 import type { ReferralTicketExtras } from './ReferralTicketExtras';
 import type { SensitiveGrievanceTicketExtras } from './SensitiveGrievanceTicketExtras';
 export type CategoryExtras = {
-    sensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
-    grievanceComplaintTicketExtras: GrievanceComplaintTicketExtras;
-    positiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
-    negativeFeedbackTicketExtras: NegativeFeedbackTicketExtras;
-    referralTicketExtras: ReferralTicketExtras;
+    sensitiveGrievanceTicketExtras?: SensitiveGrievanceTicketExtras;
+    grievanceComplaintTicketExtras?: GrievanceComplaintTicketExtras;
+    positiveFeedbackTicketExtras?: PositiveFeedbackTicketExtras;
+    negativeFeedbackTicketExtras?: NegativeFeedbackTicketExtras;
+    referralTicketExtras?: ReferralTicketExtras;
 };
 

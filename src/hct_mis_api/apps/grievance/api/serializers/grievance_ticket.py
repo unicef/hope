@@ -278,7 +278,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     admin_area_title = serializers.CharField(required=False)
     status = serializers.CharField(required=False)
     consent = serializers.BooleanField(required=False)
-    consent_sharing = serializers.ListField(child=serializers.CharField(required=False))
+    consent_sharing = serializers.ListField(child=serializers.CharField(), required=False)
     residence_status = serializers.CharField(required=False)
     country_origin = serializers.CharField(required=False)
     country = serializers.CharField(required=False)
@@ -488,16 +488,16 @@ class IssueTypeExtrasSerializer(serializers.Serializer):
 
 
 class CategoryExtrasSerializer(serializers.Serializer):
-    sensitive_grievance_ticket_extras = SensitiveGrievanceTicketExtras()
-    grievance_complaint_ticket_extras = GrievanceComplaintTicketExtras()
-    positive_feedback_ticket_extras = PositiveFeedbackTicketExtras()
-    negative_feedback_ticket_extras = NegativeFeedbackTicketExtras()
-    referral_ticket_extras = ReferralTicketExtras()
+    sensitive_grievance_ticket_extras = SensitiveGrievanceTicketExtras(required=False)
+    grievance_complaint_ticket_extras = GrievanceComplaintTicketExtras(required=False)
+    positive_feedback_ticket_extras = PositiveFeedbackTicketExtras(required=False)
+    negative_feedback_ticket_extras = NegativeFeedbackTicketExtras(required=False)
+    referral_ticket_extras = ReferralTicketExtras(required=False)
 
 
 class CreateGrievanceTicketExtrasSerializer(serializers.Serializer):
     category = CategoryExtrasSerializer(required=False)
-    issue_type = IssueTypeExtrasSerializer()
+    issue_type = IssueTypeExtrasSerializer(required=False)
 
 
 class GrievanceDocumentCreateSerializer(serializers.Serializer):
