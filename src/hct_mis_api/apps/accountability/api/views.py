@@ -9,13 +9,13 @@ from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.accountability.api.serializers import (
     FeedbackCreateSerializer,
     FeedbackDetailSerializer,
@@ -143,6 +143,13 @@ class FeedbackViewSet(
 
         if program and program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
+
+        # additional check for global scope - check if user has permission in the target program
+        if not program_slug and program:
+            if not check_permissions(
+                self.request.user, self.get_permissions_for_action(), business_area=business_area, program=program.slug
+            ):
+                raise PermissionDenied
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
