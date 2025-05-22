@@ -1,20 +1,21 @@
-import { Grid2 as Grid, GridSize, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { renderUserName } from '@utils/utils';
-import { FeedbackIssueType, FeedbackQuery } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { FeedbackIssueType } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from 'src/programContext';
+import { Grid2 as Grid, GridSize, Typography } from '@mui/material';
+import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import { renderUserName } from '@utils/utils';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 
 interface FeedbackDetailsProps {
-  feedback: FeedbackQuery['feedback'];
+  feedback: FeedbackDetail;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;
 }
@@ -58,18 +59,18 @@ function FeedbackDetails({
                 label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
-                    {feedback.householdLookup?.id &&
+                    {feedback.householdId &&
                     canViewHouseholdDetails &&
                     !isAllPrograms ? (
                       <BlackLink
-                        to={`/${baseUrl}/population/household/${feedback.householdLookup?.id}`}
+                        to={`/${baseUrl}/population/household/${feedback.householdId}`}
                       >
-                        {feedback.householdLookup?.unicefId}
+                        {feedback.householdUnicefId}
                       </BlackLink>
                     ) : (
                       <div>
-                        {feedback.householdLookup?.id
-                          ? feedback.householdLookup?.unicefId
+                        {feedback.householdId
+                          ? feedback.householdUnicefId
                           : '-'}
                       </div>
                     )}
@@ -81,18 +82,18 @@ function FeedbackDetails({
                 label: `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
-                    {feedback.individualLookup?.id &&
+                    {feedback.individualId &&
                     canViewIndividualDetails &&
                     !isAllPrograms ? (
                       <BlackLink
-                        to={`/${baseUrl}/population/individuals/${feedback.individualLookup?.id}`}
+                        to={`/${baseUrl}/population/individuals/${feedback.individualId}`}
                       >
-                        {feedback.individualLookup?.unicefId}
+                        {feedback.individualUnicefId}
                       </BlackLink>
                     ) : (
                       <div>
-                        {feedback.individualLookup?.id
-                          ? feedback.individualLookup?.unicefId
+                        {feedback.individualId
+                          ? feedback.individualUnicefId
                           : '-'}
                       </div>
                     )}
@@ -104,11 +105,11 @@ function FeedbackDetails({
                 label: t('Programme'),
                 value: (
                   <span>
-                    {feedback.program?.id ? (
+                    {feedback.programId ? (
                       <BlackLink
-                        to={`/${baseUrl}/details/${feedback.program.id}`}
+                        to={`/${baseUrl}/details/${feedback.programId}`}
                       >
-                        {feedback.program.name}
+                        {feedback.programName}
                       </BlackLink>
                     ) : (
                       '-'
@@ -134,7 +135,7 @@ function FeedbackDetails({
               },
               {
                 label: t('Administrative Level 2'),
-                value: feedback.admin2?.name,
+                value: feedback.admin2Name,
                 size: 3,
               },
               {
