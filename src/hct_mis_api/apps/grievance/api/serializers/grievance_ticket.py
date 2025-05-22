@@ -9,7 +9,6 @@ from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
 from hct_mis_api.apps.grievance.api.serializers.ticket_detail import (
     TICKET_DETAILS_SERIALIZER_MAPPING,
 )
-
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import (
     GrievanceDocument,
@@ -23,7 +22,6 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
     IndividualSimpleSerializer,
 )
-
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.api.serializers import PaymentSmallSerializer
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer

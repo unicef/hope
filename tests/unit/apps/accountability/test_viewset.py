@@ -284,6 +284,27 @@ class TestFeedbackViewSet:
             assert resp_data["language"] == "polish"
             assert resp_data["comments"] == "Test Comments"
 
+    def test_create_feedback_without_permission_in_program(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], self.afghanistan, self.program_2
+        )
+        response = self.client.post(
+            self.url_list,
+            {
+                "area": "Area 1",
+                "comments": "Test Comments",
+                "consent": True,
+                "description": "Test new description",
+                "household_lookup": str(self.hh_1.pk),
+                "issue_type": "POSITIVE_FEEDBACK",
+                "admin2": str(self.area_1.pk),
+                "language": "polish",
+                "program_id": str(self.program_active.pk),
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
