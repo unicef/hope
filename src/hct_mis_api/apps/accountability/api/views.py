@@ -9,7 +9,7 @@ from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
@@ -143,6 +143,9 @@ class FeedbackViewSet(
 
         if program and program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
+
+        if program and not request.user.has_perm(Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE, program):  # type: ignore
+            raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area

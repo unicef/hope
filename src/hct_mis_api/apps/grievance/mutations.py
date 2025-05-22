@@ -1283,7 +1283,7 @@ class PaymentDetailsApproveMutation(PermissionMutation):
 
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()  # DONE
-    update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
+    update_grievance_ticket = UpdateGrievanceTicketMutation.Field()  # in progress
     grievance_status_change = GrievanceStatusChangeMutation.Field()
     create_ticket_note = CreateTicketNoteMutation.Field()
     approve_individual_data_change = IndividualDataChangeApproveMutation.Field()
