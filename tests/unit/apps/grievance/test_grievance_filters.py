@@ -17,7 +17,6 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_URGENT,
     URGENCY_VERY_URGENT,
 )
-
 from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetailsFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
