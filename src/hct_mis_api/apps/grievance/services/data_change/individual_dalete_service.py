@@ -1,10 +1,8 @@
 from typing import List
 
 from django.contrib.auth.models import AbstractUser
-from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketDeleteIndividualDetails,
@@ -25,9 +23,7 @@ class IndividualDeleteService(DataChangeService):
     def save(self) -> List[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         individual_data_update_issue_type_extras = data_change_extras.get("individual_delete_issue_type_extras")
-        individual_encoded_id = individual_data_update_issue_type_extras.get("individual")
-        individual_id = decode_id_string(individual_encoded_id)
-        individual = get_object_or_404(Individual, id=individual_id)
+        individual = individual_data_update_issue_type_extras.get("individual")
         ticket_individual_data_update_details = TicketDeleteIndividualDetails(
             individual=individual,
             ticket=self.grievance_ticket,

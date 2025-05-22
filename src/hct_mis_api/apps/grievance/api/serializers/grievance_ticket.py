@@ -128,8 +128,8 @@ class GrievanceTicketListSerializer(serializers.ModelSerializer):
     def get_related_tickets(self, obj: GrievanceTicket) -> Dict:
         return GrievanceTicketSimpleSerializer(obj._related_tickets.all(), many=True).data
 
-    def get_total_days(self, obj: GrievanceTicket) -> int:
-        return obj.total_days
+    def get_total_days(self, obj: GrievanceTicket) -> Optional[int]:
+        return getattr(obj, "total_days", None)
 
 
 class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketListSerializer):

@@ -243,10 +243,14 @@ class GrievanceTicketViewSet(
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
-    @extend_schema(responses={201: CreateGrievanceTicketSerializer(many=True)})
+    @extend_schema(responses={201: GrievanceTicketDetailSerializer(many=True)})
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        # TODO: check later
+        # if serializer.validated_data.get("documentation"):
+        #     self.has_permission(request, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)
 
         user: AbstractUser = request.user  # type: ignore
         input_data = serializer.validated_data
@@ -264,11 +268,10 @@ class GrievanceTicketViewSet(
         details_creator = TicketDetailsCreatorFactory.get_for_category(input_data.get("category"))
         creator = TicketCreatorService(details_creator)
         grievances = creator.create(user, self.business_area, input_data)
-        print("===>>> , ", grievances)
-        serializer = CreateGrievanceTicketSerializer(grievances, many=True)
 
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        resp = GrievanceTicketDetailSerializer(grievances, many=True)
+        headers = self.get_success_headers(resp.data)
+        return Response(resp.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class GrievanceTicketGlobalViewSet(
