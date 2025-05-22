@@ -1,7 +1,6 @@
 from datetime import date
 from typing import Any
 
-# from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 import pytest
@@ -16,6 +15,10 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketAddIndividualDetails,
+)
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     HouseholdFactory,
@@ -223,14 +226,14 @@ class TestGrievanceTicketCreate:
                             "estimated_birth_date": False,
                             "relationship": RELATIONSHIP_UNKNOWN,
                             "role": ROLE_NO_ROLE,
-                            # "documents": [
-                            #     {
-                            #         "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
-                            #         "country": "POL",
-                            #         "number": "123-123-UX-321",
-                            #         "photo": SimpleUploadedFile(name="test.jpg", content=b""),
-                            #     }
-                            # ],
+                            "documents": [
+                                {
+                                    "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
+                                    "country": "POL",
+                                    "number": "123-123-UX-321",
+                                    # "photo": SimpleUploadedFile(name="test_file.pdf", content=b"abc", content_type="application/pdf"),
+                                }
+                            ],
                             "identities": [
                                 {
                                     "partner": UNHCR,
@@ -252,7 +255,11 @@ class TestGrievanceTicketCreate:
                 }
             },
         }
-
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketAddIndividualDetails.objects.all().count() == 0
         response = self.api_client.post(self.list_url, data, format="json")
-        print("RESPONSE: ", response.json())
+        resp_data = response.json()
         assert response.status_code == status.HTTP_201_CREATED
+        assert len(resp_data) == 1
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketAddIndividualDetails.objects.all().count() == 1
