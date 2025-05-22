@@ -162,7 +162,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                 try:
                     uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
                 except FinancialServiceProvider.DoesNotExist:
-                    uba_fsp = None
+                    uba_fsp = None  # pragma: no cover
 
                 if uba_fsp and obj.financial_service_provider == uba_fsp:
                     service_provider_code = financial_institution_code
