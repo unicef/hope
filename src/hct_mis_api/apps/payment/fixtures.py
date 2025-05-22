@@ -946,3 +946,8 @@ def generate_delivery_mechanisms() -> None:
                 "is_active": True,
             },
         )
+    FinancialServiceProvider.objects.get_or_create(
+        name="United Bank for Africa - Nigeria",
+        vision_vendor_number="2300117733",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+    )

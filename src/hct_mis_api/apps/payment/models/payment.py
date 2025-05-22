@@ -73,6 +73,7 @@ from hct_mis_api.apps.utils.models import (
     MergeStatusModel,
     PendingManager,
     SignatureMixin,
+    TimeStampedModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -2216,25 +2217,21 @@ class PaymentPlanSupportingDocument(models.Model):
         return self.title
 
 
-class FinancialInstitution(TimeStampedUUIDModel):
+class FinancialInstitution(TimeStampedModel):
     class FinancialInstitutionType(models.TextChoices):
         BANK = "bank", "Bank"
         TELCO = "telco", "Telco"
         OTHER = "other", "Other"
 
-    code = models.CharField(
-        max_length=30,
-        unique=True,
-    )
-    description = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self) -> str:
-        return f"{self.code} - {self.description}: {self.type}"  # pragma: no cover
+        return f"{self.id} {self.name}: {self.type}"  # pragma: no cover
 
 
-class FinancialInstitutionMapping(TimeStampedUUIDModel):
+class FinancialInstitutionMapping(TimeStampedModel):
     financial_service_provider = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE)
     financial_institution = models.ForeignKey(FinancialInstitution, on_delete=models.CASCADE)
     code = models.CharField(max_length=30)

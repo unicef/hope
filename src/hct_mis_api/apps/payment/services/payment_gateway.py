@@ -156,40 +156,38 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         if delivery_mech_data:
             if financial_institution_code := delivery_mech_data.get("bank_code__transfer_to_account"):
                 """
-                financial_institution_code is now collected as a specific fsp code (ex. uba_code),
-                but 'tomorrow' will be collected as a HOPE internal code.
-                This implementation handles both cases and performs remap when needed.
-                Data forwarded to PG:
-                 - initially collected bank_code
-                 - fsp specific Financial Institution code (service_provider_code)
+                financial_institution_code is now collected as a specific fsp code (uba_code),
                 """
 
-                # Assume it's valid code unless proven otherwise
-                service_provider_code = financial_institution_code
+                try:
+                    uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+                except FinancialServiceProvider.DoesNotExist:
+                    uba_fsp = None  # pragma: no cover
 
-                # Check if it's a correct code for chosen FSP
-                if fsp_mapping := FinancialInstitutionMapping.objects.filter(
-                    Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    financial_service_provider=obj.financial_service_provider,
-                ).first():
-                    service_provider_code = fsp_mapping.code
+                if uba_fsp and obj.financial_service_provider == uba_fsp:
+                    service_provider_code = financial_institution_code
 
-                # Check if it's valid for the current FSP
-                elif not FinancialInstitutionMapping.objects.filter(
-                    Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    financial_service_provider=obj.financial_service_provider,
-                ).exists():
-                    # Try to remap based on the provided financial institution code
-                    mapping = FinancialInstitutionMapping.objects.filter(
-                        Q(code=financial_institution_code) | Q(financial_institution__code=financial_institution_code),
-                    ).first()
-                    if mapping:
-                        fsp_mapping = FinancialInstitutionMapping.objects.filter(
+                else:
+                    try:
+                        uba_mapping = FinancialInstitutionMapping.objects.get(
+                            code=financial_institution_code,
+                            financial_service_provider=uba_fsp,
+                        )
+
+                        fsp_mapping = FinancialInstitutionMapping.objects.get(
+                            financial_institution=uba_mapping.financial_institution,
                             financial_service_provider=obj.financial_service_provider,
-                            financial_institution__code=mapping.financial_institution.code,  # hope code
-                        ).first()
-                        if fsp_mapping:
-                            service_provider_code = fsp_mapping.code
+                        )
+                        service_provider_code = fsp_mapping.code
+
+                    except FinancialInstitutionMapping.DoesNotExist:
+                        raise Exception(
+                            f"No Financial Institution Mapping found for"
+                            f" financial_institution_code {financial_institution_code},"
+                            f" fsp {obj.financial_service_provider},"
+                            f" payment {obj.id},"
+                            f" collector {obj.collector}."
+                        )
 
                 delivery_mech_data["service_provider_code"] = service_provider_code
 
