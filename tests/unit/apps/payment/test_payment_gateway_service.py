@@ -742,33 +742,16 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
 
         # no mapping, different payment fsp
-        expected_payload = {
-            "amount": str(self.payments[0].entitlement_quantity),
-            "phone_no": str(primary_collector.phone_no),
-            "last_name": primary_collector.family_name,
-            "first_name": primary_collector.given_name,
-            "full_name": primary_collector.full_name,
-            "destination_currency": self.payments[0].currency,
-            "bank_account_number__transfer_to_account": "123",
-            "bank_name__transfer_to_account": "ABC",
-            "bank_code__transfer_to_account": "456",
-            "account_holder_name__transfer_to_account": "Marek",
-            "service_provider_code": None,
-        }
-        PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        post_mock.assert_called_once_with(
-            "payment_instructions/123/add_records/",
-            [
-                {
-                    "remote_id": str(self.payments[0].id),
-                    "record_code": self.payments[0].unicef_id,
-                    "payload": expected_payload,
-                    "extra_data": {},
-                }
-            ],
-            validate_response=True,
-        )
-        post_mock.reset_mock()
+        with self.assertRaisesMessage(
+            Exception,
+            f"No Financial Institution Mapping found for"
+            f" financial_institution_code 456,"
+            f" fsp {self.payments[0].financial_service_provider},"
+            f" payment {self.payments[0].id},"
+            f" collector {self.payments[0].collector}.",
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+            post_mock.reset_mock()
 
         # no mapping, payment fsp is uba
         self.payments[0].financial_service_provider = uba_fsp

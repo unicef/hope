@@ -159,29 +159,35 @@ class PaymentSerializer(ReadOnlyModelSerializer):
                 financial_institution_code is now collected as a specific fsp code (uba_code),
                 """
 
-                service_provider_code = None
+                try:
+                    uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+                except FinancialServiceProvider.DoesNotExist:
+                    uba_fsp = None
 
-                uba_fsp = FinancialServiceProvider.objects.filter(name="United Bank for Africa - Nigeria").first()
-                if obj.financial_service_provider == uba_fsp:
+                if uba_fsp and obj.financial_service_provider == uba_fsp:
                     service_provider_code = financial_institution_code
 
-                elif uba_mapping := FinancialInstitutionMapping.objects.filter(
-                    Q(code=financial_institution_code),
-                    financial_service_provider=uba_fsp,
-                ).first():
-                    if fsp_mapping := FinancialInstitutionMapping.objects.filter(
-                        financial_institution=uba_mapping.financial_institution,
-                        financial_service_provider=obj.financial_service_provider,
-                    ).first():
+                else:
+                    try:
+                        uba_mapping = FinancialInstitutionMapping.objects.get(
+                            code=financial_institution_code,
+                            financial_service_provider=uba_fsp,
+                        )
+
+                        fsp_mapping = FinancialInstitutionMapping.objects.get(
+                            financial_institution=uba_mapping.financial_institution,
+                            financial_service_provider=obj.financial_service_provider,
+                        )
                         service_provider_code = fsp_mapping.code
 
-                if not service_provider_code:
-                    logger.error(
-                        f"No service provider code found for"
-                        f" financial_institution_code {financial_institution_code}"
-                        f" payment {obj.id}"
-                        f" collector {obj.collector}"
-                    )
+                    except FinancialInstitutionMapping.DoesNotExist:
+                        raise Exception(
+                            f"No Financial Institution Mapping found for"
+                            f" financial_institution_code {financial_institution_code},"
+                            f" fsp {obj.financial_service_provider},"
+                            f" payment {obj.id},"
+                            f" collector {obj.collector}."
+                        )
 
                 delivery_mech_data["service_provider_code"] = service_provider_code
 
