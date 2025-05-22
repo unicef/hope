@@ -85,11 +85,25 @@ class TestFeedbackViewSet:
                 "pk": str(self.feedback_2.pk),
             },
         )
+        self.url_details_feedback_1 = reverse(
+            "api:accountability:feedbacks-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.feedback_1.pk),
+            },
+        )
         self.url_msg_create = reverse(
             "api:accountability:feedbacks-message",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
                 "pk": str(self.feedback_2.pk),
+            },
+        )
+        self.url_msg_create_for_feedback_1 = reverse(
+            "api:accountability:feedbacks-message",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.feedback_1.pk),
             },
         )
         # per Program
@@ -284,6 +298,27 @@ class TestFeedbackViewSet:
             assert resp_data["language"] == "polish"
             assert resp_data["comments"] == "Test Comments"
 
+    def test_create_feedback_without_permission_in_program(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE], self.afghanistan, self.program_2
+        )
+        response = self.client.post(
+            self.url_list,
+            {
+                "area": "Area 1",
+                "comments": "Test Comments",
+                "consent": True,
+                "description": "Test new description",
+                "household_lookup": str(self.hh_1.pk),
+                "issue_type": "POSITIVE_FEEDBACK",
+                "admin2": str(self.area_1.pk),
+                "language": "polish",
+                "program_id": str(self.program_active.pk),
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
@@ -361,7 +396,7 @@ class TestFeedbackViewSet:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_update_feedback(
+    def test_update_feedback_without_program(
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
@@ -398,6 +433,50 @@ class TestFeedbackViewSet:
             assert resp_data["language"] == "eng_update"
             assert resp_data["comments"] == "AAA_update"
             assert resp_data["consent"] is False
+
+    def test_update_feedback_with_program_with_permission_in_program(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], self.afghanistan, self.program_active
+        )
+        response = self.client.patch(
+            self.url_details_feedback_1,
+            {
+                "issue_type": "NEGATIVE_FEEDBACK",
+                "individual_lookup": str(self.individual_1.pk),
+                "description": "Test_update",
+                "comments": "AAA_update",
+                "admin2": str(self.area_2.pk),
+                "area": "Area 1_updated",
+                "language": "eng_update",
+                "consent": False,
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_update_feedback_with_program_without_permission_in_program(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE], self.afghanistan, self.program_2
+        )
+        response = self.client.patch(
+            self.url_details_feedback_1,
+            {
+                "issue_type": "NEGATIVE_FEEDBACK",
+                "individual_lookup": str(self.individual_1.pk),
+                "description": "Test_update",
+                "comments": "AAA_update",
+                "admin2": str(self.area_2.pk),
+                "area": "Area 1_updated",
+                "language": "eng_update",
+                "consent": False,
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -692,6 +771,32 @@ class TestFeedbackViewSet:
             assert feedback_message["created_by"] == "Test User"
             assert "id" in feedback_message
             assert "created_at" in feedback_message
+
+    def test_create_feedback_message_with_program_with_permission_in_program(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE], self.afghanistan, self.program_active
+        )
+        response = self.client.post(
+            self.url_msg_create_for_feedback_1,
+            {"description": "Message for Feedback #1"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_create_feedback_message_with_program_without_permission_in_program(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE], self.afghanistan, self.program_2
+        )
+        response = self.client.post(
+            self.url_msg_create_for_feedback_1,
+            {"description": "Message for Feedback #1"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
