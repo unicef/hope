@@ -6,6 +6,6 @@ import type { CategoryExtras } from './CategoryExtras';
 import type { IssueTypeExtras } from './IssueTypeExtras';
 export type CreateGrievanceTicketExtras = {
     category?: CategoryExtras;
-    issueType: IssueTypeExtras;
+    issueType?: IssueTypeExtras;
 };
 

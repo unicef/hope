@@ -30,8 +30,8 @@ import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
-import type { PaginatedCreateGrievanceTicketList } from '../models/PaginatedCreateGrievanceTicketList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
+import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
@@ -2759,7 +2759,7 @@ export class RestService {
     }
     /**
      * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
-     * @returns PaginatedCreateGrievanceTicketList
+     * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
     public static restBusinessAreasProgramsGrievanceTicketsCreate({
@@ -2935,7 +2935,7 @@ export class RestService {
          * * `3` - Not urgent
          */
         urgency?: 0 | 1 | 2 | 3,
-    }): CancelablePromise<PaginatedCreateGrievanceTicketList> {
+    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/grievance-tickets/',

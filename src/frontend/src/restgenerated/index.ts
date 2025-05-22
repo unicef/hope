@@ -122,8 +122,8 @@ export type { PaginatedAreaTypeList as PaginatedAreaTypeListCamelCase } from './
 export type { PaginatedBeneficiaryGroupList as PaginatedBeneficiaryGroupListCamelCase } from './models/PaginatedBeneficiaryGroupList';
 export type { PaginatedBusinessAreaList as PaginatedBusinessAreaListCamelCase } from './models/PaginatedBusinessAreaList';
 export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './models/PaginatedCountryList';
-export type { PaginatedCreateGrievanceTicketList as PaginatedCreateGrievanceTicketListCamelCase } from './models/PaginatedCreateGrievanceTicketList';
 export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
+export type { PaginatedGrievanceTicketDetailList as PaginatedGrievanceTicketDetailListCamelCase } from './models/PaginatedGrievanceTicketDetailList';
 export type { PaginatedGrievanceTicketListList as PaginatedGrievanceTicketListListCamelCase } from './models/PaginatedGrievanceTicketListList';
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
