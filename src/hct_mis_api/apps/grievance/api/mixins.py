@@ -99,9 +99,13 @@ class GrievancePermissionsMixin:
             )
 
             if programs_can_view_ex_sensitive_all:
-                filters |= (Q(programs__id__in=programs_can_view_ex_sensitive_all)| Q(programs__isnull=True)) & ~Q(**sensitive_category_filter)
+                filters |= (Q(programs__id__in=programs_can_view_ex_sensitive_all) | Q(programs__isnull=True)) & ~Q(
+                    **sensitive_category_filter
+                )
             if programs_can_view_sensitive_all:
-                filters |= (Q(programs__id__in=programs_can_view_sensitive_all | Q(programs__isnull=True)), **sensitive_category_filter)
+                filters |= (Q(programs__id__in=programs_can_view_sensitive_all) | Q(programs__isnull=True)) & Q(
+                    **sensitive_category_filter
+                )
             if programs_can_view_ex_sensitive_creator:
                 filters |= (
                     (Q(programs__id__in=programs_can_view_ex_sensitive_creator) | Q(programs__isnull=True))
@@ -110,7 +114,7 @@ class GrievancePermissionsMixin:
                 )
             if programs_can_view_ex_sensitive_owner:
                 filters |= (
-                        (Q(programs__id__in=programs_can_view_ex_sensitive_owner) | Q(programs__isnull=True))
+                    (Q(programs__id__in=programs_can_view_ex_sensitive_owner) | Q(programs__isnull=True))
                     & Q(**assigned_to_filter)
                     & ~Q(**sensitive_category_filter)
                 )
@@ -122,7 +126,7 @@ class GrievancePermissionsMixin:
                 )
             if programs_can_view_sensitive_owner:
                 filters |= (
-                    (Q(programs__id__in=programs_can_view_sensitive_owner)  | Q(programs__isnull=True))
+                    (Q(programs__id__in=programs_can_view_sensitive_owner) | Q(programs__isnull=True))
                     & Q(**assigned_to_filter)
                     & Q(**sensitive_category_filter)
                 )
