@@ -56,7 +56,6 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { first } from 'lodash';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { createApiParams } from '@utils/apiUtils';
 
