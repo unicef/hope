@@ -1,3 +1,24 @@
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { OverviewContainer } from '@components/core/OverviewContainer';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Consent } from '@components/grievances/Consent';
+import HouseholdQuestionnaire from '@components/grievances/HouseholdQuestionnaire/HouseholdQuestionnaire';
+import IndividualQuestionnaire from '@components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
+import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
+// Constants for feedback issue types
+const FEEDBACK_ISSUE_TYPE = {
+  POSITIVE_FEEDBACK: 'POSITIVE_FEEDBACK',
+  NEGATIVE_FEEDBACK: 'NEGATIVE_FEEDBACK',
+};
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -8,47 +29,27 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { FeedbackSteps } from '@utils/constants';
 import { Field, Formik } from 'formik';
 import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import {
-  CreateFeedbackInput,
-  FeedbackIssueType,
-  useAllProgramsForChoicesQuery,
-  useAllUsersQuery,
-  useCreateFeedbackTicketMutation,
-  useFeedbackIssueTypeChoicesQuery,
-} from '@generated/graphql';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import { LabelizedField } from '@components/core/LabelizedField';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { OverviewContainer } from '@components/core/OverviewContainer';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { Consent } from '@components/grievances/Consent';
-import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import {
   PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { FeedbackSteps } from '@utils/constants';
-import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import HouseholdQuestionnaire from '@components/grievances/HouseholdQuestionnaire/HouseholdQuestionnaire';
-import IndividualQuestionnaire from '@components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { createApiParams } from '@utils/apiUtils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -174,30 +175,45 @@ function CreateFeedbackPage(): ReactElement {
     verificationRequired: false,
   };
 
-  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
-    variables: { businessArea, first: 1000 },
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['choicesFeedbackIssueTypeList', businessArea],
+    queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useFeedbackIssueTypeChoicesQuery();
-
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
 
-  const [mutate, { loading }] = useCreateFeedbackTicketMutation();
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      requestBody;
+    }) =>
+      RestService.restBusinessAreasFeedbacksCreate({
+        businessAreaSlug,
+        requestBody,
+      }),
+  });
 
-  if (userDataLoading || choicesLoading || programsDataLoading)
-    return <LoadingComponent />;
+  if (choicesLoading || programsDataLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
     return <PermissionDenied />;
 
-  if (!choicesData || !userData || !programsData) return null;
+  if (!choicesData || !programsData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -214,7 +230,7 @@ function CreateFeedbackPage(): ReactElement {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const prepareVariables = (values): CreateFeedbackInput => ({
+  const prepareVariables = (values) => ({
     area: values.area,
     comments: values.comments,
     consent: values.consent,
@@ -227,9 +243,10 @@ function CreateFeedbackPage(): ReactElement {
     program: values.program,
   });
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData?.results?.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   return (
     <Formik
@@ -238,14 +255,13 @@ function CreateFeedbackPage(): ReactElement {
         if (activeStep === steps.length - 1) {
           try {
             const response = await mutate({
-              variables: { input: prepareVariables(values) },
+              businessAreaSlug: businessArea,
+              requestBody: prepareVariables(values),
             });
             showMessage(t('Feedback created'));
-            navigate(
-              `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
-            );
+            navigate(`/${baseUrl}/grievance/feedback/${response.id}`);
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            showMessage(e.message || 'Error creating feedback');
           }
         } else {
           setValidateData(false);
@@ -321,7 +337,7 @@ function CreateFeedbackPage(): ReactElement {
                               label="Issue Type"
                               variant="outlined"
                               required
-                              choices={choicesData.feedbackIssueTypeChoices}
+                              choices={choicesData}
                               component={FormikSelectField}
                               data-cy="input-issue-type"
                             />
@@ -397,7 +413,7 @@ function CreateFeedbackPage(): ReactElement {
                                 <Grid size={{ xs: 6 }}>
                                   <LabelizedField label={t('Issue Type')}>
                                     {values.issueType ===
-                                    FeedbackIssueType.PositiveFeedback
+                                    FEEDBACK_ISSUE_TYPE.POSITIVE_FEEDBACK
                                       ? 'Positive Feedback'
                                       : 'Negative Feedback'}
                                   </LabelizedField>
