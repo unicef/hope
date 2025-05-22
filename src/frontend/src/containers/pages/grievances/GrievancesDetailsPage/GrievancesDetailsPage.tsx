@@ -43,7 +43,7 @@ const GrievancesDetailsPage = (): ReactElement => {
     isLoading: loading,
     error,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreaProgram', businessAreaSlug, id],
+    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,

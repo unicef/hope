@@ -7,7 +7,6 @@ import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Grid2 as Grid, GridSize, Typography } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
@@ -26,7 +25,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketDetail;
-  choicesData: GrievancesChoiceDataQuery;
+  choicesData: any;
   baseUrl: string;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;
