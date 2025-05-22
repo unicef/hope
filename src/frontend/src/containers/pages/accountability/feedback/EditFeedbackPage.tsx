@@ -1,16 +1,3 @@
-import { Box, Button, Divider, Grid2 as Grid } from '@mui/material';
-import { Field, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import * as Yup from 'yup';
-import {
-  UpdateFeedbackInput,
-  useAllProgramsForChoicesQuery,
-  useAllUsersQuery,
-  useFeedbackIssueTypeChoicesQuery,
-  useFeedbackQuery,
-  useUpdateFeedbackTicketMutation,
-} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
@@ -19,20 +6,31 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Button, Divider, Grid2 as Grid } from '@mui/material';
+import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { PatchedFeedbackUpdate } from '@restgenerated/models/PatchedFeedbackUpdate';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { Field, Formik } from 'formik';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import * as Yup from 'yup';
 import {
   PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string().required('Issue Type is required').nullable(),
@@ -54,42 +52,59 @@ const EditFeedbackPage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: feedbackData, loading: feedbackDataLoading } = useFeedbackQuery(
-    {
-      variables: { id },
-      fetchPolicy: 'network-only',
-    },
-  );
-
-  const { data: userData, loading: userDataLoading } = useAllUsersQuery({
-    variables: { businessArea, first: 1000 },
-  });
-
-  const { data: choicesData, loading: choicesLoading } =
-    useFeedbackIssueTypeChoicesQuery();
-
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
+  const { data: feedbackData, isLoading: feedbackDataLoading } =
+    useQuery<FeedbackDetail>({
+      queryKey: ['businessAreasFeedbacksRetrieve', businessArea, id],
+      queryFn: () =>
+        RestService.restBusinessAreasFeedbacksRetrieve({
+          businessAreaSlug: businessArea,
+          id: id,
+        }),
     });
 
-  const [mutate, { loading }] = useUpdateFeedbackTicketMutation();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['choicesFeedbackIssueTypeList', businessArea],
+    queryFn: () => RestService.restChoicesFeedbackIssueTypeList(),
+  });
 
-  if (
-    userDataLoading ||
-    choicesLoading ||
-    feedbackDataLoading ||
-    programsDataLoading
-  )
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
+    });
+
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id: feedbackId,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      requestBody?: PatchedFeedbackUpdate;
+    }) =>
+      RestService.restBusinessAreasFeedbacksPartialUpdate({
+        businessAreaSlug,
+        id: feedbackId,
+        requestBody,
+      }),
+  });
+
+  if (feedbackDataLoading || choicesLoading || programsDataLoading)
     return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
     return <PermissionDenied />;
 
-  if (!choicesData || !userData || !feedbackData || !programsData) return null;
+  if (!choicesData || !feedbackData || !programsData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -98,23 +113,27 @@ const EditFeedbackPage = (): ReactElement => {
     },
   ];
 
-  const { feedback } = feedbackData;
+  const feedback = feedbackData;
 
   const initialValues = {
     issueType: feedback.issueType,
-    selectedHousehold: feedback.householdLookup || null,
-    selectedIndividual: feedback.individualLookup || null,
+    selectedHousehold: feedback.householdId
+      ? { id: feedback.householdId, unicefId: feedback.householdUnicefId }
+      : null,
+    selectedIndividual: feedback.individualId
+      ? { id: feedback.individualId, unicefId: feedback.individualUnicefId }
+      : null,
     description: feedback.description || null,
     comments: feedback.comments || null,
-    admin2: feedback.admin2?.id || null,
+    //TODO: check if admin2Name is correct
+    admin2: null, // For FeedbackDetail, it's admin2Name not admin2 object
     area: feedback.area || null,
     language: feedback.language || null,
-    consent: false,
-    program: feedback.program?.id || null,
+    consent: feedback.consent || false,
+    program: feedback.programId || null,
   };
 
-  const prepareVariables = (values): UpdateFeedbackInput => ({
-    feedbackId: id,
+  const prepareVariables = (values) => ({
     issueType: values.issueType,
     householdLookup: values.selectedHousehold?.id,
     individualLookup: values.selectedIndividual?.id,
@@ -137,24 +156,25 @@ const EditFeedbackPage = (): ReactElement => {
     permissions,
   );
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData?.results?.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const response = await mutate({
-            variables: { input: prepareVariables(values) },
+          await mutate({
+            businessAreaSlug: businessArea,
+            id: id,
+            requestBody: prepareVariables(values),
           });
           showMessage(t('Feedback updated'));
-          navigate(
-            `/${baseUrl}/grievance/feedback/${response.data.updateFeedback.feedback.id}`,
-          );
+          navigate(`/${baseUrl}/grievance/feedback/${id}`);
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          showMessage(e.message || 'Error updating feedback');
         }
       }}
       validationSchema={validationSchema}
@@ -218,18 +238,18 @@ const EditFeedbackPage = (): ReactElement => {
                             label={t(`${beneficiaryGroup?.groupLabel} ID`)}
                           >
                             {' '}
-                            {feedback.householdLookup?.id &&
+                            {feedback.householdId &&
                             canViewHouseholdDetails &&
                             !isAllPrograms ? (
                               <BlackLink
-                                to={`/${baseUrl}/population/household/${feedback.householdLookup?.id}`}
+                                to={`/${baseUrl}/population/household/${feedback.householdId}`}
                               >
-                                {feedback.householdLookup?.unicefId}
+                                {feedback.householdUnicefId}
                               </BlackLink>
                             ) : (
                               <div>
-                                {feedback.householdLookup?.id
-                                  ? feedback.householdLookup?.unicefId
+                                {feedback.householdId
+                                  ? feedback.householdUnicefId
                                   : '-'}
                               </div>
                             )}
@@ -240,18 +260,18 @@ const EditFeedbackPage = (): ReactElement => {
                             label={t(`${beneficiaryGroup?.memberLabel} ID`)}
                           >
                             {' '}
-                            {feedback.individualLookup?.id &&
+                            {feedback.individualId &&
                             canViewIndividualDetails &&
                             !isAllPrograms ? (
                               <BlackLink
-                                to={`/${baseUrl}/population/individuals/${feedback.individualLookup?.id}`}
+                                to={`/${baseUrl}/population/individuals/${feedback.individualId}`}
                               >
-                                {feedback.individualLookup?.unicefId}
+                                {feedback.individualUnicefId}
                               </BlackLink>
                             ) : (
                               <div>
-                                {feedback.individualLookup?.id
-                                  ? feedback.individualLookup?.unicefId
+                                {feedback.individualId
+                                  ? feedback.individualUnicefId
                                   : '-'}
                               </div>
                             )}
@@ -289,7 +309,7 @@ const EditFeedbackPage = (): ReactElement => {
                           name="admin2"
                           variant="outlined"
                           component={FormikAdminAreaAutocomplete}
-                          disabled={Boolean(feedback.admin2?.id)}
+                          disabled={Boolean(feedback.admin2Name)}
                         />
                       </Grid>
                       <Grid size={{ xs: 6 }}>
@@ -320,7 +340,7 @@ const EditFeedbackPage = (): ReactElement => {
                           choices={mappedProgramChoices}
                           component={FormikSelectField}
                           disabled={
-                            !isAllPrograms || Boolean(feedback.program?.id)
+                            !isAllPrograms || Boolean(feedback.programId)
                           }
                         />
                       </Grid>

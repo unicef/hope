@@ -1,7 +1,6 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { TabPanel } from '@core/TabPanel';
 import { Tab, Tabs } from '@core/Tabs';
-import { useAllProgramsForChoicesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
@@ -20,6 +19,8 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { createApiParams } from '@utils/apiUtils';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -115,10 +116,18 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: programsData, loading: programsLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, first: 100 },
-      fetchPolicy: 'cache-first',
+  const { data: programsData, isLoading: programsLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
 
   if (householdChoicesLoading || individualChoicesLoading || programsLoading)
