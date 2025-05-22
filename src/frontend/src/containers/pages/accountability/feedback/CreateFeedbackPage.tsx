@@ -493,6 +493,7 @@ function CreateFeedbackPage(): ReactElement {
                                 label={t('Languages Spoken')}
                                 component={FormikTextField}
                                 data-cy="input-languages"
+                                required
                               />
                             </Grid>
                             <Grid size={{ xs: 3 }}>
