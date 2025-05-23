@@ -341,7 +341,10 @@ class TestGrievanceTicketGlobalList:
                 {
                     "id": str(household.id),
                     "unicef_id": household.unicef_id,
-                    "admin2": household.admin2.name,
+                    "admin2": {
+                        "id": str(household.admin2.id),
+                        "name": household.admin2.name,
+                    },
                 }
                 if household
                 else None
