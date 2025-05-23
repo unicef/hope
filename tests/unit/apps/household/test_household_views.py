@@ -127,7 +127,10 @@ class TestHouseholdList:
             assert household_result["unicef_id"] == household.unicef_id
             assert household_result["head_of_household"] == household.head_of_household.full_name
             assert household_result["admin1"] == household.admin1.name
-            assert household_result["admin2"] == household.admin2.name
+            assert household_result["admin2"] == {
+                "id": str(household.admin2.id),
+                "name": household.admin2.name,
+            }
             assert household_result["program"] == household.program.name
             assert household_result["status"] == household.status
             assert household_result["size"] == household.size
@@ -661,7 +664,7 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
-                    "admin2": "",
+                    "admin2": None,
                 },
             },
             {
@@ -676,7 +679,7 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
-                    "admin2": "",
+                    "admin2": None,
                 },
             },
             {
@@ -691,7 +694,7 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household2.id),
                     "unicef_id": self.household2.unicef_id,
-                    "admin2": "",
+                    "admin2": None,
                 },
             },
         ]
@@ -813,7 +816,10 @@ class TestHouseholdGlobalViewSet:
             assert household_result_first["unicef_id"] == household.unicef_id
             assert household_result_first["head_of_household"] == household.head_of_household.full_name
             assert household_result_first["admin1"] == household.admin1.name
-            assert household_result_first["admin2"] == household.admin2.name
+            assert household_result_first["admin2"] == {
+                "id": str(household.admin2.id),
+                "name": household.admin2.name,
+            }
             assert household_result_first["program"] == household.program.name
             assert household_result_first["status"] == household.status
             assert household_result_first["size"] == household.size
