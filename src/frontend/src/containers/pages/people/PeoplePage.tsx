@@ -22,7 +22,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 export const PeoplePage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { programHasPdu } = useProgramContext();
+  const { programHasPdu = false } = useProgramContext();
   const { businessArea } = useBaseUrl();
   const isNewTemplateJustCreated =
     location.state?.isNewTemplateJustCreated || false;

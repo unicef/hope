@@ -46,7 +46,7 @@ export function PeopleFilter({
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup || null;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -72,7 +72,7 @@ export function PeopleFilter({
     DataCollectingTypeType.Social;
 
   const individualTableOrderOptions =
-    generateTableOrderOptionsMember(beneficiaryGroup);
+    generateTableOrderOptionsMember(beneficiaryGroup) || [];
 
   return (
     <FiltersSection
@@ -90,7 +90,7 @@ export function PeopleFilter({
           />
         </Grid>
         <Grid container size={{ xs: 6 }} spacing={3}>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('documentType', e.target.value)
@@ -102,14 +102,14 @@ export function PeopleFilter({
               fullWidth
               disableClearable
             >
-              {choicesData?.documentTypeChoices.map(({ name, value }) => (
+              {choicesData?.documentTypeChoices?.map(({ name, value }) => (
                 <MenuItem key={value} value={value}>
                   {name}
                 </MenuItem>
-              ))}
+              )) || null}
             </SelectFilter>
           </Grid>
-          <Grid size={{ xs:6 }}>
+          <Grid size={{ xs: 6 }}>
             <SearchTextField
               label={t('Document number')}
               value={filter.documentNumber}
@@ -121,7 +121,7 @@ export function PeopleFilter({
           </Grid>
         </Grid>
         {isAllPrograms && (
-          <Grid size={{ xs:2 }}>
+          <Grid size={{ xs: 2 }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -140,7 +140,7 @@ export function PeopleFilter({
         )}
         {showAdminAreaFilter && (
           <>
-            <Grid size={{ xs:2 }}>
+            <Grid size={{ xs: 2 }}>
               <AdminAreaAutocomplete
                 level={1}
                 name="admin1"
@@ -154,7 +154,7 @@ export function PeopleFilter({
                 dataCy="ind-filters-admin1"
               />
             </Grid>
-            <Grid size={{ xs:2 }}>
+            <Grid size={{ xs: 2 }}>
               <AdminAreaAutocomplete
                 level={2}
                 name="admin2"
@@ -170,7 +170,7 @@ export function PeopleFilter({
             </Grid>
           </>
         )}
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}
@@ -185,7 +185,7 @@ export function PeopleFilter({
             <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <NumberTextField
             fullWidth
             topLabel={t('Age')}
@@ -199,7 +199,7 @@ export function PeopleFilter({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <NumberTextField
             fullWidth
             placeholder={t('To')}
@@ -248,7 +248,7 @@ export function PeopleFilter({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -266,7 +266,7 @@ export function PeopleFilter({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -277,7 +277,7 @@ export function PeopleFilter({
             dataCy="ind-filters-reg-date-from"
           />
         </Grid>
-        <Grid size={{ xs:2 }}>
+        <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -288,7 +288,7 @@ export function PeopleFilter({
           />
         </Grid>
         {isAllPrograms && (
-          <Grid size={{ xs:2 }}>
+          <Grid size={{ xs: 2 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)

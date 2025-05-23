@@ -59,7 +59,8 @@ export function ProgramProvider({
     selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Standard;
 
-  const programHasPdu = selectedProgram?.pduFields?.length > 0;
+  const programHasPdu =
+    selectedProgram?.pduFields && selectedProgram.pduFields.length > 0;
 
   // Set isActiveProgram to true if All Programs is selected
   if (selectedProgram === null) {
