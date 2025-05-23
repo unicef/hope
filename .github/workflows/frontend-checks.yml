@@ -1,0 +1,31 @@
+name: FRONTEND_CHECKS
+permissions:
+  contents: read
+on:
+  workflow_call:
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/frontend/node_modules
+            src/frontend/.yarn
+            src/frontend/.yarn/cache
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: yarn install --frozen-lockfile
+        working-directory: src/frontend
+      - run: yarn lint
+        working-directory: src/frontend
+      - run: yarn test --watchAll=false
+        working-directory: src/frontend

@@ -19,6 +19,7 @@ export type Household = {
     country: CountryEnum;
     countryOrigin?: CountryOriginEnum;
     size?: number | null;
+    consentSharing?: Array<ConsentSharingEnum>;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;
@@ -34,16 +35,6 @@ export type Household = {
      * Household consent
      */
     consent?: boolean | null;
-    /**
-     * Household consent sharing
-     *
-     * * `` - None
-     * * `GOVERNMENT_PARTNER` - Government partners
-     * * `HUMANITARIAN_PARTNER` - Humanitarian partners
-     * * `PRIVATE_PARTNER` - Private partners
-     * * `UNICEF` - UNICEF
-     */
-    consentSharing?: ConsentSharingEnum;
     /**
      * Household residence status
      *

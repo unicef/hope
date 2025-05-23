@@ -19,6 +19,7 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
+    DATA_SHARING_CHOICES,
     HEAD,
     NON_BENEFICIARY,
     RESIDENCE_STATUS_CHOICE,
@@ -59,6 +60,8 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin2 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin3 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin4 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+
+    consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

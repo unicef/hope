@@ -29,7 +29,7 @@ export type GrievanceTicketList = {
     urgency?: UrgencyEnum;
     readonly createdAt: string;
     readonly updatedAt: string;
-    readonly totalDays: number;
+    readonly totalDays: number | null;
     readonly targetId: string;
     readonly relatedTickets: Record<string, any>;
 };
