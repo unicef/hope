@@ -193,7 +193,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 2')}>
-            {household?.admin2}
+            {household?.admin2?.name}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

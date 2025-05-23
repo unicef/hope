@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AreaSimple } from './AreaSimple';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdList = {
@@ -9,7 +10,7 @@ export type HouseholdList = {
     unicefId: string | null;
     headOfHousehold: string;
     admin1?: string;
-    admin2?: string;
+    admin2: AreaSimple;
     program: string;
     readonly status: string;
     /**

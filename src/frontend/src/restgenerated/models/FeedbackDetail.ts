@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AreaSimple } from './AreaSimple';
 import type { FeedbackMessage } from './FeedbackMessage';
 export type FeedbackDetail = {
     readonly id: string;
@@ -24,7 +25,6 @@ export type FeedbackDetail = {
     comments?: string | null;
     consent?: boolean;
     readonly updatedAt: string;
-    readonly admin2Name: string | null;
-    readonly admin2Id: string | null;
+    admin2: AreaSimple;
 };
 

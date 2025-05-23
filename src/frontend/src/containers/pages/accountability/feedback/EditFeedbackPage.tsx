@@ -309,7 +309,7 @@ const EditFeedbackPage = (): ReactElement => {
                           name="admin2"
                           variant="outlined"
                           component={FormikAdminAreaAutocomplete}
-                          disabled={Boolean(feedback.admin2Name)}
+                          disabled={Boolean(feedback.admin2?.name)}
                         />
                       </Grid>
                       <Grid size={{ xs: 6 }}>
