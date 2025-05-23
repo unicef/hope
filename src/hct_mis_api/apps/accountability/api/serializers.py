@@ -82,6 +82,7 @@ class FeedbackListSerializer(serializers.ModelSerializer):
 
 class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
     admin2_name = serializers.SerializerMethodField()
+    admin2_id = serializers.SerializerMethodField()
 
     class Meta(FeedbackListSerializer.Meta):
         fields = FeedbackListSerializer.Meta.fields + (  # type: ignore
@@ -92,10 +93,14 @@ class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
             "consent",
             "updated_at",
             "admin2_name",
+            "admin2_id",
         )
 
     def get_admin2_name(self, obj: Feedback) -> Optional[str]:
         return getattr(obj.admin2, "name", None)
+
+    def get_admin2_id(self, obj: Feedback) -> Optional[str]:
+        return getattr(obj.admin2, "id", None)
 
 
 class FeedbackCreateSerializer(serializers.ModelSerializer):

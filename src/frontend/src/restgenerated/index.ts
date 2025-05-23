@@ -65,6 +65,7 @@ export { FrequencyOfPaymentsEnum as FrequencyOfPaymentsEnumCamelCase } from './m
 export type { FspChoice as FspChoiceCamelCase } from './models/FspChoice';
 export type { FspChoices as FspChoicesCamelCase } from './models/FspChoices';
 export type { FullList as FullListCamelCase } from './models/FullList';
+export type { GrievanceChoices as GrievanceChoicesCamelCase } from './models/GrievanceChoices';
 export type { GrievanceTicketDetail as GrievanceTicketDetailCamelCase } from './models/GrievanceTicketDetail';
 export type { GrievanceTicketList as GrievanceTicketListCamelCase } from './models/GrievanceTicketList';
 export type { HeadOfHousehold as HeadOfHouseholdCamelCase } from './models/HeadOfHousehold';
