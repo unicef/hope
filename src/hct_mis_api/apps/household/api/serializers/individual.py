@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     resolve_flex_fields_choices_to_string,
 )
+from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
@@ -120,7 +121,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
-    admin2 = serializers.CharField(source="admin2.name", default="")
+    admin2 = AreaSimpleSerializer()
 
     class Meta:
         model = Household

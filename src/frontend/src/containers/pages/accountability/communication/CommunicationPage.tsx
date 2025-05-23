@@ -1,24 +1,24 @@
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'react-router-dom';
 import { CommunicationFilters } from '@components/accountability/Communication/CommunicationTable/CommunicationFilters';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import CommunicationTable from '@containers/tables/Communication/CommunicationTable/CommunicationTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
 import {
   PERMISSIONS,
   hasPermissionInModule,
 } from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import CommunicationTable from '@containers/tables/Communication/CommunicationTable/CommunicationTable';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
 
 export function CommunicationPage(): ReactElement {
   const { baseUrl, businessArea } = useBaseUrl();
@@ -42,7 +42,7 @@ export function CommunicationPage(): ReactElement {
   );
 
   const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<GrievanceTicketDetail>({
+    useQuery<GrievanceChoices>({
       queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({

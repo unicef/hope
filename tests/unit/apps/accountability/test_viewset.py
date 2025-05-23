@@ -53,6 +53,7 @@ class TestFeedbackViewSet:
             language="test language 111",
             comments="test comments 111",
             issue_type="NEGATIVE_FEEDBACK",
+            admin2=self.area_1,
         )
         self.feedback_2 = FeedbackFactory(
             program=None,
@@ -240,7 +241,10 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["household_id"] is not None
             assert resp_data["individual_unicef_id"] is not None
@@ -284,7 +288,10 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_201_CREATED
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
             assert resp_data["issue_type"] == "Positive feedback"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
@@ -374,7 +381,7 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_201_CREATED
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] is None
+            assert resp_data["admin2"] is None
             assert resp_data["issue_type"] == "Negative feedback"
             assert resp_data["household_id"] is None
             assert resp_data["household_unicef_id"] is None
@@ -419,7 +426,10 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "Wroclaw"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_2.id),
+                "name": "Wroclaw",
+            }
             assert resp_data["issue_type"] == "Negative feedback"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
@@ -508,7 +518,10 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "Wroclaw"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_2.id),
+                "name": "Wroclaw",
+            }
             assert resp_data["issue_type"] == "Negative feedback"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
@@ -606,7 +619,10 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["household_id"] is not None
             assert resp_data["individual_unicef_id"] is not None
@@ -681,7 +697,10 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
             assert resp_data["issue_type"] == "Positive feedback"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None

@@ -1,3 +1,11 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { replaceLabels } from '@components/grievances/utils/createGrievanceUtils';
+import { BlackLink } from '@core/BlackLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { usePartnerForGrievanceChoicesQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   Box,
   FormHelperText,
@@ -5,32 +13,22 @@ import {
   GridSize,
   Typography,
 } from '@mui/material';
-import { Field } from 'formik';
-import { ReactElement, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  AllProgramsForChoicesQuery,
-  GrievancesChoiceDataQuery,
-  usePartnerForGrievanceChoicesQuery,
-} from '@generated/graphql';
-import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { choicesToDict } from '@utils/utils';
-import { BlackLink } from '@core/BlackLink';
-import { LabelizedField } from '@core/LabelizedField';
-import { OverviewContainer } from '@core/OverviewContainer';
-import { Title } from '@core/Title';
+import { Field } from 'formik';
+import { ReactElement, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { useProgramContext } from 'src/programContext';
-import { replaceLabels } from '@components/grievances/utils/createGrievanceUtils';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Choice } from '@restgenerated/models/Choice';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -52,8 +50,8 @@ export interface DescriptionProps {
   showIssueType: (values) => boolean;
   selectedIssueType: (values) => string;
   baseUrl: string;
-  choicesData: GrievancesChoiceDataQuery;
-  programsData: AllProgramsForChoicesQuery;
+  choicesData: any[];
+  programsData: PaginatedProgramListList;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
@@ -111,9 +109,10 @@ function Description({
     permissions,
   );
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData?.results?.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   const isAnonymousTicket =
     !values.selectedHousehold?.id && !values.selectedIndividual?.id;

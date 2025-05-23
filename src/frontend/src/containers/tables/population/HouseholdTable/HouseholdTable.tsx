@@ -184,7 +184,7 @@ export const HouseholdTable = ({
         </TableCell>
         <AnonTableCell>{household.headOfHousehold}</AnonTableCell>
         <TableCell align="left">{household.size}</TableCell>
-        <TableCell align="left">{household.admin2 || '-'}</TableCell>
+        <TableCell align="left">{household.admin2?.name || '-'}</TableCell>
         <TableCell align="left">{household.residenceStatus}</TableCell>
         <TableCell align="right">
           {formatCurrencyWithSymbol(

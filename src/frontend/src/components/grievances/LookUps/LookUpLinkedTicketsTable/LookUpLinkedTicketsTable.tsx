@@ -1,17 +1,17 @@
-import { MouseEvent, ReactElement, useState } from 'react';
 import { UniversalTable } from '@containers/tables/UniversalTable';
-import { choicesToDict, dateToIsoString } from '@utils/utils';
+import { TableWrapper } from '@core/TableWrapper';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
   useAllGrievanceTicketQuery,
 } from '@generated/graphql';
-import { TableWrapper } from '@core/TableWrapper';
-import { headCells } from './LookUpLinkedTicketsHeadCells';
-import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { choicesToDict, dateToIsoString } from '@utils/utils';
+import { MouseEvent, ReactElement, useState } from 'react';
+import { headCells } from './LookUpLinkedTicketsHeadCells';
+import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
 
 interface LookUpLinkedTicketsTableProps {
   businessArea: string;
@@ -27,7 +27,7 @@ export function LookUpLinkedTicketsTable({
   initialValues,
 }: LookUpLinkedTicketsTableProps): ReactElement {
   const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<GrievanceTicketDetail>({
+    useQuery<GrievanceChoices>({
       queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({

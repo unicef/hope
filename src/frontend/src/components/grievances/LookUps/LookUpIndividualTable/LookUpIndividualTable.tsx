@@ -92,7 +92,7 @@ export function LookUpIndividualTable({
       orderBy: filter.orderBy,
       householdId,
       excludedId: excludedId || ticket?.individual?.id || null,
-      program: isAllPrograms ? filter.program : programId,
+      programId: isAllPrograms ? filter.program : programId,
       isActiveProgram: filter.programState === 'active' ? true : null,
       withdrawn: false,
       rdiMergeStatus: IndividualRdiMergeStatus.Merged,

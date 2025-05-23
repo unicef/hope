@@ -1,6 +1,5 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { useFeedbackQuery } from '@generated/graphql';
 import FeedbackDetailsToolbar from '@components/accountability/Feedback/FeedbackDetailsToolbar';
 import LinkedGrievance from '@components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -12,22 +11,33 @@ import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogT
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import FeedbackDetails from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 
 function FeedbackDetailsPage(): ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
+  const { businessAreaSlug } = useBaseUrl();
 
-  const { data, loading, error } = useFeedbackQuery({
-    variables: { id },
-    fetchPolicy: 'network-only',
+  const {
+    data: feedback,
+    isLoading,
+    error,
+  } = useQuery<FeedbackDetail>({
+    queryKey: ['businessAreasFeedbacksRetrieve', businessAreaSlug, id],
+    queryFn: () =>
+      RestService.restBusinessAreasFeedbacksRetrieve({
+        businessAreaSlug,
+        id: id,
+      }),
   });
 
-  const feedback = data?.feedback;
-
-  if (loading) return <LoadingComponent />;
+  if (isLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null) return null;
+  if (!feedback || permissions === null) return null;
 
   const canEdit = hasPermissions(
     PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_UPDATE,

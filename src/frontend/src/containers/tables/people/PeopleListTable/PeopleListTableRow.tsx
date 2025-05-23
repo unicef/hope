@@ -57,7 +57,7 @@ export const PeopleListTableRow = ({
       </TableCell>
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align="left">{individual.household?.admin2}</TableCell>
+      <TableCell align="left">{individual.household?.admin2?.name}</TableCell>
     </ClickableTableRow>
   );
 };

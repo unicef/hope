@@ -12,6 +12,7 @@ from hct_mis_api.apps.accountability.models import (
     Survey,
 )
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
+from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdSmallSerializer,
 )
@@ -81,7 +82,7 @@ class FeedbackListSerializer(serializers.ModelSerializer):
 
 
 class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
-    admin2_name = serializers.SerializerMethodField()
+    admin2 = AreaSimpleSerializer()
 
     class Meta(FeedbackListSerializer.Meta):
         fields = FeedbackListSerializer.Meta.fields + (  # type: ignore
@@ -91,11 +92,8 @@ class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
             "comments",
             "consent",
             "updated_at",
-            "admin2_name",
+            "admin2",
         )
-
-    def get_admin2_name(self, obj: Feedback) -> Optional[str]:
-        return getattr(obj.admin2, "name", None)
 
 
 class FeedbackCreateSerializer(serializers.ModelSerializer):

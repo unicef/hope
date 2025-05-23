@@ -1,23 +1,24 @@
-import { Grid2 as Grid } from '@mui/material';
-import { useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
-import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/GrievancesSidebar';
-import { Notes } from '@components/grievances/Notes/Notes';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { isPermissionDeniedError } from '@utils/utils';
-import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { grievancePermissions } from './grievancePermissions';
-import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
 import GrievancesApproveSection from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
 import GrievancesDetails from '@components/grievances/GrievancesDetails/GrievancesDetails';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
+import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/GrievancesSidebar';
+import { Notes } from '@components/grievances/Notes/Notes';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { Grid2 as Grid } from '@mui/material';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { isPermissionDeniedError } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
+import { grievancePermissions } from './grievancePermissions';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
@@ -43,7 +44,7 @@ const GrievancesDetailsPage = (): ReactElement => {
     isLoading: loading,
     error,
   } = useQuery<GrievanceTicketDetail>({
-    queryKey: ['businessAreaProgram', businessAreaSlug, id],
+    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsRetrieve({
         businessAreaSlug,
@@ -54,7 +55,7 @@ const GrievancesDetailsPage = (): ReactElement => {
   const { baseUrl } = useBaseUrl();
 
   const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<GrievanceTicketDetail>({
+    useQuery<GrievanceChoices>({
       queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
       queryFn: () =>
         RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({

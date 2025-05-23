@@ -13,3 +13,9 @@ class AreaLevelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Area
         fields = ("id", "level")
+
+
+class AreaSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Area
+        fields = ("id", "name")

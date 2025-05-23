@@ -647,7 +647,10 @@ class TestGrievanceTicketDetail:
             "reason_household": {
                 "id": str(ticket_details.reason_household.id),
                 "unicef_id": ticket_details.reason_household.unicef_id,
-                "admin2": ticket_details.reason_household.admin2.name,
+                "admin2": {
+                    "id": str(ticket_details.reason_household.admin2.id),
+                    "name": ticket_details.reason_household.admin2.name,
+                },
             },
         }
 
@@ -732,7 +735,10 @@ class TestGrievanceTicketDetail:
             "household": {
                 "id": str(golden_records_individual.household.id),
                 "unicef_id": golden_records_individual.household.unicef_id,
-                "admin2": golden_records_individual.household.admin2.name,
+                "admin2": {
+                    "id": str(golden_records_individual.household.admin2.id),
+                    "name": golden_records_individual.household.admin2.name,
+                },
             },
             "deduplication_golden_record_results": [
                 {
@@ -992,7 +998,10 @@ class TestGrievanceTicketDetail:
             "household": {
                 "id": str(golden_records_individual.household.id),
                 "unicef_id": golden_records_individual.household.unicef_id,
-                "admin2": golden_records_individual.household.admin2.name,
+                "admin2": {
+                    "id": str(golden_records_individual.household.admin2.id),
+                    "name": golden_records_individual.household.admin2.name,
+                },
             },
             "deduplication_golden_record_results": [
                 {
@@ -1036,7 +1045,10 @@ class TestGrievanceTicketDetail:
             "household": {
                 "id": str(self.individuals2[0].household.id),
                 "unicef_id": self.individuals2[0].household.unicef_id,
-                "admin2": self.individuals2[0].household.admin2.name,
+                "admin2": {
+                    "id": str(self.individuals2[0].household.admin2.id),
+                    "name": self.individuals2[0].household.admin2.name,
+                },
             },
             "deduplication_golden_record_results": [],
             "documents": [],
@@ -1053,7 +1065,10 @@ class TestGrievanceTicketDetail:
                 "household": {
                     "id": str(self.individuals2[0].household.id),
                     "unicef_id": self.individuals2[0].household.unicef_id,
-                    "admin2": self.individuals2[0].household.admin2.name,
+                    "admin2": {
+                        "id": str(self.individuals2[0].household.admin2.id),
+                        "name": self.individuals2[0].household.admin2.name,
+                    },
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
@@ -1071,7 +1086,10 @@ class TestGrievanceTicketDetail:
                 "household": {
                     "id": str(duplicate.household.id),
                     "unicef_id": duplicate.household.unicef_id,
-                    "admin2": duplicate.household.admin2.name,
+                    "admin2": {
+                        "id": str(duplicate.household.admin2.id),
+                        "name": duplicate.household.admin2.name,
+                    },
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
@@ -1263,7 +1281,10 @@ class TestGrievanceTicketDetail:
                 "household": {
                     "id": str(individual.household.id),
                     "unicef_id": individual.household.unicef_id,
-                    "admin2": individual.household.admin2.name,
+                    "admin2": {
+                        "id": str(individual.household.admin2.id),
+                        "name": individual.household.admin2.name,
+                    },
                 },
                 "relationship": individual.relationship,
                 "role": (expected_role.get_role_display() if expected_role else "-"),
@@ -1274,7 +1295,10 @@ class TestGrievanceTicketDetail:
                         "household": {
                             "id": str(role.household.id),
                             "unicef_id": role.household.unicef_id,
-                            "admin2": role.household.admin2.name,
+                            "admin2": {
+                                "id": str(role.household.admin2.id),
+                                "name": role.household.admin2.name,
+                            },
                         },
                     }
                     for role in individual.households_and_roles(manager="all_merge_status_objects").all()

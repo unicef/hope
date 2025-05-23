@@ -7,6 +7,7 @@ from hct_mis_api.apps.core.utils import (
     resolve_flex_fields_choices_to_string,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.api.serializers.individual import (
     HouseholdSimpleSerializer,
@@ -38,7 +39,7 @@ from hct_mis_api.apps.household.models import (
 class HouseholdListSerializer(serializers.ModelSerializer):
     head_of_household = serializers.CharField(source="head_of_household.full_name")
     admin1 = serializers.CharField(source="admin1.name", default="")
-    admin2 = serializers.CharField(source="admin2.name", default="")
+    admin2 = AreaSimpleSerializer()
     program = serializers.CharField(source="program.name")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)

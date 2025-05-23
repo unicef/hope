@@ -70,10 +70,8 @@ export const GrievancesTable = ({
       documentNumber: filter.documentNumber.trim(),
       status: [filter.status],
       fsp: filter.fsp,
-      createdAtRange: JSON.stringify({
-        min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-        max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
-      }),
+      createdAtBefore: dateToIsoString(filter.createdAtBefore, 'startOfDay'),
+      createdAtAfter: dateToIsoString(filter.createdAtAfter, 'endOfDay'),
       category: filter.category,
       issueType: filter.issueType,
       assignedTo: filter.assignedTo,
@@ -100,8 +98,8 @@ export const GrievancesTable = ({
       filter.documentNumber,
       filter.status,
       filter.fsp,
-      filter.createdAtRangeMin,
-      filter.createdAtRangeMax,
+      filter.createdAtBefore,
+      filter.createdAtAfter,
       filter.category,
       filter.issueType,
       filter.assignedTo,
@@ -189,6 +187,7 @@ export const GrievancesTable = ({
       RestService.restBusinessAreasGrievanceTicketsCountRetrieve({
         businessAreaSlug: businessArea,
       }),
+    enabled: isAllPrograms,
   });
 
   // SELECTED PROGRAM
@@ -227,6 +226,7 @@ export const GrievancesTable = ({
           businessAreaSlug: businessArea,
           programSlug: programId,
         }),
+      enabled: !isAllPrograms,
     });
 
   const optionsData = usersData;
