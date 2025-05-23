@@ -21,7 +21,6 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { grievanceTicketStatusToColor, choicesToDict } from '@utils/utils';
 import {
   GrievancesChoiceDataQuery,
-  HouseholdNode,
   useAllGrievanceTicketQuery,
 } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
@@ -32,6 +31,7 @@ import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
+import { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -48,7 +48,7 @@ const StyledDialog = styled(Dialog)`
 `;
 
 interface LinkedGrievancesModalProps {
-  household: HouseholdNode;
+  household: HouseholdSimple;
   businessArea: string;
   baseUrl: string;
   grievancesChoices: GrievancesChoiceDataQuery;

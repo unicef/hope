@@ -1,6 +1,5 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import { PaymentNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import {
@@ -12,9 +11,10 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
 interface PaymentsHouseholdTableRowProps {
-  payment: PaymentNode;
+  payment: PaymentList;
   openInNewTab: boolean;
   canViewDetails: boolean;
 }
@@ -56,10 +56,10 @@ export function PaymentsHouseholdTableRow({
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
-      <TableCell align="left">{payment.fullName}</TableCell>
+      <TableCell align="left">{payment.hohFullName}</TableCell>
       <TableCell align="right">
         {formatCurrencyWithSymbol(
-          payment.entitlementQuantity,
+          Number(payment.entitlementQuantity),
           payment.currency,
         )}
       </TableCell>

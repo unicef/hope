@@ -5,7 +5,15 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import AddIndividualDataChange from '@components/grievances/AddIndividualDataChange';
 import { CreateGrievanceStepper } from '@components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
+import Description from '@components/grievances/CreateGrievance/Description/Description';
+import Selection from '@components/grievances/CreateGrievance/Selection/Selection';
+import Verification from '@components/grievances/CreateGrievance/Verification/Verification';
+import EditHouseholdDataChange from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
+import EditIndividualDataChange from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
+import EditPeopleDataChange from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
 import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
 import { TicketsAlreadyExist } from '@components/grievances/TicketsAlreadyExist';
@@ -22,13 +30,15 @@ import {
   useAllEditPeopleFieldsQuery,
   useAllProgramsForChoicesQuery,
   useCreateGrievanceMutation,
-  useGrievancesChoiceDataQuery,
 } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -39,21 +49,16 @@ import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import {
   PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import AddIndividualDataChange from '@components/grievances/AddIndividualDataChange';
-import Verification from '@components/grievances/CreateGrievance/Verification/Verification';
-import EditHouseholdDataChange from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
-import EditIndividualDataChange from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
-import EditPeopleDataChange from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
-import Selection from '@components/grievances/CreateGrievance/Selection/Selection';
-import Description from '@components/grievances/CreateGrievance/Description/Description';
+import { first } from 'lodash';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { createApiParams } from '@utils/apiUtils';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -132,16 +137,29 @@ const CreateGrievancePage = (): ReactElement => {
     individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
   };
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<GrievanceTicketDetail>({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
+
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
 
   const {

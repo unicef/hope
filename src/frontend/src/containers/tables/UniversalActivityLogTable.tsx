@@ -1,7 +1,6 @@
 import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { ActivityLogTable } from '@components/core/ActivityLogTable/ActivityLogTable';
-import { decodeIdString } from '@utils/utils';
 import { LogEntryNode, useAllLogEntriesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
@@ -24,7 +23,7 @@ export function UniversalActivityLogTable({
   const { data, refetch } = useAllLogEntriesQuery({
     variables: {
       businessArea,
-      objectId: decodeIdString(objectId),
+      objectId: objectId,
       first: rowsPerPage,
     },
     fetchPolicy: 'network-only',
@@ -44,7 +43,7 @@ export function UniversalActivityLogTable({
         page={page}
         onChangePage={(event, newPage) => {
           const variables = {
-            objectId: decodeIdString(objectId),
+            objectId: objectId,
             businessArea,
             first: undefined,
             last: undefined,
@@ -66,7 +65,7 @@ export function UniversalActivityLogTable({
           setRowsPerPage(value);
           setPage(0);
           const variables = {
-            objectId: decodeIdString(objectId),
+            objectId: objectId,
             businessArea,
             first: rowsPerPage,
             after: undefined,

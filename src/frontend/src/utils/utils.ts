@@ -1,10 +1,3 @@
-import { GraphQLError } from 'graphql';
-import localForage from 'localforage';
-import camelCase from 'lodash/camelCase';
-import moment from 'moment';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
-import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
@@ -14,6 +7,13 @@ import {
   PaymentStatus,
   ProgramStatus,
 } from '@generated/graphql';
+import { GraphQLError } from 'graphql';
+import localForage from 'localforage';
+import camelCase from 'lodash/camelCase';
+import moment from 'moment';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
+import { theme as themeObj } from '../theme';
 import {
   GRIEVANCE_CATEGORIES,
   PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
@@ -21,6 +21,8 @@ import {
   PROGRAM_STATES,
   TARGETING_STATES,
 } from './constants';
+import _ from 'lodash';
+import { HeadCell } from '@core/Table/EnhancedTableHead';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -54,6 +56,23 @@ export const sexToCapitalize = (sex: string): string => {
 
 export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
+}
+
+export const isPartnerVisible = (partnerName: string): boolean => {
+  if (!partnerName) return false;
+  return (
+    !partnerName.startsWith('UNICEF Partner for') && partnerName !== 'UNICEF HQ'
+  );
+};
+
+export function mapPartnerChoicesWithoutUnicef(choices, selectedPartners) {
+  return choices
+    .filter((partner) => isPartnerVisible(partner.name))
+    .map((partner) => ({
+      value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
 }
 
 export function periodicDataUpdatesStatusToColor(
@@ -629,20 +648,20 @@ export function formatCurrency(
 }
 
 export function formatCurrencyWithSymbol(
-  amount: number,
+  amount: number | string,
   currency = 'USD',
 ): string {
   const amountCleared = amount || 0;
   if (currency === 'USDC') return `${amountCleared} ${currency}`;
   // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
-  if (!currency) return formatCurrency(amountCleared, true);
+  if (!currency) return formatCurrency(Number(amountCleared), true);
   // undefined forces to use local browser settings
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
     currencyDisplay: 'code',
-  }).format(amountCleared);
+  }).format(Number(amountCleared));
 }
 
 export function countPercentage(
@@ -1187,19 +1206,108 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
 export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
 
-export function adjustHeadCells(
-  headCells,
+export function adjustHeadCells<T>(
+  headCells: HeadCell<T>[],
   beneficiaryGroup: any | undefined,
   replacements: {
     [key: string]: (beneficiaryGroup) => string;
   },
 ) {
   if (!beneficiaryGroup) return headCells;
-
   return headCells.map((cell) => {
+    // @ts-ignore
     if (replacements[cell.id]) {
+      // @ts-ignore
       return { ...cell, label: replacements[cell.id](beneficiaryGroup) };
     }
     return cell;
   });
+}
+
+/* eslint-disable @typescript-eslint/no-unused-vars,
+              @typescript-eslint/no-shadow */
+export const filterEmptyParams = (params) => {
+  if (!params) return {};
+
+  return Object.fromEntries(
+    Object.entries(params).filter(([, value]) => {
+      // Handle basic empty values
+      if (
+        value === undefined ||
+        value === null ||
+        value === '' ||
+        (Array.isArray(value) && value.length === 1 && value[0] === '')
+      ) {
+        return false;
+      }
+
+      // Handle empty arrays
+      if (Array.isArray(value) && value.length === 0) {
+        return false;
+      }
+
+      // Handle JSON strings that represent empty objects or objects with empty values
+      if (
+        typeof value === 'string' &&
+        (value.startsWith('{') || value.startsWith('['))
+      ) {
+        try {
+          const parsedValue = JSON.parse(value);
+
+          // Empty arrays in JSON format
+          if (Array.isArray(parsedValue) && parsedValue.length === 0) {
+            return false;
+          }
+
+          // Objects with empty values
+          if (typeof parsedValue === 'object' && parsedValue !== null) {
+            const hasNonEmptyValue = Object.values(parsedValue).some(
+              (v) => v !== '' && v !== null && v !== undefined,
+            );
+            return hasNonEmptyValue;
+          }
+        } catch (e) {
+          // If parsing fails, keep the value
+          return true;
+        }
+      }
+
+      return true;
+    }),
+  );
+};
+/* eslint-enable @typescript-eslint/no-unused-vars,
+                 @typescript-eslint/no-shadow */
+export function deepCamelize(data) {
+  if (_.isArray(data)) {
+    return data.map(deepCamelize);
+  } else if (_.isObject(data)) {
+    return _.reduce(
+      data,
+      (result, value, key) => {
+        const camelKey = _.camelCase(key);
+        result[camelKey] = deepCamelize(value);
+        return result;
+      },
+      {},
+    );
+  }
+  return data;
+}
+
+export function deepUnderscore(data) {
+  if (_.isArray(data)) {
+    return data.map(deepUnderscore);
+  } else if (_.isObject(data)) {
+    return _.reduce(
+      data,
+      (result, value, key) => {
+        const underscoreKey = _.snakeCase(key);
+        result[underscoreKey] = deepUnderscore(value);
+        return result;
+      },
+      {},
+    );
+  }
+  return data;
 }

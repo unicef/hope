@@ -124,10 +124,11 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
 
 const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
   const businessAreaSlug = window.location.pathname.split('/')[1];
-  const programId = window.location.pathname.split('/')[3];
+  // const programId = window.location.pathname.split('/')[3];
   const headers = {
     'Business-Area': businessAreaSlug,
-    Program: programId || 'all',
+    //TODO: removing because it does not work with slug
+    // Program: programId || 'all',
   };
 
   operation.setContext({ headers });

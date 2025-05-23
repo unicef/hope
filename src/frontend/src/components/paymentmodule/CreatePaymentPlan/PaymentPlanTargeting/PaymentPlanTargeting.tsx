@@ -9,7 +9,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ReactElement } from 'react';
-import { AllTargetPopulationsQuery } from '@generated/graphql';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -20,7 +20,7 @@ export function PaymentPlanTargeting({
   loading,
   disabled,
 }: {
-  allTargetPopulations: AllTargetPopulationsQuery;
+  allTargetPopulations: PaginatedTargetPopulationListList;
   loading: boolean;
   disabled?: boolean;
 }): ReactElement {
@@ -45,7 +45,7 @@ export function PaymentPlanTargeting({
       <OverviewContainer>
         <StyledBox display="flex" flexDirection="column">
           <Grid container>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <Field
                 name="paymentPlanId"
                 label={t('Target Population')}

@@ -21,7 +21,8 @@ import {
   SCOPE_ALL_PROGRAMS,
   SCOPE_PROGRAM,
 } from './menuItems';
-import { ProgramInterface, useProgramContext } from 'src/programContext';
+import { useProgramContext } from 'src/programContext';
+import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -124,7 +125,7 @@ export const DrawerItems = ({
 
   const beneficiaryGroupTransformator = (
     array: MenuItem[],
-    _beneficiaryGroup: ProgramInterface['beneficiaryGroup'],
+    _beneficiaryGroup: BeneficiaryGroup,
   ): MenuItem[] => {
     if (!_beneficiaryGroup) {
       return array;

@@ -4,10 +4,10 @@ import Edit from '@mui/icons-material/Edit';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentationField } from './DocumentationField';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -20,7 +20,7 @@ const DisabledDiv = styled.div<DisabledDivProps>`
 export interface EditDocumentationRowProps {
   setFieldValue;
   values;
-  document: GrievanceTicketQuery['grievanceTicket']['documentation'][number];
+  document: GrievanceTicketDetail['documentation'][number];
   arrayHelpers;
   index;
 }

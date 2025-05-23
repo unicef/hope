@@ -10,7 +10,6 @@ import {
   PaymentPlanStatus,
   PaymentStatus,
   useCashAssistUrlPrefixQuery,
-  usePaymentQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -20,19 +19,31 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 function PaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
-  const { paymentId } = useParams();
+  const { paymentPlanId, paymentId } = useParams();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const { data, loading } = usePaymentQuery({
-    variables: { id: paymentId },
-    fetchPolicy: 'cache-and-network',
+  const { businessArea, programId } = useBaseUrl();
+
+  const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
+    queryKey: ['payment', businessArea, paymentId, programId, paymentPlanId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsRetrieve({
+        businessAreaSlug: businessArea,
+        paymentId: paymentId,
+        programSlug: programId,
+        paymentPlanId,
+      }),
   });
-  const paymentPlanStatus = data?.payment?.parent?.status;
-  const paymentPlanIsFollowUp = data?.payment?.parent?.isFollowUp;
+
+  const paymentPlanStatus = payment.parent?.status;
+  const paymentPlanIsFollowUp = payment.parent?.isFollowUp;
   const permissions = usePermissions();
   const { baseUrl } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;
@@ -40,8 +51,7 @@ function PaymentDetailsPage(): ReactElement {
   if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
 
-  if (!data || !caData) return null;
-  const { payment } = data;
+  if (!payment || !caData) return null;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
@@ -53,7 +63,7 @@ function PaymentDetailsPage(): ReactElement {
       }`,
       to: `/${baseUrl}/payment-module/${
         paymentPlanIsFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${data.payment.parent.id}/`,
+      }/${payment.parent.id}/`,
     },
   ];
 

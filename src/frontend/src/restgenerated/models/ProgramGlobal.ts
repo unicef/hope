@@ -2,25 +2,78 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BlankEnum } from './BlankEnum';
 import type { FrequencyOfPaymentsEnum } from './FrequencyOfPaymentsEnum';
-import type { NullEnum } from './NullEnum';
-import type { ProgramGlobalStatusEnum } from './ProgramGlobalStatusEnum';
 import type { ScopeEnum } from './ScopeEnum';
 import type { SectorEnum } from './SectorEnum';
+import type { Status791Enum } from './Status791Enum';
 export type ProgramGlobal = {
     readonly id: string;
+    /**
+     * Program name
+     */
     name: string;
-    programme_code?: string | null;
-    status: ProgramGlobalStatusEnum;
-    start_date: string;
-    end_date?: string | null;
+    /**
+     * Program code
+     */
+    programmeCode?: string | null;
+    /**
+     * Program status
+     *
+     * * `ACTIVE` - Active
+     * * `DRAFT` - Draft
+     * * `FINISHED` - Finished
+     */
+    status: Status791Enum;
+    /**
+     * Program start date
+     */
+    startDate: string;
+    /**
+     * Program end date
+     */
+    endDate?: string | null;
+    /**
+     * Program budget
+     */
     budget: string;
-    frequency_of_payments: FrequencyOfPaymentsEnum;
+    /**
+     * Program frequency of payments
+     *
+     * * `ONE_OFF` - One-off
+     * * `REGULAR` - Regular
+     */
+    frequencyOfPayments: FrequencyOfPaymentsEnum;
+    /**
+     * Program sector
+     *
+     * * `CHILD_PROTECTION` - Child Protection
+     * * `EDUCATION` - Education
+     * * `HEALTH` - Health
+     * * `MULTI_PURPOSE` - Multi Purpose
+     * * `NUTRITION` - Nutrition
+     * * `SOCIAL_POLICY` - Social Policy
+     * * `WASH` - WASH
+     */
     sector: SectorEnum;
-    scope?: (ScopeEnum | BlankEnum | NullEnum) | null;
-    cash_plus: boolean;
-    population_goal: number;
-    readonly business_area_code: string;
+    /**
+     * Program scope
+     *
+     * * `FOR_PARTNERS` - For partners
+     * * `UNICEF` - Unicef
+     */
+    scope?: ScopeEnum | null;
+    /**
+     * Program cash+
+     */
+    cashPlus: boolean;
+    /**
+     * Program population goal
+     */
+    populationGoal: number;
+    readonly businessAreaCode: string;
+    /**
+     * Program beneficiary group
+     */
+    beneficiaryGroup: string;
 };
 

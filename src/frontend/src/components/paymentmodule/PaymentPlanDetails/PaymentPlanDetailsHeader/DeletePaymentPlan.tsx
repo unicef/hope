@@ -1,3 +1,10 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Delete } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -7,24 +14,16 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Delete } from '@mui/icons-material';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import {
-  PaymentPlanQuery,
-  useDeletePaymentPMutation,
-} from '@generated/graphql';
-import { LoadingButton } from '@core/LoadingButton';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useProgramContext } from '../../../../programContext';
 import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from '../../../../programContext';
 
 export interface DeletePaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function DeletePaymentPlan({
@@ -32,26 +31,44 @@ export function DeletePaymentPlan({
 }: DeletePaymentPlanProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const [mutate, { loading: loadingDelete }] = useDeletePaymentPMutation();
+  const { mutateAsync: deletePaymentPlan, isPending: loadingDelete } =
+    useMutation({
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsPaymentPlansDestroy({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
+    });
   const { id } = paymentPlan;
   const { isActiveProgram } = useProgramContext();
 
   const handleDelete = async (): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          paymentPlanId: id,
-        },
+      await deletePaymentPlan({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id,
       });
       showMessage(t('Payment Plan Deleted'));
       navigate(`/${baseUrl}/payment-module/payment-plans`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e);
     }
   };
+
   return (
     <>
       <Box p={2}>

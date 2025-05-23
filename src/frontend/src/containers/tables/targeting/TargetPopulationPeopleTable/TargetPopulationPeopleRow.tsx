@@ -1,13 +1,13 @@
 import TableCell from '@mui/material/TableCell';
-import { PaymentNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { TPHouseholdList } from '@restgenerated/models/TPHouseholdList';
 
 interface TargetPopulationPeopleTableRowProps {
-  payment: PaymentNode;
+  payment: TPHouseholdList;
   canViewDetails?: boolean;
 }
 

@@ -16,13 +16,13 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useApprovePaymentDetailsMutation,
 } from '@generated/graphql';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { VerifyPaymentGrievance } from '../VerifyPaymentGrievance/VerifyPaymentGrievance';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -41,7 +41,7 @@ export function PaymentGrievanceDetails({
   ticket,
   canApprovePaymentVerification,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApprovePaymentVerification: boolean;
 }): ReactElement {
   const { t } = useTranslation();
@@ -49,14 +49,11 @@ export function PaymentGrievanceDetails({
   const [mutate] = useApprovePaymentDetailsMutation();
   const confirm = useConfirmation();
 
-  const approveStatus = ticket.paymentVerificationTicketDetails?.approveStatus;
-  const oldReceivedAmount =
-    ticket.paymentVerificationTicketDetails?.oldReceivedAmount;
-  const newReceivedAmount =
-    ticket.paymentVerificationTicketDetails?.newReceivedAmount;
+  const approveStatus = ticket.ticketDetails?.approveStatus;
+  const oldReceivedAmount = ticket.ticketDetails?.oldReceivedAmount;
+  const newReceivedAmount = ticket.ticketDetails?.newReceivedAmount;
   const receivedAmount =
-    ticket.paymentVerificationTicketDetails?.paymentVerification
-      ?.receivedAmount;
+    ticket.ticketDetails?.paymentVerification?.receivedAmount;
   const deliveredQuantity = ticket.paymentRecord?.deliveredQuantity;
   const entitlementQuantity = ticket.paymentRecord?.entitlementQuantity;
 

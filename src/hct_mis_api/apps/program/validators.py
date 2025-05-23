@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from django.core.exceptions import ValidationError
 
+from rest_framework.exceptions import ValidationError as RestValidationError
+
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -75,7 +77,7 @@ class ProgramDeletionValidator(BaseValidator):
     def validate_is_deletable(cls, program: Program, *args: Any, **kwargs: Any) -> None:
         if program.status != Program.DRAFT:
             logger.warning("Only Draft Program can be deleted.")
-            raise ValidationError("Only Draft Program can be deleted.")
+            raise RestValidationError("Only Draft Program can be deleted.")
 
 
 class ProgrammeCodeValidator(BaseValidator):
@@ -90,10 +92,10 @@ class ProgrammeCodeValidator(BaseValidator):
     ) -> None:
         if programme_code:
             programme_code = programme_code.upper()
-            if not re.match(r"^[A-Z0-9\-/.]{4}$", programme_code):
+            if not re.match(r"^[A-Z0-9\-]{4}$", programme_code):
                 raise ValidationError(
                     "Programme code should be exactly 4 characters long and may only contain letters, digits "
-                    "and characters: - . /"
+                    "and character: -"
                 )
 
             qs = Program.objects.filter(business_area=business_area, programme_code=programme_code)

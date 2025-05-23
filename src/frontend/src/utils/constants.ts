@@ -3,6 +3,7 @@ import {
   ProgramStatus,
   PaymentPlanBackgroundActionStatus,
 } from '@generated/graphql';
+import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
 export const TARGETING_STATES = {
   NONE: 'None',
@@ -282,16 +283,6 @@ export const SurveyTabsValues = {
   A_2: 'Partial',
 };
 
-interface BeneficiaryGroup {
-  id: string;
-  name: string;
-  groupLabel: string;
-  groupLabelPlural: string;
-  memberLabel: string;
-  memberLabelPlural: string;
-  masterDetail: boolean;
-}
-
 export const generateTableOrderOptionsGroup = (
   beneficiaryGroup: BeneficiaryGroup | null,
 ) => {
@@ -299,11 +290,17 @@ export const generateTableOrderOptionsGroup = (
 
   return [
     { name: `${beneficiaryGroup.groupLabel}: ascending`, value: 'unicef_id' },
-    { name: `${beneficiaryGroup.groupLabel}: descending`, value: '-unicef_id' },
+    {
+      name: `${beneficiaryGroup.groupLabel}: descending`,
+      value: '-unicef_id',
+    },
     { name: 'Status: ascending', value: 'status_label' },
     { name: 'Status: descending', value: '-status_label' },
     { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
-    { name: `${beneficiaryGroup.groupLabel} Size: descending`, value: '-size' },
+    {
+      name: `${beneficiaryGroup.groupLabel} Size: descending`,
+      value: '-size',
+    },
     { name: 'Registration Date: ascending', value: 'last_registration_date' },
     { name: 'Registration Date: descending', value: '-last_registration_date' },
   ];
@@ -323,7 +320,10 @@ export const generateTableOrderOptionsMember = (
     { name: 'Status: ascending', value: 'status_label' },
     { name: 'Status: descending', value: '-status_label' },
     { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
-    { name: `${beneficiaryGroup.groupLabel} Size: descending`, value: '-size' },
+    {
+      name: `${beneficiaryGroup.groupLabel} Size: descending`,
+      value: '-size',
+    },
     { name: 'Registration Date: ascending', value: 'last_registration_date' },
     { name: 'Registration Date: descending', value: '-last_registration_date' },
   ];

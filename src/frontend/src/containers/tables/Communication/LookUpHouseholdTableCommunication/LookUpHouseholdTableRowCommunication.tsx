@@ -1,21 +1,18 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import { useBusinessArea } from '@hooks/useBusinessArea';
-import {
-  AllHouseholdsQuery,
-  HouseholdChoiceDataQuery,
-} from '@generated/graphql';
+import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { MouseEvent, ReactElement } from 'react';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 interface LookUpHouseholdTableRowCommunicationProps {
-  household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
-  radioChangeHandler: (
-    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-  ) => void;
-  selectedHousehold: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
+  household;
+  // household: HouseholdDetail;
+  radioChangeHandler: (household) => void;
+  selectedHousehold: HouseholdDetail;
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
@@ -95,7 +92,7 @@ export function LookUpHouseholdTableRowCommunication({
       </TableCell>
       <TableCell align="left">{household.headOfHousehold.fullName}</TableCell>
       <TableCell align="left">{household.size}</TableCell>
-      <TableCell align="left">{household?.admin2?.name || '-'}</TableCell>
+      <TableCell align="left">{household?.admin2 || '-'}</TableCell>
       <TableCell align="left">
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>

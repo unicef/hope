@@ -4,13 +4,13 @@ import styled from 'styled-components';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
-  AllGrievanceTicketQuery,
   AllUsersForFiltersQuery,
   useAllUsersForFiltersQuery,
   useBulkUpdateGrievanceAssigneeMutation,
 } from '@generated/graphql';
 import { AssignedToDropdown } from '../AssignedToDropdown';
 import { BulkBaseModal } from './BulkBaseModal';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -21,7 +21,7 @@ export const StyledLink = styled.div`
 `;
 
 interface BulkAssignModalProps {
-  selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+  selectedTickets: GrievanceTicketList[];
   businessArea: string;
   setSelected;
 }

@@ -10,13 +10,13 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BiometricsResults } from './BiometricsResults';
 import {
-  GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
   GrievanceTicketDocument,
 } from '@generated/graphql';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface NeedsAdjudicationActionsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   isEditable: boolean;
   canApprove: boolean;
   isTicketForApproval: boolean;
@@ -50,8 +50,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
-  const { dedupEngineSimilarityPair } =
-    ticket.needsAdjudicationTicketDetails.extraData;
+  const { dedupEngineSimilarityPair } = ticket.ticketDetails.extraData;
 
   return (
     <Box

@@ -1,29 +1,29 @@
+import { TableWrapper } from '@components/core/TableWrapper';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { PaymentPlanStatus } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Paper, Typography } from '@mui/material';
+import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { PaymentList } from '@restgenerated/models/PaymentList';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TableWrapper } from '@components/core/TableWrapper';
-import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
-import {
-  AllPaymentsForTableQuery,
-  AllPaymentsForTableQueryVariables,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useAllPaymentsForTableQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '../../UniversalTable';
+import { headCells } from './PeoplePaymentsTableHeadCells';
 import { PeoplePaymentsTableRow } from './PeoplePaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { headCells } from './PeoplePaymentsTableHeadCells';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { createApiParams } from '@utils/apiUtils';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
 `;
 interface PeoplePaymentsTableProps {
   businessArea: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
   canViewDetails?: boolean;
 }
@@ -34,15 +34,43 @@ const PeoplePaymentsTable = ({
   permissions,
   canViewDetails = false,
 }: PeoplePaymentsTableProps): ReactElement => {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
   const { t } = useTranslation();
-  const [dialogPayment, setDialogPayment] = useState<
-    AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
-  >();
-  const initialVariables: AllPaymentsForTableQueryVariables = {
-    businessArea,
+
+  const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
+  const initialQueryVariables = {
+    businessAreaSlug: businessArea,
+    programSlug: programId,
     paymentPlanId: paymentPlan.id,
   };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlan.id,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentPlanId: paymentPlan.id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
+  });
 
   return (
     <>
@@ -60,19 +88,18 @@ const PeoplePaymentsTable = ({
               />
             )}
           </StyledBox>
-          <UniversalTable<
-            AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
-            AllPaymentsForTableQueryVariables
-          >
+          <UniversalRestTable
             isOnPaper={false}
             headCells={headCells}
-            query={useAllPaymentsForTableQuery}
             rowsPerPageOptions={[10, 25, 50]}
-            queriedObjectName="allPayments"
-            initialVariables={initialVariables}
             defaultOrderBy="createdAt"
             defaultOrderDirection="desc"
-            renderRow={(row) => (
+            isLoading={isLoading}
+            error={error}
+            queryVariables={queryVariables}
+            setQueryVariables={setQueryVariables}
+            data={paymentsData}
+            renderRow={(row: PaymentList) => (
               <PeoplePaymentsTableRow
                 key={row.id}
                 payment={row}

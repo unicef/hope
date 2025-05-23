@@ -14,9 +14,9 @@ import styled from 'styled-components';
 import { Title } from '@core/Title';
 import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import { IndividualNode } from '@generated/graphql';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
@@ -24,7 +24,7 @@ const StyledTableCell = styled(MuiTableCell)`
 
 //TODO MS: add proper type
 interface ProgrammeTimeSeriesFieldsProps {
-  individual: IndividualNode;
+  individual: IndividualDetail;
   periodicFieldsData: any;
 }
 

@@ -95,6 +95,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
+        cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program", status=Program.ACTIVE)
         cls.create_user_role_with_permissions(
             cls.user,
             [
@@ -104,8 +105,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
                 Permissions.GRIEVANCES_CREATE,
             ],
             cls.business_area,
+            cls.program,
         )
-        cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program", status=Program.ACTIVE)
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area, program=cls.program
         )
@@ -117,7 +118,6 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             },
             individuals_data=[{}],
         )
-        cls.update_partner_access_to_program(partner, cls.program)
 
         country = geo_models.Country.objects.create(name="Afghanistan")
         cls.area_type = AreaTypeFactory(
@@ -184,8 +184,8 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         self.create_new_feedback(
             data=self.create_dummy_correct_input()
             | {
-                "householdLookup": encode_id_base64(self.household.pk, "Household"),
-                "individualLookup": encode_id_base64(self.individuals[0].pk, "Individual"),
+                "householdLookup": self.household.pk,
+                "individualLookup": self.individuals[0].pk,
                 "program": encode_id_base64(self.program.pk, "Program"),
             }
         )
@@ -241,7 +241,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
 
     def test_optional_household_lookup(self) -> None:
         data = self.create_dummy_correct_input() | {
-            "householdLookup": encode_id_base64(self.household.pk, "Household"),
+            "householdLookup": self.household.pk,
         }
         self.submit_feedback(data)
         feedback = Feedback.objects.first()
@@ -249,7 +249,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
 
     def test_optional_individual_lookup(self) -> None:
         data = self.create_dummy_correct_input() | {
-            "individualLookup": encode_id_base64(self.individuals[0].pk, "Individual"),
+            "individualLookup": self.individuals[0].pk,
         }
         self.submit_feedback(data)
         self.assertEqual(Feedback.objects.count(), 1)
@@ -285,7 +285,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         area_type = geo_models.AreaType.objects.create(name="X", area_level=1, country=country)
         admin2 = geo_models.Area.objects.create(p_code="SO25", name="SO25", area_type=area_type)
         data = self.create_dummy_correct_input() | {
-            "admin2": encode_id_base64(admin2.pk, "Area"),
+            "admin2": admin2.pk,
         }
         self.submit_feedback(data)
         feedback = Feedback.objects.first()

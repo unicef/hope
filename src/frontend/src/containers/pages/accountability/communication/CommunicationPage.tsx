@@ -1,7 +1,6 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { CommunicationFilters } from '@components/accountability/Communication/CommunicationTable/CommunicationFilters';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -17,9 +16,12 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import CommunicationTable from '@containers/tables/Communication/CommunicationTable/CommunicationTable';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 export function CommunicationPage(): ReactElement {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
@@ -38,8 +40,15 @@ export function CommunicationPage(): ReactElement {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<GrievanceTicketDetail>({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;

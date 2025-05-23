@@ -1,13 +1,13 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
 import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { SearchTextField } from '@core/SearchTextField';
 import { ReactElement } from 'react';
+import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
 
 interface SurveysFiltersProps {
   filter;
@@ -49,7 +49,7 @@ export function SurveysFilters({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="center" spacing={3}>
-        <Grid size={{ xs: 4 }} >
+        <Grid size={{ xs: 4 }}>
           <SearchTextField
             value={filter.search}
             label="Search"
@@ -58,7 +58,7 @@ export function SurveysFilters({
             fullWidth
           />
         </Grid>
-        <Grid size={{ xs: 4 }} >
+        <Grid size={{ xs: 4 }}>
           <TargetPopulationAutocomplete
             name="targetPopulation"
             value={filter.targetPopulation}
@@ -70,7 +70,7 @@ export function SurveysFilters({
           />
         </Grid>
         <Grid size={{ xs: 4 }}>
-          <CreatedByAutocomplete
+          <CreatedByAutocompleteRestFilter
             name="createdBy"
             label={t('Created by')}
             value={filter.createdBy}
@@ -82,7 +82,7 @@ export function SurveysFilters({
             additionalVariables={{ isSurveyCreator: true }}
           />
         </Grid>
-        <Grid container  size={{ xs: 12 }} spacing={3} alignItems="flex-end">
+        <Grid container size={{ xs: 12 }} spacing={3} alignItems="flex-end">
           <Grid size={{ xs: 3 }}>
             <DatePickerFilter
               topLabel={t('Creation Date')}
