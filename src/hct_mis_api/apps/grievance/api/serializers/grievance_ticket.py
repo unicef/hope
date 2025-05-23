@@ -565,7 +565,6 @@ class UpdateGrievanceDocumentSerializer(serializers.Serializer):
 
 
 class UpdateGrievanceTicketSerializer(serializers.Serializer):
-    id = serializers.PrimaryKeyRelatedField(required=True, queryset=GrievanceTicket.objects.all())
     version = serializers.IntegerField(required=False)
     description = serializers.CharField(required=False)
     assigned_to = serializers.PrimaryKeyRelatedField(required=False, queryset=User.objects.all())

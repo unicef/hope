@@ -7,6 +7,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, TicketHouseholdDataUpdateDetailsFactory
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
@@ -534,7 +535,54 @@ class TestGrievanceTicketUpdate:
 
         rebuild_search_index()
 
+        self.household_data_change_grievance_ticket = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            admin2=self.area,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+            created_by=self.user,
+            assigned_to=self.user,
+        )
+        self.household_data_change_grievance_ticket.programs.set([self.program])
+        self.household_data_change_grievance_ticket.save()
+        TicketHouseholdDataUpdateDetailsFactory(
+            ticket=self.household_data_change_grievance_ticket,
+            household=self.household_one,
+            household_data={
+                "village": {"value": "Test Village", "approve_status": True},
+                "size": {"value": 19, "approve_status": True},
+                "country": "AFG",
+            },
+        )
+
         self.list_details = reverse(
             "api:grievance-tickets:grievance-tickets-global-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str()},
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.household_data_change_grievance_ticket.pk)},
         )
+
+    def test_update_grievance_ticket_hh_update(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [
+            Permissions.GRIEVANCES_UPDATE
+        ], self.afghanistan, self.program)
+        data = {
+            "description": "this is new description",
+            "assigned_to": str(self.user.id),
+            "admin": str(self.household_data_change_grievance_ticket.admin2.id),
+            "language": self.household_data_change_grievance_ticket.language,
+            "area": self.household_data_change_grievance_ticket.area,
+            "extras": {
+                "household_data_update_issue_type_extras": {
+                    "household_data": {
+                        "village": "Test New",
+                        "size": 33,
+                        "country": "AFG",
+                    }
+                }
+            },
+        }
+        response = self.api_client.patch(self.list_details, data, format="json")
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_200_OK
+        assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New"
+        assert GrievanceTicket.objects.all().count() == 1
