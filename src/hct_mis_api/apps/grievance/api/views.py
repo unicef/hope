@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, User
 from django.db.models import Case, DateField, F, QuerySet, When
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -22,8 +22,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
+from hct_mis_api.apps.grievance.utils import create_grievance_documents, update_grievance_documents, delete_grievance_documents
+from hct_mis_api.apps.grievance.validators import validate_grievance_documents_size
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
@@ -315,6 +318,85 @@ class GrievanceTicketViewSet(
         return super().list(request, *args, **kwargs)
 
 
+def update_basic_data(approver: User, input_data: Dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
+    messages = []
+
+    if ids_to_delete := input_data.pop("documentation_to_delete", None):
+        delete_grievance_documents(grievance_ticket.id, ids_to_delete)
+
+    if documents_to_update := input_data.pop("documentation_to_update", None):
+        validate_grievance_documents_size(grievance_ticket.id, documents_to_update, is_updated=True)
+        update_grievance_documents(documents_to_update)
+
+    if documents := input_data.pop("documentation", None):
+        validate_grievance_documents_size(grievance_ticket.id, documents)
+        create_grievance_documents(approver, grievance_ticket, documents)
+
+    priority = input_data.pop("priority", grievance_ticket.priority)
+    if priority != grievance_ticket.priority:
+        grievance_ticket.priority = priority
+
+    urgency = input_data.pop("urgency", grievance_ticket.urgency)
+    if urgency != grievance_ticket.urgency:
+        grievance_ticket.urgency = urgency
+
+    if partner := input_data.pop("partner", None):
+        grievance_ticket.partner = partner
+
+    if program := input_data.pop("program", None):
+        grievance_ticket.programs.add(program)
+
+    assigned_to = input_data.pop("assigned_to", None)
+
+    if admin := input_data.pop("admin", None):
+        grievance_ticket.admin2 = admin
+
+    linked_tickets = input_data.pop("linked_tickets", [])
+    grievance_ticket.linked_tickets.set(linked_tickets)
+    grievance_ticket.user_modified = timezone.now()
+
+    for field, value in input_data.items():
+        current_value = getattr(grievance_ticket, field, None)
+        if not current_value:
+            setattr(grievance_ticket, field, value)
+
+    if assigned_to != grievance_ticket.assigned_to:
+        messages.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
+            grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_ON_HOLD:
+            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+            messages.append(
+                GrievanceNotification(
+                    grievance_ticket,
+                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                    approver=approver,
+                )
+            )
+
+        grievance_ticket.assigned_to = assigned_to
+    elif grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+        grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+        messages.append(
+            GrievanceNotification(
+                grievance_ticket,
+                GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                approver=approver,
+            )
+        )
+
+    grievance_ticket.save()
+    grievance_ticket.refresh_from_db()
+
+    GrievanceNotification.send_all_notifications(messages)
+    return grievance_ticket
+
+
 class GrievanceTicketGlobalViewSet(
     BusinessAreaVisibilityMixin,
     GrievancePermissionsMixin,
@@ -332,7 +414,7 @@ class GrievanceTicketGlobalViewSet(
         "retrieve": GrievanceTicketDetailSerializer,
         "choices": GrievanceChoicesSerializer,
         "create": CreateGrievanceTicketSerializer,
-        "update": UpdateGrievanceTicketSerializer,
+        "partial_update": UpdateGrievanceTicketSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -360,7 +442,7 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
-        "update": [Permissions.GRIEVANCES_UPDATE],
+        "partial_update": [Permissions.GRIEVANCES_UPDATE],
     }
     http_method_names = ["get", "post", "patch"]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -405,9 +487,15 @@ class GrievanceTicketGlobalViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # TODO: check later
-        # if serializer.validated_data.get("documentation"):
-        #     self.has_permission(request, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)
+        if program := serializer.validated_data.get("program"):
+            if not check_permissions(
+                    self.request.user, self.get_permissions_for_action(), business_area=self.business_area,
+                    program=program.slug
+            ):
+                raise PermissionDenied
+
+        if serializer.validated_data.get("documentation"):
+            request.user.has_perm(Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)
 
         user: AbstractUser = request.user  # type: ignore
         input_data = serializer.validated_data
@@ -430,18 +518,24 @@ class GrievanceTicketGlobalViewSet(
         headers = self.get_success_headers(resp.data)
         return Response(resp.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    @extend_schema(responses={201: GrievanceTicketDetailSerializer})
-    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+    @extend_schema(responses={200: GrievanceTicketDetailSerializer})
+    def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(grievance_ticket, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
 
+        if program := grievance_ticket.programs.first():
+            # TODO: check with many programs in GRV
+            if not check_permissions(
+                    self.request.user, self.get_permissions_for_action(), business_area=self.business_area,
+                    program=program.slug
+            ):
+                raise PermissionDenied
+
         user = request.user
-        ticket_id = input_data.get("id")
-        old_grievance_ticket = get_object_or_404(GrievanceTicket, id=ticket_id)
-        grievance_ticket = instance
-        business_area = grievance_ticket.business_area
+        old_grievance_ticket = get_object_or_404(GrievanceTicket, id=str(grievance_ticket.id))
+        # business_area = grievance_ticket.business_area
 
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
 
@@ -458,7 +552,7 @@ class GrievanceTicketGlobalViewSet(
             verify_required_arguments(input_data, "issue_type", GRV_UPDATE_EXTRAS_OPTIONS)
 
         extras = input_data.pop("extras", {})
-        grievance_ticket = self.update_basic_data(user, input_data, grievance_ticket)
+        grievance_ticket = update_basic_data(user, input_data, grievance_ticket)
 
         update_extra_methods = {
             GrievanceTicket.CATEGORY_REFERRAL: update_referral_service,
@@ -467,17 +561,18 @@ class GrievanceTicketGlobalViewSet(
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: update_ticket_based_on_payment_record_service,
         }
 
-        if self.has_creator_or_owner_permission(
-            request,
-            business_area,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
-            False,
-        ):
-            update_extra_methods[GrievanceTicket.CATEGORY_DATA_CHANGE] = update_data_change_extras
+        # TODO: fix it soon
+        # if self.has_creator_or_owner_permission(
+        #     request,
+        #     business_area,
+        #     Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+        #     grievance_ticket.created_by == user,
+        #     Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
+        #     grievance_ticket.assigned_to == user,
+        #     Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+        #     False,
+        # ):
+        update_extra_methods[GrievanceTicket.CATEGORY_DATA_CHANGE] = update_data_change_extras
 
         if update_extra_method := update_extra_methods.get(grievance_ticket.category):
             grievance_ticket = update_extra_method(grievance_ticket, extras, input_data)
@@ -489,5 +584,5 @@ class GrievanceTicketGlobalViewSet(
             old_grievance_ticket,
             grievance_ticket,
         )
-
-        return Response(serializer.data, status.HTTP_200_OK)
+        resp = GrievanceTicketDetailSerializer(grievance_ticket)
+        return Response(resp.data, status.HTTP_200_OK)

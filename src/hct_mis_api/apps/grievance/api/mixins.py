@@ -33,6 +33,12 @@ class GrievancePermissionsMixin:
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
             ],
+            "partial_update": [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,],
         }
         action = self.action
         sensitive_category_filter = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
