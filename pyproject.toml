@@ -17,6 +17,7 @@ exclude = '''
   | snapshots
   | __pypackages__
   | frontend
+  | uv-cache
 )/
 '''
 # TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop
@@ -45,7 +46,7 @@ known_first_party = [
 known_django = "django"
 sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 include_trailing_comma = true
-skip = ["migrations", "snapshots", "venv", ".venv", "__pypackages__", "frontend"]
+skip = ["migrations", "snapshots", "venv", ".venv", "__pypackages__", "frontend", ".tox", "uv-cache"]
 
 [tool.mypy]
 python_version = 3.12
@@ -55,7 +56,8 @@ exclude = [
     "venv",
     "snapshots",
     "__pypackages__",
-    "build"
+    "build",
+    "uv-cache"
 ]
 
 strict = true
@@ -78,7 +80,9 @@ django_settings_module = "hct_mis_api.settings"
 
 [tool.uv]
 package = true
-dev-dependencies = [
+
+[dependency-groups]
+dev = [
     "mypy==0.982",
     "django-stubs~=1.12.0",
     "django-stubs-ext<1.0.0,>=0.7.0",
@@ -107,7 +111,7 @@ dev-dependencies = [
     "responses<1.0,>=0.22",
     "snapshottest<2.0.0,>=1.0.0a0",
     "types-freezegun<2.0.0,>=1.1.10",
-    "types-requests<3.0.0.0,>=2.28.11.2",
+    "types-requests==2.31.0.6",
     "types-python-dateutil<3.0.0.0,>=2.8.19.2",
     "types-pytz<2023.0.0.0,>=2022.4.0.0",
     "types-redis<5.0.0.0,>=4.3.21.2",
@@ -125,6 +129,8 @@ dev-dependencies = [
     "pytest-html-reporter>=0.2.9",
     "flaky<4.0.0,>=3.8.1",
     "coverage<8.0.0,>=7.3.2",
+    "tox>=4.25.0",
+    "tox-uv>=1.25.0",
 ]
 
 [tool.pdm]
