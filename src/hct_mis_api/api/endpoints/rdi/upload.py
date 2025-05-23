@@ -19,6 +19,7 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
+    DATA_SHARING_CHOICES,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     NON_BENEFICIARY,
@@ -163,6 +164,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     size = serializers.IntegerField(required=False, allow_null=True)
+    consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 
     class Meta:
         model = PendingHousehold

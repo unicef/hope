@@ -45,7 +45,7 @@ class Individuals(BaseComponents):
     templateStatus = 'td[data-cy="template-status-{}"]'
     templateAction = 'td[data-cy="template-action-{}"]'
     updateDetailsBtn = 'button[data-cy="update-details-btn-{}"]'
-    downloadBtn = 'button[data-cy="download-btn-{}"]'
+    downloadBtn = 'a[data-cy="download-btn-{}"]'
     exportBtn = 'button[data-cy="export-btn-{}"]'
     pduUpdates = 'button[data-cy="pdu-updates"]'
     statusContainer = '[data-cy="status-container"]'

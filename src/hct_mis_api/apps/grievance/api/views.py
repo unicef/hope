@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -22,9 +22,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
-from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.utils import create_grievance_documents, update_grievance_documents, delete_grievance_documents
-from hct_mis_api.apps.grievance.validators import validate_grievance_documents_size
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -47,6 +44,7 @@ from hct_mis_api.apps.grievance.api.serializers.grievance_ticket import (
 )
 from hct_mis_api.apps.grievance.filters import GrievanceTicketFilter
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.services.data_change_services import (
     update_data_change_extras,
 )
@@ -63,6 +61,12 @@ from hct_mis_api.apps.grievance.services.ticket_creator_service import (
     TicketCreatorService,
     TicketDetailsCreatorFactory,
 )
+from hct_mis_api.apps.grievance.utils import (
+    create_grievance_documents,
+    delete_grievance_documents,
+    update_grievance_documents,
+)
+from hct_mis_api.apps.grievance.validators import validate_grievance_documents_size
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 
@@ -489,13 +493,15 @@ class GrievanceTicketGlobalViewSet(
 
         if program := serializer.validated_data.get("program"):
             if not check_permissions(
-                    self.request.user, self.get_permissions_for_action(), business_area=self.business_area,
-                    program=program.slug
+                self.request.user,
+                self.get_permissions_for_action(),
+                business_area=self.business_area,
+                program=program.slug,
             ):
                 raise PermissionDenied
 
         if serializer.validated_data.get("documentation"):
-            request.user.has_perm(Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)
+            request.user.has_perm(Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)  # type: ignore
 
         user: AbstractUser = request.user  # type: ignore
         input_data = serializer.validated_data
@@ -528,12 +534,14 @@ class GrievanceTicketGlobalViewSet(
         if program := grievance_ticket.programs.first():
             # TODO: check with many programs in GRV
             if not check_permissions(
-                    self.request.user, self.get_permissions_for_action(), business_area=self.business_area,
-                    program=program.slug
+                self.request.user,
+                self.get_permissions_for_action(),
+                business_area=self.business_area,
+                program=program.slug,
             ):
                 raise PermissionDenied
 
-        user = request.user
+        user: AbstractUser = request.user  # type: ignore
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=str(grievance_ticket.id))
         # business_area = grievance_ticket.business_area
 
@@ -552,7 +560,7 @@ class GrievanceTicketGlobalViewSet(
             verify_required_arguments(input_data, "issue_type", GRV_UPDATE_EXTRAS_OPTIONS)
 
         extras = input_data.pop("extras", {})
-        grievance_ticket = update_basic_data(user, input_data, grievance_ticket)
+        grievance_ticket = update_basic_data(user, input_data, grievance_ticket)  # type: ignore
 
         update_extra_methods = {
             GrievanceTicket.CATEGORY_REFERRAL: update_referral_service,

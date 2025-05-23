@@ -1,0 +1,30 @@
+name: CI-PR
+run-name: "PR CHECK #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}"
+on:
+  pull_request:
+    branches:
+    - develop
+    - staging
+    - master
+    - ephemeral-*
+    - long-term/*
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: CI-PR-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    uses: ./.github/workflows/frontend-checks.yml
+  lint:
+    uses: ./.github/workflows/lint.yml
+  tests:
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
+  build:
+    uses: ./.github/workflows/build-and-push.yml
+    secrets: inherit

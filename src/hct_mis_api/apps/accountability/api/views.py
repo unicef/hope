@@ -15,7 +15,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.accountability.api.serializers import (
     FeedbackCreateSerializer,
     FeedbackDetailSerializer,
@@ -144,8 +144,12 @@ class FeedbackViewSet(
         if program and program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
 
-        if program and not request.user.has_perm(Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE, program):  # type: ignore
-            raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        # additional check for global scope - check if user has permission in the target program
+        if not program_slug and program:
+            if not check_permissions(
+                self.request.user, self.get_permissions_for_action(), business_area=business_area, program=program.slug
+            ):
+                raise PermissionDenied
 
         input_data = serializer.validated_data
         input_data["business_area"] = business_area
@@ -174,13 +178,18 @@ class FeedbackViewSet(
         serializer = self.get_serializer(feedback, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        program_slug = self.kwargs.get("program_slug")
-        program = None
-        if program_slug:
-            program = Program.objects.get(slug=program_slug)
+        business_area = BusinessArea.objects.get(slug=self.kwargs.get("business_area_slug"))
+        program = feedback.program
 
         if program and program.status == Program.FINISHED:
             raise ValidationError("In order to proceed this action, program status must not be finished")
+
+        # additional check for global scope - check if user has permission in the target program
+        if program:
+            if not check_permissions(
+                self.request.user, self.get_permissions_for_action(), business_area=business_area, program=program.slug
+            ):
+                raise PermissionDenied
 
         input_data = serializer.validated_data
         updated_feedback = FeedbackCrudServices.update(feedback, input_data)
@@ -205,6 +214,16 @@ class FeedbackViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         feedback = self.get_object()
+
+        # additional check for global scope - check if user has permission in the target program
+        if program := feedback.program:
+            if not check_permissions(
+                self.request.user,
+                self.get_permissions_for_action(),
+                business_area=feedback.business_area,
+                program=program.slug,
+            ):
+                raise PermissionDenied
 
         feedback_message = FeedbackMessage.objects.create(
             feedback=feedback, description=serializer.validated_data["description"], created_by=request.user

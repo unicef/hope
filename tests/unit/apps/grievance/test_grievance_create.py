@@ -7,7 +7,6 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory, TicketHouseholdDataUpdateDetailsFactory
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
@@ -16,6 +15,10 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceTicketFactory,
+    TicketHouseholdDataUpdateDetailsFactory,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketAddIndividualDetails,
@@ -558,13 +561,14 @@ class TestGrievanceTicketUpdate:
 
         self.list_details = reverse(
             "api:grievance-tickets:grievance-tickets-global-detail",
-            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.household_data_change_grievance_ticket.pk)},
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "pk": str(self.household_data_change_grievance_ticket.pk),
+            },
         )
 
     def test_update_grievance_ticket_hh_update(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [
-            Permissions.GRIEVANCES_UPDATE
-        ], self.afghanistan, self.program)
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
         data = {
             "description": "this is new description",
             "assigned_to": str(self.user.id),

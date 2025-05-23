@@ -11,10 +11,10 @@ export type { AccountabilityRandomSamplingArguments as AccountabilityRandomSampl
 export { ActionEnum as ActionEnumCamelCase } from './models/ActionEnum';
 export type { AddIndividualData as AddIndividualDataCamelCase } from './models/AddIndividualData';
 export type { AddIndividualIssueTypeExtras as AddIndividualIssueTypeExtrasCamelCase } from './models/AddIndividualIssueTypeExtras';
-export type { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
-export type { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
-export type { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
-export type { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
+export { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
+export { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
+export { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
+export { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
 export type { Age as AgeCamelCase } from './models/Age';
 export type { ApplyEngineFormula as ApplyEngineFormulaCamelCase } from './models/ApplyEngineFormula';
 export type { ApprovalProcess as ApprovalProcessCamelCase } from './models/ApprovalProcess';
@@ -39,6 +39,7 @@ export type { CountResponse as CountResponseCamelCase } from './models/CountResp
 export type { Country as CountryCamelCase } from './models/Country';
 export { CountryEnum as CountryEnumCamelCase } from './models/CountryEnum';
 export { CountryOriginEnum as CountryOriginEnumCamelCase } from './models/CountryOriginEnum';
+export type { CreateGrievanceDocument as CreateGrievanceDocumentCamelCase } from './models/CreateGrievanceDocument';
 export type { CreateGrievanceTicket as CreateGrievanceTicketCamelCase } from './models/CreateGrievanceTicket';
 export type { CreateGrievanceTicketExtras as CreateGrievanceTicketExtrasCamelCase } from './models/CreateGrievanceTicketExtras';
 export { CurrencyEnum as CurrencyEnumCamelCase } from './models/CurrencyEnum';
@@ -157,6 +158,7 @@ export type { PatchedPaymentVerificationUpdate as PatchedPaymentVerificationUpda
 export type { PatchedProgramCycleUpdate as PatchedProgramCycleUpdateCamelCase } from './models/PatchedProgramCycleUpdate';
 export type { PatchedRDI as PatchedRDICamelCase } from './models/PatchedRDI';
 export type { PatchedTargetPopulationCreate as PatchedTargetPopulationCreateCamelCase } from './models/PatchedTargetPopulationCreate';
+export type { PatchedUpdateGrievanceTicket as PatchedUpdateGrievanceTicketCamelCase } from './models/PatchedUpdateGrievanceTicket';
 export type { PaymentDetail as PaymentDetailCamelCase } from './models/PaymentDetail';
 export type { PaymentList as PaymentListCamelCase } from './models/PaymentList';
 export type { PaymentPlan as PaymentPlanCamelCase } from './models/PaymentPlan';
@@ -247,8 +249,14 @@ export type { TargetPopulationCreate as TargetPopulationCreateCamelCase } from '
 export type { TargetPopulationDetail as TargetPopulationDetailCamelCase } from './models/TargetPopulationDetail';
 export type { TargetPopulationList as TargetPopulationListCamelCase } from './models/TargetPopulationList';
 export type { TicketNote as TicketNoteCamelCase } from './models/TicketNote';
+export type { TicketPaymentVerificationDetailsExtras as TicketPaymentVerificationDetailsExtrasCamelCase } from './models/TicketPaymentVerificationDetailsExtras';
 export type { TPHouseholdList as TPHouseholdListCamelCase } from './models/TPHouseholdList';
 export { TransferTypeEnum as TransferTypeEnumCamelCase } from './models/TransferTypeEnum';
+export type { UpdateAddIndividualIssueTypeExtras as UpdateAddIndividualIssueTypeExtrasCamelCase } from './models/UpdateAddIndividualIssueTypeExtras';
+export type { UpdateGrievanceDocument as UpdateGrievanceDocumentCamelCase } from './models/UpdateGrievanceDocument';
+export type { UpdateGrievanceTicketExtras as UpdateGrievanceTicketExtrasCamelCase } from './models/UpdateGrievanceTicketExtras';
+export type { UpdateHouseholdDataUpdateIssueTypeExtras as UpdateHouseholdDataUpdateIssueTypeExtrasCamelCase } from './models/UpdateHouseholdDataUpdateIssueTypeExtras';
+export type { UpdateIndividualDataUpdateIssueTypeExtras as UpdateIndividualDataUpdateIssueTypeExtrasCamelCase } from './models/UpdateIndividualDataUpdateIssueTypeExtras';
 export { UrgencyEnum as UrgencyEnumCamelCase } from './models/UrgencyEnum';
 export type { User as UserCamelCase } from './models/User';
 export type { UserChoices as UserChoicesCamelCase } from './models/UserChoices';
