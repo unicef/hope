@@ -14,6 +14,7 @@ import type { FeedbackMessage } from '../models/FeedbackMessage';
 import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FspChoices } from '../models/FspChoices';
+import type { GrievanceChoices } from '../models/GrievanceChoices';
 import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
@@ -1189,14 +1190,14 @@ export class RestService {
     }
     /**
      * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns any No response body
+     * @returns GrievanceChoices
      * @throws ApiError
      */
     public static restBusinessAreasGrievanceTicketsChoicesRetrieve({
         businessAreaSlug,
     }: {
         businessAreaSlug: string,
-    }): CancelablePromise<any> {
+    }): CancelablePromise<GrievanceChoices> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/choices/',
