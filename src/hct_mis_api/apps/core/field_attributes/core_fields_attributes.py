@@ -2154,6 +2154,26 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "program_registration_id_h_c",
         "scope": [Scope.KOBO_IMPORT],
     },
+    {
+        "id": "7003a190-f71f-4ba1-b0f5-fd805097b33c",
+        "type": TYPE_STRING,
+        "name": "identification_key",
+        "lookup": "identification_key",
+        "required": False,
+        "label": {"English(EN)": "Identification key"},
+        "hint": "Field used to identify collisions",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "identification_key_h_c",
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.KOBO_IMPORT,
+            Scope.INDIVIDUAL_UPDATE,
+            Scope.XLSX_PEOPLE,
+            Scope.PEOPLE_UPDATE,
+        ],
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
