@@ -1298,4 +1298,4 @@ class Mutations(graphene.ObjectType):
     bulk_update_grievance_assignee = BulkUpdateGrievanceTicketsAssigneesMutation.Field()  # DONE
     bulk_update_grievance_priority = BulkUpdateGrievanceTicketsPriorityMutation.Field()  # DONE
     bulk_update_grievance_urgency = BulkUpdateGrievanceTicketsUrgencyMutation.Field()  # DONE
-    bulk_grievance_add_note = BulkGrievanceAddNoteMutation.Field()  # in progress
+    bulk_grievance_add_note = BulkGrievanceAddNoteMutation.Field()  # DONE

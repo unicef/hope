@@ -906,4 +906,21 @@ class GrievanceTicketGlobalViewSet(
             status=status.HTTP_202_ACCEPTED,
         )
 
-    # def test_bulk_add_note() # TODO
+    @extend_schema(
+        request=BulkGrievanceTicketsAddNoteSerializer,
+        responses={202: GrievanceTicketDetailSerializer(many=True)},
+    )
+    @action(detail=False, methods=["post"], url_path="bulk-add-note")
+    def bulk_add_note(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tickets = BulkActionService().bulk_add_note(
+            request.user,  # type: ignore
+            serializer.validated_data["grievance_ticket_ids"],
+            serializer.validated_data["note"],
+            self.business_area_slug,  # type: ignore
+        )
+        return Response(
+            GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
