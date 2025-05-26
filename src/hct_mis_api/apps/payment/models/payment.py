@@ -2058,7 +2058,7 @@ class PaymentDataCollector(Account):
             if account.number:
                 delivery_data["number"] = account.number
             if account.financial_institution:
-                delivery_data["financial_institution"] = account.financial_institution.id
+                delivery_data["financial_institution"] = str(account.financial_institution.id)
 
         return delivery_data
 
