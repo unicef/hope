@@ -32,6 +32,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import Account
+from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):
@@ -263,6 +264,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
 
     deduplication_golden_record_results = serializers.SerializerMethodField()
     biometric_deduplication_golden_record_results = serializers.SerializerMethodField()
+    program = ProgramSmallSerializer()
 
     class Meta:
         model = Individual
@@ -290,6 +292,8 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "biometric_deduplication_golden_record_status_display",
             "deduplication_golden_record_results",
             "biometric_deduplication_golden_record_results",
+            "program",
+            "last_registration_date",
         )
 
     def get_role(self, obj: Individual) -> str:
