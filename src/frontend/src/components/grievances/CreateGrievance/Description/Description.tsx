@@ -28,7 +28,7 @@ import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { Choice } from '@restgenerated/models/Choice';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -50,7 +50,7 @@ export interface DescriptionProps {
   showIssueType: (values) => boolean;
   selectedIssueType: (values) => string;
   baseUrl: string;
-  choicesData: any[];
+  choicesData: GrievanceChoices;
   programsData: PaginatedProgramListList;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;

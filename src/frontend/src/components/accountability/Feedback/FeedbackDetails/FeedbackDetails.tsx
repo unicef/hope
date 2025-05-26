@@ -135,7 +135,7 @@ function FeedbackDetails({
               },
               {
                 label: t('Administrative Level 2'),
-                value: feedback.admin2.name,
+                value: feedback.admin2?.name,
                 size: 3,
               },
               {
