@@ -90,6 +90,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
   };
   if (currentStep === FeedbackSteps.Description) {
     datum.description = Yup.string().required('Description is required');
+    datum.language = Yup.string().required('Languages Spoken is required');
   }
   if (currentStep >= FeedbackSteps.Verification) {
     datum.consent = Yup.bool().oneOf([true], 'Consent is required');
@@ -158,7 +159,6 @@ function CreateFeedbackPage(): ReactElement {
   ];
 
   const [activeStep, setActiveStep] = useState(FeedbackSteps.Selection);
-  const [validateData, setValidateData] = useState(false);
 
   const initialValues = {
     category: 'Feedback',
@@ -264,12 +264,11 @@ function CreateFeedbackPage(): ReactElement {
             showMessage(e.message || 'Error creating feedback');
           }
         } else {
-          setValidateData(false);
           handleNext();
         }
       }}
-      validateOnChange={activeStep < FeedbackSteps.Verification || validateData}
-      validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
+      validateOnChange={true}
+      validateOnBlur={true}
       validationSchema={validationSchemaWithSteps(activeStep)}
       // validate={(values) =>
       //   validateUsingSteps(values, activeStep, setValidateData)
@@ -539,6 +538,16 @@ function CreateFeedbackPage(): ReactElement {
                             variant="contained"
                             onClick={submitForm}
                             data-cy="button-submit"
+                            disabled={
+                              activeStep === steps.length - 1
+                                ? // On final step, check only fields required for this step
+                                  !values.description ||
+                                  !values.language ||
+                                  Object.keys(errors).includes('description') ||
+                                  Object.keys(errors).includes('language')
+                                : // On earlier steps, check if there are any errors for fields on the current step
+                                  Object.keys(errors).length > 0
+                            }
                           >
                             {activeStep === steps.length - 1
                               ? t('Save')

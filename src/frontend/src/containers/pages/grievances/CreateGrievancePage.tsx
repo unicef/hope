@@ -44,7 +44,7 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
 } from '@utils/constants';
-import { decodeIdString, thingForSpecificGrievanceType } from '@utils/utils';
+import { thingForSpecificGrievanceType } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -127,9 +127,7 @@ const CreateGrievancePage = (): ReactElement => {
     partner: null,
     program: isAllPrograms ? '' : programId,
     comments: null,
-    linkedFeedbackId: linkedFeedbackId
-      ? decodeIdString(linkedFeedbackId)
-      : null,
+    linkedFeedbackId: linkedFeedbackId || null,
     documentation: [],
     individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
   };

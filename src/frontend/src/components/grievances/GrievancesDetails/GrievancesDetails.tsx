@@ -22,10 +22,11 @@ import { useProgramContext } from 'src/programContext';
 import { replaceLabels } from '../utils/createGrievanceUtils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketDetail;
-  choicesData: any;
+  choicesData: GrievanceChoices;
   baseUrl: string;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;

@@ -125,8 +125,7 @@ const EditFeedbackPage = (): ReactElement => {
       : null,
     description: feedback.description || null,
     comments: feedback.comments || null,
-    //TODO: check if admin2Name is correct
-    admin2: null, // For FeedbackDetail, it's admin2Name not admin2 object
+    admin2: feedback.admin2?.id,
     area: feedback.area || null,
     language: feedback.language || null,
     consent: feedback.consent || false,
@@ -329,6 +328,7 @@ const EditFeedbackPage = (): ReactElement => {
                           variant="outlined"
                           label={t('Languages Spoken')}
                           component={FormikTextField}
+                          required
                         />
                       </Grid>
                       <Grid size={{ xs: 3 }}>
