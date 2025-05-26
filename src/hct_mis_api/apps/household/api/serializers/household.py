@@ -34,16 +34,17 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):
     head_of_household = serializers.CharField(source="head_of_household.full_name")
     admin1 = serializers.CharField(source="admin1.name", default="")
     admin2 = AreaSimpleSerializer()
-    program = serializers.CharField(source="program.name")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     has_duplicates = serializers.SerializerMethodField()
+    program = ProgramSmallSerializer()
 
     class Meta:
         model = Household
