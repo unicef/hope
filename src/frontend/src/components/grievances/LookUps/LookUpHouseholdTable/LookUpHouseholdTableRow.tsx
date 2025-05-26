@@ -103,20 +103,19 @@ export function LookUpHouseholdTableRow({
       </TableCell>
       <TableCell align="left">{household.headOfHousehold}</TableCell>
       <TableCell align="left">{household.size}</TableCell>
-      <TableCell align="left">{household?.admin2 || '-'}</TableCell>
+      <TableCell align="left">{household?.admin2?.name || '-'}</TableCell>
       <TableCell align="left">
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
       {isAllPrograms && (
         <TableCell align="left">
-          {/* //TODO: fix */}
-          {/* {household.program ? (
+          {household.program ? (
             <BlackLink to={`/${baseUrl}/details/${household.program.id}`}>
               {household.program.name}
             </BlackLink>
           ) : (
             '-'
-          )} */}
+          )}
         </TableCell>
       )}
     </ClickableTableRow>

@@ -1,26 +1,27 @@
-import TableCell from '@mui/material/TableCell';
-import { ReactElement, ReactNode, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
+import { Bold } from '@components/core/Bold';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { IndividualNode } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import TableCell from '@mui/material/TableCell';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { HouseholdMember } from '@restgenerated/models/HouseholdMember';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import {
   adjustHeadCells,
   choicesToDict,
   populationStatusToColor,
   sexToCapitalize,
 } from '@utils/utils';
-import { HouseholdChoiceDataQuery, IndividualNode } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Bold } from '@components/core/Bold';
+import { ReactElement, ReactNode, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
-import { HouseholdMember } from '@restgenerated/models/HouseholdMember';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -63,7 +64,7 @@ const headCells: HeadCell<IndividualNode>[] = [
 
 interface HouseholdMembersTableProps {
   household: HouseholdDetail;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: IndividualChoices;
 }
 export const HouseholdMembersTable = ({
   household,
@@ -131,7 +132,7 @@ export const HouseholdMembersTable = ({
       title={`${beneficiaryGroup?.groupLabel} Members`}
       allowSort={false}
       headCells={adjustedHeadCells}
-      data={data} //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+      data={data}
       error={error}
       isLoading={isLoading}
       queryVariables={queryVariables}

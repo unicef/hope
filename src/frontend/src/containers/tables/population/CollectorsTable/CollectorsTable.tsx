@@ -4,13 +4,13 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
 import {
-  HouseholdChoiceDataQuery,
   IndividualNode,
   IndividualRoleInHouseholdRole,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { adjustHeadCells, choicesToDict } from '@utils/utils';
 import { ReactElement, ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +39,7 @@ const headCells: HeadCell<IndividualNode>[] = [
 
 interface CollectorsTableProps {
   household: HouseholdDetail;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: IndividualChoices;
 }
 export const CollectorsTable = ({
   household,
