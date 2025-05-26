@@ -2,7 +2,18 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -19,6 +30,12 @@ from graphene_django.filter.utils import (
 from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import get_program_id_from_headers
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AnonymousUser
+
+    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -348,6 +365,25 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     obj = program or business_area
 
     return any(user.has_perm(permission.name, obj) for permission in permissions)
+
+
+def check_creator_or_owner_permission(
+    user: Union["User", "AnonymousUser"],
+    general_permission: str,
+    is_creator: bool,
+    creator_permission: str,
+    is_owner: bool,
+    owner_permission: str,
+    business_area: "BusinessArea",
+    program: Optional["Program"],
+) -> None:
+    scope = program or business_area
+    if not user.is_authenticated or not (
+        user.has_perm(general_permission, scope)
+        or (is_creator and user.has_perm(creator_permission, scope))
+        or (is_owner and user.has_perm(owner_permission, scope))
+    ):
+        raise PermissionDenied("Permission Denied")
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
