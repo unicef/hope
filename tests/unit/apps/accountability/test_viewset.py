@@ -588,6 +588,15 @@ class TestFeedbackViewSet:
             assert resp_data["program_name"] == "Test Active Program"
             assert resp_data["description"] == "Description per Program Create"
             assert resp_data["comments"] == "New comments per Program Create"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
+            assert resp_data["area"] == "Area new"
+            assert resp_data["language"] == "polish_english"
+            assert resp_data["issue_type"] == "POSITIVE_FEEDBACK"
+            assert resp_data["individual_unicef_id"] == str(self.individual_1.unicef_id)
+            assert resp_data["individual_id"] == str(self.individual_1.id)
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
