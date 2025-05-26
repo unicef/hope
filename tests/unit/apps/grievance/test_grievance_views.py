@@ -32,6 +32,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
+    TicketNote,
 )
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -1257,3 +1258,24 @@ class TestGrievanceTicketApprove:
         assert len(resp_data) == 2
         assert resp_data[0]["urgency"] == 2
         assert resp_data[1]["urgency"] == 2
+
+    def test_bulk_add_note(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-bulk-add-note",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {
+                "note": "New Note bulk create",
+                "grievance_ticket_ids": [str(self.bulk_grievance_ticket1.id), str(self.bulk_grievance_ticket2.id)],
+            },
+            format="json",
+        )
+
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert TicketNote.objects.count() == 2
+        assert len(resp_data) == 2
+        assert resp_data[0]["ticket_notes"][0]["description"] == "New Note bulk create"
+        assert resp_data[1]["ticket_notes"][0]["description"] == "New Note bulk create"
