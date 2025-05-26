@@ -1,22 +1,22 @@
 import { BlackLink } from '@components/core/BlackLink';
 import { Bold } from '@components/core/Bold';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
-import {
-  IndividualNode,
-  IndividualRoleInHouseholdRole,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { IndividualSimple } from '@restgenerated/models/IndividualSimple';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, choicesToDict } from '@utils/utils';
 import { ReactElement, ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 
-const headCells: HeadCell<IndividualNode>[] = [
+const headCells: HeadCell<IndividualSimple>[] = [
   {
     disablePadding: false,
     label: 'Role',
@@ -46,7 +46,7 @@ export const CollectorsTable = ({
   choicesData,
 }: CollectorsTableProps): ReactElement => {
   const navigate = useNavigate();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
@@ -74,40 +74,63 @@ export const CollectorsTable = ({
     choicesData?.relationshipChoices,
   );
 
-  //TODO:
-  const allCollectors = [];
-  // household?.individuals?.edges
-  //   ?.map((edge) => edge.node)
-  //   .filter(
-  //     (el) =>
-  //       el.role === IndividualRoleInHouseholdRole.Alternate ||
-  //       el.role === IndividualRoleInHouseholdRole.Primary,
-  //   ) || [];
+  const { data, isLoading, error } = useQuery({
+    queryKey: [
+      'businessAreasProgramsHouseholdsMembers',
+      programId,
+      businessArea,
+      household.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsMembersRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: household.id,
+      }),
+    enabled: !!businessArea && !!programId && !!household?.id,
+  });
+
+  if (isLoading) {
+    return <LoadingComponent />;
+  }
+
+  if (error) {
+    console.error('Error loading household members:', error);
+    return <div>Error loading collectors. Please try again.</div>;
+  }
+
+  // Extract collectors from the response
+  const allCollectors = data || [];
+
+  let sortedCollectors = [...allCollectors];
 
   if (orderBy) {
     if (orderDirection === 'asc') {
-      allCollectors.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
+      sortedCollectors.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
     } else {
-      allCollectors.sort((a, b) => (a[orderBy] > b[orderBy] ? 1 : -1));
+      sortedCollectors.sort((a, b) => (a[orderBy] > b[orderBy] ? 1 : -1));
     }
   }
 
-  const sortedCollectors = allCollectors.sort((a, b) => {
-    if (a.role === IndividualRoleInHouseholdRole.Primary) {
+  // Sort collectors by role (PRIMARY first, then ALTERNATE)
+  sortedCollectors = sortedCollectors.sort((a, b) => {
+    if (a.role === 'PRIMARY') {
       return -1;
-    } else if (b.role === IndividualRoleInHouseholdRole.Primary) {
+    } else if (b.role === 'PRIMARY') {
       return 1;
-    } else if (a.role === IndividualRoleInHouseholdRole.Alternate) {
+    } else if (a.role === 'ALTERNATE') {
       return -1;
-    } else if (b.role === IndividualRoleInHouseholdRole.Alternate) {
+    } else if (b.role === 'ALTERNATE') {
       return 1;
     } else {
       return 0;
     }
   });
+
   const totalCount = allCollectors.length;
+
   return (
-    <TableComponent<IndividualNode>
+    <TableComponent
       title="Collectors"
       data={sortedCollectors.slice(
         page * rowsPerPage,
@@ -159,8 +182,8 @@ export const CollectorsTable = ({
         );
       }}
       headCells={adjustedHeadCells}
-      rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
-      rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}
+      rowsPerPageOptions={totalCount < 5 ? [totalCount || 1] : [5, 10, 15]}
+      rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount || 1}
       page={page}
       itemsCount={totalCount}
       handleChangePage={(_event, newPage) => {
