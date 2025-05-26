@@ -228,6 +228,14 @@ class TestIndividualList:
                     "name": individual.household.admin2.name,
                 },
             }
+            assert individual_result["program"] == {
+                "id": str(individual.program.id),
+                "name": individual.program.name,
+                "slug": individual.program.slug,
+                "programme_code": individual.program.programme_code,
+                "status": individual.program.status,
+            }
+            assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 
     def test_individual_list_on_draft_program(self, create_user_role_with_permissions: Any) -> None:
         program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
@@ -1031,6 +1039,14 @@ class TestIndividualGlobalViewSet:
                     "name": individual.household.admin2.name,
                 },
             }
+            assert individual_result["program"] == {
+                "id": str(individual.program.id),
+                "name": individual.program.name,
+                "slug": individual.program.slug,
+                "programme_code": individual.program.programme_code,
+                "status": individual.program.status,
+            }
+            assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 
     def test_individual_global_list_with_permissions_in_one_program(
         self, create_user_role_with_permissions: Any
