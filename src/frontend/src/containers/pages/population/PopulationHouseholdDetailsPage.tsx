@@ -19,7 +19,6 @@ import { usePermissions } from '@hooks/usePermissions';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { Theme } from '@mui/material/styles';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -32,6 +31,8 @@ import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
+import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 const Container = styled.div`
   padding: 20px;
@@ -85,11 +86,11 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllHouseholdsFlexFieldsAttributesQuery();
 
-  const { data: householdChoicesData, isLoading: householdChoicesLoading } =
-    useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
       queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });
@@ -104,7 +105,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     });
 
   if (
-    householdChoicesLoading ||
+    individualChoicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
     householdLoading
@@ -114,7 +115,7 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !householdChoicesData ||
+    !individualChoicesData ||
     !grievancesChoices ||
     !flexFieldsData ||
     permissions === null ||
@@ -189,17 +190,16 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
       />
       <HouseholdCompositionTable household={household} />
       <Container>
-        <Missing />
-        {/* //TODO: */}
-        {/* {household?.individuals?.edges?.length ? (
+        {household ? (
           <>
             <HouseholdMembersTable
-              choicesData={choicesData}
+              choicesData={individualChoicesData}
               household={household}
             />
-            <CollectorsTable choicesData={choicesData} household={household} />
+            {/* //TODO: */}
+            {/* <CollectorsTable choicesData={choicesData} household={household} /> */}
           </>
-        ) : null} */}
+        ) : null}
         {hasPermissions(
           PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
           permissions,
@@ -248,13 +248,13 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
                 {household?.registrationDataImport.importedBy.email}
               </LabelizedField>
             </Grid>
-            {/* {household?.programRegistrationId && (
+            {household?.programRegistrationId && (
               <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Programme registration id')}>
                   {household.programRegistrationId}
                 </LabelizedField>
               </Grid>
-            )} */}
+            )}
           </Grid>
           {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>

@@ -11,11 +11,6 @@ import { Consent } from '@components/grievances/Consent';
 import HouseholdQuestionnaire from '@components/grievances/HouseholdQuestionnaire/HouseholdQuestionnaire';
 import IndividualQuestionnaire from '@components/grievances/IndividualQuestionnnaire/IndividualQuestionnaire';
 import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
-// Constants for feedback issue types
-const FEEDBACK_ISSUE_TYPE = {
-  POSITIVE_FEEDBACK: 'POSITIVE_FEEDBACK',
-  NEGATIVE_FEEDBACK: 'NEGATIVE_FEEDBACK',
-};
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -50,6 +45,13 @@ import {
 } from '../../../../config/permissions';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { createApiParams } from '@utils/apiUtils';
+import { decodeIdString } from '@utils/utils';
+
+// Constants for feedback issue types
+const FEEDBACK_ISSUE_TYPE = {
+  POSITIVE_FEEDBACK: 'POSITIVE_FEEDBACK',
+  NEGATIVE_FEEDBACK: 'NEGATIVE_FEEDBACK',
+};
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -238,7 +240,7 @@ function CreateFeedbackPage(): ReactElement {
     householdLookup: values.selectedHousehold?.id,
     individualLookup: values.selectedIndividual?.id,
     issueType: values.issueType,
-    admin2: values.admin2,
+    admin2: decodeIdString(values.admin2),
     language: values.language,
     program: values.program,
   });

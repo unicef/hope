@@ -9,11 +9,12 @@ import type { DeduplicationEngineSimilarityPairIndividual } from './Deduplicatio
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
 import type { DeduplicationResult } from './DeduplicationResult';
 import type { HouseholdSimple } from './HouseholdSimple';
+import type { ProgramSmall } from './ProgramSmall';
 import type { RelationshipEnum } from './RelationshipEnum';
 import type { SexEnum } from './SexEnum';
 export type IndividualList = {
     readonly id: string;
-    unicefId?: string | null;
+    unicefId: string | null;
     /**
      * Full Name of the Beneficiary
      */
@@ -107,5 +108,10 @@ export type IndividualList = {
     biometricDeduplicationGoldenRecordStatusDisplay: string;
     readonly deduplicationGoldenRecordResults: Array<DeduplicationResult>;
     readonly biometricDeduplicationGoldenRecordResults: Array<DeduplicationEngineSimilarityPairIndividual>;
+    program: ProgramSmall;
+    /**
+     * Last registration date [sys]
+     */
+    lastRegistrationDate: string;
 };
 

@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { AreaSimple } from './AreaSimple';
 import type { CurrencyEnum } from './CurrencyEnum';
+import type { ProgramSmall } from './ProgramSmall';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdList = {
     readonly id: string;
@@ -11,7 +12,7 @@ export type HouseholdList = {
     headOfHousehold: string;
     admin1?: string;
     admin2: AreaSimple;
-    program: string;
+    program: ProgramSmall;
     readonly status: string;
     /**
      * Household size

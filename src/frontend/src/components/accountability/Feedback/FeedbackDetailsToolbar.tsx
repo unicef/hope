@@ -43,9 +43,7 @@ function FeedbackDetailsToolbar({
     <PageHeader
       title={`Feedback ID: ${feedback.unicefId}`}
       breadCrumbs={breadCrumbsItems}
-      flags={<AdminButton adminUrl={''} />}
-      //TODO: Add the correct path for the feedback details page
-      // flags={<AdminButton adminUrl={feedback.adminUrl} />}
+      flags={<AdminButton adminUrl={feedback.adminUrl} />}
     >
       <Box display="flex" alignItems="center">
         {canEdit && (

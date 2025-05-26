@@ -5,7 +5,6 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { FeedbackIssueType } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, GridSize, Typography } from '@mui/material';
 import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
@@ -48,7 +47,7 @@ function FeedbackDetails({
                 label: t('Issue Type'),
                 value: (
                   <span>
-                    {feedback.issueType === FeedbackIssueType.PositiveFeedback
+                    {feedback.issueType === 'POSITIVE_FEEDBACK'
                       ? 'Positive Feedback'
                       : 'Negative Feedback'}
                   </span>

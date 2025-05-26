@@ -4,10 +4,11 @@
 /* eslint-disable */
 import type { AreaSimple } from './AreaSimple';
 import type { FeedbackMessage } from './FeedbackMessage';
+import type { IssueTypeEnum } from './IssueTypeEnum';
 export type FeedbackDetail = {
     readonly id: string;
     unicefId?: string | null;
-    issueType: string;
+    issueType: IssueTypeEnum;
     householdUnicefId: string | null;
     householdId: string | null;
     individualUnicefId: string | null;
@@ -19,6 +20,7 @@ export type FeedbackDetail = {
     readonly createdBy: string;
     readonly createdAt: string;
     readonly feedbackMessages: Array<FeedbackMessage>;
+    readonly adminUrl: string;
     description: string;
     area?: string;
     language?: string;
