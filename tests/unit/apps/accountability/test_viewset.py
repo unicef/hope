@@ -242,6 +242,7 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area"
             assert resp_data["language"] == "test language"
             assert resp_data["comments"] == "test comments"
+            assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -555,6 +556,7 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area 111"
             assert resp_data["language"] == "test language 111"
             assert resp_data["comments"] == "test comments 111"
+            assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_1.id)}/change/"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
