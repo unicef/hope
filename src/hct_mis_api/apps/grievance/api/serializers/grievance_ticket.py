@@ -589,3 +589,28 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
     documentation_to_delete = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=GrievanceDocument.objects.all()), required=False
     )
+
+
+class GrievanceStatusChangeSerializer(serializers.Serializer):
+    status = serializers.IntegerField(required=True)
+    version = serializers.IntegerField(required=False)
+
+
+class GrievanceCreateNoteSerializer(serializers.Serializer):
+    description = serializers.CharField(required=True)
+    version = serializers.IntegerField(required=False)
+
+
+class GrievanceIndividualDataChangeApproveSerializer(serializers.Serializer):
+    individual_approve_data = serializers.JSONField(required=True)
+    approved_documents_to_create = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_documents_to_edit = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_documents_to_remove = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_identities_to_create = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_identities_to_edit = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_identities_to_remove = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_payment_channels_to_create = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_payment_channels_to_edit = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_payment_channels_to_remove = serializers.ListField(child=serializers.IntegerField(), required=False)
+    flex_fields_approve_data = serializers.JSONField(required=False)
+    version = serializers.IntegerField(required=False)
