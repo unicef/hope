@@ -1,3 +1,4 @@
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -65,11 +66,9 @@ export function LookUpIndividualTableRow({
         {individual.household?.admin2?.name || '-'}
       </TableCell>
       <TableCell align="left">
-        {/* //TODO: */}
-        {/* <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment> */}
+        <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
       </TableCell>
-      {/* //TODO: */}
-      {/* {isAllPrograms && (
+      {isAllPrograms && (
         <TableCell align="left">
           {individual.program ? (
             <BlackLink to={`/${baseUrl}/details/${individual.program.id}`}>
@@ -79,7 +78,7 @@ export function LookUpIndividualTableRow({
             '-'
           )}
         </TableCell>
-      )} */}
+      )}
     </ClickableTableRow>
   );
 }
