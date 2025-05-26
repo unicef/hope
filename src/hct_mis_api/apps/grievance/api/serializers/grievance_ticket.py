@@ -614,3 +614,64 @@ class GrievanceIndividualDataChangeApproveSerializer(serializers.Serializer):
     approved_payment_channels_to_remove = serializers.ListField(child=serializers.IntegerField(), required=False)
     flex_fields_approve_data = serializers.JSONField(required=False)
     version = serializers.IntegerField(required=False)
+
+
+class GrievanceHouseholdDataChangeApproveSerializer(serializers.Serializer):
+    household_approve_data = serializers.JSONField(required=True)
+    flex_fields_approve_data = serializers.JSONField(required=False)
+    version = serializers.IntegerField(required=False)
+
+
+class GrievanceUpdateApproveStatusSerializer(serializers.Serializer):
+    approve_status = serializers.BooleanField(required=True)
+    version = serializers.IntegerField(required=False)
+
+
+class GrievanceDeleteHouseholdApproveStatusSerializer(serializers.Serializer):
+    approve_status = serializers.BooleanField(required=True)
+    reason_hh_id = serializers.CharField(required=False, allow_blank=True)
+    version = serializers.IntegerField(required=False)
+
+
+class GrievanceNeedsAdjudicationApproveSerializer(serializers.Serializer):
+    selected_individual_id = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=False)
+    duplicate_individual_ids = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()), required=False
+    )
+    distinct_individual_ids = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()), required=False
+    )
+    clear_individual_ids = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()), required=False
+    )
+    version = serializers.IntegerField(required=False)
+
+
+class GrievanceReassignRoleSerializer(serializers.Serializer):
+    household_id = serializers.PrimaryKeyRelatedField(queryset=Household.objects.all(), required=True)
+    household_version = serializers.IntegerField(required=False)
+    individual_id = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=True)
+    individual_version = serializers.IntegerField(required=False)
+    new_individual_id = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=False)
+    role = serializers.CharField(required=True)
+    version = serializers.IntegerField(required=False)
+
+
+class BulkUpdateGrievanceTicketsAssigneesSerializer(serializers.Serializer):
+    grievance_ticket_ids = serializers.ListField(child=serializers.UUIDField(), required=True)
+    assigned_to = serializers.UUIDField(required=True)
+
+
+class BulkUpdateGrievanceTicketsPrioritySerializer(serializers.Serializer):
+    grievance_ticket_ids = serializers.ListField(child=serializers.UUIDField(), required=True)
+    priority = serializers.IntegerField(required=True)
+
+
+class BulkUpdateGrievanceTicketsUrgencySerializer(serializers.Serializer):
+    grievance_ticket_ids = serializers.ListField(child=serializers.UUIDField(), required=True)
+    urgency = serializers.IntegerField(required=True)
+
+
+class BulkGrievanceTicketsAddNoteSerializer(serializers.Serializer):
+    grievance_ticket_ids = serializers.ListField(child=serializers.UUIDField(), required=True)
+    note = serializers.CharField(required=True)
