@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any
 
+from django.core.files.base import ContentFile
 from django.core.management import call_command
 
 import pytest
@@ -17,8 +18,11 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
+    TicketDeleteHouseholdDetailsFactory,
     TicketHouseholdDataUpdateDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+    TicketPaymentVerificationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -41,15 +45,25 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     RELATIONSHIP_UNKNOWN,
     ROLE_NO_ROLE,
+    ROLE_PRIMARY,
     SINGLE,
     UNHCR,
     WIDOWED,
     DocumentType,
+    IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.django_db()
 
@@ -664,7 +678,7 @@ class TestGrievanceTicketApprove:
 
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
-        self.user2 = UserFactory(partner=self.partner)
+        self.user2 = UserFactory(first_name="SecondUser", partner=self.partner)
         self.api_client = api_client(self.user)
 
         self.program = ProgramFactory(
@@ -746,15 +760,16 @@ class TestGrievanceTicketApprove:
         household_one.save()
         self.household_one = household_one
 
-        self.add_individual_grievance_ticket = GrievanceTicketFactory(
+        self.add_individual_grv = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
             admin2=self.area_1,
             business_area=self.afghanistan,
         )
+        self.add_individual_grv.programs.set([self.program])
         TicketAddIndividualDetailsFactory(
-            ticket=self.add_individual_grievance_ticket,
+            ticket=self.add_individual_grv,
             household=self.household_one,
             individual_data={
                 "given_name": "Test",
@@ -786,7 +801,6 @@ class TestGrievanceTicketApprove:
             business_area=self.afghanistan,
         )
         self.individual_data_change_grv.programs.set([self.program])
-        self.individual_data_change_grv.save()
         TicketIndividualDataUpdateDetailsFactory(
             ticket=self.individual_data_change_grv,
             individual=self.individuals[0],
@@ -837,7 +851,6 @@ class TestGrievanceTicketApprove:
             business_area=self.afghanistan,
         )
         self.household_data_change_grv.programs.set([self.program])
-        self.household_data_change_grv.save()
         TicketHouseholdDataUpdateDetailsFactory(
             ticket=self.household_data_change_grv,
             household=self.household_one,
@@ -846,6 +859,28 @@ class TestGrievanceTicketApprove:
                 "size": {"value": 19},
                 "flex_fields": {},
             },
+        )
+        self.bulk_grievance_ticket1 = GrievanceTicketFactory(
+            description="Test 1",
+            assigned_to=self.user,
+            priority=1,
+            urgency=1,
+            category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+            language="PL",
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+            created_by=self.user2,
+            business_area=self.afghanistan,
+        )
+        self.bulk_grievance_ticket2 = GrievanceTicketFactory(
+            description="Test 2",
+            assigned_to=self.user,
+            priority=1,
+            urgency=1,
+            category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+            language="PL",
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=self.user2,
+            business_area=self.afghanistan,
         )
 
     def test_approve_individual_data_change(self, create_user_role_with_permissions: Any) -> None:
@@ -876,3 +911,349 @@ class TestGrievanceTicketApprove:
         resp_data = response.json()
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert "id" in resp_data
+
+    def test_approve_household_data_change(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.afghanistan, self.program
+        )
+        data = {
+            "household_approve_data": {"village": True},
+            "flex_fields_approve_data": {},
+        }
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-household-data-change",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.household_data_change_grv.pk)},
+            ),
+            data,
+            format="json",
+        )
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+
+    def test_approve_add_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.afghanistan, self.program
+        )
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-status-update",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.add_individual_grv.pk)},
+            ),
+            {"approve_status": True, "version": self.add_individual_grv.version},
+            format="json",
+        )
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+
+    def test_approve_delete_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.afghanistan, self.program
+        )
+        grievance_ticket = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
+            admin2=self.area_1,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        grievance_ticket.programs.set([self.program])
+        details = TicketDeleteHouseholdDetailsFactory(
+            ticket=grievance_ticket,
+            household=self.household_one,
+            approve_status=False,
+        )
+
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-delete-household",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
+            ),
+            {"approve_status": True, "reason_hh_id": "", "version": grievance_ticket.version},
+            format="json",
+        )
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+        details.refresh_from_db()
+        assert details.approve_status is True
+
+    def test_approve_needs_adjudication(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.afghanistan, self.program
+        )
+        partner = PartnerFactory()
+        household_one = HouseholdFactory.build(
+            registration_data_import__imported_by__partner=partner,
+            program=self.program,
+            admin2=self.area_1,
+        )
+        household_one.household_collection.save()
+        household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = household_one.program
+        household_one.registration_data_import.save()
+
+        individuals_to_create = [
+            {
+                "full_name": "Benjamin Butler",
+                "given_name": "Benjamin",
+                "family_name": "Butler",
+                "phone_no": "(953)682-4596",
+                "birth_date": "1943-07-30",
+                "unicef_id": "IND-123-123",
+                "photo": ContentFile(b"111", name="foo1.png"),
+            },
+            {
+                "full_name": "Robin Ford",
+                "given_name": "Robin",
+                "family_name": "Ford",
+                "phone_no": "+18663567905",
+                "birth_date": "1946-02-15",
+                "unicef_id": "IND-222-222",
+                "photo": ContentFile(b"222", name="foo2.png"),
+            },
+        ]
+
+        individuals = [
+            IndividualFactory(household=household_one, program=self.program, **individual)
+            for individual in individuals_to_create
+        ]
+        first_individual = individuals[0]
+        second_individual = individuals[1]
+        household_one.head_of_household = first_individual
+        household_one.save()
+        na_grv = GrievanceTicketFactory(
+            description="needs_adjudication_grievance_ticket",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            admin2=self.area_1,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        na_grv.programs.set([self.program])
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
+            ticket=na_grv,
+            golden_records_individual=first_individual,
+            possible_duplicate=second_individual,
+            selected_individual=None,
+        )
+        ticket_details.possible_duplicates.add(first_individual, second_individual)
+        assert ticket_details.selected_individuals.all().count() == 0
+
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
+            ),
+            {"duplicate_individual_ids": [str(individuals[1].id)], "version": na_grv.version},
+            format="json",
+        )
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+        ticket_details.refresh_from_db()
+        assert ticket_details.selected_individuals.all().count() == 1
+        assert individuals[1] in ticket_details.selected_individuals.all()
+
+    def test_approve_payment_details(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION], self.afghanistan, self.program
+        )
+        payment_plan = PaymentPlanFactory(
+            name="TEST",
+            program_cycle=self.program.cycles.first(),
+            business_area=self.afghanistan,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan=payment_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+        )
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=self.household_one,
+            unicef_id="P8F-21-CSH-00031-123123",
+            currency="PLN",
+        )
+        payment_verification = PaymentVerificationFactory(
+            id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
+            payment_verification_plan=payment_verification_plan,
+            payment=payment,
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+        )
+        ticket_details = TicketPaymentVerificationDetailsFactory(payment_verification=payment_verification)
+        ticket_details.ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+        ticket_details.ticket.programs.set([self.program])
+        ticket_details.ticket.save()
+
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-payment-details",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(ticket_details.ticket.pk)},
+            ),
+            {"approve_status": True, "version": ticket_details.ticket.version},
+            format="json",
+        )
+
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+        ticket_details.refresh_from_db()
+        assert ticket_details.approve_status is True
+
+    def test_reassign_role(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        household = HouseholdFactory.build(program=self.program)
+        household.household_collection.save()
+        household.registration_data_import.imported_by.save()
+        household.registration_data_import.program = self.program
+        household.registration_data_import.save()
+
+        individual_1 = IndividualFactory(
+            **{
+                "full_name": "Benjamin Butler",
+                "given_name": "Benjamin",
+                "family_name": "Butler",
+                "phone_no": "(953)682-4596",
+                "birth_date": "1943-07-30",
+                "household": None,
+                "program": self.program,
+            },
+        )
+
+        individual_2 = IndividualFactory(
+            **{
+                "full_name": "Andrew Jackson",
+                "given_name": "Andrew",
+                "family_name": "Jackson",
+                "phone_no": "(853)692-4696",
+                "birth_date": "1963-09-12",
+                "household": None,
+                "program": self.program,
+            },
+        )
+
+        IndividualFactory(
+            **{
+                "full_name": "Ulysses Grant",
+                "given_name": "Ulysses",
+                "family_name": "Grant",
+                "phone_no": "(953)682-1111",
+                "birth_date": "1913-01-31",
+                "household": None,
+                "program": self.program,
+            },
+        )
+
+        household.head_of_household = individual_1
+        household.save()
+
+        individual_1.household = household
+        individual_2.household = household
+
+        individual_1.save()
+        individual_2.save()
+
+        household.refresh_from_db()
+        individual_1.refresh_from_db()
+        individual_2.refresh_from_db()
+
+        IndividualRoleInHousehold.objects.create(
+            household=household,
+            individual=individual_1,
+            role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        grievance_ticket = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            admin2=self.area_1,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        grievance_ticket.programs.set([self.program])
+        TicketNeedsAdjudicationDetailsFactory(
+            ticket=grievance_ticket,
+            golden_records_individual=individual_1,
+            possible_duplicate=individual_2,
+            is_multiple_duplicates_version=True,
+            selected_individual=None,
+        )
+
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-reassign-role",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
+            ),
+            {
+                "household_id": str(household.id),
+                "individual_id": str(individual_1.id),
+                "new_individual_id": str(individual_2.id),
+                "role": ROLE_PRIMARY,
+                "version": grievance_ticket.version,
+            },
+            format="json",
+        )
+
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+
+    def test_bulk_update_grievance_assignee(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-bulk-update-assignee",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {
+                "assigned_to": str(self.user2.id),
+                "grievance_ticket_ids": [str(self.bulk_grievance_ticket1.id), str(self.bulk_grievance_ticket2.id)],
+            },
+            format="json",
+        )
+
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert len(resp_data) == 2
+        assert resp_data[0]["assigned_to"]["first_name"] == "SecondUser"
+        assert resp_data[1]["assigned_to"]["first_name"] == "SecondUser"
+
+    def test_bulk_update_grievance_priority(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-bulk-update-priority",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {
+                "priority": 3,
+                "grievance_ticket_ids": [str(self.bulk_grievance_ticket1.id), str(self.bulk_grievance_ticket2.id)],
+            },
+            format="json",
+        )
+
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert len(resp_data) == 2
+        assert resp_data[0]["priority"] == 3
+        assert resp_data[1]["priority"] == 3
+
+    def test_bulk_update_grievance_urgency(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-bulk-update-urgency",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            ),
+            {
+                "urgency": 2,
+                "grievance_ticket_ids": [str(self.bulk_grievance_ticket1.id), str(self.bulk_grievance_ticket2.id)],
+            },
+            format="json",
+        )
+
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert len(resp_data) == 2
+        assert resp_data[0]["urgency"] == 2
+        assert resp_data[1]["urgency"] == 2

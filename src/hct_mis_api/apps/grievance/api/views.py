@@ -39,13 +39,22 @@ from hct_mis_api.apps.grievance.api.mixins import (
     GrievancePermissionsMixin,
 )
 from hct_mis_api.apps.grievance.api.serializers.grievance_ticket import (
+    BulkGrievanceTicketsAddNoteSerializer,
+    BulkUpdateGrievanceTicketsAssigneesSerializer,
+    BulkUpdateGrievanceTicketsPrioritySerializer,
+    BulkUpdateGrievanceTicketsUrgencySerializer,
     CreateGrievanceTicketSerializer,
     GrievanceChoicesSerializer,
     GrievanceCreateNoteSerializer,
+    GrievanceDeleteHouseholdApproveStatusSerializer,
+    GrievanceHouseholdDataChangeApproveSerializer,
     GrievanceIndividualDataChangeApproveSerializer,
+    GrievanceNeedsAdjudicationApproveSerializer,
+    GrievanceReassignRoleSerializer,
     GrievanceStatusChangeSerializer,
     GrievanceTicketDetailSerializer,
     GrievanceTicketListSerializer,
+    GrievanceUpdateApproveStatusSerializer,
     TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
@@ -56,6 +65,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketNote,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
+from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
 from hct_mis_api.apps.grievance.services.data_change_services import (
     update_data_change_extras,
 )
@@ -75,8 +85,12 @@ from hct_mis_api.apps.grievance.services.ticket_creator_service import (
 from hct_mis_api.apps.grievance.services.ticket_status_changer_service import (
     TicketStatusChangerService,
 )
-from hct_mis_api.apps.grievance.utils import clear_cache
+from hct_mis_api.apps.grievance.utils import (
+    clear_cache,
+    validate_individual_for_need_adjudication,
+)
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
+from hct_mis_api.apps.household.models import HEAD, Household, IndividualRoleInHousehold
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 
@@ -161,6 +175,16 @@ class GrievanceTicketGlobalViewSet(
         "status_change": GrievanceStatusChangeSerializer,
         "create_note": GrievanceCreateNoteSerializer,
         "approve_individual_data_change": GrievanceIndividualDataChangeApproveSerializer,
+        "approve_household_data_change": GrievanceHouseholdDataChangeApproveSerializer,
+        "approve_status_update": GrievanceUpdateApproveStatusSerializer,
+        "approve_delete_household": GrievanceDeleteHouseholdApproveStatusSerializer,
+        "approve_needs_adjudication": GrievanceNeedsAdjudicationApproveSerializer,
+        "approve_payment_details": GrievanceUpdateApproveStatusSerializer,
+        "reassign_role": GrievanceReassignRoleSerializer,
+        "bulk_update_assignee": BulkUpdateGrievanceTicketsAssigneesSerializer,
+        "bulk_update_priority": BulkUpdateGrievanceTicketsPrioritySerializer,
+        "bulk_update_urgency": BulkUpdateGrievanceTicketsUrgencySerializer,
+        "bulk_add_note": BulkGrievanceTicketsAddNoteSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -192,6 +216,16 @@ class GrievanceTicketGlobalViewSet(
         "status_change": [Permissions.GRIEVANCES_SET_IN_PROGRESS, Permissions.GRIEVANCES_SET_ON_HOLD],
         "create_note": [Permissions.GRIEVANCES_ADD_NOTE],
         "approve_individual_data_change": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
+        "approve_household_data_change": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
+        "approve_status_update": [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+        "approve_delete_household": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
+        "approve_needs_adjudication": [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+        "approve_payment_details": [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION],
+        "reassign_role": [Permissions.GRIEVANCES_UPDATE],
+        "bulk_update_assignee": [Permissions.GRIEVANCES_UPDATE],
+        "bulk_update_priority": [Permissions.GRIEVANCES_UPDATE],
+        "bulk_update_urgency": [Permissions.GRIEVANCES_UPDATE],
+        "bulk_add_note": [Permissions.GRIEVANCES_UPDATE],
     }
     http_method_names = ["get", "post", "patch"]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -521,3 +555,355 @@ class GrievanceTicketGlobalViewSet(
         grievance_ticket.refresh_from_db()
 
         return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(
+        request=GrievanceHouseholdDataChangeApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
+    )
+    @action(detail=True, methods=["post"], url_path="approve-household-data-change")
+    def approve_household_data_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+        household_approve_data = input_data.get("household_approve_data")
+        flex_fields_approve_data = input_data.get("flex_fields_approve_data")
+
+        check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
+        # self.has_creator_or_owner_permission(
+        #     request,
+        #     grievance_ticket.business_area,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+        #     grievance_ticket.created_by == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+        #     grievance_ticket.assigned_to == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        # )  # FIXME
+
+        self.verify_approve_data(household_approve_data)
+        self.verify_approve_data(flex_fields_approve_data)
+        household_data_details = grievance_ticket.household_data_update_ticket_details
+        household_data = household_data_details.household_data
+        self.verify_approve_data_against_object_data(household_data, household_approve_data)
+        self.verify_approve_data_against_object_data(household_data.get("flex_fields"), flex_fields_approve_data)
+
+        for field_name, item in household_data.items():
+            if field_name == "flex_fields":
+                for flex_field_name in item.keys():
+                    household_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
+                        flex_field_name
+                    )
+            elif household_approve_data.get(field_name):
+                household_data[field_name]["approve_status"] = True
+            else:
+                household_data[field_name]["approve_status"] = False
+
+        household_data_details.household_data = household_data
+        household_data_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(request=GrievanceUpdateApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="approve-status-update")
+    def approve_status_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        action for approve_add_individual, approve_delete_individual, approve_system_flagging
+        """
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), grievance_ticket)
+        # if grievance_ticket.category in (
+        #         GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+        #         GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        # ):
+        #     self.has_creator_or_owner_permission(
+        #         request,
+        #         grievance_ticket.business_area,
+        #         Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+        #         grievance_ticket.created_by == info.context.user,
+        #         Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+        #         grievance_ticket.assigned_to == info.context.user,
+        #         Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        #     )
+        # else:
+        #     self.has_creator_or_owner_permission(
+        #         request,
+        #         grievance_ticket.business_area,
+        #         Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+        #         grievance_ticket.created_by == info.context.user,
+        #         Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+        #         grievance_ticket.assigned_to == info.context.user,
+        #         Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        #     ) # FIXME
+
+        ticket_details = grievance_ticket.ticket_details
+        ticket_details.approve_status = serializer.validated_data.get("approve_status")
+        ticket_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(
+        request=GrievanceDeleteHouseholdApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer}
+    )
+    @action(detail=True, methods=["post"], url_path="approve-delete-household")
+    def approve_delete_household(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        reason_hh_id = serializer.validated_data.get("reason_hh_id")
+
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), grievance_ticket)
+        # self.has_creator_or_owner_permission(
+        #     request,
+        #     grievance_ticket.business_area,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+        #     grievance_ticket.created_by == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+        #     grievance_ticket.assigned_to == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        # )  # FIXME
+
+        ticket_details = grievance_ticket.ticket_details
+
+        reason_hh_obj = None
+        reason_hh_id = reason_hh_id.strip() if reason_hh_id else None
+        if reason_hh_id:
+            # validate reason HH id
+            reason_hh_obj = get_object_or_404(
+                Household, unicef_id=reason_hh_id, program=ticket_details.household.program
+            )
+            if reason_hh_obj.withdrawn:
+                raise ValidationError(f"The provided household {reason_hh_obj.unicef_id} has to be active.")
+            if reason_hh_obj == ticket_details.household:
+                raise ValidationError(
+                    f"The provided household {reason_hh_obj.unicef_id} is the same as the one being withdrawn."
+                )
+
+        # update reason_household value
+        ticket_details.reason_household = reason_hh_obj  # set HH or None
+        ticket_details.approve_status = serializer.validated_data["approve_status"]
+        ticket_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(
+        request=GrievanceNeedsAdjudicationApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
+    )
+    @action(detail=True, methods=["post"], url_path="approve-needs-adjudication")
+    def approve_needs_adjudication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), grievance_ticket)
+        # self.has_creator_or_owner_permission(
+        #     request,
+        #     grievance_ticket.business_area,
+        #     Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+        #     grievance_ticket.created_by == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+        #     grievance_ticket.assigned_to == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        # )  # FIXME
+
+        duplicate_individuals = serializer.validated_data.get("duplicate_individual_ids", [])
+        distinct_individuals = serializer.validated_data.get("distinct_individual_ids", [])
+        clear_individuals = serializer.validated_data.get("clear_individual_ids", [])
+        selected_individual = serializer.validated_data.get("selected_individual_id")
+
+        if any(
+            [
+                duplicate_individuals and (selected_individual or distinct_individuals or clear_individuals),
+                clear_individuals and (duplicate_individuals or distinct_individuals or selected_individual),
+            ]
+        ):
+            log_and_raise("Only one option for duplicate or distinct or clear individuals is available")
+
+        if (
+            duplicate_individuals or distinct_individuals or selected_individual
+        ) and grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
+            raise ValidationError("A user can not flag individuals when a ticket is not in the 'For Approval' status")
+
+        user = request.user
+        partner = user.partner
+
+        ticket_details: TicketNeedsAdjudicationDetails = grievance_ticket.ticket_details
+
+        # using for old tickets
+        if selected_individual:
+            validate_individual_for_need_adjudication(partner, selected_individual, ticket_details)
+
+            ticket_details.selected_individual = selected_individual
+            ticket_details.role_reassign_data = {}
+
+        if clear_individuals:
+            # remove Individual from selected_individuals and selected_distinct
+            ticket_details.selected_individuals.remove(*clear_individuals)
+            ticket_details.selected_distinct.remove(*clear_individuals)
+
+        if distinct_individuals:
+            for individual in distinct_individuals:
+                validate_individual_for_need_adjudication(partner, individual, ticket_details)
+
+            ticket_details.selected_distinct.add(*distinct_individuals)
+            ticket_details.selected_individuals.remove(*distinct_individuals)
+
+        if duplicate_individuals:
+            for individual in duplicate_individuals:
+                validate_individual_for_need_adjudication(partner, individual, ticket_details)
+
+            ticket_details.selected_individuals.add(*duplicate_individuals)
+            ticket_details.selected_distinct.remove(*duplicate_individuals)
+
+        ticket_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @extend_schema(request=GrievanceUpdateApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="approve-payment-details")
+    def approve_payment_details(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), grievance_ticket)
+        # cls.has_creator_or_owner_permission(
+        #     info,
+        #     grievance_ticket.business_area,
+        #     Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
+        #     grievance_ticket.created_by == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
+        #     grievance_ticket.assigned_to == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
+        # )  # FIXME
+
+        if grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL:
+            log_and_raise("Payment Details changes can approve only for Grievance Ticket in status For Approval")
+
+        grievance_ticket.payment_verification_ticket_details.approve_status = serializer.validated_data[
+            "approve_status"
+        ]
+        grievance_ticket.payment_verification_ticket_details.save()
+        grievance_ticket.refresh_from_db()
+        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(request=GrievanceReassignRoleSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="reassign-role")
+    def reassign_role(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        household = serializer.validated_data["household_id"]
+        individual = serializer.validated_data["individual_id"]
+        role = serializer.validated_data["role"]
+
+        check_concurrency_version_in_mutation(serializer.validated_data.get("version"), grievance_ticket)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("household_version"), household)
+        check_concurrency_version_in_mutation(serializer.validated_data.get("individual_version"), individual)
+
+        ticket_details = grievance_ticket.ticket_details
+        if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
+            if ticket_details.is_multiple_duplicates_version:
+                ticket_individual = individual
+            else:
+                ticket_individual = ticket_details.selected_individual
+        elif grievance_ticket.category == GrievanceTicket.CATEGORY_SYSTEM_FLAGGING:
+            ticket_individual = ticket_details.golden_records_individual
+        else:
+            ticket_individual = ticket_details.individual
+        self.verify_if_role_exists(household, ticket_individual, role)
+
+        if role == HEAD:
+            role_data_key = role
+        else:
+            role_object = get_object_or_404(
+                IndividualRoleInHousehold,
+                individual=ticket_individual,
+                household=household,
+                role=role,
+            )
+            role_data_key = str(role_object.id)
+
+        ticket_details.role_reassign_data[role_data_key] = {
+            "role": role,
+            "household": str(household.pk),
+            "individual": str(individual.id),
+        }
+
+        if getattr(ticket_details, "is_multiple_duplicates_version", False):
+            ticket_details.role_reassign_data[role_data_key]["new_individual"] = str(
+                serializer.validated_data["new_individual_id"].pk
+            )
+        ticket_details.save()
+        grievance_ticket.refresh_from_db()
+        # return cls(household=household, individual=individual)
+        # TODO: check if we need to return here Ind and HH
+        # or Grievance Ticket
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @extend_schema(
+        request=BulkUpdateGrievanceTicketsAssigneesSerializer,
+        responses={202: GrievanceTicketDetailSerializer(many=True)},
+    )
+    @action(detail=False, methods=["post"], url_path="bulk-update-assignee")
+    def bulk_update_assignee(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tickets = BulkActionService().bulk_assign(
+            serializer.validated_data["grievance_ticket_ids"],
+            serializer.validated_data["assigned_to"],
+            self.business_area_slug,  # type: ignore
+        )
+        return Response(
+            GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @extend_schema(
+        request=BulkUpdateGrievanceTicketsPrioritySerializer,
+        responses={202: GrievanceTicketDetailSerializer(many=True)},
+    )
+    @action(detail=False, methods=["post"], url_path="bulk-update-priority")
+    def bulk_update_priority(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tickets = BulkActionService().bulk_set_priority(
+            serializer.validated_data["grievance_ticket_ids"],
+            serializer.validated_data["priority"],
+            self.business_area_slug,  # type: ignore
+        )
+        return Response(
+            GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    @extend_schema(
+        request=BulkUpdateGrievanceTicketsUrgencySerializer,
+        responses={202: GrievanceTicketDetailSerializer(many=True)},
+    )
+    @action(detail=False, methods=["post"], url_path="bulk-update-urgency")
+    def bulk_update_urgency(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tickets = BulkActionService().bulk_set_urgency(
+            serializer.validated_data["grievance_ticket_ids"],
+            serializer.validated_data["urgency"],
+            self.business_area_slug,  # type: ignore
+        )
+        return Response(
+            GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+    # def test_bulk_add_note() # TODO
