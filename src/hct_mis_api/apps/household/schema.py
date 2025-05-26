@@ -218,7 +218,7 @@ class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
         if self.number:
             data["number"] = self.number
         if self.financial_institution:
-            data["financial_institution"] = self.financial_institution.code
+            data["financial_institution"] = self.financial_institution.id
         return data
 
     class Meta:
