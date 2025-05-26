@@ -85,6 +85,7 @@ class FeedbackDetailSerializer(AdminUrlSerializerMixin, FeedbackListSerializer):
 
     class Meta(FeedbackListSerializer.Meta):
         fields = FeedbackListSerializer.Meta.fields + (  # type: ignore
+            "admin_url",
             "description",
             "area",
             "language",
