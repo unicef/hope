@@ -2030,8 +2030,6 @@ class PaymentDataCollector(Account):
         delivery_data = {}
         account = collector.accounts.filter(account_type=delivery_mechanism.account_type).first()
 
-        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-
         dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
         collector_country = collector.household and collector.household.country
         if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
@@ -2040,6 +2038,8 @@ class PaymentDataCollector(Account):
             dm_config = dm_configs.first()
         if not dm_config:
             return account.data if account else {}
+
+        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
 
         for field in dm_config.required_fields:
             if fsp_name_mapping := fsp_names_mappings.get(field, None):
