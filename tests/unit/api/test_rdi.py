@@ -106,7 +106,7 @@ class PushToRDITests(HOPEApiTestCase):
                             {
                                 "account_type": "bank",
                                 "number": "123",
-                                "financial_institution": self.fi.code,
+                                "financial_institution": self.fi.id,
                                 "data": {"field_name": "field_value"},
                             }
                         ],
@@ -141,7 +141,7 @@ class PushToRDITests(HOPEApiTestCase):
         account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
         self.assertIsNotNone(account)
         self.assertEqual(account.account_type.key, "bank")
-        self.assertEqual(account.financial_institution.code, self.fi.code)
+        self.assertEqual(account.financial_institution.id, self.fi.id)
         self.assertEqual(account.number, "123")
         self.assertEqual(account.data, {"field_name": "field_value"})
 

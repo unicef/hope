@@ -973,7 +973,7 @@ class TestAccountModel(TestCase):
                 "custom_ind_name": f"{dmd.individual.full_name} Custom",
                 "custom_hh_address": f"{self.hh.address} Custom",
                 "address": self.hh.address,
-                "financial_institution": "ABC",
+                "financial_institution": self.financial_institution.id,
             },
         )
 
