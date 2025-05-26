@@ -150,7 +150,7 @@ class TestFeedbackViewSet:
             for i, feedback in enumerate([self.feedback_1, self.feedback_2, self.feedback_3]):
                 feedback_result = response_results[i]
                 assert feedback_result["id"] == str(feedback.id)
-                assert feedback_result["issue_type"] == feedback.get_issue_type_display()
+                assert feedback_result["issue_type"] == feedback.issue_type
                 assert feedback_result["unicef_id"] == str(feedback.unicef_id)
                 assert feedback_result["household_unicef_id"] == (
                     str(feedback.household_lookup.unicef_id) if feedback.household_lookup else None
@@ -278,7 +278,7 @@ class TestFeedbackViewSet:
                 "id": str(self.area_1.id),
                 "name": "AREA_name",
             }
-            assert resp_data["issue_type"] == "Positive feedback"
+            assert resp_data["issue_type"] == "POSITIVE_FEEDBACK"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["individual_unicef_id"] is None
@@ -347,7 +347,7 @@ class TestFeedbackViewSet:
             resp_data = response.json()
             assert "id" in resp_data
             assert resp_data["admin2"] is None
-            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["issue_type"] == "NEGATIVE_FEEDBACK"
             assert resp_data["household_id"] is None
             assert resp_data["household_unicef_id"] is None
             assert resp_data["individual_unicef_id"] is None
@@ -395,7 +395,7 @@ class TestFeedbackViewSet:
                 "id": str(self.area_2.id),
                 "name": "Wroclaw",
             }
-            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["issue_type"] == "NEGATIVE_FEEDBACK"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["individual_unicef_id"] is not None
@@ -443,7 +443,7 @@ class TestFeedbackViewSet:
                 "id": str(self.area_2.id),
                 "name": "Wroclaw",
             }
-            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["issue_type"] == "NEGATIVE_FEEDBACK"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["individual_unicef_id"] is not None
@@ -480,7 +480,7 @@ class TestFeedbackViewSet:
             assert len(response_results) == 1
             feedback_result = response_results[0]
             assert feedback_result["id"] == str(self.feedback_1.id)
-            assert feedback_result["issue_type"] == self.feedback_1.get_issue_type_display()
+            assert feedback_result["issue_type"] == self.feedback_1.issue_type
             assert feedback_result["unicef_id"] == str(self.feedback_1.unicef_id)
             assert feedback_result["household_unicef_id"] == str(self.feedback_1.household_lookup.unicef_id)
             assert feedback_result["household_id"] == str(self.feedback_1.household_lookup.id)
@@ -622,7 +622,7 @@ class TestFeedbackViewSet:
                 "id": str(self.area_1.id),
                 "name": "AREA_name",
             }
-            assert resp_data["issue_type"] == "Positive feedback"
+            assert resp_data["issue_type"] == "POSITIVE_FEEDBACK"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["individual_unicef_id"] is not None

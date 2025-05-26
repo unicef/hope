@@ -48,7 +48,6 @@ class FeedbackMessageCreateSerializer(serializers.Serializer):
 
 
 class FeedbackListSerializer(serializers.ModelSerializer):
-    issue_type = serializers.CharField(source="get_issue_type_display")
     household_unicef_id = serializers.CharField(source="household_lookup.unicef_id", allow_null=True)
     household_id = serializers.CharField(source="household_lookup_id", allow_null=True)
     individual_unicef_id = serializers.CharField(source="individual_lookup.unicef_id", allow_null=True)
