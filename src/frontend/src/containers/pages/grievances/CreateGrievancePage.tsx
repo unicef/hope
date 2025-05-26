@@ -28,7 +28,6 @@ import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
   useAllEditPeopleFieldsQuery,
-  useAllProgramsForChoicesQuery,
   useCreateGrievanceMutation,
 } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
@@ -36,15 +35,16 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
 } from '@utils/constants';
-import { decodeIdString, thingForSpecificGrievanceType } from '@utils/utils';
+import { thingForSpecificGrievanceType } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -56,9 +56,6 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { first } from 'lodash';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
-import { createApiParams } from '@utils/apiUtils';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -130,21 +127,18 @@ const CreateGrievancePage = (): ReactElement => {
     partner: null,
     program: isAllPrograms ? '' : programId,
     comments: null,
-    linkedFeedbackId: linkedFeedbackId
-      ? decodeIdString(linkedFeedbackId)
-      : null,
+    linkedFeedbackId: linkedFeedbackId || null,
     documentation: [],
     individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
   };
 
-  const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<GrievanceTicketDetail>({
-      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
-    });
+  const { data: choicesData, isLoading: choicesLoading } = useQuery<any>({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
 

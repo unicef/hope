@@ -53,6 +53,7 @@ class TestFeedbackViewSet:
             language="test language 111",
             comments="test comments 111",
             issue_type="NEGATIVE_FEEDBACK",
+            admin2=self.area_1,
         )
         self.feedback_2 = FeedbackFactory(
             program=None,
@@ -163,7 +164,7 @@ class TestFeedbackViewSet:
             for i, feedback in enumerate([self.feedback_1, self.feedback_2, self.feedback_3]):
                 feedback_result = response_results[i]
                 assert feedback_result["id"] == str(feedback.id)
-                assert feedback_result["issue_type"] == feedback.get_issue_type_display()
+                assert feedback_result["issue_type"] == feedback.issue_type
                 assert feedback_result["unicef_id"] == str(feedback.unicef_id)
                 assert feedback_result["household_unicef_id"] == (
                     str(feedback.household_lookup.unicef_id) if feedback.household_lookup else None
@@ -240,7 +241,10 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["household_id"] is not None
             assert resp_data["individual_unicef_id"] is not None
@@ -252,6 +256,7 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area"
             assert resp_data["language"] == "test language"
             assert resp_data["comments"] == "test comments"
+            assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_2.id)}/change/"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -284,8 +289,11 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_201_CREATED
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "AREA_name"
-            assert resp_data["issue_type"] == "Positive feedback"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
+            assert resp_data["issue_type"] == "POSITIVE_FEEDBACK"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["individual_unicef_id"] is None
@@ -374,8 +382,8 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_201_CREATED
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] is None
-            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["admin2"] is None
+            assert resp_data["issue_type"] == "NEGATIVE_FEEDBACK"
             assert resp_data["household_id"] is None
             assert resp_data["household_unicef_id"] is None
             assert resp_data["individual_unicef_id"] is None
@@ -419,8 +427,11 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "Wroclaw"
-            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_2.id),
+                "name": "Wroclaw",
+            }
+            assert resp_data["issue_type"] == "NEGATIVE_FEEDBACK"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["individual_unicef_id"] is not None
@@ -508,8 +519,11 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "Wroclaw"
-            assert resp_data["issue_type"] == "Negative feedback"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_2.id),
+                "name": "Wroclaw",
+            }
+            assert resp_data["issue_type"] == "NEGATIVE_FEEDBACK"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["individual_unicef_id"] is not None
@@ -546,7 +560,7 @@ class TestFeedbackViewSet:
             assert len(response_results) == 1
             feedback_result = response_results[0]
             assert feedback_result["id"] == str(self.feedback_1.id)
-            assert feedback_result["issue_type"] == self.feedback_1.get_issue_type_display()
+            assert feedback_result["issue_type"] == self.feedback_1.issue_type
             assert feedback_result["unicef_id"] == str(self.feedback_1.unicef_id)
             assert feedback_result["household_unicef_id"] == str(self.feedback_1.household_lookup.unicef_id)
             assert feedback_result["household_id"] == str(self.feedback_1.household_lookup.id)
@@ -606,7 +620,10 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "AREA_name"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["household_id"] is not None
             assert resp_data["individual_unicef_id"] is not None
@@ -618,6 +635,7 @@ class TestFeedbackViewSet:
             assert resp_data["area"] == "test area 111"
             assert resp_data["language"] == "test language 111"
             assert resp_data["comments"] == "test comments 111"
+            assert resp_data["admin_url"] == f"/api/unicorn/accountability/feedback/{str(self.feedback_1.id)}/change/"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -651,6 +669,15 @@ class TestFeedbackViewSet:
             assert resp_data["program_name"] == "Test Active Program"
             assert resp_data["description"] == "Description per Program Create"
             assert resp_data["comments"] == "New comments per Program Create"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
+            assert resp_data["area"] == "Area new"
+            assert resp_data["language"] == "polish_english"
+            assert resp_data["issue_type"] == "POSITIVE_FEEDBACK"
+            assert resp_data["individual_unicef_id"] == str(self.individual_1.unicef_id)
+            assert resp_data["individual_id"] == str(self.individual_1.id)
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -681,8 +708,11 @@ class TestFeedbackViewSet:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
             assert "id" in resp_data
-            assert resp_data["admin2_name"] == "AREA_name"
-            assert resp_data["issue_type"] == "Positive feedback"
+            assert resp_data["admin2"] == {
+                "id": str(self.area_1.id),
+                "name": "AREA_name",
+            }
+            assert resp_data["issue_type"] == "POSITIVE_FEEDBACK"
             assert resp_data["household_id"] is not None
             assert resp_data["household_unicef_id"] is not None
             assert resp_data["individual_unicef_id"] is not None

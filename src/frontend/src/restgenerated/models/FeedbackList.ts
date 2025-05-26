@@ -3,17 +3,18 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FeedbackMessage } from './FeedbackMessage';
+import type { IssueTypeEnum } from './IssueTypeEnum';
 export type FeedbackList = {
     readonly id: string;
     unicefId?: string | null;
-    issueType: string;
-    readonly householdUnicefId: string | null;
-    readonly householdId: string | null;
-    readonly individualUnicefId: string | null;
-    readonly individualId: string | null;
+    issueType: IssueTypeEnum;
+    householdUnicefId: string | null;
+    householdId: string | null;
+    individualUnicefId: string | null;
+    individualId: string | null;
     readonly linkedGrievanceId: string | null;
-    readonly linkedGrievanceUnicefId: string | null;
-    readonly programName: string | null;
+    linkedGrievanceUnicefId: string | null;
+    programName: string | null;
     readonly programId: string | null;
     readonly createdBy: string;
     readonly createdAt: string;

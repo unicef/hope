@@ -1302,8 +1302,15 @@ export function deepUnderscore(data) {
     return _.reduce(
       data,
       (result, value, key) => {
-        const underscoreKey = _.snakeCase(key);
-        result[underscoreKey] = deepUnderscore(value);
+        // Special handling for keys that follow the pattern of letters followed by numbers
+        if (/^[a-zA-Z]+\d+$/.test(key)) {
+          // Keep original key for letter+number pattern fields
+          result[key] = deepUnderscore(value);
+        } else {
+          // Normal snake_case conversion for other fields
+          const underscoreKey = _.snakeCase(key);
+          result[underscoreKey] = deepUnderscore(value);
+        }
         return result;
       },
       {},

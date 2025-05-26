@@ -4,11 +4,12 @@ import { FiltersSection } from '@core/FiltersSection';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { useFeedbackIssueTypeChoicesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
+import { useQuery } from '@tanstack/react-query';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,9 +32,16 @@ const FeedbackFilters = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { businessArea } = useBaseUrl();
   const { isAllPrograms } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useFeedbackIssueTypeChoicesQuery();
+
+  const { data: choicesData, isLoading: choicesLoading } = useQuery<any>({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -114,16 +122,16 @@ const FeedbackFilters = ({
           <DatePickerFilter
             topLabel={t('Creation Date')}
             label="From"
-            onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
-            value={filter.createdAtRangeMin}
+            onChange={(date) => handleFilterChange('createdAtBefore', date)}
+            value={filter.createdAtBefore}
             dataCy="filters-creation-date-from"
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             label={t('To')}
-            onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
-            value={filter.createdAtRangeMax}
+            onChange={(date) => handleFilterChange('createdAtAfter', date)}
+            value={filter.createdAtAfter}
             dataCy="filters-creation-date-to"
           />
         </Grid>
