@@ -1,6 +1,6 @@
-from typing import Any, Dict
+from typing import Any
 
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import AbstractUser
 from django.db.models import Case, DateField, F, QuerySet, When
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -10,7 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -22,9 +22,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
-from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.utils import create_grievance_documents, update_grievance_documents, delete_grievance_documents
-from hct_mis_api.apps.grievance.validators import validate_grievance_documents_size
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -37,16 +34,28 @@ from hct_mis_api.apps.core.api.mixins import (
 )
 from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
-from hct_mis_api.apps.grievance.api.mixins import GrievancePermissionsMixin
+from hct_mis_api.apps.grievance.api.mixins import (
+    GrievanceMutationMixin,
+    GrievancePermissionsMixin,
+)
 from hct_mis_api.apps.grievance.api.serializers.grievance_ticket import (
     CreateGrievanceTicketSerializer,
     GrievanceChoicesSerializer,
+    GrievanceCreateNoteSerializer,
+    GrievanceIndividualDataChangeApproveSerializer,
+    GrievanceStatusChangeSerializer,
     GrievanceTicketDetailSerializer,
     GrievanceTicketListSerializer,
+    TicketNoteSerializer,
     UpdateGrievanceTicketSerializer,
 )
 from hct_mis_api.apps.grievance.filters import GrievanceTicketFilter
-from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+    TicketNote,
+)
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.services.data_change_services import (
     update_data_change_extras,
 )
@@ -63,201 +72,12 @@ from hct_mis_api.apps.grievance.services.ticket_creator_service import (
     TicketCreatorService,
     TicketDetailsCreatorFactory,
 )
+from hct_mis_api.apps.grievance.services.ticket_status_changer_service import (
+    TicketStatusChangerService,
+)
+from hct_mis_api.apps.grievance.utils import clear_cache
+from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.utils.exceptions import log_and_raise
-
-
-def verify_required_arguments(input_data: Dict, field_name: str, options: Dict) -> None:
-    from hct_mis_api.apps.core.utils import nested_dict_get
-
-    for key, value in options.items():
-        if key != input_data.get(field_name):
-            continue
-        for required in value.get("required"):
-            if nested_dict_get(input_data, required) is None:
-                log_and_raise(f"You have to provide {required} in {key}")
-        for not_allowed in value.get("not_allowed"):
-            if nested_dict_get(input_data, not_allowed) is not None:
-                log_and_raise(f"You can't provide {not_allowed} in {key}")
-
-
-GRV_CREATE_CATEGORY_OPTIONS = {
-    GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: {
-        "required": [],
-        "not_allowed": [
-            "extras.category.sensitive_grievance_ticket_extras",
-            "extras.category.grievance_complaint_ticket_extras",
-        ],
-    },
-    GrievanceTicket.CATEGORY_DATA_CHANGE: {
-        "required": [],
-        "not_allowed": [
-            "extras.category.sensitive_grievance_ticket_extras",
-            "extras.category.grievance_complaint_ticket_extras",
-        ],
-    },
-    GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: {
-        "required": ["issue_type"],
-        "not_allowed": ["extras.category.grievance_complaint_ticket_extras"],
-    },
-    GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: {
-        "required": ["issue_type"],
-        "not_allowed": ["extras.category.sensitive_grievance_ticket_extras"],
-    },
-    GrievanceTicket.CATEGORY_REFERRAL: {
-        "required": [],
-        "not_allowed": [
-            "extras.category.sensitive_grievance_ticket_extras",
-            "extras.category.grievance_complaint_ticket_extras",
-        ],
-    },
-    GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: {
-        "required": [],
-        "not_allowed": [
-            "extras.category.sensitive_grievance_ticket_extras",
-            "extras.category.grievance_complaint_ticket_extras",
-        ],
-    },
-    GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: {
-        "required": [],
-        "not_allowed": [
-            "extras.category.sensitive_grievance_ticket_extras",
-            "extras.category.grievance_complaint_ticket_extras",
-        ],
-    },
-}
-
-
-GRV_CREATE_ISSUE_TYPE_OPTIONS = {
-    GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
-        "required": ["extras.issue_type.household_data_update_issue_type_extras"],
-        "not_allowed": [
-            "individual_data_update_issue_type_extras",
-            "individual_delete_issue_type_extras",
-        ],
-    },
-    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {
-        "required": ["extras.issue_type.household_delete_issue_type_extras"],
-        "not_allowed": [
-            "household_data_update_issue_type_extras",
-            "individual_data_update_issue_type_extras",
-        ],
-    },
-    GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
-        "required": ["extras.issue_type.individual_data_update_issue_type_extras"],
-        "not_allowed": [
-            "household_data_update_issue_type_extras",
-            "individual_delete_issue_type_extras",
-        ],
-    },
-    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
-        "required": ["extras.issue_type.add_individual_issue_type_extras"],
-        "not_allowed": [
-            "household_data_update_issue_type_extras",
-            "individual_data_update_issue_type_extras",
-            "individual_delete_issue_type_extras",
-        ],
-    },
-    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
-        "required": ["extras.issue_type.individual_delete_issue_type_extras"],
-        "not_allowed": [
-            "household_data_update_issue_type_extras",
-            "individual_data_update_issue_type_extras",
-        ],
-    },
-    GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_FRAUD_MISUSE: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_HARASSMENT: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_GROSS_MISMANAGEMENT: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_PERSONAL_DISPUTES: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: {"required": [], "not_allowed": []},
-}
-
-
-GRV_UPDATE_EXTRAS_OPTIONS = {
-    GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
-        "required": ["extras.household_data_update_issue_type_extras"],
-        "not_allowed": [
-            "individual_data_update_issue_type_extras",
-            "add_individual_issue_type_extras",
-        ],
-    },
-    GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
-        "required": ["extras.individual_data_update_issue_type_extras"],
-        "not_allowed": [
-            "household_data_update_issue_type_extras",
-            "add_individual_issue_type_extras",
-        ],
-    },
-    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
-        "required": ["extras.add_individual_issue_type_extras"],
-        "not_allowed": [
-            "household_data_update_issue_type_extras",
-            "individual_data_update_issue_type_extras",
-        ],
-    },
-    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_FRAUD_MISUSE: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_HARASSMENT: {"required": [], "not_allowed": []},
-    GrievanceTicket.ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_GROSS_MISMANAGEMENT: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_PERSONAL_DISPUTES: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: {
-        "required": [],
-        "not_allowed": [],
-    },
-    GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: {"required": [], "not_allowed": []},
-}
 
 
 class GrievanceTicketViewSet(
@@ -318,85 +138,6 @@ class GrievanceTicketViewSet(
         return super().list(request, *args, **kwargs)
 
 
-def update_basic_data(approver: User, input_data: Dict, grievance_ticket: GrievanceTicket) -> GrievanceTicket:
-    messages = []
-
-    if ids_to_delete := input_data.pop("documentation_to_delete", None):
-        delete_grievance_documents(grievance_ticket.id, ids_to_delete)
-
-    if documents_to_update := input_data.pop("documentation_to_update", None):
-        validate_grievance_documents_size(grievance_ticket.id, documents_to_update, is_updated=True)
-        update_grievance_documents(documents_to_update)
-
-    if documents := input_data.pop("documentation", None):
-        validate_grievance_documents_size(grievance_ticket.id, documents)
-        create_grievance_documents(approver, grievance_ticket, documents)
-
-    priority = input_data.pop("priority", grievance_ticket.priority)
-    if priority != grievance_ticket.priority:
-        grievance_ticket.priority = priority
-
-    urgency = input_data.pop("urgency", grievance_ticket.urgency)
-    if urgency != grievance_ticket.urgency:
-        grievance_ticket.urgency = urgency
-
-    if partner := input_data.pop("partner", None):
-        grievance_ticket.partner = partner
-
-    if program := input_data.pop("program", None):
-        grievance_ticket.programs.add(program)
-
-    assigned_to = input_data.pop("assigned_to", None)
-
-    if admin := input_data.pop("admin", None):
-        grievance_ticket.admin2 = admin
-
-    linked_tickets = input_data.pop("linked_tickets", [])
-    grievance_ticket.linked_tickets.set(linked_tickets)
-    grievance_ticket.user_modified = timezone.now()
-
-    for field, value in input_data.items():
-        current_value = getattr(grievance_ticket, field, None)
-        if not current_value:
-            setattr(grievance_ticket, field, value)
-
-    if assigned_to != grievance_ticket.assigned_to:
-        messages.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED))
-
-        if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
-            grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
-
-        if grievance_ticket.status == GrievanceTicket.STATUS_ON_HOLD:
-            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-
-        if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-            grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-            messages.append(
-                GrievanceNotification(
-                    grievance_ticket,
-                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                    approver=approver,
-                )
-            )
-
-        grievance_ticket.assigned_to = assigned_to
-    elif grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
-        grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-        messages.append(
-            GrievanceNotification(
-                grievance_ticket,
-                GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
-                approver=approver,
-            )
-        )
-
-    grievance_ticket.save()
-    grievance_ticket.refresh_from_db()
-
-    GrievanceNotification.send_all_notifications(messages)
-    return grievance_ticket
-
-
 class GrievanceTicketGlobalViewSet(
     BusinessAreaVisibilityMixin,
     GrievancePermissionsMixin,
@@ -407,6 +148,8 @@ class GrievanceTicketGlobalViewSet(
     CreateModelMixin,
     UpdateModelMixin,
     BaseViewSet,
+    GrievanceMutationMixin,
+    DataChangeValidator,
 ):
     queryset = GrievanceTicket.objects.all()
     serializer_classes_by_action = {
@@ -415,6 +158,9 @@ class GrievanceTicketGlobalViewSet(
         "choices": GrievanceChoicesSerializer,
         "create": CreateGrievanceTicketSerializer,
         "partial_update": UpdateGrievanceTicketSerializer,
+        "status_change": GrievanceStatusChangeSerializer,
+        "create_note": GrievanceCreateNoteSerializer,
+        "approve_individual_data_change": GrievanceIndividualDataChangeApproveSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -443,6 +189,9 @@ class GrievanceTicketGlobalViewSet(
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
         "partial_update": [Permissions.GRIEVANCES_UPDATE],
+        "status_change": [Permissions.GRIEVANCES_SET_IN_PROGRESS, Permissions.GRIEVANCES_SET_ON_HOLD],
+        "create_note": [Permissions.GRIEVANCES_ADD_NOTE],
+        "approve_individual_data_change": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
     }
     http_method_names = ["get", "post", "patch"]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -489,13 +238,15 @@ class GrievanceTicketGlobalViewSet(
 
         if program := serializer.validated_data.get("program"):
             if not check_permissions(
-                    self.request.user, self.get_permissions_for_action(), business_area=self.business_area,
-                    program=program.slug
+                self.request.user,
+                self.get_permissions_for_action(),
+                business_area=self.business_area,
+                program=program.slug,
             ):
                 raise PermissionDenied
 
         if serializer.validated_data.get("documentation"):
-            request.user.has_perm(Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)
+            request.user.has_perm(Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)  # type: ignore
 
         user: AbstractUser = request.user  # type: ignore
         input_data = serializer.validated_data
@@ -506,9 +257,9 @@ class GrievanceTicketGlobalViewSet(
         ):
             raise ValidationError("Feedback tickets are not allowed to be created through this mutation.")
 
-        verify_required_arguments(input_data, "category", GRV_CREATE_CATEGORY_OPTIONS)
+        self.verify_required_arguments(input_data, "category", self.CREATE_CATEGORY_OPTIONS)
         if input_data.get("issue_type"):
-            verify_required_arguments(input_data, "issue_type", GRV_CREATE_ISSUE_TYPE_OPTIONS)
+            self.verify_required_arguments(input_data, "issue_type", self.CREATE_ISSUE_TYPE_OPTIONS)
 
         details_creator = TicketDetailsCreatorFactory.get_for_category(input_data.get("category"))
         creator = TicketCreatorService(details_creator)
@@ -528,8 +279,10 @@ class GrievanceTicketGlobalViewSet(
         if program := grievance_ticket.programs.first():
             # TODO: check with many programs in GRV
             if not check_permissions(
-                    self.request.user, self.get_permissions_for_action(), business_area=self.business_area,
-                    program=program.slug
+                self.request.user,
+                self.get_permissions_for_action(),
+                business_area=self.business_area,
+                program=program.slug,
             ):
                 raise PermissionDenied
 
@@ -549,10 +302,10 @@ class GrievanceTicketGlobalViewSet(
             raise ValidationError("Grievance Ticket in status Closed is not editable")
 
         if grievance_ticket.issue_type:
-            verify_required_arguments(input_data, "issue_type", GRV_UPDATE_EXTRAS_OPTIONS)
+            self.verify_required_arguments(input_data, "issue_type", self.UPDATE_EXTRAS_OPTIONS)
 
         extras = input_data.pop("extras", {})
-        grievance_ticket = update_basic_data(user, input_data, grievance_ticket)
+        grievance_ticket = self.update_basic_data(user, input_data, grievance_ticket)  # type: ignore
 
         update_extra_methods = {
             GrievanceTicket.CATEGORY_REFERRAL: update_referral_service,
@@ -586,3 +339,185 @@ class GrievanceTicketGlobalViewSet(
         )
         resp = GrievanceTicketDetailSerializer(grievance_ticket)
         return Response(resp.data, status.HTTP_200_OK)
+
+    @extend_schema(request=GrievanceStatusChangeSerializer, responses={202: GrievanceTicketDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="status-change")
+    def status_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(grievance_ticket, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+
+        user = request.user
+        new_status = input_data["status"]
+        notifications = []
+        old_grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket.pk)
+        check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
+        if grievance_ticket.category in (
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+        ):
+            raise ValidationError("Feedback tickets are not allowed to be created through this mutation.")
+
+        if grievance_ticket.status == new_status:
+            return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+
+        # if permissions_to_use := self.get_permissions(new_status, grievance_ticket.status, grievance_ticket.is_feedback):
+        #     self.has_creator_or_owner_permission(
+        #         request,
+        #         grievance_ticket.business_area,
+        #         permissions_to_use[0],
+        #         grievance_ticket.created_by == user,
+        #         permissions_to_use[1],
+        #         grievance_ticket.assigned_to == user,
+        #         permissions_to_use[2],
+        #     )  # FIXME
+
+        if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
+            request.user.has_perm(Permissions.GRIEVANCE_ASSIGN, grievance_ticket.business_area)  # type: ignore
+            notifications.append(
+                GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
+            )
+        if new_status == GrievanceTicket.STATUS_CLOSED:
+            if isinstance(grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails):
+                partner = user.partner
+
+                for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
+                    if not partner.has_area_access(
+                        area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                    ):
+                        raise PermissionDenied("Permission Denied: User does not have access to close ticket")
+
+        if not grievance_ticket.can_change_status(new_status):
+            log_and_raise("New status is incorrect")
+        status_changer = TicketStatusChangerService(grievance_ticket, user)  # type: ignore
+        status_changer.change_status(new_status)
+
+        grievance_ticket.refresh_from_db()
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+            notifications.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
+
+        if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
+            clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
+
+        if (
+            old_grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
+            and grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+        ):
+            notifications.append(
+                GrievanceNotification(
+                    grievance_ticket,
+                    GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS,
+                    approver=user,
+                )
+            )
+        log_create(
+            GrievanceTicket.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            grievance_ticket.programs.all(),
+            old_grievance_ticket,
+            grievance_ticket,
+        )
+
+        GrievanceNotification.send_all_notifications(notifications)
+        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(request=GrievanceCreateNoteSerializer, responses={201: TicketNoteSerializer})
+    @action(detail=True, methods=["post"], url_path="create-note")
+    def create_note(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+        user = request.user
+
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
+        # self.has_creator_or_owner_permission(
+        #     request=request,
+        #     grievance_ticket.business_area,
+        #     Permissions.GRIEVANCES_ADD_NOTE,
+        #     grievance_ticket.created_by == user,
+        #     Permissions.GRIEVANCES_ADD_NOTE_AS_CREATOR,
+        #     grievance_ticket.assigned_to == user,
+        #     Permissions.GRIEVANCES_ADD_NOTE_AS_OWNER,
+        # )  # FIXME
+
+        description = input_data["description"]
+        ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=user)
+        notification = GrievanceNotification(
+            grievance_ticket,
+            GrievanceNotification.ACTION_NOTES_ADDED,
+            created_by=user,
+            ticket_note=ticket_note,
+        )
+        notification.send_email_notification()
+
+        return Response(TicketNoteSerializer(ticket_note).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request=GrievanceIndividualDataChangeApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
+    )
+    @action(detail=True, methods=["post"], url_path="approve-individual-data-change")
+    def approve_individual_data_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        grievance_ticket = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+        individual_approve_data = input_data.get("individual_approve_data")
+        flex_fields_approve_data = input_data.get("flex_fields_approve_data")
+
+        check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
+        # self.has_creator_or_owner_permission(
+        #     request,
+        #     grievance_ticket.business_area,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+        #     grievance_ticket.created_by == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+        #     grievance_ticket.assigned_to == info.context.user,
+        #     Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        # )  # FIXME
+
+        self.verify_approve_data(individual_approve_data)
+        self.verify_approve_data(flex_fields_approve_data)
+        individual_data_details = grievance_ticket.individual_data_update_ticket_details
+        individual_data = individual_data_details.individual_data
+        if individual_approve_data:
+            self.verify_approve_data_against_object_data(individual_data, individual_approve_data)
+        if flex_fields_approve_data:
+            self.verify_approve_data_against_object_data(individual_data.get("flex_fields"), flex_fields_approve_data)
+
+        documents_mapping = {
+            "documents": input_data.get("approved_documents_to_create", []),
+            "documents_to_remove": input_data.get("approved_documents_to_remove", []),
+            "documents_to_edit": input_data.get("approved_documents_to_edit", []),
+            "identities": input_data.get("approved_identities_to_create", []),
+            "identities_to_remove": input_data.get("approved_identities_to_remove", []),
+            "identities_to_edit": input_data.get("approved_identities_to_edit", []),
+            "payment_channels": input_data.get("approved_payment_channels_to_create", []),
+            "payment_channels_to_remove": input_data.get("approved_payment_channels_to_remove", []),
+            "payment_channels_to_edit": input_data.get("approved_payment_channels_to_edit", []),
+        }
+
+        for field_name, item in individual_data.items():
+            field_to_approve = individual_approve_data.get(field_name)
+            if field_name in documents_mapping:
+                for index, document_data in enumerate(individual_data[field_name]):
+                    approved_documents_indexes = documents_mapping.get(field_name, [])
+                    document_data["approve_status"] = index in approved_documents_indexes
+            elif field_name == "flex_fields":
+                for flex_field_name in item.keys():
+                    individual_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
+                        flex_field_name
+                    )
+            elif field_to_approve:
+                individual_data[field_name]["approve_status"] = True
+            else:
+                individual_data[field_name]["approve_status"] = False
+
+        individual_data_details.individual_data = individual_data
+        individual_data_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
