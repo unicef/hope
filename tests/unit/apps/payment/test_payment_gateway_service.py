@@ -664,7 +664,7 @@ class TestPaymentGatewayService(APITestCase):
                             "service_provider_code": "CBA",
                             "number": "123456789",
                             "provider": "Provider",
-                            "financial_institution": fi.id,
+                            "financial_institution": str(fi.id),
                         },
                     },
                     "extra_data": {},
