@@ -131,7 +131,13 @@ class TestHouseholdList:
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
             }
-            assert household_result["program"] == household.program.name
+            assert household_result["program"] == {
+                "id": str(household.program.id),
+                "name": household.program.name,
+                "slug": household.program.slug,
+                "programme_code": household.program.programme_code,
+                "status": household.program.status,
+            }
             assert household_result["status"] == household.status
             assert household_result["size"] == household.size
             assert household_result["residence_status"] == household.residence_status
@@ -820,7 +826,13 @@ class TestHouseholdGlobalViewSet:
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
             }
-            assert household_result_first["program"] == household.program.name
+            assert household_result_first["program"] == {
+                "id": str(household.program.id),
+                "name": household.program.name,
+                "slug": household.program.slug,
+                "programme_code": household.program.programme_code,
+                "status": household.program.status,
+            }
             assert household_result_first["status"] == household.status
             assert household_result_first["size"] == household.size
             assert household_result_first["residence_status"] == household.residence_status
