@@ -702,12 +702,12 @@ class AccountTypeAdmin(HOPEModelAdminBase):
 @admin.register(FinancialInstitution)
 class FinancialInstitutionAdmin(HOPEModelAdminBase):
     list_display = (
-        "code",
+        "id",
         "name",
         "type",
         "country",
     )
-    search_fields = ("code", "name")
+    search_fields = ("id", "name")
     list_filter = (
         ("country", AutoCompleteFilter),
         "type",
@@ -742,8 +742,8 @@ class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
     )
     search_fields = (
         "code",
-        "finanacial_institution__code",
-        "finanacial_institution__name",
+        "financial_institution__id",
+        "financial_institution__name",
         "financial_service_provider__name",
         "financial_service_provider__vision_vendor_number",
     )

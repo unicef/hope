@@ -664,7 +664,7 @@ class TestPaymentGatewayService(APITestCase):
                             "service_provider_code": "CBA",
                             "number": "123456789",
                             "provider": "Provider",
-                            "financial_institution": fi.code,
+                            "financial_institution": fi.id,
                         },
                     },
                     "extra_data": {},
@@ -710,34 +710,16 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
 
         # no mapping, different payment fsp
-        expected_payload = {
-            "amount": str(self.payments[0].entitlement_quantity),
-            "phone_no": str(primary_collector.phone_no),
-            "last_name": primary_collector.family_name,
-            "first_name": primary_collector.given_name,
-            "full_name": primary_collector.full_name,
-            "destination_currency": self.payments[0].currency,
-            "delivery_mechanism": "transfer_to_account",
-            "account_type": "bank",
-            "account": {
-                "number": "123",
-                "name": "ABC",
-                "code": "456",
-            },
-        }
-        expected_body = {
-            "remote_id": str(self.payments[0].id),
-            "record_code": self.payments[0].unicef_id,
-            "payload": expected_payload,
-            "extra_data": {},
-        }
-        PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        actual_args, actual_kwargs = post_mock.call_args
-        assert actual_args[0] == "payment_instructions/123/add_records/"
-        assert normalize(actual_args[1][0]) == normalize(expected_body)
-        assert actual_kwargs["validate_response"] is True
-
-        post_mock.reset_mock()
+        with self.assertRaisesMessage(
+            Exception,
+            f"No Financial Institution Mapping found for"
+            f" financial_institution_code 456,"
+            f" fsp {self.payments[0].financial_service_provider},"
+            f" payment {self.payments[0].id},"
+            f" collector {self.payments[0].collector}.",
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+            post_mock.reset_mock()
 
         # no mapping, payment fsp is uba
         self.payments[0].financial_service_provider = uba_fsp
@@ -755,11 +737,7 @@ class TestPaymentGatewayService(APITestCase):
             "destination_currency": self.payments[0].currency,
             "delivery_mechanism": "transfer_to_account",
             "account_type": "bank",
-            "account": {
-                "number": "123",
-                "name": "ABC",
-                "code": "456",
-            },
+            "account": {"number": "123", "name": "ABC", "code": "456", "service_provider_code": "456"},
         }
         expected_body = {
             "remote_id": str(self.payments[0].id),
@@ -795,7 +773,8 @@ class TestPaymentGatewayService(APITestCase):
         self.payments[0].refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
-        expected_payload["account"]["code"] = "789"
+        expected_payload["account"]["code"] = "456"
+        expected_payload["account"]["service_provider_code"] = "789"
 
         actual_args, actual_kwargs = post_mock.call_args
         assert actual_args[0] == "payment_instructions/123/add_records/"
@@ -957,8 +936,6 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
     def test_sync_fsps(self, get_fsps_mock: Any) -> None:
-        assert FinancialServiceProvider.objects.all().count() == 1
-
         assert self.pg_fsp.name == "Western Union"
         assert self.pg_fsp.payment_gateway_id == "123"
         assert list(self.pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter"]

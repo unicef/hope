@@ -65,6 +65,7 @@ from hct_mis_api.apps.utils.models import (
     MergeStatusModel,
     PendingManager,
     SignatureMixin,
+    TimeStampedModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -1883,28 +1884,21 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-class FinancialInstitution(TimeStampedUUIDModel):
+class FinancialInstitution(TimeStampedModel):
     class FinancialInstitutionType(models.TextChoices):
         BANK = "bank", "Bank"
         TELCO = "telco", "Telco"
         OTHER = "other", "Other"
 
-    code = models.BigIntegerField(unique=True, null=True, editable=False)
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        super().save(*args, **kwargs)
-        if self._state.adding or self.code is None:
-            # due to existence of "CREATE TRIGGER" in migrations
-            self.refresh_from_db(fields=["code"])
-
     def __str__(self) -> str:
-        return f"{self.code} - {self.name}: {self.type}"  # pragma: no cover
+        return f"{self.id} {self.name}: {self.type}"  # pragma: no cover
 
 
-class FinancialInstitutionMapping(TimeStampedUUIDModel):
+class FinancialInstitutionMapping(TimeStampedModel):
     financial_service_provider = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE)
     financial_institution = models.ForeignKey(FinancialInstitution, on_delete=models.CASCADE)
     code = models.CharField(max_length=30)
@@ -2064,7 +2058,7 @@ class PaymentDataCollector(Account):
             if account.number:
                 delivery_data["number"] = account.number
             if account.financial_institution:
-                delivery_data["financial_institution"] = account.financial_institution.code
+                delivery_data["financial_institution"] = account.financial_institution.id
 
         return delivery_data
 
