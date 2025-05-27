@@ -4,24 +4,18 @@ from typing import Dict, List
 from django.contrib.auth.models import AbstractUser
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.data_change.add_individual_service import (
-    AddIndividualService,
-)
-from hct_mis_api.apps.grievance.services.data_change.data_change_service import (
-    DataChangeService,
-)
-from hct_mis_api.apps.grievance.services.data_change.household_data_update_service import (
-    HouseholdDataUpdateService,
-)
-from hct_mis_api.apps.grievance.services.data_change.household_delete_service import (
-    HouseholdDeleteService,
-)
-from hct_mis_api.apps.grievance.services.data_change.individual_dalete_service import (
-    IndividualDeleteService,
-)
-from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
-    IndividualDataUpdateService,
-)
+from hct_mis_api.apps.grievance.services.data_change.add_individual_service import \
+    AddIndividualService
+from hct_mis_api.apps.grievance.services.data_change.data_change_service import \
+    DataChangeService
+from hct_mis_api.apps.grievance.services.data_change.household_data_update_service import \
+    HouseholdDataUpdateService
+from hct_mis_api.apps.grievance.services.data_change.household_delete_service import \
+    HouseholdDeleteService
+from hct_mis_api.apps.grievance.services.data_change.individual_dalete_service import \
+    IndividualDeleteService
+from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import \
+    IndividualDataUpdateService
 
 logger = logging.getLogger(__name__)
 

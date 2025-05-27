@@ -1,8 +1,11 @@
 import csv
 import logging
 from collections import defaultdict, namedtuple
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Type, Union
+from typing import (TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Type,
+                    Union)
 
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
@@ -14,19 +17,15 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
-
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
 from jsoneditor.forms import JSONEditor
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.admin.ad import ADUSerMixin
-from hct_mis_api.apps.account.admin.filters import BusinessAreaFilter, HasKoboAccount
-from hct_mis_api.apps.account.admin.forms import (
-    AddRoleForm,
-    HopeUserCreationForm,
-    ImportCSVForm,
-)
+from hct_mis_api.apps.account.admin.filters import (BusinessAreaFilter,
+                                                    HasKoboAccount)
+from hct_mis_api.apps.account.admin.forms import (AddRoleForm,
+                                                  HopeUserCreationForm,
+                                                  ImportCSVForm)
 from hct_mis_api.apps.account.admin.mixins import KoboAccessMixin
 from hct_mis_api.apps.account.admin.user_role import RoleAssignmentInline
 from hct_mis_api.apps.account.models import Partner

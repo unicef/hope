@@ -3,54 +3,40 @@ import logging
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Union
 
+from dateutil.parser import parse
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
-
-from dateutil.parser import parse
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import (
-    KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
-    get_field_name,
-    get_submission_metadata,
-)
+    KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name, get_submission_metadata)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import chunks, rename_dict_keys
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.models import Country as GeoCountry
 from hct_mis_api.apps.household.models import (
-    HEAD,
-    NON_BENEFICIARY,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    DocumentType,
-    PendingBankAccountInfo,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold,
-)
+    HEAD, NON_BENEFICIARY, ROLE_ALTERNATE, ROLE_PRIMARY, DocumentType,
+    PendingBankAccountInfo, PendingDocument, PendingHousehold,
+    PendingIndividual, PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold)
 from hct_mis_api.apps.payment.models import Account
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.registration_data.models import (
-    ImportData,
-    KoboImportedSubmission,
-    RegistrationDataImport,
-)
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
-    RdiBaseCreateTask,
-)
+from hct_mis_api.apps.periodic_data_update.utils import \
+    populate_pdu_with_null_values
+from hct_mis_api.apps.registration_data.models import (ImportData,
+                                                       KoboImportedSubmission,
+                                                       RegistrationDataImport)
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import \
+    DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import \
+    RdiBaseCreateTask
 from hct_mis_api.apps.registration_datahub.utils import (
-    calculate_hash_for_kobo_submission,
-    find_attachment_in_kobo,
-)
-from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
+    calculate_hash_for_kobo_submission, find_attachment_in_kobo)
+from hct_mis_api.apps.utils.age_at_registration import \
+    calculate_age_at_registration
 
 logger = logging.getLogger(__name__)
 

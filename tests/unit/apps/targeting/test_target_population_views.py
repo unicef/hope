@@ -1,20 +1,16 @@
 import json
 from typing import Callable
 
+import freezegun
+import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-
-import freezegun
-import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
+                                               PartnerFactory, UserFactory)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan

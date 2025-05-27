@@ -11,58 +11,43 @@ from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
+from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
+                                            create_afghanistan)
+from hct_mis_api.apps.core.models import (BusinessArea, DataCollectingType,
+                                          FlexibleAttribute, PeriodicFieldData)
 from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household_with_individual_with_collectors,
-)
-from hct_mis_api.apps.household.models import (
-    HEARING,
-    HOST,
-    REFUGEE,
-    ROLE_PRIMARY,
-    SEEING,
-    Household,
-    Individual,
-)
+    HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory,
+    create_household_with_individual_with_collectors)
+from hct_mis_api.apps.household.models import (HEARING, HOST, REFUGEE,
+                                               ROLE_PRIMARY, SEEING, Household,
+                                               Individual)
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
-)
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+    FspXlsxTemplatePerDeliveryMechanismFactory, PaymentPlanFactory,
+    generate_delivery_mechanisms)
+from hct_mis_api.apps.payment.models import (DeliveryMechanism,
+                                             FinancialServiceProvider,
+                                             PaymentPlan)
+from hct_mis_api.apps.payment.services.payment_plan_services import \
+    PaymentPlanService
 from hct_mis_api.apps.periodic_data_update.utils import (
-    field_label_to_field_name,
-    populate_pdu_with_null_values,
-)
+    field_label_to_field_name, populate_pdu_with_null_values)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
+                                             ProgramCycle)
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import (TargetingCriteriaFactory,
+                                                 TargetingCriteriaRuleFactory)
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.targeting.targeting import Targeting
-from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
-from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
+from tests.selenium.page_object.targeting.targeting_create import \
+    TargetingCreate
+from tests.selenium.page_object.targeting.targeting_details import \
+    TargetingDetails
 
 pytestmark = pytest.mark.django_db()
 
@@ -1056,7 +1041,9 @@ class TestTargeting:
         pageTargetingDetails.getLockButton().click()
         pageTargetingDetails.getLockPopupButton().click()
         pageTargetingDetails.waitForLabelStatus("LOCKED")
+        pageTargetingDetails.screenshot("targeting_locked.png")
         pageTargetingDetails.getButtonMarkReady().click()
+        pageTargetingDetails.screenshot("targeting_lockedgetButtonMarkReady.png")
         pageTargetingDetails.getButtonPopupMarkReady().click()
         pageTargetingDetails.waitForLabelStatus("READY FOR PAYMENT MODULE")
 

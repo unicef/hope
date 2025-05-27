@@ -1,5 +1,4 @@
 from django.utils import timezone
-
 from factory import SubFactory
 from factory.django import DjangoModelFactory
 

@@ -1,11 +1,7 @@
-from hct_mis_api.apps.household.models import (
-    BankAccountInfo,
-    Document,
-    Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-)
+from hct_mis_api.apps.household.models import (BankAccountInfo, Document,
+                                               Household, Individual,
+                                               IndividualIdentity,
+                                               IndividualRoleInHousehold)
 
 
 def soft_delete_original_objects() -> None:

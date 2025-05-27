@@ -2,21 +2,20 @@ from datetime import timedelta
 from random import choice
 from typing import Callable
 
-from django.utils import timezone
-
 import factory
 import pytest
+from django.utils import timezone
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                               PaymentPlanFactory)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup
-from tests.selenium.page_object.country_dashboard.country_dashboard import (
-    CountryDashboard,
-)
+from tests.selenium.page_object.country_dashboard.country_dashboard import \
+    CountryDashboard
 
 
 class ModifiedPaymentFactory(PaymentFactory):

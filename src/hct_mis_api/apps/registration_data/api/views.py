@@ -1,9 +1,8 @@
 import logging
 from typing import Any
 
-from django.db import transaction
-
 from constance import config
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -19,39 +18,30 @@ from rest_framework_extensions.cache.decorators import cache_response
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.api.mixins import (
-    BaseViewSet,
-    CountActionMixin,
-    ProgramMixin,
-    SerializerActionMixin,
-)
+from hct_mis_api.apps.core.api.mixins import (BaseViewSet, CountActionMixin,
+                                              ProgramMixin,
+                                              SerializerActionMixin)
 from hct_mis_api.apps.core.api.serializers import ChoiceSerializer
-from hct_mis_api.apps.core.utils import (
-    check_concurrency_version_in_mutation,
-    to_choice_object,
-)
+from hct_mis_api.apps.core.utils import (check_concurrency_version_in_mutation,
+                                         to_choice_object)
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.serializers import (
-    RefuseRdiSerializer,
-    RegistrationDataImportCreateSerializer,
+    RefuseRdiSerializer, RegistrationDataImportCreateSerializer,
     RegistrationDataImportDetailSerializer,
-    RegistrationDataImportListSerializer,
-)
-from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
+    RegistrationDataImportListSerializer)
+from hct_mis_api.apps.registration_data.filters import \
+    RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
-    merge_registration_data_import_task,
-    rdi_deduplication_task,
-    registration_program_population_import_task,
-)
-from hct_mis_api.apps.utils.elasticsearch_utils import (
-    remove_elasticsearch_documents_by_matching_ids,
-)
+    merge_registration_data_import_task, rdi_deduplication_task,
+    registration_program_population_import_task)
+from hct_mis_api.apps.utils.elasticsearch_utils import \
+    remove_elasticsearch_documents_by_matching_ids
 
 logger = logging.getLogger(__name__)
 

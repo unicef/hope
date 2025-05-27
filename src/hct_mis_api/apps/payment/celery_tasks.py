@@ -2,6 +2,7 @@ import datetime
 import logging
 from typing import Any, List, Optional
 
+from concurrency.api import disable_concurrency
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -12,31 +13,26 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from concurrency.api import disable_concurrency
-
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.core.utils import (
-    send_email_notification,
-    send_email_notification_on_commit,
-)
-from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
-from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
-    PaymentPlanPDFExportService,
-)
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-)
-from hct_mis_api.apps.payment.utils import generate_cache_key, get_quantity_in_usd
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
-)
-from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
-    XlsxVerificationExportService,
-)
+from hct_mis_api.apps.core.utils import (send_email_notification,
+                                         send_email_notification_on_commit)
+from hct_mis_api.apps.payment.models import (PaymentPlan,
+                                             PaymentVerificationPlan)
+from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import \
+    PaymentPlanPDFExportService
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import \
+    create_payment_plan_snapshot_data
+from hct_mis_api.apps.payment.utils import (generate_cache_key,
+                                            get_quantity_in_usd)
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import \
+    XlsxPaymentPlanImportPerFspService
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import \
+    XlsxVerificationExportService
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hct_mis_api.apps.utils.sentry import (sentry_tags,
+                                           set_sentry_business_area_tag)
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +42,8 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def get_sync_run_rapid_pro_task(self: Any) -> None:
     try:
-        from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
-            CheckRapidProVerificationTask,
-        )
+        from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import \
+            CheckRapidProVerificationTask
 
         CheckRapidProVerificationTask().execute()
     except Exception as e:
@@ -109,9 +104,8 @@ def remove_old_cash_plan_payment_verification_xls(self: Any, past_days: int = 30
 def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
-            XlsxPaymentPlanExportService,
-        )
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import \
+            XlsxPaymentPlanExportService
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -146,9 +140,8 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
 ) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-            XlsxPaymentPlanExportPerFspService,
-        )
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import \
+            XlsxPaymentPlanExportPerFspService
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -187,9 +180,8 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
 ) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
-            XlsxPaymentPlanExportPerFspService,
-        )
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import \
+            XlsxPaymentPlanExportPerFspService
 
         user: User = get_user_model().objects.get(pk=user_id)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
@@ -207,9 +199,8 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
 def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
-            XlsxPaymentPlanImportService,
-        )
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import \
+            XlsxPaymentPlanImportService
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -247,9 +238,8 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.services.payment_plan_services import (
-            PaymentPlanService,
-        )
+        from hct_mis_api.apps.payment.services.payment_plan_services import \
+            PaymentPlanService
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -361,9 +351,8 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     from hct_mis_api.apps.payment.models import PaymentPlan
-    from hct_mis_api.apps.payment.services.payment_plan_services import (
-        PaymentPlanService,
-    )
+    from hct_mis_api.apps.payment.services.payment_plan_services import \
+        PaymentPlanService
 
     cache_key = generate_cache_key(
         {
@@ -411,9 +400,8 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
-        from hct_mis_api.apps.payment.services.payment_plan_services import (
-            PaymentPlanService,
-        )
+        from hct_mis_api.apps.payment.services.payment_plan_services import \
+            PaymentPlanService
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -569,12 +557,12 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
-    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+    from hct_mis_api.apps.payment.services.payment_gateway import \
+        PaymentGatewayAPI
 
     try:
-        from hct_mis_api.apps.payment.services.payment_gateway import (
-            PaymentGatewayService,
-        )
+        from hct_mis_api.apps.payment.services.payment_gateway import \
+            PaymentGatewayService
 
         PaymentGatewayService().sync_fsps()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
@@ -588,12 +576,12 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: no cover
-    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+    from hct_mis_api.apps.payment.services.payment_gateway import \
+        PaymentGatewayAPI
 
     try:
-        from hct_mis_api.apps.payment.services.payment_gateway import (
-            PaymentGatewayService,
-        )
+        from hct_mis_api.apps.payment.services.payment_gateway import \
+            PaymentGatewayService
 
         PaymentGatewayService().sync_account_types()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
@@ -607,7 +595,8 @@ def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: n
 @log_start_and_end
 @sentry_tags
 def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
-    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayService
+    from hct_mis_api.apps.payment.services.payment_gateway import \
+        PaymentGatewayService
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
@@ -633,12 +622,12 @@ def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> No
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_records(self: Any) -> None:
-    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+    from hct_mis_api.apps.payment.services.payment_gateway import \
+        PaymentGatewayAPI
 
     try:
-        from hct_mis_api.apps.payment.services.payment_gateway import (
-            PaymentGatewayService,
-        )
+        from hct_mis_api.apps.payment.services.payment_gateway import \
+            PaymentGatewayService
 
         PaymentGatewayService().sync_records()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
@@ -669,12 +658,12 @@ def send_payment_notification_emails(
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
-    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+    from hct_mis_api.apps.payment.services.payment_gateway import \
+        PaymentGatewayAPI
 
     try:
-        from hct_mis_api.apps.payment.services.payment_gateway import (
-            PaymentGatewayService,
-        )
+        from hct_mis_api.apps.payment.services.payment_gateway import \
+            PaymentGatewayService
 
         PaymentGatewayService().sync_delivery_mechanisms()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
@@ -755,9 +744,8 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
 @log_start_and_end
 @sentry_tags
 def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
-    from hct_mis_api.apps.payment.services.payment_plan_services import (
-        PaymentPlanService,
-    )
+    from hct_mis_api.apps.payment.services.payment_plan_services import \
+        PaymentPlanService
 
     with cache.lock(
         f"payment_plan_full_rebuild_{payment_plan_id}",

@@ -9,21 +9,15 @@ from django.core.files import File
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import (
-    FEMALE,
-    HEAD,
-    MALE,
-    OTHER,
-    SON_DAUGHTER,
-    WIFE_HUSBAND,
-    XlsxUpdateFile,
-)
+from hct_mis_api.apps.household.fixtures import \
+    create_household_and_individuals
+from hct_mis_api.apps.household.models import (FEMALE, HEAD, MALE, OTHER,
+                                               SON_DAUGHTER, WIFE_HUSBAND,
+                                               XlsxUpdateFile)
 from hct_mis_api.apps.household.services.individual_xlsx_update import (
-    IndividualXlsxUpdate,
-    InvalidColumnsError,
-)
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+    IndividualXlsxUpdate, InvalidColumnsError)
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 
 
 def valid_file() -> File:

@@ -1,17 +1,13 @@
 from typing import Callable, Dict, Optional
 from unittest.mock import Mock, patch
 
-from django.test import RequestFactory
-
 import pytest
+from django.test import RequestFactory
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (
-    BusinessAreaFactory,
-    RoleFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
+                                               RoleFactory, UserFactory)
 from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.dashboard.views import DashboardReportView

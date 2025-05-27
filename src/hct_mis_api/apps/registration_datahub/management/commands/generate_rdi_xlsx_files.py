@@ -3,10 +3,9 @@ import random
 from argparse import ArgumentParser
 from typing import Any
 
+import openpyxl
 from django.conf import settings
 from django.core.management import BaseCommand
-
-import openpyxl
 from faker import Faker
 
 faker = Faker()

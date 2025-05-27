@@ -2,16 +2,13 @@ import dataclasses
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from dateutil.parser import parse
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 
-from dateutil.parser import parse
-
-from hct_mis_api.apps.core.exchange_rates.api import (
-    ExchangeRateClient,
-    get_exchange_rate_client,
-)
+from hct_mis_api.apps.core.exchange_rates.api import (ExchangeRateClient,
+                                                      get_exchange_rate_client)
 
 
 @dataclasses.dataclass(frozen=True)

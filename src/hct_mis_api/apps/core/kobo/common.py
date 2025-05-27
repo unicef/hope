@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Optional
 from dateutil.parser import parse
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
+from hct_mis_api.apps.household.models import (NON_BENEFICIARY,
+                                               RELATIONSHIP_UNKNOWN)
 
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
@@ -70,7 +71,8 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     from hashlib import sha256
 
     from hct_mis_api.apps.core.utils import rename_dict_keys
-    from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
+    from hct_mis_api.apps.registration_data.models import \
+        KoboImportedSubmission
 
     total_households_count = 0
     total_individuals_count = 0

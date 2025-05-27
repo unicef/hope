@@ -6,9 +6,8 @@ from django.db import transaction
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
-from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
-    KoboRetriableError,
-)
+from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import \
+    KoboRetriableError
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
@@ -38,9 +37,8 @@ class transaction_celery_task:  # used as decorator
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, xlsx_kobo_template_id: str) -> None:
     try:
-        from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
-            UploadNewKoboTemplateAndUpdateFlexFieldsTask,
-        )
+        from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import \
+            UploadNewKoboTemplateAndUpdateFlexFieldsTask
 
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError as exc:
@@ -64,9 +62,8 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
 @sentry_tags
 def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_template_id: str) -> None:
     try:
-        from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
-            UploadNewKoboTemplateAndUpdateFlexFieldsTask,
-        )
+        from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import \
+            UploadNewKoboTemplateAndUpdateFlexFieldsTask
 
         UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=xlsx_kobo_template_id)
     except KoboRetriableError:

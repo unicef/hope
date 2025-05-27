@@ -3,13 +3,13 @@ from datetime import datetime, timedelta
 from typing import Any
 from unittest import mock
 
+import requests_mock
 from django.test import TestCase
 from django.utils import timezone
-
-import requests_mock
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
+from hct_mis_api.apps.core.exchange_rates import (ExchangeRateClientAPI,
+                                                  ExchangeRates)
 from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClientDummy
 
 EXCHANGE_RATES_WITH_HISTORICAL_DATA = {

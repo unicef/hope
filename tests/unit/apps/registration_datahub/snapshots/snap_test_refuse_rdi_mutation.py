@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestRefuseRdiMutation::test_refuse_registration_data_import_0_with_permission 1'] = {

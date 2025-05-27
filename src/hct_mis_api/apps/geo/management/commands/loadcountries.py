@@ -2,7 +2,6 @@ import logging
 from typing import Any, Dict
 
 from django.core.management import BaseCommand
-
 from django_countries import countries
 
 from hct_mis_api.apps.geo.missing_countries import missing_countries

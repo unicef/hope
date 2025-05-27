@@ -1,17 +1,15 @@
 import logging
 from typing import TYPE_CHECKING
 
+from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import messages
 from django.db import transaction
 from django.db.transaction import atomic
 from django.template.response import TemplateResponse
 
-from admin_extra_buttons.decorators import button
-
-from hct_mis_api.apps.payment.celery_tasks import (
-    payment_plan_apply_steficon_hh_selection,
-)
+from hct_mis_api.apps.payment.celery_tasks import \
+    payment_plan_apply_steficon_hh_selection
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.steficon.debug import get_error_info
 

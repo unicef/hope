@@ -1,52 +1,38 @@
 from typing import Any, Dict, List
 
+import graphene
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
-import graphene
-
 from hct_mis_api.apps.account.permissions import (
-    DjangoPermissionFilterConnectionField,
-    Permissions,
-    hopeOneOfPermissionClass,
-)
+    DjangoPermissionFilterConnectionField, Permissions,
+    hopeOneOfPermissionClass)
 from hct_mis_api.apps.accountability.filters import (
-    FeedbackFilter,
-    MessageRecipientsMapFilter,
-    MessagesFilter,
-    RecipientFilter,
-    SurveyFilter,
-)
+    FeedbackFilter, MessageRecipientsMapFilter, MessagesFilter,
+    RecipientFilter, SurveyFilter)
 from hct_mis_api.apps.accountability.inputs import (
     AccountabilitySampleSizeInput,
-    GetAccountabilityCommunicationMessageSampleSizeInput,
-)
+    GetAccountabilityCommunicationMessageSampleSizeInput)
 from hct_mis_api.apps.accountability.models import Feedback, Message, Survey
 from hct_mis_api.apps.accountability.nodes import (
-    AccountabilitySampleSizeNode,
-    CommunicationMessageNode,
-    CommunicationMessageRecipientMapNode,
-    FeedbackNode,
-    GetCommunicationMessageSampleSizeNode,
-    RapidProFlowNode,
-    RecipientNode,
-    SurveyNode,
-)
-from hct_mis_api.apps.accountability.services.message_crud_services import (
-    MessageCrudServices,
-)
+    AccountabilitySampleSizeNode, CommunicationMessageNode,
+    CommunicationMessageRecipientMapNode, FeedbackNode,
+    GetCommunicationMessageSampleSizeNode, RapidProFlowNode, RecipientNode,
+    SurveyNode)
+from hct_mis_api.apps.accountability.services.message_crud_services import \
+    MessageCrudServices
 from hct_mis_api.apps.accountability.services.sampling import Sampling
-from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
+from hct_mis_api.apps.accountability.services.verifiers import \
+    MessageArgumentVerifier
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.core.utils import (
-    decode_id_string,
-    get_program_id_from_headers,
-    to_choice_object,
-)
-from hct_mis_api.apps.grievance.utils import filter_feedback_based_on_partner_areas_2
+from hct_mis_api.apps.core.utils import (decode_id_string,
+                                         get_program_id_from_headers,
+                                         to_choice_object)
+from hct_mis_api.apps.grievance.utils import \
+    filter_feedback_based_on_partner_areas_2
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program

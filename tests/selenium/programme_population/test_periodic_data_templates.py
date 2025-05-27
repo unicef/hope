@@ -6,25 +6,25 @@ from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import \
+    create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.periodic_data_update.fixtures import (
-    PeriodicDataUpdateTemplateFactory,
-)
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.fixtures import \
+    PeriodicDataUpdateTemplateFactory
+from hct_mis_api.apps.periodic_data_update.models import \
+    PeriodicDataUpdateTemplate
 from hct_mis_api.apps.periodic_data_update.utils import (
-    field_label_to_field_name,
-    populate_pdu_with_null_values,
-)
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
+    field_label_to_field_name, populate_pdu_with_null_values)
+from hct_mis_api.apps.program.fixtures import (BeneficiaryGroupFactory,
+                                               ProgramFactory)
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.individuals import \
+    Individuals
 from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
-)
+    PeriodicDatUpdateTemplates, PeriodicDatUpdateTemplatesDetails)
 
 pytestmark = pytest.mark.django_db()
 

@@ -2,12 +2,12 @@ from typing import Any, Dict, List
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
 from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role, User
+from hct_mis_api.apps.account.models import (USER_STATUS_CHOICES, Partner,
+                                             Role, User)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object

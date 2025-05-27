@@ -16,8 +16,7 @@ def profiling(**silk_kwargs: Any) -> Any:
     if not settings.PROFILING:
         return do_nothing_decorator
 
-    from silk.profiling.profiler import (
-        silk_profile,  # pylint: disable=import-outside-toplevel
-    )
+    from silk.profiling.profiler import \
+        silk_profile  # pylint: disable=import-outside-toplevel
 
     return silk_profile(**silk_kwargs)

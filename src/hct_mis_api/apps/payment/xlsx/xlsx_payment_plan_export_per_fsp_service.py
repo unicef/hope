@@ -5,29 +5,25 @@ from io import BytesIO
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
+import msoffcrypto
+import openpyxl
+import pyzipper
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-
-import msoffcrypto
-import openpyxl
-import pyzipper
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FspXlsxTemplatePerDeliveryMechanism,
-    Payment,
-    PaymentPlan,
-)
+    DeliveryMechanism, FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate, FspXlsxTemplatePerDeliveryMechanism,
+    Payment, PaymentPlan)
 from hct_mis_api.apps.payment.validators import generate_numeric_token
-from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import \
+    XlsxExportBaseService
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 logger = logging.getLogger(__name__)

@@ -1,8 +1,7 @@
 from typing import Any
 
-from django.db.models import QuerySet
-
 import graphene
+from django.db.models import QuerySet
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField

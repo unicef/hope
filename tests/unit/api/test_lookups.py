@@ -5,7 +5,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
+                                           CountryFactory)
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.program.models import Program
 from tests.unit.api.base import HOPEApiTestCase, token_grant_permission

@@ -1,5 +1,13 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from admin_cursor_paginator import CursorPaginatorAdmin
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import confirm_action
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
+from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
+from adminfilters.querystring import QueryStringFilter
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
@@ -10,42 +18,23 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-
-from admin_cursor_paginator import CursorPaginatorAdmin
-from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.depot.widget import DepotManager
-from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
-from adminfilters.querystring import QueryStringFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import (
-    Account,
-    AccountType,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialInstitution,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FspNameMapping,
-    FspXlsxTemplatePerDeliveryMechanism,
-    Payment,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
+    Account, AccountType, DeliveryMechanism, DeliveryMechanismConfig,
+    FinancialInstitution, FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate, FspNameMapping,
+    FspXlsxTemplatePerDeliveryMechanism, Payment, PaymentHouseholdSnapshot,
+    PaymentPlan, PaymentPlanSupportingDocument, PaymentVerification,
+    PaymentVerificationPlan)
 from hct_mis_api.apps.payment.models.payment import FinancialInstitutionMapping
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
-    VerificationPlanStatusChangeServices,
-)
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import \
+    VerificationPlanStatusChangeServices
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
+from hct_mis_api.apps.utils.admin import (HOPEModelAdminBase,
+                                          PaymentPlanCeleryTasksMixin)
 from hct_mis_api.apps.utils.security import is_root
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
@@ -145,9 +134,8 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     @button(permission="core.execute_sync_rapid_pro")
     def execute_sync_rapid_pro(self, request: HttpRequest) -> Optional[HttpResponseRedirect]:
         if request.method == "POST":
-            from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
-                CheckRapidProVerificationTask,
-            )
+            from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import \
+                CheckRapidProVerificationTask
 
             task = CheckRapidProVerificationTask()
             task.execute()
@@ -316,9 +304,8 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
-            from hct_mis_api.apps.payment.services.payment_gateway import (
-                PaymentGatewayService,
-            )
+            from hct_mis_api.apps.payment.services.payment_gateway import \
+                PaymentGatewayService
 
             payment_plan = PaymentPlan.objects.get(pk=pk)
             PaymentGatewayService().sync_payment_plan(payment_plan)
@@ -420,9 +407,8 @@ class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdm
     )
     def sync_with_payment_gateway(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         if request.method == "POST":
-            from hct_mis_api.apps.payment.services.payment_gateway import (
-                PaymentGatewayService,
-            )
+            from hct_mis_api.apps.payment.services.payment_gateway import \
+                PaymentGatewayService
 
             payment = Payment.objects.get(pk=pk)
             PaymentGatewayService().sync_record(payment)

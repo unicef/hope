@@ -1,8 +1,7 @@
 from uuid import uuid4
 
-from django.urls import reverse
-
 import pytest
+from django.urls import reverse
 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.admin import AutocompleteWidget

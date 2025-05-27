@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestCreateCommunicationMessage::test_create_accountability_communication_message_by_households_0_FULL_LIST 1'] = {

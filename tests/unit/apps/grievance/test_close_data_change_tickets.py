@@ -2,9 +2,8 @@ import uuid
 from datetime import date
 from typing import Any, List
 
-from django.core.management import call_command
-
 import pytest
+from django.core.management import call_command
 from flaky import flaky
 from parameterized import parameterized
 
@@ -17,33 +16,20 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory,
-    TicketAddIndividualDetailsFactory,
-    TicketDeleteHouseholdDetailsFactory,
-    TicketDeleteIndividualDetailsFactory,
+    GrievanceTicketFactory, TicketAddIndividualDetailsFactory,
+    TicketDeleteHouseholdDetailsFactory, TicketDeleteIndividualDetailsFactory,
     TicketHouseholdDataUpdateDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-)
+    TicketIndividualDataUpdateDetailsFactory)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-)
+from hct_mis_api.apps.household.fixtures import (BankAccountInfoFactory,
+                                                 DocumentFactory,
+                                                 HouseholdFactory,
+                                                 IndividualFactory)
 from hct_mis_api.apps.household.models import (
-    HEAD,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    NOT_ANSWERED,
-    ROLE_PRIMARY,
-    SINGLE,
-    BankAccountInfo,
-    Document,
-    DocumentType,
-    Individual,
-    IndividualRoleInHousehold,
-)
+    HEAD, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_NATIONAL_ID, NOT_ANSWERED, ROLE_PRIMARY, SINGLE,
+    BankAccountInfo, Document, DocumentType, Individual,
+    IndividualRoleInHousehold)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index

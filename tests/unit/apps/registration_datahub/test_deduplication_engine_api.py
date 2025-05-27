@@ -4,16 +4,12 @@ import uuid
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
 from django.test import TestCase
 
-import pytest
-
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
-    DeduplicationEngineAPI,
-    DeduplicationImage,
-    DeduplicationSet,
-    IgnoredFilenamesPair,
-)
+    DeduplicationEngineAPI, DeduplicationImage, DeduplicationSet,
+    IgnoredFilenamesPair)
 
 
 @pytest.fixture(autouse=True)

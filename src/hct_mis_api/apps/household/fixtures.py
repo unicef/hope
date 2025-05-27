@@ -1,9 +1,8 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
-from django.conf import settings
-
 import factory
+from django.conf import settings
 from factory import enums, fuzzy
 from factory.django import DjangoModelFactory
 from faker import Faker
@@ -12,36 +11,17 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
-    HUMANITARIAN_PARTNER,
-    IDENTIFICATION_TYPE_CHOICE,
-    MARITAL_STATUS_CHOICE,
-    NOT_DISABLED,
-    ORG_ENUMERATOR_CHOICES,
-    RELATIONSHIP_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    SEX_CHOICE,
-    UNICEF,
-    BankAccountInfo,
-    Document,
-    DocumentType,
-    EntitlementCard,
-    Household,
-    HouseholdCollection,
-    Individual,
-    IndividualCollection,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-    PendingBankAccountInfo,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold,
-)
+    HUMANITARIAN_PARTNER, IDENTIFICATION_TYPE_CHOICE, MARITAL_STATUS_CHOICE,
+    NOT_DISABLED, ORG_ENUMERATOR_CHOICES, RELATIONSHIP_CHOICE,
+    RESIDENCE_STATUS_CHOICE, ROLE_ALTERNATE, ROLE_PRIMARY, SEX_CHOICE, UNICEF,
+    BankAccountInfo, Document, DocumentType, EntitlementCard, Household,
+    HouseholdCollection, Individual, IndividualCollection, IndividualIdentity,
+    IndividualRoleInHousehold, PendingBankAccountInfo, PendingDocument,
+    PendingHousehold, PendingIndividual, PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 faker = Faker()

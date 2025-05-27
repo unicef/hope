@@ -6,12 +6,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.account.fixtures import (
-    PartnerFactory,
-    RoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.fixtures import (PartnerFactory,
+                                               RoleAssignmentFactory,
+                                               RoleFactory, UserFactory)
 from hct_mis_api.apps.core.backends import PermissionsBackend
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea

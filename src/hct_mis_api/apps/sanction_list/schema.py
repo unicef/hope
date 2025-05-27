@@ -4,17 +4,14 @@ import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectionField
+from hct_mis_api.apps.account.permissions import \
+    DjangoPermissionFilterConnectionField
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.sanction_list.filters import SanctionListIndividualFilter
 from hct_mis_api.apps.sanction_list.models import (
-    SanctionListIndividual,
-    SanctionListIndividualAliasName,
-    SanctionListIndividualCountries,
-    SanctionListIndividualDateOfBirth,
-    SanctionListIndividualDocument,
-    SanctionListIndividualNationalities,
-)
+    SanctionListIndividual, SanctionListIndividualAliasName,
+    SanctionListIndividualCountries, SanctionListIndividualDateOfBirth,
+    SanctionListIndividualDocument, SanctionListIndividualNationalities)
 
 
 class SanctionListIndividualNode(DjangoObjectType):

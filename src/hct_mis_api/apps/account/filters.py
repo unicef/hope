@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, List
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import Lower
-
-from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
+from django_filters import (BooleanFilter, CharFilter, FilterSet,
+                            MultipleChoiceFilter)
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
 from hct_mis_api.apps.core.utils import CustomOrderingFilter

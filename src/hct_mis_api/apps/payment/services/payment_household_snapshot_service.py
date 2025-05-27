@@ -5,24 +5,16 @@ from uuid import UUID
 
 from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
-
 from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hct_mis_api.apps.household.models import (
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    BankAccountInfo,
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
-)
-from hct_mis_api.apps.payment.models import (
-    Payment,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-)
+from hct_mis_api.apps.household.models import (ROLE_ALTERNATE, ROLE_PRIMARY,
+                                               BankAccountInfo, Household,
+                                               Individual,
+                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.payment.models import (Payment, PaymentHouseholdSnapshot,
+                                             PaymentPlan)
 
 excluded_individual_fields = ["_state", "_prefetched_objects_cache"]
 excluded_household_fields = ["_state", "_prefetched_objects_cache"]

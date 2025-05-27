@@ -4,41 +4,32 @@ from collections import defaultdict
 from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
+from constance import config
 from django.db import transaction
 from django.db.models import Case, CharField, F, Q, QuerySet, Value, When
 from django.db.models.functions import Concat
-
-from constance import config
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_dict
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketNeedsAdjudicationDetails,
-)
-from hct_mis_api.apps.household.documents import IndividualDocument, get_individual_doc
-from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    DUPLICATE_IN_BATCH,
-    NEEDS_ADJUDICATION,
-    NOT_PROCESSED,
-    SIMILAR_IN_BATCH,
-    UNIQUE,
-    UNIQUE_IN_BATCH,
-    Document,
-    Individual,
-    PendingIndividual,
-)
+from hct_mis_api.apps.grievance.models import (GrievanceTicket,
+                                               TicketNeedsAdjudicationDetails)
+from hct_mis_api.apps.household.documents import (IndividualDocument,
+                                                  get_individual_doc)
+from hct_mis_api.apps.household.models import (DUPLICATE, DUPLICATE_IN_BATCH,
+                                               NEEDS_ADJUDICATION,
+                                               NOT_PROCESSED, SIMILAR_IN_BATCH,
+                                               UNIQUE, UNIQUE_IN_BATCH,
+                                               Document, Individual,
+                                               PendingIndividual)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.utils import post_process_dedupe_results
+from hct_mis_api.apps.registration_datahub.utils import \
+    post_process_dedupe_results
 from hct_mis_api.apps.utils.elasticsearch_utils import (
-    populate_index,
-    remove_elasticsearch_documents_by_matching_ids,
-    wait_until_es_healthy,
-)
+    populate_index, remove_elasticsearch_documents_by_matching_ids,
+    wait_until_es_healthy)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
@@ -869,9 +860,7 @@ class HardDocumentDeduplication:
         possible_duplicates_through_dict: Dict,
     ) -> Optional[TicketData]:
         from hct_mis_api.apps.grievance.models import (
-            GrievanceTicket,
-            TicketNeedsAdjudicationDetails,
-        )
+            GrievanceTicket, TicketNeedsAdjudicationDetails)
 
         new_duplicates_set = {str(main_individual.id), *[str(x.id) for x in possible_duplicates_individuals]}
         for duplicates_set in possible_duplicates_through_dict.values():

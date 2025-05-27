@@ -5,7 +5,6 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.core.management import call_command
-
 from elasticsearch import Elasticsearch
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -14,12 +13,9 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.grievance.constants import (
-    PRIORITY_HIGH,
-    PRIORITY_LOW,
-    URGENCY_URGENT,
-    URGENCY_VERY_URGENT,
-)
+from hct_mis_api.apps.grievance.constants import (PRIORITY_HIGH, PRIORITY_LOW,
+                                                  URGENCY_URGENT,
+                                                  URGENCY_VERY_URGENT)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from tests.unit.conftest import disabled_locally_test

@@ -1,34 +1,28 @@
 from typing import Any
 from unittest import mock
 
+from constance.test import override_config
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 
-from constance.test import override_config
-
-from hct_mis_api.apps.account.fixtures import (
-    RoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.fixtures import (RoleAssignmentFactory,
+                                               RoleFactory, UserFactory)
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
+from hct_mis_api.apps.household.fixtures import (EntitlementCardFactory,
+                                                 create_household)
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory,
-)
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
-    VerificationPlanStatusChangeServices,
-)
+    PaymentFactory, PaymentPlanFactory, PaymentVerificationFactory,
+    PaymentVerificationPlanFactory, PaymentVerificationSummaryFactory)
+from hct_mis_api.apps.payment.models import (PaymentVerification,
+                                             PaymentVerificationPlan)
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import \
+    VerificationPlanStatusChangeServices
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 
 
 class TestFinishVerificationPlan(TestCase):

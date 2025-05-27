@@ -4,6 +4,8 @@ from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
+import pytest
+from dateutil.relativedelta import relativedelta
 from django import forms
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
@@ -13,60 +15,44 @@ from django.db.utils import IntegrityError
 from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
 
-import pytest
-from dateutil.relativedelta import relativedelta
-
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.currencies import USDC
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory,
-    HouseholdFactory,
-    IndividualFactory,
-    create_household,
-)
-from hct_mis_api.apps.household.models import (
-    LOT_DIFFICULTY,
-    ROLE_PRIMARY,
-    IndividualRoleInHousehold,
-)
-from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hct_mis_api.apps.payment.fixtures import (
-    AccountFactory,
-    ApprovalFactory,
-    ApprovalProcessFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    RealProgramFactory,
-    generate_delivery_mechanisms,
-)
+from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
+                                            create_afghanistan)
+from hct_mis_api.apps.core.models import (BusinessArea, DataCollectingType,
+                                          FileTemp)
+from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
+                                           CountryFactory)
+from hct_mis_api.apps.household.fixtures import (DocumentFactory,
+                                                 HouseholdFactory,
+                                                 IndividualFactory,
+                                                 create_household)
+from hct_mis_api.apps.household.models import (LOT_DIFFICULTY, ROLE_PRIMARY,
+                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.payment.fields import (DynamicChoiceArrayField,
+                                             DynamicChoiceField)
+from hct_mis_api.apps.payment.fixtures import (AccountFactory, ApprovalFactory,
+                                               ApprovalProcessFactory,
+                                               FinancialServiceProviderFactory,
+                                               PaymentFactory,
+                                               PaymentPlanFactory,
+                                               RealProgramFactory,
+                                               generate_delivery_mechanisms)
 from hct_mis_api.apps.payment.models import (
-    Account,
-    AccountType,
-    Approval,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialInstitution,
-    FinancialServiceProviderXlsxTemplate,
-    FspNameMapping,
-    Payment,
-    PaymentPlan,
-)
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-)
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
+    Account, AccountType, Approval, DeliveryMechanism, DeliveryMechanismConfig,
+    FinancialInstitution, FinancialServiceProviderXlsxTemplate, FspNameMapping,
+    Payment, PaymentPlan)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import \
+    create_payment_plan_snapshot_data
+from hct_mis_api.apps.program.fixtures import (BeneficiaryGroupFactory,
+                                               ProgramFactory)
 from hct_mis_api.apps.program.models import ProgramCycle
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import (TargetingCriteriaFactory,
+                                                 TargetingCriteriaRuleFactory)
 
 pytestmark = pytest.mark.django_db()
 

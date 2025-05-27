@@ -3,21 +3,16 @@ import json
 from decimal import Decimal
 from typing import Any, Callable, Dict, Optional
 
+import pytest
 from django.core.cache import cache
 from django.utils import timezone
 
-import pytest
-
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
-from hct_mis_api.apps.dashboard.services import (
-    DashboardDataCache,
-    DashboardGlobalDataCache,
-)
-from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismFactory,
-    FinancialServiceProviderFactory,
-)
+from hct_mis_api.apps.dashboard.services import (DashboardDataCache,
+                                                 DashboardGlobalDataCache)
+from hct_mis_api.apps.payment.fixtures import (DeliveryMechanismFactory,
+                                               FinancialServiceProviderFactory)
 from hct_mis_api.apps.payment.models import Payment
 
 CACHE_CONFIG = [

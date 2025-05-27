@@ -4,10 +4,8 @@ from unittest.mock import patch
 import pytest
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.dashboard.celery_tasks import (
-    generate_dash_report_task,
-    update_dashboard_figures,
-)
+from hct_mis_api.apps.dashboard.celery_tasks import (generate_dash_report_task,
+                                                     update_dashboard_figures)
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
 
 

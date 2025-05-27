@@ -1,20 +1,20 @@
 from django.test import TestCase
-
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.fixtures import (
-    AccountFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    RealProgramFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentHouseholdSnapshot
+from hct_mis_api.apps.household.fixtures import (HouseholdFactory,
+                                                 IndividualFactory)
+from hct_mis_api.apps.household.models import (ROLE_PRIMARY,
+                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.payment.fixtures import (AccountFactory, PaymentFactory,
+                                               PaymentPlanFactory,
+                                               RealProgramFactory,
+                                               generate_delivery_mechanisms)
+from hct_mis_api.apps.payment.models import (DeliveryMechanism,
+                                             PaymentHouseholdSnapshot)
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from hct_mis_api.one_time_scripts.create_payment_snapshot import create_payment_snapshot
+from hct_mis_api.one_time_scripts.create_payment_snapshot import \
+    create_payment_snapshot
 
 
 class TestMigratePaymentSnapShot(TestCase):

@@ -1,10 +1,9 @@
 import logging
 from typing import Any
 
+from constance import config
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import FileResponse
-
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.decorators import action
@@ -19,29 +18,22 @@ from rest_framework_extensions.cache.decorators import cache_response
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
-from hct_mis_api.apps.core.api.mixins import (
-    BaseViewSet,
-    ProgramMixin,
-    SerializerActionMixin,
-)
+from hct_mis_api.apps.core.api.mixins import (BaseViewSet, ProgramMixin,
+                                              SerializerActionMixin)
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.periodic_data_update.api.caches import PeriodicFieldKeyConstructor
+from hct_mis_api.apps.periodic_data_update.api.caches import \
+    PeriodicFieldKeyConstructor
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
     PeriodicDataUpdateTemplateCreateSerializer,
     PeriodicDataUpdateTemplateDetailSerializer,
     PeriodicDataUpdateTemplateListSerializer,
     PeriodicDataUpdateUploadDetailSerializer,
-    PeriodicDataUpdateUploadListSerializer,
-    PeriodicDataUpdateUploadSerializer,
-    PeriodicFieldSerializer,
-)
+    PeriodicDataUpdateUploadListSerializer, PeriodicDataUpdateUploadSerializer,
+    PeriodicFieldSerializer)
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
-)
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
-    PeriodicDataUpdateImportService,
-)
+    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import \
+    PeriodicDataUpdateImportService
 
 logger = logging.getLogger(__name__)
 

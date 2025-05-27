@@ -1,6 +1,10 @@
 import logging
 from typing import Any, Dict, List, Optional
 
+from admin_extra_buttons.decorators import button
+from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
+from adminactions.export import ForeignKeysCollector
+from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
 from django.contrib.auth import get_user_model
@@ -11,18 +15,14 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
-
-from admin_extra_buttons.decorators import button
-from admin_sync.mixin import GetManyFromRemoteMixin, SyncMixin
-from adminactions.export import ForeignKeysCollector
-from adminfilters.autocomplete import AutoCompleteFilter
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ManyToManyWidget
 from smart_admin.decorators import smart_register
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, HopeModelAdminMixin
+from hct_mis_api.apps.utils.admin import (HOPEModelAdminBase,
+                                          HopeModelAdminMixin)
 
 logger = logging.getLogger(__name__)
 

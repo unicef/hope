@@ -2,20 +2,21 @@ import pytest
 from freezegun import freeze_time
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
+                                            create_afghanistan)
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import (
-    create_household_with_individual_with_collectors,
-)
+from hct_mis_api.apps.household.fixtures import \
+    create_household_with_individual_with_collectors
 from hct_mis_api.apps.household.models import FEMALE, MARRIED, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.individuals_details import (
-    IndividualsDetails,
-)
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
+from tests.selenium.page_object.programme_population.individuals import \
+    Individuals
+from tests.selenium.page_object.programme_population.individuals_details import \
+    IndividualsDetails
 
 pytestmark = pytest.mark.django_db()
 

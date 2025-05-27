@@ -2,18 +2,19 @@ import logging
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Optional
 
+import openpyxl
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.urls import reverse
-
-import openpyxl
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
+from hct_mis_api.apps.payment.models import (PaymentVerification,
+                                             PaymentVerificationPlan)
+from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import \
+    XlsxExportBaseService
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User

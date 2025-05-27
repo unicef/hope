@@ -4,54 +4,44 @@ from functools import partial
 from itertools import groupby
 from typing import IO, TYPE_CHECKING, Callable, Dict, Optional, Union
 
+from constance import config
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import OuterRef
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-from constance import config
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import chunks
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (ROLE_PRIMARY,
+                                               IndividualRoleInHousehold)
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
-    payment_plan_full_rebuild,
-    payment_plan_rebuild_stats,
-    prepare_follow_up_payment_plan_task,
-    prepare_payment_plan_task,
+    payment_plan_full_rebuild, payment_plan_rebuild_stats,
+    prepare_follow_up_payment_plan_task, prepare_payment_plan_task,
     send_payment_notification_emails,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
-    send_to_payment_gateway,
-)
-from hct_mis_api.apps.payment.models import (
-    Account,
-    Approval,
-    ApprovalProcess,
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-)
+    send_to_payment_gateway)
+from hct_mis_api.apps.payment.models import (Account, Approval,
+                                             ApprovalProcess,
+                                             DeliveryMechanism,
+                                             FinancialServiceProvider, Payment,
+                                             PaymentPlan, PaymentPlanSplit)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import \
+    create_payment_plan_snapshot_data
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.models import (
-    TargetingCollectorRuleFilterBlock,
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingIndividualRuleFilterBlock,
-)
-from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
-from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
+    TargetingCollectorRuleFilterBlock, TargetingCriteria,
+    TargetingCriteriaRule, TargetingIndividualRuleFilterBlock)
+from hct_mis_api.apps.targeting.services.utils import \
+    from_input_to_targeting_criteria
+from hct_mis_api.apps.targeting.validators import \
+    TargetingCriteriaInputValidator
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:  # pragma: no cover

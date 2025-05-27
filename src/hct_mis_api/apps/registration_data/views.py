@@ -4,9 +4,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.services.template_generator_service import (
-    TemplateFileGeneratorService,
-)
+from hct_mis_api.apps.registration_data.services.template_generator_service import \
+    TemplateFileGeneratorService
 
 
 def download_template(request: HttpRequest, program_id: str) -> HttpResponse:

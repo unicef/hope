@@ -1,25 +1,19 @@
 import json
 from typing import Callable
 
+import freezegun
+import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
-
-import freezegun
-import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
+                                               PartnerFactory, UserFactory)
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
-)
+from hct_mis_api.apps.core.fixtures import (FlexibleAttributeForPDUFactory,
+                                            PeriodicFieldDataFactory)
 from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 

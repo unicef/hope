@@ -1,7 +1,8 @@
 import logging
 from typing import Any, Iterable
 
-from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
+from hct_mis_api.apps.registration_datahub.templatetags.smart_register import \
+    is_image
 from hct_mis_api.contrib.aurora.models import Record
 
 logger = logging.getLogger(__name__)

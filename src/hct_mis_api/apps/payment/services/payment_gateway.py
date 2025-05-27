@@ -3,28 +3,20 @@ import logging
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from django.utils.timezone import now
-
 from _decimal import Decimal
+from django.utils.timezone import now
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 from hct_mis_api.apps.core.utils import chunks
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialServiceProvider,
-    FspNameMapping,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
+from hct_mis_api.apps.payment.models import (AccountType, DeliveryMechanism,
+                                             DeliveryMechanismConfig,
+                                             FinancialServiceProvider,
+                                             FspNameMapping, Payment,
+                                             PaymentPlan, PaymentPlanSplit)
 from hct_mis_api.apps.payment.utils import (
-    get_payment_delivered_quantity_status_and_value,
-    get_quantity_in_usd,
-    to_decimal,
-)
+    get_payment_delivered_quantity_status_and_value, get_quantity_in_usd,
+    to_decimal)
 
 logger = logging.getLogger(__name__)
 

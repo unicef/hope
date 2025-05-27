@@ -4,20 +4,13 @@ from django.core.management import call_command
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.services.reassign_roles_services import (
-    reassign_roles_on_update_service,
-)
+from hct_mis_api.apps.grievance.services.reassign_roles_services import \
+    reassign_roles_on_update_service
 from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
-    create_household_and_individuals,
-)
-from hct_mis_api.apps.household.models import (
-    HEAD,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    IndividualRoleInHousehold,
-)
+    HouseholdFactory, IndividualFactory, create_household_and_individuals)
+from hct_mis_api.apps.household.models import (HEAD, ROLE_ALTERNATE,
+                                               ROLE_PRIMARY,
+                                               IndividualRoleInHousehold)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

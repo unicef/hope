@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils import timezone
-
 from django_countries import Countries
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
@@ -18,22 +17,15 @@ from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
-    HEAD,
-    IDENTIFICATION_TYPE_CHOICE,
-    NON_BENEFICIARY,
-    ROLE_ALTERNATE,
-    ROLE_NO_ROLE,
-    ROLE_PRIMARY,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-)
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
+from hct_mis_api.apps.household.models import (DATA_SHARING_CHOICES, HEAD,
+                                               IDENTIFICATION_TYPE_CHOICE,
+                                               NON_BENEFICIARY, ROLE_ALTERNATE,
+                                               ROLE_NO_ROLE, ROLE_PRIMARY,
+                                               PendingDocument,
+                                               PendingHousehold,
+                                               PendingIndividual)
+from hct_mis_api.apps.payment.models import (AccountType, FinancialInstitution,
+                                             PendingAccount)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -163,6 +155,7 @@ class HouseholdSerializer(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     size = serializers.IntegerField(required=False, allow_null=True)
+    consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 
     class Meta:
         model = PendingHousehold

@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from django.template.loader import get_template
-
 from weasyprint import HTML
 
 

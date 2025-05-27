@@ -1,32 +1,26 @@
 from tempfile import NamedTemporaryFile
 from typing import Optional, Union
 
+import openpyxl
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.db import transaction
 from django.db.models import Q, QuerySet
-
-import openpyxl
 from openpyxl.packaging.custom import StringProperty
 
-from hct_mis_api.apps.core.attributes_qet_queries import age_to_birth_date_query
+from hct_mis_api.apps.core.attributes_qet_queries import \
+    age_to_birth_date_query
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketComplaintDetails,
-    TicketDeleteIndividualDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketNeedsAdjudicationDetails,
-    TicketNegativeFeedbackDetails,
-    TicketPositiveFeedbackDetails,
-    TicketReferralDetails,
-    TicketSensitiveDetails,
-    TicketSystemFlaggingDetails,
-)
+    GrievanceTicket, TicketComplaintDetails, TicketDeleteIndividualDetails,
+    TicketIndividualDataUpdateDetails, TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails, TicketPositiveFeedbackDetails,
+    TicketReferralDetails, TicketSensitiveDetails, TicketSystemFlaggingDetails)
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.models import \
+    PeriodicDataUpdateTemplate
 
 
 class PeriodicDataUpdateExportTemplateService:

@@ -1,35 +1,26 @@
+import pytest
 from django.core.management import call_command
 from django.test import TestCase
 
-import pytest
-
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.documents import get_individual_doc
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    FEMALE,
-    HEAD,
-    MALE,
-    NEEDS_ADJUDICATION,
-    SON_DAUGHTER,
-    UNIQUE,
-    WIFE_HUSBAND,
-    Individual,
-    PendingIndividual,
-)
+from hct_mis_api.apps.household.fixtures import \
+    create_household_and_individuals
+from hct_mis_api.apps.household.models import (DUPLICATE, FEMALE, HEAD, MALE,
+                                               NEEDS_ADJUDICATION,
+                                               SON_DAUGHTER, UNIQUE,
+                                               WIFE_HUSBAND, Individual,
+                                               PendingIndividual)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (
-    DUPLICATE_IN_BATCH,
-    UNIQUE_IN_BATCH,
-    ImportData,
-)
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.utils.elasticsearch_utils import (
-    populate_index,
-    rebuild_search_index,
-)
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import (DUPLICATE_IN_BATCH,
+                                                       UNIQUE_IN_BATCH,
+                                                       ImportData)
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import \
+    DeduplicateTask
+from hct_mis_api.apps.utils.elasticsearch_utils import (populate_index,
+                                                        rebuild_search_index)
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 from tests.unit.conftest import disabled_locally_test
 

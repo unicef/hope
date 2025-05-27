@@ -5,14 +5,13 @@ from typing import Any, List, Optional, Union
 import factory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
+    FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
-from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-)
+from hct_mis_api.apps.targeting.models import (TargetingCriteria,
+                                               TargetingCriteriaRule,
+                                               TargetingCriteriaRuleFilter)
 
 
 def comparison_method_resolver(obj: Any) -> Optional[Union[List[str], str]]:

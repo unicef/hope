@@ -15,24 +15,18 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-
 from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.grievance.constants import (
-    PRIORITY_CHOICES,
-    PRIORITY_NOT_SET,
-    URGENCY_CHOICES,
-    URGENCY_NOT_SET,
-)
+from hct_mis_api.apps.grievance.constants import (PRIORITY_CHOICES,
+                                                  PRIORITY_NOT_SET,
+                                                  URGENCY_CHOICES,
+                                                  URGENCY_NOT_SET)
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import Payment, PaymentVerification
-from hct_mis_api.apps.utils.models import (
-    AdminUrlMixin,
-    ConcurrencyModel,
-    TimeStampedUUIDModel,
-    UnicefIdentifiedModel,
-)
+from hct_mis_api.apps.utils.models import (AdminUrlMixin, ConcurrencyModel,
+                                           TimeStampedUUIDModel,
+                                           UnicefIdentifiedModel)
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household  # pragma: no cover

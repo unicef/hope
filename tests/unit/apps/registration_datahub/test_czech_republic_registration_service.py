@@ -1,38 +1,24 @@
 import datetime
 
+import pytz
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
-
-import pytz
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
-    DISABLED,
-    FEMALE,
-    GOVERNMENT_PARTNER,
-    MALE,
-    NOT_DISABLED,
-    PRIVATE_PARTNER,
-    DocumentType,
-    PendingBankAccountInfo,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
-)
+    DISABLED, FEMALE, GOVERNMENT_PARTNER, MALE, NOT_DISABLED, PRIVATE_PARTNER,
+    DocumentType, PendingBankAccountInfo, PendingDocument, PendingHousehold,
+    PendingIndividual, PendingIndividualRoleInHousehold)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
+from hct_mis_api.contrib.aurora.fixtures import (OrganizationFactory,
+                                                 ProjectFactory,
+                                                 RegistrationFactory)
 from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.czech_republic_flex_registration_service import (
-    CzechRepublicFlexRegistration,
-)
+from hct_mis_api.contrib.aurora.services.czech_republic_flex_registration_service import \
+    CzechRepublicFlexRegistration
 
 
 class TestCzechRepublicRegistrationService(TestCase):

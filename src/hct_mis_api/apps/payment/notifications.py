@@ -1,11 +1,10 @@
 import logging
 from typing import Any, Dict
 
+from constance import config
 from django.conf import settings
 from django.db.models import Q, QuerySet
 from django.utils import timezone
-
-from constance import config
 
 from hct_mis_api.apps.account.models import RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions

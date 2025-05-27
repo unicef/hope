@@ -5,10 +5,10 @@ from django.db import transaction
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
-    import_program_population,
-)
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import \
+    DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.import_program_population import \
+    import_program_population
 
 logger = logging.getLogger(__name__)
 

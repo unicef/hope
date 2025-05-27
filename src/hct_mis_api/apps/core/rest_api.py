@@ -2,14 +2,15 @@ import logging
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from django.core.cache import cache
-
 from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice
-from hct_mis_api.apps.core.schema import get_fields_attr_generators, sort_by_attr
+from hct_mis_api.apps.core.models import (FlexibleAttribute,
+                                          FlexibleAttributeChoice)
+from hct_mis_api.apps.core.schema import (get_fields_attr_generators,
+                                          sort_by_attr)
 from hct_mis_api.apps.core.utils import to_choice_object
 
 if TYPE_CHECKING:

@@ -1,14 +1,11 @@
 from django.urls import include, path
-
 from rest_framework.routers import SimpleRouter
 from rest_framework_nested.routers import NestedSimpleRouter
 
 from hct_mis_api.apps.core.api.urls import get_business_area_nested_router
-from hct_mis_api.apps.program.api.views import (
-    BeneficiaryGroupViewSet,
-    ProgramCycleViewSet,
-    ProgramViewSet,
-)
+from hct_mis_api.apps.program.api.views import (BeneficiaryGroupViewSet,
+                                                ProgramCycleViewSet,
+                                                ProgramViewSet)
 
 app_name = "program"
 

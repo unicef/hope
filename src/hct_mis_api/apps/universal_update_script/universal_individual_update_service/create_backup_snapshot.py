@@ -3,16 +3,14 @@ import tempfile
 from typing import Callable, Optional
 
 from django.core.files.base import ContentFile
-
 from openpyxl import load_workbook
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
-    get_household_snapshot,
-)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import \
+    get_household_snapshot
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 
 

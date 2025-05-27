@@ -7,34 +7,19 @@ from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.utils import (
     build_arg_dict_from_dict_if_exists,
-    build_flex_arg_dict_from_list_if_exists,
-)
+    build_flex_arg_dict_from_list_if_exists)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.models import Country as GeoCountry
-from hct_mis_api.apps.household.forms import (
-    BankAccountInfoForm,
-    DocumentForm,
-    IndividualForm,
-)
+from hct_mis_api.apps.household.forms import (BankAccountInfoForm,
+                                              DocumentForm, IndividualForm)
 from hct_mis_api.apps.household.models import (
-    GOVERNMENT_PARTNER,
-    HEAD,
-    HUMANITARIAN_PARTNER,
-    NOT_DISABLED,
-    PRIVATE_PARTNER,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    DocumentType,
-    PendingBankAccountInfo,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
-)
+    GOVERNMENT_PARTNER, HEAD, HUMANITARIAN_PARTNER, NOT_DISABLED,
+    PRIVATE_PARTNER, ROLE_ALTERNATE, ROLE_PRIMARY, DocumentType,
+    PendingBankAccountInfo, PendingDocument, PendingHousehold,
+    PendingIndividual, PendingIndividualRoleInHousehold)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
-    BaseRegistrationService,
-)
+from hct_mis_api.contrib.aurora.services.base_flex_registration_service import \
+    BaseRegistrationService
 
 logger = logging.getLogger(__name__)
 

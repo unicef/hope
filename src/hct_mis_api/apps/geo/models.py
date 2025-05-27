@@ -7,14 +7,13 @@ from django.contrib.gis.db import models
 from django.contrib.postgres.fields import CICharField
 from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
-
-from natural_keys import NaturalKeyModel
-
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 from mptt.querysets import TreeQuerySet
+from natural_keys import NaturalKeyModel
+
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class ValidityQuerySet(TreeQuerySet):

@@ -5,39 +5,31 @@ from typing import Any
 import openpyxl
 import pytest
 
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import (
-    DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
+                                            create_afghanistan)
+from hct_mis_api.apps.core.models import (DataCollectingType,
+                                          FlexibleAttribute, PeriodicFieldData)
+from hct_mis_api.apps.household.fixtures import \
+    create_household_and_individuals
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.periodic_data_update.fixtures import (
-    PeriodicDataUpdateTemplateFactory,
-    PeriodicDataUpdateUploadFactory,
-)
+    PeriodicDataUpdateTemplateFactory, PeriodicDataUpdateUploadFactory)
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
-)
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
-)
+    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import \
+    PeriodicDataUpdateExportTemplateService
 from hct_mis_api.apps.periodic_data_update.utils import (
-    field_label_to_field_name,
-    populate_pdu_with_null_values,
-)
+    field_label_to_field_name, populate_pdu_with_null_values)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-)
-from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
+from tests.selenium.page_object.programme_population.individuals import \
+    Individuals
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import \
+    PeriodicDatUpdateTemplates
+from tests.selenium.page_object.programme_population.periodic_data_update_uploads import \
+    PeriodicDataUpdateUploads
 
 pytestmark = pytest.mark.django_db()
 

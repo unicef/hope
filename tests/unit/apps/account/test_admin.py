@@ -3,26 +3,20 @@ from typing import Any, Optional, Union
 from unittest.mock import MagicMock
 from urllib.parse import unquote
 
+import pytest
 from django.contrib.admin.sites import AdminSite
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-
-import pytest
 from django_webtest import DjangoTestApp
 
 from hct_mis_api.apps.account.admin import PartnerAdmin
-from hct_mis_api.apps.account.admin.user_role import (
-    RoleAssignmentAdmin,
-    RoleAssignmentInline,
-)
-from hct_mis_api.apps.account.fixtures import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    RoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.admin.user_role import (RoleAssignmentAdmin,
+                                                      RoleAssignmentInline)
+from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
+                                               PartnerFactory,
+                                               RoleAssignmentFactory,
+                                               RoleFactory, UserFactory)
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 

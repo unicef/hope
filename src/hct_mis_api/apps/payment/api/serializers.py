@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Optional, Union
 from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
-
 from rest_framework import serializers
 
 from hct_mis_api.apps.account.permissions import Permissions
@@ -14,55 +13,38 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.lookup_functions import (
-    get_debit_card_issuer,
-    get_debit_card_number,
-)
-from hct_mis_api.apps.core.utils import (
-    check_concurrency_version_in_mutation,
-    to_choice_object,
-)
+    get_debit_card_issuer, get_debit_card_number)
+from hct_mis_api.apps.core.utils import (check_concurrency_version_in_mutation,
+                                         to_choice_object)
 from hct_mis_api.apps.household.api.serializers.household import (
-    HouseholdDetailSerializer,
-    HouseholdSmallSerializer,
-)
+    HouseholdDetailSerializer, HouseholdSmallSerializer)
 from hct_mis_api.apps.household.api.serializers.individual import (
-    IndividualDetailSerializer,
-    IndividualListSerializer,
-    IndividualSmallSerializer,
-)
-from hct_mis_api.apps.household.models import (
-    STATUS_ACTIVE,
-    STATUS_INACTIVE,
-    Household,
-    Individual,
-)
-from hct_mis_api.apps.payment.models import (
-    Approval,
-    ApprovalProcess,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
+    IndividualDetailSerializer, IndividualListSerializer,
+    IndividualSmallSerializer)
+from hct_mis_api.apps.household.models import (STATUS_ACTIVE, STATUS_INACTIVE,
+                                               Household, Individual)
+from hct_mis_api.apps.payment.models import (Approval, ApprovalProcess,
+                                             FinancialServiceProvider, Payment,
+                                             PaymentPlan, PaymentPlanSplit,
+                                             PaymentPlanSupportingDocument,
+                                             PaymentVerification,
+                                             PaymentVerificationPlan,
+                                             PaymentVerificationSummary)
 from hct_mis_api.apps.payment.models.payment import (
-    DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
-)
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+    DeliveryMechanism, DeliveryMechanismPerPaymentPlan)
+from hct_mis_api.apps.payment.services.payment_plan_services import \
+    PaymentPlanService
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.program.api.serializers import (
-    ProgramCycleSmallSerializer,
-    ProgramSmallSerializer,
-)
+    ProgramCycleSmallSerializer, ProgramSmallSerializer)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.api.serializers import RuleCommitSerializer
-from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
-from hct_mis_api.contrib.api.serializers.vision import FundsCommitmentSerializer
-from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
+from hct_mis_api.apps.targeting.api.serializers import \
+    TargetingCriteriaSerializer
+from hct_mis_api.contrib.api.serializers.vision import \
+    FundsCommitmentSerializer
+from hct_mis_api.contrib.vision.models import (FundsCommitmentGroup,
+                                               FundsCommitmentItem)
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):

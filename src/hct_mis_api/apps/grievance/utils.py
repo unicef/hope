@@ -13,15 +13,10 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
-    GrievanceDocument,
-    GrievanceTicket,
-    TicketAddIndividualDetails,
-    TicketDeleteHouseholdDetails,
-    TicketDeleteIndividualDetails,
-    TicketHouseholdDataUpdateDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketNeedsAdjudicationDetails,
-)
+    GrievanceDocument, GrievanceTicket, TicketAddIndividualDetails,
+    TicketDeleteHouseholdDetails, TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails, TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails)
 from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
 

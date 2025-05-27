@@ -1,7 +1,6 @@
 import os
 
 from django.conf import settings
-
 from elasticsearch_dsl import analyzer, token_filter, tokenizer
 
 phonetic_filter = token_filter(

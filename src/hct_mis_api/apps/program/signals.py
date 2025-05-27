@@ -7,10 +7,8 @@ from django.dispatch import Signal, receiver
 
 from hct_mis_api.api.caches import get_or_create_cache_key
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.program.utils import (
-    create_program_partner_access,
-    remove_program_partner_access,
-)
+from hct_mis_api.apps.program.utils import (create_program_partner_access,
+                                            remove_program_partner_access)
 
 program_copied = Signal()
 

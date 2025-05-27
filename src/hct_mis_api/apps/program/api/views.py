@@ -1,16 +1,17 @@
 import logging
 from typing import Any
 
-from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
-
 from constance import config
+from django.db.models import (Case, IntegerField, Prefetch, QuerySet, Value,
+                              When)
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
-from rest_framework.mixins import DestroyModelMixin, ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
+                                   RetrieveModelMixin)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -19,36 +20,26 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
-from hct_mis_api.apps.account.permissions import (
-    ALL_GRIEVANCES_CREATE_MODIFY,
-    Permissions,
-)
-from hct_mis_api.apps.core.api.mixins import (
-    BaseViewSet,
-    BusinessAreaMixin,
-    CountActionMixin,
-    ProgramMixin,
-    SerializerActionMixin,
-)
+from hct_mis_api.apps.account.permissions import (ALL_GRIEVANCES_CREATE_MODIFY,
+                                                  Permissions)
+from hct_mis_api.apps.core.api.mixins import (BaseViewSet, BusinessAreaMixin,
+                                              CountActionMixin, ProgramMixin,
+                                              SerializerActionMixin)
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.program.api.caches import (
-    BeneficiaryGroupKeyConstructor,
-    ProgramCycleKeyConstructor,
-    ProgramListKeyConstructor,
-)
-from hct_mis_api.apps.program.api.filters import ProgramCycleFilter, ProgramFilter
+    BeneficiaryGroupKeyConstructor, ProgramCycleKeyConstructor,
+    ProgramListKeyConstructor)
+from hct_mis_api.apps.program.api.filters import (ProgramCycleFilter,
+                                                  ProgramFilter)
 from hct_mis_api.apps.program.api.serializers import (
-    BeneficiaryGroupSerializer,
-    ProgramCycleCreateSerializer,
-    ProgramCycleDeleteSerializer,
-    ProgramCycleListSerializer,
-    ProgramCycleUpdateSerializer,
-    ProgramDetailSerializer,
-    ProgramListSerializer,
-)
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+    BeneficiaryGroupSerializer, ProgramCycleCreateSerializer,
+    ProgramCycleDeleteSerializer, ProgramCycleListSerializer,
+    ProgramCycleUpdateSerializer, ProgramDetailSerializer,
+    ProgramListSerializer)
+from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
+                                             ProgramCycle)
 from hct_mis_api.apps.program.validators import ProgramDeletionValidator
 
 logger = logging.getLogger(__name__)

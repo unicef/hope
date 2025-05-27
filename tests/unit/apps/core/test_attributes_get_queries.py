@@ -1,42 +1,26 @@
 import datetime as dt
 
+from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
-from dateutil.relativedelta import relativedelta
-
 from hct_mis_api.apps.core.attributes_qet_queries import (
-    age_to_birth_date_query,
-    age_to_birth_date_range_query,
-    country_origin_query,
-    country_query,
+    age_to_birth_date_query, age_to_birth_date_range_query,
+    country_origin_query, country_query,
     get_birth_certificate_document_number_query,
-    get_birth_certificate_issuer_query,
-    get_documents_issuer_query,
+    get_birth_certificate_issuer_query, get_documents_issuer_query,
     get_drivers_license_document_number_query,
     get_drivers_licensee_issuer_query,
-    get_electoral_card_document_number_query,
-    get_electoral_card_issuer_query,
-    get_has_bank_account_number_query,
-    get_has_phone_number_query,
-    get_has_tax_id_query,
-    get_national_id_document_number_query,
-    get_national_id_issuer_query,
-    get_national_passport_document_number_query,
-    get_national_passport_issuer_query,
-    get_other_document_number_query,
-    get_other_issuer_query,
-    get_receiver_poi_issuer_query,
-    get_receiver_poi_number_query,
-    get_role_query,
-    get_scope_id_issuer_query,
-    get_scope_id_number_query,
-    get_tax_id_document_number_query,
-    get_tax_id_issuer_query,
-    get_unhcr_id_issuer_query,
-    get_unhcr_id_number_query,
-    registration_data_import_query,
-)
+    get_electoral_card_document_number_query, get_electoral_card_issuer_query,
+    get_has_bank_account_number_query, get_has_phone_number_query,
+    get_has_tax_id_query, get_national_id_document_number_query,
+    get_national_id_issuer_query, get_national_passport_document_number_query,
+    get_national_passport_issuer_query, get_other_document_number_query,
+    get_other_issuer_query, get_receiver_poi_issuer_query,
+    get_receiver_poi_number_query, get_role_query, get_scope_id_issuer_query,
+    get_scope_id_number_query, get_tax_id_document_number_query,
+    get_tax_id_issuer_query, get_unhcr_id_issuer_query,
+    get_unhcr_id_number_query, registration_data_import_query)
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.household.models import UNHCR, WFP

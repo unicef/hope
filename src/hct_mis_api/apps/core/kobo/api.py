@@ -5,9 +5,8 @@ from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
-from django.conf import settings
-
 import requests
+from django.conf import settings
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RetryError
 from requests.packages.urllib3.util.retry import Retry

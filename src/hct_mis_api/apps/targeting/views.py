@@ -7,9 +7,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
-    XlsxExportTargetingService,
-)
+from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import \
+    XlsxExportTargetingService
 
 if TYPE_CHECKING:
     from uuid import UUID

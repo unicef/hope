@@ -5,27 +5,21 @@ from datetime import date, datetime
 from typing import Any, Dict, Iterable, List, Optional, Set, Union
 from urllib.request import urlopen
 
+import dateutil.parser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-import dateutil.parser
-
 from hct_mis_api.apps.core.countries import SanctionListCountries as Countries
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.sanction_list.models import (
-    SanctionListIndividual,
-    SanctionListIndividualAliasName,
-    SanctionListIndividualCountries,
-    SanctionListIndividualDateOfBirth,
-    SanctionListIndividualDocument,
-    SanctionListIndividualNationalities,
-)
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
-    CheckAgainstSanctionListPreMergeTask,
-)
+    SanctionListIndividual, SanctionListIndividualAliasName,
+    SanctionListIndividualCountries, SanctionListIndividualDateOfBirth,
+    SanctionListIndividualDocument, SanctionListIndividualNationalities)
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import \
+    CheckAgainstSanctionListPreMergeTask
 
 
 class LoadSanctionListXMLTask:

@@ -2,7 +2,6 @@ from datetime import date
 from typing import Any, Callable, Optional, Type
 
 from django.db.models import Model
-
 from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.core.models import BusinessArea

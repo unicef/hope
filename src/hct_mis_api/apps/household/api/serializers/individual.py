@@ -9,28 +9,19 @@ from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.utils import (
-    decode_id_string,
-    resolve_flex_fields_choices_to_string,
-)
+from hct_mis_api.apps.core.utils import (decode_id_string,
+                                         resolve_flex_fields_choices_to_string)
 from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.api.serializers.registration_data_import import (
-    RegistrationDataImportSerializer,
-)
-from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    DUPLICATE_IN_BATCH,
-    ROLE_NO_ROLE,
-    BankAccountInfo,
-    Document,
-    DocumentType,
-    Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-)
+from hct_mis_api.apps.household.api.serializers.registration_data_import import \
+    RegistrationDataImportSerializer
+from hct_mis_api.apps.household.models import (DUPLICATE, DUPLICATE_IN_BATCH,
+                                               ROLE_NO_ROLE, BankAccountInfo,
+                                               Document, DocumentType,
+                                               Household, Individual,
+                                               IndividualIdentity,
+                                               IndividualRoleInHousehold)
 from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 

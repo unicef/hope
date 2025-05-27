@@ -1,15 +1,8 @@
 from typing import Any, Dict, Optional, Union
 
 from django.http import HttpRequest, HttpResponse
-
-from smart_admin.console.email import (
-    concurrent,
-    logger,
-    messages,
-    render,
-    settings,
-    timezone,
-)
+from smart_admin.console.email import (concurrent, logger, messages, render,
+                                       settings, timezone)
 
 from hct_mis_api.apps.utils.security import is_root
 

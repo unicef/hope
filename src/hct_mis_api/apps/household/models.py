@@ -3,6 +3,7 @@ import re
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.gis.db.models import Q, UniqueConstraint
 from django.contrib.gis.geos import Point
@@ -10,14 +11,13 @@ from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
-from django.core.validators import MinLengthValidator, validate_image_file_extension
+from django.core.validators import (MinLengthValidator,
+                                    validate_image_file_extension)
 from django.db import models
 from django.db.models import BooleanField, F, Func, JSONField, QuerySet, Value
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-
-from dateutil.relativedelta import relativedelta
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
@@ -30,31 +30,21 @@ from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.core.utils import FlexFieldsEncoder
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.mixins import (
-    HouseholdDeliveryDataMixin,
-    IndividualDeliveryDataMixin,
-)
-from hct_mis_api.apps.household.signals import (
-    household_deleted,
-    household_withdrawn,
-    individual_deleted,
-    individual_withdrawn,
-)
-from hct_mis_api.apps.utils.models import (
-    AbstractSyncable,
-    AdminUrlMixin,
-    ConcurrencyModel,
-    InternalDataFieldModel,
-    MergeStatusModel,
-    PendingManager,
-    SoftDeletableMergeStatusModel,
-    TimeStampedUUIDModel,
-    UnicefIdentifiedModel,
-)
-from hct_mis_api.apps.utils.phone import (
-    calculate_phone_numbers_validity,
-    recalculate_phone_numbers_validity,
-)
+from hct_mis_api.apps.household.mixins import (HouseholdDeliveryDataMixin,
+                                               IndividualDeliveryDataMixin)
+from hct_mis_api.apps.household.signals import (household_deleted,
+                                                household_withdrawn,
+                                                individual_deleted,
+                                                individual_withdrawn)
+from hct_mis_api.apps.utils.models import (AbstractSyncable, AdminUrlMixin,
+                                           ConcurrencyModel,
+                                           InternalDataFieldModel,
+                                           MergeStatusModel, PendingManager,
+                                           SoftDeletableMergeStatusModel,
+                                           TimeStampedUUIDModel,
+                                           UnicefIdentifiedModel)
+from hct_mis_api.apps.utils.phone import (calculate_phone_numbers_validity,
+                                          recalculate_phone_numbers_validity)
 
 if TYPE_CHECKING:
     from hct_mis_api.contrib.aurora.models import Record

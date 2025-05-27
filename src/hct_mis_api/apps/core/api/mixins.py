@@ -3,7 +3,6 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from django.db.models import Q, QuerySet
-
 from drf_spectacular.utils import extend_schema, inline_serializer
 from requests import Response, session
 from requests.adapters import HTTPAdapter

@@ -7,18 +7,14 @@ from typing import Any, Collection, Optional
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
-from django.core.validators import (
-    MaxLengthValidator,
-    MinLengthValidator,
-    MinValueValidator,
-    ProhibitNullCharactersValidator,
-)
+from django.core.validators import (MaxLengthValidator, MinLengthValidator,
+                                    MinValueValidator,
+                                    ProhibitNullCharactersValidator)
 from django.db import models
 from django.db.models import Q, QuerySet, Sum
 from django.db.models.constraints import UniqueConstraint
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext_lazy as _
-
 from model_utils.models import SoftDeletableModel
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
@@ -26,18 +22,13 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.utils.models import (
-    AbstractSyncable,
-    AdminUrlMixin,
-    ConcurrencyModel,
-    SoftDeletableIsVisibleManager,
-    TimeStampedUUIDModel,
-    UnicefIdentifiedModel,
-)
-from hct_mis_api.apps.utils.validators import (
-    DoubleSpaceValidator,
-    StartEndSpaceValidator,
-)
+from hct_mis_api.apps.utils.models import (AbstractSyncable, AdminUrlMixin,
+                                           ConcurrencyModel,
+                                           SoftDeletableIsVisibleManager,
+                                           TimeStampedUUIDModel,
+                                           UnicefIdentifiedModel)
+from hct_mis_api.apps.utils.validators import (DoubleSpaceValidator,
+                                               StartEndSpaceValidator)
 
 
 class ProgramPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment

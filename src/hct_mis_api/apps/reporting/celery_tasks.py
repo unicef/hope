@@ -4,7 +4,8 @@ from uuid import UUID
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hct_mis_api.apps.utils.sentry import (sentry_tags,
+                                           set_sentry_business_area_tag)
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +16,8 @@ logger = logging.getLogger(__name__)
 def report_export_task(self: Any, report_id: UUID) -> None:
     try:
         from hct_mis_api.apps.reporting.models import Report
-        from hct_mis_api.apps.reporting.services.generate_report_service import (
-            GenerateReportService,
-        )
+        from hct_mis_api.apps.reporting.services.generate_report_service import \
+            GenerateReportService
 
         report_obj = Report.objects.get(id=report_id)
         set_sentry_business_area_tag(report_obj.business_area.name)

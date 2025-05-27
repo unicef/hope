@@ -1,18 +1,14 @@
 from django.contrib.auth.models import AbstractUser
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.data_change_services import (
-    close_data_change_ticket_service,
-)
-from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
-    close_needs_adjudication_ticket_service,
-)
-from hct_mis_api.apps.grievance.services.payment_verification_services import (
-    update_payment_verification_service,
-)
-from hct_mis_api.apps.grievance.services.system_ticket_service import (
-    close_system_flagging_ticket_service,
-)
+from hct_mis_api.apps.grievance.services.data_change_services import \
+    close_data_change_ticket_service
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import \
+    close_needs_adjudication_ticket_service
+from hct_mis_api.apps.grievance.services.payment_verification_services import \
+    update_payment_verification_service
+from hct_mis_api.apps.grievance.services.system_ticket_service import \
+    close_system_flagging_ticket_service
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 

@@ -2,11 +2,10 @@ import logging
 from enum import auto
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
+from constance import config
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
-
-from constance import config
 
 from hct_mis_api.apps.account.models import RoleAssignment, User
 from hct_mis_api.apps.core.utils import encode_id_base64

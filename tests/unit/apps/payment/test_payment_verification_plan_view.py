@@ -2,32 +2,26 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any, List, Optional
 
+import pytest
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.utils import timezone
-
-import pytest
 from openpyxl import Workbook
 from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-)
-from hct_mis_api.apps.payment.models import (
-    Payment,
-    PaymentPlan,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-    build_summary,
-)
+from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                               PaymentPlanFactory,
+                                               PaymentVerificationFactory,
+                                               PaymentVerificationPlanFactory)
+from hct_mis_api.apps.payment.models import (Payment, PaymentPlan,
+                                             PaymentVerification,
+                                             PaymentVerificationPlan,
+                                             PaymentVerificationSummary,
+                                             build_summary)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 

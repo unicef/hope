@@ -1,7 +1,6 @@
 from typing import Any, List
 
 from django.core.management import call_command
-
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
@@ -11,10 +10,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory,
-    TicketNoteFactory,
-)
+from hct_mis_api.apps.grievance.fixtures import (GrievanceTicketFactory,
+                                                 TicketNoteFactory)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 

@@ -2,14 +2,13 @@ from typing import Any
 
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
-from rest_framework_extensions.key_constructor.constructors import KeyConstructor
+from rest_framework_extensions.key_constructor.constructors import \
+    KeyConstructor
 
-from hct_mis_api.api.caches import (
-    BusinessAreaAndProgramLastUpdatedKeyBit,
-    BusinessAreaVersionKeyBit,
-    KeyConstructorMixin,
-    get_or_create_cache_key,
-)
+from hct_mis_api.api.caches import (BusinessAreaAndProgramLastUpdatedKeyBit,
+                                    BusinessAreaVersionKeyBit,
+                                    KeyConstructorMixin,
+                                    get_or_create_cache_key)
 
 
 class ProgramCycleListVersionsKeyBit(BusinessAreaAndProgramLastUpdatedKeyBit):

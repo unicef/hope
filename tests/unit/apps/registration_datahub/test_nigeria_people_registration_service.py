@@ -10,26 +10,17 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area, AreaType
 from hct_mis_api.apps.household.models import (
-    HEAD,
-    MALE,
-    DocumentType,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
-)
+    HEAD, MALE, DocumentType, PendingDocument, PendingHousehold,
+    PendingIndividual, PendingIndividualRoleInHousehold)
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.contrib.aurora.fixtures import (
-    OrganizationFactory,
-    ProjectFactory,
-    RegistrationFactory,
-)
+from hct_mis_api.contrib.aurora.fixtures import (OrganizationFactory,
+                                                 ProjectFactory,
+                                                 RegistrationFactory)
 from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.nigeria_people_registration_service import (
-    NigeriaPeopleRegistrationService,
-)
+from hct_mis_api.contrib.aurora.services.nigeria_people_registration_service import \
+    NigeriaPeopleRegistrationService
 
 
 class TestNigeriaPeopleRegistrationService(TestCase):

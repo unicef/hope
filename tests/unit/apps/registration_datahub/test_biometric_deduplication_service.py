@@ -4,37 +4,25 @@ from decimal import Decimal
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
 from django.conf import settings
 from django.test import TestCase
 
-import pytest
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import (
-    IndividualFactory,
-    PendingIndividualFactory,
-)
-from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    DUPLICATE_IN_BATCH,
-    NOT_PROCESSED,
-    UNIQUE,
-)
+from hct_mis_api.apps.household.fixtures import (IndividualFactory,
+                                                 PendingIndividualFactory)
+from hct_mis_api.apps.household.models import (DUPLICATE, DUPLICATE_IN_BATCH,
+                                               NOT_PROCESSED, UNIQUE)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
-    DeduplicationEngineAPI,
-    DeduplicationImage,
-    DeduplicationSet,
-    DeduplicationSetData,
-    IgnoredFilenamesPair,
-    SimilarityPair,
-)
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
+    DeduplicationEngineAPI, DeduplicationImage, DeduplicationSet,
+    DeduplicationSetData, IgnoredFilenamesPair, SimilarityPair)
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import \
+    BiometricDeduplicationService
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 

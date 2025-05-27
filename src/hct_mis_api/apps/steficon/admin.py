@@ -5,6 +5,12 @@ from io import StringIO
 from typing import Any, Collection, Dict, List, Optional, Tuple, Type, Union
 from uuid import UUID
 
+from admin_extra_buttons.api import button
+from admin_extra_buttons.decorators import view
+from admin_extra_buttons.utils import labelize
+from admin_sync.mixin import SyncMixin
+from adminactions.export import ForeignKeysCollector
+from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.conf import settings
 from django.contrib import messages
@@ -19,13 +25,6 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
-
-from admin_extra_buttons.api import button
-from admin_extra_buttons.decorators import view
-from admin_extra_buttons.utils import labelize
-from admin_sync.mixin import SyncMixin
-from adminactions.export import ForeignKeysCollector
-from adminfilters.autocomplete import AutoCompleteFilter
 from import_export import fields
 from import_export.admin import ImportExportMixin
 from import_export.resources import ModelResource
@@ -36,13 +35,10 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.steficon.forms import (
-    RuleCommitAdminForm,
-    RuleDownloadCSVFileProcessForm,
-    RuleFileProcessForm,
-    RuleForm,
-    RuleTestForm,
-)
+from hct_mis_api.apps.steficon.forms import (RuleCommitAdminForm,
+                                             RuleDownloadCSVFileProcessForm,
+                                             RuleFileProcessForm, RuleForm,
+                                             RuleTestForm)
 from hct_mis_api.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root

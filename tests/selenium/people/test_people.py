@@ -1,28 +1,26 @@
 from datetime import datetime
 from typing import List
 
-from django.db import transaction
-
 import pytest
 from dateutil.relativedelta import relativedelta
+from django.db import transaction
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.household.fixtures import (
-    create_household,
-    create_individual_document,
-)
+from hct_mis_api.apps.household.fixtures import (create_household,
+                                                 create_individual_document)
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                               PaymentPlanFactory)
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from tests.selenium.page_object.filters import Filters
-from tests.selenium.page_object.grievance.details_grievance_page import (
-    GrievanceDetailsPage,
-)
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.grievance.details_grievance_page import \
+    GrievanceDetailsPage
+from tests.selenium.page_object.grievance.grievance_tickets import \
+    GrievanceTickets
 from tests.selenium.page_object.grievance.new_ticket import NewTicket
 from tests.selenium.page_object.people.people import People
 from tests.selenium.page_object.people.people_details import PeopleDetails

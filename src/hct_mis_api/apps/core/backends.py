@@ -7,10 +7,8 @@ from django.db.models import Model, Q
 from django.utils import timezone
 
 from hct_mis_api.api.caches import get_or_create_cache_key
-from hct_mis_api.apps.account.caches import (
-    get_user_permissions_cache_key,
-    get_user_permissions_version_key,
-)
+from hct_mis_api.apps.account.caches import (get_user_permissions_cache_key,
+                                             get_user_permissions_version_key)
 from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program

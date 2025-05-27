@@ -5,7 +5,8 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
+from hct_mis_api.apps.core.flex_fields_importer import \
+    FlexibleAttributeImporter
 
 logger = logging.getLogger(__name__)
 

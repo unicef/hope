@@ -2,13 +2,13 @@ import json
 import operator
 from typing import Dict
 
-from django.db import transaction
-
 import openpyxl
+from django.db import transaction
 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
+from hct_mis_api.apps.registration_datahub.validators import \
+    UploadXLSXInstanceValidator
 
 
 class ValidateXlsxImport:

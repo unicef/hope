@@ -2,6 +2,17 @@ import base64
 from typing import Any, Dict, Generator, Optional, Type
 from uuid import UUID
 
+import requests
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin
+from adminactions.mass_update import mass_update
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.combo import ChoicesFieldComboFilter
+from adminfilters.depot.widget import DepotManager
+from adminfilters.json import JsonFieldFilter
+from adminfilters.mixin import AdminFiltersMixin
+from adminfilters.numbers import NumberFilter
+from adminfilters.querystring import QueryStringFilter
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.views.main import ChangeList
@@ -14,18 +25,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-
-import requests
-from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin
-from adminactions.mass_update import mass_update
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.combo import ChoicesFieldComboFilter
-from adminfilters.depot.widget import DepotManager
-from adminfilters.json import JsonFieldFilter
-from adminfilters.mixin import AdminFiltersMixin
-from adminfilters.numbers import NumberFilter
-from adminfilters.querystring import QueryStringFilter
 from jsoneditor.forms import JSONEditor
 from requests.auth import HTTPBasicAuth
 from smart_admin.decorators import smart_register
@@ -38,9 +37,8 @@ from hct_mis_api.contrib.aurora import models
 from hct_mis_api.contrib.aurora.celery_tasks import fresh_extract_records_task
 from hct_mis_api.contrib.aurora.models import Record, Registration
 from hct_mis_api.contrib.aurora.services.extract_record import extract
-from hct_mis_api.contrib.aurora.services.flex_registration_service import (
-    create_task_for_processing_records,
-)
+from hct_mis_api.contrib.aurora.services.flex_registration_service import \
+    create_task_for_processing_records
 from hct_mis_api.contrib.aurora.utils import fetch_records, get_metadata
 
 

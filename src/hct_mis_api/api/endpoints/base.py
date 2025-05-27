@@ -1,12 +1,11 @@
 from typing import Any, Dict
 
+from constance import config
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.http import Http404, HttpRequest
 from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
-
-from constance import config
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response

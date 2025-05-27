@@ -2,9 +2,8 @@ import random
 from io import BytesIO
 from typing import Any
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
-
 import factory
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from factory.django import DjangoModelFactory
 from pytz import utc
 
@@ -12,26 +11,17 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
-    GrievanceDocument,
-    GrievanceTicket,
-    TicketAddIndividualDetails,
-    TicketComplaintDetails,
-    TicketDeleteHouseholdDetails,
-    TicketDeleteIndividualDetails,
-    TicketHouseholdDataUpdateDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketNeedsAdjudicationDetails,
-    TicketNegativeFeedbackDetails,
-    TicketNote,
-    TicketPaymentVerificationDetails,
-    TicketPositiveFeedbackDetails,
-    TicketReferralDetails,
-    TicketSensitiveDetails,
-    TicketSystemFlaggingDetails,
-)
+    GrievanceDocument, GrievanceTicket, TicketAddIndividualDetails,
+    TicketComplaintDetails, TicketDeleteHouseholdDetails,
+    TicketDeleteIndividualDetails, TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails, TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails, TicketNote,
+    TicketPaymentVerificationDetails, TicketPositiveFeedbackDetails,
+    TicketReferralDetails, TicketSensitiveDetails, TicketSystemFlaggingDetails)
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentVerificationFactory
+from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                               PaymentVerificationFactory)
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport

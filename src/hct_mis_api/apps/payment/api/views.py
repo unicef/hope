@@ -5,12 +5,11 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from zipfile import BadZipFile
 
+from constance import config
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.http import FileResponse
 from django.utils import timezone
-
-from constance import config
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
@@ -27,97 +26,66 @@ from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.api.mixins import (
-    BaseViewSet,
-    BusinessAreaProgramsAccessMixin,
-    CountActionMixin,
-    ProgramMixin,
-    SerializerActionMixin,
-)
+from hct_mis_api.apps.core.api.mixins import (BaseViewSet,
+                                              BusinessAreaProgramsAccessMixin,
+                                              CountActionMixin, ProgramMixin,
+                                              SerializerActionMixin)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.payment.api.caches import (
-    PaymentPlanKeyConstructor,
-    PaymentPlanListKeyConstructor,
-    PaymentVerificationListKeyConstructor,
-    TargetPopulationListKeyConstructor,
-)
-from hct_mis_api.apps.payment.api.filters import (
-    PaymentPlanFilter,
-    TargetPopulationFilter,
-)
+    PaymentPlanKeyConstructor, PaymentPlanListKeyConstructor,
+    PaymentVerificationListKeyConstructor, TargetPopulationListKeyConstructor)
+from hct_mis_api.apps.payment.api.filters import (PaymentPlanFilter,
+                                                  TargetPopulationFilter)
 from hct_mis_api.apps.payment.api.serializers import (
-    AcceptanceProcessSerializer,
-    ApplyEngineFormulaSerializer,
-    FspChoicesSerializer,
-    PaymentDetailSerializer,
-    PaymentListSerializer,
-    PaymentPlanBulkActionSerializer,
-    PaymentPlanCreateFollowUpSerializer,
-    PaymentPlanCreateUpdateSerializer,
-    PaymentPlanDetailSerializer,
+    AcceptanceProcessSerializer, ApplyEngineFormulaSerializer,
+    FspChoicesSerializer, PaymentDetailSerializer, PaymentListSerializer,
+    PaymentPlanBulkActionSerializer, PaymentPlanCreateFollowUpSerializer,
+    PaymentPlanCreateUpdateSerializer, PaymentPlanDetailSerializer,
     PaymentPlanExcludeBeneficiariesSerializer,
-    PaymentPlanExportAuthCodeSerializer,
-    PaymentPlanImportFileSerializer,
-    PaymentPlanListSerializer,
-    PaymentPlanSerializer,
+    PaymentPlanExportAuthCodeSerializer, PaymentPlanImportFileSerializer,
+    PaymentPlanListSerializer, PaymentPlanSerializer,
     PaymentPlanSupportingDocumentSerializer,
     PaymentVerificationPlanActivateSerializer,
     PaymentVerificationPlanCreateSerializer,
     PaymentVerificationPlanDetailsSerializer,
     PaymentVerificationPlanImportSerializer,
-    PaymentVerificationPlanListSerializer,
-    PaymentVerificationUpdateSerializer,
-    RevertMarkPaymentAsFailedSerializer,
-    SplitPaymentPlanSerializer,
-    TargetPopulationCopySerializer,
-    TargetPopulationCreateSerializer,
-    TargetPopulationDetailSerializer,
-    TPHouseholdListSerializer,
-    XlsxErrorSerializer,
-)
+    PaymentVerificationPlanListSerializer, PaymentVerificationUpdateSerializer,
+    RevertMarkPaymentAsFailedSerializer, SplitPaymentPlanSerializer,
+    TargetPopulationCopySerializer, TargetPopulationCreateSerializer,
+    TargetPopulationDetailSerializer, TPHouseholdListSerializer,
+    XlsxErrorSerializer)
 from hct_mis_api.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary,
-    import_payment_plan_payment_list_from_xlsx,
-    payment_plan_apply_engine_rule,
+    import_payment_plan_payment_list_from_xlsx, payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
-    payment_plan_exclude_beneficiaries,
-    payment_plan_full_rebuild,
-)
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentPlanSupportingDocument,
-    PaymentVerification,
-    PaymentVerificationPlan,
-)
+    payment_plan_exclude_beneficiaries, payment_plan_full_rebuild)
+from hct_mis_api.apps.payment.models import (DeliveryMechanism,
+                                             FinancialServiceProvider, Payment,
+                                             PaymentPlan, PaymentPlanSplit,
+                                             PaymentPlanSupportingDocument,
+                                             PaymentVerification,
+                                             PaymentVerificationPlan)
 from hct_mis_api.apps.payment.services.mark_as_failed import (
-    mark_as_failed,
-    revert_mark_as_failed,
-)
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.payment.services.verification_plan_crud_services import (
-    VerificationPlanCrudServices,
-)
-from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
-    VerificationPlanStatusChangeServices,
-)
-from hct_mis_api.apps.payment.utils import calculate_counts, from_received_to_status
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
-    XlsxPaymentPlanImportService,
-)
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
-    XlsxPaymentPlanImportPerFspService,
-)
-from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
-    XlsxVerificationImportService,
-)
+    mark_as_failed, revert_mark_as_failed)
+from hct_mis_api.apps.payment.services.payment_plan_services import \
+    PaymentPlanService
+from hct_mis_api.apps.payment.services.verification_plan_crud_services import \
+    VerificationPlanCrudServices
+from hct_mis_api.apps.payment.services.verification_plan_status_change_services import \
+    VerificationPlanStatusChangeServices
+from hct_mis_api.apps.payment.utils import (calculate_counts,
+                                            from_received_to_status)
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import \
+    XlsxPaymentPlanImportService
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import \
+    XlsxPaymentPlanImportPerFspService
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import \
+    XlsxVerificationImportService
 from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.api.serializers import TargetPopulationListSerializer
+from hct_mis_api.apps.targeting.api.serializers import \
+    TargetPopulationListSerializer
 
 logger = logging.getLogger(__name__)
 

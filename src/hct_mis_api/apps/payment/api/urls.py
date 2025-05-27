@@ -1,19 +1,12 @@
 from django.urls import include, path
-
 from rest_framework_nested.routers import NestedSimpleRouter
 
 from hct_mis_api.apps.core.api.urls import get_business_area_nested_router
 from hct_mis_api.apps.payment.api.views import (
-    PaymentPlanManagerialViewSet,
-    PaymentPlanSupportingDocumentViewSet,
-    PaymentPlanViewSet,
-    PaymentVerificationRecordViewSet,
-    PaymentVerificationViewSet,
-    PaymentViewSet,
-    TargetPopulationViewSet,
-    TPHouseholdViewSet,
-    available_fsps_for_delivery_mechanisms,
-)
+    PaymentPlanManagerialViewSet, PaymentPlanSupportingDocumentViewSet,
+    PaymentPlanViewSet, PaymentVerificationRecordViewSet,
+    PaymentVerificationViewSet, PaymentViewSet, TargetPopulationViewSet,
+    TPHouseholdViewSet, available_fsps_for_delivery_mechanisms)
 from hct_mis_api.apps.program.api.urls import program_base_router
 
 app_name = "payment"
