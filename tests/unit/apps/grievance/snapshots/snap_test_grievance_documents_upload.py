@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestGrievanceDocumentsUpload::test_mutation_creates_and_deletes_documents_for_existing_grievance_ticket_0_with_permission 1'] = {

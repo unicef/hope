@@ -1,4 +1,4 @@
-from django.db import migrations, connection
+from django.db import connection, migrations
 
 TRIGGER_FUNCTION = """
 CREATE OR REPLACE FUNCTION funds_commitment_trigger_function()
@@ -104,15 +104,6 @@ DROP TRIGGER IF EXISTS funds_commitment_insert_trigger ON vision_fundscommitment
 DROP FUNCTION IF EXISTS funds_commitment_trigger_function;
 """
 
-def create_trigger(apps, schema_editor):
-    with connection.cursor() as cursor:
-        cursor.execute(TRIGGER_FUNCTION)
-        cursor.execute(TRIGGER_CREATION)
-
-def drop_trigger(apps, schema_editor):
-    with connection.cursor() as cursor:
-        cursor.execute(TRIGGER_DELETION)
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -120,5 +111,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_trigger, reverse_code=drop_trigger),
+        migrations.RunSQL(TRIGGER_FUNCTION, ""),
+        migrations.RunSQL(TRIGGER_CREATION, TRIGGER_DELETION),
     ]

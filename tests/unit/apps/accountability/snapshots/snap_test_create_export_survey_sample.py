@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestSurveyQueries::test_create_export_survey_sample_with_invalid_survey_id 1'] = {
