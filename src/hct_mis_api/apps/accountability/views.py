@@ -4,8 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.accountability.models import (SampleFileExpiredException,
-                                                    Survey)
+from hct_mis_api.apps.accountability.models import SampleFileExpiredException, Survey
 from hct_mis_api.apps.core.utils import decode_id_string
 
 

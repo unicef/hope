@@ -4,10 +4,11 @@ from typing import Any
 from unittest import mock
 from unittest.mock import patch
 
-from aniso8601 import parse_date
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
+
+from aniso8601 import parse_date
 from django_fsm import TransitionNotAllowed
 from flaky import flaky
 from freezegun import freeze_time
@@ -18,32 +19,42 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
-    create_household_with_individual_with_collectors)
-from hct_mis_api.apps.household.models import (ROLE_PRIMARY,
-                                               IndividualRoleInHousehold)
+    create_household_with_individual_with_collectors,
+)
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
-    prepare_follow_up_payment_plan_task, prepare_payment_plan_task)
-from hct_mis_api.apps.payment.fixtures import (AccountFactory,
-                                               FinancialServiceProviderFactory,
-                                               PaymentFactory,
-                                               PaymentPlanFactory,
-                                               PaymentPlanSplitFactory,
-                                               generate_delivery_mechanisms)
-from hct_mis_api.apps.payment.models import (AccountType, DeliveryMechanism,
-                                             FinancialServiceProvider, Payment,
-                                             PaymentPlan, PaymentPlanSplit)
-from hct_mis_api.apps.payment.services.payment_plan_services import \
-    PaymentPlanService
-from hct_mis_api.apps.program.fixtures import (ProgramCycleFactory,
-                                               ProgramFactory)
+    prepare_follow_up_payment_plan_task,
+    prepare_payment_plan_task,
+)
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentPlanSplitFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+)
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.fixtures import (TargetingCriteriaFactory,
-                                                 TargetingCriteriaRuleFactory)
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+)
 
 
 class TestPaymentPlanServices(APITestCase):

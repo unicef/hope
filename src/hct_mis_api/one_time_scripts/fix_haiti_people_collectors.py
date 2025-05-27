@@ -1,5 +1,4 @@
-from hct_mis_api.apps.household.models import (ROLE_PRIMARY,
-                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 

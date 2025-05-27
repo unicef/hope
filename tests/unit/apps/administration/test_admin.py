@@ -1,9 +1,10 @@
 from typing import Any, Dict, Iterable, Tuple
 
-import factory
 from django.contrib.admin import ModelAdmin, site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.urls import reverse
+
+import factory
 from django_webtest import WebTest
 from factory.base import FactoryMetaClass
 from parameterized import parameterized

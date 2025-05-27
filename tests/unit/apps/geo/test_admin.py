@@ -2,6 +2,7 @@ from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
+
 from django_webtest import WebTest
 from factory import fuzzy
 from flaky import flaky

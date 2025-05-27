@@ -6,8 +6,9 @@ from django.db.models.signals import m2m_changed, post_save
 from django.dispatch import receiver
 
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment
-from hct_mis_api.apps.account.permissions import \
-    DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
+from hct_mis_api.apps.account.permissions import (
+    DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
+)
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 
 

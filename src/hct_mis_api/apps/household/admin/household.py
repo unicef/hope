@@ -4,12 +4,6 @@ from itertools import chain
 from typing import Any, List, Optional
 from uuid import UUID
 
-from admin_cursor_paginator import CursorPaginatorAdmin
-from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import LinkedAutoCompleteFilter
-from adminfilters.depot.widget import DepotManager
-from adminfilters.querystring import QueryStringFilter
 from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
@@ -20,6 +14,13 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
+
+from admin_cursor_paginator import CursorPaginatorAdmin
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import confirm_action
+from adminfilters.autocomplete import LinkedAutoCompleteFilter
+from adminfilters.depot.widget import DepotManager
+from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -27,19 +28,29 @@ from hct_mis_api.apps.core.utils import JSONBSet
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.admin.mixins import HouseholdWithDrawnMixin
 from hct_mis_api.apps.household.celery_tasks import (
-    enroll_households_to_program_task, mass_withdraw_households_from_list_task)
-from hct_mis_api.apps.household.forms import (MassEnrollForm,
-                                              WithdrawHouseholdsForm)
-from hct_mis_api.apps.household.models import (HEAD, ROLE_ALTERNATE,
-                                               ROLE_PRIMARY, Document,
-                                               Household, HouseholdCollection,
-                                               Individual,
-                                               IndividualRoleInHousehold)
+    enroll_households_to_program_task,
+    mass_withdraw_households_from_list_task,
+)
+from hct_mis_api.apps.household.forms import MassEnrollForm, WithdrawHouseholdsForm
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Document,
+    Household,
+    HouseholdCollection,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import (
-    BusinessAreaForHouseholdCollectionListFilter, HOPEModelAdminBase,
-    LastSyncDateResetMixin, LinkedObjectsManagerMixin,
-    RdiMergeStatusAdminMixin, SoftDeletableAdminMixin)
+    BusinessAreaForHouseholdCollectionListFilter,
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    LinkedObjectsManagerMixin,
+    RdiMergeStatusAdminMixin,
+    SoftDeletableAdminMixin,
+)
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)

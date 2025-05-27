@@ -1,8 +1,9 @@
 from functools import cached_property
 from typing import Any, Dict
 
-import openpyxl
 from django.db.models import Q, QuerySet
+
+import openpyxl
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet

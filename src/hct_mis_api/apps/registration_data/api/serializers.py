@@ -5,8 +5,7 @@ from rest_framework import serializers
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import get_count_and_percentage
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.utils import \
-    get_rdi_program_population
+from hct_mis_api.apps.registration_datahub.utils import get_rdi_program_population
 
 
 class RegistrationDataImportListSerializer(serializers.ModelSerializer):

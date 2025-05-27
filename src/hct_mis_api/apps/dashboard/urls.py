@@ -1,9 +1,12 @@
 from django.urls import path
+
 from rest_framework.routers import DefaultRouter
 
-from hct_mis_api.apps.dashboard.views import (CreateOrUpdateDashReportView,
-                                              DashboardDataView,
-                                              DashboardReportView)
+from hct_mis_api.apps.dashboard.views import (
+    CreateOrUpdateDashReportView,
+    DashboardDataView,
+    DashboardReportView,
+)
 
 router = DefaultRouter()
 urlpatterns = [

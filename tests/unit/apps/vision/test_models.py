@@ -1,11 +1,11 @@
-import pytest
 from django.test import TestCase
+
+import pytest
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
-from hct_mis_api.contrib.vision.models import (FundsCommitmentGroup,
-                                               FundsCommitmentItem)
+from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 pytestmark = pytest.mark.django_db
 

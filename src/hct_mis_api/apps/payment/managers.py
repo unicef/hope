@@ -1,7 +1,19 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import (Case, Exists, F, Func, JSONField, OuterRef, Q,
-                              QuerySet, Subquery, Value, When)
+from django.db.models import (
+    Case,
+    Exists,
+    F,
+    Func,
+    JSONField,
+    OuterRef,
+    Q,
+    QuerySet,
+    Subquery,
+    Value,
+    When,
+)
+
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 
 

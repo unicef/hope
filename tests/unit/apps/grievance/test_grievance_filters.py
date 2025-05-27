@@ -1,38 +1,48 @@
 from datetime import datetime
 from typing import Any, Callable
 
-import pytest
 from django.utils import timezone
+
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
-from hct_mis_api.apps.grievance.constants import (PRIORITY_HIGH,
-                                                  PRIORITY_MEDIUM,
-                                                  URGENCY_URGENT,
-                                                  URGENCY_VERY_URGENT)
-from hct_mis_api.apps.grievance.fixtures import \
-    TicketPaymentVerificationDetailsFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_HIGH,
+    PRIORITY_MEDIUM,
+    URGENCY_URGENT,
+    URGENCY_VERY_URGENT,
+)
+from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetailsFactory
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket, TicketComplaintDetails, TicketIndividualDataUpdateDetails,
-    TicketNeedsAdjudicationDetails, TicketSensitiveDetails,
-    TicketSystemFlaggingDetails)
+    GrievanceTicket,
+    TicketComplaintDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
+)
 from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory, DocumentTypeFactory, create_household_and_individuals)
+    DocumentFactory,
+    DocumentTypeFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.payment.fixtures import (
-    FinancialServiceProviderFactory, PaymentFactory, PaymentPlanFactory,
-    PaymentVerificationFactory, PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory)
-from hct_mis_api.apps.payment.models import (PaymentVerification,
-                                             PaymentVerificationPlan)
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.sanction_list.fixtures import \
-    SanctionListIndividualFactory
+from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 
 pytestmark = pytest.mark.django_db()
 

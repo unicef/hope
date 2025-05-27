@@ -1,8 +1,9 @@
 from typing import Any
 
-from constance import config
 from django.db.models import Case, DateField, F, QuerySet, When
 from django.utils import timezone
+
+from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
@@ -12,17 +13,20 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import (BaseViewSet,
-                                              BusinessAreaVisibilityMixin,
-                                              CountActionMixin,
-                                              ProgramVisibilityMixin,
-                                              SerializerActionMixin)
-from hct_mis_api.apps.grievance.api.caches import \
-    GrievanceTicketListKeyConstructor
+from hct_mis_api.apps.core.api.mixins import (
+    BaseViewSet,
+    BusinessAreaVisibilityMixin,
+    CountActionMixin,
+    ProgramVisibilityMixin,
+    SerializerActionMixin,
+)
+from hct_mis_api.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hct_mis_api.apps.grievance.api.mixins import GrievancePermissionsMixin
 from hct_mis_api.apps.grievance.api.serializers.grievance_ticket import (
-    GrievanceChoicesSerializer, GrievanceTicketDetailSerializer,
-    GrievanceTicketListSerializer)
+    GrievanceChoicesSerializer,
+    GrievanceTicketDetailSerializer,
+    GrievanceTicketListSerializer,
+)
 from hct_mis_api.apps.grievance.filters import GrievanceTicketFilter
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 

@@ -2,17 +2,22 @@ from datetime import timedelta
 from typing import Any
 from unittest.mock import patch
 
-import pytest
 from django.core.cache import cache
 from django.utils import timezone
 
+import pytest
+
 from hct_mis_api.apps.account.caches import get_user_permissions_version_key
-from hct_mis_api.apps.account.celery_tasks import \
-    invalidate_permissions_cache_for_user_if_expired_role
-from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
-                                               PartnerFactory,
-                                               RoleAssignmentFactory,
-                                               RoleFactory, UserFactory)
+from hct_mis_api.apps.account.celery_tasks import (
+    invalidate_permissions_cache_for_user_if_expired_role,
+)
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.signals import _invalidate_user_permissions_cache
 from hct_mis_api.apps.program.fixtures import ProgramFactory

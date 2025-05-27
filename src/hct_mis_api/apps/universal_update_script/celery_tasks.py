@@ -1,15 +1,18 @@
 import traceback
 
-from celery.exceptions import SoftTimeLimitExceeded
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 
+from celery.exceptions import SoftTimeLimitExceeded
+
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import \
-    create_and_save_snapshot_chunked
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import \
-    UniversalIndividualUpdateService
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.create_backup_snapshot import (
+    create_and_save_snapshot_chunked,
+)
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.universal_individual_update_service import (
+    UniversalIndividualUpdateService,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 

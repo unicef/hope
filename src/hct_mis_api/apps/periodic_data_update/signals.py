@@ -7,7 +7,9 @@ from django.dispatch import receiver
 from hct_mis_api.api.caches import get_or_create_cache_key
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 
 
 @receiver(post_save, sender=PeriodicDataUpdateTemplate)

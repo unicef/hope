@@ -2,14 +2,14 @@ import datetime
 import logging
 from typing import Any, Dict
 
-import graphene
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
-from hct_mis_api.apps.account.permissions import (PermissionMutation,
-                                                  Permissions)
+from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -17,8 +17,10 @@ from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.celery_tasks import report_export_task
-from hct_mis_api.apps.reporting.inputs import (CreateReportInput,
-                                               RestartCreateReportInput)
+from hct_mis_api.apps.reporting.inputs import (
+    CreateReportInput,
+    RestartCreateReportInput,
+)
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.reporting.schema import ReportNode
 from hct_mis_api.apps.reporting.validators import ReportValidator

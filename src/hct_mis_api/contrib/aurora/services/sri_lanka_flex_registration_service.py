@@ -1,21 +1,30 @@
 from typing import Any, Dict, Optional
 
 from hct_mis_api.apps.core.utils import (
-    IDENTIFICATION_TYPE_TO_KEY_MAPPING, build_arg_dict_from_dict_if_exists,
-    build_flex_arg_dict_from_list_if_exists)
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+    build_arg_dict_from_dict_if_exists,
+    build_flex_arg_dict_from_list_if_exists,
+)
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
-    HEAD, IDENTIFICATION_TYPE_BANK_STATEMENT,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, IDENTIFICATION_TYPE_NATIONAL_ID,
-    ROLE_PRIMARY, DocumentType, PendingBankAccountInfo, PendingDocument,
-    PendingHousehold, PendingIndividual, PendingIndividualRoleInHousehold)
-from hct_mis_api.apps.periodic_data_update.utils import \
-    populate_pdu_with_null_values
+    HEAD,
+    IDENTIFICATION_TYPE_BANK_STATEMENT,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    ROLE_PRIMARY,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+)
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.utils.age_at_registration import \
-    calculate_age_at_registration
-from hct_mis_api.contrib.aurora.services.base_flex_registration_service import \
-    BaseRegistrationService
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
+from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
 
 
 class SriLankaRegistrationService(BaseRegistrationService):

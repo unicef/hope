@@ -1,24 +1,31 @@
-import pytest
 from django.test import TestCase
+
+import pytest
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket, TicketComplaintDetails, TicketIndividualDataUpdateDetails)
+    GrievanceTicket,
+    TicketComplaintDetails,
+    TicketIndividualDataUpdateDetails,
+)
 from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory, create_household_and_individuals)
-from hct_mis_api.apps.household.models import (Document, Household, Individual,
-                                               PendingDocument,
-                                               PendingHousehold,
-                                               PendingIndividual)
-from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
-                                               PaymentPlanFactory)
+    DocumentFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import (
+    Document,
+    Household,
+    Individual,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.admin import \
-    RegistrationDataImportAdmin
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.admin import RegistrationDataImportAdmin
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel

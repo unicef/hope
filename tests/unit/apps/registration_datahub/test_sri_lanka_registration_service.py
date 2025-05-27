@@ -3,6 +3,7 @@ import datetime
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
 from freezegun import freeze_time
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
@@ -10,16 +11,24 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID, DocumentType, PendingBankAccountInfo,
-    PendingDocument, PendingHousehold, PendingIndividual,
-    PendingIndividualRoleInHousehold)
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.contrib.aurora.fixtures import (OrganizationFactory,
-                                                 ProjectFactory,
-                                                 RegistrationFactory)
+from hct_mis_api.contrib.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import \
-    SriLankaRegistrationService
+from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import (
+    SriLankaRegistrationService,
+)
 
 
 class TestSriLankaRegistrationService(TestCase):

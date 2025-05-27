@@ -4,19 +4,21 @@ import json
 from typing import Any
 from unittest.mock import patch
 
-from constance.test import override_config
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
 from django.utils import timezone
+
+from constance.test import override_config
 from freezegun import freeze_time
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
 from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import \
-    CheckAgainstSanctionListTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
+    CheckAgainstSanctionListTask,
+)
 
 
 class TestSanctionList(TestCase):

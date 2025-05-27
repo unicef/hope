@@ -3,8 +3,7 @@ from django.shortcuts import get_object_or_404
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.utils import CopyProgramPopulation
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.utils import \
-    get_rdi_program_population
+from hct_mis_api.apps.registration_datahub.utils import get_rdi_program_population
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 

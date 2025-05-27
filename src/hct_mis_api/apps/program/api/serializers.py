@@ -3,17 +3,16 @@ from typing import Any, Dict, Optional
 from django.db.models import Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
+
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hct_mis_api.apps.account.api.serializers import \
-    PartnerForProgramSerializer
+from hct_mis_api.apps.account.api.serializers import PartnerForProgramSerializer
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.api.serializers import DataCollectingTypeSerializer
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
-                                             ProgramCycle)
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
 def validate_cycle_timeframes_overlapping(

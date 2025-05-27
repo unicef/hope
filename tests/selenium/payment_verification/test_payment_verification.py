@@ -14,28 +14,31 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
-    FinancialServiceProviderFactory, PaymentFactory, PaymentPlanFactory,
-    PaymentVerificationFactory, PaymentVerificationPlanFactory,
-    PaymentVerificationSummaryFactory, generate_delivery_mechanisms)
-from hct_mis_api.apps.payment.models import (DeliveryMechanism, Payment,
-                                             PaymentPlan)
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
-                                             ProgramCycle)
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
-from tests.selenium.page_object.grievance.details_grievance_page import \
-    GrievanceDetailsPage
-from tests.selenium.page_object.grievance.grievance_tickets import \
-    GrievanceTickets
-from tests.selenium.page_object.payment_verification.payment_record import \
-    PaymentRecord
-from tests.selenium.page_object.payment_verification.payment_verification import \
-    PaymentVerification
-from tests.selenium.page_object.payment_verification.payment_verification_details import \
-    PaymentVerificationDetails
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.selenium.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
+from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
+from tests.selenium.page_object.payment_verification.payment_verification import (
+    PaymentVerification,
+)
+from tests.selenium.page_object.payment_verification.payment_verification_details import (
+    PaymentVerificationDetails,
+)
 from tests.selenium.payment_module.test_payment_plans import find_file
 
 pytestmark = pytest.mark.django_db()

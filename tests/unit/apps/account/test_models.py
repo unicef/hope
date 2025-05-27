@@ -2,10 +2,13 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TransactionTestCase
 
-from hct_mis_api.apps.account.fixtures import (AdminAreaLimitedToFactory,
-                                               PartnerFactory,
-                                               RoleAssignmentFactory,
-                                               RoleFactory, UserFactory)
+from hct_mis_api.apps.account.fixtures import (
+    AdminAreaLimitedToFactory,
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.geo.fixtures import AreaFactory

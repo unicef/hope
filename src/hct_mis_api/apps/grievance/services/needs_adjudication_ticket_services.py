@@ -6,25 +6,39 @@ from django.db.models import QuerySet
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.models import (GrievanceTicket,
-                                               TicketNeedsAdjudicationDetails)
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.services.reassign_roles_services import \
-    reassign_roles_on_marking_as_duplicate_individual_service
+from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+    reassign_roles_on_marking_as_duplicate_individual_service,
+)
 from hct_mis_api.apps.grievance.signals import (
-    individual_marked_as_distinct, individual_marked_as_duplicated)
+    individual_marked_as_distinct,
+    individual_marked_as_duplicated,
+)
 from hct_mis_api.apps.grievance.utils import (
     traverse_sibling_tickets,
-    validate_all_individuals_before_close_needs_adjudication)
+    validate_all_individuals_before_close_needs_adjudication,
+)
 from hct_mis_api.apps.household.documents import get_individual_doc
-from hct_mis_api.apps.household.models import (UNIQUE, UNIQUE_IN_BATCH,
-                                               Household, Individual)
+from hct_mis_api.apps.household.models import (
+    UNIQUE,
+    UNIQUE_IN_BATCH,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair, RegistrationDataImport)
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import \
-    HardDocumentDeduplication
-from hct_mis_api.apps.utils.elasticsearch_utils import \
-    remove_elasticsearch_documents_by_matching_ids
+    DeduplicationEngineSimilarityPair,
+    RegistrationDataImport,
+)
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+    HardDocumentDeduplication,
+)
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
+)
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
@@ -74,8 +88,9 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
     if ticket_details.ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
         # both individuals are distinct, report false positive
         if not duplicate_individuals and distinct_individuals:
-            from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import \
-                BiometricDeduplicationService
+            from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+                BiometricDeduplicationService,
+            )
 
             photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
             service = BiometricDeduplicationService()
@@ -116,7 +131,9 @@ def create_grievance_ticket_with_details(
     is_multiple_duplicates_version: bool = False,
 ) -> Tuple[Optional[GrievanceTicket], Optional[TicketNeedsAdjudicationDetails]]:
     from hct_mis_api.apps.grievance.models import (
-        GrievanceTicket, TicketNeedsAdjudicationDetails)
+        GrievanceTicket,
+        TicketNeedsAdjudicationDetails,
+    )
 
     if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
         return None, None

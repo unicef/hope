@@ -1,8 +1,7 @@
 from typing import Dict, List, Optional, Tuple
 
 from hct_mis_api.apps.core.utils import decode_and_get_object
-from hct_mis_api.apps.grievance.models import (GrievanceTicket,
-                                               TicketReferralDetails)
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketReferralDetails
 from hct_mis_api.apps.household.models import Household, Individual
 
 

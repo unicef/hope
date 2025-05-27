@@ -3,8 +3,9 @@ import json
 from django.conf import settings
 from django.test import TestCase
 
-from hct_mis_api.apps.registration_datahub.utils import \
-    calculate_hash_for_kobo_submission
+from hct_mis_api.apps.registration_datahub.utils import (
+    calculate_hash_for_kobo_submission,
+)
 
 
 class TestRdiUtils(TestCase):

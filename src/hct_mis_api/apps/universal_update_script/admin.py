@@ -1,7 +1,5 @@
 from typing import Any, Iterator, Tuple, Union
 
-from admin_extra_buttons.buttons import Button
-from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -10,15 +8,24 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 
+from admin_extra_buttons.buttons import Button
+from admin_extra_buttons.decorators import button
+
 from hct_mis_api.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
-    run_universal_individual_update)
-from hct_mis_api.apps.universal_update_script.models import (DeliveryMechanism,
-                                                             DocumentType,
-                                                             UniversalUpdate)
+    run_universal_individual_update,
+)
+from hct_mis_api.apps.universal_update_script.models import (
+    DeliveryMechanism,
+    DocumentType,
+    UniversalUpdate,
+)
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
-    get_household_flex_fields, get_individual_flex_fields, household_fields,
-    individual_fields)
+    get_household_flex_fields,
+    get_individual_flex_fields,
+    household_fields,
+    individual_fields,
+)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 

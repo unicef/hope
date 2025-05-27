@@ -1,6 +1,7 @@
+from django.contrib import admin
+
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.mixin import AdminFiltersMixin
-from django.contrib import admin
 
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
 

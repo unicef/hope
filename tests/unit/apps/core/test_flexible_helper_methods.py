@@ -1,13 +1,13 @@
 from typing import Dict, List, Optional, Union
 
-import xlrd
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+
+import xlrd
 from xlrd.sheet import Cell
 
-from hct_mis_api.apps.core.flex_fields_importer import \
-    FlexibleAttributeImporter
+from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 
 
 class TestFlexibleHelperMethods(TestCase):

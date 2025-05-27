@@ -9,8 +9,11 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.utils.models import (AdminUrlMixin, TimeStampedUUIDModel,
-                                           UnicefIdentifiedModel)
+from hct_mis_api.apps.utils.models import (
+    AdminUrlMixin,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
 
 
 class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):

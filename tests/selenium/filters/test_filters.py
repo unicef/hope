@@ -4,34 +4,36 @@ import pytest
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
-                                            create_afghanistan)
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory, PaymentPlanFactory, PaymentVerificationFactory,
-    PaymentVerificationPlanFactory, PaymentVerificationSummaryFactory)
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (ImportData,
-                                                       RegistrationDataImport)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from tests.selenium.page_object.filters import Filters
-from tests.selenium.page_object.grievance.details_grievance_page import \
-    GrievanceDetailsPage
-from tests.selenium.page_object.grievance.grievance_tickets import \
-    GrievanceTickets
+from tests.selenium.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
+from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
 from tests.selenium.page_object.grievance.new_ticket import NewTicket
-from tests.selenium.page_object.programme_details.programme_details import \
-    ProgrammeDetails
+from tests.selenium.page_object.programme_details.programme_details import (
+    ProgrammeDetails,
+)
 
 pytestmark = pytest.mark.django_db()
 

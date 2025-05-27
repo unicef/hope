@@ -3,22 +3,27 @@ from typing import Any, List
 import freezegun
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
-                                               PartnerFactory, RoleFactory,
-                                               UserFactory)
-from hct_mis_api.apps.account.models import (AdminAreaLimitedTo, Partner,
-                                             RoleAssignment)
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    RoleFactory,
+    UserFactory,
+)
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (FlexibleAttributeForPDUFactory,
-                                            PeriodicFieldDataFactory,
-                                            create_afghanistan)
-from hct_mis_api.apps.core.models import (BusinessArea, DataCollectingType,
-                                          PeriodicFieldData)
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
-from hct_mis_api.apps.program.fixtures import (BeneficiaryGroupFactory,
-                                               ProgramFactory)
+from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    PeriodicFieldData,
+)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 

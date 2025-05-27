@@ -4,11 +4,11 @@ from typing import Any
 from django.db.models import DecimalField, Q, QuerySet
 from django.db.models.aggregates import Count, Sum
 from django.db.models.functions import Coalesce, Lower
+
 from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
-from hct_mis_api.apps.core.utils import (CustomOrderingFilter,
-                                         decode_id_string_required)
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 

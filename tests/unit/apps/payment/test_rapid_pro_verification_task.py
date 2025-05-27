@@ -10,18 +10,20 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import (EntitlementCardFactory,
-                                                 create_household)
+from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory, PaymentPlanFactory, PaymentVerificationFactory,
-    PaymentVerificationPlanFactory, PaymentVerificationSummaryFactory)
-from hct_mis_api.apps.payment.models import (PaymentVerification,
-                                             PaymentVerificationPlan)
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import \
-    CheckRapidProVerificationTask
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
+)
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+    CheckRapidProVerificationTask,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 

@@ -6,8 +6,7 @@ from django.db import transaction
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import (DISABLED, NOT_DISABLED,
-                                               Individual)
+from hct_mis_api.apps.household.models import DISABLED, NOT_DISABLED, Individual
 
 
 # for copying & pasting into the terminal purposes

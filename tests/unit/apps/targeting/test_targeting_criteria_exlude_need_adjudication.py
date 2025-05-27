@@ -2,17 +2,18 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.grievance.fixtures import \
-    TicketNeedsAdjudicationDetailsFactory
+from hct_mis_api.apps.grievance.fixtures import TicketNeedsAdjudicationDetailsFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
-    IndividualFactory, create_household_and_individuals)
+    IndividualFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
-                                               PaymentPlanFactory)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
-from hct_mis_api.apps.targeting.services.targeting_service import \
-    TargetingCriteriaQueryingBase
+from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCriteriaQueryingBase,
+)
 
 
 class TestTargetingCriteriaFlags(APITestCase):

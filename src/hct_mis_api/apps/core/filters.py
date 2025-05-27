@@ -2,11 +2,18 @@ import json
 from datetime import date, timedelta
 from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
-from dateutil.parser import parse
 from django.db.models import QuerySet
-from django.forms import (CharField, DateField, DateTimeField, DecimalField,
-                          Field, IntegerField)
+from django.forms import (
+    CharField,
+    DateField,
+    DateTimeField,
+    DecimalField,
+    Field,
+    IntegerField,
+)
 from django.utils import timezone
+
+from dateutil.parser import parse
 from django_filters import Filter, FilterSet
 
 from hct_mis_api.apps.core.models import BusinessArea

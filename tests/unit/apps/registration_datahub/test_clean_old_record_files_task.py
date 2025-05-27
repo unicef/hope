@@ -48,8 +48,7 @@ class TestClearRecordFilesTask(APITestCase):
         )
 
     def test_clean_old_record_files_task(self) -> None:
-        from hct_mis_api.contrib.aurora.celery_tasks import \
-            clean_old_record_files_task
+        from hct_mis_api.contrib.aurora.celery_tasks import clean_old_record_files_task
 
         clean_old_record_files_task()
 

@@ -5,7 +5,9 @@ from faker import Faker
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 fake = Faker()

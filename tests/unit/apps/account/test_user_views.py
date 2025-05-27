@@ -2,23 +2,28 @@ import datetime
 import json
 from typing import Any
 
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (AdminAreaLimitedToFactory,
-                                               PartnerFactory,
-                                               RoleAssignmentFactory,
-                                               RoleFactory, UserFactory)
+from hct_mis_api.apps.account.fixtures import (
+    AdminAreaLimitedToFactory,
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Role
-from hct_mis_api.apps.account.permissions import (ALL_GRIEVANCES_CREATE_MODIFY,
-                                                  Permissions)
-from hct_mis_api.apps.accountability.fixtures import (FeedbackFactory,
-                                                      SurveyFactory)
+from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
+    Permissions,
+)
+from hct_mis_api.apps.accountability.fixtures import FeedbackFactory, SurveyFactory
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea

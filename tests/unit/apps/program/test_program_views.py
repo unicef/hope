@@ -2,33 +2,41 @@ import datetime
 from enum import Enum
 from typing import Any
 
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+
+import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (AdminAreaLimitedToFactory,
-                                               PartnerFactory, UserFactory)
+from hct_mis_api.apps.account.fixtures import (
+    AdminAreaLimitedToFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
-                                            FlexibleAttributeForPDUFactory,
-                                            create_afghanistan, create_ukraine)
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.core.fixtures import (
+    DataCollectingTypeFactory,
+    FlexibleAttributeForPDUFactory,
+    create_afghanistan,
+    create_ukraine,
+)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory, create_household_and_individuals)
-from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
-                                               PaymentPlanFactory)
+    HouseholdFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import (BeneficiaryGroupFactory,
-                                               ProgramCycleFactory,
-                                               ProgramFactory)
+from hct_mis_api.apps.program.fixtures import (
+    BeneficiaryGroupFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 pytestmark = pytest.mark.django_db
 

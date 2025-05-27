@@ -4,6 +4,7 @@ from time import sleep
 from typing import Literal, Optional, Union
 
 from django.conf import settings
+
 from selenium.common import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome, Keys

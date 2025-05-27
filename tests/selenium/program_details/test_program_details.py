@@ -7,26 +7,24 @@ from dateutil.relativedelta import relativedelta
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
-                                            create_afghanistan)
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import (ProgramCycleFactory,
-                                               ProgramFactory)
-from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
-                                             ProgramCycle)
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from tests.selenium.helpers.date_time_format import FormatTime
-from tests.selenium.page_object.programme_details.programme_details import \
-    ProgrammeDetails
-from tests.selenium.page_object.programme_management.programme_management import \
-    ProgrammeManagement
+from tests.selenium.page_object.programme_details.programme_details import (
+    ProgrammeDetails,
+)
+from tests.selenium.page_object.programme_management.programme_management import (
+    ProgrammeManagement,
+)
 
 pytestmark = pytest.mark.django_db()
 

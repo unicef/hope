@@ -5,6 +5,7 @@ import re
 from typing import Any, Dict, List, Optional
 
 from django.template import Context, Library, Node
+
 from PIL import Image, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)

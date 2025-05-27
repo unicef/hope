@@ -1,19 +1,21 @@
 from typing import Any
 from unittest import mock
 
-from constance.test import override_config
 from django.test import override_settings
 from django.utils import timezone
 
-from hct_mis_api.apps.account.fixtures import (PartnerFactory, RoleFactory,
-                                               UserFactory)
+from constance.test import override_config
+
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.fixtures import (ApprovalFactory,
-                                               ApprovalProcessFactory,
-                                               PaymentPlanFactory)
+from hct_mis_api.apps.payment.fixtures import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
+    PaymentPlanFactory,
+)
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
 from hct_mis_api.apps.payment.notifications import PaymentNotification
 from hct_mis_api.apps.program.fixtures import ProgramFactory

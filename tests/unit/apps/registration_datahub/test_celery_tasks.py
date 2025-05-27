@@ -8,11 +8,12 @@ from pathlib import Path
 from typing import Any, Dict, Generator, Optional
 from unittest.mock import Mock, patch
 
-import pytest
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
+import pytest
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -20,47 +21,75 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import (DocumentFactory,
-                                                 DocumentTypeFactory,
-                                                 PendingBankAccountInfoFactory,
-                                                 PendingHouseholdFactory,
-                                                 PendingIndividualFactory)
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
+    PendingBankAccountInfoFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
-    DISABLED, FEMALE, HEAD, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_TAX_ID, MALE, NOT_DISABLED, SON_DAUGHTER, DocumentType,
-    PendingBankAccountInfo, PendingDocument, PendingHousehold,
-    PendingIndividual)
+    DISABLED,
+    FEMALE,
+    HEAD,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_TAX_ID,
+    MALE,
+    NOT_DISABLED,
+    SON_DAUGHTER,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (ImportData,
-                                                       KoboImportData,
-                                                       RegistrationDataImport)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import (
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
-    merge_registration_data_import_task, pull_kobo_submissions_task,
-    rdi_deduplication_task, registration_kobo_import_hourly_task,
-    registration_kobo_import_task, registration_xlsx_import_hourly_task,
-    remove_old_rdi_links_task, validate_xlsx_import_task)
-from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import \
-    PullKoboSubmissions
+    merge_registration_data_import_task,
+    pull_kobo_submissions_task,
+    rdi_deduplication_task,
+    registration_kobo_import_hourly_task,
+    registration_kobo_import_task,
+    registration_xlsx_import_hourly_task,
+    remove_old_rdi_links_task,
+    validate_xlsx_import_task,
+)
+from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
+    PullKoboSubmissions,
+)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.contrib.aurora.celery_tasks import (
-    automate_rdi_creation_task, process_flex_records_task)
-from hct_mis_api.contrib.aurora.fixtures import (OrganizationFactory,
-                                                 ProjectFactory,
-                                                 RegistrationFactory)
+    automate_rdi_creation_task,
+    process_flex_records_task,
+)
+from hct_mis_api.contrib.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.base_flex_registration_service import \
-    BaseRegistrationService
-from hct_mis_api.contrib.aurora.services.flex_registration_service import \
-    create_task_for_processing_records
-from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import \
-    SriLankaRegistrationService
+from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
+from hct_mis_api.contrib.aurora.services.flex_registration_service import (
+    create_task_for_processing_records,
+)
+from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import (
+    SriLankaRegistrationService,
+)
 from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
-    UkraineBaseRegistrationService, UkraineRegistrationService)
+    UkraineBaseRegistrationService,
+    UkraineRegistrationService,
+)
 
 SRI_LANKA_FIELDS: Dict = {
     "caretaker-info": [
@@ -905,8 +934,9 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
 
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import \
-            RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
 

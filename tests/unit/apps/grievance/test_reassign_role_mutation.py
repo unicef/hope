@@ -7,13 +7,13 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory, TicketDeleteIndividualDetailsFactory,
-    TicketNeedsAdjudicationDetailsFactory)
+    GrievanceTicketFactory,
+    TicketDeleteIndividualDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (HouseholdFactory,
-                                                 IndividualFactory)
-from hct_mis_api.apps.household.models import (ROLE_PRIMARY,
-                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

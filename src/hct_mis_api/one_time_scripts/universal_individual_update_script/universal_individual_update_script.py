@@ -5,14 +5,19 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.documents import (HouseholdDocument,
-                                                  get_individual_doc)
-from hct_mis_api.apps.household.models import (Document, DocumentType,
-                                               Household, Individual)
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
+from hct_mis_api.apps.household.models import (
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.payment.models import Account, AccountType
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
-    DeduplicateTask, HardDocumentDeduplication)
+    DeduplicateTask,
+    HardDocumentDeduplication,
+)
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 

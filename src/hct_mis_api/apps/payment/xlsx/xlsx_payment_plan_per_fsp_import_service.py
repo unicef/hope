@@ -4,21 +4,25 @@ import logging
 from decimal import Decimal
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
+from django.db.models import QuerySet
+from django.utils import timezone
+
 import openpyxl
 import pytz
 from dateutil.parser import parse
-from django.db.models import QuerySet
-from django.utils import timezone
 from xlwt import Row
 
 from hct_mis_api.apps.payment.models import Payment, PaymentVerification
-from hct_mis_api.apps.payment.services.handle_total_cash_in_households import \
-    handle_total_cash_in_specific_households
+from hct_mis_api.apps.payment.services.handle_total_cash_in_households import (
+    handle_total_cash_in_specific_households,
+)
 from hct_mis_api.apps.payment.utils import (
-    calculate_counts, get_payment_delivered_quantity_status_and_value,
-    get_quantity_in_usd, to_decimal)
-from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import \
-    XlsxImportBaseService
+    calculate_counts,
+    get_payment_delivered_quantity_status_and_value,
+    get_quantity_in_usd,
+    to_decimal,
+)
+from hct_mis_api.apps.payment.xlsx.base_xlsx_import_service import XlsxImportBaseService
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 
 if TYPE_CHECKING:

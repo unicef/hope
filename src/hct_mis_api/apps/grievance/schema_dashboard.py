@@ -1,17 +1,16 @@
 import itertools
 from typing import Any, Dict, Tuple
 
-import graphene
-from django.db.models import (Avg, Case, CharField, Count, F, Q, QuerySet,
-                              Value, When)
+from django.db.models import Avg, Case, CharField, Count, F, Q, QuerySet, Value, When
 from django.db.models.functions import Extract
 from django.utils.encoding import force_str
+
+import graphene
 
 from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.utils.schema import (ChartDatasetNode,
-                                           ChartDetailedDatasetsNode)
+from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode
 
 TICKET_ORDERING_KEYS = [
     "Data Change",

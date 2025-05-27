@@ -1,10 +1,11 @@
 import logging
 from typing import Any
 
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.mixin import AdminFiltersMixin
 from django.contrib import admin
 from django.http import HttpRequest
+
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.mixin import AdminFiltersMixin
 
 from hct_mis_api.apps.household.models import BankAccountInfo, Individual
 from hct_mis_api.apps.utils.admin import RdiMergeStatusAdminMixin

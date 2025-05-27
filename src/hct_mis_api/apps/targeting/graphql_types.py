@@ -5,8 +5,7 @@ import graphene
 from graphene_django import DjangoObjectType
 
 import hct_mis_api.apps.targeting.models as target_models
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
-    FieldFactory
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import FieldAttributeNode
@@ -18,10 +17,10 @@ from hct_mis_api.apps.utils.schema import Arg
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
+
     from graphene.types.structures import List as GrapheneList
 
-    from hct_mis_api.apps.targeting.models import \
-        TargetingIndividualRuleFilterBlock
+    from hct_mis_api.apps.targeting.models import TargetingIndividualRuleFilterBlock
 
 
 def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> Dict:

@@ -7,14 +7,17 @@ from django.test import TestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket, TicketComplaintDetails, TicketIndividualDataUpdateDetails)
-from hct_mis_api.apps.household.admin.household import \
-    HouseholdWithdrawFromListMixin
+    GrievanceTicket,
+    TicketComplaintDetails,
+    TicketIndividualDataUpdateDetails,
+)
+from hct_mis_api.apps.household.admin.household import HouseholdWithdrawFromListMixin
 from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory, create_household_and_individuals)
+    DocumentFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.household.services.household_withdraw import \
-    HouseholdWithdraw
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 

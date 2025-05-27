@@ -4,12 +4,19 @@ import pytest
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.household.models import (CANNOT_DO, COMMUNICATING,
-                                               DISABLED, HEARING, MEMORY,
-                                               NOT_DISABLED, SEEING, SELF_CARE,
-                                               WALKING, Individual)
-from hct_mis_api.one_time_scripts.fix_disability_fields import \
-    fix_disability_fields
+from hct_mis_api.apps.household.models import (
+    CANNOT_DO,
+    COMMUNICATING,
+    DISABLED,
+    HEARING,
+    MEMORY,
+    NOT_DISABLED,
+    SEEING,
+    SELF_CARE,
+    WALKING,
+    Individual,
+)
+from hct_mis_api.one_time_scripts.fix_disability_fields import fix_disability_fields
 
 pytestmark = pytest.mark.django_db
 

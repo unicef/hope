@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING, Any
 
-from constance import config
 from django.db.models import Q, QuerySet
+
+from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
@@ -13,17 +14,24 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.caches import UserListKeyConstructor
-from hct_mis_api.apps.account.api.serializers import (ProfileSerializer,
-                                                      UserChoicesSerializer,
-                                                      UserSerializer)
+from hct_mis_api.apps.account.api.serializers import (
+    ProfileSerializer,
+    UserChoicesSerializer,
+    UserSerializer,
+)
 from hct_mis_api.apps.account.filters import UsersFilter
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.account.permissions import (ALL_GRIEVANCES_CREATE_MODIFY,
-                                                  Permissions)
-from hct_mis_api.apps.core.api.mixins import (BaseViewSet, CountActionMixin,
-                                              CustomSerializerMixin,
-                                              PermissionActionMixin,
-                                              SerializerActionMixin)
+from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
+    Permissions,
+)
+from hct_mis_api.apps.core.api.mixins import (
+    BaseViewSet,
+    CountActionMixin,
+    CustomSerializerMixin,
+    PermissionActionMixin,
+    SerializerActionMixin,
+)
 
 if TYPE_CHECKING:
     from rest_framework.request import Request

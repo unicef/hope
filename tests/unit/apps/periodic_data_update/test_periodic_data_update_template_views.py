@@ -1,8 +1,6 @@
 import json
 from typing import Callable
 
-import freezegun
-import pytest
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -10,18 +8,24 @@ from django.db import connection
 from django.http import FileResponse
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+
+import freezegun
+import pytest
 from flaky import flaky
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
-                                               PartnerFactory, UserFactory)
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.periodic_data_update.fixtures import \
-    PeriodicDataUpdateTemplateFactory
-from hct_mis_api.apps.periodic_data_update.models import \
-    PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.fixtures import (
+    PeriodicDataUpdateTemplateFactory,
+)
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 pytestmark = pytest.mark.django_db

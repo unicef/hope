@@ -5,9 +5,11 @@ import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
-from hct_mis_api.apps.account.permissions import (BaseNodePermissionMixin,
-                                                  Permissions,
-                                                  hopePermissionClass)
+from hct_mis_api.apps.account.permissions import (
+    BaseNodePermissionMixin,
+    Permissions,
+    hopePermissionClass,
+)
 from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.household.models import Individual
 

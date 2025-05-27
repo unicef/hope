@@ -3,15 +3,26 @@ from collections import defaultdict
 from functools import reduce
 from typing import Any, List
 
-from hct_mis_api.apps.core.utils import (get_combined_attributes,
-                                         serialize_flex_attributes)
+from hct_mis_api.apps.core.utils import (
+    get_combined_attributes,
+    serialize_flex_attributes,
+)
 from hct_mis_api.apps.household.models import PendingIndividual
-from hct_mis_api.apps.payment.models import (AccountType, FinancialInstitution,
-                                             PendingAccount)
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
+)
 from hct_mis_api.apps.registration_datahub.value_caster import (
-    BooleanValueCaster, DateValueCaster, DecimalValueCaster,
-    DefaultValueCaster, IntegerValueCaster, SelectManyValueCaster,
-    SelectOneValueCaster, StringValueCaster)
+    BooleanValueCaster,
+    DateValueCaster,
+    DecimalValueCaster,
+    DefaultValueCaster,
+    IntegerValueCaster,
+    SelectManyValueCaster,
+    SelectOneValueCaster,
+    StringValueCaster,
+)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 logger = logging.getLogger(__name__)

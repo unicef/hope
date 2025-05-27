@@ -1,10 +1,11 @@
 import json
 from typing import Any, Dict, Optional
 
-import graphene
-from concurrency.fields import IntegerVersionField
 from django.contrib.gis.db.models import GeometryField
 from django.forms import MultipleChoiceField
+
+import graphene
+from concurrency.fields import IntegerVersionField
 from graphene_django.converter import convert_django_field
 from graphene_django.forms.converter import convert_form_field
 

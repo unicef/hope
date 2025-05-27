@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def sync_sanction_list_task(self: Any) -> None:
     try:
-        from hct_mis_api.apps.sanction_list.tasks.load_xml import \
-            LoadSanctionListXMLTask
+        from hct_mis_api.apps.sanction_list.tasks.load_xml import (
+            LoadSanctionListXMLTask,
+        )
 
         LoadSanctionListXMLTask().execute()
     except ParseError:
@@ -32,8 +33,9 @@ def sync_sanction_list_task(self: Any) -> None:
 @sentry_tags
 def check_against_sanction_list_task(self: Any, uploaded_file_id: UUID, original_file_name: str) -> None:
     try:
-        from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import \
-            CheckAgainstSanctionListTask
+        from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
+            CheckAgainstSanctionListTask,
+        )
 
         CheckAgainstSanctionListTask().execute(
             uploaded_file_id=uploaded_file_id,

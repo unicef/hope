@@ -4,27 +4,30 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from functools import cached_property
-from typing import (TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple,
-                    Union)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
-from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.validators import (MaxLengthValidator, MaxValueValidator,
-                                    MinLengthValidator, MinValueValidator,
-                                    ProhibitNullCharactersValidator)
+from django.core.validators import (
+    MaxLengthValidator,
+    MaxValueValidator,
+    MinLengthValidator,
+    MinValueValidator,
+    ProhibitNullCharactersValidator,
+)
 from django.db import models, transaction
-from django.db.models import (Count, JSONField, Q, QuerySet, Sum,
-                              UniqueConstraint)
+from django.db.models import Count, JSONField, Q, QuerySet, Sum, UniqueConstraint
 from django.db.models.functions import Coalesce
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from django_fsm import FSMField, transition
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -35,35 +38,48 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    FieldFactory, get_core_fields_attributes)
-from hct_mis_api.apps.core.field_attributes.fields_types import (_HOUSEHOLD,
-                                                                 _INDIVIDUAL)
+    FieldFactory,
+    get_core_fields_attributes,
+)
+from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import (FileTemp, FlexibleAttribute,
-                                          StorageFile)
+from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute, StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.models import (FEMALE, MALE, DocumentType,
-                                               Household, Individual)
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MALE,
+    DocumentType,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
-from hct_mis_api.apps.payment.validators import \
-    payment_token_and_order_number_validator
+from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
-from hct_mis_api.apps.utils.models import (AdminUrlMixin, ConcurrencyModel,
-                                           InternalDataFieldModel,
-                                           MergedManager, MergeStatusModel,
-                                           PendingManager, SignatureMixin,
-                                           TimeStampedUUIDModel,
-                                           UnicefIdentifiedModel)
-from hct_mis_api.apps.utils.validators import (DoubleSpaceValidator,
-                                               StartEndSpaceValidator)
+from hct_mis_api.apps.utils.models import (
+    AdminUrlMixin,
+    ConcurrencyModel,
+    InternalDataFieldModel,
+    MergedManager,
+    MergeStatusModel,
+    PendingManager,
+    SignatureMixin,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
+)
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
-    from hct_mis_api.apps.payment.models import (AcceptanceProcessThreshold,
-                                                 PaymentVerificationPlan)
+    from hct_mis_api.apps.payment.models import (
+        AcceptanceProcessThreshold,
+        PaymentVerificationPlan,
+    )
     from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)

@@ -1,12 +1,16 @@
 from typing import Any, Dict, List, Optional
 
-import graphene
 from django.contrib.contenttypes.models import ContentType
+
+import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
-    DjangoPermissionFilterConnectionField, Permissions, hopePermissionClass)
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
+)
 from hct_mis_api.apps.activity_log.filters import LogEntryFilter
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection

@@ -2,20 +2,21 @@ import os
 from typing import Any
 from unittest.mock import patch
 
-import pytest
 from django import forms
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+import pytest
+
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.payment.admin import (ArrayFieldWidget,
-                                            CommaSeparatedArrayField)
-from hct_mis_api.apps.payment.fixtures import (FinancialServiceProviderFactory,
-                                               PaymentFactory,
-                                               PaymentPlanFactory)
-from hct_mis_api.apps.payment.models import (FinancialServiceProvider,
-                                             PaymentPlan)
+from hct_mis_api.apps.payment.admin import ArrayFieldWidget, CommaSeparatedArrayField
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+)
+from hct_mis_api.apps.payment.models import FinancialServiceProvider, PaymentPlan
 
 
 @pytest.fixture(autouse=True)

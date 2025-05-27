@@ -3,6 +3,7 @@ from typing import List
 
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
+
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -11,14 +12,22 @@ from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket, TicketHouseholdDataUpdateDetails)
-from hct_mis_api.apps.grievance.services.data_change.data_change_service import \
-    DataChangeService
+    GrievanceTicket,
+    TicketHouseholdDataUpdateDetails,
+)
+from hct_mis_api.apps.grievance.services.data_change.data_change_service import (
+    DataChangeService,
+)
 from hct_mis_api.apps.grievance.services.data_change.utils import (
-    cast_flex_fields, is_approved, to_date_string, verify_flex_fields)
+    cast_flex_fields,
+    is_approved,
+    to_date_string,
+    verify_flex_fields,
+)
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.household.services.household_recalculate_data import \
-    recalculate_data
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
 
 
 class HouseholdDataUpdateService(DataChangeService):

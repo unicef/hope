@@ -4,10 +4,11 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
-import requests
-from constance import config
 from django.conf import settings
 from django.core.exceptions import ValidationError
+
+import requests
+from constance import config
 
 from hct_mis_api.apps.core.models import BusinessArea
 

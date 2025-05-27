@@ -1,15 +1,20 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, TypeVar
 
-import graphene
 from django.db.models.functions import ExtractYear
+
+import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
-    BaseNodePermissionMixin, BasePermission,
-    DjangoPermissionFilterConnectionField, Permissions, hopePermissionClass)
+    BaseNodePermissionMixin,
+    BasePermission,
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
+)
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject

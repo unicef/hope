@@ -2,14 +2,6 @@ import logging
 from typing import Any, Iterable, Optional, Tuple
 from uuid import UUID
 
-from admin_cursor_paginator import CursorPaginatorAdmin
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import (AutoCompleteFilter,
-                                       LinkedAutoCompleteFilter)
-from adminfilters.combo import ChoicesFieldComboFilter
-from adminfilters.depot.widget import DepotManager
-from adminfilters.querystring import QueryStringFilter
-from adminfilters.value import ValueFilter
 from django.contrib import admin, messages
 from django.db import transaction
 from django.db.models import JSONField, QuerySet
@@ -18,24 +10,41 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+
+from admin_cursor_paginator import CursorPaginatorAdmin
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
+from adminfilters.combo import ChoicesFieldComboFilter
+from adminfilters.depot.widget import DepotManager
+from adminfilters.querystring import QueryStringFilter
+from adminfilters.value import ValueFilter
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.celery_tasks import (
-    revalidate_phone_number_task, update_individuals_iban_from_xlsx_task)
+    revalidate_phone_number_task,
+    update_individuals_iban_from_xlsx_task,
+)
 from hct_mis_api.apps.household.forms import UpdateIndividualsIBANFromXlsxForm
-from hct_mis_api.apps.household.models import (Household, Individual,
-                                               IndividualCollection,
-                                               IndividualIdentity,
-                                               IndividualRoleInHousehold,
-                                               XlsxUpdateFile)
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    IndividualCollection,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+    XlsxUpdateFile,
+)
 from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.utils.admin import (
-    BusinessAreaForIndividualCollectionListFilter, HOPEModelAdminBase,
-    LastSyncDateResetMixin, LinkedObjectsManagerMixin,
-    RdiMergeStatusAdminMixin, SoftDeletableAdminMixin)
+    BusinessAreaForIndividualCollectionListFilter,
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    LinkedObjectsManagerMixin,
+    RdiMergeStatusAdminMixin,
+    SoftDeletableAdminMixin,
+)
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)

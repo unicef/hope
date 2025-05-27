@@ -53,31 +53,40 @@ import time
 from argparse import ArgumentParser
 from typing import Any, List
 
-import elasticsearch
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 from django.utils import timezone
+
+import elasticsearch
 from flags.models import FlagState
 
-from hct_mis_api.apps.account.fixtures import (create_superuser,
-                                               generate_unicef_partners)
+from hct_mis_api.apps.account.fixtures import create_superuser, generate_unicef_partners
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
-from hct_mis_api.apps.accountability.fixtures import (generate_feedback,
-                                                      generate_messages)
-from hct_mis_api.apps.core.fixtures import (generate_business_areas,
-                                            generate_country_codes,
-                                            generate_data_collecting_types,
-                                            generate_pdu_data)
+from hct_mis_api.apps.accountability.fixtures import (
+    generate_feedback,
+    generate_messages,
+)
+from hct_mis_api.apps.core.fixtures import (
+    generate_business_areas,
+    generate_country_codes,
+    generate_data_collecting_types,
+    generate_pdu_data,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import generate_area_types, generate_areas
 from hct_mis_api.apps.grievance.fixtures import generate_fake_grievances
 from hct_mis_api.apps.household.fixtures import generate_additional_doc_types
 from hct_mis_api.apps.payment.fixtures import (
-    generate_delivery_mechanisms, generate_payment_plan,
-    generate_reconciled_payment_plan, update_fsps)
-from hct_mis_api.apps.program.fixtures import (generate_beneficiary_groups,
-                                               generate_people_program)
+    generate_delivery_mechanisms,
+    generate_payment_plan,
+    generate_reconciled_payment_plan,
+    update_fsps,
+)
+from hct_mis_api.apps.program.fixtures import (
+    generate_beneficiary_groups,
+    generate_people_program,
+)
 from hct_mis_api.apps.registration_data.fixtures import generate_rdi
 from hct_mis_api.apps.steficon.fixtures import generate_rule_formulas
 from hct_mis_api.contrib.aurora.fixtures import generate_aurora_test_data

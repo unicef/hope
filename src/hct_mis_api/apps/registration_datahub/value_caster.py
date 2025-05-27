@@ -5,8 +5,14 @@ from typing import Any, List, Optional, Union
 from dateutil.parser import parse
 
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    TYPE_BOOL, TYPE_DATE, TYPE_DECIMAL, TYPE_INTEGER, TYPE_SELECT_MANY,
-    TYPE_SELECT_ONE, TYPE_STRING)
+    TYPE_BOOL,
+    TYPE_DATE,
+    TYPE_DECIMAL,
+    TYPE_INTEGER,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
+)
 
 
 class BaseValueCaster(abc.ABC):

@@ -1,8 +1,12 @@
-from hct_mis_api.apps.core.field_attributes.fields_types import (_INDIVIDUAL,
-                                                                 TYPE_STRING,
-                                                                 Scope)
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    _INDIVIDUAL,
+    TYPE_STRING,
+    Scope,
+)
 from hct_mis_api.apps.core.field_attributes.lookup_functions import (
-    get_debit_card_issuer, get_debit_card_number)
+    get_debit_card_issuer,
+    get_debit_card_number,
+)
 
 # about "snapshot_field"
 # if it's the same field that can connect with "associated_with" and "lookup"

@@ -5,11 +5,12 @@ import sys
 from time import sleep
 from typing import Any
 
+from django.conf import settings
+from django.core.cache import cache
+
 import pytest
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from django.conf import settings
-from django.core.cache import cache
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections

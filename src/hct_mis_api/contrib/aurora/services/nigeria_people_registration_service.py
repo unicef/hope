@@ -1,14 +1,23 @@
 from typing import Any, Dict, Optional
 
-from hct_mis_api.apps.core.utils import (IDENTIFICATION_TYPE_NATIONAL_ID,
-                                         IDENTIFICATION_TYPE_TO_KEY_MAPPING)
+from hct_mis_api.apps.core.utils import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+)
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
-    HEAD, ROLE_PRIMARY, DocumentType, PendingDocument, PendingIndividual,
-    PendingIndividualRoleInHousehold)
+    HEAD,
+    ROLE_PRIMARY,
+    DocumentType,
+    PendingDocument,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.generic_registration_service import (
-    GenericRegistrationService, mergedicts)
+    GenericRegistrationService,
+    mergedicts,
+)
 
 
 class NigeriaPeopleRegistrationService(GenericRegistrationService):

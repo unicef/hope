@@ -1,15 +1,19 @@
 import logging
 from typing import Any, Dict, Tuple
 
-import openpyxl
 from django.db import transaction
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
+
+import openpyxl
 from xlwt import Row
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.household.models import (BankAccountInfo, Individual,
-                                               XlsxUpdateFile)
+from hct_mis_api.apps.household.models import (
+    BankAccountInfo,
+    Individual,
+    XlsxUpdateFile,
+)
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

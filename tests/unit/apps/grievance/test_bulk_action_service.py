@@ -1,21 +1,23 @@
 from unittest.mock import patch
 
-import pytest
 from django.test import TestCase, override_settings
+
+import pytest
 from faker.generator import random
 from flaky import flaky
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.constants import (PRIORITY_HIGH,
-                                                  PRIORITY_NOT_SET,
-                                                  URGENCY_NOT_SET,
-                                                  URGENCY_VERY_URGENT)
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_HIGH,
+    PRIORITY_NOT_SET,
+    URGENCY_NOT_SET,
+    URGENCY_VERY_URGENT,
+)
 from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.bulk_action_service import \
-    BulkActionService
+from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

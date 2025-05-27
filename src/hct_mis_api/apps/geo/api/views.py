@@ -11,8 +11,11 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import (BaseViewSet, BusinessAreaMixin,
-                                              PermissionsMixin)
+from hct_mis_api.apps.core.api.mixins import (
+    BaseViewSet,
+    BusinessAreaMixin,
+    PermissionsMixin,
+)
 from hct_mis_api.apps.geo.api.caches import AreaKeyConstructor
 from hct_mis_api.apps.geo.api.filters import AreaFilter
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer

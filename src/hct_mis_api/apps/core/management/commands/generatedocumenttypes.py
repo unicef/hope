@@ -4,8 +4,7 @@ from django.core.management import BaseCommand
 from django.db import transaction
 
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (IDENTIFICATION_TYPE_CHOICE,
-                                               DocumentType)
+from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 
 
 class Command(BaseCommand):

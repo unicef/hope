@@ -8,18 +8,25 @@ from rest_framework import serializers
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import (
-    TicketAddIndividualDetails, TicketDeleteHouseholdDetails,
-    TicketDeleteIndividualDetails, TicketHouseholdDataUpdateDetails,
-    TicketIndividualDataUpdateDetails, TicketNeedsAdjudicationDetails,
-    TicketPaymentVerificationDetails, TicketSystemFlaggingDetails)
+    TicketAddIndividualDetails,
+    TicketDeleteHouseholdDetails,
+    TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketPaymentVerificationDetails,
+    TicketSystemFlaggingDetails,
+)
 from hct_mis_api.apps.household.api.serializers.individual import (
-    HouseholdSimpleSerializer, IndividualForTicketSerializer)
+    HouseholdSimpleSerializer,
+    IndividualForTicketSerializer,
+)
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.api.serializers import \
-    PaymentVerificationSerializer
+from hct_mis_api.apps.payment.api.serializers import PaymentVerificationSerializer
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.sanction_list.api.serializers import \
-    SanctionListIndividualSerializer
+from hct_mis_api.apps.sanction_list.api.serializers import (
+    SanctionListIndividualSerializer,
+)
 
 
 class HouseholdDataUpdateTicketDetailsSerializer(serializers.ModelSerializer):

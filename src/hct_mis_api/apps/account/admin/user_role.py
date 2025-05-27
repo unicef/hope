@@ -1,15 +1,18 @@
 import logging
 from typing import Any, Dict, Optional
 
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.combo import AllValuesComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.combo import AllValuesComboFilter
+
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.admin.forms import (RoleAssignmentAdminForm,
-                                                  RoleAssignmentInlineFormSet)
+from hct_mis_api.apps.account.admin.forms import (
+    RoleAssignmentAdminForm,
+    RoleAssignmentInlineFormSet,
+)
 from hct_mis_api.apps.account.models import Partner, Role
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase

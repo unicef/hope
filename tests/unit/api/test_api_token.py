@@ -3,10 +3,11 @@ from datetime import datetime
 from typing import Any
 from unittest.mock import patch
 
-from constance.test import override_config
 from django.conf import settings
 from django.http import HttpRequest
 from django.test import TestCase, override_settings
+
+from constance.test import override_config
 
 from hct_mis_api.api.admin import TOKEN_INFO_EMAIL, APITokenAdmin
 from hct_mis_api.api.models import Grant

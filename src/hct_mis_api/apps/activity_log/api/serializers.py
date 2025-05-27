@@ -1,6 +1,7 @@
 from typing import Optional
 
 from django.contrib.contenttypes.models import ContentType
+
 from rest_framework import serializers
 
 from hct_mis_api.apps.activity_log.models import LogEntry

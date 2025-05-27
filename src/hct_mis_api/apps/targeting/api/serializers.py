@@ -4,9 +4,14 @@ from rest_framework import serializers
 
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.models import (
-    TargetingCollectorBlockRuleFilter, TargetingCollectorRuleFilterBlock,
-    TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter,
-    TargetingIndividualBlockRuleFilter, TargetingIndividualRuleFilterBlock)
+    TargetingCollectorBlockRuleFilter,
+    TargetingCollectorRuleFilterBlock,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
+)
 
 
 class TargetPopulationListSerializer(serializers.ModelSerializer):

@@ -2,57 +2,82 @@ import datetime
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
-import graphene
 from django.core.files.storage import default_storage
 from django.db.models import Case, DateField, F, Q, QuerySet, When
 from django.utils import timezone
+
+import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
-    POPULATION_DETAILS, AdminUrlNodeMixin, BaseNodePermissionMixin,
-    BasePermission, DjangoPermissionFilterConnectionField,
-    DjangoPermissionFilterFastConnectionField, Permissions,
-    hopeOneOfPermissionClass, hopePermissionClass)
+    POPULATION_DETAILS,
+    AdminUrlNodeMixin,
+    BaseNodePermissionMixin,
+    BasePermission,
+    DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField,
+    Permissions,
+    hopeOneOfPermissionClass,
+    hopePermissionClass,
+)
 from hct_mis_api.apps.account.schema import PartnerType
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
-    FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import (TYPE_IMAGE,
-                                                                 Scope)
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE, Scope
 from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import (ChoiceObject, ChoiceObjectInt,
-                                          FieldAttributeNode, sort_by_attr)
-from hct_mis_api.apps.core.utils import (chart_filters_decoder,
-                                         chart_get_filtered_qs,
-                                         chart_permission_decorator,
-                                         encode_ids,
-                                         get_program_id_from_headers,
-                                         to_choice_object)
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    ChoiceObjectInt,
+    FieldAttributeNode,
+    sort_by_attr,
+)
+from hct_mis_api.apps.core.utils import (
+    chart_filters_decoder,
+    chart_get_filtered_qs,
+    chart_permission_decorator,
+    encode_ids,
+    get_program_id_from_headers,
+    to_choice_object,
+)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
-from hct_mis_api.apps.grievance.constants import (PRIORITY_CHOICES,
-                                                  URGENCY_CHOICES)
-from hct_mis_api.apps.grievance.filters import (ExistingGrievanceTicketFilter,
-                                                GrievanceTicketFilter,
-                                                TicketNoteFilter)
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
+from hct_mis_api.apps.grievance.filters import (
+    ExistingGrievanceTicketFilter,
+    GrievanceTicketFilter,
+    TicketNoteFilter,
+)
 from hct_mis_api.apps.grievance.models import (
-    GrievanceDocument, GrievanceTicket, TicketAddIndividualDetails,
-    TicketComplaintDetails, TicketDeleteHouseholdDetails,
-    TicketDeleteIndividualDetails, TicketHouseholdDataUpdateDetails,
-    TicketIndividualDataUpdateDetails, TicketNeedsAdjudicationDetails,
-    TicketNegativeFeedbackDetails, TicketNote,
-    TicketPaymentVerificationDetails, TicketPositiveFeedbackDetails,
-    TicketReferralDetails, TicketSensitiveDetails, TicketSystemFlaggingDetails)
-from hct_mis_api.apps.grievance.utils import \
-    filter_grievance_tickets_based_on_partner_areas_2
+    GrievanceDocument,
+    GrievanceTicket,
+    TicketAddIndividualDetails,
+    TicketComplaintDetails,
+    TicketDeleteHouseholdDetails,
+    TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
+    TicketNote,
+    TicketPaymentVerificationDetails,
+    TicketPositiveFeedbackDetails,
+    TicketReferralDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
+)
+from hct_mis_api.apps.grievance.utils import (
+    filter_grievance_tickets_based_on_partner_areas_2,
+)
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.registration_data.nodes import (
-    DeduplicationEngineSimilarityPairNode, DeduplicationResultNode)
+    DeduplicationEngineSimilarityPairNode,
+    DeduplicationResultNode,
+)
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 

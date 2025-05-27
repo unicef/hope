@@ -1,26 +1,35 @@
 import logging.config
 from unittest.mock import Mock, patch
 
-from celery.exceptions import Retry
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
+
+from celery.exceptions import Retry
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
-    payment_plan_apply_steficon_hh_selection, payment_plan_full_rebuild,
-    payment_plan_rebuild_stats, prepare_payment_plan_task,
-    send_payment_plan_payment_list_xlsx_per_fsp_password)
+    payment_plan_apply_steficon_hh_selection,
+    payment_plan_full_rebuild,
+    payment_plan_rebuild_stats,
+    prepare_payment_plan_task,
+    send_payment_plan_payment_list_xlsx_per_fsp_password,
+)
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
-    FinancialServiceProviderXlsxTemplateFactory, PaymentFactory,
-    PaymentPlanFactory, generate_delivery_mechanisms)
-from hct_mis_api.apps.payment.models import (DeliveryMechanism,
-                                             FinancialServiceProvider,
-                                             PaymentPlan)
+    FinancialServiceProviderXlsxTemplateFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    PaymentPlan,
+)
 from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory

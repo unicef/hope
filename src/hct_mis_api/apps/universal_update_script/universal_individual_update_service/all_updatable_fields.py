@@ -9,11 +9,20 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.models import DeliveryMechanismConfig
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
-    handle_admin_field, handle_boolean_field, handle_date_field,
-    handle_integer_field, handle_simple_field, validate_admin,
-    validate_boolean, validate_choices, validate_date,
-    validate_flex_field_string, validate_integer, validate_phone_number,
-    validate_string)
+    handle_admin_field,
+    handle_boolean_field,
+    handle_date_field,
+    handle_integer_field,
+    handle_simple_field,
+    validate_admin,
+    validate_boolean,
+    validate_choices,
+    validate_date,
+    validate_flex_field_string,
+    validate_integer,
+    validate_phone_number,
+    validate_string,
+)
 
 individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     # "photo": ("photo", validate_string, handle_simple_field), # TODO: Handle photo

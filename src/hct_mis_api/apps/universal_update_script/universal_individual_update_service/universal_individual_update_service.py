@@ -2,25 +2,37 @@ import logging
 from io import BytesIO
 from typing import Any, List, Tuple
 
-import openpyxl
 from django.db import transaction
+
+import openpyxl
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.documents import (HouseholdDocument,
-                                                  get_individual_doc)
-from hct_mis_api.apps.household.models import (Document, DocumentType,
-                                               Household, Individual)
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
+from hct_mis_api.apps.household.models import (
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.payment.models import Account, AccountType
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
-    DeduplicateTask, HardDocumentDeduplication)
+    DeduplicateTask,
+    HardDocumentDeduplication,
+)
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
-    get_document_fields, get_household_flex_fields, get_individual_flex_fields,
-    get_wallet_fields, household_fields, individual_fields)
-from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import \
-    get_generator_handler
+    get_document_fields,
+    get_household_flex_fields,
+    get_individual_flex_fields,
+    get_wallet_fields,
+    household_fields,
+    individual_fields,
+)
+from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
+    get_generator_handler,
+)
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 logger = logging.getLogger(__name__)

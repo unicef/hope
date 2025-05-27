@@ -1,7 +1,8 @@
 import logging
 
-from dateutil.relativedelta import relativedelta
 from django.core.paginator import Paginator
+
+from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.household.models import Individual
 

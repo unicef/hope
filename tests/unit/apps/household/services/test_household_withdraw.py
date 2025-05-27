@@ -2,11 +2,12 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import (DocumentFactory,
-                                                 create_household_for_fixtures)
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    create_household_for_fixtures,
+)
 from hct_mis_api.apps.household.models import Document, Household, Individual
-from hct_mis_api.apps.household.services.household_withdraw import \
-    HouseholdWithdraw
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 

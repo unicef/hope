@@ -3,6 +3,7 @@ from typing import Any, List
 
 from django.core.management import call_command
 from django.test import override_settings
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
@@ -14,7 +15,9 @@ from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceDocumentFactory, ReferralTicketWithoutExtrasFactory)
+    GrievanceDocumentFactory,
+    ReferralTicketWithoutExtrasFactory,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory

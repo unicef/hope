@@ -7,43 +7,52 @@ from functools import cached_property, partial
 from io import BytesIO
 from typing import Any, Callable, Dict, Optional, Union
 
-import openpyxl
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
+
+import openpyxl
 from django_countries.fields import Country
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import (BusinessArea, FlexibleAttribute,
-                                          PeriodicFieldData)
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
-    HEAD, NON_BENEFICIARY, ROLE_ALTERNATE, ROLE_PRIMARY, DocumentType,
-    PendingBankAccountInfo, PendingDocument, PendingHousehold,
-    PendingIndividual, PendingIndividualIdentity,
-    PendingIndividualRoleInHousehold)
+    HEAD,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.models import Account
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import \
-    PeriodicDataUpdateImportService
-from hct_mis_api.apps.periodic_data_update.utils import \
-    populate_pdu_with_null_values
-from hct_mis_api.apps.registration_data.models import (ImportData,
-                                                       RegistrationDataImport)
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import \
-    DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import \
-    RdiBaseCreateTask
-from hct_mis_api.apps.registration_datahub.tasks.utils import \
-    collectors_str_ids_to_list
-from hct_mis_api.apps.utils.age_at_registration import \
-    calculate_age_at_registration
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
+    PeriodicDataUpdateImportService,
+)
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
+    RdiBaseCreateTask,
+)
+from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
@@ -614,8 +623,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 obj_to_create.flex_fields["enumerator_id"] = cell.value
 
                             if header in ("country_h_c", "country_origin_h_c"):
-                                from hct_mis_api.apps.geo.models import \
-                                    Country as GeoCountry
+                                from hct_mis_api.apps.geo.models import (
+                                    Country as GeoCountry,
+                                )
 
                                 setattr(
                                     obj_to_create,

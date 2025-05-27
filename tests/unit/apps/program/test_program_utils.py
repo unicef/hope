@@ -8,22 +8,31 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.celery_tasks import \
-    enroll_households_to_program_task
+from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory, DocumentFactory, HouseholdFactory,
-    IndividualFactory, IndividualIdentityFactory,
-    IndividualRoleInHouseholdFactory)
-from hct_mis_api.apps.household.models import (ROLE_ALTERNATE, ROLE_PRIMARY,
-                                               BankAccountInfo, Document,
-                                               Household, Individual,
-                                               IndividualIdentity,
-                                               IndividualRoleInHousehold)
+    BankAccountInfoFactory,
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+)
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    Document,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.utils import (enroll_households_to_program,
-                                            generate_rdi_unique_name)
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.program.utils import (
+    enroll_households_to_program,
+    generate_rdi_unique_name,
+)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 

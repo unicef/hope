@@ -2,16 +2,21 @@ import logging
 from typing import Any, Dict, List
 from urllib.parse import urlencode
 
-import coreapi
-from constance import config
-from coreapi import codecs
-from coreapi.exceptions import NoCodecAvailable
 from django.db.models.options import Options
 from django.db.transaction import atomic
 from django.utils import timezone
 
-from hct_mis_api.contrib.aurora.models import (Organization, Project, Record,
-                                               Registration)
+import coreapi
+from constance import config
+from coreapi import codecs
+from coreapi.exceptions import NoCodecAvailable
+
+from hct_mis_api.contrib.aurora.models import (
+    Organization,
+    Project,
+    Record,
+    Registration,
+)
 
 logger = logging.getLogger(__name__)
 

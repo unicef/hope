@@ -1,21 +1,24 @@
-import pytest
 from django.utils import timezone
+
+import pytest
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import (FinancialServiceProviderFactory,
-                                               PaymentFactory,
-                                               PaymentPlanFactory,
-                                               generate_delivery_mechanisms)
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment
-from hct_mis_api.apps.payment.services.dashboard_service import \
-    payment_verification_chart_query
+from hct_mis_api.apps.payment.services.dashboard_service import (
+    payment_verification_chart_query,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
