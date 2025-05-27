@@ -152,6 +152,7 @@ export const PeopleBioData = ({
           <LabelizedField label={t('Residence Status')}>
             {/* //TODO: */}
             {/* {residenceChoicesDict[household?.residenceStatus]} */}
+            {}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -193,7 +194,7 @@ export const PeopleBioData = ({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 2')}>
-            {household?.admin2}
+            {household?.admin2?.name}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>

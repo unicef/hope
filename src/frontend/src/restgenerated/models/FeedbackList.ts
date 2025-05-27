@@ -3,10 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FeedbackMessage } from './FeedbackMessage';
+import type { IssueTypeEnum } from './IssueTypeEnum';
 export type FeedbackList = {
     readonly id: string;
     unicefId?: string | null;
-    issueType: string;
+    issueType: IssueTypeEnum;
     householdUnicefId: string | null;
     householdId: string | null;
     individualUnicefId: string | null;

@@ -32,7 +32,6 @@ import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
   useAllEditPeopleFieldsQuery,
-  useAllProgramsForChoicesQuery,
   useGrievanceTicketStatusChangeMutation,
   useUpdateGrievanceMutation,
 } from '@generated/graphql';
@@ -285,9 +284,10 @@ const EditGrievancePage = (): ReactElement => {
     baseUrl,
   );
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData?.results?.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   const individualFieldsDictForValidation = isSocialDctType
     ? peopleFieldsDict

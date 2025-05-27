@@ -17,15 +17,15 @@ import { useArrayToDict } from '@hooks/useArrayToDict';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPeriodicFieldList';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
 `;
 
-//TODO MS: add proper type
 interface ProgrammeTimeSeriesFieldsProps {
   individual: IndividualDetail;
-  periodicFieldsData: any;
+  periodicFieldsData: PaginatedPeriodicFieldList;
 }
 
 export const ProgrammeTimeSeriesFields = ({

@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     resolve_flex_fields_choices_to_string,
 )
+from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
@@ -31,6 +32,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.models import Account
+from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 
 
 class DocumentTypeSerializer(serializers.ModelSerializer):
@@ -120,7 +122,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
-    admin2 = serializers.CharField(source="admin2.name", default="")
+    admin2 = AreaSimpleSerializer()
 
     class Meta:
         model = Household
@@ -262,6 +264,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
 
     deduplication_golden_record_results = serializers.SerializerMethodField()
     biometric_deduplication_golden_record_results = serializers.SerializerMethodField()
+    program = ProgramSmallSerializer()
 
     class Meta:
         model = Individual
@@ -289,6 +292,8 @@ class IndividualListSerializer(serializers.ModelSerializer):
             "biometric_deduplication_golden_record_status_display",
             "deduplication_golden_record_results",
             "biometric_deduplication_golden_record_results",
+            "program",
+            "last_registration_date",
         )
 
     def get_role(self, obj: Individual) -> str:

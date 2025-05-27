@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export function LookUpReassignRoleModal({
   onValueChange,
@@ -48,9 +49,7 @@ export function LookUpReassignRoleModal({
   setLookUpDialogOpen;
   ticket;
   selectedIndividual;
-  selectedHousehold;
-  //TODO: add types
-  // selectedHousehold: HouseholdDetail;
+  selectedHousehold: HouseholdDetail;
   setSelectedIndividual;
   setSelectedHousehold;
   shouldUseMultiple;
