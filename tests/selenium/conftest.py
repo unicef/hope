@@ -1,16 +1,13 @@
 import logging
 import os
-import re
 from datetime import datetime
 from typing import Any
 
-from django.conf import settings
-
 import pytest
-import redis
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+from django.conf import settings
 from environ import Env
 from flags.models import FlagState
 from pytest_django.live_server_helper import LiveServer
@@ -23,91 +20,83 @@ from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.fixtures import generate_small_areas_for_afghanistan_only
+from hct_mis_api.apps.geo.fixtures import \
+    generate_small_areas_for_afghanistan_only
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
-from hct_mis_api.config.env import env
-from tests.selenium.page_object.accountability.communication import (
-    AccountabilityCommunication,
-)
-from tests.selenium.page_object.accountability.comunication_details import (
-    AccountabilityCommunicationDetails,
-)
-from tests.selenium.page_object.accountability.surveys import AccountabilitySurveys
-from tests.selenium.page_object.accountability.surveys_details import (
-    AccountabilitySurveysDetails,
-)
+from tests.selenium.page_object.accountability.communication import \
+    AccountabilityCommunication
+from tests.selenium.page_object.accountability.comunication_details import \
+    AccountabilityCommunicationDetails
+from tests.selenium.page_object.accountability.surveys import \
+    AccountabilitySurveys
+from tests.selenium.page_object.accountability.surveys_details import \
+    AccountabilitySurveysDetails
 from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
-from tests.selenium.page_object.country_dashboard.country_dashboard import (
-    CountryDashboard,
-)
+from tests.selenium.page_object.country_dashboard.country_dashboard import \
+    CountryDashboard
 from tests.selenium.page_object.filters import Filters
-from tests.selenium.page_object.grievance.details_feedback_page import (
-    FeedbackDetailsPage,
-)
-from tests.selenium.page_object.grievance.details_grievance_page import (
-    GrievanceDetailsPage,
-)
+from tests.selenium.page_object.grievance.details_feedback_page import \
+    FeedbackDetailsPage
+from tests.selenium.page_object.grievance.details_grievance_page import \
+    GrievanceDetailsPage
 from tests.selenium.page_object.grievance.feedback import Feedback
-from tests.selenium.page_object.grievance.grievance_dashboard import GrievanceDashboard
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.grievance.grievance_dashboard import \
+    GrievanceDashboard
+from tests.selenium.page_object.grievance.grievance_tickets import \
+    GrievanceTickets
 from tests.selenium.page_object.grievance.new_feedback import NewFeedback
 from tests.selenium.page_object.grievance.new_ticket import NewTicket
-from tests.selenium.page_object.managerial_console.managerial_console import (
-    ManagerialConsole,
-)
-from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
-from tests.selenium.page_object.payment_module.payment_module import PaymentModule
-from tests.selenium.page_object.payment_module.payment_module_details import (
-    PaymentModuleDetails,
-)
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
-from tests.selenium.page_object.payment_module.program_cycle_details import (
-    ProgramCycleDetailsPage,
-)
-from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
-from tests.selenium.page_object.payment_verification.payment_verification import (
-    PaymentVerification,
-)
-from tests.selenium.page_object.payment_verification.payment_verification_details import (
-    PaymentVerificationDetails,
-)
+from tests.selenium.page_object.managerial_console.managerial_console import \
+    ManagerialConsole
+from tests.selenium.page_object.payment_module.new_payment_plan import \
+    NewPaymentPlan
+from tests.selenium.page_object.payment_module.payment_module import \
+    PaymentModule
+from tests.selenium.page_object.payment_module.payment_module_details import \
+    PaymentModuleDetails
+from tests.selenium.page_object.payment_module.program_cycle import \
+    ProgramCyclePage
+from tests.selenium.page_object.payment_module.program_cycle_details import \
+    ProgramCycleDetailsPage
+from tests.selenium.page_object.payment_verification.payment_record import \
+    PaymentRecord
+from tests.selenium.page_object.payment_verification.payment_verification import \
+    PaymentVerification
+from tests.selenium.page_object.payment_verification.payment_verification_details import \
+    PaymentVerificationDetails
 from tests.selenium.page_object.people.people import People
 from tests.selenium.page_object.people.people_details import PeopleDetails
 from tests.selenium.page_object.program_log.payment_log import ProgramLog
-from tests.selenium.page_object.programme_details.programme_details import (
-    ProgrammeDetails,
-)
-from tests.selenium.page_object.programme_management.programme_management import (
-    ProgrammeManagement,
-)
-from tests.selenium.page_object.programme_population.households import Households
-from tests.selenium.page_object.programme_population.households_details import (
-    HouseholdsDetails,
-)
-from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.individuals_details import (
-    IndividualsDetails,
-)
+from tests.selenium.page_object.programme_details.programme_details import \
+    ProgrammeDetails
+from tests.selenium.page_object.programme_management.programme_management import \
+    ProgrammeManagement
+from tests.selenium.page_object.programme_population.households import \
+    Households
+from tests.selenium.page_object.programme_population.households_details import \
+    HouseholdsDetails
+from tests.selenium.page_object.programme_population.individuals import \
+    Individuals
+from tests.selenium.page_object.programme_population.individuals_details import \
+    IndividualsDetails
 from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
-)
-from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
-from tests.selenium.page_object.programme_users.programme_users import ProgrammeUsers
-from tests.selenium.page_object.registration_data_import.rdi_details_page import (
-    RDIDetailsPage,
-)
-from tests.selenium.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
-)
+    PeriodicDatUpdateTemplates, PeriodicDatUpdateTemplatesDetails)
+from tests.selenium.page_object.programme_population.periodic_data_update_uploads import \
+    PeriodicDataUpdateUploads
+from tests.selenium.page_object.programme_users.programme_users import \
+    ProgrammeUsers
+from tests.selenium.page_object.registration_data_import.rdi_details_page import \
+    RDIDetailsPage
+from tests.selenium.page_object.registration_data_import.registration_data_import import \
+    RegistrationDataImport
 from tests.selenium.page_object.targeting.targeting import Targeting
-from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
-from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
+from tests.selenium.page_object.targeting.targeting_create import \
+    TargetingCreate
+from tests.selenium.page_object.targeting.targeting_details import \
+    TargetingDetails
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -132,27 +121,10 @@ def create_role_with_all_permissions() -> None:
 
 
 @pytest.fixture(autouse=True)
-def configure_cache_for_tests(worker_id: str, settings: Any) -> None:
-    """
-    Dynamically configure Django's cache backend for each pytest-xdist worker.
-    """
-    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
-    settings.CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://{get_redis_host()}:6379/{redis_db}",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            },
-        }
-    }
+def clear_default_cache() -> None:
+    from django.core.cache import cache
 
-
-@pytest.fixture(autouse=True)
-def flush_redis(worker_id: str) -> None:
-    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
-    redis_client = redis.StrictRedis(host=get_redis_host(), port=6379, db=redis_db)
-    redis_client.flushdb()
+    cache.clear()
 
 
 def pytest_configure(config) -> None:  # type: ignore
@@ -189,6 +161,7 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.CACHE_ENABLED = False
+    settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
 
     settings.LOGGING["loggers"].update(
         {
@@ -256,7 +229,7 @@ def download_path(worker_id: str) -> str:
         yield settings.DOWNLOAD_DIRECTORY
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def driver(download_path: str) -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -280,12 +253,12 @@ def driver(download_path: str) -> Chrome:
     yield driver
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def live_server() -> LiveServer:
     yield LiveServer("localhost")
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=True)
 def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
     try:
         driver.live_server = live_server
@@ -325,13 +298,13 @@ def login(browser: Chrome) -> Chrome:
     sleep(0.3)  # TODO: added just for test in CI
     browser.get(f"{browser.live_server.url}/")
 
-    # Clear cache
-    WebDriverWait(browser, 10).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]'))
-    ).click()
-    WebDriverWait(browser, 10).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]'))
-    ).click()
+    # # Clear cache
+    # WebDriverWait(browser, 10).until(
+    #     EC.visibility_of_element_located((By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]'))
+    # ).click()
+    # WebDriverWait(browser, 10).until(
+    #     EC.visibility_of_element_located((By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]'))
+    # ).click()
 
     from django.core.cache import cache
 
@@ -754,3 +727,56 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.migrations.loader import MigrationLoader
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    orig = getattr(settings, "MIGRATION_MODULES", None)
+    settings.MIGRATION_MODULES = {}
+
+    loader = MigrationLoader(None, load=False)
+    loader.load_disk()
+    all_migrations = loader.disk_migrations
+    if orig is not None:
+        settings.MIGRATION_MODULES = orig
+    apps = set()
+    all_sqls = []
+    for (app_label, _), migration in all_migrations.items():
+        apps.add(app_label)
+
+        for operation in migration.operations:
+            from django.db.migrations.operations.special import RunSQL
+
+            if isinstance(operation, RunSQL):
+                sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
+                for stmt in sql_statements:
+                    all_sqls.append(stmt)
+
+    def pre_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
+        with open(filename, "r") as file:
+            pre_sql = file.read()
+        conn = connections[using]
+        conn.cursor().execute(pre_sql)
+
+    def post_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        app_label = app_config.label
+        if app_label not in apps:
+            return
+        apps.remove(app_label)
+        if apps:
+            return
+        conn = connections[using]
+        for stmt in all_sqls:
+            conn.cursor().execute(stmt)
+
+    pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
+    post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)

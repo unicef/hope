@@ -7,12 +7,9 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.account.caches import get_user_permissions_version_key
-from hct_mis_api.apps.account.fixtures import (
-    PartnerFactory,
-    RoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.fixtures import (PartnerFactory,
+                                               RoleAssignmentFactory,
+                                               RoleFactory, UserFactory)
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea

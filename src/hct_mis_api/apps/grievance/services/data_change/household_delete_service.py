@@ -3,20 +3,18 @@ from typing import List
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketDeleteHouseholdDetails,
-    TicketNeedsAdjudicationDetails,
-)
-from hct_mis_api.apps.grievance.services.data_change.data_change_service import (
-    DataChangeService,
-)
-from hct_mis_api.apps.household.models import Household, IndividualRoleInHousehold
-from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.grievance.models import (GrievanceTicket,
+                                               TicketDeleteHouseholdDetails,
+                                               TicketNeedsAdjudicationDetails)
+from hct_mis_api.apps.grievance.services.data_change.data_change_service import \
+    DataChangeService
+from hct_mis_api.apps.household.models import (Household,
+                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.household.services.household_withdraw import \
+    HouseholdWithdraw
 
 
 class HouseholdDeleteService(DataChangeService):

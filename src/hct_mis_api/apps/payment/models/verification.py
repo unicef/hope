@@ -10,17 +10,13 @@ from django.db.models import Count, JSONField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
-
 from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
-from hct_mis_api.apps.utils.models import (
-    AdminUrlMixin,
-    ConcurrencyModel,
-    TimeStampedUUIDModel,
-    UnicefIdentifiedModel,
-)
+from hct_mis_api.apps.utils.models import (AdminUrlMixin, ConcurrencyModel,
+                                           TimeStampedUUIDModel,
+                                           UnicefIdentifiedModel)
 
 if TYPE_CHECKING:  # pragma: no cover
     from hct_mis_api.apps.payment.models import PaymentPlan

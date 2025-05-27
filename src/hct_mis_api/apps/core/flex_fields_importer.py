@@ -3,29 +3,20 @@ from collections import defaultdict
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set, Union
 
+import xlrd
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
 from django.utils.html import strip_tags
-
-import xlrd
 from openpyxl.worksheet.worksheet import Worksheet
 from xlwt import Row
 
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    TYPE_DATE,
-    TYPE_DECIMAL,
-    TYPE_IMAGE,
-    TYPE_INTEGER,
-    TYPE_SELECT_MANY,
-    TYPE_SELECT_ONE,
-    TYPE_STRING,
-)
-from hct_mis_api.apps.core.models import (
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
-)
+    TYPE_DATE, TYPE_DECIMAL, TYPE_IMAGE, TYPE_INTEGER, TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE, TYPE_STRING)
+from hct_mis_api.apps.core.models import (FlexibleAttribute,
+                                          FlexibleAttributeChoice,
+                                          FlexibleAttributeGroup)
 
 logger = logging.getLogger(__name__)
 

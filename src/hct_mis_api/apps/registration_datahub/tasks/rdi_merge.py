@@ -9,42 +9,30 @@ from django.db.models import QuerySet
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
-    create_needs_adjudication_tickets,
-)
-from hct_mis_api.apps.household.celery_tasks import recalculate_population_fields_task
-from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
+from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import \
+    create_needs_adjudication_tickets
+from hct_mis_api.apps.household.celery_tasks import \
+    recalculate_population_fields_task
+from hct_mis_api.apps.household.documents import (HouseholdDocument,
+                                                  get_individual_doc)
 from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    NEEDS_ADJUDICATION,
-    Household,
-    HouseholdCollection,
-    Individual,
-    IndividualCollection,
-    PendingBankAccountInfo,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
-)
+    DUPLICATE, NEEDS_ADJUDICATION, Household, HouseholdCollection, Individual,
+    IndividualCollection, PendingBankAccountInfo, PendingDocument,
+    PendingHousehold, PendingIndividual, PendingIndividualRoleInHousehold)
 from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.registration_data.models import (
-    KoboImportedSubmission,
-    RegistrationDataImport,
-)
-from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
+from hct_mis_api.apps.registration_data.models import (KoboImportedSubmission,
+                                                       RegistrationDataImport)
+from hct_mis_api.apps.registration_datahub.celery_tasks import \
+    deduplicate_documents
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import \
+    BiometricDeduplicationService
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
-    CheckAgainstSanctionListPreMergeTask,
-)
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import \
+    DeduplicateTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import \
+    CheckAgainstSanctionListPreMergeTask
 from hct_mis_api.apps.utils.elasticsearch_utils import (
-    populate_index,
-    remove_elasticsearch_documents_by_matching_ids,
-)
+    populate_index, remove_elasticsearch_documents_by_matching_ids)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 

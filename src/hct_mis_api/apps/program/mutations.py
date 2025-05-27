@@ -1,54 +1,41 @@
 from datetime import datetime
 from typing import Any, Dict
 
+import graphene
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-import graphene
-
-from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.account.permissions import (PermissionMutation,
+                                                  Permissions)
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
-from hct_mis_api.apps.core.utils import (
-    check_concurrency_version_in_mutation,
-    decode_id_string,
-    decode_id_string_required,
-)
-from hct_mis_api.apps.core.validators import (
-    CommonValidator,
-    DataCollectingTypeValidator,
-    PartnersDataValidator,
-)
-from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import (
-    FlexibleAttributeForPDUService,
-)
+from hct_mis_api.apps.core.utils import (check_concurrency_version_in_mutation,
+                                         decode_id_string,
+                                         decode_id_string_required)
+from hct_mis_api.apps.core.validators import (CommonValidator,
+                                              DataCollectingTypeValidator,
+                                              PartnersDataValidator)
+from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import \
+    FlexibleAttributeForPDUService
 from hct_mis_api.apps.program.celery_tasks import (
-    copy_program_task,
-    populate_pdu_new_rounds_with_null_values_task,
-)
-from hct_mis_api.apps.program.inputs import (
-    CopyProgramInput,
-    CreateProgramInput,
-    UpdateProgramInput,
-    UpdateProgramPartnersInput,
-)
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+    copy_program_task, populate_pdu_new_rounds_with_null_values_task)
+from hct_mis_api.apps.program.inputs import (CopyProgramInput,
+                                             CreateProgramInput,
+                                             UpdateProgramInput,
+                                             UpdateProgramPartnersInput)
+from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
+                                             ProgramCycle)
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.program.utils import (
-    copy_program_object,
-    create_program_partner_access,
-    remove_program_partner_access,
-)
-from hct_mis_api.apps.program.validators import (
-    ProgramDeletionValidator,
-    ProgrammeCodeValidator,
-    ProgramValidator,
-)
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
+from hct_mis_api.apps.program.utils import (copy_program_object,
+                                            create_program_partner_access,
+                                            remove_program_partner_access)
+from hct_mis_api.apps.program.validators import (ProgramDeletionValidator,
+                                                 ProgrammeCodeValidator,
+                                                 ProgramValidator)
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import \
+    BiometricDeduplicationService
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 

@@ -4,25 +4,19 @@ from typing import TYPE_CHECKING, Any, List
 from django.db import models
 from django.db.models import JSONField, Q
 from django.utils.translation import gettext_lazy as _
-
 from model_utils import Choices
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
+    FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
-from hct_mis_api.apps.household.models import (
-    ROLE_PRIMARY,
-    Individual,
-    IndividualRoleInHousehold,
-)
+from hct_mis_api.apps.household.models import (ROLE_PRIMARY, Individual,
+                                               IndividualRoleInHousehold)
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.services.targeting_service import (
-    TargetingCollectorRuleFilterBlockBase,
-    TargetingCriteriaFilterBase,
-    TargetingCriteriaQueryingBase,
-    TargetingCriteriaRuleQueryingBase,
-    TargetingIndividualRuleFilterBlockBase,
-)
+    TargetingCollectorRuleFilterBlockBase, TargetingCriteriaFilterBase,
+    TargetingCriteriaQueryingBase, TargetingCriteriaRuleQueryingBase,
+    TargetingIndividualRuleFilterBlockBase)
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 if TYPE_CHECKING:

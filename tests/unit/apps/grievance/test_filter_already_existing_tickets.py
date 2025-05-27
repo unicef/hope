@@ -1,8 +1,7 @@
 from typing import Any, List
 
-from django.core.management import call_command
-
 import pytest
+from django.core.management import call_command
 from flaky import flaky
 from parameterized import parameterized
 
@@ -14,14 +13,13 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceComplaintTicketFactory,
-    GrievanceTicketFactory,
+    GrievanceComplaintTicketFactory, GrievanceTicketFactory,
     SensitiveGrievanceTicketFactory,
-    SensitiveGrievanceTicketWithoutExtrasFactory,
-)
+    SensitiveGrievanceTicketWithoutExtrasFactory)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                               PaymentPlanFactory)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 

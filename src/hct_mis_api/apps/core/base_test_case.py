@@ -7,21 +7,22 @@ from functools import reduce
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
+import factory
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory
-
-import factory
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Role, RoleAssignment
+from hct_mis_api.apps.account.models import (AdminAreaLimitedTo, Role,
+                                             RoleAssignment)
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
+from hct_mis_api.apps.household.models import (IDENTIFICATION_TYPE_CHOICE,
+                                               DocumentType)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 if TYPE_CHECKING:  # pragma: no_cover

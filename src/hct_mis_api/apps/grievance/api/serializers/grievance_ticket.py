@@ -2,26 +2,21 @@ from typing import Any, Dict, List, Optional
 
 from rest_framework import serializers
 
-from hct_mis_api.apps.account.api.serializers import PartnerSerializer, UserSerializer
+from hct_mis_api.apps.account.api.serializers import (PartnerSerializer,
+                                                      UserSerializer)
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
-from hct_mis_api.apps.grievance.api.serializers.ticket_detail import (
-    TICKET_DETAILS_SERIALIZER_MAPPING,
-)
-from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
-from hct_mis_api.apps.grievance.models import (
-    GrievanceDocument,
-    GrievanceTicket,
-    TicketNote,
-)
-from hct_mis_api.apps.household.api.serializers.household import (
-    HouseholdForTicketSerializer,
-)
+from hct_mis_api.apps.grievance.api.serializers.ticket_detail import \
+    TICKET_DETAILS_SERIALIZER_MAPPING
+from hct_mis_api.apps.grievance.constants import (PRIORITY_CHOICES,
+                                                  URGENCY_CHOICES)
+from hct_mis_api.apps.grievance.models import (GrievanceDocument,
+                                               GrievanceTicket, TicketNote)
+from hct_mis_api.apps.household.api.serializers.household import \
+    HouseholdForTicketSerializer
 from hct_mis_api.apps.household.api.serializers.individual import (
-    HouseholdSimpleSerializer,
-    IndividualSimpleSerializer,
-)
+    HouseholdSimpleSerializer, IndividualSimpleSerializer)
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.api.serializers import PaymentSmallSerializer
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer

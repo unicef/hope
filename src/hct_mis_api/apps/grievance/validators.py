@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.utils import decode_id_string

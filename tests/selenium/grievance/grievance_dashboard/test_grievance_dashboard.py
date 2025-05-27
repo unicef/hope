@@ -2,20 +2,20 @@ from datetime import timedelta
 from random import choice
 from typing import Optional
 
-from django.utils import timezone
-
 import pytest
+from django.utils import timezone
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.models import Program
 from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
-from tests.selenium.page_object.grievance.details_grievance_page import (
-    GrievanceDetailsPage,
-)
-from tests.selenium.page_object.grievance.grievance_dashboard import GrievanceDashboard
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.grievance.details_grievance_page import \
+    GrievanceDetailsPage
+from tests.selenium.page_object.grievance.grievance_dashboard import \
+    GrievanceDashboard
+from tests.selenium.page_object.grievance.grievance_tickets import \
+    GrievanceTickets
 
 pytestmark = pytest.mark.django_db()
 

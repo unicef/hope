@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 
 from django import template
 from django.utils.safestring import mark_safe
-
 from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
 

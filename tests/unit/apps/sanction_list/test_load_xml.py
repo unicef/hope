@@ -1,14 +1,14 @@
 from datetime import datetime
 
+import pytest
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-import pytest
-
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
-from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+from hct_mis_api.apps.sanction_list.tasks.load_xml import \
+    LoadSanctionListXMLTask
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

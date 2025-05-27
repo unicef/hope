@@ -3,25 +3,18 @@ from pathlib import Path
 from typing import Dict
 
 from django.core.management import call_command
-
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    HEAD,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    NON_BENEFICIARY,
-    ROLE_PRIMARY,
-    DocumentType,
-    PendingHousehold,
-)
-from hct_mis_api.apps.payment.models import FinancialInstitution, PendingAccount
+    HEAD, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NON_BENEFICIARY, ROLE_PRIMARY,
+    DocumentType, PendingHousehold)
+from hct_mis_api.apps.payment.models import (AccountType, FinancialInstitution,
+                                             PendingAccount)
 from hct_mis_api.apps.program.fixtures import (
-    ProgramFactory,
-    get_program_with_dct_type_and_name,
-)
+    ProgramFactory, get_program_with_dct_type_and_name)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.unit.api.base import HOPEApiTestCase
@@ -75,6 +68,7 @@ class PushToRDITests(HOPEApiTestCase):
             status=RegistrationDataImport.LOADING,
             program=cls.program,
         )
+        AccountType.objects.get_or_create(key="bank", defaults=dict(label="Bank", unique_fields=["number"]))
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
     def test_push(self) -> None:

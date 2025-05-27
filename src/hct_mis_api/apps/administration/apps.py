@@ -1,6 +1,5 @@
 import django.contrib.admin
 from django.contrib.admin.apps import AppConfig
-
 from smart_admin.apps import SmartConfig
 from smart_admin.decorators import smart_register
 
@@ -19,8 +18,8 @@ class Config(SmartConfig):
         from django.contrib.admin.models import LogEntry
         from django.contrib.auth.models import Permission
         from django.contrib.contenttypes.models import ContentType
-
-        from smart_admin.smart_auth.admin import ContentTypeAdmin, PermissionAdmin
+        from smart_admin.smart_auth.admin import (ContentTypeAdmin,
+                                                  PermissionAdmin)
 
         from .admin import LogEntryAdmin  # noqa
 
@@ -28,16 +27,11 @@ class Config(SmartConfig):
         smart_register(LogEntry)(LogEntryAdmin)
         smart_register(Permission)(PermissionAdmin)
 
-        from django.contrib.admin import site
-
         from adminactions import tasks  # noqa
-        from smart_admin.console import (
-            panel_error_page,
-            panel_migrations,
-            panel_redis,
-            panel_sentry,
-            panel_sysinfo,
-        )
+        from django.contrib.admin import site
+        from smart_admin.console import (panel_error_page, panel_migrations,
+                                         panel_redis, panel_sentry,
+                                         panel_sysinfo)
 
         from .panels import email, panel_elasticsearch  # noqa
 

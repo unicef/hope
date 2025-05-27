@@ -1,18 +1,12 @@
 from typing import Any, Dict
 
 from django.shortcuts import get_object_or_404
-
 from rest_framework import serializers
 
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
+from hct_mis_api.apps.core.models import (BusinessArea, FlexibleAttribute,
+                                          PeriodicFieldData)
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
-)
+    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
 from hct_mis_api.apps.program.models import Program
 
 

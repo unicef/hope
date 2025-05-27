@@ -4,19 +4,16 @@ from datetime import date, datetime
 from itertools import permutations
 from typing import TYPE_CHECKING
 
+import dateutil.parser
 from django.conf import settings
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.utils import timezone
-
-import dateutil.parser
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 
-from hct_mis_api.apps.sanction_list.models import (
-    SanctionListIndividual,
-    UploadedXLSXFile,
-)
+from hct_mis_api.apps.sanction_list.models import (SanctionListIndividual,
+                                                   UploadedXLSXFile)
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 if TYPE_CHECKING:

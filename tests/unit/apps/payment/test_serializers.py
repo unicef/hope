@@ -10,34 +10,23 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (HouseholdFactory,
+                                                 IndividualFactory)
 from hct_mis_api.apps.payment.api.serializers import (
-    ApprovalProcessSerializer,
-    PaymentListSerializer,
-    PaymentPlanDetailSerializer,
-    PaymentPlanListSerializer,
-    TPHouseholdListSerializer,
-    VolumeByDeliveryMechanismSerializer,
-)
-from hct_mis_api.apps.payment.fixtures import (
-    ApprovalFactory,
-    ApprovalProcessFactory,
-    DeliveryMechanismFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-)
-from hct_mis_api.apps.payment.models import (
-    Approval,
-    PaymentHouseholdSnapshot,
-    PaymentPlan,
-    PaymentPlanSplit,
-)
+    ApprovalProcessSerializer, PaymentListSerializer,
+    PaymentPlanDetailSerializer, PaymentPlanListSerializer,
+    TPHouseholdListSerializer, VolumeByDeliveryMechanismSerializer)
+from hct_mis_api.apps.payment.fixtures import (ApprovalFactory,
+                                               ApprovalProcessFactory,
+                                               DeliveryMechanismFactory,
+                                               FinancialServiceProviderFactory,
+                                               PaymentFactory,
+                                               PaymentPlanFactory)
+from hct_mis_api.apps.payment.models import (Approval,
+                                             PaymentHouseholdSnapshot,
+                                             PaymentPlan, PaymentPlanSplit)
 from hct_mis_api.apps.payment.models.payment import (
-    DeliveryMechanismPerPaymentPlan,
-    FinancialServiceProvider,
-    Payment,
-)
+    DeliveryMechanismPerPaymentPlan, FinancialServiceProvider, Payment)
 
 
 class TPHouseholdListSerializerTest(TestCase):

@@ -6,9 +6,8 @@ from random import randint
 from typing import Any, Optional
 from uuid import UUID
 
-from django.utils import timezone
-
 import factory
+from django.utils import timezone
 from factory.django import DjangoModelFactory
 from pytz import utc
 
@@ -19,50 +18,31 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import (
-    EntitlementCardFactory,
-    HouseholdCollectionFactory,
-    HouseholdFactory,
-    IndividualCollectionFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-    create_household,
-)
-from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
+    EntitlementCardFactory, HouseholdCollectionFactory, HouseholdFactory,
+    IndividualCollectionFactory, IndividualFactory,
+    IndividualRoleInHouseholdFactory, create_household)
+from hct_mis_api.apps.household.models import (MALE, ROLE_PRIMARY, Household,
+                                               Individual)
 from hct_mis_api.apps.payment.models import (
-    Account,
-    AccountType,
-    Approval,
-    ApprovalProcess,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    FspXlsxTemplatePerDeliveryMechanism,
-    Payment,
-    PaymentPlan,
-    PaymentPlanSplit,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+    Account, AccountType, Approval, ApprovalProcess, DeliveryMechanism,
+    DeliveryMechanismConfig, FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate, FspXlsxTemplatePerDeliveryMechanism,
+    Payment, PaymentPlan, PaymentPlanSplit, PaymentVerification,
+    PaymentVerificationPlan, PaymentVerificationSummary)
+from hct_mis_api.apps.payment.services.payment_plan_services import \
+    PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
-from hct_mis_api.apps.program.fixtures import (
-    BeneficiaryGroupFactory,
-    ProgramCycleFactory,
-)
+from hct_mis_api.apps.program.fixtures import (BeneficiaryGroupFactory,
+                                               ProgramCycleFactory)
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-    TargetingCriteriaRuleFilterFactory,
-)
-from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-)
+    TargetingCriteriaFactory, TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory)
+from hct_mis_api.apps.targeting.models import (TargetingCriteria,
+                                               TargetingCriteriaRule,
+                                               TargetingCriteriaRuleFilter)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 

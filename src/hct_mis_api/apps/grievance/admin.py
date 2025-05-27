@@ -1,28 +1,18 @@
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
-
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.grievance.models import (
-    GrievanceDocument,
-    GrievanceTicket,
-    TicketAddIndividualDetails,
-    TicketComplaintDetails,
-    TicketDeleteHouseholdDetails,
-    TicketDeleteIndividualDetails,
-    TicketHouseholdDataUpdateDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketNeedsAdjudicationDetails,
-    TicketNegativeFeedbackDetails,
-    TicketNote,
-    TicketPaymentVerificationDetails,
-    TicketPositiveFeedbackDetails,
-    TicketReferralDetails,
-    TicketSensitiveDetails,
-)
+    GrievanceDocument, GrievanceTicket, TicketAddIndividualDetails,
+    TicketComplaintDetails, TicketDeleteHouseholdDetails,
+    TicketDeleteIndividualDetails, TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails, TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails, TicketNote,
+    TicketPaymentVerificationDetails, TicketPositiveFeedbackDetails,
+    TicketReferralDetails, TicketSensitiveDetails)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 

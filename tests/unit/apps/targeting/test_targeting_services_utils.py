@@ -2,21 +2,15 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (HouseholdFactory,
+                                                 IndividualFactory)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.models import (
-    TargetingCollectorBlockRuleFilter,
-    TargetingCollectorRuleFilterBlock,
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetingIndividualBlockRuleFilter,
-    TargetingIndividualRuleFilterBlock,
-)
+    TargetingCollectorBlockRuleFilter, TargetingCollectorRuleFilterBlock,
+    TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter, TargetingIndividualRuleFilterBlock)
 from hct_mis_api.apps.targeting.services.utils import (
-    from_input_to_targeting_criteria,
-    get_unicef_ids,
-)
+    from_input_to_targeting_criteria, get_unicef_ids)
 
 
 class TestPaymentPlanModel(TestCase):

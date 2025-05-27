@@ -4,9 +4,8 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.utils import get_count_and_percentage
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.payment.utils import (
-    get_payment_delivered_quantity_status_and_value,
-)
+from hct_mis_api.apps.payment.utils import \
+    get_payment_delivered_quantity_status_and_value
 
 
 class TestCoreUtils(TestCase):

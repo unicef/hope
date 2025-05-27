@@ -8,15 +8,10 @@ from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.household.models import (
-    HEAD,
-    RELATIONSHIP_UNKNOWN,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
-)
+from hct_mis_api.apps.household.models import (HEAD, RELATIONSHIP_UNKNOWN,
+                                               ROLE_ALTERNATE, ROLE_PRIMARY,
+                                               Household, Individual,
+                                               IndividualRoleInHousehold)
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 

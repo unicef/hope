@@ -1,19 +1,15 @@
 from pathlib import Path
 
-from django.conf import settings
-from django.urls import reverse
-
 import responses
 from constance.test import override_config
+from django.conf import settings
+from django.urls import reverse
 from django_webtest import WebTest
 
 from hct_mis_api.apps.account.admin.mixins import get_valid_kobo_username
-from hct_mis_api.apps.account.fixtures import (
-    PartnerFactory,
-    RoleAssignmentFactory,
-    RoleFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.fixtures import (PartnerFactory,
+                                               RoleAssignmentFactory,
+                                               RoleFactory, UserFactory)
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea

@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (PartnerFactory, RoleFactory,
+                                               UserFactory)
 from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan

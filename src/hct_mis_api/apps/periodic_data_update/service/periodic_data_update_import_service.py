@@ -2,22 +2,18 @@ import datetime
 import json
 from typing import Any, Optional, Union
 
+import openpyxl
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import transaction
 
-import openpyxl
-
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
-)
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
-)
+    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import \
+    PeriodicDataUpdateExportTemplateService
 
 
 class PeriodicDataUpdateBaseForm(forms.Form):

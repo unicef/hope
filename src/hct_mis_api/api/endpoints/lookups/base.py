@@ -9,15 +9,12 @@ from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.api.endpoints.serializers import CountrySerializer
 from hct_mis_api.api.filters import CountryFilter
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_CHOICE,
-    MARITAL_STATUS_CHOICE,
-    OBSERVED_DISABILITY_CHOICE,
-    RELATIONSHIP_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
-    ROLE_CHOICE,
-    SEX_CHOICE,
-)
+from hct_mis_api.apps.household.models import (IDENTIFICATION_TYPE_CHOICE,
+                                               MARITAL_STATUS_CHOICE,
+                                               OBSERVED_DISABILITY_CHOICE,
+                                               RELATIONSHIP_CHOICE,
+                                               RESIDENCE_STATUS_CHOICE,
+                                               ROLE_CHOICE, SEX_CHOICE)
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:

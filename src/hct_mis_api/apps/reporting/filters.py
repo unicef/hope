@@ -1,10 +1,5 @@
-from django_filters import (
-    CharFilter,
-    DateTimeFilter,
-    FilterSet,
-    MultipleChoiceFilter,
-    OrderingFilter,
-)
+from django_filters import (CharFilter, DateTimeFilter, FilterSet,
+                            MultipleChoiceFilter, OrderingFilter)
 
 from hct_mis_api.apps.reporting.models import Report
 

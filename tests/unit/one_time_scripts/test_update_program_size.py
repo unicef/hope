@@ -4,7 +4,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.one_time_scripts.update_program_size import update_program_size
+from hct_mis_api.one_time_scripts.update_program_size import \
+    update_program_size
 
 
 class TestUpdateProgramSize(TestCase):

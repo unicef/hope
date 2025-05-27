@@ -4,18 +4,19 @@ from unittest.mock import Mock, patch
 
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.urls import reverse
-
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import \
+    create_household_and_individuals
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.unit.api.base import HOPEApiTestCase
 

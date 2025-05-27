@@ -4,21 +4,13 @@ from typing import Any, Dict
 
 from django.core.management import call_command
 from django.urls import reverse
-
 from rest_framework import status
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    HEAD,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    NON_BENEFICIARY,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    SON_DAUGHTER,
-    DocumentType,
-    PendingHousehold,
-)
+    HEAD, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, NON_BENEFICIARY,
+    ROLE_ALTERNATE, ROLE_PRIMARY, SON_DAUGHTER, DocumentType, PendingHousehold)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport

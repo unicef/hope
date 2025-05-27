@@ -3,33 +3,17 @@ from typing import Any, Dict, List, Optional, Tuple
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.forms import (
-    BankAccountInfoForm,
-    DocumentForm,
-    IndividualForm,
-)
+from hct_mis_api.apps.household.forms import (BankAccountInfoForm,
+                                              DocumentForm, IndividualForm)
 from hct_mis_api.apps.household.models import (
-    DISABLED,
-    HEAD,
-    NOT_DISABLED,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    DocumentType,
-    PendingBankAccountInfo,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
-)
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
+    DISABLED, HEAD, NOT_DISABLED, ROLE_ALTERNATE, ROLE_PRIMARY, DocumentType,
+    PendingBankAccountInfo, PendingDocument, PendingHousehold,
+    PendingIndividual, PendingIndividualRoleInHousehold)
+from hct_mis_api.apps.payment.models import (AccountType, FinancialInstitution,
+                                             PendingAccount)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
-    BaseRegistrationService,
-)
+from hct_mis_api.contrib.aurora.services.base_flex_registration_service import \
+    BaseRegistrationService
 
 YES = "1"
 NO = "0"

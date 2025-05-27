@@ -1,9 +1,8 @@
 from typing import Any
 
+import pytest
 from django.core.cache import cache
 from django.urls import reverse
-
-import pytest
 from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import UserFactory

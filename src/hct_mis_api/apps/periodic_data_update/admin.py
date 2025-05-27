@@ -1,16 +1,14 @@
 from typing import Optional
 
+from adminfilters.autocomplete import (AutoCompleteFilter,
+                                       LinkedAutoCompleteFilter)
+from adminfilters.combo import ChoicesFieldComboFilter
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
-from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
-from adminfilters.combo import ChoicesFieldComboFilter
-
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate,
-    PeriodicDataUpdateUpload,
-)
+    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 

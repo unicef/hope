@@ -1,20 +1,12 @@
 from typing import List, Tuple
 
+from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.db.models import Count, Q
 
-from dateutil.relativedelta import relativedelta
-
-from hct_mis_api.apps.household.models import (
-    DISABLED,
-    FEMALE,
-    MALE,
-    NON_BENEFICIARY,
-    NOT_COLLECTED,
-    OTHER,
-    Household,
-    Individual,
-)
+from hct_mis_api.apps.household.models import (DISABLED, FEMALE, MALE,
+                                               NON_BENEFICIARY, NOT_COLLECTED,
+                                               OTHER, Household, Individual)
 
 # Set of Individual fields which affects Household recalculation
 RECALCULATION_INDIVIDUAL_FIELDS = {

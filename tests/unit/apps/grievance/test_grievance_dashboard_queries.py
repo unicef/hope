@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Any, List
 
-from django.core.management import call_command
-
 import pytz
+from django.core.management import call_command
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory

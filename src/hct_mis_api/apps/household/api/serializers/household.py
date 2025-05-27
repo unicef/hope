@@ -3,37 +3,26 @@ from typing import Any, Dict, List
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
-from hct_mis_api.apps.core.utils import (
-    resolve_flex_fields_choices_to_string,
-    to_choice_object,
-)
+from hct_mis_api.apps.core.utils import (resolve_flex_fields_choices_to_string,
+                                         to_choice_object)
 from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.api.serializers.individual import (
-    HouseholdSimpleSerializer,
-    LinkedGrievanceTicketSerializer,
-)
-from hct_mis_api.apps.household.api.serializers.registration_data_import import (
-    RegistrationDataImportSerializer,
-)
-from hct_mis_api.apps.household.models import (
-    AGENCY_TYPE_CHOICES,
-    DUPLICATE,
-    INDIVIDUAL_FLAGS_CHOICES,
-    INDIVIDUAL_STATUS_CHOICES,
-    MARITAL_STATUS_CHOICE,
-    OBSERVED_DISABILITY_CHOICE,
-    RELATIONSHIP_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
-    ROLE_CHOICE,
-    ROLE_NO_ROLE,
-    SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
-    WORK_STATUS_CHOICE,
-    DocumentType,
-    Household,
-    Individual,
-)
+    HouseholdSimpleSerializer, LinkedGrievanceTicketSerializer)
+from hct_mis_api.apps.household.api.serializers.registration_data_import import \
+    RegistrationDataImportSerializer
+from hct_mis_api.apps.household.models import (AGENCY_TYPE_CHOICES, DUPLICATE,
+                                               INDIVIDUAL_FLAGS_CHOICES,
+                                               INDIVIDUAL_STATUS_CHOICES,
+                                               MARITAL_STATUS_CHOICE,
+                                               OBSERVED_DISABILITY_CHOICE,
+                                               RELATIONSHIP_CHOICE,
+                                               RESIDENCE_STATUS_CHOICE,
+                                               ROLE_CHOICE, ROLE_NO_ROLE,
+                                               SEVERITY_OF_DISABILITY_CHOICES,
+                                               SEX_CHOICE, WORK_STATUS_CHOICE,
+                                               DocumentType, Household,
+                                               Individual)
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 
 

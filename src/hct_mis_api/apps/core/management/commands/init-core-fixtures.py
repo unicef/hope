@@ -2,14 +2,11 @@ import logging
 from typing import Any
 
 from django.core.management import BaseCommand
-
 from flags.models import FlagState
 
-from hct_mis_api.apps.core.fixtures import (
-    generate_business_areas,
-    generate_country_codes,
-    generate_data_collecting_types,
-)
+from hct_mis_api.apps.core.fixtures import (generate_business_areas,
+                                            generate_country_codes,
+                                            generate_data_collecting_types)
 
 logger = logging.getLogger(__name__)
 

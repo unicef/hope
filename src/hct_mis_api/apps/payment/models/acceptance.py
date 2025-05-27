@@ -5,7 +5,6 @@ from django.contrib.postgres.fields import IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
 from psycopg2._range import NumericRange
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel

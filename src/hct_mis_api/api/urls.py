@@ -1,10 +1,6 @@
 from django.urls import include, path, re_path
-
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
+from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
+                                   SpectacularSwaggerView)
 from rest_framework.routers import DefaultRouter
 
 from hct_mis_api.api import endpoints
@@ -13,11 +9,9 @@ from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
 from hct_mis_api.apps.core.api.views import ChoicesViewSet
 from hct_mis_api.apps.core.rest_api import get_currency_choices
 from hct_mis_api.apps.steficon.views import RuleEngineViewSet
-from hct_mis_api.contrib.aurora.views import (
-    OrganizationListView,
-    ProjectListView,
-    RegistrationListView,
-)
+from hct_mis_api.contrib.aurora.views import (OrganizationListView,
+                                              ProjectListView,
+                                              RegistrationListView)
 
 app_name = "api"
 

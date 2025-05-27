@@ -1,5 +1,9 @@
 from typing import Any, Optional, Union
 
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from django import forms
 from django.contrib import admin, messages
 from django.db.models import Q, QuerySet
@@ -8,30 +12,24 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminAutoCompleteSearchMixin
+from mptt.forms import TreeNodeMultipleChoiceField
 
 from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Partner
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
+from hct_mis_api.apps.household.documents import (HouseholdDocument,
+                                                  get_individual_doc)
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
+from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
+                                             ProgramCycle)
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import \
+    BiometricDeduplicationService
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
 from hct_mis_api.apps.targeting.models import TargetingCriteria
-from hct_mis_api.apps.utils.admin import (
-    HOPEModelAdminBase,
-    LastSyncDateResetMixin,
-    SoftDeletableAdminMixin,
-)
+from hct_mis_api.apps.utils.admin import (HOPEModelAdminBase,
+                                          LastSyncDateResetMixin,
+                                          SoftDeletableAdminMixin)
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
-from mptt.forms import TreeNodeMultipleChoiceField
 
 
 @admin.register(ProgramCycle)

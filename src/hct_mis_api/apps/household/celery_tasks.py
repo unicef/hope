@@ -4,26 +4,26 @@ import logging
 from typing import List, Optional
 from uuid import UUID
 
+from concurrency.api import disable_concurrency
+from constance import config
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.utils import timezone
 
-from concurrency.api import disable_concurrency
-from constance import config
-
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
+from hct_mis_api.apps.household.documents import (HouseholdDocument,
+                                                  get_individual_doc)
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.household.services.household_recalculate_data import (
-    recalculate_data,
-)
+from hct_mis_api.apps.household.services.household_recalculate_data import \
+    recalculate_data
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.utils import enroll_households_to_program
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
-from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hct_mis_api.apps.utils.sentry import (sentry_tags,
+                                           set_sentry_business_area_tag)
 
 logger = logging.getLogger(__name__)
 
@@ -117,11 +117,9 @@ def interval_recalculate_population_fields_task() -> None:
 def calculate_children_fields_for_not_collected_individual_data() -> int:
     from django.db.models.functions import Coalesce
 
-    from hct_mis_api.apps.household.models import (
-        COLLECT_TYPE_FULL,
-        COLLECT_TYPE_PARTIAL,
-        Household,
-    )
+    from hct_mis_api.apps.household.models import (COLLECT_TYPE_FULL,
+                                                   COLLECT_TYPE_PARTIAL,
+                                                   Household)
 
     return Household.objects.exclude(collect_individual_data__in=[COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL]).update(
         # TODO: count differently or add all the fields for the new gender options
@@ -158,9 +156,8 @@ def calculate_children_fields_for_not_collected_individual_data() -> int:
 def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_by_id: UUID) -> None:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.household.models import XlsxUpdateFile
-    from hct_mis_api.apps.household.services.individuals_iban_xlsx_update import (
-        IndividualsIBANXlsxUpdate,
-    )
+    from hct_mis_api.apps.household.services.individuals_iban_xlsx_update import \
+        IndividualsIBANXlsxUpdate
 
     uploaded_by = User.objects.get(id=uploaded_by_id)
     xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
@@ -233,9 +230,8 @@ def enroll_households_to_program_task(households_ids: List, program_for_enroll_i
 @log_start_and_end
 @sentry_tags
 def mass_withdraw_households_from_list_task(household_id_list: list, tag: str, program_id: str) -> None:
-    from hct_mis_api.apps.household.admin.household import (
-        HouseholdWithdrawFromListMixin,
-    )
+    from hct_mis_api.apps.household.admin.household import \
+        HouseholdWithdrawFromListMixin
 
     program = Program.objects.get(id=program_id)
     HouseholdWithdrawFromListMixin().mass_withdraw_households_from_list_bulk(household_id_list, tag, program)

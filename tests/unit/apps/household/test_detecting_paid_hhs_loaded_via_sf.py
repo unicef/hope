@@ -3,14 +3,11 @@ from django.test import TestCase
 from hct_mis_api.apps.core.fixtures import StorageFileFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
-    DocumentAllowDuplicatesFactory,
-    DocumentTypeFactory,
-    create_household,
-)
-from hct_mis_api.apps.household.management.commands.detect_paid_households import (
-    find_paid_households,
-)
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+    DocumentAllowDuplicatesFactory, DocumentTypeFactory, create_household)
+from hct_mis_api.apps.household.management.commands.detect_paid_households import \
+    find_paid_households
+from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                               PaymentPlanFactory)
 
 
 class TestDetectingAlreadyPaidHouseholds(TestCase):

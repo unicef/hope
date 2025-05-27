@@ -2,35 +2,21 @@ from base64 import b64decode
 from typing import Any, List
 from uuid import UUID
 
-from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
+from django.db.models import (Case, Count, IntegerField, Q, QuerySet, Value,
+                              When)
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
-
-from django_filters import (
-    BooleanFilter,
-    CharFilter,
-    ChoiceFilter,
-    DateFilter,
-    FilterSet,
-    MultipleChoiceFilter,
-    NumberFilter,
-    OrderingFilter,
-    UUIDFilter,
-)
+from django_filters import (BooleanFilter, CharFilter, ChoiceFilter,
+                            DateFilter, FilterSet, MultipleChoiceFilter,
+                            NumberFilter, OrderingFilter, UUIDFilter)
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate,
-    Payment,
-    PaymentPlan,
-    PaymentVerification,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
+    DeliveryMechanism, FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate, Payment, PaymentPlan,
+    PaymentVerification, PaymentVerificationPlan, PaymentVerificationSummary)
 
 
 class PaymentOrderingFilter(OrderingFilter):

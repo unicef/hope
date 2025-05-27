@@ -5,8 +5,10 @@ from django.core.management import call_command
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import (ImportData,
+                                                       RegistrationDataImport)
 
 
 class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
@@ -17,9 +19,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
 
     @mock.patch("hct_mis_api.apps.utils.celery_manager.get_all_celery_tasks")
     def test_querysets(self, _: mock.MagicMock) -> None:
-        from hct_mis_api.apps.utils.celery_manager import (
-            RegistrationDataXlsxImportCeleryManager,
-        )
+        from hct_mis_api.apps.utils.celery_manager import \
+            RegistrationDataXlsxImportCeleryManager
 
         manager = RegistrationDataXlsxImportCeleryManager()
         program = ProgramFactory()
@@ -95,9 +96,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         mock_get_all_celery_tasks: mock.MagicMock,
         mock_registration_xlsx_import_task_delay: mock.MagicMock,
     ) -> None:
-        from hct_mis_api.apps.utils.celery_manager import (
-            RegistrationDataXlsxImportCeleryManager,
-        )
+        from hct_mis_api.apps.utils.celery_manager import \
+            RegistrationDataXlsxImportCeleryManager
 
         mock_get_all_celery_tasks.return_value = []
         program = ProgramFactory()
@@ -131,9 +131,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         mock_get_all_celery_tasks: mock.MagicMock,
         mock_registration_xlsx_import_task_delay: mock.MagicMock,
     ) -> None:
-        from hct_mis_api.apps.utils.celery_manager import (
-            RegistrationDataXlsxImportCeleryManager,
-        )
+        from hct_mis_api.apps.utils.celery_manager import \
+            RegistrationDataXlsxImportCeleryManager
 
         mock_get_all_celery_tasks.return_value = []
         program = ProgramFactory()
@@ -167,9 +166,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         mock_get_all_celery_tasks: mock.MagicMock,
         mock_registration_xlsx_import_task_delay: mock.MagicMock,
     ) -> None:
-        from hct_mis_api.apps.utils.celery_manager import (
-            RegistrationDataXlsxImportCeleryManager,
-        )
+        from hct_mis_api.apps.utils.celery_manager import \
+            RegistrationDataXlsxImportCeleryManager
 
         program = ProgramFactory()
         import_data = ImportData.objects.create()
@@ -207,9 +205,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         mock_get_all_celery_tasks: mock.MagicMock,
         mock_registration_xlsx_import_task_delay: mock.MagicMock,
     ) -> None:
-        from hct_mis_api.apps.utils.celery_manager import (
-            RegistrationDataXlsxImportCeleryManager,
-        )
+        from hct_mis_api.apps.utils.celery_manager import \
+            RegistrationDataXlsxImportCeleryManager
 
         program = ProgramFactory()
         import_data = ImportData.objects.create()
@@ -247,9 +244,8 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         mock_get_all_celery_tasks: mock.MagicMock,
         mock_registration_xlsx_import_task_delay: mock.MagicMock,
     ) -> None:
-        from hct_mis_api.apps.utils.celery_manager import (
-            RegistrationDataXlsxImportCeleryManager,
-        )
+        from hct_mis_api.apps.utils.celery_manager import \
+            RegistrationDataXlsxImportCeleryManager
 
         program = ProgramFactory()
         import_data = ImportData.objects.create()

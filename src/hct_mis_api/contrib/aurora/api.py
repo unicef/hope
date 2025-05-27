@@ -2,7 +2,8 @@ from typing import Optional
 
 from rest_framework import serializers
 
-from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
+from hct_mis_api.contrib.aurora.models import (Organization, Project,
+                                               Registration)
 
 
 class OrganizationSerializer(serializers.ModelSerializer):

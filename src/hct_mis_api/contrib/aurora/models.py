@@ -1,9 +1,8 @@
 import json
 from typing import Dict
 
-from django.db import models
-
 import swapper
+from django.db import models
 from strategy_field.fields import StrategyField
 
 from hct_mis_api.apps.registration_datahub.utils import combine_collections

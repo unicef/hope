@@ -2,24 +2,21 @@ import logging
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
+from admin_extra_buttons.decorators import button
+from admin_sync.collector import ForeignKeysCollector
+from admin_sync.mixin import SyncMixin
+from admin_sync.protocol import LoadDumpProtocol
 from django.contrib import admin
 from django.contrib.admin.utils import construct_change_message
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-from admin_extra_buttons.decorators import button
-from admin_sync.collector import ForeignKeysCollector
-from admin_sync.mixin import SyncMixin
-from admin_sync.protocol import LoadDumpProtocol
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.admin.filters import (
-    IncompatibleRoleFilter,
-    PermissionFilter,
-)
+from hct_mis_api.apps.account.admin.filters import (IncompatibleRoleFilter,
+                                                    PermissionFilter)
 from hct_mis_api.apps.account.admin.forms import RoleAdminForm
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase

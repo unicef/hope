@@ -1,21 +1,18 @@
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.db.models import QuerySet
-
 from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
-from hct_mis_api.apps.payment.services.create_payment_verifications import (
-    CreatePaymentVerifications,
-)
-from hct_mis_api.apps.payment.services.process_verification import ProcessVerification
+from hct_mis_api.apps.payment.services.create_payment_verifications import \
+    CreatePaymentVerifications
+from hct_mis_api.apps.payment.services.process_verification import \
+    ProcessVerification
 from hct_mis_api.apps.payment.services.sampling import Sampling
-from hct_mis_api.apps.payment.services.verifiers import (
-    PaymentVerificationArgumentVerifier,
-)
-from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
-    does_payment_record_have_right_hoh_phone_number,
-)
+from hct_mis_api.apps.payment.services.verifiers import \
+    PaymentVerificationArgumentVerifier
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import \
+    does_payment_record_have_right_hoh_phone_number
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.payment.models import PaymentPlan  # pragma: no cover

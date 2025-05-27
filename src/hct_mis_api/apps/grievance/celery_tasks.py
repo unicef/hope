@@ -9,7 +9,8 @@ from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hct_mis_api.apps.utils.sentry import (sentry_tags,
+                                           set_sentry_business_area_tag)
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +22,8 @@ def deduplicate_and_check_against_sanctions_list_task(
     self: Any, should_populate_index: bool, individuals_ids: List[str]
 ) -> None:
     try:
-        from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
-            DeduplicateAndCheckAgainstSanctionsListTask,
-        )
+        from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import \
+            DeduplicateAndCheckAgainstSanctionsListTask
         from hct_mis_api.apps.household.models import Individual
 
         individual = Individual.objects.filter(id__in=individuals_ids[:1]).first()

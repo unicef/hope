@@ -13,30 +13,23 @@ from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceComplaintTicketWithoutExtrasFactory,
-    GrievanceTicketFactory,
-    SensitiveGrievanceTicketWithoutExtrasFactory,
-)
+    GrievanceComplaintTicketWithoutExtrasFactory, GrievanceTicketFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
-    DocumentFactory,
-    EntitlementCardFactory,
-    create_household_for_fixtures,
-)
+from hct_mis_api.apps.household.fixtures import (DocumentFactory,
+                                                 EntitlementCardFactory,
+                                                 create_household_for_fixtures)
 from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
-)
+from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                               PaymentPlanFactory,
+                                               PaymentVerificationFactory,
+                                               PaymentVerificationPlanFactory)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-    TargetingCriteriaRuleFilterFactory,
-)
+    TargetingCriteriaFactory, TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory)
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 

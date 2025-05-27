@@ -1,10 +1,10 @@
 from typing import Any
 
 from django.db.models import Max
-
 from rest_framework_extensions.key_constructor import bits
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
-from rest_framework_extensions.key_constructor.constructors import KeyConstructor
+from rest_framework_extensions.key_constructor.constructors import \
+    KeyConstructor
 
 
 class BusinessAreaListVersionKeyBit(KeyBitBase):

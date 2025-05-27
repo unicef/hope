@@ -1,30 +1,28 @@
 from datetime import datetime
 from time import sleep
 
-from django.conf import settings
-
 import pytest
+from django.conf import settings
 from elasticsearch_dsl import connections
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
+                                            create_afghanistan)
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport as RDI
+from hct_mis_api.apps.registration_data.models import \
+    RegistrationDataImport as RDI
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from tests.selenium.page_object.programme_population.households_details import (
-    HouseholdsDetails,
-)
-from tests.selenium.page_object.registration_data_import.rdi_details_page import (
-    RDIDetailsPage,
-)
-from tests.selenium.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
-)
+from tests.selenium.page_object.programme_population.households_details import \
+    HouseholdsDetails
+from tests.selenium.page_object.registration_data_import.rdi_details_page import \
+    RDIDetailsPage
+from tests.selenium.page_object.registration_data_import.registration_data_import import \
+    RegistrationDataImport
 
 pytestmark = pytest.mark.django_db()
 

@@ -2,34 +2,29 @@ from datetime import date
 from io import BytesIO
 from pathlib import Path
 
+import pytest
 from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
-
-import pytest
 from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.fixtures import (
-    create_afghanistan,
-    create_pdu_flexible_attribute,
-)
+from hct_mis_api.apps.core.fixtures import (create_afghanistan,
+                                            create_pdu_flexible_attribute)
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.geo.models import Country as GeoCountry
-from hct_mis_api.apps.household.models import (
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    PendingHousehold,
-    PendingIndividual,
-)
+from hct_mis_api.apps.household.models import (ROLE_ALTERNATE, ROLE_PRIMARY,
+                                               PendingHousehold,
+                                               PendingIndividual)
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -49,9 +44,8 @@ class TestRdiXlsxPeople(TestCase):
         parent = AreaFactory(p_code="AF11", name="Name")
         AreaFactory(p_code="AF1115", name="Name2", parent=parent)
 
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
-            RdiXlsxPeopleCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import \
+            RdiXlsxPeopleCreateTask
 
         cls.RdiXlsxPeopleCreateTask = RdiXlsxPeopleCreateTask
         cls.import_data = ImportData.objects.create(

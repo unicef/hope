@@ -6,27 +6,15 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
-from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    DUPLICATE_IN_BATCH,
-    UNIQUE,
-    UNIQUE_IN_BATCH,
-    Individual,
-    PendingIndividual,
-)
+from hct_mis_api.apps.household.models import (DUPLICATE, DUPLICATE_IN_BATCH,
+                                               UNIQUE, UNIQUE_IN_BATCH,
+                                               Individual, PendingIndividual)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    RegistrationDataImport,
-)
+    DeduplicationEngineSimilarityPair, RegistrationDataImport)
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
-    DeduplicationEngineAPI,
-    DeduplicationImage,
-    DeduplicationSet,
-    DeduplicationSetData,
-    IgnoredFilenamesPair,
-    SimilarityPair,
-)
+    DeduplicationEngineAPI, DeduplicationImage, DeduplicationSet,
+    DeduplicationSetData, IgnoredFilenamesPair, SimilarityPair)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 logger = logging.getLogger(__name__)
@@ -330,9 +318,8 @@ class BiometricDeduplicationService:
 
     def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
         # create tickets only against merged individuals
-        from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
-            create_needs_adjudication_tickets_for_biometrics,
-        )
+        from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import \
+            create_needs_adjudication_tickets_for_biometrics
 
         deduplication_pairs = self.get_duplicates_for_rdi_against_population(
             rdi, rdi_merged=True, exclude_not_valid=False

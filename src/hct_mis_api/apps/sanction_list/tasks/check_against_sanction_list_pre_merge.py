@@ -1,28 +1,20 @@
 import logging
 from typing import Dict, Iterable, List, Optional, Tuple
 
+from constance import config
 from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 
-from constance import config
-
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketSystemFlaggingDetails,
-)
+from hct_mis_api.apps.grievance.models import (GrievanceTicket,
+                                               TicketSystemFlaggingDetails)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import (
-    IndividualDocumentAfghanistan,
-    IndividualDocumentOthers,
-    IndividualDocumentUkraine,
-    get_individual_doc,
-)
-from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    Individual,
-)
+    IndividualDocumentAfghanistan, IndividualDocumentOthers,
+    IndividualDocumentUkraine, get_individual_doc)
+from hct_mis_api.apps.household.models import (IDENTIFICATION_TYPE_NATIONAL_ID,
+                                               Individual)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.utils.querysets import evaluate_qs

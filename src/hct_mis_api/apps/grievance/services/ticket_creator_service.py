@@ -10,30 +10,25 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import (
-    decode_and_get_object,
-    decode_id_string,
-    decode_id_string_required,
-)
+from hct_mis_api.apps.core.utils import (decode_and_get_object,
+                                         decode_id_string,
+                                         decode_id_string_required)
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketComplaintDetails,
-    TicketSensitiveDetails,
-)
+from hct_mis_api.apps.grievance.models import (GrievanceTicket,
+                                               TicketComplaintDetails,
+                                               TicketSensitiveDetails)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.services.data_change_services import (
-    save_data_change_extras,
-)
-from hct_mis_api.apps.grievance.services.payment_verification_services import (
-    update_payment_verification_service,
-)
-from hct_mis_api.apps.grievance.services.referral_services import save_referral_service
-from hct_mis_api.apps.grievance.services.ticket_based_on_payment_record_services import (
-    create_tickets_based_on_payment_records_service,
-)
+from hct_mis_api.apps.grievance.services.data_change_services import \
+    save_data_change_extras
+from hct_mis_api.apps.grievance.services.payment_verification_services import \
+    update_payment_verification_service
+from hct_mis_api.apps.grievance.services.referral_services import \
+    save_referral_service
+from hct_mis_api.apps.grievance.services.ticket_based_on_payment_record_services import \
+    create_tickets_based_on_payment_records_service
 from hct_mis_api.apps.grievance.utils import create_grievance_documents
-from hct_mis_api.apps.grievance.validators import validate_grievance_documents_size
+from hct_mis_api.apps.grievance.validators import \
+    validate_grievance_documents_size
 from hct_mis_api.apps.program.models import Program
 
 

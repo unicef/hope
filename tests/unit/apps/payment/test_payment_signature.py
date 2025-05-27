@@ -4,7 +4,6 @@ from unittest import mock
 
 from django.conf import settings
 from django.utils import timezone
-
 from freezegun import freeze_time
 from pytz import utc
 
@@ -13,24 +12,20 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory,
-    IndividualFactory,
-    IndividualRoleInHouseholdFactory,
-)
+    HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
-from hct_mis_api.apps.payment.fixtures import (
-    AccountFactory,
-    FinancialServiceProviderFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-)
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.payment.fixtures import (AccountFactory,
+                                               FinancialServiceProviderFactory,
+                                               PaymentFactory,
+                                               PaymentPlanFactory,
+                                               generate_delivery_mechanisms)
+from hct_mis_api.apps.payment.models import (DeliveryMechanism, Payment,
+                                             PaymentPlan)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import \
+    create_payment_plan_snapshot_data
+from hct_mis_api.apps.payment.services.payment_plan_services import \
+    PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 

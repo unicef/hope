@@ -3,7 +3,8 @@ from typing import Dict, List
 
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
+    FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value

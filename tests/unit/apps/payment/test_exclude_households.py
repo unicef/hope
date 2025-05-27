@@ -4,17 +4,18 @@ from unittest import mock
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
+                                            create_afghanistan)
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (HouseholdFactory,
+                                                 IndividualFactory)
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    RealProgramFactory,
-)
+from hct_mis_api.apps.payment.celery_tasks import \
+    payment_plan_exclude_beneficiaries
+from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                               PaymentPlanFactory,
+                                               RealProgramFactory)
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
 

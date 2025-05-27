@@ -1,12 +1,10 @@
 from collections import OrderedDict
 from typing import Any, Dict, List, Optional
 
-from rest_framework.pagination import (
-    LimitOffsetPagination,
-    _divide_with_ceil,
-    _get_displayed_page_numbers,
-    _get_page_links,
-)
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       _divide_with_ceil,
+                                       _get_displayed_page_numbers,
+                                       _get_page_links)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.urls import remove_query_param, replace_query_param

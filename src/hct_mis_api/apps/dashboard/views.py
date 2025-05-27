@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
-
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -17,11 +16,9 @@ from rest_framework.views import APIView
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import generate_dash_report_task
-from hct_mis_api.apps.dashboard.services import (
-    DashboardCacheBase,
-    DashboardDataCache,
-    DashboardGlobalDataCache,
-)
+from hct_mis_api.apps.dashboard.services import (DashboardCacheBase,
+                                                 DashboardDataCache,
+                                                 DashboardGlobalDataCache)
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 log = logging.getLogger(__name__)

@@ -1,9 +1,8 @@
 import datetime
 
+import pytz
 from django.test import TestCase
 from django.utils import timezone
-
-import pytz
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.utils import timezone_datetime

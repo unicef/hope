@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestFeedbackMessages::test_create_feedback_message_0_with_permission 1'] = {

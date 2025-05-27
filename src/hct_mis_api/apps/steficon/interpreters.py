@@ -11,7 +11,6 @@ from uuid import UUID
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
-
 from jinja2 import Environment
 
 from hct_mis_api.apps.steficon.config import config

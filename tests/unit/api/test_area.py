@@ -3,7 +3,8 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
+                                           CountryFactory)
 from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 

@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple
 
+import mptt
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
@@ -8,22 +9,18 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
-
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from fernet_fields import EncryptedCharField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
+from mptt.fields import TreeForeignKey
 from natural_keys import NaturalKeyModel
 
-import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
-from hct_mis_api.apps.utils.models import (
-    SoftDeletionTreeManager,
-    SoftDeletionTreeModel,
-    TimeStampedUUIDModel,
-)
-from mptt.fields import TreeForeignKey
+from hct_mis_api.apps.utils.models import (SoftDeletionTreeManager,
+                                           SoftDeletionTreeModel,
+                                           TimeStampedUUIDModel)
 
 
 class BusinessAreaPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment

@@ -1,11 +1,10 @@
 from typing import Any, Optional, Sequence, Union
 
+from adminfilters.autocomplete import AutoCompleteFilter
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
-
-from adminfilters.autocomplete import AutoCompleteFilter
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.accountability.models import Feedback, Message, Survey
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase

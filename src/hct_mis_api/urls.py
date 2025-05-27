@@ -1,3 +1,4 @@
+import adminactions.actions as actions
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -5,8 +6,6 @@ from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import csrf_exempt
-
-import adminactions.actions as actions
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
@@ -17,13 +16,8 @@ import hct_mis_api.apps.registration_data.views
 import hct_mis_api.apps.sanction_list.views
 import hct_mis_api.apps.targeting.views
 from hct_mis_api.apps.core.rest_api import all_fields_attributes
-from hct_mis_api.apps.core.views import (
-    UploadFile,
-    homepage,
-    logout_view,
-    schema,
-    trigger_error,
-)
+from hct_mis_api.apps.core.views import (UploadFile, homepage, logout_view,
+                                         schema, trigger_error)
 from hct_mis_api.apps.web.views import react_main
 
 # register all adminactions

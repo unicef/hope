@@ -7,13 +7,10 @@ from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
-
 from elasticsearch_dsl.connections import create_connection
 
-from hct_mis_api.apps.utils.elasticsearch_utils import (
-    populate_all_indexes,
-    rebuild_search_index,
-)
+from hct_mis_api.apps.utils.elasticsearch_utils import (populate_all_indexes,
+                                                        rebuild_search_index)
 
 logger = logging.getLogger(__name__)
 

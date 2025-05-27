@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
@@ -10,9 +12,6 @@ from django.db.transaction import atomic
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
 from smart_admin.modeladmin import SmartModelAdmin
 
 from hct_mis_api.api.models import APILogEntry, APIToken

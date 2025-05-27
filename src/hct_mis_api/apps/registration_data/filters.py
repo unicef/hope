@@ -2,14 +2,10 @@ from typing import Any
 
 from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Lower
-
 from django_filters import CharFilter, DateFilter, FilterSet
 
-from hct_mis_api.apps.core.filters import (
-    DateTimeRangeFilter,
-    IntegerFilter,
-    IntegerRangeFilter,
-)
+from hct_mis_api.apps.core.filters import (DateTimeRangeFilter, IntegerFilter,
+                                           IntegerRangeFilter)
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 

@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
-
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status

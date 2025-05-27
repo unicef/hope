@@ -1,5 +1,6 @@
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
+from concurrency.fields import AutoIncVersionField
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.validators import ProhibitNullCharactersValidator
@@ -9,16 +10,14 @@ from django.db.transaction import atomic
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
-from concurrency.fields import AutoIncVersionField
-
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
-from hct_mis_api.apps.steficon.interpreters import Interpreter, interpreters, mapping
+from hct_mis_api.apps.steficon.config import (SAFETY_HIGH, SAFETY_NONE,
+                                              SAFETY_STANDARD)
+from hct_mis_api.apps.steficon.interpreters import (Interpreter, interpreters,
+                                                    mapping)
 from hct_mis_api.apps.steficon.result import Result
-from hct_mis_api.apps.steficon.validators import (
-    DoubleSpaceValidator,
-    StartEndSpaceValidator,
-)
+from hct_mis_api.apps.steficon.validators import (DoubleSpaceValidator,
+                                                  StartEndSpaceValidator)
 
 MONITORED_FIELDS = ("name", "enabled", "deprecated", "language", "definition")
 

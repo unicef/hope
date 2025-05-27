@@ -1,7 +1,8 @@
 import calendar
 import json
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Protocol, Set, Tuple, TypedDict, cast
+from typing import (Any, Dict, List, Optional, Protocol, Set, Tuple, TypedDict,
+                    cast)
 from uuid import UUID
 
 from django.core.cache import cache

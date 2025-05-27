@@ -8,12 +8,8 @@ from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.accountability.models import (
-    Feedback,
-    FeedbackMessage,
-    Message,
-    Survey,
-)
+from hct_mis_api.apps.accountability.models import (Feedback, FeedbackMessage,
+                                                    Message, Survey)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import Household

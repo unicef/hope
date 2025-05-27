@@ -10,7 +10,8 @@ from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.payment.models import Payment, PaymentPlan  # pragma: no cover
+    from hct_mis_api.apps.payment.models import (Payment,  # pragma: no cover
+                                                 PaymentPlan)
 
 
 class Sampling:

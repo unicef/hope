@@ -1,103 +1,65 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
-from django.core.exceptions import PermissionDenied
-from django.db.models import (
-    Case,
-    F,
-    Func,
-    Model,
-    OuterRef,
-    Prefetch,
-    Q,
-    QuerySet,
-    Subquery,
-    Sum,
-    Value,
-    When,
-)
-from django.db.models.functions import Coalesce
-
 import graphene
+from django.core.exceptions import PermissionDenied
+from django.db.models import (Case, F, Func, Model, OuterRef, Prefetch, Q,
+                              QuerySet, Subquery, Sum, Value, When)
+from django.db.models.functions import Coalesce
 from graphene import Boolean, DateTime, Enum, Int, String, relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
-    ALL_GRIEVANCES_CREATE_MODIFY,
-    AdminUrlNodeMixin,
-    BaseNodePermissionMixin,
-    BasePermission,
-    DjangoPermissionFilterConnectionField,
-    DjangoPermissionFilterFastConnectionField,
-    Permissions,
-    hopeOneOfPermissionClass,
-    hopePermissionClass,
-)
+    ALL_GRIEVANCES_CREATE_MODIFY, AdminUrlNodeMixin, BaseNodePermissionMixin,
+    BasePermission, DjangoPermissionFilterConnectionField,
+    DjangoPermissionFilterFastConnectionField, Permissions,
+    hopeOneOfPermissionClass, hopePermissionClass)
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
-from hct_mis_api.apps.core.utils import (
-    chart_filters_decoder,
-    chart_permission_decorator,
-    encode_ids,
-    get_model_choices_fields,
-    get_program_id_from_headers,
-    resolve_flex_fields_choices_to_string,
-    sum_lists_with_values,
-    to_choice_object,
-)
+from hct_mis_api.apps.core.utils import (chart_filters_decoder,
+                                         chart_permission_decorator,
+                                         encode_ids, get_model_choices_fields,
+                                         get_program_id_from_headers,
+                                         resolve_flex_fields_choices_to_string,
+                                         sum_lists_with_values,
+                                         to_choice_object)
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.filters import (
-    HouseholdFilter,
-    IndividualFilter,
-    MergedHouseholdFilter,
-    MergedIndividualFilter,
-)
-from hct_mis_api.apps.household.models import (
-    AGENCY_TYPE_CHOICES,
-    DUPLICATE,
-    DUPLICATE_IN_BATCH,
-    INDIVIDUAL_FLAGS_CHOICES,
-    MARITAL_STATUS_CHOICE,
-    NEEDS_ADJUDICATION,
-    OBSERVED_DISABILITY_CHOICE,
-    RELATIONSHIP_CHOICE,
-    RESIDENCE_STATUS_CHOICE,
-    ROLE_CHOICE,
-    ROLE_NO_ROLE,
-    SEVERITY_OF_DISABILITY_CHOICES,
-    SEX_CHOICE,
-    STATUS_ACTIVE,
-    STATUS_INACTIVE,
-    WORK_STATUS_CHOICE,
-    BankAccountInfo,
-    Document,
-    DocumentType,
-    Household,
-    Individual,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-)
-from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
-    delivered_quantity_service,
-)
+from hct_mis_api.apps.household.filters import (HouseholdFilter,
+                                                IndividualFilter,
+                                                MergedHouseholdFilter,
+                                                MergedIndividualFilter)
+from hct_mis_api.apps.household.models import (AGENCY_TYPE_CHOICES, DUPLICATE,
+                                               DUPLICATE_IN_BATCH,
+                                               INDIVIDUAL_FLAGS_CHOICES,
+                                               MARITAL_STATUS_CHOICE,
+                                               NEEDS_ADJUDICATION,
+                                               OBSERVED_DISABILITY_CHOICE,
+                                               RELATIONSHIP_CHOICE,
+                                               RESIDENCE_STATUS_CHOICE,
+                                               ROLE_CHOICE, ROLE_NO_ROLE,
+                                               SEVERITY_OF_DISABILITY_CHOICES,
+                                               SEX_CHOICE, STATUS_ACTIVE,
+                                               STATUS_INACTIVE,
+                                               WORK_STATUS_CHOICE,
+                                               BankAccountInfo, Document,
+                                               DocumentType, Household,
+                                               Individual, IndividualIdentity,
+                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import \
+    delivered_quantity_service
 from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.nodes import (
-    DeduplicationEngineSimilarityPairIndividualNode,
-    DeduplicationResultNode,
-)
+    DeduplicationEngineSimilarityPairIndividualNode, DeduplicationResultNode)
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
-from hct_mis_api.apps.utils.schema import (
-    ChartDatasetNode,
-    ChartDetailedDatasetsNode,
-    FlexFieldsScalar,
-    SectionTotalNode,
-)
+from hct_mis_api.apps.utils.schema import (ChartDatasetNode,
+                                           ChartDetailedDatasetsNode,
+                                           FlexFieldsScalar, SectionTotalNode)
 
 INDIVIDUALS_CHART_LABELS = [
     "Females 0-5",

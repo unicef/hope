@@ -1,9 +1,8 @@
 from typing import Any
 
+from constance import config
 from django.db.models import Q, QuerySet
 from django.utils import timezone
-
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
@@ -21,18 +20,13 @@ from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.api.caches import BusinessAreaKeyConstructor
 from hct_mis_api.apps.core.api.filters import BusinessAreaFilter
 from hct_mis_api.apps.core.api.mixins import BaseViewSet, CountActionMixin
-from hct_mis_api.apps.core.api.serializers import (
-    BusinessAreaSerializer,
-    ChoiceSerializer,
-)
+from hct_mis_api.apps.core.api.serializers import (BusinessAreaSerializer,
+                                                   ChoiceSerializer)
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    PaymentPlan,
-    PaymentVerificationPlan,
-)
+from hct_mis_api.apps.payment.models import (DeliveryMechanism, PaymentPlan,
+                                             PaymentVerificationPlan)
 
 
 class BusinessAreaViewSet(

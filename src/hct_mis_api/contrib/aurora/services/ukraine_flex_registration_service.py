@@ -5,40 +5,22 @@ from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.utils import (
-    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
-    build_arg_dict_from_dict,
-    build_flex_arg_dict_from_list_if_exists,
-)
+    IDENTIFICATION_TYPE_TO_KEY_MAPPING, build_arg_dict_from_dict,
+    build_flex_arg_dict_from_list_if_exists)
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.forms import (
-    BankAccountInfoForm,
-    DocumentForm,
-    IndividualForm,
-)
+from hct_mis_api.apps.household.forms import (BankAccountInfoForm,
+                                              DocumentForm, IndividualForm)
 from hct_mis_api.apps.household.models import (
-    BLANK,
-    DISABLED,
-    HEAD,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_DRIVERS_LICENSE,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
+    BLANK, DISABLED, HEAD, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_DRIVERS_LICENSE, IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
-    IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO,
-    IDENTIFICATION_TYPE_TAX_ID,
-    NOT_DISABLED,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    DocumentType,
-    PendingBankAccountInfo,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualRoleInHousehold,
-)
+    IDENTIFICATION_TYPE_RESIDENCE_PERMIT_NO, IDENTIFICATION_TYPE_TAX_ID,
+    NOT_DISABLED, ROLE_ALTERNATE, ROLE_PRIMARY, DocumentType,
+    PendingBankAccountInfo, PendingDocument, PendingHousehold,
+    PendingIndividual, PendingIndividualRoleInHousehold)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
-    BaseRegistrationService,
-)
+from hct_mis_api.contrib.aurora.services.base_flex_registration_service import \
+    BaseRegistrationService
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestSampleSizeQuery::test_get_communication_message_sample_size_for_households_0_with_permission_and_full_list_households 1'] = {

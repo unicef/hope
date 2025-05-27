@@ -6,28 +6,21 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 
-from hct_mis_api.apps.account.models import (
-    AdminAreaLimitedTo,
-    Partner,
-    RoleAssignment,
-    User,
-)
+from hct_mis_api.apps.account.models import (AdminAreaLimitedTo, Partner,
+                                             RoleAssignment, User)
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
-from hct_mis_api.apps.household.models import (
-    BankAccountInfo,
-    Document,
-    EntitlementCard,
-    Household,
-    HouseholdCollection,
-    Individual,
-    IndividualCollection,
-    IndividualIdentity,
-    IndividualRoleInHousehold,
-)
+from hct_mis_api.apps.household.documents import (HouseholdDocument,
+                                                  get_individual_doc)
+from hct_mis_api.apps.household.models import (BankAccountInfo, Document,
+                                               EntitlementCard, Household,
+                                               HouseholdCollection, Individual,
+                                               IndividualCollection,
+                                               IndividualIdentity,
+                                               IndividualRoleInHousehold)
 from hct_mis_api.apps.payment.models import Account
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hct_mis_api.apps.periodic_data_update.utils import \
+    populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport

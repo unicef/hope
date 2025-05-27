@@ -2,6 +2,11 @@ import uuid
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
 
+from admin_extra_buttons.buttons import Button
+from admin_extra_buttons.decorators import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from adminactions.helpers import AdminActionPermMixin
+from adminfilters.mixin import AdminFiltersMixin
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
@@ -12,12 +17,6 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-from admin_extra_buttons.buttons import Button
-from admin_extra_buttons.decorators import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
-from adminactions.helpers import AdminActionPermMixin
-from adminfilters.mixin import AdminFiltersMixin
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
@@ -208,7 +207,8 @@ class PaymentPlanCeleryTasksMixin:
     )
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         """Preparing Payment Plan"""
-        from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
+        from hct_mis_api.apps.payment.celery_tasks import \
+            prepare_payment_plan_task
 
         payment_plan = PaymentPlan.objects.get(pk=pk)
         if payment_plan.status != PaymentPlan.Status.OPEN:
@@ -251,9 +251,8 @@ class PaymentPlanCeleryTasksMixin:
     def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         """Exporting template for entitlement"""
 
-        from hct_mis_api.apps.payment.celery_tasks import (
-            create_payment_plan_payment_list_xlsx,
-        )
+        from hct_mis_api.apps.payment.celery_tasks import \
+            create_payment_plan_payment_list_xlsx
 
         if request.method == "POST":
             task_name = self.create_payment_plan_payment_list_xlsx
@@ -286,9 +285,8 @@ class PaymentPlanCeleryTasksMixin:
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         """Importing entitlement file"""
 
-        from hct_mis_api.apps.payment.celery_tasks import (
-            import_payment_plan_payment_list_from_xlsx,
-        )
+        from hct_mis_api.apps.payment.celery_tasks import \
+            import_payment_plan_payment_list_from_xlsx
 
         if request.method == "POST":
             task_name = self.import_payment_plan_payment_list_from_xlsx
@@ -319,9 +317,8 @@ class PaymentPlanCeleryTasksMixin:
     def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         """Exporting payment plan list"""
 
-        from hct_mis_api.apps.payment.celery_tasks import (
-            create_payment_plan_payment_list_xlsx_per_fsp,
-        )
+        from hct_mis_api.apps.payment.celery_tasks import \
+            create_payment_plan_payment_list_xlsx_per_fsp
 
         if request.method == "POST":
             task_name = self.create_payment_plan_payment_list_xlsx_per_fsp
@@ -352,9 +349,8 @@ class PaymentPlanCeleryTasksMixin:
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         """Importing payment plan list (from xlsx)"""
 
-        from hct_mis_api.apps.payment.celery_tasks import (
-            import_payment_plan_payment_list_per_fsp_from_xlsx,
-        )
+        from hct_mis_api.apps.payment.celery_tasks import \
+            import_payment_plan_payment_list_per_fsp_from_xlsx
 
         if request.method == "POST":
             task_name = self.import_payment_plan_payment_list_per_fsp_from_xlsx

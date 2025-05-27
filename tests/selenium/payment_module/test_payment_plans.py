@@ -18,35 +18,35 @@ from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    FinancialServiceProvider,
-    PaymentPlan,
-)
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+    FspXlsxTemplatePerDeliveryMechanismFactory, generate_delivery_mechanisms)
+from hct_mis_api.apps.payment.models import (DeliveryMechanism,
+                                             FinancialServiceProvider,
+                                             PaymentPlan)
+from hct_mis_api.apps.payment.services.payment_plan_services import \
+    PaymentPlanService
+from hct_mis_api.apps.program.fixtures import (ProgramCycleFactory,
+                                               ProgramFactory)
+from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
+                                             ProgramCycle)
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
-from src.hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from src.hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.targeting.fixtures import (TargetingCriteriaFactory,
+                                                 TargetingCriteriaRuleFactory)
+from src.hct_mis_api.apps.household.fixtures import (HouseholdFactory,
+                                                     IndividualFactory)
+from src.hct_mis_api.apps.payment.fixtures import (PaymentFactory,
+                                                   PaymentPlanFactory)
 from tests.selenium.helpers.date_time_format import FormatTime
-from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
-from tests.selenium.page_object.payment_module.payment_module import PaymentModule
-from tests.selenium.page_object.payment_module.payment_module_details import (
-    PaymentModuleDetails,
-)
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
-from tests.selenium.page_object.payment_module.program_cycle_details import (
-    ProgramCycleDetailsPage,
-)
+from tests.selenium.page_object.payment_module.new_payment_plan import \
+    NewPaymentPlan
+from tests.selenium.page_object.payment_module.payment_module import \
+    PaymentModule
+from tests.selenium.page_object.payment_module.payment_module_details import \
+    PaymentModuleDetails
+from tests.selenium.page_object.payment_module.program_cycle import \
+    ProgramCyclePage
+from tests.selenium.page_object.payment_module.program_cycle_details import \
+    ProgramCycleDetailsPage
 
 pytestmark = pytest.mark.django_db()
 

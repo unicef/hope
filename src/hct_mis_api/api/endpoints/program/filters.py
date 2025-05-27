@@ -1,5 +1,4 @@
 from django.db.models.query import QuerySet
-
 from django_filters import BooleanFilter, CharFilter
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter

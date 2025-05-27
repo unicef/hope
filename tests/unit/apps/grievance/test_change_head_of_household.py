@@ -1,6 +1,5 @@
-from django.core.management import call_command
-
 import pytest
+from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -10,17 +9,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory,
-    TicketIndividualDataUpdateDetailsFactory,
-)
+    GrievanceTicketFactory, TicketIndividualDataUpdateDetailsFactory)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import (
-    AUNT_UNCLE,
-    BROTHER_SISTER,
-    HEAD,
-    Individual,
-)
+from hct_mis_api.apps.household.fixtures import (HouseholdFactory,
+                                                 IndividualFactory)
+from hct_mis_api.apps.household.models import (AUNT_UNCLE, BROTHER_SISTER,
+                                               HEAD, Individual)
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

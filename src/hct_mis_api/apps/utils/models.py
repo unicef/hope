@@ -5,19 +5,13 @@ import logging
 import sys
 import warnings
 from functools import cached_property
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Sequence,
-    T,
-    Tuple,
-)
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Iterable, List,
+                    Optional, Sequence, T, Tuple)
 
+import celery
+from celery import states
+from celery.contrib.abortable import AbortableAsyncResult
+from concurrency.fields import IntegerVersionField
 from django.conf import settings
 from django.db import models
 from django.http import HttpRequest
@@ -25,18 +19,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import classproperty
 from django.utils.translation import gettext_lazy as _
-
-import celery
-from celery import states
-from celery.contrib.abortable import AbortableAsyncResult
-from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from model_utils.models import UUIDModel
+from mptt.managers import TreeManager
+from mptt.models import MPTTModel
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.utils import nested_getattr
-from mptt.managers import TreeManager
-from mptt.models import MPTTModel
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -349,9 +338,8 @@ class UnicefIdentifiedModel(models.Model):
 
 class SignatureManager(models.Manager):
     def bulk_create_with_signature(self, objs: Iterable[T], *args: Any, **kwargs: Any) -> List[T]:
-        from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
-            bulk_create_payment_snapshot_data,
-        )
+        from hct_mis_api.apps.payment.services.payment_household_snapshot_service import \
+            bulk_create_payment_snapshot_data
 
         created_objects = super().bulk_create(objs, *args, **kwargs)
         bulk_create_payment_snapshot_data([x.id for x in created_objects])

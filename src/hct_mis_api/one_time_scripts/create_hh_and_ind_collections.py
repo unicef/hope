@@ -2,12 +2,9 @@ import logging
 from typing import List, Optional, Type, Union
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import (
-    Household,
-    HouseholdCollection,
-    Individual,
-    IndividualCollection,
-)
+from hct_mis_api.apps.household.models import (Household, HouseholdCollection,
+                                               Individual,
+                                               IndividualCollection)
 
 logger = logging.getLogger(__name__)
 

@@ -3,37 +3,24 @@ from typing import Any, Dict, List, Optional
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
-from django.core.validators import (
-    MaxLengthValidator,
-    MinLengthValidator,
-    ProhibitNullCharactersValidator,
-)
+from django.core.validators import (MaxLengthValidator, MinLengthValidator,
+                                    ProhibitNullCharactersValidator)
 from django.db import models, transaction
 from django.db.models import Count, OuterRef, Q, QuerySet, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    NEEDS_ADJUDICATION,
-    Household,
-    Individual,
-    PendingHousehold,
-    PendingIndividual,
-)
-from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
-    SimilarityPair,
-)
-from hct_mis_api.apps.utils.models import (
-    AdminUrlMixin,
-    ConcurrencyModel,
-    TimeStampedUUIDModel,
-)
-from hct_mis_api.apps.utils.validators import (
-    DoubleSpaceValidator,
-    StartEndSpaceValidator,
-)
+from hct_mis_api.apps.household.models import (DUPLICATE, NEEDS_ADJUDICATION,
+                                               Household, Individual,
+                                               PendingHousehold,
+                                               PendingIndividual)
+from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import \
+    SimilarityPair
+from hct_mis_api.apps.utils.models import (AdminUrlMixin, ConcurrencyModel,
+                                           TimeStampedUUIDModel)
+from hct_mis_api.apps.utils.validators import (DoubleSpaceValidator,
+                                               StartEndSpaceValidator)
 
 logger = logging.getLogger(__name__)
 

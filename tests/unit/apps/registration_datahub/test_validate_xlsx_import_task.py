@@ -8,11 +8,11 @@ from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
+from hct_mis_api.apps.program.fixtures import \
+    get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
-    ValidateXlsxImport,
-)
+from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import \
+    ValidateXlsxImport
 
 
 class TestValidateXlsxImportTask(TestCase):

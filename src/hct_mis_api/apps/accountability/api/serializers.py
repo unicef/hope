@@ -1,30 +1,22 @@
 from typing import Optional
 
 from django.conf import settings
-
 from rest_framework import serializers
 
-from hct_mis_api.apps.accountability.models import (
-    Feedback,
-    FeedbackMessage,
-    Message,
-    SampleFileExpiredException,
-    Survey,
-)
+from hct_mis_api.apps.accountability.models import (Feedback, FeedbackMessage,
+                                                    Message,
+                                                    SampleFileExpiredException,
+                                                    Survey)
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
-from hct_mis_api.apps.household.api.serializers.household import (
-    HouseholdSmallSerializer,
-)
+from hct_mis_api.apps.household.api.serializers.household import \
+    HouseholdSmallSerializer
 from hct_mis_api.apps.payment.api.serializers import (
-    FollowUpPaymentPlanSerializer,
-    FullListSerializer,
-    RandomSamplingSerializer,
-)
+    FollowUpPaymentPlanSerializer, FullListSerializer,
+    RandomSamplingSerializer)
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.registration_data.api.serializers import (
-    RegistrationDataImportListSerializer,
-)
+from hct_mis_api.apps.registration_data.api.serializers import \
+    RegistrationDataImportListSerializer
 
 
 class FeedbackMessageSerializer(serializers.ModelSerializer):

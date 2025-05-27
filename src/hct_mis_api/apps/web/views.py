@@ -2,14 +2,13 @@ import json
 import logging
 from typing import Dict
 
+import requests
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.decorators.cache import never_cache
-
-import requests
 
 logger = logging.getLogger(__name__)
 

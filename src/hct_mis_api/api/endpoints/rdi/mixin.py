@@ -6,19 +6,15 @@ from typing import Dict, List, Optional
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import (
-    HEAD,
-    NON_BENEFICIARY,
-    RELATIONSHIP_UNKNOWN,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    DocumentType,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-)
+from hct_mis_api.apps.household.models import (HEAD, NON_BENEFICIARY,
+                                               RELATIONSHIP_UNKNOWN,
+                                               ROLE_ALTERNATE, ROLE_PRIMARY,
+                                               DocumentType, PendingDocument,
+                                               PendingHousehold,
+                                               PendingIndividual)
 from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
+from hct_mis_api.apps.periodic_data_update.utils import \
+    populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)

@@ -2,40 +2,29 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
+import graphene
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.encoding import force_str
 from django.utils.functional import Promise
-
-import graphene
 from flags.state import flag_state
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.filters import UsersFilter
-from hct_mis_api.apps.account.models import (
-    USER_STATUS_CHOICES,
-    Partner,
-    Role,
-    RoleAssignment,
-    User,
-)
+from hct_mis_api.apps.account.models import (USER_STATUS_CHOICES, Partner,
+                                             Role, RoleAssignment, User)
 from hct_mis_api.apps.account.permissions import (
-    ALL_GRIEVANCES_CREATE_MODIFY,
-    DjangoPermissionFilterConnectionField,
-    Permissions,
-    hopeOneOfPermissionClass,
-)
+    ALL_GRIEVANCES_CREATE_MODIFY, DjangoPermissionFilterConnectionField,
+    Permissions, hopeOneOfPermissionClass)
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import (
-    decode_id_string,
-    get_program_id_from_headers,
-    to_choice_object,
-)
+from hct_mis_api.apps.core.utils import (decode_id_string,
+                                         get_program_id_from_headers,
+                                         to_choice_object)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.household.models import Household, Individual
@@ -45,7 +34,6 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
-
     from graphene import Node
 
 

@@ -3,15 +3,13 @@ from typing import Any
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-
 from xlrd import XLRDError
 
-from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from hct_mis_api.apps.core.models import (
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
-)
+from hct_mis_api.apps.core.flex_fields_importer import \
+    FlexibleAttributeImporter
+from hct_mis_api.apps.core.models import (FlexibleAttribute,
+                                          FlexibleAttributeChoice,
+                                          FlexibleAttributeGroup)
 
 
 class MockSuperUser:

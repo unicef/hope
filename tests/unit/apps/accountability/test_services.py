@@ -1,13 +1,12 @@
-from django.core.exceptions import ValidationError
-
 import pytest
+from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.accountability.fixtures import FeedbackFactory
 from hct_mis_api.apps.accountability.models import Message
-from hct_mis_api.apps.accountability.services.feedback_crud_services import (
-    FeedbackCrudServices,
-)
-from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
+from hct_mis_api.apps.accountability.services.feedback_crud_services import \
+    FeedbackCrudServices
+from hct_mis_api.apps.accountability.services.verifiers import \
+    MessageArgumentVerifier
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program

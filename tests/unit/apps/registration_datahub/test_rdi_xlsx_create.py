@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
+import pytest
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -12,46 +13,30 @@ from django.core.management import call_command
 from django.forms import model_to_dict
 from django.test import TestCase
 from django.utils.dateparse import parse_datetime
-
-import pytest
 from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.fixtures import (
-    create_afghanistan,
-    create_pdu_flexible_attribute,
-)
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    PeriodicFieldData,
-)
-from hct_mis_api.apps.core.utils import (
-    IDENTIFICATION_TYPE_TO_KEY_MAPPING,
-    SheetImageLoader,
-)
+from hct_mis_api.apps.core.fixtures import (create_afghanistan,
+                                            create_pdu_flexible_attribute)
+from hct_mis_api.apps.core.models import (BusinessArea, FlexibleAttribute,
+                                          PeriodicFieldData)
+from hct_mis_api.apps.core.utils import (IDENTIFICATION_TYPE_TO_KEY_MAPPING,
+                                         SheetImageLoader)
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.geo.models import Country as GeoCountry
-from hct_mis_api.apps.household.fixtures import (
-    IndividualFactory,
-    PendingIndividualFactory,
-)
+from hct_mis_api.apps.household.fixtures import (IndividualFactory,
+                                                 PendingIndividualFactory)
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    IDENTIFICATION_TYPE_TAX_ID,
-    DocumentType,
-    PendingBankAccountInfo,
-    PendingDocument,
-    PendingHousehold,
-    PendingIndividual,
-    PendingIndividualIdentity,
-)
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, IDENTIFICATION_TYPE_TAX_ID,
+    DocumentType, PendingBankAccountInfo, PendingDocument, PendingHousehold,
+    PendingIndividual, PendingIndividualIdentity)
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import \
+    RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -107,9 +92,8 @@ class TestRdiXlsxCreateTask(TestCase):
         parent = AreaFactory(p_code="AF11", name="Name")
         AreaFactory(p_code="AF1115", name="Name2", parent=parent)
 
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
-            RdiXlsxCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import \
+            RdiXlsxCreateTask
 
         PartnerFactory(name="WFP")
         PartnerFactory(name="UNHCR")

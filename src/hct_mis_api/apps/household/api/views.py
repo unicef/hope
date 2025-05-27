@@ -1,8 +1,7 @@
 from typing import Any
 
-from django.db.models import Prefetch, QuerySet
-
 from constance import config
+from django.db.models import Prefetch, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -14,34 +13,23 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.api.mixins import (
-    BaseViewSet,
-    BusinessAreaVisibilityMixin,
-    CountActionMixin,
-    ProgramVisibilityMixin,
-    SerializerActionMixin,
-)
+from hct_mis_api.apps.core.api.mixins import (BaseViewSet,
+                                              BusinessAreaVisibilityMixin,
+                                              CountActionMixin,
+                                              ProgramVisibilityMixin,
+                                              SerializerActionMixin)
 from hct_mis_api.apps.household.api.caches import (
-    HouseholdListKeyConstructor,
-    IndividualListKeyConstructor,
-)
+    HouseholdListKeyConstructor, IndividualListKeyConstructor)
 from hct_mis_api.apps.household.api.serializers.household import (
-    HouseholdChoicesSerializer,
-    HouseholdDetailSerializer,
-    HouseholdListSerializer,
-    HouseholdMemberSerializer,
-    IndividualChoicesSerializer,
-)
+    HouseholdChoicesSerializer, HouseholdDetailSerializer,
+    HouseholdListSerializer, HouseholdMemberSerializer,
+    IndividualChoicesSerializer)
 from hct_mis_api.apps.household.api.serializers.individual import (
-    IndividualDetailSerializer,
-    IndividualListSerializer,
-)
-from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
-from hct_mis_api.apps.household.models import (
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
-)
+    IndividualDetailSerializer, IndividualListSerializer)
+from hct_mis_api.apps.household.filters import (HouseholdFilter,
+                                                IndividualFilter)
+from hct_mis_api.apps.household.models import (Household, Individual,
+                                               IndividualRoleInHousehold)
 from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.models import Program

@@ -1,5 +1,7 @@
 from typing import Any, Dict
 
+from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
+from constance import config
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -7,9 +9,6 @@ from django.http import Http404, HttpRequest
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 from django.views.generic.edit import ProcessFormView
-
-from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
-from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
@@ -19,13 +18,12 @@ from sentry_sdk import set_tag
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.api.filters import ProjectFilter, RegistrationFilter
-from hct_mis_api.contrib.aurora.api import (
-    OrganizationSerializer,
-    ProjectSerializer,
-    RegistrationSerializer,
-)
+from hct_mis_api.contrib.aurora.api import (OrganizationSerializer,
+                                            ProjectSerializer,
+                                            RegistrationSerializer)
 from hct_mis_api.contrib.aurora.caches import AuroraKeyConstructor
-from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
+from hct_mis_api.contrib.aurora.models import (Organization, Project,
+                                               Registration)
 from hct_mis_api.contrib.aurora.utils import fetch_metadata
 
 
