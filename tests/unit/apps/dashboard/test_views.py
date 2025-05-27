@@ -257,8 +257,12 @@ def test_dashboard_data_view_global_slug_cache_miss(
         }
     ]
 
-    with patch.object(DashboardGlobalDataCache, "refresh_data", return_value=mock_global_data) as mock_refresh:
+    with patch.object(
+        DashboardGlobalDataCache, "refresh_data", autospec=True, return_value=mock_global_data
+    ) as mock_refresh:
         response = client.get(global_url)
+        # View calls refresh_data without years_to_refresh, meaning full refresh on cache miss.
+        # The mock records the call as it was made.
         mock_refresh.assert_called_once_with("global")
 
     assert response.status_code == status.HTTP_200_OK

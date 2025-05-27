@@ -1,7 +1,18 @@
 import calendar
 import json
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Protocol, Set, Tuple, TypedDict, cast
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Set,
+    Tuple,
+    TypedDict,
+    Union,
+    cast,
+)
 from uuid import UUID
 
 from django.core.cache import cache
@@ -206,7 +217,7 @@ class DashboardCacheBase(Protocol):
     def _get_payment_plan_counts(
         cls, base_queryset: models.QuerySet, group_by_annotated_names: List[str]
     ) -> Dict[str, Dict[Tuple, int]]:
-        date_field = Coalesce("delivery_date", "entitlement_date", "status_date")
+        date_field: Union[F, Coalesce] = Coalesce("delivery_date", "entitlement_date", "status_date")
         potential_annotations = {
             "year": ExtractYear(date_field),
             "month": ExtractMonth(date_field),
@@ -248,13 +259,30 @@ class DashboardCacheBase(Protocol):
         return {"total": dict(total_counts), "finished": dict(finished_counts)}
 
     @classmethod
-    def refresh_data(cls, identifier: str) -> List[Dict[str, Any]]:
+    def refresh_data(cls, identifier: str, years_to_refresh: Optional[List[int]] = None) -> List[Dict[str, Any]]:
         raise NotImplementedError
 
 
 class DashboardDataCache(DashboardCacheBase):
     @classmethod
-    def refresh_data(cls, business_area_slug: str) -> List[Dict[str, Any]]:
+    def refresh_data(
+        cls, business_area_slug: str, years_to_refresh: Optional[List[int]] = None
+    ) -> List[Dict[str, Any]]:
+        existing_data_for_other_years: List[Dict[str, Any]] = []
+        is_partial_refresh_attempt = bool(years_to_refresh)
+
+        if is_partial_refresh_attempt and years_to_refresh:
+            cache_key = cls.get_cache_key(business_area_slug)
+            cached_data_str = cache.get(cache_key)
+            if cached_data_str:
+                all_cached_data = json.loads(cached_data_str)
+                existing_data_for_other_years = [
+                    item for item in all_cached_data if item.get("year") not in years_to_refresh
+                ]
+            else:
+                is_partial_refresh_attempt = False
+                years_to_refresh = None
+
         try:
             business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
         except BusinessArea.DoesNotExist:
@@ -263,14 +291,30 @@ class DashboardDataCache(DashboardCacheBase):
 
         base_payments_qs = cls._get_base_payment_queryset(business_area=business_area)
 
+        if is_partial_refresh_attempt and years_to_refresh:
+            date_field_expr: Union[F, Coalesce] = Coalesce("delivery_date", "entitlement_date", "status_date")
+            if base_payments_qs.exists():
+                base_payments_qs = base_payments_qs.annotate(_temp_refresh_year=ExtractYear(date_field_expr)).filter(
+                    _temp_refresh_year__in=years_to_refresh
+                )
+
         household_ids: Set[UUID] = set(
             hh_id for hh_id in base_payments_qs.values_list("household_id", flat=True).distinct() if hh_id is not None
         )
+
         if not household_ids:
-            cls.store_data(business_area_slug, [])
-            return []
+            final_result_list = existing_data_for_other_years if is_partial_refresh_attempt else []
+            serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
+            cls.store_data(business_area_slug, serialized_data)
+            return serialized_data
 
         household_map = cls._get_household_data(household_ids)
+
+        if not base_payments_qs.exists() and is_partial_refresh_attempt:
+            final_result_list = existing_data_for_other_years
+            serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
+            cls.store_data(business_area_slug, serialized_data)
+            return serialized_data
 
         plan_group_fields = [
             "year",
@@ -351,13 +395,13 @@ class DashboardDataCache(DashboardCacheBase):
                 current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
                 current_summary["_seen_households"].add(household_id)
 
-        result_list = []
+        newly_processed_result_list = []
         for (year, month, admin1, program, sector, fsp, delivery_type, status, currency), totals in summary.items():
             month_name = "Unknown"
             if month and 1 <= month <= 12:
                 month_name = calendar.month_name[month]
 
-            result_list.append(
+            newly_processed_result_list.append(
                 {
                     "year": year,
                     "month": month_name,
@@ -381,24 +425,58 @@ class DashboardDataCache(DashboardCacheBase):
                 }
             )
 
-        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(result_list, many=True).data)
+        final_result_list = newly_processed_result_list + existing_data_for_other_years
+        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data
 
 
 class DashboardGlobalDataCache(DashboardCacheBase):
     @classmethod
-    def refresh_data(cls, identifier: str = GLOBAL_SLUG) -> List[Dict[str, Any]]:
+    def refresh_data(
+        cls, identifier: str = GLOBAL_SLUG, years_to_refresh: Optional[List[int]] = None
+    ) -> List[Dict[str, Any]]:
+        existing_data_for_other_years: List[Dict[str, Any]] = []
+        is_partial_refresh_attempt = bool(years_to_refresh)
+
+        if is_partial_refresh_attempt and years_to_refresh:
+            cache_key = cls.get_cache_key(identifier)
+            cached_data_str = cache.get(cache_key)
+            if cached_data_str:
+                all_cached_data = json.loads(cached_data_str)
+                existing_data_for_other_years = [
+                    item for item in all_cached_data if item.get("year") not in years_to_refresh
+                ]
+            else:
+                is_partial_refresh_attempt = False
+                years_to_refresh = None
+
         base_payments_qs = cls._get_base_payment_queryset()
+
+        if is_partial_refresh_attempt and years_to_refresh:
+            date_field_expr: Union[F, Coalesce] = Coalesce("delivery_date", "entitlement_date", "status_date")
+            if base_payments_qs.exists():
+                base_payments_qs = base_payments_qs.annotate(_temp_refresh_year=ExtractYear(date_field_expr)).filter(
+                    _temp_refresh_year__in=years_to_refresh
+                )
 
         household_ids: Set[UUID] = set(
             hh_id for hh_id in base_payments_qs.values_list("household_id", flat=True).distinct() if hh_id is not None
         )
+
         if not household_ids:
-            cls.store_data(identifier, [])
-            return []
+            final_result_list = existing_data_for_other_years if is_partial_refresh_attempt else []
+            serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
+            cls.store_data(identifier, serialized_data)
+            return serialized_data
 
         household_map = cls._get_household_data(household_ids)
+
+        if not base_payments_qs.exists() and is_partial_refresh_attempt:
+            final_result_list = existing_data_for_other_years
+            serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
+            cls.store_data(identifier, serialized_data)
+            return serialized_data
 
         plan_group_fields = [
             "year",
@@ -467,9 +545,9 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                 current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
                 current_summary["_seen_households"].add(household_id)
 
-        result_list = []
+        newly_processed_result_list = []
         for (year, country, region, sector, delivery_type, status), totals in summary.items():
-            result_list.append(
+            newly_processed_result_list.append(
                 {
                     "year": year,
                     "country": country,
@@ -489,6 +567,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                 }
             )
 
-        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(result_list, many=True).data)
+        final_result_list = newly_processed_result_list + existing_data_for_other_years
+        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
         cls.store_data(identifier, serialized_data)
         return serialized_data

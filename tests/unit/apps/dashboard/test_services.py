@@ -12,6 +12,7 @@ from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.dashboard.services import (
+    GLOBAL_SLUG,
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
@@ -26,7 +27,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     create_payment_verification_plan_with_status,
 )
-from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 CACHE_CONFIG = [
@@ -110,7 +111,7 @@ def test_refresh_data(
 
     populate_dashboard_cache(afghanistan)
 
-    refreshed_data = cache_class.refresh_data() if slug == "global" else cache_class.refresh_data(afghanistan.slug)
+    refreshed_data = cache_class.refresh_data(identifier=slug) if slug == "global" else cache_class.refresh_data(slug)
     assert refreshed_data is not None, "Refresh data returned None"
     assert len(refreshed_data) > 0, "No data returned by refresh"
     assert sum(item["payments"] for item in refreshed_data) > 0, "Payments data mismatch"
@@ -181,7 +182,7 @@ def test_dashboard_data_cache(
     if cache_service == DashboardDataCache:
         result = cache_service.refresh_data(business_area.slug)
     else:
-        result = cache_service.refresh_data()
+        result = cache_service.refresh_data(identifier=GLOBAL_SLUG)
 
     total_usd = sum(Decimal(item["total_delivered_quantity_usd"]) for item in result)
     assert len(result) > 0
@@ -262,7 +263,7 @@ def test_global_dashboard_unique_household_metrics(
         status=common_status,
         program=household.program,
     )
-    result = DashboardGlobalDataCache.refresh_data()
+    result = DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
     assert result is not None, "Result should not be None"
     target_group_data = None
     for item in result:
@@ -300,7 +301,7 @@ def test_dashboard_reconciliation_verification_consistency(
     country_data = DashboardDataCache.refresh_data(country_slug)
     assert country_data, "Country dashboard data should not be empty"
 
-    global_data_all = DashboardGlobalDataCache.refresh_data()
+    global_data_all = DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
     assert global_data_all, "Global dashboard data should not be empty"
 
     global_data_filtered_for_country = [
@@ -528,8 +529,171 @@ def test_dashboard_global_data_cache_refresh_data_no_payments() -> None:
     cache_key = DashboardGlobalDataCache.get_cache_key("global")
     cache.delete(cache_key)
 
-    result = DashboardGlobalDataCache.refresh_data()
+    result = DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
     assert result == []
     cached_data = cache.get(cache_key)
     assert cached_data is not None
     assert json.loads(cached_data) == []
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_refresh_data_partial_cache_empty_falls_back_to_full(
+    afghanistan: BusinessAreaFactory,
+    payment_factory: Callable,
+    program_factory: Callable,
+    household_factory: Callable,
+    individual_factory: Callable,
+) -> None:
+    """Test partial refresh falls back to full refresh if cache is empty."""
+    ba_slug = afghanistan.slug
+    cache.delete(DashboardDataCache.get_cache_key(ba_slug))
+
+    prog = program_factory(business_area=afghanistan)
+    hh = household_factory(program=prog, business_area=afghanistan, head_of_household=None)
+    hoh_individual = individual_factory(household=hh, program=prog, business_area=afghanistan, relationship="HEAD")
+    hh.head_of_household = hoh_individual
+    hh.save()
+
+    payment_factory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=hh,
+        program=prog,
+        business_area=afghanistan,
+        delivery_date=timezone.datetime(CURRENT_YEAR - 1, 1, 1, tzinfo=timezone.utc),
+        delivered_quantity_usd=Decimal("100.00"),
+    )
+    payment_factory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=hh,
+        program=prog,
+        business_area=afghanistan,
+        delivery_date=timezone.datetime(CURRENT_YEAR, 1, 1, tzinfo=timezone.utc),
+        delivered_quantity_usd=Decimal("200.00"),
+    )
+
+    refreshed_data = DashboardDataCache.refresh_data(ba_slug, years_to_refresh=[CURRENT_YEAR])
+
+    assert len(refreshed_data) == 2, "Should contain data for both years due to full fallback"
+    years_in_result = {item["year"] for item in refreshed_data}
+    assert {CURRENT_YEAR, CURRENT_YEAR - 1} == years_in_result
+
+    cache.delete(DashboardGlobalDataCache.get_cache_key(GLOBAL_SLUG))
+    refreshed_global_data = DashboardGlobalDataCache.refresh_data(
+        identifier=GLOBAL_SLUG, years_to_refresh=[CURRENT_YEAR]
+    )
+    assert len(refreshed_global_data) == 2
+    global_years_in_result = {item["year"] for item in refreshed_global_data}
+    assert {CURRENT_YEAR, CURRENT_YEAR - 1} == global_years_in_result
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_refresh_data_partial_update_combines_data(
+    afghanistan: BusinessAreaFactory,
+    payment_factory: Callable,
+    program_factory: Callable,
+    household_factory: Callable,
+    individual_factory: Callable,
+) -> None:
+    """Test partial refresh updates specified years and combines with existing cached data."""
+    ba_slug = afghanistan.slug
+    prog = program_factory(business_area=afghanistan)
+    hh = household_factory(program=prog, business_area=afghanistan, head_of_household=None, size=1)
+    hoh_individual = individual_factory(household=hh, program=prog, business_area=afghanistan, relationship="HEAD")
+    hh.head_of_household = hoh_individual
+    hh.save()
+
+    year_old = CURRENT_YEAR - 2
+    year_mid = CURRENT_YEAR - 1
+    year_new = CURRENT_YEAR
+
+    payment_factory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=hh,
+        program=prog,
+        business_area=afghanistan,
+        delivery_date=timezone.datetime(year_old, 1, 1, tzinfo=timezone.utc),
+        delivered_quantity_usd=Decimal("100.00"),
+        status="Transaction Successful",
+    )
+    DashboardDataCache.refresh_data(ba_slug)
+    cached_data_step1 = DashboardDataCache.get_data(ba_slug)
+    assert cached_data_step1 is not None, "cached_data_step1 should not be None after refresh"
+    assert len(cached_data_step1) == 1
+    assert cached_data_step1[0]["year"] == year_old
+    assert Decimal(cached_data_step1[0]["total_delivered_quantity_usd"]) == Decimal("100.00")
+
+    payment_factory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=hh,
+        program=prog,
+        business_area=afghanistan,
+        delivery_date=timezone.datetime(year_mid, 1, 1, tzinfo=timezone.utc),
+        delivered_quantity_usd=Decimal("200.00"),
+        status="Transaction Successful",
+    )
+    payment_factory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=hh,
+        program=prog,
+        business_area=afghanistan,
+        delivery_date=timezone.datetime(year_new, 1, 1, tzinfo=timezone.utc),
+        delivered_quantity_usd=Decimal("300.00"),
+        status="Transaction Successful",
+    )
+
+    refreshed_data = DashboardDataCache.refresh_data(ba_slug, years_to_refresh=[year_mid, year_new])
+
+    assert len(refreshed_data) == 3, "Should contain data for all three years"
+
+    data_map = {item["year"]: item for item in refreshed_data}
+    assert Decimal(data_map[year_old]["total_delivered_quantity_usd"]) == Decimal("100.00")
+    assert Decimal(data_map[year_mid]["total_delivered_quantity_usd"]) == Decimal("200.00")
+    assert Decimal(data_map[year_new]["total_delivered_quantity_usd"]) == Decimal("300.00")
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_refresh_data_partial_no_new_payments_for_years(
+    afghanistan: BusinessAreaFactory,
+    payment_factory: Callable,
+    program_factory: Callable,
+    household_factory: Callable,
+    individual_factory: Callable,
+) -> None:
+    """Test partial refresh when no new payments exist for the specified years_to_refresh."""
+    ba_slug = afghanistan.slug
+    prog = program_factory(business_area=afghanistan)
+    hh = household_factory(program=prog, business_area=afghanistan, head_of_household=None)
+    hoh_individual = individual_factory(household=hh, program=prog, business_area=afghanistan, relationship="HEAD")
+    hh.head_of_household = hoh_individual
+    hh.save()
+
+    year_cached = CURRENT_YEAR - 2
+    payment_factory(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=hh,
+        program=prog,
+        business_area=afghanistan,
+        delivery_date=timezone.datetime(year_cached, 1, 1, tzinfo=timezone.utc),
+        delivered_quantity_usd=Decimal("50.00"),
+    )
+    DashboardDataCache.refresh_data(ba_slug)
+
+    years_to_refresh_recent = [CURRENT_YEAR, CURRENT_YEAR - 1]
+    refreshed_data = DashboardDataCache.refresh_data(ba_slug, years_to_refresh=years_to_refresh_recent)
+
+    assert len(refreshed_data) == 1, "Should only contain the old cached data"
+    assert refreshed_data[0]["year"] == year_cached
+    assert Decimal(refreshed_data[0]["total_delivered_quantity_usd"]) == Decimal("50.00")
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_refresh_data_partial_no_payments_at_all_for_ba(afghanistan: BusinessAreaFactory) -> None:
+    """Test partial refresh when the BA has no payments at all (even for other years)."""
+    ba_slug = afghanistan.slug
+    Payment.objects.filter(business_area=afghanistan).delete()
+    cache.delete(DashboardDataCache.get_cache_key(ba_slug))
+
+    years_to_refresh_recent = [CURRENT_YEAR, CURRENT_YEAR - 1]
+    refreshed_data = DashboardDataCache.refresh_data(ba_slug, years_to_refresh=years_to_refresh_recent)
+
+    assert refreshed_data == []

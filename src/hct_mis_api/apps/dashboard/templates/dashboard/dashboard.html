@@ -76,11 +76,10 @@
             }
 
             const url = "{{household_data_url}}";
-            const pendingList = ["Sent to Payment Gateway", "Sent to FSP"];
+            const pendingList = ["Sent to Payment Gateway", "Sent to FSP", "Pending"];
             const successfulList = [
                 "Distribution Successful",
                 "Partially Distributed",
-                "Pending",
                 "Transaction Successful",
             ];
 
@@ -311,11 +310,42 @@
                                 }),
                             )
                             .value();
-                        
-                        const totalReconciledPaymentsCount = ndx.groupAll().reduceSum(d => d.reconciled || 0).value();
+
+                        const nonPendingPaymentSum = ndx.groupAll().reduce(
+                            (p, v) => {
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value += (v.payments || 0);
+                                }
+                                return p;
+                            },
+                            (p, v) => {
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value -= (v.payments || 0);
+                                }
+                                return p;
+                            },
+                            () => ({ value: 0 })
+                        ).value().value;
+
                         const reconciliationPercentage = totalPaymentsCount > 0 ?
-                            (totalReconciledPaymentsCount / totalPaymentsCount) * 100 :
+                            (nonPendingPaymentSum / totalPaymentsCount) * 100 :
                             0;
+                        
+                        const reconciledPaymentsValueUSD = ndx.groupAll().reduce(
+                            (p, v) => { // add
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value += (v.delivered_quantity_usd || 0);
+                                }
+                                return p;
+                            },
+                            (p, v) => { // remove
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value -= (v.delivered_quantity_usd || 0);
+                                }
+                                return p;
+                            },
+                            () => ({ value: 0 }) // initial
+                        ).value().value;
 
                         const paymentPlanMetrics = ndx.groupAll().reduce(
                                     (p, v) => {
@@ -430,8 +460,11 @@
                             `${simplenumberFormatter(pwdReached)}`;
                         document.getElementById("children-reached").innerHTML =
                             `${simplenumberFormatter(childrenReached)}`;
-                        document.querySelector(".reconciliation-percentage").innerHTML =
-                            `${decimalnumberFormatter(reconciliationPercentage)}%`;
+                        
+                        document.querySelector(".reconciliation-percentage-value").innerHTML =
+                            `${decimalnumberFormatter(reconciliationPercentage)}`;
+                        document.querySelector(".reconciliation-amount-value").innerHTML =
+                            `${decimalnumberFormatter(reconciledPaymentsValueUSD)}`;
                         document.querySelector(
                                 ".pending-reconciliation-percentage",
                             ).innerHTML =`${decimalnumberFormatter(verificationPercentage)}%`;
