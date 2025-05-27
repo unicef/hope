@@ -132,12 +132,22 @@ export const FilterIndividuals: FC<FilterIndividualsProps> = ({
           <AdminAreaAutocompleteMultipleRestFilter
             value={filter.admin1 || []}
             onChange={(_, option) => {
-              console.log('AdminArea onChange called with option:', option);
               handleStateFilterChange('admin1', option);
             }}
             level={1}
             dataCy="filter-admin1"
             disabled={filter.admin2?.length > 0}
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <AdminAreaAutocompleteMultipleRestFilter
+            value={filter.admin2 || []}
+            onChange={(_, option) => {
+              handleStateFilterChange('admin2', option);
+            }}
+            level={1}
+            dataCy="filter-admin2"
+            disabled={filter.admin1?.length > 0}
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
