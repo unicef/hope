@@ -142,6 +142,7 @@ def document_national_id(individual: Individual, program: Program, poland: Count
     )
 
 
+@pytest.mark.elasticsearch
 class TestUniversalIndividualUpdateCeleryTasks:
     def test_run_universal_individual_update(
         self,
