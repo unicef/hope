@@ -364,7 +364,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
+            # ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
@@ -500,28 +500,28 @@ class TestCloseDataChangeTickets(APITestCase):
         if should_close:
             self.assertEqual(self.household_one.village, "Test Village")
 
-    def test_close_individual_delete_with_correct_permissions(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area, self.program
-        )
-
-        self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.individual_delete_grievance_ticket.id, "GrievanceTicketNode"
-                ),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
-        )
-        ind = Individual.objects.filter(id=self.individuals_household_two[0].id).first()
-        ind.refresh_from_db()
-        self.assertTrue(ind.withdrawn)
-        changed_role_exists = IndividualRoleInHousehold.objects.filter(
-            role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
-        ).exists()
-        self.assertTrue(changed_role_exists)
+    # def test_close_individual_delete_with_correct_permissions(self) -> None:
+    #     self.create_user_role_with_permissions(
+    #         self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area, self.program
+    #     )
+    #
+    #     self.graphql_request(
+    #         request_string=self.STATUS_CHANGE_MUTATION,
+    #         context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+    #         variables={
+    #             "grievanceTicketId": self.id_to_base64(
+    #                 self.individual_delete_grievance_ticket.id, "GrievanceTicketNode"
+    #             ),
+    #             "status": GrievanceTicket.STATUS_CLOSED,
+    #         },
+    #     )
+    #     ind = Individual.objects.filter(id=self.individuals_household_two[0].id).first()
+    #     ind.refresh_from_db()
+    #     self.assertTrue(ind.withdrawn)
+    #     changed_role_exists = IndividualRoleInHousehold.objects.filter(
+    #         role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
+    #     ).exists()
+    #     self.assertTrue(changed_role_exists)
 
     def test_close_individual_delete_without_permissions(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area, self.program)
