@@ -7,7 +7,6 @@ from typing import Any
 from django.conf import settings
 
 import pytest
-import redis
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
@@ -132,27 +131,10 @@ def create_role_with_all_permissions() -> None:
 
 
 @pytest.fixture(autouse=True)
-def configure_cache_for_tests(worker_id: str, settings: Any) -> None:
-    """
-    Dynamically configure Django's cache backend for each pytest-xdist worker.
-    """
-    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
-    settings.CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://{get_redis_host()}:6379/{redis_db}",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            },
-        }
-    }
+def clear_default_cache() -> None:
+    from django.core.cache import cache
 
-
-@pytest.fixture(autouse=True)
-def flush_redis(worker_id: str) -> None:
-    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
-    redis_client = redis.StrictRedis(host=get_redis_host(), port=6379, db=redis_db)
-    redis_client.flushdb()
+    cache.clear()
 
 
 def pytest_configure(config) -> None:  # type: ignore
@@ -189,6 +171,7 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.CACHE_ENABLED = False
+    settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
 
     settings.LOGGING["loggers"].update(
         {
@@ -256,7 +239,7 @@ def download_path(worker_id: str) -> str:
         yield settings.DOWNLOAD_DIRECTORY
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def driver(download_path: str) -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -280,12 +263,12 @@ def driver(download_path: str) -> Chrome:
     yield driver
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def live_server() -> LiveServer:
     yield LiveServer("localhost")
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=True)
 def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
     try:
         driver.live_server = live_server
@@ -325,13 +308,13 @@ def login(browser: Chrome) -> Chrome:
     sleep(0.3)  # TODO: added just for test in CI
     browser.get(f"{browser.live_server.url}/")
 
-    # Clear cache
-    WebDriverWait(browser, 10).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]'))
-    ).click()
-    WebDriverWait(browser, 10).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]'))
-    ).click()
+    # # Clear cache
+    # WebDriverWait(browser, 10).until(
+    #     EC.visibility_of_element_located((By.CSS_SELECTOR, 'button[data-cy="menu-user-profile"]'))
+    # ).click()
+    # WebDriverWait(browser, 10).until(
+    #     EC.visibility_of_element_located((By.CSS_SELECTOR, 'li[data-cy="menu-item-clear-cache"]'))
+    # ).click()
 
     from django.core.cache import cache
 
@@ -754,3 +737,56 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.migrations.loader import MigrationLoader
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    orig = getattr(settings, "MIGRATION_MODULES", None)
+    settings.MIGRATION_MODULES = {}
+
+    loader = MigrationLoader(None, load=False)
+    loader.load_disk()
+    all_migrations = loader.disk_migrations
+    if orig is not None:
+        settings.MIGRATION_MODULES = orig
+    apps = set()
+    all_sqls = []
+    for (app_label, _), migration in all_migrations.items():
+        apps.add(app_label)
+
+        for operation in migration.operations:
+            from django.db.migrations.operations.special import RunSQL
+
+            if isinstance(operation, RunSQL):
+                sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
+                for stmt in sql_statements:
+                    all_sqls.append(stmt)
+
+    def pre_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
+        with open(filename, "r") as file:
+            pre_sql = file.read()
+        conn = connections[using]
+        conn.cursor().execute(pre_sql)
+
+    def post_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        app_label = app_config.label
+        if app_label not in apps:
+            return
+        apps.remove(app_label)
+        if apps:
+            return
+        conn = connections[using]
+        for stmt in all_sqls:
+            conn.cursor().execute(stmt)
+
+    pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
+    post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)

@@ -428,7 +428,7 @@ export function Criteria({
       {individualIds && (
         <div>
           <Typography data-cy="individual-ids-modal-title" variant="body1">
-            {t(`${beneficiaryGroup?.groupLabel} IDs selected`)}:
+            {t(`${beneficiaryGroup?.memberLabel} IDs selected`)}:
           </Typography>
           <BlueText
             onClick={() => handleOpenIndividualIds(individualIds)}
