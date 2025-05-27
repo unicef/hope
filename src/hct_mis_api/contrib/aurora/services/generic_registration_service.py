@@ -21,11 +21,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import (
-    AccountType,
-    FinancialInstitution,
-    PendingAccount,
-)
+from hct_mis_api.apps.payment.models import AccountType, PendingAccount
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
@@ -340,14 +336,10 @@ class GenericRegistrationService(BaseRegistrationService):
                     self._create_object_and_validate(document_data, PendingDocument, DocumentForm)
 
             if account_data:
-                financial_institution_code = account_data["data"].get("uba_code", None)
                 PendingAccount.objects.create(
                     individual_id=individual.id,
                     account_type=AccountType.objects.get(key="bank"),
                     number=account_data["data"].get("number", None),
-                    financial_institution=FinancialInstitution.objects.filter(code=financial_institution_code).first()
-                    if financial_institution_code
-                    else None,
                     **account_data,
                 )
 

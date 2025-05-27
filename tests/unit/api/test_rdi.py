@@ -66,7 +66,9 @@ class PushToRDITests(HOPEApiTestCase):
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
-        FinancialInstitution.objects.create(code="mbank", type=FinancialInstitution.FinancialInstitutionType.BANK)
+        cls.fi = FinancialInstitution.objects.create(
+            name="mbank", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
@@ -104,7 +106,7 @@ class PushToRDITests(HOPEApiTestCase):
                             {
                                 "account_type": "bank",
                                 "number": "123",
-                                "financial_institution": "mbank",
+                                "financial_institution": self.fi.id,
                                 "data": {"field_name": "field_value"},
                             }
                         ],
@@ -139,7 +141,7 @@ class PushToRDITests(HOPEApiTestCase):
         account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
         self.assertIsNotNone(account)
         self.assertEqual(account.account_type.key, "bank")
-        self.assertEqual(account.financial_institution.code, "mbank")
+        self.assertEqual(account.financial_institution.id, self.fi.id)
         self.assertEqual(account.number, "123")
         self.assertEqual(account.data, {"field_name": "field_value"})
 
