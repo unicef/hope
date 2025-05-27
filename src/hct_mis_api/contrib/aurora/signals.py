@@ -4,11 +4,12 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from hct_mis_api.apps.core.utils import clear_cache_for_key
-from hct_mis_api.contrib.aurora.caches import (OrganizationListVersionsKeyBit,
-                                               ProjectListVersionsKeyBit,
-                                               RegistrationListVersionsKeyBit)
-from hct_mis_api.contrib.aurora.models import (Organization, Project,
-                                               Registration)
+from hct_mis_api.contrib.aurora.caches import (
+    OrganizationListVersionsKeyBit,
+    ProjectListVersionsKeyBit,
+    RegistrationListVersionsKeyBit,
+)
+from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 
 
 @receiver(post_save, sender=Registration)

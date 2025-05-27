@@ -14,8 +14,10 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.steficon.config import config
 from hct_mis_api.apps.steficon.interpreters import Interpreter, mapping
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
-from hct_mis_api.apps.steficon.widget import (ContentTypeChoiceField,
-                                              PythonFormatterEditor)
+from hct_mis_api.apps.steficon.widget import (
+    ContentTypeChoiceField,
+    PythonFormatterEditor,
+)
 
 if TYPE_CHECKING:
     from django.db.models.fields import _ChoicesCallable

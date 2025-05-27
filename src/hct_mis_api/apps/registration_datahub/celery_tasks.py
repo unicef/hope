@@ -12,14 +12,17 @@ from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
-    AlreadyRunningException, WrongStatusException)
-from hct_mis_api.apps.registration_datahub.tasks.deduplicate import \
-    HardDocumentDeduplication
-from hct_mis_api.apps.registration_datahub.tasks.rdi_program_population_create import \
-    RdiProgramPopulationCreateTask
+    AlreadyRunningException,
+    WrongStatusException,
+)
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+    HardDocumentDeduplication,
+)
+from hct_mis_api.apps.registration_datahub.tasks.rdi_program_population_create import (
+    RdiProgramPopulationCreateTask,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import (sentry_tags,
-                                           set_sentry_business_area_tag)
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -69,10 +72,12 @@ def registration_xlsx_import_task(
 ) -> bool:
     try:
         from hct_mis_api.apps.program.models import Program
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import \
-            RdiXlsxCreateTask
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import \
-            RdiXlsxPeopleCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
+            RdiXlsxPeopleCreateTask,
+        )
 
         with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
             if not locked:
@@ -162,8 +167,9 @@ def registration_kobo_import_task(
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import \
-            RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
 
         set_sentry_business_area_tag(BusinessArea.objects.get(pk=business_area_id).name)
 
@@ -187,8 +193,9 @@ def registration_kobo_import_task(
 def registration_kobo_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import \
-            RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
 
         not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
 
@@ -215,8 +222,9 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
 def registration_xlsx_import_hourly_task(self: Any) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import \
-            RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
+            RdiXlsxCreateTask,
+        )
 
         not_started_rdi = RegistrationDataImport.objects.filter(status=RegistrationDataImport.LOADING).first()
         if not_started_rdi is None:
@@ -247,10 +255,10 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
         if not locked:
             return True  # pragma: no cover
         try:
-            from hct_mis_api.apps.registration_data.models import \
-                RegistrationDataImport
-            from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import \
-                RdiMergeTask
+            from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+            from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import (
+                RdiMergeTask,
+            )
 
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             set_sentry_business_area_tag(obj_hct.business_area.name)
@@ -262,8 +270,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
             RdiMergeTask().execute(registration_data_import_id)
         except Exception as e:
             logger.exception(e)
-            from hct_mis_api.apps.registration_data.models import \
-                RegistrationDataImport
+            from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
             RegistrationDataImport.objects.filter(
                 id=registration_data_import_id,
@@ -281,8 +288,9 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import \
-            DeduplicateTask
+        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
+            DeduplicateTask,
+        )
 
         rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
         program_id = rdi_obj.program.id
@@ -305,8 +313,9 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)
     set_sentry_business_area_tag(kobo_import_data.business_area_slug)
-    from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import \
-        PullKoboSubmissions
+    from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
+        PullKoboSubmissions,
+    )
 
     try:
         return PullKoboSubmissions().execute(kobo_import_data, program)
@@ -323,8 +332,9 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "U
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_data.models import ImportData
-    from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import \
-        ValidateXlsxImport
+    from hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import import (
+        ValidateXlsxImport,
+    )
 
     import_data = ImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)
@@ -386,8 +396,9 @@ def check_rdi_import_periodic_task(self: Any, business_area_slug: Optional[str] 
     ) as locked:
         if not locked:
             raise Exception("cannot set lock on check_rdi_import_periodic_task")
-        from hct_mis_api.apps.utils.celery_manager import \
-            RegistrationDataXlsxImportCeleryManager
+        from hct_mis_api.apps.utils.celery_manager import (
+            RegistrationDataXlsxImportCeleryManager,
+        )
 
         business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
         if business_area:
@@ -447,8 +458,9 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
 @sentry_tags
 @log_start_and_end
 def deduplication_engine_process(self: Any, program_id: str) -> None:
-    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import \
-        BiometricDeduplicationService
+    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+        BiometricDeduplicationService,
+    )
 
     program = Program.objects.get(id=program_id)
     set_sentry_business_area_tag(program.business_area.name)
@@ -465,8 +477,9 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
 @log_start_and_end
 @sentry_tags
 def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: Optional[str]) -> None:
-    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import \
-        BiometricDeduplicationService
+    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+        BiometricDeduplicationService,
+    )
 
     if not deduplication_set_id:
         logger.warning("Program.deduplication_set_id is None")

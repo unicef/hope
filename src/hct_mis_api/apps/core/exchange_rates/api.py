@@ -5,6 +5,7 @@ import os
 from typing import Dict, Optional
 
 from django.conf import settings
+
 from requests import session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry

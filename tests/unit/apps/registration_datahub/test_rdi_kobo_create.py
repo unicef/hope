@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Dict
 from unittest import mock
 
-import pytest
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -13,6 +12,8 @@ from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
+
+import pytest
 from django_countries.fields import Country
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -20,19 +21,19 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import IndividualFactory
-from hct_mis_api.apps.household.models import (IDENTIFICATION_TYPE_CHOICE,
-                                               DocumentType,
-                                               PendingBankAccountInfo,
-                                               PendingDocument,
-                                               PendingHousehold,
-                                               PendingIndividual)
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_CHOICE,
+    DocumentType,
+    PendingBankAccountInfo,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+)
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (ImportData,
-                                                       RegistrationDataImport)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -49,8 +50,9 @@ class TestRdiKoboCreateTask(TestCase):
         super().setUpTestData()
         call_command("init-geo-fixtures")
         create_afghanistan()
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import \
-            RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create import (
+            RdiKoboCreateTask,
+        )
 
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 

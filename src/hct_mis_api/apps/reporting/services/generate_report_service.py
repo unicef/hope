@@ -4,28 +4,50 @@ from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, List, Tuple
 
-import openpyxl
 from django.conf import settings
 from django.core.files import File
-from django.db.models import (Case, Count, DateTimeField, DecimalField, F,
-                              IntegerField, Max, Min, Q, QuerySet, Sum, Value,
-                              When)
+from django.db.models import (
+    Case,
+    Count,
+    DateTimeField,
+    DecimalField,
+    F,
+    IntegerField,
+    Max,
+    Min,
+    Q,
+    QuerySet,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce, Greatest, Least
 from django.template.loader import render_to_string
+
+import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hct_mis_api.apps.core.utils import (decode_id_string, encode_id_base64,
-                                         timezone_datetime)
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    encode_id_base64,
+    timezone_datetime,
+)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import (NONE, WORK_STATUS_CHOICE,
-                                               Household, Individual)
-from hct_mis_api.apps.payment.delivery_mechanisms import \
-    DeliveryMechanismChoices
-from hct_mis_api.apps.payment.models import (Payment, PaymentPlan,
-                                             PaymentVerification,
-                                             PaymentVerificationPlan)
+from hct_mis_api.apps.household.models import (
+    NONE,
+    WORK_STATUS_CHOICE,
+    Household,
+    Individual,
+)
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 

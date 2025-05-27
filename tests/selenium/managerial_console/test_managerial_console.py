@@ -1,24 +1,24 @@
 from datetime import datetime
 from typing import Optional
 
+from django.utils import timezone
+
 import pytest
 from dateutil.relativedelta import relativedelta
-from django.utils import timezone
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.payment.fixtures import (ApprovalProcessFactory,
-                                               PaymentPlanFactory)
+from hct_mis_api.apps.payment.fixtures import ApprovalProcessFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import (ProgramCycleFactory,
-                                               ProgramFactory)
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
-from tests.selenium.page_object.managerial_console.managerial_console import \
-    ManagerialConsole
+from tests.selenium.page_object.managerial_console.managerial_console import (
+    ManagerialConsole,
+)
 
 pytestmark = pytest.mark.django_db()
 

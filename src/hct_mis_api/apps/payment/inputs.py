@@ -1,8 +1,7 @@
 import graphene
 
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.graphql_types import \
-    TargetingCriteriaObjectType
+from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 
 
 class FullListArguments(graphene.InputObjectType):

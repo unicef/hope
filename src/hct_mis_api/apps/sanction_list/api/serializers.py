@@ -1,8 +1,10 @@
 from rest_framework import serializers
 
 from hct_mis_api.apps.sanction_list.models import (
-    SanctionListIndividual, SanctionListIndividualDateOfBirth,
-    SanctionListIndividualDocument)
+    SanctionListIndividual,
+    SanctionListIndividualDateOfBirth,
+    SanctionListIndividualDocument,
+)
 
 
 class SanctionListIndividualDocumentSerializer(serializers.ModelSerializer):

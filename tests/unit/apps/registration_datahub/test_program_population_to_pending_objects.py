@@ -3,21 +3,34 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory, DocumentFactory, DocumentTypeFactory,
-    HouseholdCollectionFactory, IndividualCollectionFactory, IndividualFactory,
-    IndividualIdentityFactory, IndividualRoleInHouseholdFactory,
-    create_household_and_individuals)
-from hct_mis_api.apps.household.models import (HEAD, MALE, ROLE_ALTERNATE,
-                                               ROLE_PRIMARY, BankAccountInfo,
-                                               Document, Household, Individual,
-                                               IndividualIdentity,
-                                               IndividualRoleInHousehold)
+    BankAccountInfoFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
+    HouseholdCollectionFactory,
+    IndividualCollectionFactory,
+    IndividualFactory,
+    IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    MALE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    Document,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.models import Account, DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.tasks.import_program_population import \
-    import_program_population
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
+    import_program_population,
+)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 HOUSEHOLD_FIELDS = (

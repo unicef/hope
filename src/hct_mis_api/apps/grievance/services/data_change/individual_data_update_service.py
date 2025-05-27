@@ -5,34 +5,61 @@ from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
 from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.grievance.celery_tasks import \
-    deduplicate_and_check_against_sanctions_list_task
+from hct_mis_api.apps.grievance.celery_tasks import (
+    deduplicate_and_check_against_sanctions_list_task,
+)
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket, TicketIndividualDataUpdateDetails)
-from hct_mis_api.apps.grievance.services.data_change.data_change_service import \
-    DataChangeService
+    GrievanceTicket,
+    TicketIndividualDataUpdateDetails,
+)
+from hct_mis_api.apps.grievance.services.data_change.data_change_service import (
+    DataChangeService,
+)
 from hct_mis_api.apps.grievance.services.data_change.utils import (
-    cast_flex_fields, convert_to_empty_string_if_null, handle_add_document,
-    handle_add_identity, handle_add_payment_channel, handle_document,
-    handle_edit_document, handle_edit_identity, handle_role,
-    handle_update_payment_channel, is_approved, prepare_edit_documents,
-    prepare_edit_identities, prepare_edit_payment_channel,
-    prepare_previous_documents, prepare_previous_identities,
-    prepare_previous_payment_channels, save_images, to_date_string,
-    to_phone_number_str, update_es, verify_flex_fields)
-from hct_mis_api.apps.grievance.services.reassign_roles_services import \
-    reassign_roles_on_update_service
-from hct_mis_api.apps.household.models import (HEAD, BankAccountInfo, Document,
-                                               Household, Individual,
-                                               IndividualIdentity)
-from hct_mis_api.apps.household.services.household_recalculate_data import \
-    recalculate_data
+    cast_flex_fields,
+    convert_to_empty_string_if_null,
+    handle_add_document,
+    handle_add_identity,
+    handle_add_payment_channel,
+    handle_document,
+    handle_edit_document,
+    handle_edit_identity,
+    handle_role,
+    handle_update_payment_channel,
+    is_approved,
+    prepare_edit_documents,
+    prepare_edit_identities,
+    prepare_edit_payment_channel,
+    prepare_previous_documents,
+    prepare_previous_identities,
+    prepare_previous_payment_channels,
+    save_images,
+    to_date_string,
+    to_phone_number_str,
+    update_es,
+    verify_flex_fields,
+)
+from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+    reassign_roles_on_update_service,
+)
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    BankAccountInfo,
+    Document,
+    Household,
+    Individual,
+    IndividualIdentity,
+)
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 

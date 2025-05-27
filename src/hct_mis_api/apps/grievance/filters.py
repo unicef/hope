@@ -3,15 +3,23 @@ from typing import Any, List
 
 from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
-from django_filters import (BooleanFilter, CharFilter, ChoiceFilter, FilterSet,
-                            ModelChoiceFilter, ModelMultipleChoiceFilter,
-                            MultipleChoiceFilter, OrderingFilter, UUIDFilter)
+
+from django_filters import (
+    BooleanFilter,
+    CharFilter,
+    ChoiceFilter,
+    FilterSet,
+    ModelChoiceFilter,
+    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
+    OrderingFilter,
+    UUIDFilter,
+)
 from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.constants import (PRIORITY_CHOICES,
-                                                  URGENCY_CHOICES)
+from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, Household, Individual
 from hct_mis_api.apps.payment.models import Payment

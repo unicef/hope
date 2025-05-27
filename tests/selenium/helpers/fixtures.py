@@ -5,8 +5,7 @@ from dateutil.relativedelta import relativedelta
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
-                                             ProgramCycle)
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
 def get_program_with_dct_type_and_name(

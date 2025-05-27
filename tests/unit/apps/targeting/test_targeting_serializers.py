@@ -1,10 +1,11 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.targeting.api.serializers import \
-    TargetingCriteriaSerializer
-from hct_mis_api.apps.targeting.models import (TargetingCriteria,
-                                               TargetingCriteriaRule,
-                                               TargetingCriteriaRuleFilter)
+from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+)
 
 
 class TargetingCriteriaSerializerTest(TestCase):

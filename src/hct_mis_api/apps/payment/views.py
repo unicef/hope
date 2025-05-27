@@ -4,17 +4,20 @@ from typing import TYPE_CHECKING, Union
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
+
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import (PaymentPlan,
-                                             PaymentVerificationPlan)
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
-    from django.http import (HttpRequest, HttpResponsePermanentRedirect,
-                             HttpResponseRedirect)
+    from django.http import (
+        HttpRequest,
+        HttpResponsePermanentRedirect,
+        HttpResponseRedirect,
+    )
 
 logger = logging.getLogger(__name__)
 

@@ -1,17 +1,24 @@
 from importlib import import_module
 
-import pytest
 from django.apps import apps
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
-                                               PartnerFactory, UserFactory)
-from hct_mis_api.apps.account.models import (AdminAreaLimitedTo, Partner, Role,
-                                             RoleAssignment)
+import pytest
+
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    Role,
+    RoleAssignment,
+)
 from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 

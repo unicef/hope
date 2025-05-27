@@ -2,9 +2,10 @@ from unittest.mock import patch
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    FieldFactory, get_core_fields_attributes)
-from hct_mis_api.apps.core.field_attributes.fields_types import (TYPE_STRING,
-                                                                 Scope)
+    FieldFactory,
+    get_core_fields_attributes,
+)
+from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING, Scope
 
 
 class TestCoreFields(APITestCase):

@@ -9,11 +9,20 @@ from collections.abc import MutableMapping
 from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, Iterable,
-                    List, Optional, Tuple, Type, Union)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
-import pytz
-from adminfilters.autocomplete import AutoCompleteFilter
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
@@ -21,6 +30,9 @@ from django.db.models import Func, Q, Value
 from django.http import Http404
 from django.template.loader import render_to_string
 from django.utils import timezone
+
+import pytz
+from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
 from PIL import Image
 
@@ -29,6 +41,7 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
     from django.http import HttpHeaders
+
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
 
@@ -235,8 +248,9 @@ def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
 
 
 def get_combined_attributes() -> Dict:
-    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
-        FieldFactory
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
     from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
     flex_attrs = serialize_flex_attributes()
@@ -374,6 +388,7 @@ def build_flex_arg_dict_from_list_if_exists(data_dict: Dict, flex_list: List) ->
 class CustomOrderingFilter(OrderingFilter):
     def filter(self, qs: "QuerySet", value: Any) -> "QuerySet":
         from django.db.models.functions import Lower
+
         from django_filters.constants import EMPTY_VALUES
 
         if value in EMPTY_VALUES:
@@ -508,8 +523,9 @@ def update_labels_mapping(csv_file: str) -> None:
     import json
     import re
 
-    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
-        FieldFactory
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
     from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 
     with open(csv_file, newline="") as csv_file_ptr:

@@ -1,20 +1,22 @@
 import io
 
 from django.utils import timezone
+
 from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket, TicketPaymentVerificationDetails)
+    GrievanceTicket,
+    TicketPaymentVerificationDetails,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.celery_tasks import \
-    create_payment_verification_plan_xlsx
-from hct_mis_api.apps.payment.models import (PaymentVerification,
-                                             PaymentVerificationPlan)
+from hct_mis_api.apps.payment.celery_tasks import create_payment_verification_plan_xlsx
+from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import calculate_counts
-from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import \
-    XlsxVerificationImportService
+from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
+    XlsxVerificationImportService,
+)
 
 
 class VerificationPlanStatusChangeServices:

@@ -10,46 +10,67 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
+
 from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import (BusinessArea, DataCollectingType,
-                                          FileTemp, FlexibleAttribute)
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FileTemp,
+    FlexibleAttribute,
+)
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import (BankAccountInfoFactory,
-                                                 DocumentFactory,
-                                                 create_household)
-from hct_mis_api.apps.household.models import (IDENTIFICATION_TYPE_NATIONAL_ID,
-                                               ROLE_PRIMARY, Document,
-                                               Household,
-                                               IndividualRoleInHousehold)
-from hct_mis_api.apps.payment.delivery_mechanisms import \
-    DeliveryMechanismChoices
+from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
+    DocumentFactory,
+    create_household,
+)
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    ROLE_PRIMARY,
+    Document,
+    Household,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory, PaymentFactory,
-    PaymentPlanFactory, PaymentPlanSplitFactory, RealProgramFactory,
-    generate_delivery_mechanisms)
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentPlanSplitFactory,
+    RealProgramFactory,
+    generate_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism, FinancialServiceProvider,
-    FinancialServiceProviderXlsxTemplate, FspXlsxTemplatePerDeliveryMechanism,
-    PaymentHouseholdSnapshot, PaymentPlan, PaymentPlanSplit)
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import \
-    create_payment_plan_snapshot_data
-from hct_mis_api.apps.payment.services.payment_plan_services import \
-    PaymentPlanService
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
+    FspXlsxTemplatePerDeliveryMechanism,
+    PaymentHouseholdSnapshot,
+    PaymentPlan,
+    PaymentPlanSplit,
+)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+)
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import \
-    XlsxPaymentPlanExportPerFspService
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import \
-    XlsxPaymentPlanExportService
-from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import \
-    XlsxPaymentPlanImportService
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+    XlsxPaymentPlanExportPerFspService,
+)
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
+    XlsxPaymentPlanExportService,
+)
+from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
+    XlsxPaymentPlanImportService,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 

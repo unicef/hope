@@ -2,9 +2,11 @@ from typing import Any
 
 from rest_framework_extensions.key_constructor.bits import KeyBitBase
 
-from hct_mis_api.api.caches import (BusinessAreaAndProgramLastUpdatedKeyBit,
-                                    BusinessAreaKeyBitMixin,
-                                    KeyConstructorMixin)
+from hct_mis_api.api.caches import (
+    BusinessAreaAndProgramLastUpdatedKeyBit,
+    BusinessAreaKeyBitMixin,
+    KeyConstructorMixin,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 
 

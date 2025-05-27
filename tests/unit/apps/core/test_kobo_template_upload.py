@@ -3,7 +3,6 @@ from tempfile import NamedTemporaryFile
 from typing import Any, Callable, Dict
 from unittest.mock import patch
 
-import requests
 from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
@@ -15,12 +14,16 @@ from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 
+import requests
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.admin import XLSXKoboTemplateAdmin
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
-    KoboRetriableError, UploadNewKoboTemplateAndUpdateFlexFieldsTask)
+    KoboRetriableError,
+    UploadNewKoboTemplateAndUpdateFlexFieldsTask,
+)
 
 
 class MockSuperUser:

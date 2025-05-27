@@ -11,11 +11,13 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
-from hct_mis_api.apps.core.utils import (chart_create_filter_query,
-                                         chart_get_filtered_qs)
-from hct_mis_api.apps.payment.models import (Payment, PaymentPlan,
-                                             PaymentVerification,
-                                             PaymentVerificationPlan)
+from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentPlan,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet

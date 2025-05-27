@@ -4,8 +4,7 @@ import string
 import urllib.parse
 from collections import Counter
 from datetime import datetime
-from typing import (TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple,
-                    Union)
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -16,21 +15,34 @@ from django.utils import timezone
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    FIELD_TYPES_TO_INTERNAL_TYPE, TYPE_DATE, TYPE_IMAGE, TYPE_SELECT_MANY,
-    TYPE_SELECT_ONE)
+    FIELD_TYPES_TO_INTERNAL_TYPE,
+    TYPE_DATE,
+    TYPE_IMAGE,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+)
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.utils import (decode_id_string, encode_id_base64,
-                                         encode_id_base64_required,
-                                         serialize_flex_attributes)
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    encode_id_base64,
+    encode_id_base64_required,
+    serialize_flex_attributes,
+)
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.documents import (HouseholdDocument,
-                                                  get_individual_doc)
-from hct_mis_api.apps.household.models import (HEAD, RELATIONSHIP_UNKNOWN,
-                                               ROLE_ALTERNATE, ROLE_PRIMARY,
-                                               BankAccountInfo, Document,
-                                               DocumentType, Household,
-                                               Individual, IndividualIdentity,
-                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    RELATIONSHIP_UNKNOWN,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:

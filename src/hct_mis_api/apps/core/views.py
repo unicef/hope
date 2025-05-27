@@ -10,14 +10,14 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import View
+
 from graphene_django.settings import graphene_settings
 from graphql.utils import schema_printer
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.forms import StorageFileForm
 from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.core.permissions_views_mixins import \
-    UploadFilePermissionMixin
+from hct_mis_api.apps.core.permissions_views_mixins import UploadFilePermissionMixin
 from hct_mis_api.apps.reporting.models import DashboardReport
 
 if TYPE_CHECKING:

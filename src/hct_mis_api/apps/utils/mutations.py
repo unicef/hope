@@ -1,8 +1,9 @@
 import logging
 from typing import Any
 
-import graphene
 from django.core.exceptions import ValidationError
+
+import graphene
 
 from hct_mis_api.apps.utils.schema import Arg
 

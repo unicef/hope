@@ -1,11 +1,12 @@
 from typing import Any, Optional
 
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.mixin import AdminFiltersMixin
-from advanced_filters.admin import AdminAdvancedFiltersMixin
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
+
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.mixin import AdminFiltersMixin
+from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.activity_log.models import LogEntry
 

@@ -4,10 +4,11 @@ import graphene
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.core.permissions import is_authenticated
-from hct_mis_api.apps.registration_datahub.validators import (XlsxException,
-                                                              XLSXValidator)
-from hct_mis_api.apps.sanction_list.celery_tasks import \
-    check_against_sanction_list_task
+from hct_mis_api.apps.registration_datahub.validators import (
+    XlsxException,
+    XLSXValidator,
+)
+from hct_mis_api.apps.sanction_list.celery_tasks import check_against_sanction_list_task
 from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
 
 

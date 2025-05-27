@@ -2,9 +2,11 @@ from typing import Any, Optional
 
 from django.db.models import QuerySet
 
-from hct_mis_api.api.caches import (AreaLimitKeyBit,
-                                    BusinessAreaAndProgramLastUpdatedKeyBit,
-                                    KeyConstructorMixin)
+from hct_mis_api.api.caches import (
+    AreaLimitKeyBit,
+    BusinessAreaAndProgramLastUpdatedKeyBit,
+    KeyConstructorMixin,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 

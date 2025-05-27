@@ -1,12 +1,17 @@
 import csv
 import logging
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List, Tuple,
-                    Type, Union)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Tuple,
+    Type,
+    Union,
+)
 
-from admin_extra_buttons.decorators import button
-from admin_sync.mixin import SyncMixin
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import NumberFilter
 from django.contrib import admin, messages
 from django.contrib.admin import ListFilter, ModelAdmin, RelatedFieldListFilter
 from django.contrib.admin.utils import prepare_lookup_value
@@ -15,14 +20,22 @@ from django.db.models import Model, QuerySet
 from django.forms import FileField, FileInput, Form, TextInput
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
+
+from admin_extra_buttons.decorators import button
+from admin_sync.mixin import SyncMixin
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
 
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 if TYPE_CHECKING:
-    from django.http import (HttpRequest, HttpResponsePermanentRedirect,
-                             HttpResponseRedirect)
+    from django.http import (
+        HttpRequest,
+        HttpResponsePermanentRedirect,
+        HttpResponseRedirect,
+    )
 
 logger = logging.getLogger(__name__)
 

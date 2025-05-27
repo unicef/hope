@@ -2,11 +2,12 @@ import json
 from datetime import datetime
 from typing import Any, Callable
 
-import pytest
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+
+import pytest
 from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -14,13 +15,13 @@ from rest_framework.reverse import reverse
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
-from hct_mis_api.apps.grievance.models import (GrievanceTicket,
-                                               TicketNeedsAdjudicationDetails)
-from hct_mis_api.apps.household.fixtures import \
-    create_household_and_individuals
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 

@@ -1,6 +1,5 @@
 from typing import Any, List
 
-from constance import config
 from django.contrib import messages
 from django.contrib.messages import add_message
 from django.core.cache import cache as dj_cache
@@ -10,6 +9,8 @@ from django.shortcuts import render
 from django.urls import path
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
+from constance import config
 from smart_admin.site import SmartAdminSite
 
 from hct_mis_api.apps.administration.forms import ClearCacheForm

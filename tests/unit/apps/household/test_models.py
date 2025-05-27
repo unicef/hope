@@ -8,13 +8,20 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import (BankAccountInfoFactory,
-                                                 HouseholdFactory,
-                                                 IndividualFactory,
-                                                 create_household)
+from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_NATIONAL_PASSPORT, IDENTIFICATION_TYPE_OTHER,
-    IDENTIFICATION_TYPE_TAX_ID, Document, DocumentType, Household)
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
+    IDENTIFICATION_TYPE_OTHER,
+    IDENTIFICATION_TYPE_TAX_ID,
+    Document,
+    DocumentType,
+    Household,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

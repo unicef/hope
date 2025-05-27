@@ -8,8 +8,11 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.kobo.common import get_field_name
-from hct_mis_api.apps.household.models import (Household, Individual,
-                                               IndividualRoleInHousehold)
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.models import Program
 
 

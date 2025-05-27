@@ -9,8 +9,7 @@ from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.accountability.services.sampling import Sampling
-from hct_mis_api.apps.accountability.services.verifiers import \
-    MessageArgumentVerifier
+from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.household.models import Household

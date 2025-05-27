@@ -1,27 +1,38 @@
 from typing import Any, Optional
 from unittest.mock import patch
 
-import pytest
 from django.test import TestCase
+
+import pytest
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory, DocumentFactory, DocumentTypeFactory,
-    IndividualIdentityFactory, IndividualRoleInHouseholdFactory,
-    create_household_and_individuals)
-from hct_mis_api.apps.household.models import (HEAD, MALE, ROLE_PRIMARY,
-                                               BankAccountInfo, Document,
-                                               Household, Individual,
-                                               IndividualIdentity,
-                                               IndividualRoleInHousehold)
+    BankAccountInfoFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    MALE,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    Document,
+    Household,
+    Individual,
+    IndividualIdentity,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import \
-    registration_program_population_import_task
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    registration_program_population_import_task,
+)
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")

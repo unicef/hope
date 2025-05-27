@@ -4,28 +4,32 @@ import uuid
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
-import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import (create_afghanistan,
-                                            create_pdu_flexible_attribute)
+import openpyxl
+
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    create_pdu_flexible_attribute,
+)
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.household.fixtures import \
-    create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import \
-    PeriodicDataUpdateExportTemplateService
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import \
-    PeriodicDataUpdateImportService
-from hct_mis_api.apps.periodic_data_update.utils import \
-    populate_pdu_with_null_values
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+    PeriodicDataUpdateExportTemplateService,
+)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
+    PeriodicDataUpdateImportService,
+)
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 def add_pdu_data_to_xlsx(

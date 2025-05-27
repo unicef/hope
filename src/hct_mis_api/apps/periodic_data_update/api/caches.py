@@ -1,5 +1,7 @@
-from hct_mis_api.api.caches import (BusinessAreaAndProgramKeyBitMixin,
-                                    KeyConstructorMixin)
+from hct_mis_api.api.caches import (
+    BusinessAreaAndProgramKeyBitMixin,
+    KeyConstructorMixin,
+)
 
 
 class PDUTemplateListVersionsKeyBit(BusinessAreaAndProgramKeyBitMixin):

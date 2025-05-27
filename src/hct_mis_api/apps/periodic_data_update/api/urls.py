@@ -1,8 +1,10 @@
 from django.urls import include, path
 
 from hct_mis_api.apps.periodic_data_update.api.views import (
-    PeriodicDataUpdateTemplateViewSet, PeriodicDataUpdateUploadViewSet,
-    PeriodicFieldViewSet)
+    PeriodicDataUpdateTemplateViewSet,
+    PeriodicDataUpdateUploadViewSet,
+    PeriodicFieldViewSet,
+)
 from hct_mis_api.apps.program.api.urls import program_base_router
 
 app_name = "periodic_data_update"

@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, Callable, List
 from unittest.mock import patch
 
-import pytest
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
@@ -13,26 +12,39 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
+
+import pytest
 from openpyxl import Workbook
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
-                                               PartnerFactory, UserFactory)
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
 from hct_mis_api.apps.payment.fixtures import (
-    ApprovalFactory, ApprovalProcessFactory, DeliveryMechanismFactory,
+    ApprovalFactory,
+    ApprovalProcessFactory,
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
-    FspXlsxTemplatePerDeliveryMechanismFactory, PaymentFactory,
-    PaymentPlanFactory, PaymentPlanSplitFactory)
-from hct_mis_api.apps.payment.models import (Approval,
-                                             FinancialServiceProvider, Payment,
-                                             PaymentPlan, PaymentPlanSplit)
-from hct_mis_api.apps.program.fixtures import (ProgramCycleFactory,
-                                               ProgramFactory)
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentPlanSplitFactory,
+)
+from hct_mis_api.apps.payment.models import (
+    Approval,
+    FinancialServiceProvider,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+)
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule

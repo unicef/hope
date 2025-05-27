@@ -4,48 +4,93 @@ from functools import reduce
 from typing import Any, Dict, Iterable, List, Optional, Set
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
-    age_to_birth_date_query, get_birth_certificate_document_number_query,
+    age_to_birth_date_query,
+    get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_drivers_license_document_number_query,
     get_drivers_licensee_issuer_query,
-    get_electoral_card_document_number_query, get_electoral_card_issuer_query,
-    get_has_bank_account_number_query, get_has_phone_number_query,
-    get_has_tax_id_query, get_national_id_document_number_query,
-    get_national_id_issuer_query, get_national_passport_document_number_query,
-    get_national_passport_issuer_query, get_other_document_number_query,
-    get_other_issuer_query, get_role_query, get_scope_id_issuer_query,
-    get_scope_id_number_query, get_tax_id_document_number_query,
-    get_tax_id_issuer_query, get_unhcr_id_issuer_query,
-    get_unhcr_id_number_query, registration_data_import_query)
+    get_electoral_card_document_number_query,
+    get_electoral_card_issuer_query,
+    get_has_bank_account_number_query,
+    get_has_phone_number_query,
+    get_has_tax_id_query,
+    get_national_id_document_number_query,
+    get_national_id_issuer_query,
+    get_national_passport_document_number_query,
+    get_national_passport_issuer_query,
+    get_other_document_number_query,
+    get_other_issuer_query,
+    get_role_query,
+    get_scope_id_issuer_query,
+    get_scope_id_number_query,
+    get_tax_id_document_number_query,
+    get_tax_id_issuer_query,
+    get_unhcr_id_issuer_query,
+    get_unhcr_id_number_query,
+    registration_data_import_query,
+)
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _HOUSEHOLD, _INDIVIDUAL, TEMPLATE_HOH, TEMPLATE_HOUSEHOLD,
-    TEMPLATE_INDIVIDUAL, TEMPLATE_MAPPING_NORMAL, TEMPLATE_MAPPING_PEOPLE,
-    TYPE_BOOL, TYPE_DATE, TYPE_GEOPOINT, TYPE_ID, TYPE_IMAGE, TYPE_INTEGER,
-    TYPE_LIST_OF_IDS, TYPE_SELECT_MANY, TYPE_SELECT_ONE, TYPE_STRING, Scope)
+    _HOUSEHOLD,
+    _INDIVIDUAL,
+    TEMPLATE_HOH,
+    TEMPLATE_HOUSEHOLD,
+    TEMPLATE_INDIVIDUAL,
+    TEMPLATE_MAPPING_NORMAL,
+    TEMPLATE_MAPPING_PEOPLE,
+    TYPE_BOOL,
+    TYPE_DATE,
+    TYPE_GEOPOINT,
+    TYPE_ID,
+    TYPE_IMAGE,
+    TYPE_INTEGER,
+    TYPE_LIST_OF_IDS,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
+    Scope,
+)
 from hct_mis_api.apps.core.field_attributes.lookup_functions import (
-    get_birth_certificate_issuer, get_birth_certificate_no,
-    get_drivers_license_issuer, get_drivers_license_no,
-    get_electoral_card_issuer, get_electoral_card_no, get_national_id_issuer,
-    get_national_id_no, get_national_passport_issuer, get_national_passport_no,
-    get_other_id_issuer, get_other_id_no, get_scope_id_issuer, get_scope_id_no,
-    get_tax_id_issuer, get_tax_id_no, get_unhcr_id_issuer, get_unhcr_id_no)
-from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import \
-    PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
+    get_birth_certificate_issuer,
+    get_birth_certificate_no,
+    get_drivers_license_issuer,
+    get_drivers_license_no,
+    get_electoral_card_issuer,
+    get_electoral_card_no,
+    get_national_id_issuer,
+    get_national_id_no,
+    get_national_passport_issuer,
+    get_national_passport_no,
+    get_other_id_issuer,
+    get_other_id_no,
+    get_scope_id_issuer,
+    get_scope_id_no,
+    get_tax_id_issuer,
+    get_tax_id_no,
+    get_unhcr_id_issuer,
+    get_unhcr_id_no,
+)
+from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
+    PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
+)
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.models import (BLANK, DATA_SHARING_CHOICES,
-                                               DISABILITY_CHOICES,
-                                               MARITAL_STATUS_CHOICE,
-                                               OBSERVED_DISABILITY_CHOICE,
-                                               ORG_ENUMERATOR_CHOICES,
-                                               REGISTRATION_METHOD_CHOICES,
-                                               RELATIONSHIP_CHOICE,
-                                               RESIDENCE_STATUS_CHOICE,
-                                               ROLE_CHOICE,
-                                               SEVERITY_OF_DISABILITY_CHOICES,
-                                               SEX_CHOICE, WORK_STATUS_CHOICE)
+from hct_mis_api.apps.household.models import (
+    BLANK,
+    DATA_SHARING_CHOICES,
+    DISABILITY_CHOICES,
+    MARITAL_STATUS_CHOICE,
+    OBSERVED_DISABILITY_CHOICE,
+    ORG_ENUMERATOR_CHOICES,
+    REGISTRATION_METHOD_CHOICES,
+    RELATIONSHIP_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
+    ROLE_CHOICE,
+    SEVERITY_OF_DISABILITY_CHOICES,
+    SEX_CHOICE,
+    WORK_STATUS_CHOICE,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)

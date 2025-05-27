@@ -4,8 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.cache import cache
 from django.db.models import Q
-from django.db.models.signals import (m2m_changed, post_save, pre_delete,
-                                      pre_save)
+from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 

@@ -3,6 +3,7 @@ from typing import Any
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
 from parameterized import parameterized
 from pytz import utc
 
@@ -10,12 +11,13 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.household.fixtures import \
-    create_household_and_individuals
-from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
-                                               PaymentPlanFactory,
-                                               PaymentVerificationFactory,
-                                               PaymentVerificationPlanFactory)
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.payment.fixtures import (
+    PaymentFactory,
+    PaymentPlanFactory,
+    PaymentVerificationFactory,
+    PaymentVerificationPlanFactory,
+)
 from hct_mis_api.apps.payment.models import PaymentVerificationSummary
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.reporting.fixtures import ReportFactory
@@ -28,8 +30,9 @@ class TestGenerateReportService(TestCase):
         call_command("init-geo-fixtures")
         self.business_area = create_afghanistan()
         PartnerFactory(name="UNICEF")
-        from hct_mis_api.apps.reporting.services.generate_report_service import \
-            GenerateReportService
+        from hct_mis_api.apps.reporting.services.generate_report_service import (
+            GenerateReportService,
+        )
 
         self.GenerateReportService = GenerateReportService
 

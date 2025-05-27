@@ -4,8 +4,7 @@ import openpyxl
 
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.household.services.household_withdraw import \
-    HouseholdWithdraw
+from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
 
 
 def mass_withdraw_sudan_hhs() -> None:

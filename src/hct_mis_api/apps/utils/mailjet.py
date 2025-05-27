@@ -1,8 +1,9 @@
 import json
 from typing import Any, Dict, Optional
 
-from constance import config
 from django.conf import settings
+
+from constance import config
 
 from hct_mis_api.apps.utils.celery_tasks import send_email_task
 

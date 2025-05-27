@@ -2,11 +2,11 @@ import logging
 from io import BytesIO
 from typing import Optional
 
-import requests
 from django.utils import timezone
 
-from hct_mis_api.apps.core.flex_fields_importer import \
-    FlexibleAttributeImporter
+import requests
+
+from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
 

@@ -3,6 +3,7 @@ from typing import Any, Callable, List, Optional, Sequence
 
 from django.conf import settings
 from django.db.models import Model, QuerySet
+
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch import Elasticsearch
@@ -11,8 +12,7 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import (DocumentType, Household,
-                                               Individual)
+from hct_mis_api.apps.household.models import DocumentType, Household, Individual
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)

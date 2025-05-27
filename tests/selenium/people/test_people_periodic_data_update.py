@@ -5,36 +5,44 @@ from time import sleep
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from hct_mis_api.apps.core.fixtures import (DataCollectingTypeFactory,
-                                            create_afghanistan)
-from hct_mis_api.apps.core.models import (BusinessArea, DataCollectingType,
-                                          FlexibleAttribute, PeriodicFieldData)
-from hct_mis_api.apps.household.fixtures import \
-    create_household_and_individuals
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
-from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
-                                               PaymentPlanFactory)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.periodic_data_update.fixtures import (
-    PeriodicDataUpdateTemplateFactory, PeriodicDataUpdateUploadFactory)
+    PeriodicDataUpdateTemplateFactory,
+    PeriodicDataUpdateUploadFactory,
+)
 from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateTemplate, PeriodicDataUpdateUpload)
+    PeriodicDataUpdateTemplate,
+    PeriodicDataUpdateUpload,
+)
 from hct_mis_api.apps.periodic_data_update.utils import (
-    field_label_to_field_name, populate_pdu_with_null_values)
+    field_label_to_field_name,
+    populate_pdu_with_null_values,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.people.people import People
 from tests.selenium.page_object.people.people_details import PeopleDetails
-from tests.selenium.page_object.programme_population.individuals import \
-    Individuals
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import \
-    PeriodicDatUpdateTemplates
-from tests.selenium.page_object.programme_population.periodic_data_update_uploads import \
-    PeriodicDataUpdateUploads
-from tests.selenium.programme_population.test_periodic_data_update_upload import \
-    prepare_xlsx_file
+from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
+from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
+from tests.selenium.programme_population.test_periodic_data_update_upload import (
+    prepare_xlsx_file,
+)
 
 pytestmark = pytest.mark.django_db()
 

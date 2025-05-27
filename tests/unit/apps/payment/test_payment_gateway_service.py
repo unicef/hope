@@ -11,27 +11,46 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory, IndividualFactory, IndividualRoleInHouseholdFactory)
+    HouseholdFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
-from hct_mis_api.apps.payment.celery_tasks import \
-    periodic_sync_payment_gateway_delivery_mechanisms
-from hct_mis_api.apps.payment.fixtures import (AccountFactory,
-                                               FinancialServiceProviderFactory,
-                                               PaymentFactory,
-                                               PaymentPlanFactory,
-                                               generate_delivery_mechanisms)
-from hct_mis_api.apps.payment.models import (AccountType, DeliveryMechanism,
-                                             FinancialServiceProvider,
-                                             FspNameMapping, Payment,
-                                             PaymentHouseholdSnapshot,
-                                             PaymentPlan, PaymentPlanSplit,
-                                             PaymentVerificationSummary)
+from hct_mis_api.apps.payment.celery_tasks import (
+    periodic_sync_payment_gateway_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    FspNameMapping,
+    Payment,
+    PaymentHouseholdSnapshot,
+    PaymentPlan,
+    PaymentPlanSplit,
+    PaymentVerificationSummary,
+)
 from hct_mis_api.apps.payment.services.payment_gateway import (
-    AccountTypeData, AddRecordsResponseData, DeliveryMechanismData, FspData,
-    PaymentGatewayAPI, PaymentGatewayService, PaymentInstructionData,
-    PaymentInstructionStatus, PaymentRecordData)
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import \
-    create_payment_plan_snapshot_data
+    AccountTypeData,
+    AddRecordsResponseData,
+    DeliveryMechanismData,
+    FspData,
+    PaymentGatewayAPI,
+    PaymentGatewayService,
+    PaymentInstructionData,
+    PaymentInstructionStatus,
+    PaymentRecordData,
+)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+)
 
 
 @pytest.fixture(autouse=True)

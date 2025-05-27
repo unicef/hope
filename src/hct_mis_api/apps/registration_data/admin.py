@@ -2,13 +2,6 @@ import logging
 from typing import Any, Optional
 from uuid import UUID
 
-from admin_extra_buttons.api import confirm_action
-from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import (AutoCompleteFilter,
-                                       LinkedAutoCompleteFilter)
-from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminAutoCompleteSearchMixin
-from adminfilters.querystring import QueryStringFilter
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.contenttypes.models import ContentType
@@ -19,21 +12,32 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+from admin_extra_buttons.api import confirm_action
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
+from adminfilters.querystring import QueryStringFilter
+
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.celery_tasks import \
-    enroll_households_to_program_task
+from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual, PendingIndividual
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair, ImportData, KoboImportData,
-    RegistrationDataImport)
-from hct_mis_api.apps.registration_datahub.celery_tasks import \
-    merge_registration_data_import_task
+    DeduplicationEngineSimilarityPair,
+    ImportData,
+    KoboImportData,
+    RegistrationDataImport,
+)
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    merge_registration_data_import_task,
+)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-from hct_mis_api.apps.utils.elasticsearch_utils import \
-    remove_elasticsearch_documents_by_matching_ids
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    remove_elasticsearch_documents_by_matching_ids,
+)
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
@@ -94,13 +98,15 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         obj = self.get_object(request, str(pk))
         try:
             if obj.data_source == RegistrationDataImport.XLS:
-                from hct_mis_api.apps.registration_datahub.celery_tasks import \
-                    registration_xlsx_import_task
+                from hct_mis_api.apps.registration_datahub.celery_tasks import (
+                    registration_xlsx_import_task,
+                )
 
                 celery_task = registration_xlsx_import_task
             else:
-                from hct_mis_api.apps.registration_datahub.celery_tasks import \
-                    registration_kobo_import_task
+                from hct_mis_api.apps.registration_datahub.celery_tasks import (
+                    registration_kobo_import_task,
+                )
 
                 celery_task = registration_kobo_import_task
 

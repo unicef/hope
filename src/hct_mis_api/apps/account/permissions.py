@@ -2,17 +2,30 @@ import logging
 from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Iterable, List,
-                    Optional, Tuple, Type, Union)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
-import graphene
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
+
+import graphene
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments
-from graphene_django.filter.utils import (get_filtering_args_from_filterset,
-                                          get_filterset_class)
+from graphene_django.filter.utils import (
+    get_filtering_args_from_filterset,
+    get_filterset_class,
+)
 
 from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea

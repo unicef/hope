@@ -1,5 +1,6 @@
-import openpyxl
 from django.test import TestCase
+
+import openpyxl
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -7,26 +8,31 @@ from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket, TicketComplaintDetails, TicketDeleteIndividualDetails,
-    TicketIndividualDataUpdateDetails, TicketNeedsAdjudicationDetails,
-    TicketNegativeFeedbackDetails, TicketPositiveFeedbackDetails,
-    TicketReferralDetails, TicketSensitiveDetails, TicketSystemFlaggingDetails)
-from hct_mis_api.apps.household.fixtures import \
-    create_household_and_individuals
+    GrievanceTicket,
+    TicketComplaintDetails,
+    TicketDeleteIndividualDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
+    TicketPositiveFeedbackDetails,
+    TicketReferralDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
+)
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import FEMALE, MALE
-from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
-                                               PaymentPlanFactory)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.periodic_data_update.fixtures import \
-    PeriodicDataUpdateTemplateFactory
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import \
-    PeriodicDataUpdateExportTemplateService
+from hct_mis_api.apps.periodic_data_update.fixtures import (
+    PeriodicDataUpdateTemplateFactory,
+)
+from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
+    PeriodicDataUpdateExportTemplateService,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
-from hct_mis_api.apps.sanction_list.fixtures import \
-    SanctionListIndividualFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 
 
 class TestPeriodicDataUpdateExportTemplateService(TestCase):

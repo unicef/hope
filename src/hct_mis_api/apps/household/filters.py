@@ -2,28 +2,40 @@ import logging
 from datetime import date, timedelta
 from typing import Any, Dict, List
 
-from constance import config
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 from django.utils import timezone
-from django_filters import (BooleanFilter, CharFilter, ChoiceFilter, FilterSet,
-                            MultipleChoiceFilter, OrderingFilter)
+
+from constance import config
+from django_filters import (
+    BooleanFilter,
+    CharFilter,
+    ChoiceFilter,
+    FilterSet,
+    MultipleChoiceFilter,
+    OrderingFilter,
+)
 from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.core.exceptions import SearchException
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
-from hct_mis_api.apps.household.documents import (HouseholdDocument,
-                                                  get_individual_doc)
-from hct_mis_api.apps.household.models import (DUPLICATE, DUPLICATE_IN_BATCH,
-                                               INDIVIDUAL_FLAGS_CHOICES,
-                                               INDIVIDUAL_STATUS_CHOICES,
-                                               NEEDS_ADJUDICATION,
-                                               SANCTION_LIST_CONFIRMED_MATCH,
-                                               SANCTION_LIST_POSSIBLE_MATCH,
-                                               SEX_CHOICE, STATUS_ACTIVE,
-                                               STATUS_DUPLICATE,
-                                               STATUS_WITHDRAWN, DocumentType,
-                                               Household, Individual)
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
+    INDIVIDUAL_FLAGS_CHOICES,
+    INDIVIDUAL_STATUS_CHOICES,
+    NEEDS_ADJUDICATION,
+    SANCTION_LIST_CONFIRMED_MATCH,
+    SANCTION_LIST_POSSIBLE_MATCH,
+    SEX_CHOICE,
+    STATUS_ACTIVE,
+    STATUS_DUPLICATE,
+    STATUS_WITHDRAWN,
+    DocumentType,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

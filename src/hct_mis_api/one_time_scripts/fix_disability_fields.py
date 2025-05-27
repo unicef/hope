@@ -2,9 +2,13 @@ import logging
 
 from django.db.models import Q
 
-from hct_mis_api.apps.household.models import (CANNOT_DO, DISABLED,
-                                               LOT_DIFFICULTY, NOT_DISABLED,
-                                               Individual)
+from hct_mis_api.apps.household.models import (
+    CANNOT_DO,
+    DISABLED,
+    LOT_DIFFICULTY,
+    NOT_DISABLED,
+    Individual,
+)
 
 logger = logging.getLogger(__name__)
 

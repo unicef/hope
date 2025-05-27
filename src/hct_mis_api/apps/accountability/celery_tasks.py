@@ -4,15 +4,15 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from hct_mis_api.apps.accountability.models import Survey
-from hct_mis_api.apps.accountability.services.export_survey_sample_service import \
-    ExportSurveySampleService
+from hct_mis_api.apps.accountability.services.export_survey_sample_service import (
+    ExportSurveySampleService,
+)
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import send_email_notification
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import (sentry_tags,
-                                           set_sentry_business_area_tag)
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
 

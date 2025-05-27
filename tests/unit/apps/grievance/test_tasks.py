@@ -6,10 +6,10 @@ from django.test import TestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import \
-    DeduplicateAndCheckAgainstSanctionsListTask
-from hct_mis_api.apps.household.fixtures import (HouseholdFactory,
-                                                 IndividualFactory)
+from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
+    DeduplicateAndCheckAgainstSanctionsListTask,
+)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 

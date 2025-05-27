@@ -1,19 +1,21 @@
 from datetime import timedelta
 from tempfile import NamedTemporaryFile
 
-import pytest
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.periodic_data_update.celery_tasks import \
-    remove_old_pdu_template_files_task
-from hct_mis_api.apps.periodic_data_update.fixtures import \
-    PeriodicDataUpdateTemplateFactory
-from hct_mis_api.apps.periodic_data_update.models import \
-    PeriodicDataUpdateTemplate
+from hct_mis_api.apps.periodic_data_update.celery_tasks import (
+    remove_old_pdu_template_files_task,
+)
+from hct_mis_api.apps.periodic_data_update.fixtures import (
+    PeriodicDataUpdateTemplateFactory,
+)
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateTemplate
 
 pytestmark = pytest.mark.django_db
 

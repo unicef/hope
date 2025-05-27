@@ -3,10 +3,13 @@ from typing import Any, Dict, List, Tuple
 from django.db import transaction
 
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.one_time_scripts.universal_individual_update_script.universal_individual_update_script import \
-    UniversalIndividualUpdateScript
+from hct_mis_api.one_time_scripts.universal_individual_update_script.universal_individual_update_script import (
+    UniversalIndividualUpdateScript,
+)
 from hct_mis_api.one_time_scripts.universal_individual_update_script.validator_and_handlers import (
-    handle_simple_field, validate_phone_number)
+    handle_simple_field,
+    validate_phone_number,
+)
 
 individual_fields: Dict[str, Tuple[str, Any, Any]] = {
     "phone_no": ("phone_no", validate_phone_number, handle_simple_field),

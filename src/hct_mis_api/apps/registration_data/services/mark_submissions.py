@@ -6,8 +6,10 @@ from django.db.models import QuerySet
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.registration_data.models import (KoboImportedSubmission,
-                                                       RegistrationDataImport)
+from hct_mis_api.apps.registration_data.models import (
+    KoboImportedSubmission,
+    RegistrationDataImport,
+)
 
 
 class MarkSubmissions:

@@ -1,8 +1,19 @@
 from typing import Any, Dict, List
 
+from django.db.models import (
+    Case,
+    Count,
+    DecimalField,
+    F,
+    IntegerField,
+    Q,
+    QuerySet,
+    Sum,
+    Value,
+    When,
+)
+
 import graphene
-from django.db.models import (Case, Count, DecimalField, F, IntegerField, Q,
-                              QuerySet, Sum, Value, When)
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -10,24 +21,33 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
-    ALL_GRIEVANCES_CREATE_MODIFY, AdminUrlNodeMixin, BaseNodePermissionMixin,
-    DjangoPermissionFilterConnectionField, Permissions,
-    hopeOneOfPermissionClass, hopePermissionClass)
+    ALL_GRIEVANCES_CREATE_MODIFY,
+    AdminUrlNodeMixin,
+    BaseNodePermissionMixin,
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopeOneOfPermissionClass,
+    hopePermissionClass,
+)
 from hct_mis_api.apps.account.schema import PartnerNode
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.core.schema import (ChoiceObject, DataCollectingTypeNode,
-                                          PeriodicFieldNode)
-from hct_mis_api.apps.core.utils import (chart_filters_decoder,
-                                         chart_permission_decorator,
-                                         get_program_id_from_headers,
-                                         to_choice_object)
+from hct_mis_api.apps.core.schema import (
+    ChoiceObject,
+    DataCollectingTypeNode,
+    PeriodicFieldNode,
+)
+from hct_mis_api.apps.core.utils import (
+    chart_filters_decoder,
+    chart_permission_decorator,
+    get_program_id_from_headers,
+    to_choice_object,
+)
 from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentPlan
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
-from hct_mis_api.apps.program.models import (BeneficiaryGroup, Program,
-                                             ProgramCycle)
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 

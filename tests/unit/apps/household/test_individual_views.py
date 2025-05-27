@@ -1,56 +1,75 @@
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-import freezegun
-import pytest
-from constance.test import override_config
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+
+import freezegun
+import pytest
+from constance.test import override_config
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import (FlexibleAttributeForPDUFactory,
-                                            PeriodicFieldDataFactory,
-                                            create_afghanistan, create_ukraine)
+from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+    create_ukraine,
+)
 from hct_mis_api.apps.core.models import PeriodicFieldData
 from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory, DocumentFactory, DocumentTypeFactory,
-    IndividualIdentityFactory, IndividualRoleInHouseholdFactory,
-    create_household_and_individuals)
-from hct_mis_api.apps.household.models import (AGENCY_TYPE_CHOICES, CANNOT_DO,
-                                               DISABLED, DUPLICATE, FEMALE,
-                                               HEARING,
-                                               INDIVIDUAL_FLAGS_CHOICES,
-                                               INDIVIDUAL_STATUS_CHOICES,
-                                               LOT_DIFFICULTY, MALE,
-                                               MARITAL_STATUS_CHOICE,
-                                               NEEDS_ADJUDICATION,
-                                               NOT_COLLECTED,
-                                               OBSERVED_DISABILITY_CHOICE,
-                                               OTHER, RELATIONSHIP_CHOICE,
-                                               ROLE_ALTERNATE, ROLE_CHOICE,
-                                               ROLE_PRIMARY, SEEING,
-                                               SEVERITY_OF_DISABILITY_CHOICES,
-                                               SEX_CHOICE, STATUS_ACTIVE,
-                                               UNIQUE, WORK_STATUS_CHOICE,
-                                               DocumentType, Household,
-                                               Individual)
-from hct_mis_api.apps.payment.fixtures import (AccountFactory,
-                                               generate_delivery_mechanisms)
-from hct_mis_api.apps.periodic_data_update.utils import \
-    populate_pdu_with_null_values
+    BankAccountInfoFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualIdentityFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import (
+    AGENCY_TYPE_CHOICES,
+    CANNOT_DO,
+    DISABLED,
+    DUPLICATE,
+    FEMALE,
+    HEARING,
+    INDIVIDUAL_FLAGS_CHOICES,
+    INDIVIDUAL_STATUS_CHOICES,
+    LOT_DIFFICULTY,
+    MALE,
+    MARITAL_STATUS_CHOICE,
+    NEEDS_ADJUDICATION,
+    NOT_COLLECTED,
+    OBSERVED_DISABILITY_CHOICE,
+    OTHER,
+    RELATIONSHIP_CHOICE,
+    ROLE_ALTERNATE,
+    ROLE_CHOICE,
+    ROLE_PRIMARY,
+    SEEING,
+    SEVERITY_OF_DISABILITY_CHOICES,
+    SEX_CHOICE,
+    STATUS_ACTIVE,
+    UNIQUE,
+    WORK_STATUS_CHOICE,
+    DocumentType,
+    Household,
+    Individual,
+)
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

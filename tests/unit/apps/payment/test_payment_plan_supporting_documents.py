@@ -1,11 +1,11 @@
 from io import BytesIO
 
 from django.core.files.storage import default_storage
-from django.core.files.uploadedfile import (InMemoryUploadedFile,
-                                            SimpleUploadedFile)
+from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
 from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
@@ -13,11 +13,11 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.payment.api.serializers import \
-    PaymentPlanSupportingDocumentSerializer
+from hct_mis_api.apps.payment.api.serializers import (
+    PaymentPlanSupportingDocumentSerializer,
+)
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.payment.models import (PaymentPlan,
-                                             PaymentPlanSupportingDocument)
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 
 
 class PaymentPlanSupportingDocumentSerializerTests(TestCase):

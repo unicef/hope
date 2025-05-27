@@ -1,11 +1,11 @@
 from typing import Any
 
-import django_filters
 from django.db.models import Q, QuerySet
+
+import django_filters
 from django_filters import FilterSet
 
-from hct_mis_api.apps.payment.models import (PaymentPlan,
-                                             PaymentVerificationSummary)
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationSummary
 
 
 class PaymentPlanFilter(FilterSet):

@@ -1,35 +1,48 @@
 import logging
 from collections.abc import Iterable
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
-                    Optional, Type, Union)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Type,
+    Union,
+)
 
-import graphene
-from constance import config
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
+
+import graphene
+from constance import config
 from flags.state import flag_state
-from graphene import (Boolean, Connection, ConnectionField, DateTime, Int,
-                      String, relay)
-from graphene.types.resolver import (attr_resolver, dict_or_attr_resolver,
-                                     dict_resolver)
+from graphene import Boolean, Connection, ConnectionField, DateTime, Int, String, relay
+from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
-    FieldFactory
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    FILTERABLE_TYPES, TYPE_STRING, Scope)
+    FILTERABLE_TYPES,
+    TYPE_STRING,
+    Scope,
+)
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
-from hct_mis_api.apps.core.models import (BusinessArea, DataCollectingType,
-                                          FlexibleAttribute,
-                                          FlexibleAttributeChoice,
-                                          FlexibleAttributeGroup,
-                                          PeriodicFieldData)
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+    FlexibleAttributeGroup,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.models import Program
 

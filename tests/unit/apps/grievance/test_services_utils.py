@@ -2,46 +2,65 @@ import uuid
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import (BusinessAreaFactory,
-                                               PartnerFactory, UserFactory)
+import pytest
+
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import AdminAreaLimitedTo
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.models import \
-    FlexibleAttribute as Core_FlexibleAttribute
+from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
 from hct_mis_api.apps.core.utils import encode_id_base64_required
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory, TicketNeedsAdjudicationDetailsFactory)
+    GrievanceTicketFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.data_change.utils import (
-    cast_flex_fields, convert_to_empty_string_if_null, handle_add_document,
-    handle_add_payment_channel, handle_role, handle_update_payment_channel,
-    to_phone_number_str, verify_flex_fields)
+    cast_flex_fields,
+    convert_to_empty_string_if_null,
+    handle_add_document,
+    handle_add_payment_channel,
+    handle_role,
+    handle_update_payment_channel,
+    to_phone_number_str,
+    verify_flex_fields,
+)
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     close_needs_adjudication_ticket_service,
-    create_grievance_ticket_with_details)
+    create_grievance_ticket_with_details,
+)
 from hct_mis_api.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
-    validate_individual_for_need_adjudication)
+    validate_individual_for_need_adjudication,
+)
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory, DocumentFactory, DocumentTypeFactory,
-    IndividualFactory, IndividualRoleInHouseholdFactory, create_household,
-    create_household_and_individuals)
-from hct_mis_api.apps.household.models import (ROLE_ALTERNATE, ROLE_PRIMARY,
-                                               BankAccountInfo, Document,
-                                               IndividualRoleInHousehold)
+    BankAccountInfoFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    Document,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import \
-    DeduplicationEngineSimilarityPair
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 

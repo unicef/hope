@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from django.db.models import QuerySet
+
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
@@ -14,10 +15,12 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.api.serializers import LogEntrySerializer
 from hct_mis_api.apps.activity_log.filters import LogEntryFilter
 from hct_mis_api.apps.activity_log.models import LogEntry
-from hct_mis_api.apps.core.api.mixins import (BaseViewSet,
-                                              BusinessAreaProgramsAccessMixin,
-                                              CountActionMixin,
-                                              SerializerActionMixin)
+from hct_mis_api.apps.core.api.mixins import (
+    BaseViewSet,
+    BusinessAreaProgramsAccessMixin,
+    CountActionMixin,
+    SerializerActionMixin,
+)
 from hct_mis_api.apps.core.api.serializers import ChoiceSerializer
 from hct_mis_api.apps.core.utils import to_choice_object
 

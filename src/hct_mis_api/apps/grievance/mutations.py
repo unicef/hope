@@ -1,58 +1,80 @@
 import logging
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-import graphene
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.account.permissions import (PermissionMutation,
-                                                  Permissions)
+from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
-from hct_mis_api.apps.core.utils import (check_concurrency_version_in_mutation,
-                                         decode_id_string, to_snake_case)
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+    to_snake_case,
+)
 from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.inputs import (CreateGrievanceTicketInput,
-                                               CreateTicketNoteInput,
-                                               UpdateGrievanceTicketInput)
-from hct_mis_api.apps.grievance.models import (GrievanceTicket,
-                                               TicketNeedsAdjudicationDetails,
-                                               TicketNote)
+from hct_mis_api.apps.grievance.inputs import (
+    CreateGrievanceTicketInput,
+    CreateTicketNoteInput,
+    UpdateGrievanceTicketInput,
+)
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+    TicketNote,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.grievance.schema import (GrievanceTicketNode,
-                                               TicketNoteNode)
-from hct_mis_api.apps.grievance.services.bulk_action_service import \
-    BulkActionService
-from hct_mis_api.apps.grievance.services.data_change_services import \
-    update_data_change_extras
-from hct_mis_api.apps.grievance.services.payment_verification_services import \
-    update_ticket_payment_verification_service
-from hct_mis_api.apps.grievance.services.referral_services import \
-    update_referral_service
-from hct_mis_api.apps.grievance.services.ticket_based_on_payment_record_services import \
-    update_ticket_based_on_payment_record_service
+from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
+from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
+from hct_mis_api.apps.grievance.services.data_change_services import (
+    update_data_change_extras,
+)
+from hct_mis_api.apps.grievance.services.payment_verification_services import (
+    update_ticket_payment_verification_service,
+)
+from hct_mis_api.apps.grievance.services.referral_services import (
+    update_referral_service,
+)
+from hct_mis_api.apps.grievance.services.ticket_based_on_payment_record_services import (
+    update_ticket_based_on_payment_record_service,
+)
 from hct_mis_api.apps.grievance.services.ticket_creator_service import (
-    TicketCreatorService, TicketDetailsCreatorFactory)
-from hct_mis_api.apps.grievance.services.ticket_status_changer_service import \
-    TicketStatusChangerService
+    TicketCreatorService,
+    TicketDetailsCreatorFactory,
+)
+from hct_mis_api.apps.grievance.services.ticket_status_changer_service import (
+    TicketStatusChangerService,
+)
 from hct_mis_api.apps.grievance.utils import (
-    clear_cache, create_grievance_documents, delete_grievance_documents,
-    get_individual, update_grievance_documents,
-    validate_individual_for_need_adjudication)
+    clear_cache,
+    create_grievance_documents,
+    delete_grievance_documents,
+    get_individual,
+    update_grievance_documents,
+    validate_individual_for_need_adjudication,
+)
 from hct_mis_api.apps.grievance.validators import (
-    DataChangeValidator, validate_grievance_documents_size)
-from hct_mis_api.apps.household.models import (HEAD, ROLE_ALTERNATE,
-                                               ROLE_PRIMARY, Household,
-                                               Individual,
-                                               IndividualRoleInHousehold)
+    DataChangeValidator,
+    validate_grievance_documents_size,
+)
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.exceptions import log_and_raise

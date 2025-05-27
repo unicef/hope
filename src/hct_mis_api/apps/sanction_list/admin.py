@@ -1,11 +1,14 @@
-from adminfilters.autocomplete import AutoCompleteFilter
 from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 
+from adminfilters.autocomplete import AutoCompleteFilter
+
 from hct_mis_api.apps.sanction_list.models import (
-    SanctionListIndividual, SanctionListIndividualDateOfBirth,
-    SanctionListIndividualDocument)
+    SanctionListIndividual,
+    SanctionListIndividualDateOfBirth,
+    SanctionListIndividualDocument,
+)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 

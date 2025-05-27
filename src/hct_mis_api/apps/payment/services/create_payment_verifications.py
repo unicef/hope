@@ -2,8 +2,11 @@ from typing import Iterable
 
 from django.utils import timezone
 
-from hct_mis_api.apps.payment.models import (Payment, PaymentVerification,
-                                             PaymentVerificationPlan)
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 
 
 class CreatePaymentVerifications:

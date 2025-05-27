@@ -5,6 +5,7 @@ from django import template
 from django.core import serializers
 from django.db.models import Model
 from django.utils.safestring import mark_safe
+
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import JsonLexer, PythonLexer

@@ -1,12 +1,14 @@
-import pytest
 from django.urls import reverse
+
+import pytest
 from django_webtest import WebTest
 
-from hct_mis_api.apps.account.fixtures import (PartnerFactory,
-                                               RoleAssignmentFactory,
-                                               UserFactory)
-from hct_mis_api.apps.account.models import (AdminAreaLimitedTo, Partner,
-                                             RoleAssignment)
+from hct_mis_api.apps.account.fixtures import (
+    PartnerFactory,
+    RoleAssignmentFactory,
+    UserFactory,
+)
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Area

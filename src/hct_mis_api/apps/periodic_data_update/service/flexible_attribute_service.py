@@ -5,10 +5,10 @@ from graphql import GraphQLError
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.periodic_data_update.signals import \
-    increment_periodic_field_version_cache
-from hct_mis_api.apps.periodic_data_update.utils import \
-    field_label_to_field_name
+from hct_mis_api.apps.periodic_data_update.signals import (
+    increment_periodic_field_version_cache,
+)
+from hct_mis_api.apps.periodic_data_update.utils import field_label_to_field_name
 from hct_mis_api.apps.program.models import Program
 
 

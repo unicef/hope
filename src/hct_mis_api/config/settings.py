@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+
 from single_source import get_version
 
 from hct_mis_api.config.env import env

@@ -1,4 +1,5 @@
 from django.urls import reverse
+
 from django_webtest import WebTest
 
 from hct_mis_api.apps.account.fixtures import UserFactory

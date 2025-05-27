@@ -12,7 +12,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
-    RegistrationDataImport, RegistrationDataImportDatahub)
+    RegistrationDataImport,
+    RegistrationDataImportDatahub,
+)
 
 faker = Faker()
 

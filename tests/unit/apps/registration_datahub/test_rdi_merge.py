@@ -3,31 +3,43 @@ from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
 
-import pytest
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
+
+import pytest
 from freezegun import freeze_time
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.household.fixtures import (HouseholdCollectionFactory,
-                                                 HouseholdFactory,
-                                                 IndividualCollectionFactory,
-                                                 IndividualFactory,
-                                                 PendingHouseholdFactory,
-                                                 PendingIndividualFactory)
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdCollectionFactory,
+    HouseholdFactory,
+    IndividualCollectionFactory,
+    IndividualFactory,
+    PendingHouseholdFactory,
+    PendingIndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
-    BROTHER_SISTER, COUSIN, HEAD, NON_BENEFICIARY, ROLE_ALTERNATE, Household,
-    Individual, PendingHousehold, PendingIndividual,
-    PendingIndividualRoleInHousehold)
+    BROTHER_SISTER,
+    COUSIN,
+    HEAD,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    Household,
+    Individual,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (KoboImportedSubmission,
-                                                       RegistrationDataImport)
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import (
+    KoboImportedSubmission,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel

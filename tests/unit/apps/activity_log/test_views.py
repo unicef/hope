@@ -1,8 +1,9 @@
 from typing import Any, List
 from urllib.parse import urlencode
 
-import pytest
 from django.urls import reverse
+
+import pytest
 from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory

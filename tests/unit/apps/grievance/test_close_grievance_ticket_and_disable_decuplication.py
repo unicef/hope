@@ -1,8 +1,9 @@
 from datetime import date
 from unittest import mock
 
-import pytest
 from django.core.management import call_command
+
+import pytest
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -13,14 +14,24 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
-    GrievanceTicketFactory, TicketAddIndividualDetailsFactory)
+    GrievanceTicketFactory,
+    TicketAddIndividualDetailsFactory,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (DocumentFactory,
-                                                 HouseholdFactory,
-                                                 IndividualFactory)
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, IDENTIFICATION_TYPE_NATIONAL_ID,
-    RELATIONSHIP_UNKNOWN, ROLE_PRIMARY, SINGLE, UNIQUE_IN_BATCH, DocumentType)
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    RELATIONSHIP_UNKNOWN,
+    ROLE_PRIMARY,
+    SINGLE,
+    UNIQUE_IN_BATCH,
+    DocumentType,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 

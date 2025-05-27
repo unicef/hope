@@ -2,7 +2,6 @@ import logging
 from collections import namedtuple
 from typing import Any
 
-from admin_extra_buttons.decorators import button
 from django import forms
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -10,11 +9,12 @@ from django.core.validators import validate_email
 from django.forms.forms import Form
 from django.http import Http404, HttpRequest
 from django.template.response import TemplateResponse
+
+from admin_extra_buttons.decorators import button
 from requests import HTTPError
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.microsoft_graph import (DJANGO_USER_MAP,
-                                                      MicrosoftGraphAPI)
+from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict

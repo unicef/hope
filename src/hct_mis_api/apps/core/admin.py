@@ -1,14 +1,6 @@
 import logging
-from typing import (TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple,
-                    Union)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
-import xlrd
-from admin_extra_buttons.api import button
-from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
-from admin_sync.mixin import GetManyFromRemoteMixin
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminAutoCompleteSearchMixin, AdminFiltersMixin
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter, TabularInline
@@ -21,39 +13,58 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.forms import inlineformset_factory
-from django.http import (HttpRequest, HttpResponse,
-                         HttpResponsePermanentRedirect, HttpResponseRedirect)
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+)
 from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
+import xlrd
+from admin_extra_buttons.api import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
+from admin_sync.mixin import GetManyFromRemoteMixin
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin, AdminFiltersMixin
 from jsoneditor.forms import JSONEditor
-from mptt.admin import MPTTModelAdmin
 from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import Partner, RoleAssignment
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.core.celery_tasks import \
-    upload_new_kobo_template_and_update_flex_fields_task
+from hct_mis_api.apps.core.celery_tasks import (
+    upload_new_kobo_template_and_update_flex_fields_task,
+)
 from hct_mis_api.apps.core.forms import DataCollectingTypeForm
-from hct_mis_api.apps.core.models import (BusinessArea, CountryCodeMap,
-                                          DataCollectingType,
-                                          FlexibleAttribute,
-                                          FlexibleAttributeChoice,
-                                          FlexibleAttributeGroup,
-                                          PeriodicFieldData, StorageFile,
-                                          XLSXKoboTemplate)
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    CountryCodeMap,
+    DataCollectingType,
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+    FlexibleAttributeGroup,
+    PeriodicFieldData,
+    StorageFile,
+    XLSXKoboTemplate,
+)
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.forms import AcceptanceProcessThresholdForm
 from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
-from hct_mis_api.apps.utils.admin import (HOPEModelAdminBase,
-                                          LastSyncDateResetMixin,
-                                          SoftDeletableAdminMixin)
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+    SoftDeletableAdminMixin,
+)
 from hct_mis_api.apps.utils.security import is_root
+from mptt.admin import MPTTModelAdmin
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -371,8 +382,9 @@ class BusinessAreaAdmin(
     def mark_submissions(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         business_area = self.get_queryset(request).get(pk=pk)
         if request.method == "POST":
-            from hct_mis_api.apps.registration_data.services.mark_submissions import \
-                MarkSubmissions
+            from hct_mis_api.apps.registration_data.services.mark_submissions import (
+                MarkSubmissions,
+            )
 
             try:
                 task = MarkSubmissions(business_area)

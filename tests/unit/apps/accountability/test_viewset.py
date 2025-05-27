@@ -2,27 +2,28 @@ from typing import Any, List
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlencode
 
-import pytest
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+
+import pytest
 from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.fixtures import (
-    CommunicationMessageFactory, FeedbackFactory, SurveyFactory)
+    CommunicationMessageFactory,
+    FeedbackFactory,
+    SurveyFactory,
+)
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import (HouseholdFactory,
-                                                 IndividualFactory)
-from hct_mis_api.apps.payment.fixtures import (PaymentFactory,
-                                               PaymentPlanFactory)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 pytestmark = pytest.mark.django_db
 

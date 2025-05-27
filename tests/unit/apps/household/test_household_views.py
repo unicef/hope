@@ -1,13 +1,14 @@
 import json
 from typing import Any, Dict, Optional, Tuple
 
-import pytest
-from constance.test import override_config
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+
+import pytest
+from constance.test import override_config
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -15,20 +16,28 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory, DocumentFactory, DocumentTypeFactory,
-    IndividualRoleInHouseholdFactory, create_household_and_individuals)
-from hct_mis_api.apps.household.models import (DUPLICATE, HOST, REFUGEE,
-                                               RESIDENCE_STATUS_CHOICE,
-                                               ROLE_ALTERNATE, ROLE_PRIMARY,
-                                               DocumentType, Household)
+    BankAccountInfoFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
+    IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
+)
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    HOST,
+    REFUGEE,
+    RESIDENCE_STATUS_CHOICE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    DocumentType,
+    Household,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import \
-    RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 

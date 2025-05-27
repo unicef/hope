@@ -1,11 +1,17 @@
 from typing import Any, Callable, Iterable, List, Optional
 
-import pytest
 from django.conf import settings
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.account.models import (AdminAreaLimitedTo, Partner, Role,
-                                             RoleAssignment, User)
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.fixtures import ProgramFactory

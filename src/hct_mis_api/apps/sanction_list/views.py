@@ -3,8 +3,7 @@ from tempfile import NamedTemporaryFile
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 
-from hct_mis_api.apps.sanction_list.template_generator import \
-    TemplateFileGenerator
+from hct_mis_api.apps.sanction_list.template_generator import TemplateFileGenerator
 
 
 @login_required

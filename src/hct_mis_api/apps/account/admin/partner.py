@@ -1,13 +1,13 @@
 from typing import Any, Optional, Sequence, Type
 
-from adminfilters.autocomplete import AutoCompleteFilter
 from django import forms
 from django.contrib import admin
 from django.forms import CheckboxSelectMultiple, ModelForm
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
-from mptt.forms import TreeNodeMultipleChoiceField
+
+from adminfilters.autocomplete import AutoCompleteFilter
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.admin.user_role import RoleAssignmentInline
@@ -15,6 +15,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
+from mptt.forms import TreeNodeMultipleChoiceField
 
 
 def can_add_business_area_to_partner(request: Any, *args: Any, **kwargs: Any) -> bool:

@@ -5,21 +5,30 @@ from typing import Union
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.models import (
-    ROLE_PRIMARY, DocumentType, PendingDocument, PendingHousehold,
-    PendingIndividual, PendingIndividualRoleInHousehold)
+    ROLE_PRIMARY,
+    DocumentType,
+    PendingDocument,
+    PendingHousehold,
+    PendingIndividual,
+    PendingIndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.contrib.aurora.fixtures import (OrganizationFactory,
-                                                 ProjectFactory,
-                                                 RegistrationFactory)
+from hct_mis_api.contrib.aurora.fixtures import (
+    OrganizationFactory,
+    ProjectFactory,
+    RegistrationFactory,
+)
 from hct_mis_api.contrib.aurora.models import Record
-from hct_mis_api.contrib.aurora.services.people_registration_service import \
-    PeopleRegistrationService
+from hct_mis_api.contrib.aurora.services.people_registration_service import (
+    PeopleRegistrationService,
+)
 
 
 class TestPeopleRegistrationService(TestCase):

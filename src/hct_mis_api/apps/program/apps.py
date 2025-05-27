@@ -10,8 +10,7 @@ class ProgramConfig(AppConfig):
         from hct_mis_api.apps.household import signals as household_signals
         from hct_mis_api.apps.program import signals as program_signals
         from hct_mis_api.apps.program.signals import adjust_program_size
-        from hct_mis_api.apps.registration_datahub import \
-            signals as rdi_signals
+        from hct_mis_api.apps.registration_datahub import signals as rdi_signals
 
         rdi_signals.rdi_merged.connect(
             lambda sender, instance, **kwargs: adjust_program_size(instance.program), weak=False

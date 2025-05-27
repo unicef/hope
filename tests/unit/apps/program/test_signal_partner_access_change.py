@@ -3,8 +3,7 @@ from django.test import TestCase
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory
 from hct_mis_api.apps.account.models import AdminAreaLimitedTo, RoleAssignment
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 

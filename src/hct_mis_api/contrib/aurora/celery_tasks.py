@@ -1,12 +1,16 @@
 import logging
 from typing import TYPE_CHECKING, Any, List, Optional
 
-from constance import config
 from django.utils import timezone
+
+from constance import config
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    check_and_set_taxid, locked_cache, merge_registration_data_import_task)
+    check_and_set_taxid,
+    locked_cache,
+    merge_registration_data_import_task,
+)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
 from hct_mis_api.contrib.aurora.models import Record, Registration

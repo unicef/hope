@@ -5,15 +5,20 @@ from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.grievance.models import (GrievanceTicket,
-                                               TicketDeleteIndividualDetails)
-from hct_mis_api.apps.grievance.services.data_change.data_change_service import \
-    DataChangeService
-from hct_mis_api.apps.grievance.services.reassign_roles_services import \
-    reassign_roles_on_disable_individual_service
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketDeleteIndividualDetails,
+)
+from hct_mis_api.apps.grievance.services.data_change.data_change_service import (
+    DataChangeService,
+)
+from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+    reassign_roles_on_disable_individual_service,
+)
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.household.services.household_recalculate_data import \
-    recalculate_data
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
 
 
 class IndividualDeleteService(DataChangeService):

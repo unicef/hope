@@ -1,10 +1,14 @@
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ValueFilter
 from django.contrib import admin
 
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import ValueFilter
+
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-from hct_mis_api.contrib.vision.models import (DownPayment, FundsCommitment,
-                                               FundsCommitmentItem)
+from hct_mis_api.contrib.vision.models import (
+    DownPayment,
+    FundsCommitment,
+    FundsCommitmentItem,
+)
 
 
 @admin.register(FundsCommitment)

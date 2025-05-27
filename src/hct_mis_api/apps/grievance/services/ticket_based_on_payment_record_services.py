@@ -4,8 +4,10 @@ from typing import Dict, List, Optional, Type
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
-from hct_mis_api.apps.core.utils import (decode_and_get_object,
-                                         decode_and_get_object_required)
+from hct_mis_api.apps.core.utils import (
+    decode_and_get_object,
+    decode_and_get_object_required,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.models import Payment

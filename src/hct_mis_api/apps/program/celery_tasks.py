@@ -1,12 +1,12 @@
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.periodic_data_update.utils import \
-    populate_pdu_new_rounds_with_null_values
+from hct_mis_api.apps.periodic_data_update.utils import (
+    populate_pdu_new_rounds_with_null_values,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.signals import program_copied
 from hct_mis_api.apps.program.utils import copy_program_related_data
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import (sentry_tags,
-                                           set_sentry_business_area_tag)
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 
 @app.task()

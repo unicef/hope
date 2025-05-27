@@ -3,15 +3,19 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Union
 
-import graphene
 from django.db.models import QuerySet
+
+import graphene
 from graphene import Connection
 from graphene.relay import PageInfo
 from graphene_django import DjangoConnectionField
 from graphene_django.utils import maybe_queryset
 from graphql_relay.connection.arrayconnection import (
-    connection_from_list_slice, cursor_to_offset, get_offset_with_default,
-    offset_to_cursor)
+    connection_from_list_slice,
+    cursor_to_offset,
+    get_offset_with_default,
+    offset_to_cursor,
+)
 
 from hct_mis_api.apps.core.utils import save_data_in_cache
 

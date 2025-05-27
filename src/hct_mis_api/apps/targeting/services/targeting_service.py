@@ -5,10 +5,16 @@ from django.contrib.postgres.search import CombinedSearchQuery, SearchQuery
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
+
 from model_utils import Choices
 
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _HOUSEHOLD, _INDIVIDUAL, TYPE_DECIMAL, TYPE_INTEGER, TYPE_SELECT_MANY)
+    _HOUSEHOLD,
+    _INDIVIDUAL,
+    TYPE_DECIMAL,
+    TYPE_INTEGER,
+    TYPE_SELECT_MANY,
+)
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.grievance.models import GrievanceTicket

@@ -7,39 +7,54 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import (Any, Callable, Dict, List, Optional, Sequence, Set, Tuple,
-                    Union)
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 from zipfile import BadZipfile
+
+from django.core import validators as django_core_validators
 
 import openpyxl
 import phonenumbers
 from dateutil import parser
-from django.core import validators as django_core_validators
 from openpyxl import Workbook, load_workbook
 from openpyxl.cell import Cell
 from openpyxl.worksheet.worksheet import Worksheet
 from PIL.Image import Image
 
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    TYPE_SELECT_MANY, TYPE_SELECT_ONE, FieldFactory)
-from hct_mis_api.apps.core.field_attributes.fields_types import (_INDIVIDUAL,
-                                                                 Scope)
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    FieldFactory,
+)
+from hct_mis_api.apps.core.field_attributes.fields_types import _INDIVIDUAL, Scope
 from hct_mis_api.apps.core.kobo.common import (
-    KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name)
-from hct_mis_api.apps.core.models import (BusinessArea, FlexibleAttribute,
-                                          PeriodicFieldData)
-from hct_mis_api.apps.core.utils import (SheetImageLoader, rename_dict_keys,
-                                         serialize_flex_attributes)
+    KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
+    get_field_name,
+)
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
+from hct_mis_api.apps.core.utils import (
+    SheetImageLoader,
+    rename_dict_keys,
+    serialize_flex_attributes,
+)
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import (HEAD, NON_BENEFICIARY,
-                                               ROLE_ALTERNATE, ROLE_PRIMARY)
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
-from hct_mis_api.apps.registration_datahub.tasks.utils import \
-    collectors_str_ids_to_list
+from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.registration_datahub.utils import (
-    calculate_hash_for_kobo_submission, find_attachment_in_kobo)
+    calculate_hash_for_kobo_submission,
+    find_attachment_in_kobo,
+)
 
 logger = logging.getLogger(__name__)
 

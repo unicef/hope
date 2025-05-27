@@ -9,7 +9,9 @@ from rest_framework.response import Response
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.household.models import (
-    ROLE_PRIMARY, PendingIndividualRoleInHousehold)
+    ROLE_PRIMARY,
+    PendingIndividualRoleInHousehold,
+)
 
 
 class DelegateSerializer(serializers.Serializer):

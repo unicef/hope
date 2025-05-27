@@ -3,7 +3,9 @@ from typing import List
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.periodic_data_update.utils import (
-    field_label_to_field_name, populate_pdu_new_rounds_with_null_values)
+    field_label_to_field_name,
+    populate_pdu_new_rounds_with_null_values,
+)
 from hct_mis_api.apps.program.models import Program
 
 

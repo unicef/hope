@@ -2,12 +2,11 @@ from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import (AreaFactory, AreaTypeFactory,
-                                           CountryFactory)
-from hct_mis_api.apps.grievance.fixtures import \
-    TicketHouseholdDataUpdateDetailsFactory
-from hct_mis_api.apps.grievance.services.data_change.household_data_update_service import \
-    HouseholdDataUpdateService
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.grievance.fixtures import TicketHouseholdDataUpdateDetailsFactory
+from hct_mis_api.apps.grievance.services.data_change.household_data_update_service import (
+    HouseholdDataUpdateService,
+)
 from hct_mis_api.apps.household.fixtures import create_household
 
 

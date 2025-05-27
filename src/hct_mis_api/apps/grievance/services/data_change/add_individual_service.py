@@ -7,26 +7,44 @@ from django.utils import timezone
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
-from hct_mis_api.apps.grievance.celery_tasks import \
-    deduplicate_and_check_against_sanctions_list_task
-from hct_mis_api.apps.grievance.models import (GrievanceTicket,
-                                               TicketAddIndividualDetails)
-from hct_mis_api.apps.grievance.services.data_change.data_change_service import \
-    DataChangeService
+from hct_mis_api.apps.grievance.celery_tasks import (
+    deduplicate_and_check_against_sanctions_list_task,
+)
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketAddIndividualDetails,
+)
+from hct_mis_api.apps.grievance.services.data_change.data_change_service import (
+    DataChangeService,
+)
 from hct_mis_api.apps.grievance.services.data_change.utils import (
-    handle_add_document, handle_add_identity, handle_add_payment_channel,
-    handle_documents, handle_role, save_images, to_date_string,
-    to_phone_number_str, update_es, verify_flex_fields)
+    handle_add_document,
+    handle_add_identity,
+    handle_add_payment_channel,
+    handle_documents,
+    handle_role,
+    save_images,
+    to_date_string,
+    to_phone_number_str,
+    update_es,
+    verify_flex_fields,
+)
 from hct_mis_api.apps.grievance.signals import individual_added
-from hct_mis_api.apps.household.models import (HEAD, NON_BENEFICIARY,
-                                               RELATIONSHIP_UNKNOWN,
-                                               ROLE_NO_ROLE, BankAccountInfo,
-                                               Document, Household, Individual,
-                                               IndividualIdentity)
-from hct_mis_api.apps.household.services.household_recalculate_data import \
-    recalculate_data
-from hct_mis_api.apps.periodic_data_update.utils import \
-    populate_pdu_with_null_values
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    NON_BENEFICIARY,
+    RELATIONSHIP_UNKNOWN,
+    ROLE_NO_ROLE,
+    BankAccountInfo,
+    Document,
+    Household,
+    Individual,
+    IndividualIdentity,
+)
+from hct_mis_api.apps.household.services.household_recalculate_data import (
+    recalculate_data,
+)
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 

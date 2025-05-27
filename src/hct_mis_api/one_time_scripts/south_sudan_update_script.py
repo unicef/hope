@@ -3,12 +3,19 @@ from typing import Any, Dict, List, Tuple
 from django.db import transaction
 
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.one_time_scripts.universal_individual_update_script.universal_individual_update_script import \
-    UniversalIndividualUpdateScript
+from hct_mis_api.one_time_scripts.universal_individual_update_script.universal_individual_update_script import (
+    UniversalIndividualUpdateScript,
+)
 from hct_mis_api.one_time_scripts.universal_individual_update_script.validator_and_handlers import (
-    handle_admin_field, handle_simple_field, validate_admin, validate_date,
-    validate_flex_field_string, validate_phone_number, validate_sex,
-    validate_string)
+    handle_admin_field,
+    handle_simple_field,
+    validate_admin,
+    validate_date,
+    validate_flex_field_string,
+    validate_phone_number,
+    validate_sex,
+    validate_string,
+)
 
 household_fields: Dict[str, Tuple[str, Any, Any]] = {
     "admin1_h_c": ("admin1", validate_admin, handle_admin_field),

@@ -9,15 +9,17 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.core.exceptions import ValidationError
-from django.core.validators import (MaxLengthValidator, MinLengthValidator,
-                                    ProhibitNullCharactersValidator)
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    ProhibitNullCharactersValidator,
+)
 from django.db import models
 from django.db.models import JSONField, Q, QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
 from model_utils.models import UUIDModel
-from mptt.fields import TreeForeignKey
-from mptt.models import MPTTModel
 from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField
@@ -29,8 +31,12 @@ from hct_mis_api.apps.core.visibility_backends import VisibilityBackend
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
-from hct_mis_api.apps.utils.validators import (DoubleSpaceValidator,
-                                               StartEndSpaceValidator)
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
+from mptt.fields import TreeForeignKey
+from mptt.models import MPTTModel
 
 logger = logging.getLogger(__name__)
 

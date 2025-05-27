@@ -3,19 +3,31 @@ import typing
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
-import xlrd
 from django.core.exceptions import ValidationError
+
+import xlrd
 from graphql.execution.base import ResolveInfo
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import \
-    FieldFactory
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    TYPE_BOOL, TYPE_DATE, TYPE_DECIMAL, TYPE_GEOPOINT, TYPE_IMAGE,
-    TYPE_INTEGER, TYPE_SELECT_MANY, TYPE_SELECT_ONE, TYPE_STRING, Scope)
-from hct_mis_api.apps.core.utils import (decode_id_string_required,
-                                         xlrd_rows_iterator)
-from hct_mis_api.apps.household.models import (BLANK, NOT_PROVIDED,
-                                               RELATIONSHIP_UNKNOWN, Household)
+    TYPE_BOOL,
+    TYPE_DATE,
+    TYPE_DECIMAL,
+    TYPE_GEOPOINT,
+    TYPE_IMAGE,
+    TYPE_INTEGER,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
+    Scope,
+)
+from hct_mis_api.apps.core.utils import decode_id_string_required, xlrd_rows_iterator
+from hct_mis_api.apps.household.models import (
+    BLANK,
+    NOT_PROVIDED,
+    RELATIONSHIP_UNKNOWN,
+    Household,
+)
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
