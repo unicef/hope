@@ -36,7 +36,7 @@ def migrate_payments_to_default_split(apps, schema_editor):  # pragma: no cover
             default_split.save()
             # and delete the old object
             PaymentPlanSplit.objects.filter(id=old_obj_id).delete()
-        payment_plan.payment_items.all().update(parent_split=default_split)
+        payment_plan.payment_items.all().update(parent_split_id=default_split.id)
 
 
 def migrate_dmppp_pp_fk(apps, schema_editor):  # pragma: no cover
