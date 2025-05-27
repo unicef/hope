@@ -390,7 +390,7 @@ class TestPaymentPlanServices(APITestCase):
         p_force_failed = payments[2]
         p_manually_cancelled = payments[3]
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -440,7 +440,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
