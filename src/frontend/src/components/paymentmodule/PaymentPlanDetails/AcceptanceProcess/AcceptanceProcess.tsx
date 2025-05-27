@@ -42,7 +42,7 @@ function AcceptanceProcess({
 
   const matchDataSize = (data) => (showAll ? data : [data[0]]);
 
-  if (!approvalProcess.length) {
+  if (!approvalProcess?.length) {
     return null;
   }
   const handleExportPdf = async (): Promise<void> => {
