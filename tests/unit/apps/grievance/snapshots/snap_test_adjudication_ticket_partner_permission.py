@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partner_does_not_have_admin_area_access 1'] = {

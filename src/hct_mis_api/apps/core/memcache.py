@@ -17,9 +17,9 @@ class SimpleCacheLock:
         while True:
             if self.cache.add(self.key, "LOCKED", self.timeout):
                 return self
-            if time.time() - start > self.blocking_timeout:
-                raise TimeoutError(f"Could not acquire lock {self.key}")
-            time.sleep(0.1)
+            if time.time() - start > self.blocking_timeout:  # pragma: no cover
+                raise TimeoutError(f"Could not acquire lock {self.key}")  # pragma: no cover
+            time.sleep(0.1)  # pragma: no cover
 
     def __exit__(self, exc_type: Optional[type], exc: Optional[BaseException], tb: Optional[Any]) -> None:
         self.cache.delete(self.key)

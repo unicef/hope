@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestCreateNeedsAdjudicationTicketsBiometrics::test_ticket_biometric_query_response 1'] = {
@@ -19,10 +18,10 @@ snapshots['TestCreateNeedsAdjudicationTicketsBiometrics::test_ticket_biometric_q
                             'extraData': {
                                 'dedupEngineSimilarityPair': {
                                     'individual1': {
-                                        'fullName': 'test name',
+                                        'fullName': 'test name'
                                     },
                                     'individual2': {
-                                        'fullName': 'Test2 Name2',
+                                        'fullName': 'Test2 Name2'
                                     },
                                     'similarityScore': '55.55'
                                 },

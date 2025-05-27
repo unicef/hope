@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestRuleSchema::test_rule_schema_shows_only_allowed_rules 1'] = {
