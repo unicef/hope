@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestHouseholdDeliveredQuantitiesQuery::test_household_query_single_0_with_permission 1'] = {

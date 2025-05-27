@@ -507,11 +507,11 @@ class PaymentPlan(
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        constraints = [
-            UniqueConstraint(
-                fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
-            ),
-        ]
+        # constraints = [
+        #     UniqueConstraint(
+        #         fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
+        #     ),
+        # ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""

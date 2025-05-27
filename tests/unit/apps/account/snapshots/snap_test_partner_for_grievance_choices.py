@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['PartnerForGrievanceTest::test_partner_choices_with_program 1'] = {

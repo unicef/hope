@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestDashboardQueries::test_charts_individuals_with_disability_reached_by_age_0_chartIndividualsWithDisabilityReachedByAge 1'] = {

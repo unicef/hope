@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_all_0_with_permission 1'] = {
