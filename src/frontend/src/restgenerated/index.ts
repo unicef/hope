@@ -105,6 +105,7 @@ export type { PaginatedCountryList as PaginatedCountryListCamelCase } from './mo
 export type { PaginatedFeedbackListList as PaginatedFeedbackListListCamelCase } from './models/PaginatedFeedbackListList';
 export type { PaginatedGrievanceTicketListList as PaginatedGrievanceTicketListListCamelCase } from './models/PaginatedGrievanceTicketListList';
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
+export type { PaginatedHouseholdMemberList as PaginatedHouseholdMemberListCamelCase } from './models/PaginatedHouseholdMemberList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
 export type { PaginatedLogEntryList as PaginatedLogEntryListCamelCase } from './models/PaginatedLogEntryList';
 export type { PaginatedMessageListList as PaginatedMessageListListCamelCase } from './models/PaginatedMessageListList';

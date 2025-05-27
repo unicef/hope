@@ -5,7 +5,7 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import { AdminAreaAutocompleteMultipleRest } from '@shared/autocompletes/rest/AdminAreaAutocompleteMultipleRest';
-import { TargetPopulationAutocompleteRest } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRest';
+import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { t } from 'i18next';
 import React, { FC } from 'react';
 
@@ -40,7 +40,7 @@ export const FilterIndividuals: FC<FilterIndividualsProps> = ({
           />
         </Grid>
         <Grid size={{ xs: 3 }}>
-          <TargetPopulationAutocompleteRest
+          <TargetPopulationAutocompleteRestFilter
             value={filter.targetPopulationId}
             onChange={(selectedItem) =>
               handleStateFilterChange('targetPopulationId', selectedItem)

@@ -18,7 +18,6 @@ import type { GrievanceChoices } from '../models/GrievanceChoices';
 import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
-import type { HouseholdMember } from '../models/HouseholdMember';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
 import type { MessageCreate } from '../models/MessageCreate';
@@ -32,6 +31,7 @@ import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
+import type { PaginatedHouseholdMemberList } from '../models/PaginatedHouseholdMemberList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
 import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
@@ -541,7 +541,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedBusinessAreaList
      * @throws ApiError
      */
@@ -574,7 +573,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
@@ -636,7 +634,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns any No response body
      * @throws ApiError
      */
@@ -654,7 +651,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -689,7 +685,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -777,7 +772,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -799,7 +793,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -823,7 +816,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -851,7 +843,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -879,7 +870,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -897,9 +887,6 @@ export class RestService {
         });
     }
     /**
-     * "
-     * Mixin to allow using the same viewset for both internal and external endpoints.
-     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to variable token_permission.
      * @returns PaginatedAreaListList
      * @throws ApiError
      */
@@ -946,7 +933,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
      */
@@ -1165,7 +1151,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1189,7 +1174,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns GrievanceChoices
      * @throws ApiError
      */
@@ -1207,7 +1191,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -1225,7 +1208,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns PaginatedHouseholdListList
      * @throws ApiError
      */
@@ -1394,7 +1376,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns HouseholdChoices
      * @throws ApiError
      */
@@ -1412,7 +1393,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -1430,7 +1410,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns PaginatedIndividualListList
      * @throws ApiError
      */
@@ -1587,7 +1566,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns IndividualChoices
      * @throws ApiError
      */
@@ -1605,7 +1583,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -1623,7 +1600,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedPaymentPlanList
      * @throws ApiError
      */
@@ -1744,7 +1720,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaymentPlanBulkAction
      * @throws ApiError
      */
@@ -1909,7 +1884,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
@@ -1974,7 +1948,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns any No response body
      * @throws ApiError
      */
@@ -1995,7 +1968,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -2016,7 +1988,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedProgramCycleListList
      * @throws ApiError
      */
@@ -2092,7 +2063,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleCreate
      * @throws ApiError
      */
@@ -2117,7 +2087,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleList
      * @throws ApiError
      */
@@ -2144,7 +2113,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleUpdate
      * @throws ApiError
      */
@@ -2175,7 +2143,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleUpdate
      * @throws ApiError
      */
@@ -2206,7 +2173,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns void
      * @throws ApiError
      */
@@ -2233,7 +2199,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -2260,7 +2225,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -2287,7 +2251,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -2308,7 +2271,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -2399,7 +2361,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -2424,7 +2385,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -2451,7 +2411,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -2482,7 +2441,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -2513,7 +2471,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -2534,7 +2491,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
      */
@@ -2756,7 +2712,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -2777,7 +2732,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedHouseholdListList
      * @throws ApiError
      */
@@ -2949,7 +2903,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns HouseholdDetail
      * @throws ApiError
      */
@@ -2976,14 +2929,15 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
-     * @returns HouseholdMember
+     * @returns PaginatedHouseholdMemberList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsHouseholdsMembersRetrieve({
+    public static restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug,
         id,
         programSlug,
+        limit,
+        offset,
     }: {
         businessAreaSlug: string,
         /**
@@ -2991,7 +2945,15 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-    }): CancelablePromise<HouseholdMember> {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedHouseholdMemberList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/members/',
@@ -3000,10 +2962,13 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -3181,7 +3146,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns any No response body
      * @throws ApiError
      */
@@ -3208,7 +3172,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3229,7 +3192,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedIndividualListList
      * @throws ApiError
      */
@@ -3389,7 +3351,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns IndividualDetail
      * @throws ApiError
      */
@@ -3416,7 +3377,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3437,7 +3397,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedMessageListList
      * @throws ApiError
      */
@@ -3537,7 +3496,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns MessageDetail
      * @throws ApiError
      */
@@ -3562,7 +3520,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns MessageDetail
      * @throws ApiError
      */
@@ -3589,7 +3546,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3610,7 +3566,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedPaymentPlanListList
      * @throws ApiError
      */
@@ -3734,7 +3689,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanCreateUpdate
      * @throws ApiError
      */
@@ -3759,7 +3713,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -3797,7 +3750,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentDetail
      * @throws ApiError
      */
@@ -3824,7 +3776,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -3851,7 +3802,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RevertMarkPaymentAsFailed
      * @throws ApiError
      */
@@ -3882,7 +3832,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3985,7 +3934,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -4012,7 +3960,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanCreateUpdate
      * @throws ApiError
      */
@@ -4043,7 +3990,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns void
      * @throws ApiError
      */
@@ -4070,7 +4016,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -4101,7 +4046,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns AcceptanceProcess
      * @throws ApiError
      */
@@ -4132,7 +4076,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns AcceptanceProcess
      * @throws ApiError
      */
@@ -4163,7 +4106,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -4194,7 +4136,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4221,7 +4162,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -4252,7 +4192,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -4283,7 +4222,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4310,7 +4248,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanExportAuthCode
      * @throws ApiError
      */
@@ -4341,7 +4278,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4368,7 +4304,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4395,7 +4330,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns AcceptanceProcess
      * @throws ApiError
      */
@@ -4426,7 +4360,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4453,7 +4386,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -4484,7 +4416,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns AcceptanceProcess
      * @throws ApiError
      */
@@ -4515,7 +4446,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4542,7 +4472,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4569,7 +4498,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4596,7 +4524,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns SplitPaymentPlan
      * @throws ApiError
      */
@@ -4627,7 +4554,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4654,7 +4580,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -4681,7 +4606,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -4702,7 +4626,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedPaymentVerificationPlanListList
      * @throws ApiError
      */
@@ -4953,7 +4876,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentDetail
      * @throws ApiError
      */
@@ -5017,7 +4939,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -5041,7 +4962,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5068,7 +4988,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5133,7 +5052,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5167,7 +5085,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5201,7 +5118,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5235,7 +5151,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5269,7 +5184,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5303,7 +5217,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5337,7 +5250,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -5371,7 +5283,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -5682,7 +5593,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedRegistrationDataImportListList
      * @throws ApiError
      */
@@ -5788,7 +5698,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RegistrationDataImportDetail
      * @throws ApiError
      */
@@ -5813,7 +5722,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RegistrationDataImportDetail
      * @throws ApiError
      */
@@ -5840,7 +5748,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -5867,7 +5774,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -5894,7 +5800,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -5921,7 +5826,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RefuseRdi
      * @throws ApiError
      */
@@ -5952,7 +5856,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -5973,7 +5876,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -5994,7 +5896,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Choice
      * @throws ApiError
      */
@@ -6015,7 +5916,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -6036,7 +5936,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedSurveyList
      * @throws ApiError
      */
@@ -6117,7 +6016,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Survey
      * @throws ApiError
      */
@@ -6142,7 +6040,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Survey
      * @throws ApiError
      */
@@ -6169,7 +6066,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Survey
      * @throws ApiError
      */
@@ -6196,7 +6092,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Survey
      * @throws ApiError
      */
@@ -6217,7 +6112,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Survey
      * @throws ApiError
      */
@@ -6238,7 +6132,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -6259,7 +6152,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedTargetPopulationListList
      * @throws ApiError
      */
@@ -6385,7 +6277,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationCreate
      * @throws ApiError
      */
@@ -6410,7 +6301,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationDetail
      * @throws ApiError
      */
@@ -6437,7 +6327,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationCreate
      * @throws ApiError
      */
@@ -6468,7 +6357,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns void
      * @throws ApiError
      */
@@ -6495,7 +6383,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ApplyEngineFormula
      * @throws ApiError
      */
@@ -6526,7 +6413,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationCopy
      * @throws ApiError
      */
@@ -6557,7 +6443,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -6584,7 +6469,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -6611,7 +6495,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -6638,7 +6521,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -6665,7 +6547,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedTPHouseholdListList
      * @throws ApiError
      */
@@ -6703,7 +6584,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TPHouseholdList
      * @throws ApiError
      */
@@ -6733,7 +6613,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -6757,7 +6636,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -7011,7 +6889,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedUserList
      * @throws ApiError
      */
@@ -7103,7 +6980,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns UserChoices
      * @throws ApiError
      */
@@ -7121,7 +6997,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -7139,7 +7014,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Profile
      * @throws ApiError
      */
@@ -7162,7 +7036,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns BusinessArea
      * @throws ApiError
      */
@@ -7180,7 +7053,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */

@@ -9,6 +9,7 @@ import TableCell from '@mui/material/TableCell';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualSimple } from '@restgenerated/models/IndividualSimple';
+import { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, choicesToDict } from '@utils/utils';
@@ -74,7 +75,7 @@ export const CollectorsTable = ({
     choicesData?.relationshipChoices,
   );
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PaginatedHouseholdMemberList>({
     queryKey: [
       'businessAreasProgramsHouseholdsMembers',
       programId,
@@ -82,7 +83,7 @@ export const CollectorsTable = ({
       household.id,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsMembersRetrieve({
+      RestService.restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug: businessArea,
         programSlug: programId,
         id: household.id,
@@ -100,7 +101,7 @@ export const CollectorsTable = ({
   }
 
   // Extract collectors from the response
-  const allCollectors = data || [];
+  const allCollectors = data?.results || [];
 
   let sortedCollectors = [...allCollectors];
 
