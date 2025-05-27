@@ -602,6 +602,13 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[0].split_payment_items.count(), 4)
         self.assertEqual(pp_splits[1].split_payment_items.count(), 8)
 
+        # split by no_split
+        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.NO_SPLIT)
+        pp_splits = pp.splits.all().order_by("order")
+        self.assertEqual(pp.splits.count(), 1)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.NO_SPLIT)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 12)
+
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
