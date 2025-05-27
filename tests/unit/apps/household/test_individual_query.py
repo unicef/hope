@@ -832,7 +832,7 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
         cls.financial_institution = FinancialInstitution.objects.create(
-            code="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+            name="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
         )
 
         cls.program = ProgramFactory(

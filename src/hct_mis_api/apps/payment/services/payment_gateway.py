@@ -119,14 +119,14 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         snapshot_data = snapshot.snapshot_data
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
-        delivery_mech_data = collector_data.get("accounts_data", {}).get(obj.delivery_type.account_type.key, {})
+        account_data = collector_data.get("account_data", {})
 
         base_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
             "origination_currency": obj.currency,
             "delivery_mechanism": obj.delivery_type.code,
-            "account_type": obj.delivery_type.account_type.key,
+            "account_type": obj.delivery_type.account_type and obj.delivery_type.account_type.key,
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
@@ -140,17 +140,44 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         payload_data = payload.data
 
-        if delivery_mech_data:
-            financial_institution_code = delivery_mech_data.get("financial_institution") or delivery_mech_data.get(
-                "code"
-            )
-            mapping = FinancialInstitutionMapping.objects.filter(
-                financial_institution__code=financial_institution_code,
-                financial_service_provider=obj.financial_service_provider,
-            ).first()
-            if financial_institution_code and mapping:
-                delivery_mech_data["service_provider_code"] = mapping.code
-            payload_data["account"] = delivery_mech_data
+        if account_data:
+            if financial_institution_code := account_data.get("code"):
+                """
+                financial_institution_code is now collected as a specific fsp code (uba_code),
+                """
+
+                try:
+                    uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+                except FinancialServiceProvider.DoesNotExist:
+                    uba_fsp = None  # pragma: no cover
+
+                if uba_fsp and obj.financial_service_provider == uba_fsp:
+                    service_provider_code = financial_institution_code
+
+                else:
+                    try:
+                        uba_mapping = FinancialInstitutionMapping.objects.get(
+                            code=financial_institution_code,
+                            financial_service_provider=uba_fsp,
+                        )
+                        fsp_mapping = FinancialInstitutionMapping.objects.get(
+                            financial_institution=uba_mapping.financial_institution,
+                            financial_service_provider=obj.financial_service_provider,
+                        )
+                        service_provider_code = fsp_mapping.code
+
+                    except FinancialInstitutionMapping.DoesNotExist:
+                        raise Exception(
+                            f"No Financial Institution Mapping found for"
+                            f" financial_institution_code {financial_institution_code},"
+                            f" fsp {obj.financial_service_provider},"
+                            f" payment {obj.id},"
+                            f" collector {obj.collector}."
+                        )
+
+                account_data["service_provider_code"] = service_provider_code
+
+            payload_data["account"] = account_data
 
         return payload_data
 
@@ -258,7 +285,7 @@ class DeliveryMechanismData(FlexibleArgumentsDataclassMixin):
     code: str
     name: str
     transfer_type: str
-    account_type: str
+    account_type: Optional[str] = None
 
 
 @dataclasses.dataclass()
@@ -554,6 +581,7 @@ class PaymentGatewayService:
                 if payment_plan.is_reconciled:
                     payment_plan.status_finished()
                     payment_plan.save()
+                    payment_plan.update_money_fields()
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 
@@ -599,6 +627,8 @@ class PaymentGatewayService:
                     "name": dm.name,
                     "transfer_type": dm.transfer_type,
                     "is_active": True,
-                    "account_type": AccountType.objects.get(payment_gateway_id=dm.account_type),
+                    "account_type": AccountType.objects.get(payment_gateway_id=dm.account_type)
+                    if dm.account_type
+                    else None,
                 },
             )

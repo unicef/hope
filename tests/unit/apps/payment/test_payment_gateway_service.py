@@ -1,3 +1,4 @@
+import json
 import os
 from decimal import Decimal
 from typing import Any
@@ -61,6 +62,10 @@ def mock_payment_gateway_env_vars() -> None:
         yield
 
 
+def normalize(data: Any) -> dict:
+    return json.loads(json.dumps(data))
+
+
 class TestPaymentGatewayService(APITestCase):
     databases = ("default",)
 
@@ -77,6 +82,7 @@ class TestPaymentGatewayService(APITestCase):
         cls.dm_cash_over_the_counter = DeliveryMechanism.objects.get(code="cash_over_the_counter")
         cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
         cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
+        cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.pg_fsp.delivery_mechanisms.add(cls.dm_cash_over_the_counter)
@@ -605,7 +611,7 @@ class TestPaymentGatewayService(APITestCase):
         )
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
-    def test_api_add_records_to_payment_instruction_wallet_integration(self, post_mock: Any) -> None:
+    def test_api_add_records_to_payment_instruction_wallet_integration_mobile(self, post_mock: Any) -> None:
         post_mock.return_value = {
             "remote_id": "123",
             "records": {
@@ -615,15 +621,13 @@ class TestPaymentGatewayService(APITestCase):
         }, 200
 
         primary_collector = self.payments[0].collector
-        fi = FinancialInstitution.objects.create(type=FinancialInstitution.FinancialInstitutionType.TELCO, code="ABC")
-        FinancialInstitutionMapping.objects.create(
-            financial_institution=fi, financial_service_provider=self.payments[0].financial_service_provider, code="CBA"
-        )
+        fi = FinancialInstitution.objects.create(type=FinancialInstitution.FinancialInstitutionType.TELCO, name="ABC")
         AccountFactory(
             individual=primary_collector,
             data={
                 "number": "123456789",
                 "provider": "Provider",
+                "service_provider_code": "CBA",
             },
             account_type=AccountType.objects.get(key="mobile"),
             financial_institution=fi,
@@ -660,7 +664,7 @@ class TestPaymentGatewayService(APITestCase):
                             "service_provider_code": "CBA",
                             "number": "123456789",
                             "provider": "Provider",
-                            "financial_institution": "ABC",
+                            "financial_institution": str(fi.id),
                         },
                     },
                     "extra_data": {},
@@ -668,6 +672,115 @@ class TestPaymentGatewayService(APITestCase):
             ],
             validate_response=True,
         )
+
+    @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
+    def test_api_add_records_to_payment_instruction_wallet_integration_bank(self, post_mock: Any) -> None:
+        uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+
+        post_mock.return_value = {
+            "remote_id": "123",
+            "records": {
+                "1": self.payments[0].id,
+            },
+            "errors": None,
+        }, 200
+
+        primary_collector = self.payments[0].collector
+
+        AccountFactory(
+            number="123",
+            individual=primary_collector,
+            account_type=self.dm_transfer_to_account.account_type,
+            data={
+                "number": "123",
+                "name": "ABC",
+                "code": "456",
+            },
+        )
+        self.payments[0].delivery_type = self.dm_transfer_to_account
+        self.payments[0].save()
+
+        # remove old and create new snapshot
+        PaymentHouseholdSnapshot.objects.all().delete()
+        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 0)
+        self.assertEqual(Payment.objects.count(), 2)
+
+        create_payment_plan_snapshot_data(self.payments[0].parent)
+        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
+        self.payments[0].refresh_from_db()
+
+        # no mapping, different payment fsp
+        with self.assertRaisesMessage(
+            Exception,
+            f"No Financial Institution Mapping found for"
+            f" financial_institution_code 456,"
+            f" fsp {self.payments[0].financial_service_provider},"
+            f" payment {self.payments[0].id},"
+            f" collector {self.payments[0].collector}.",
+        ):
+            PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+            post_mock.reset_mock()
+
+        # no mapping, payment fsp is uba
+        self.payments[0].financial_service_provider = uba_fsp
+        self.payments[0].save()
+        PaymentHouseholdSnapshot.objects.all().delete()
+        create_payment_plan_snapshot_data(self.payments[0].parent)
+        self.payments[0].refresh_from_db()
+
+        expected_payload = {
+            "amount": str(self.payments[0].entitlement_quantity),
+            "phone_no": str(primary_collector.phone_no),
+            "last_name": primary_collector.family_name,
+            "first_name": primary_collector.given_name,
+            "full_name": primary_collector.full_name,
+            "destination_currency": self.payments[0].currency,
+            "delivery_mechanism": "transfer_to_account",
+            "account_type": "bank",
+            "account": {"number": "123", "name": "ABC", "code": "456", "service_provider_code": "456"},
+        }
+        expected_body = {
+            "remote_id": str(self.payments[0].id),
+            "record_code": self.payments[0].unicef_id,
+            "payload": expected_payload,
+            "extra_data": {},
+        }
+        PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+        actual_args, actual_kwargs = post_mock.call_args
+        assert actual_args[0] == "payment_instructions/123/add_records/"
+        assert normalize(actual_args[1][0]) == normalize(expected_body)
+        assert actual_kwargs["validate_response"] is True
+
+        post_mock.reset_mock()
+
+        # mapping exists, payment fsp is not uba, remap to correct code
+        self.payments[0].financial_service_provider = self.pg_fsp
+        self.payments[0].save()
+
+        financial_institution = FinancialInstitution.objects.create(
+            name="BANK1",
+            type=FinancialInstitution.FinancialInstitutionType.BANK,
+        )
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=financial_institution, financial_service_provider=uba_fsp, code="456"
+        )
+        FinancialInstitutionMapping.objects.create(
+            financial_institution=financial_institution, financial_service_provider=self.pg_fsp, code="789"
+        )
+
+        PaymentHouseholdSnapshot.objects.all().delete()
+        create_payment_plan_snapshot_data(self.payments[0].parent)
+        self.payments[0].refresh_from_db()
+
+        PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
+        expected_payload["account"]["code"] = "456"
+        expected_payload["account"]["service_provider_code"] = "789"
+
+        actual_args, actual_kwargs = post_mock.call_args
+        assert actual_args[0] == "payment_instructions/123/add_records/"
+        assert normalize(actual_args[1][0]) == normalize(expected_body)
+        assert actual_kwargs["validate_response"] is True
+        post_mock.reset_mock()
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_validation_error(self, post_mock: Any) -> None:
@@ -823,8 +936,6 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_fsps")
     def test_sync_fsps(self, get_fsps_mock: Any) -> None:
-        assert FinancialServiceProvider.objects.all().count() == 1
-
         assert self.pg_fsp.name == "Western Union"
         assert self.pg_fsp.payment_gateway_id == "123"
         assert list(self.pg_fsp.delivery_mechanisms.values_list("code", flat=True)) == ["cash_over_the_counter"]
