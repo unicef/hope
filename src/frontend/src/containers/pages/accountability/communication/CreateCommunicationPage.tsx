@@ -1,3 +1,24 @@
+import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { FormikEffect } from '@components/core/FormikEffect';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TabPanel } from '@components/core/TabPanel';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaperContainer } from '@components/targeting/PaperContainer';
+import {
+  AccountabilityCommunicationMessageSampleSizeQueryVariables,
+  CreateAccountabilityCommunicationMessageMutationVariables,
+  SamplingChoices,
+  useAccountabilityCommunicationMessageSampleSizeLazyQuery,
+  useCreateAccountabilityCommunicationMessageMutation,
+  useSurveyAvailableFlowsLazyQuery,
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -11,6 +32,16 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
+import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useQuery } from '@tanstack/react-query';
+import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
+import { getPercentage } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import {
   ReactElement,
@@ -23,36 +54,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import {
-  AccountabilityCommunicationMessageSampleSizeQueryVariables,
-  CreateAccountabilityCommunicationMessageMutationVariables,
-  SamplingChoices,
-  useAccountabilityCommunicationMessageSampleSizeLazyQuery,
-  useAllAdminAreasQuery,
-  useCreateAccountabilityCommunicationMessageMutation,
-  useSurveyAvailableFlowsLazyQuery,
-} from '@generated/graphql';
-import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useConfirmation } from '@components/core/ConfirmationDialog';
-import { FormikEffect } from '@components/core/FormikEffect';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { TabPanel } from '@components/core/TabPanel';
-import { PaperContainer } from '@components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { FormikSliderField } from '@shared/Formik/FormikSliderField';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
-import { getPercentage } from '@utils/utils';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -135,11 +137,16 @@ const CreateCommunicationPage = (): ReactElement => {
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
 
-  const { data } = useAllAdminAreasQuery({
-    variables: {
-      first: 100,
-      businessArea,
+  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
+    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+    queryFn: async () => {
+      return RestService.restAreasList({
+        limit: 100,
+        areaTypeAreaLevel: 2,
+        search: undefined,
+      });
     },
+    enabled: !!businessArea,
   });
 
   const [loadSampleSize, { data: sampleSizesData }] =
@@ -215,10 +222,10 @@ const CreateCommunicationPage = (): ReactElement => {
     return errors;
   };
 
-  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
-    ? data.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
+  const mappedAdminAreas = adminAreasData?.results?.length
+    ? adminAreasData.results.map((area) => ({
+        value: area.id,
+        name: area.name || '',
       }))
     : [];
 
