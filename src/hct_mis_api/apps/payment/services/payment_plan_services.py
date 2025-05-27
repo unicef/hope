@@ -746,6 +746,7 @@ class PaymentPlanService:
             delivery_mechanism=source_pp.delivery_mechanism,
             financial_service_provider=source_pp.financial_service_provider,
         )
+        PaymentPlanSplit.objects.create(payment_plan=follow_up_pp)
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
 
@@ -798,6 +799,9 @@ class PaymentPlanService:
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
                 payments_chunks.append(list(payments))
+
+        elif split_type == PaymentPlanSplit.SplitType.NO_SPLIT:
+            payments_chunks = [list(payments)]
 
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
