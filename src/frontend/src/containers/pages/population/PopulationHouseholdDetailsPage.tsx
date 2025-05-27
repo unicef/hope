@@ -2,7 +2,6 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { FlagTooltip } from '@components/core/FlagTooltip';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { Missing } from '@components/core/Missing';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { Title } from '@components/core/Title';
@@ -33,6 +32,7 @@ import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTabl
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -196,8 +196,10 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
               choicesData={individualChoicesData}
               household={household}
             />
-            {/* //TODO: */}
-            {/* <CollectorsTable choicesData={choicesData} household={household} /> */}
+            <CollectorsTable
+              choicesData={individualChoicesData}
+              household={household}
+            />
           </>
         ) : null}
         {hasPermissions(
@@ -244,7 +246,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('User name')}>
-                {<Missing />}
                 {household?.registrationDataImport.importedBy.email}
               </LabelizedField>
             </Grid>
