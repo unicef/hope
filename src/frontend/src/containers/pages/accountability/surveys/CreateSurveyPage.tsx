@@ -29,10 +29,11 @@ import {
   SamplingChoices,
   SurveyCategory,
   useAccountabilitySampleSizeLazyQuery,
-  useAllAdminAreasQuery,
-  useSurveyAvailableFlowsLazyQuery,
   useCreateSurveyAccountabilityMutation,
 } from '@generated/graphql';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
 import { LookUpSelectionSurveys } from '@components/accountability/Surveys/LookUpsSurveys/LookUpSelectionSurveys';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
@@ -149,12 +150,17 @@ const CreateSurveyPage = (): ReactElement => {
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
 
-  const { data: adminAreasData, loading: adminAreasLoading } =
-    useAllAdminAreasQuery({
-      variables: {
-        first: 100,
-        businessArea,
+  const { data: adminAreasData, isLoading: adminAreasLoading } =
+    useQuery<PaginatedAreaList>({
+      queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+      queryFn: async () => {
+        return RestService.restAreasList({
+          limit: 100,
+          areaTypeAreaLevel: 2,
+          search: undefined,
+        });
       },
+      enabled: !!businessArea,
     });
 
   const [loadSampleSize, { data: sampleSizesData }] =
@@ -163,12 +169,31 @@ const CreateSurveyPage = (): ReactElement => {
       fetchPolicy: 'network-only',
     });
 
-  const [
-    loadAvailableFlows,
-    { data: flowsData, loading: flowsLoading, error: flowsError },
-  ] = useSurveyAvailableFlowsLazyQuery({
-    fetchPolicy: 'network-only',
-  });
+  const [flowsData, setFlowsData] = useState(null);
+  const [flowsLoading, setFlowsLoading] = useState(false);
+  const [flowsError, setFlowsError] = useState(null);
+
+  const loadAvailableFlows = useCallback(async () => {
+    if (!businessArea || !programId) return;
+
+    try {
+      setFlowsLoading(true);
+      const result =
+        await RestService.restBusinessAreasProgramsSurveysAvailableFlowsRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+          },
+        );
+      setFlowsData({ surveyAvailableFlows: result });
+      console.log('Available flows loaded:', result);
+    } catch (error) {
+      console.error('Error loading available flows:', error);
+      setFlowsError(error);
+    } finally {
+      setFlowsLoading(false);
+    }
+  }, [businessArea, programId]);
 
   useEffect(() => {
     if (category === SurveyCategory.RapidPro) {
@@ -246,12 +271,13 @@ const CreateSurveyPage = (): ReactElement => {
     return errors;
   };
 
-  const mappedAdminAreas = adminAreasData?.allAdminAreas?.edges?.length
-    ? adminAreasData.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
+  const mappedAdminAreas = adminAreasData?.results?.length
+    ? adminAreasData.results.map((area) => ({
+        value: area.id,
+        name: area.name || '',
       }))
     : [];
+
   const mappedFlows = flowsData?.surveyAvailableFlows?.length
     ? flowsData.surveyAvailableFlows.map((el) => ({
         value: el.id,
@@ -392,7 +418,7 @@ const CreateSurveyPage = (): ReactElement => {
               }
             />
             <PaperContainer>
-              <Grid size={{ xs: 12 }} >
+              <Grid size={{ xs: 12 }}>
                 <Stepper activeStep={activeStep}>
                   {steps.map((label) => {
                     const stepProps: { completed?: boolean } = {};
@@ -559,7 +585,7 @@ const CreateSurveyPage = (): ReactElement => {
                               </Grid>
                             )}
                             {values.sexCheckbox && (
-                              <Grid size={{ xs:5 }}>
+                              <Grid size={{ xs: 5 }}>
                                 <Field
                                   name="filterSex"
                                   label={t('Gender')}

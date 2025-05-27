@@ -46,7 +46,7 @@ export const EditProgramMenu = ({
   };
 
   const handleMenuItemClick = (option: string): void => {
-    navigate(`/${baseUrl}/edit/${program.id}`, { state: { option } });
+    navigate(`/${baseUrl}/edit/${program.slug}`, { state: { option } });
   };
 
   return (

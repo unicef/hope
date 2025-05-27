@@ -12,6 +12,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { headCells } from './ProgrammesHeadCells';
 import ProgrammesTableRow from './ProgrammesTableRow';
+import { ProgramList } from '@restgenerated/models/ProgramList';
 
 interface ProgrammesTableProps {
   businessArea: string;
@@ -107,7 +108,7 @@ function ProgrammesTable({
           isLoading={isLoadingPrograms}
           error={errorPrograms}
           itemsCount={dataProgramsCount?.count}
-          renderRow={(row) => (
+          renderRow={(row: ProgramList) => (
             <ProgrammesTableRow
               key={row.id}
               program={row}
