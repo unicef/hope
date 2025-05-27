@@ -22,7 +22,7 @@ export const TargetPopulationAutocompleteRestFilter = ({
   setFilter,
   disabled,
   dataCy = 'filters-target-population-autocomplete',
-  onChange, // Added onChange prop
+  onChange,
 }: {
   value?: any;
   name?: string;
