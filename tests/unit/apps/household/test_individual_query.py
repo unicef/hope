@@ -49,6 +49,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
+@pytest.mark.elasticsearch
 class TestIndividualQuery(APITestCase):
     databases = "__all__"
 
@@ -686,6 +687,7 @@ class TestIndividualQuery(APITestCase):
         )
 
 
+@pytest.mark.elasticsearch
 class TestIndividualWithFlexFieldsQuery(APITestCase):
     databases = "__all__"
 
@@ -804,6 +806,7 @@ class TestIndividualWithFlexFieldsQuery(APITestCase):
         )
 
 
+@pytest.mark.elasticsearch
 class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
     databases = "__all__"
 
