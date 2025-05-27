@@ -217,7 +217,7 @@ class IndividualViewSet(
         if self.program.status == Program.DRAFT:
             return Individual.objects.none()
 
-        return super().get_queryset().select_related("household", "household__admin2").order_by("created_at")
+        return super().get_queryset().select_related("household", "household__admin2", "program").order_by("created_at")
 
     @etag_decorator(IndividualListKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
@@ -246,7 +246,7 @@ class IndividualGlobalViewSet(
     admin_area_model_fields = ["household__admin1", "household__admin2", "household__admin3"]
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().select_related("household", "household__admin2").order_by("created_at")
+        return super().get_queryset().select_related("household", "household__admin2", "program").order_by("created_at")
 
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:

@@ -2,15 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AreaSimple } from './AreaSimple';
 import type { CurrencyEnum } from './CurrencyEnum';
+import type { ProgramSmall } from './ProgramSmall';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdList = {
     readonly id: string;
     unicefId: string | null;
     headOfHousehold: string;
     admin1?: string;
-    admin2?: string;
-    program: string;
+    admin2: AreaSimple;
+    program: ProgramSmall;
     readonly status: string;
     /**
      * Household size
