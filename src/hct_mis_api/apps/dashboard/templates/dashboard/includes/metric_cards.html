@@ -13,6 +13,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-preparedness icon-blue"></span>
         {% translate "Number of Payments" %}
+        <span class="info-icon" id="info-icon-number-of-payments" aria-label="Info about Number of Payments">ⓘ
+            <div class="tooltip" id="tooltip-number-of-payments" role="tooltip">{% translate "Total count of all payments processed, regardless of their status." %}</div>
+        </span>
     </h3>
     <div id="number-of-payments" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "payments" %}</p>
@@ -31,6 +34,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-house icon-blue"></span>
         {% translate "Households Reached" %}
+        <span class="info-icon" id="info-icon-households-reached" aria-label="Info about Households Reached">ⓘ
+            <div class="tooltip" id="tooltip-households-reached" role="tooltip">{% translate "Total count of unique households that have received at least one payment." %}</div>
+        </span>
     </h3>
     <div id="households-reached" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "households" %}</p>
@@ -39,6 +45,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-people-targeted icon-blue"></span>
         {% translate "Individuals Reached" %}
+        <span class="info-icon" id="info-icon-individuals-reached" aria-label="Info about Individuals Reached">ⓘ
+            <div class="tooltip" id="tooltip-individuals-reached" role="tooltip">{% translate "Total count of individuals within households that have received payments." %}</div>
+        </span>
     </h3>
     <div id="individuals-reached" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "persons" %}</p>
@@ -47,6 +56,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-children icon-blue"></span>
         {% translate "Children Reached" %}
+        <span class="info-icon" id="info-icon-children-reached" aria-label="Info about Children Reached">ⓘ
+            <div class="tooltip" id="tooltip-children-reached" role="tooltip">{% translate "Total count of children (based on household demographics) within households that have received payments." %}</div>
+        </span>
     </h3>
     <div id="children-reached" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "children" %}</p>
@@ -55,6 +67,9 @@
     <h3 class="text-sm font-bold">
         <span class="icon icon-users icon-blue"></span>
         {% translate "PWD Reached" %}
+        <span class="info-icon" id="info-icon-pwd-reached" aria-label="Info about PWD Reached">ⓘ
+            <div class="tooltip" id="tooltip-pwd-reached" role="tooltip">{% translate "Total count of persons with disabilities (based on household demographics) within households that have received payments." %}</div>
+        </span>
     </h3>
     <div id="pwd-reached" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "of persons with disabilities" %}</p>

@@ -144,10 +144,11 @@
                         .height(400)
                         .margins({ top: 10, right: 5, bottom: 30, left: 4 })
                         .useViewBoxResizing(true)
-                        .label(
-                            (d) =>
-                            `${d.key} ${((d.value / deliveryGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%`,
-                        )
+                        .label((d) => {
+                            const totalDeliverySum = deliveryGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalDeliverySum > 0 ? ((d.value / totalDeliverySum) * 100).toFixed(0) : '0';
+                            return `${d.key} ${percentage}%`;
+                        })
                         .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`)
                         .xAxis()
                         .ticks(3);
@@ -158,10 +159,11 @@
                         .group(sectorGroup)
                         .elasticX(true)
                         .margins({ top: 10, right: 5, bottom: 30, left: 4 })
-                        .label(
-                            (d) =>
-                            `${d.key}: ${decimalnumberFormatter(d.value)} USD (${((d.value / sectorGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
-                        )
+                        .label((d) => {
+                            const totalSectorSum = sectorGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalSectorSum > 0 ? ((d.value / totalSectorSum) * 100).toFixed(0) : '0';
+                            return `${d.key}: ${decimalnumberFormatter(d.value)} USD (${percentage}%)`;
+                        })
                         .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
@@ -201,10 +203,11 @@
                         .elasticX(true)
                         .height(400)
                         .margins({ top: 10, right: 5, bottom: 30, left: 4 })
-                        .label(
-                            (d) =>
-                            `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / regionGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
-                        )
+                        .label((d) => {
+                            const totalRegionSum = regionGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalRegionSum > 0 ? ((d.value / totalRegionSum) * 100).toFixed(0) : '0';
+                            return `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${percentage}%)`;
+                        })
                         .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
@@ -448,6 +451,11 @@
         setupTooltipToggle('info-icon-outstanding-payment', 'tooltip-outstanding-payment');
         setupTooltipToggle('info-icon-reconciliation', 'tooltip-reconciliation');
         setupTooltipToggle('info-icon-verification', 'tooltip-verification');
+        setupTooltipToggle('info-icon-number-of-payments', 'tooltip-number-of-payments');
+        setupTooltipToggle('info-icon-households-reached', 'tooltip-households-reached');
+        setupTooltipToggle('info-icon-individuals-reached', 'tooltip-individuals-reached');
+        setupTooltipToggle('info-icon-children-reached', 'tooltip-children-reached');
+        setupTooltipToggle('info-icon-pwd-reached', 'tooltip-pwd-reached');
 
         // Hide tooltips when clicking anywhere else on the document
         document.addEventListener('click', function() {
