@@ -26,8 +26,11 @@ from hct_mis_api.apps.accountability.api.serializers import (
     MessageCreateSerializer,
     MessageDetailSerializer,
     MessageListSerializer,
+    MessageSampleSizeSerializer,
+    SampleSizeSerializer,
     SurveyCategoryChoiceSerializer,
     SurveyRapidProFlowSerializer,
+    SurveySampleSizeSerializer,
     SurveySerializer,
 )
 from hct_mis_api.apps.accountability.celery_tasks import (
@@ -51,9 +54,11 @@ from hct_mis_api.apps.accountability.services.feedback_crud_services import (
 from hct_mis_api.apps.accountability.services.message_crud_services import (
     MessageCrudServices,
 )
+from hct_mis_api.apps.accountability.services.sampling import Sampling
 from hct_mis_api.apps.accountability.services.survey_crud_services import (
     SurveyCrudServices,
 )
+from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
@@ -65,6 +70,7 @@ from hct_mis_api.apps.core.api.mixins import (
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
@@ -256,11 +262,13 @@ class MessageViewSet(
         "list": MessageListSerializer,
         "retrieve": MessageDetailSerializer,
         "create": MessageCreateSerializer,
+        "sample_size": MessageSampleSizeSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
         "retrieve": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
         "create": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+        "sample_size": [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
     }
 
     @extend_schema(
@@ -280,6 +288,23 @@ class MessageViewSet(
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @action(detail=False, methods=["post"], url_path="sample-size")
+    @extend_schema(responses=SampleSizeSerializer)
+    def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+        verifier = MessageArgumentVerifier(input_data)
+        verifier.verify()
+
+        households = MessageCrudServices._get_households(input_data)
+        sampling = Sampling(input_data, households)
+        number_of_recipients, sample_size = sampling.generate_sampling()
+        return Response(
+            SampleSizeSerializer(data={"number_of_recipients": number_of_recipients, "sample_size": sample_size}).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
+
 
 class SurveyViewSet(
     ProgramMixin,
@@ -297,12 +322,14 @@ class SurveyViewSet(
         "retrieve": SurveySerializer,
         "create": SurveySerializer,
         "export_sample": SurveySerializer,
+        "sample_size": SurveySampleSizeSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
         "retrieve": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
         "create": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
         "export_sample": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+        "sample_size": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE],
     }
     queryset = Survey.objects.all()
     serializer_class = SurveySerializer
@@ -370,3 +397,23 @@ class SurveyViewSet(
     def available_flows(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
         return Response(api.get_flows())
+
+    @action(detail=False, methods=["post"], url_path="sample-size")
+    @extend_schema(responses=SampleSizeSerializer)
+    def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+        if payment_plan := input_data.get("payment_plan"):
+            households = Household.objects.filter(payment__parent=payment_plan)
+        elif program := self.program:
+            households = program.households_with_payments_in_program
+        else:
+            raise ValidationError("Target population or program should be provided.")
+
+        sampling = Sampling(input_data, households)
+        number_of_recipients, sample_size = sampling.generate_sampling()
+        return Response(
+            SampleSizeSerializer(data={"number_of_recipients": number_of_recipients, "sample_size": sample_size}).data,
+            status=status.HTTP_202_ACCEPTED,
+        )

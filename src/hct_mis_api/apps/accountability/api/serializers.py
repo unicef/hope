@@ -25,6 +25,7 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class FeedbackMessageSerializer(serializers.ModelSerializer):
@@ -211,8 +212,8 @@ class AccountabilityCommunicationMessageAgeInput(serializers.Serializer):
 class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgumentsSerializer):
     confidence_interval = serializers.FloatField(required=True)
     margin_of_error = serializers.FloatField(required=True)
-    age = AccountabilityCommunicationMessageAgeInput(required=True)
-    sex = serializers.CharField(required=True)
+    age = AccountabilityCommunicationMessageAgeInput(required=False)
+    sex = serializers.CharField(required=False)
 
 
 class SurveySerializer(serializers.ModelSerializer):
@@ -279,3 +280,29 @@ class SurveyCategoryChoiceSerializer(serializers.Serializer):
 class SurveyRapidProFlowSerializer(serializers.Serializer):
     uuid: serializers.CharField = serializers.CharField()
     name: serializers.CharField = serializers.CharField()
+
+
+class SurveySampleSizeSerializer(serializers.Serializer):
+    value: serializers.CharField = serializers.CharField()
+    payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
+    sampling_type = serializers.ChoiceField(required=True, choices=Survey.SAMPLING_CHOICES)
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False)
+
+
+class SampleSizeSerializer(serializers.Serializer):
+    number_of_recipients = serializers.IntegerField()
+    sample_size = serializers.IntegerField()
+
+
+class MessageSampleSizeSerializer(serializers.Serializer):
+    households = serializers.ListSerializer(
+        child=serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all()), required=False
+    )
+    payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
+    registration_data_import = serializers.PrimaryKeyRelatedField(
+        queryset=RegistrationDataImport.objects.all(), required=False
+    )
+    sampling_type = serializers.ChoiceField(required=True, choices=Message.SamplingChoices)
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False)
