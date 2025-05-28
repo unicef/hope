@@ -301,7 +301,7 @@ class MessageViewSet(
         sampling = Sampling(input_data, households)
         number_of_recipients, sample_size = sampling.generate_sampling()
         return Response(
-            SampleSizeSerializer(data={"number_of_recipients": number_of_recipients, "sample_size": sample_size}).data,
+            SampleSizeSerializer({"number_of_recipients": number_of_recipients, "sample_size": sample_size}).data,
             status=status.HTTP_202_ACCEPTED,
         )
 
@@ -414,6 +414,6 @@ class SurveyViewSet(
         sampling = Sampling(input_data, households)
         number_of_recipients, sample_size = sampling.generate_sampling()
         return Response(
-            SampleSizeSerializer(data={"number_of_recipients": number_of_recipients, "sample_size": sample_size}).data,
+            SampleSizeSerializer({"number_of_recipients": number_of_recipients, "sample_size": sample_size}).data,
             status=status.HTTP_202_ACCEPTED,
         )

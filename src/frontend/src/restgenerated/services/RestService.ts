@@ -22,6 +22,7 @@ import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
 import type { MessageCreate } from '../models/MessageCreate';
 import type { MessageDetail } from '../models/MessageDetail';
+import type { MessageSampleSize } from '../models/MessageSampleSize';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
 import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
@@ -94,6 +95,7 @@ import type { RegistrationDataImportDetail } from '../models/RegistrationDataImp
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { Survey } from '../models/Survey';
+import type { SurveySampleSize } from '../models/SurveySampleSize';
 import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
@@ -3566,6 +3568,30 @@ export class RestService {
         });
     }
     /**
+     * @returns MessageSampleSize
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesSampleSizeCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: MessageSampleSize,
+    }): CancelablePromise<MessageSampleSize> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/sample-size/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns PaginatedPaymentPlanListList
      * @throws ApiError
      */
@@ -6149,6 +6175,30 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
+        });
+    }
+    /**
+     * @returns SurveySampleSize
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysSampleSizeCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: SurveySampleSize,
+    }): CancelablePromise<SurveySampleSize> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/sample-size/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

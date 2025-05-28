@@ -3,12 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { FullList } from './FullList';
-import type { MessageCreateSamplingTypeEnum } from './MessageCreateSamplingTypeEnum';
 import type { RandomSampling } from './RandomSampling';
+import type { SamplingTypeE86Enum } from './SamplingTypeE86Enum';
 export type MessageCreate = {
     title: string;
     body: string;
-    samplingType: MessageCreateSamplingTypeEnum;
+    samplingType: SamplingTypeE86Enum;
     fullListArguments: FullList;
     randomSamplingArguments: RandomSampling | null;
     paymentPlan?: string;

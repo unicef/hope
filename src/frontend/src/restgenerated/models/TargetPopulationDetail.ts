@@ -17,7 +17,7 @@ export type TargetPopulationDetail = {
      * Name
      */
     name?: string | null;
-    status: string;
+    readonly status: string;
     /**
      * Total Households Count [sys]
      */

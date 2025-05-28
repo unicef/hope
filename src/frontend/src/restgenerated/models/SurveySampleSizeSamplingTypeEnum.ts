@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `FULL_LIST` - FULL_LIST
- * * `RANDOM` - RANDOM
+ * * `FULL_LIST` - Full list
+ * * `RANDOM` - Random
  */
-export enum MessageCreateSamplingTypeEnum {
+export enum SurveySampleSizeSamplingTypeEnum {
     FULL_LIST = 'FULL_LIST',
     RANDOM = 'RANDOM',
 }

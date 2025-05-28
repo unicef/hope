@@ -11,7 +11,7 @@ export type PaymentPlan = {
      * Name
      */
     name?: string | null;
-    status: string;
+    readonly status: string;
     /**
      * Target Criteria
      */
