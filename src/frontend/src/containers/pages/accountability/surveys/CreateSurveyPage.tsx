@@ -327,12 +327,9 @@ const CreateSurveyPage = (): ReactElement => {
       }))
     : [];
 
-  // Get sample size percentage from REST API response
   const getSampleSizePercentage = (): string => {
     if (!sampleSizesData) return '(0%)';
 
-    // The response might have different property names
-    // We'll try a few possibilities based on conventions
     const sampleSizeValue =
       sampleSizesData.sample_size ||
       sampleSizesData.sampleSize ||

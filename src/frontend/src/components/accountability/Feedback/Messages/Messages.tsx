@@ -3,19 +3,15 @@ import { LoadingButton } from '@core/LoadingButton';
 import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  FeedbackDocument,
-  FeedbackQuery,
-  useCreateFeedbackMsgMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { renderUserName } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -39,7 +35,7 @@ const StyledBox = styled(Paper)`
 `;
 
 interface MessagesProps {
-  messages: FeedbackQuery['feedback']['feedbackMessages'];
+  messages: FeedbackDetail['feedbackMessages'];
   canAddMessage: boolean;
 }
 
@@ -61,7 +57,29 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   });
 
   const { id } = useParams();
-  const [mutate, { loading }] = useCreateFeedbackMsgMutation();
+  const [loading, setLoading] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+
+  const createFeedbackMessage = async (description: string) => {
+    if (!id || !businessAreaSlug) return;
+
+    try {
+      setLoading(true);
+      await RestService.restBusinessAreasFeedbacksMessageCreate({
+        businessAreaSlug,
+        id,
+        requestBody: { description },
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasFeedbacksRetrieve', id],
+      });
+    } catch (error) {
+      console.error('Error creating feedback message:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (meLoading) {
     return null;
@@ -95,13 +113,8 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
     </Grid>
   );
 
-  const mappedMessages = messages?.edges?.map((el) =>
-    note(
-      renderUserName(el.node.createdBy),
-      el.node.createdAt,
-      el.node.description,
-      el.node.id,
-    ),
+  const mappedMessages = messages?.map((el) =>
+    note(renderUserName(el.createdBy), el.createdAt, el.description, el.id),
   );
 
   const initialValues: { [key: string]: string } = {
@@ -119,15 +132,8 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
       <Box p={3}>
         <Formik
           initialValues={initialValues}
-          onSubmit={(values, { resetForm }) => {
-            mutate({
-              variables: {
-                input: { feedback: id, description: values.newNote },
-              },
-              refetchQueries: () => [
-                { query: FeedbackDocument, variables: { id } },
-              ],
-            });
+          onSubmit={async (values, { resetForm }) => {
+            await createFeedbackMessage(values.newNote);
             resetForm({});
           }}
           validationSchema={validationSchema}
