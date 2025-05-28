@@ -420,7 +420,7 @@ class TestPaymentPlanList:
         assert str(self.pp.id) == payment_plan["id"]
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
-        assert payment_plan["status"] == self.pp.get_status_display()
+        assert payment_plan["status"] == self.pp.get_status_display().upper()
         assert payment_plan["total_households_count"] == self.pp.total_households_count
         assert payment_plan["currency"] == self.pp.currency
         assert payment_plan["excluded_ids"] == self.pp.excluded_ids
@@ -580,7 +580,7 @@ class TestPaymentPlanDetail:
         assert payment_plan["id"] == str(self.pp.id)
         assert payment_plan["unicef_id"] == self.pp.unicef_id
         assert payment_plan["name"] == self.pp.name
-        assert payment_plan["status"] == self.pp.get_status_display()
+        assert payment_plan["status"] == self.pp.get_status_display().upper()
         assert payment_plan["total_households_count"] == self.pp.total_households_count
         assert payment_plan["currency"] == self.pp.currency
         assert payment_plan["excluded_ids"] == self.pp.excluded_ids
@@ -709,7 +709,7 @@ class TestPaymentPlanFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(self.pp_finished.id)
-        assert response_data[0]["status"] == "Finished"
+        assert response_data[0]["status"] == "FINISHED"
         assert response_data[0]["name"] == self.pp_finished.name
 
         response = self.client.get(self.list_url, {"status": PaymentPlan.Status.IN_APPROVAL.value})
@@ -718,7 +718,7 @@ class TestPaymentPlanFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(self.pp.id)
-        assert response_data[0]["status"] == "In Approval"
+        assert response_data[0]["status"] == "IN APPROVAL"
         assert response_data[0]["name"] == self.pp.name
 
     def test_filter_by_program_cycle(self) -> None:
@@ -734,7 +734,7 @@ class TestPaymentPlanFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "TEST_ABC_123"
-        assert response_data[0]["status"] == "Accepted"
+        assert response_data[0]["status"] == "ACCEPTED"
 
     def test_filter_by_search(self) -> None:
         new_pp = PaymentPlanFactory(
@@ -751,7 +751,7 @@ class TestPaymentPlanFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "TEST_ABC_999"
-        assert response_data[0]["status"] == "Accepted"
+        assert response_data[0]["status"] == "ACCEPTED"
         # id
         response = self.client.get(self.list_url, {"search": str(new_pp.id)})
         assert response.status_code == status.HTTP_200_OK
@@ -921,7 +921,7 @@ class TestTargetPopulationList:
         tp = response_data[0]
         assert str(self.tp.id) == tp["id"]
         assert tp["name"] == "Test new TP"
-        assert tp["status"] == self.tp.get_status_display()
+        assert tp["status"] == self.tp.get_status_display().upper()
         assert tp["total_households_count"] == self.tp.total_households_count
         assert tp["total_individuals_count"] == self.tp.total_individuals_count
         assert tp["created_at"] == self.tp.created_at.isoformat().replace("+00:00", "Z")
@@ -1027,7 +1027,7 @@ class TestTargetPopulationDetail:
         assert tp["name"] == self.tp.name
         assert tp["program_cycle"]["title"] == self.cycle.title
         assert tp["program"]["name"] == self.program_active.name
-        assert tp["status"] == self.tp.get_status_display()
+        assert tp["status"] == self.tp.get_status_display().upper()
         assert tp["total_households_count"] == self.tp.total_households_count
         assert tp["total_individuals_count"] == self.tp.total_individuals_count
         assert tp["created_by"] == f"{self.user.first_name} {self.user.last_name}"
@@ -1091,7 +1091,7 @@ class TestTargetPopulationFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(self.tp_locked.id)
-        assert response_data[0]["status"] == "Locked"
+        assert response_data[0]["status"] == "LOCKED"
         assert response_data[0]["name"] == "LOCKED"
 
         response = self.client.get(self.list_url, {"status": "ASSIGNED"})
@@ -1115,7 +1115,7 @@ class TestTargetPopulationFilter:
         response_data = response.json()["results"]
         assert len(response_data) == 1
         assert response_data[0]["name"] == "TEST_ABC_QWOOL"
-        assert response_data[0]["status"] == "Steficon Run"
+        assert response_data[0]["status"] == "STEFICON RUN"
 
     def test_filter_by_number_of_hh(self) -> None:
         PaymentPlanFactory(
@@ -1650,7 +1650,7 @@ class TestPaymentPlanActions:
             resp_data = response.json()
             assert "id" in resp_data
             assert "USD" == resp_data["currency"]
-            assert "Open" == resp_data["status"]
+            assert "OPEN" == resp_data["status"]
 
     def test_create_pp_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.PM_CREATE], self.afghanistan, self.program_active)
@@ -1964,7 +1964,7 @@ class TestPaymentPlanActions:
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "In Approval"
+            assert response.json()["status"] == "IN APPROVAL"
 
     @pytest.mark.parametrize(
         "permissions, expected_status, payment_plan_status",
@@ -2001,7 +2001,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_reject, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "Locked FSP"
+            assert response.json()["status"] == "LOCKED FSP"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2023,7 +2023,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_approve, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "In Authorization"
+            assert response.json()["status"] == "IN AUTHORIZATION"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2045,7 +2045,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_authorize, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "In Review"
+            assert response.json()["status"] == "IN REVIEW"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2067,7 +2067,7 @@ class TestPaymentPlanActions:
         response = self.client.post(self.url_approval_process_mark_as_released, {"comment": "test123"}, format="json")
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "Accepted"
+            assert response.json()["status"] == "ACCEPTED"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2092,7 +2092,7 @@ class TestPaymentPlanActions:
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.json()["status"] == "Accepted"
+            assert response.json()["status"] == "ACCEPTED"
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
