@@ -1116,10 +1116,13 @@ class TestMessageViewSet:
 
     def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.afghanistan, self.program_active
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
         )
         url = reverse(
-            "api:accountability:surveys-sample-size",
+            "api:accountability:messages-sample-size",
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
                 "program_slug": self.program_active.slug,
