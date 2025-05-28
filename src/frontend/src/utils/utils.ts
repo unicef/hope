@@ -23,6 +23,7 @@ import {
 } from './constants';
 import _ from 'lodash';
 import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Choice } from '@restgenerated/models/Choice';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -31,6 +32,19 @@ const Gender = new Map([
   ['NOT_COLLECTED', 'Not Collected'],
   ['NOT_ANSWERED', 'Not Answered'],
 ]);
+
+export function restChoicesToDict(choices: Choice[] | null): {
+  [key: string]: string;
+} {
+  if (!choices || !choices.length) return {};
+  return choices.reduce(
+    (dict, choice) => {
+      dict[choice.value] = choice.name;
+      return dict;
+    },
+    {} as { [key: string]: string },
+  );
+}
 
 const IdentificationType = new Map([
   ['NA', 'N/A'],
