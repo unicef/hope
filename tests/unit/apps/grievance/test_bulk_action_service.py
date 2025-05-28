@@ -24,6 +24,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @override_settings(ELASTICSEARCH_DSL_AUTOSYNC=True)
+@pytest.mark.elasticsearch
 @pytest.mark.skip("Too flaky, hard to pass, need to fix")
 class TestGrievanceApproveAutomaticMutation(TestCase):
     databases = "__all__"
