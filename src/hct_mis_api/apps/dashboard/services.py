@@ -41,6 +41,7 @@ class CountrySummaryDict(TypedDict):
     reconciled_count: int
     finished_payment_plans: int
     total_payment_plans: int
+    planned_sum_for_group: float
     _seen_households: Set[UUID]
 
 
@@ -53,6 +54,7 @@ class GlobalSummaryDict(TypedDict):
     reconciled_count: int
     finished_payment_plans: int
     total_payment_plans: int
+    planned_sum_for_group: float
     _seen_households: Set[UUID]
 
 
@@ -147,7 +149,9 @@ class DashboardCacheBase(Protocol):
                 F("delivered_quantity"), F("entitlement_quantity"), Value(0.0), output_field=DecimalField()
             ),
             total_planned_usd_for_this_payment=models.Case(
-                models.When(parent__status__in=PLANNED_STATUSES, then=Coalesce(F("entitlement_quantity_usd"), Value(0.0))),
+                models.When(
+                    parent__status__in=PLANNED_STATUSES, then=Coalesce(F("entitlement_quantity_usd"), Value(0.0))
+                ),
                 default=Value(0.0),
                 output_field=DecimalField(),
             ),
@@ -400,9 +404,7 @@ class DashboardDataCache(DashboardCacheBase):
             current_summary["total_quantity"] += float(payment.get("payment_quantity") or 0.0)
             current_summary["total_payments"] += 1
             current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
-            current_summary["planned_sum_for_group"] += float(
-                payment.get("total_planned_usd_for_this_payment") or 0.0
-            )
+            current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
 
             household_id = payment.get("household_id_val")
             if (
@@ -558,9 +560,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
             current_summary["total_payments"] += 1
             current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
-            current_summary["planned_sum_for_group"] += float(
-                payment.get("total_planned_usd_for_this_payment") or 0.0
-            )
+            current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
 
             household_id = payment.get("household_id_val")
             if (
