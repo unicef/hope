@@ -11,7 +11,7 @@ export type PaymentPlanList = {
      * Name
      */
     name?: string | null;
-    status: string;
+    readonly status: string;
     /**
      * Total Households Count [sys]
      */

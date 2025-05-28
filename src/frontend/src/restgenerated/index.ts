@@ -89,10 +89,10 @@ export type { LogEntry as LogEntryCamelCase } from './models/LogEntry';
 export { MaritalStatusEnum as MaritalStatusEnumCamelCase } from './models/MaritalStatusEnum';
 export { MemoryDisabilityEnum as MemoryDisabilityEnumCamelCase } from './models/MemoryDisabilityEnum';
 export type { MessageCreate as MessageCreateCamelCase } from './models/MessageCreate';
-export { MessageCreateSamplingTypeEnum as MessageCreateSamplingTypeEnumCamelCase } from './models/MessageCreateSamplingTypeEnum';
 export type { MessageDetail as MessageDetailCamelCase } from './models/MessageDetail';
 export { MessageDetailSamplingTypeEnum as MessageDetailSamplingTypeEnumCamelCase } from './models/MessageDetailSamplingTypeEnum';
 export type { MessageList as MessageListCamelCase } from './models/MessageList';
+export type { MessageSampleSize as MessageSampleSizeCamelCase } from './models/MessageSampleSize';
 export { ObservedDisabilityEnum as ObservedDisabilityEnumCamelCase } from './models/ObservedDisabilityEnum';
 export type { Organization as OrganizationCamelCase } from './models/Organization';
 export { OrgEnumeratorEnum as OrgEnumeratorEnumCamelCase } from './models/OrgEnumeratorEnum';
@@ -200,6 +200,7 @@ export type { RevertMarkPaymentAsFailed as RevertMarkPaymentAsFailedCamelCase } 
 export type { Rule as RuleCamelCase } from './models/Rule';
 export type { RuleCommit as RuleCommitCamelCase } from './models/RuleCommit';
 export { RuleTypeEnum as RuleTypeEnumCamelCase } from './models/RuleTypeEnum';
+export { SamplingTypeE86Enum as SamplingTypeE86EnumCamelCase } from './models/SamplingTypeE86Enum';
 export { ScopeEnum as ScopeEnumCamelCase } from './models/ScopeEnum';
 export { SectorEnum as SectorEnumCamelCase } from './models/SectorEnum';
 export { SeeingDisabilityEnum as SeeingDisabilityEnumCamelCase } from './models/SeeingDisabilityEnum';
@@ -211,6 +212,8 @@ export { Status791Enum as Status791EnumCamelCase } from './models/Status791Enum'
 export { StatusEbbEnum as StatusEbbEnumCamelCase } from './models/StatusEbbEnum';
 export { SubtypeEnum as SubtypeEnumCamelCase } from './models/SubtypeEnum';
 export type { Survey as SurveyCamelCase } from './models/Survey';
+export type { SurveySampleSize as SurveySampleSizeCamelCase } from './models/SurveySampleSize';
+export { SurveySampleSizeSamplingTypeEnum as SurveySampleSizeSamplingTypeEnumCamelCase } from './models/SurveySampleSizeSamplingTypeEnum';
 export type { TargetingCollectorBlockRuleFilter as TargetingCollectorBlockRuleFilterCamelCase } from './models/TargetingCollectorBlockRuleFilter';
 export { TargetingCollectorBlockRuleFilterComparisonMethodEnum as TargetingCollectorBlockRuleFilterComparisonMethodEnumCamelCase } from './models/TargetingCollectorBlockRuleFilterComparisonMethodEnum';
 export type { TargetingCollectorRuleFilterBlock as TargetingCollectorRuleFilterBlockCamelCase } from './models/TargetingCollectorRuleFilterBlock';

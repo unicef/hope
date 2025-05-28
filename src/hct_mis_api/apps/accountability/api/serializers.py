@@ -283,11 +283,10 @@ class SurveyRapidProFlowSerializer(serializers.Serializer):
 
 
 class SurveySampleSizeSerializer(serializers.Serializer):
-    value: serializers.CharField = serializers.CharField()
     payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
     sampling_type = serializers.ChoiceField(required=True, choices=Survey.SAMPLING_CHOICES)
     full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False)
-    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=True)
 
 
 class SampleSizeSerializer(serializers.Serializer):

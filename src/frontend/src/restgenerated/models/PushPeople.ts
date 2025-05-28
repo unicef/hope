@@ -9,6 +9,7 @@ import type { Admin4Enum } from './Admin4Enum';
 import type { BiometricDeduplicationBatchStatusEnum } from './BiometricDeduplicationBatchStatusEnum';
 import type { BiometricDeduplicationGoldenRecordStatusEnum } from './BiometricDeduplicationGoldenRecordStatusEnum';
 import type { CommsDisabilityEnum } from './CommsDisabilityEnum';
+import type { ConsentSharingEnum } from './ConsentSharingEnum';
 import type { CountryEnum } from './CountryEnum';
 import type { CountryOriginEnum } from './CountryOriginEnum';
 import type { DeduplicationGoldenRecordStatusEnum } from './DeduplicationGoldenRecordStatusEnum';
@@ -44,6 +45,7 @@ export type PushPeople = {
     admin2?: Admin2Enum | null;
     admin3?: Admin3Enum | null;
     admin4?: Admin4Enum | null;
+    consentSharing?: Array<ConsentSharingEnum>;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;

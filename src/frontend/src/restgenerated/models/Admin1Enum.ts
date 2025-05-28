@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `UA81` - Caitlynport
- * * `HR59` - Chavezbury
- * * `HR17` - Lake Terri
- * * `AF64` - Port Emilyside
- * * `UA68` - Port Kristenberg
- * * `HR44` - South Holly
- * * `UA17` - Transide
- * * `AF19` - Virginiachester
- * * `AF62` - West Davidport
+ * * `HR32` - Andrewville
+ * * `AF99` - East Ashleymouth
+ * * `HR83` - Garciatown
+ * * `HR48` - Jeffreyside
+ * * `AF66` - Lake Amy
+ * * `AF50` - Lake David
+ * * `UA29` - Lisatown
+ * * `UA42` - New Aaronborough
+ * * `UA19` - Ramirezberg
  */
 export enum Admin1Enum {
-    UA81 = 'UA81',
-    HR59 = 'HR59',
-    HR17 = 'HR17',
-    AF64 = 'AF64',
-    UA68 = 'UA68',
-    HR44 = 'HR44',
-    UA17 = 'UA17',
-    AF19 = 'AF19',
-    AF62 = 'AF62',
+    HR32 = 'HR32',
+    AF99 = 'AF99',
+    HR83 = 'HR83',
+    HR48 = 'HR48',
+    AF66 = 'AF66',
+    AF50 = 'AF50',
+    UA29 = 'UA29',
+    UA42 = 'UA42',
+    UA19 = 'UA19',
 }
