@@ -2,8 +2,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { PaymentPlanNode } from '@generated/graphql';
-import { useBusinessArea } from '@hooks/useBusinessArea';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import {
@@ -12,9 +11,10 @@ import {
 } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 
 interface LookUpTargetPopulationTableRowCommunicationProps {
-  targetPopulation: PaymentPlanNode;
+  targetPopulation: TargetPopulationList;
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;
@@ -27,7 +27,7 @@ export function LookUpTargetPopulationTableRowCommunication({
   selectedTargetPopulation,
 }: LookUpTargetPopulationTableRowCommunicationProps): ReactElement {
   const navigate = useNavigate();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
@@ -73,11 +73,9 @@ export function LookUpTargetPopulationTableRowCommunication({
           statusNameMapping={paymentPlanStatusMapping}
         />
       </TableCell>
+      <TableCell align="left">{'-'}</TableCell>
       <TableCell align="left">
-        {targetPopulation.program?.name || '-'}
-      </TableCell>
-      <TableCell align="left">
-        {targetPopulation.totalHouseholdsCountWithValidPhoneNo || 0}
+        {targetPopulation.totalHouseholdsCount || 0}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>
@@ -85,10 +83,7 @@ export function LookUpTargetPopulationTableRowCommunication({
       <TableCell align="left">
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">
-        {targetPopulation.createdBy?.firstName}{' '}
-        {targetPopulation.createdBy?.lastName}
-      </TableCell>
+      <TableCell align="left">{targetPopulation.createdBy || '-'}</TableCell>
     </ClickableTableRow>
   );
 }

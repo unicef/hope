@@ -34,6 +34,7 @@ export const PAYMENT_PLAN_STATES = {
   [PaymentPlanStatus.InReview]: 'In Review',
   [PaymentPlanStatus.Accepted]: 'Accepted',
   [PaymentPlanStatus.Finished]: 'Finished',
+  ['ASSIGNED']: 'Assigned',
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {

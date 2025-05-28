@@ -3,14 +3,13 @@ import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Button } from '@mui/material';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { decodeIdString } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -27,20 +26,18 @@ export function CreatePaymentPlanHeader({
   const { businessArea, programId } = useBaseUrl();
   const { programCycleId } = useParams();
 
-  const decodedProgramCycleId = decodeIdString(programCycleId);
-
   const { data: programCycleData, isLoading: isLoadingProgramCycle } =
     useQuery<ProgramCycleList>({
       queryKey: [
         'programCyclesDetails',
         businessArea,
-        decodedProgramCycleId,
+        programCycleId,
         programId,
       ],
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesRetrieve({
           businessAreaSlug: businessArea,
-          id: decodedProgramCycleId,
+          id: programCycleId,
           programSlug: programId,
         });
       },
