@@ -23,7 +23,7 @@ from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
 CACHE_TIMEOUT = 60 * 60 * 6
 GLOBAL_SLUG = "global"
@@ -110,7 +110,13 @@ class DashboardCacheBase(Protocol):
                 "parent__program",
             )
             .filter(
-                parent__status__in=["ACCEPTED", "FINISHED"],
+                parent__status__in=[
+                    PaymentPlan.Status.IN_APPROVAL,
+                    PaymentPlan.Status.IN_AUTHORIZATION,
+                    PaymentPlan.Status.IN_REVIEW,
+                    PaymentPlan.Status.ACCEPTED,
+                    PaymentPlan.Status.FINISHED,
+                ],
                 program__is_visible=True,
                 parent__is_removed=False,
                 is_removed=False,
@@ -127,6 +133,11 @@ class DashboardCacheBase(Protocol):
     @classmethod
     def _get_payment_data(cls, base_queryset: models.QuerySet) -> models.QuerySet:
         date_field = Coalesce("delivery_date", "entitlement_date", "status_date")
+        PLANNED_STATUSES = [
+            PaymentPlan.Status.IN_APPROVAL,
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            PaymentPlan.Status.IN_REVIEW,
+        ]
 
         return base_queryset.annotate(
             payment_quantity_usd=Coalesce(
@@ -134,6 +145,11 @@ class DashboardCacheBase(Protocol):
             ),
             payment_quantity=Coalesce(
                 F("delivered_quantity"), F("entitlement_quantity"), Value(0.0), output_field=DecimalField()
+            ),
+            total_planned_usd_for_this_payment=models.Case(
+                models.When(parent__status__in=PLANNED_STATUSES, then=Coalesce(F("entitlement_quantity_usd"), Value(0.0))),
+                default=Value(0.0),
+                output_field=DecimalField(),
             ),
             year=ExtractYear(date_field),
             month=ExtractMonth(date_field),
@@ -168,6 +184,7 @@ class DashboardCacheBase(Protocol):
             "reconciled",
             "household_id_val",
             "parent_id_val",
+            "total_planned_usd_for_this_payment",
         )
 
     @classmethod
@@ -342,6 +359,7 @@ class DashboardDataCache(DashboardCacheBase):
                 "reconciled_count": 0,
                 "finished_payment_plans": 0,
                 "total_payment_plans": 0,
+                "planned_sum_for_group": 0.0,
                 "_seen_households": set(),
             }
         )
@@ -382,6 +400,9 @@ class DashboardDataCache(DashboardCacheBase):
             current_summary["total_quantity"] += float(payment.get("payment_quantity") or 0.0)
             current_summary["total_payments"] += 1
             current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
+            current_summary["planned_sum_for_group"] += float(
+                payment.get("total_planned_usd_for_this_payment") or 0.0
+            )
 
             household_id = payment.get("household_id_val")
             if (
@@ -422,10 +443,14 @@ class DashboardDataCache(DashboardCacheBase):
                     "reconciled": totals["reconciled_count"],
                     "finished_payment_plans": totals["finished_payment_plans"],
                     "total_payment_plans": totals["total_payment_plans"],
+                    "total_planned_usd": totals["planned_sum_for_group"],
                 }
             )
 
-        final_result_list = newly_processed_result_list + existing_data_for_other_years
+        final_result_list = newly_processed_result_list
+        if is_partial_refresh_attempt:
+            final_result_list.extend(existing_data_for_other_years)
+
         serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data
@@ -500,6 +525,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                 "reconciled_count": 0,
                 "finished_payment_plans": 0,
                 "total_payment_plans": 0,
+                "planned_sum_for_group": 0.0,
                 "_seen_households": set(),
             }
         )
@@ -532,6 +558,9 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
             current_summary["total_payments"] += 1
             current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
+            current_summary["planned_sum_for_group"] += float(
+                payment.get("total_planned_usd_for_this_payment") or 0.0
+            )
 
             household_id = payment.get("household_id_val")
             if (
@@ -564,10 +593,14 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                     "reconciled": totals["reconciled_count"],
                     "finished_payment_plans": totals["finished_payment_plans"],
                     "total_payment_plans": totals["total_payment_plans"],
+                    "total_planned_usd": totals["planned_sum_for_group"],
                 }
             )
 
-        final_result_list = newly_processed_result_list + existing_data_for_other_years
+        final_result_list = newly_processed_result_list
+        if is_partial_refresh_attempt:
+            final_result_list.extend(existing_data_for_other_years)
+
         serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
         cls.store_data(identifier, serialized_data)
         return serialized_data

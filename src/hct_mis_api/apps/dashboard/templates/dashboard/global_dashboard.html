@@ -85,13 +85,35 @@
                 ].forEach(showSpinner);
 
                 d3.json(url).then((data) => {
+
                     if (!data || data.length === 0) {
-                        console.error("No data available or data is undefined.");
+                        console.warn("No data available. Displaying 0 for all metrics.");
+                        [
+                            "payments-by-delivery",
+                            "payments-by-sector",
+                            "payments-by-country",
+                            "payments-by-region",
+                        ].forEach(hideSpinner);
+                        const ndx = crossfilter([]);
+                        updateTopMetrics(ndx);
                         return;
                     }
 
+                    const regionNameMap = {
+                        "EAPR": "(EAPRO) East Asia and Pacific Regional Office",
+                        "ECAR": "(ECARO) Europe and Central Asia Region Office",
+                        "ESAR": "(ESARO) Eastern and Southern Africa Regional Office",
+                        "GLOBAL": "Global",
+                        "HQ": "Headquarters",
+                        "LACR": "(LACRO) Latin America and Carribbean Regional Office",
+                        "MENAR": "(MENARO) Middle East Northern Africa Regional Office",
+                        "SAR": "(ROSA) Regional Office South Asia",
+                        "WCAR": "(WCARO) West and Central Africa Regional Office",
+                        "Unknown Region": "Unknown Region" 
+                    };
+
                     const processedPayments = data.map((item) => ({
-                        delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0,
+                        delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0, 
                         payments: item.payments || 0,
                         individuals: item.individuals || 0,
                         households: item.households || 0,
@@ -104,7 +126,7 @@
                         sector: item.sector || "Unknown sector",
                         payment_status: item.status || "Unknown status",
                         country: item.country || "Unknown Country",
-                        region: item.region || "Unknown Region",
+                        region: regionNameMap[item.region] || item.region || "Unknown Region",
                         fsp: item.fsp || "Unknown fsp",
                         delivery_types: item.delivery_types || "Unknown delivery type",
                         pwd_counts: item.pwd_counts || 0,
@@ -260,19 +282,19 @@
                             0;
 
                         const reconciledPaymentsValueUSD = ndx.groupAll().reduce(
-                            (p, v) => { // add
+                            (p, v) => {
                                 if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
                                     p.value += (v.delivered_quantity_usd || 0);
                                 }
                                 return p;
                             },
-                            (p, v) => { // remove
+                            (p, v) => { 
                                 if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
                                     p.value -= (v.delivered_quantity_usd || 0);
                                 }
                                 return p;
                             },
-                            () => ({ value: 0 }) // initial
+                            () => ({ value: 0 }) 
                         ).value().value;
 
                         const paymentPlanMetrics = ndx.groupAll().reduce(
@@ -366,7 +388,7 @@
 
                     function filterByYear(year) {
                         yearDim.filter(year);
-                        updateTopMetrics();
+                        updateTopMetrics(ndx);
                         if (isChartsInitialized) dc.redrawAll();
                     }
 
@@ -413,9 +435,11 @@
                     if (uniqueYears.includes(currentYear)) changeYear(currentYear);
                     else if (uniqueYears.length > 0) changeYear(uniqueYears[0]);
 
+                    updateTopMetrics(ndx);
+
                     for (const chart of dc.chartRegistry.list()) {
                         chart.on("filtered", () => {
-                            updateTopMetrics();
+                            updateTopMetrics(ndx);
                         });
                     }
                     hideSpinner("payments-by-delivery");
