@@ -29,6 +29,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
+@pytest.mark.elasticsearch
 class TestSanctionListPreMerge(TestCase):
     databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
