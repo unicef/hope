@@ -1,8 +1,9 @@
 import { TextField, Autocomplete } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import get from 'lodash/get';
-import { useCurrencyChoicesQuery } from '@generated/graphql';
 import { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 
 export const FormikCurrencyAutocomplete = ({
   field,
@@ -12,7 +13,10 @@ export const FormikCurrencyAutocomplete = ({
 }): ReactElement => {
   const { t } = useTranslation();
 
-  const { data } = useCurrencyChoicesQuery();
+  const { data } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => RestService.restChoicesCurrenciesList(),
+  });
 
   const handleChange = (e, option): void => {
     if (!option) {
@@ -29,7 +33,7 @@ export const FormikCurrencyAutocomplete = ({
   if (!data) return null;
   return (
     <Autocomplete
-      options={data?.currencyChoices || []}
+      options={data || []}
       defaultValue={field.value}
       getOptionLabel={(option: any) => option.name}
       onChange={handleChange}
