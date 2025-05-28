@@ -16,6 +16,7 @@ from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdSmallSerializer,
 )
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.api.serializers import (
     FollowUpPaymentPlanSerializer,
     FullListSerializer,
@@ -296,7 +297,7 @@ class SampleSizeSerializer(serializers.Serializer):
 
 class MessageSampleSizeSerializer(serializers.Serializer):
     households = serializers.ListSerializer(
-        child=serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all()), required=False
+        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()), required=False
     )
     payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
     registration_data_import = serializers.PrimaryKeyRelatedField(
