@@ -11,11 +11,7 @@ import DeleteProgramCycle from '@containers/tables/ProgramCycle/DeleteProgramCyc
 import EditProgramCycle from '@containers/tables/ProgramCycle/EditProgramCycle';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  fetchProgramCycles,
-  PaginatedListResponse,
-  ProgramCycle,
-} from '@api/programCycleApi';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { BlackLink } from '@core/BlackLink';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
@@ -45,19 +41,30 @@ export const ProgramCyclesTableProgramDetails = ({
     program.status === Status791Enum.ACTIVE &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
-  const { data, error, isLoading } = useQuery<
-    PaginatedListResponse<ProgramCycle>
-  >({
+  const { data, error, isLoading } = useQuery<PaginatedProgramCycleListList>({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
-    queryFn: async () => {
-      return fetchProgramCycles(businessArea, program.id, queryVariables);
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsCyclesList({
+        businessAreaSlug: businessArea,
+        programSlug: program.id,
+        limit: queryVariables.limit,
+        offset: queryVariables.offset,
+        ordering: queryVariables.ordering,
+      });
     },
   });
 
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasProgramsCyclesCountRetrieve', queryVariables],
+    queryKey: [
+      'businessAreasProgramsCyclesCountRetrieve',
+      businessArea,
+      program.id,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsCyclesCountRetrieve(queryVariables),
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: program.id,
+      }),
   });
 
   const canViewDetails = programId !== 'all';

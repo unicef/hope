@@ -2,7 +2,6 @@ import { CreateSurveyMenu } from '@components/accountability/Surveys/CreateSurve
 import { SurveysFilters } from '@components/accountability/Surveys/SurveysTable/SurveysFilters';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { useSurveysChoiceDataQuery } from '@generated/graphql';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState } from 'react';
@@ -12,16 +11,34 @@ import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { SurveysTable } from '@containers/tables/Surveys/SurveysTable';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 
 function SurveysPage(): ReactElement {
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
-  const { data: choicesData } = useSurveysChoiceDataQuery({
-    fetchPolicy: 'cache-and-network',
+  const { baseUrl, programId } = useBaseUrl();
+  const businessAreaSlug = baseUrl.split('/')[0];
+
+  const { data: categoryChoicesData } = useQuery({
+    queryKey: ['surveyCategoryChoices', businessAreaSlug, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsSurveysCategoryChoicesRetrieve({
+        businessAreaSlug,
+        programSlug: programId,
+      }),
+    enabled: !!businessAreaSlug && !!programId,
   });
+
+  // Since we've migrated to REST, we can directly use the categoryChoicesData
+  // without adapting it to match the GraphQL format
+  const choicesData = categoryChoicesData || null;
+
   const initialFilter = {
     search: '',
     targetPopulation: '',
@@ -38,7 +55,7 @@ function SurveysPage(): ReactElement {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  if (!choicesData || permissions === null) return null;
+  if (permissions === null) return null;
   if (
     !hasPermissionInModule(
       PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_LIST,
@@ -46,6 +63,10 @@ function SurveysPage(): ReactElement {
     )
   )
     return <PermissionDenied />;
+
+  if (!choicesData) {
+    return <LoadingComponent />;
+  }
   const canViewDetails = hasPermissionInModule(
     PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
     permissions,
