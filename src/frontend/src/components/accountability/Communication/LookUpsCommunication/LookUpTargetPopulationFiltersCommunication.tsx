@@ -2,7 +2,6 @@ import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PaymentPlanStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
   paymentPlanStatusMapping,
@@ -13,6 +12,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { ReactElement } from 'react';
+import { PaymentPlanStatus } from '@generated/graphql';
 
 interface LookUpTargetPopulationFiltersCommunicationProps {
   filter;

@@ -86,34 +86,39 @@ function prepareSampleSizeRequest(
   selectedSampleSizeType,
   values,
 ): MessageSampleSize {
+  const samplingType =
+    selectedSampleSizeType === 0
+      ? SamplingTypeE86Enum.FULL_LIST
+      : SamplingTypeE86Enum.RANDOM;
+
+  const fullListArguments = {
+    excludedAdminAreas: values.excludedAdminAreasFull || [],
+  };
+
+  const randomSamplingArguments = {
+    confidenceInterval: values.confidenceInterval * 0.01,
+    marginOfError: values.marginOfError * 0.01,
+    excludedAdminAreas: values.adminCheckbox
+      ? values.excludedAdminAreasRandom
+      : [],
+    age: values.ageCheckbox
+      ? { min: values.filterAgeMin, max: values.filterAgeMax }
+      : null,
+    sex: values.sexCheckbox ? values.filterSex : null,
+  };
+
   return {
     households: values.households,
     paymentPlan: values.targetPopulation,
     registrationDataImport: values.registrationDataImport,
-    samplingType:
-      selectedSampleSizeType === 0
-        ? SamplingTypeE86Enum.FULL_LIST
-        : SamplingTypeE86Enum.RANDOM,
+    samplingType,
+    // Always include both arguments but set them appropriately based on sampling type
     fullListArguments:
-      selectedSampleSizeType === 0
-        ? {
-            excludedAdminAreas: values.excludedAdminAreasFull || [],
-          }
-        : undefined,
+      samplingType === SamplingTypeE86Enum.FULL_LIST ? fullListArguments : null,
     randomSamplingArguments:
-      selectedSampleSizeType === 1
-        ? {
-            confidenceInterval: values.confidenceInterval * 0.01,
-            marginOfError: values.marginOfError * 0.01,
-            excludedAdminAreas: values.adminCheckbox
-              ? values.excludedAdminAreasRandom
-              : [],
-            age: values.ageCheckbox
-              ? { min: values.filterAgeMin, max: values.filterAgeMax }
-              : undefined,
-            sex: values.sexCheckbox ? values.filterSex : undefined,
-          }
-        : undefined,
+      samplingType === SamplingTypeE86Enum.RANDOM
+        ? randomSamplingArguments
+        : null,
   };
 }
 
@@ -135,7 +140,6 @@ const CreateCommunicationPage = (): ReactElement => {
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
 
-  // State for sample size data from REST API
   const [sampleSizesData, setSampleSizesData] = useState<any>(null);
   const [sampleSizeLoading, setSampleSizeLoading] = useState<boolean>(false);
   const [sampleSizeError, setSampleSizeError] = useState<Error | null>(null);
@@ -177,7 +181,6 @@ const CreateCommunicationPage = (): ReactElement => {
         numberOfRecipients?: number;
       };
 
-      // Set sample size data using the camelCase property names from the API response
       setSampleSizesData({
         accountabilityCommunicationMessageSampleSize: {
           sampleSize: response.sampleSize || 0,
@@ -266,7 +269,8 @@ const CreateCommunicationPage = (): ReactElement => {
       }))
     : [];
 
-  if (permissions === null) return null;
+  if (permissions === null || permissions.length === 0) return null;
+
   if (
     !hasPermissions(
       PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,

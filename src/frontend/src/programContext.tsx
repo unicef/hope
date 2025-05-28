@@ -5,7 +5,6 @@ import {
   useContext,
   useState,
 } from 'react';
-import { DataCollectingTypeType } from './__generated__/graphql';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
@@ -31,11 +30,9 @@ export function ProgramProvider({
     useState<ProgramContextType>(null);
   let isActiveProgram = selectedProgram?.status === Status791Enum.ACTIVE;
   const isSocialDctType =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Social;
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() === 'SOCIAL';
   const isStandardDctType =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Standard;
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() === 'STANDARD';
 
   const programHasPdu = selectedProgram?.pduFields?.length > 0;
 
