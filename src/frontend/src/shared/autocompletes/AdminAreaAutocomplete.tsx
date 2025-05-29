@@ -1,12 +1,4 @@
-import { get } from 'lodash';
-import {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -68,19 +60,6 @@ export function AdminAreaAutocomplete({
     enabled: open && !!businessArea,
   });
 
-  // Transform REST API data to match expected GraphQL structure
-  const data = useMemo(() => {
-    return areasData
-      ? {
-          allAdminAreas: {
-            edges: areasData.results.map((area) => ({
-              node: area,
-            })),
-          },
-        }
-      : null;
-  }, [areasData]);
-
   const isMounted = useRef(true);
 
   const loadData = useCallback(() => {
@@ -114,7 +93,7 @@ export function AdminAreaAutocomplete({
     setAppliedFilter,
   );
 
-  const allEdges = get(data, 'allAdminAreas.edges', []);
+  const allEdges = areasData?.results || [];
 
   return (
     <BaseAutocomplete
@@ -129,11 +108,7 @@ export function AdminAreaAutocomplete({
         if (!selectedValue) {
           onInputTextChange('');
         }
-        handleAutocompleteChange(
-          name,
-          selectedValue?.node?.id,
-          handleFilterChange,
-        );
+        handleAutocompleteChange(name, selectedValue?.id, handleFilterChange);
       }}
       handleOpen={() => setOpen(true)}
       open={open}
@@ -141,12 +116,12 @@ export function AdminAreaAutocomplete({
         handleAutocompleteClose(setOpen, onInputTextChange, reason)
       }
       handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.node?.id, value1)
+        handleOptionSelected(option?.id, value1)
       }
       handleOptionLabel={(option) =>
         getAutocompleteOptionLabel(option, allEdges, inputValue)
       }
-      data={data}
+      data={areasData}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}

@@ -1,17 +1,19 @@
 import { LoadingButton } from '@components/core/LoadingButton';
-import { Action, BusinessAreaDataQuery } from '@generated/graphql';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { BusinessAreaDataQuery } from '@generated/graphql';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FileCopy } from '@mui/icons-material';
 import { Box, Button, Tooltip } from '@mui/material';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 const IconContainer = styled.span`
   button {
@@ -43,11 +45,25 @@ export function LockedTargetPopulationHeaderButtons({
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
 
-  const { mutatePaymentPlanAction: unlockAction, loading: loadingUnlock } =
-    usePaymentPlanAction(Action.TpUnlock, targetPopulation.id, () => {
+  const { mutateAsync: unlockAction, isPending: loadingUnlock } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsUnlockRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: targetPopulation.id,
+      }),
+    onSuccess: () => {
       showMessage(t('Target Population Unlocked'));
-    });
+    },
+    onError: (error) => {
+      showMessage(
+        error.message ||
+          t('An error occurred while unlocking the target population.'),
+      );
+    },
+  });
 
   return (
     <Box display="flex" alignItems="center">

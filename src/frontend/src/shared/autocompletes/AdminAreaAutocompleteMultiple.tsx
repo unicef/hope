@@ -86,9 +86,11 @@ export function AdminAreaAutocompleteMultiple({
       renderInput={(params) => (
         <StyledTextField
           {...params}
-          inputProps={{
-            ...params.inputProps,
-            value: inputValue,
+          slotProps={{
+            htmlInput: {
+              ...params.inputProps,
+              value: inputValue,
+            },
           }}
           size="small"
           placeholder={newValue.length > 0 ? null : t('Administrative Level 2')}
