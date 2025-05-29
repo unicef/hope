@@ -26,6 +26,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestChangeHeadOfHousehold(APITestCase):
     STATUS_CHANGE_MUTATION = """
     mutation GrievanceStatusChange($grievanceTicketId: ID!, $status: Int) {
