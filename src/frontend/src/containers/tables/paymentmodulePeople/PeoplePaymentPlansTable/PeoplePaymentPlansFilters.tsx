@@ -8,7 +8,7 @@ import {
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { usePaymentPlanStatusChoicesQueryQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -16,6 +16,8 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import { Choice } from '@restgenerated/models/Choice';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface PeoplePaymentPlansFiltersProps {
   filter;
@@ -53,7 +55,10 @@ export const PeoplePaymentPlansFilters = ({
     clearFilter();
   };
 
-  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
+  const { data: statusChoicesData } = useQuery<Array<Choice>>({
+    queryKey: ['choicesPaymentPlanStatusList'],
+    queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
+  });
 
   if (!statusChoicesData) {
     return null;
@@ -82,7 +87,7 @@ export const PeoplePaymentPlansFilters = ({
             value={filter.status}
             fullWidth
           >
-            {statusChoicesData.paymentPlanStatusChoices.map((item) => (
+            {statusChoicesData?.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>

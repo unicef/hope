@@ -5,10 +5,8 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
-import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -43,10 +41,10 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
       refetchInterval: () => {
         const { status, backgroundActionStatus } = paymentPlan;
         if (
-          status === PaymentPlanStatus.Preparing ||
+          status === PaymentPlanStatusEnum.PREPARING ||
           (backgroundActionStatus !== null &&
             backgroundActionStatus !==
-              PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+              PaymentPlanBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
         ) {
           return 3000;
         }

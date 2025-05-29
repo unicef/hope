@@ -25,7 +25,8 @@ export function usePermissions(): string[] {
 
   return useMemo(() => {
     if (meDataLoading) {
-      return [];
+      // Return null while loading to indicate permissions aren't ready yet
+      return null;
     }
 
     if (error) {

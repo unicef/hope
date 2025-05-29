@@ -8,10 +8,8 @@ import { PaymentPlanDetailsHeader } from '@containers/pages/paymentmodule/Progra
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { PermissionDenied } from '@core/PermissionDenied';
-import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -47,10 +45,10 @@ const PaymentPlanDetailsPage = (): ReactElement => {
     refetchInterval: (query) => {
       const data = query.state.data;
       if (
-        data?.status === PaymentPlanStatus.Preparing ||
+        data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
           data?.backgroundActionStatus !==
-            PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+            PaymentPlanBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
       ) {
         return 3000;
       }
@@ -73,17 +71,18 @@ const PaymentPlanDetailsPage = (): ReactElement => {
   const { status } = paymentPlan;
 
   const shouldDisplayEntitlement =
-    status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
+    status !== PaymentPlanStatusEnum.OPEN &&
+    status !== PaymentPlanStatusEnum.ACCEPTED;
 
-  const shouldDisplayFsp = status !== PaymentPlanStatus.Open;
+  const shouldDisplayFsp = status !== PaymentPlanStatusEnum.OPEN;
   const shouldDisplayReconciliationSummary =
-    status === PaymentPlanStatus.Accepted ||
-    status === PaymentPlanStatus.Finished;
+    status === PaymentPlanStatusEnum.ACCEPTED ||
+    status === PaymentPlanStatusEnum.FINISHED;
 
   const shouldDisplayFundsCommitment =
-    status === PaymentPlanStatus.InReview ||
-    status === PaymentPlanStatus.Accepted ||
-    status === PaymentPlanStatus.Finished;
+    status === PaymentPlanStatusEnum.IN_REVIEW ||
+    status === PaymentPlanStatusEnum.ACCEPTED ||
+    status === PaymentPlanStatusEnum.FINISHED;
 
   return (
     <Box display="flex" flexDirection="column">
@@ -92,7 +91,7 @@ const PaymentPlanDetailsPage = (): ReactElement => {
         permissions={permissions}
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      {status !== PaymentPlanStatus.Preparing && (
+      {status !== PaymentPlanStatusEnum.PREPARING && (
         <>
           <AcceptanceProcess paymentPlan={paymentPlan} />
           {shouldDisplayFundsCommitment && (

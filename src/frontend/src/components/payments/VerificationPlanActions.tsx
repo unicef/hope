@@ -3,11 +3,11 @@ import { GetApp } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  PaymentVerificationPlanStatus,
   PaymentVerificationPlanVerificationChannel,
   useExportXlsxPaymentVerificationPlanFileMutation,
   useInvalidPaymentVerificationPlanMutation,
 } from '@generated/graphql';
+import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { PERMISSIONS, hasPermissions } from '../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -49,9 +49,9 @@ export function VerificationPlanActions({
   if (!verificationPlan || !permissions) return null;
 
   const isPending =
-    verificationPlan.status === PaymentVerificationPlanStatus.Pending;
+    verificationPlan.status === PaymentVerificationPlanStatusEnum.PENDING;
   const isActive =
-    verificationPlan.status === PaymentVerificationPlanStatus.Active;
+    verificationPlan.status === PaymentVerificationPlanStatusEnum.ACTIVE;
 
   const verificationChannelXLSX =
     verificationPlan.verificationChannel ===

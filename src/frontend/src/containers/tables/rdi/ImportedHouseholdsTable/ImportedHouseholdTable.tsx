@@ -62,6 +62,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   if (isMerged) {
     return (
       <UniversalRestQueryTable
+        isOnPaper={false}
         renderRow={(row) => (
           <ImportedHouseholdTableRow rdi={rdi} key={row.id} household={row} />
         )}
@@ -74,6 +75,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   }
   return (
     <UniversalRestQueryTable
+      isOnPaper={false}
       renderRow={(row) => (
         <ImportedHouseholdTableRow
           rdi={rdi}

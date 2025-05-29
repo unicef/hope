@@ -340,6 +340,7 @@ const EditProgramPage = (): ReactElement => {
             t,
             initialValuesProgramDetails,
           )}
+          validationContext={{ isEdit: true }}
           validateOnChange={true}
         >
           {({

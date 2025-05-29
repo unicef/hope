@@ -1,10 +1,8 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedPaymentPlanListList } from '@restgenerated/models/PaginatedPaymentPlanListList';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -12,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
 import { LookUpTargetPopulationTableRowSurveys } from './LookUpTargetPopulationTableRowSurveys';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 
 interface LookUpTargetPopulationTableSurveysProps {
   filter;
@@ -54,7 +54,7 @@ export function LookUpTargetPopulationTableSurveys({
         min: filter.createdAtRangeMin || null,
         max: filter.createdAtRangeMax || null,
       }),
-      statusNot: PaymentPlanStatus.Open,
+      statusNot: PaymentPlanStatusEnum.OPEN,
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
       programSlug: programId,
@@ -79,15 +79,15 @@ export function LookUpTargetPopulationTableSurveys({
     data: paymentPlansData,
     isLoading,
     error,
-  } = useQuery<PaginatedPaymentPlanListList>({
+  } = useQuery<PaginatedTargetPopulationListList>({
     queryKey: [
-      'businessAreasProgramsPaymentPlansList',
+      'businessAreasProgramsTargetPopulationsList',
       queryVariables,
       businessArea,
       programId,
     ],
     queryFn: () => {
-      return RestService.restBusinessAreasProgramsPaymentPlansList(
+      return RestService.restBusinessAreasProgramsTargetPopulationsList(
         createApiParams(
           { businessAreaSlug: businessArea, programSlug: programId },
           queryVariables,
@@ -114,7 +114,7 @@ export function LookUpTargetPopulationTableSurveys({
         error={error}
         queryVariables={queryVariables}
         setQueryVariables={setQueryVariables}
-        renderRow={(row: PaymentPlanList) => (
+        renderRow={(row: TargetPopulationList) => (
           <LookUpTargetPopulationTableRowSurveys
             radioChangeHandler={enableRadioButton && handleRadioChange}
             selectedTargetPopulation={selectedTargetPopulation}

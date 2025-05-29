@@ -139,6 +139,7 @@ const RegistrationDataImportDetailsPage = (): ReactElement => {
               </TabPanel>
               <TabPanel value={selectedTab} index={1}>
                 <ImportedIndividualsTable
+                  isOnPaper={false}
                   showCheckbox
                   rdiId={id}
                   isMerged={isMerged}

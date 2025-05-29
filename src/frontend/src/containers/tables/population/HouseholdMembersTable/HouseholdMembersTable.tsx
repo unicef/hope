@@ -11,6 +11,7 @@ import TableCell from '@mui/material/TableCell';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { HouseholdMember } from '@restgenerated/models/HouseholdMember';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { PaginatedHouseholdMemberList } from '@restgenerated/models/PaginatedHouseholdMemberList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -111,7 +112,7 @@ export const HouseholdMembersTable = ({
     setQueryVariables(initialQueryVariables);
   }, [initialQueryVariables]);
 
-  const { data, isLoading, error } = useQuery<HouseholdMember>({
+  const { data, isLoading, error } = useQuery<PaginatedHouseholdMemberList>({
     queryKey: [
       'businessAreasProgramsHouseholdsMembers',
       programId,
@@ -119,7 +120,7 @@ export const HouseholdMembersTable = ({
       household.id,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsMembersRetrieve({
+      RestService.restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug: businessArea,
         programSlug: programId,
         id: household.id,

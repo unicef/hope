@@ -12,8 +12,9 @@ import {
   SurveyCategory,
   useExportSurveySampleMutation,
   useSurveyQuery,
-  useSurveysChoiceDataQuery,
 } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -29,16 +30,20 @@ function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const { data, loading, error } = useSurveyQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: choicesData, loading: choicesLoading } =
-    useSurveysChoiceDataQuery({
-      fetchPolicy: 'cache-and-network',
-    });
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['surveyCategoryChoices', baseUrl, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsSurveysCategoryChoicesList({
+        businessAreaSlug: baseUrl,
+        programSlug: programId,
+      }),
+  });
 
   const [mutate] = useExportSurveySampleMutation();
   const permissions = usePermissions();

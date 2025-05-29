@@ -234,6 +234,7 @@ export const CreateProgramPage = (): ReactElement => {
         programmeCode: true,
       }}
       validationSchema={programValidationSchema(t)}
+      validationContext={{ programHasRdi: false, isCopy: false }}
       validateOnChange={true}
     >
       {({
