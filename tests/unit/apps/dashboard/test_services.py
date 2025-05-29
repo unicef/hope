@@ -18,10 +18,7 @@ from hct_mis_api.apps.dashboard.services import (
     DashboardGlobalDataCache,
     get_pwd_count_expression,
 )
-from hct_mis_api.apps.household.fixtures import (
-    HouseholdFactory,
-    create_household,
-)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismFactory,
@@ -32,6 +29,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
@@ -40,6 +38,40 @@ CACHE_CONFIG = [
 CURRENT_YEAR = timezone.now().year
 TEST_COUNTRY_SLUG = "afghanistan"
 TEST_DATE = timezone.datetime(CURRENT_YEAR, 7, 15, tzinfo=timezone.utc)
+
+
+def _create_test_payment_for_queryset(
+    program_obj: Program,
+    business_area_obj: BusinessArea,
+    *,
+    pp_status: str = PaymentPlan.Status.ACCEPTED,
+    pp_is_removed: bool = False,
+    prog_is_visible: bool = True,
+    payment_is_removed: bool = False,
+    payment_conflicted: bool = False,
+    payment_excluded: bool = False,
+    payment_status: str = "Transaction Successful",
+    delivery_date: Optional[timezone.datetime] = None,
+) -> tuple[Payment, PaymentPlan]:
+    program_obj.is_visible = prog_is_visible
+    program_obj.save()
+
+    pp = PaymentPlanFactory.create(
+        program_cycle__program=program_obj,
+        status=pp_status,
+        is_removed=pp_is_removed,
+    )
+    payment = PaymentFactory.create(
+        parent=pp,
+        program=program_obj,
+        business_area=business_area_obj,
+        is_removed=payment_is_removed,
+        conflicted=payment_conflicted,
+        excluded=payment_excluded,
+        status=payment_status,
+        delivery_date=delivery_date or timezone.now(),
+    )
+    return payment, pp
 
 
 @pytest.mark.parametrize("cache_name, cache_class, slug", CACHE_CONFIG)
@@ -444,7 +476,7 @@ def test_get_payment_plan_counts_logic() -> None:
     )
     Payment.objects.filter(parent=pp2, business_area=ba).update(
         delivery_date=timezone.datetime(2023, 6, 1, tzinfo=timezone.utc)
-    ) 
+    )
     Payment.objects.filter(parent=pp3, business_area=ba).update(
         delivery_date=timezone.datetime(2023, 3, 10, tzinfo=timezone.utc)
     )
@@ -548,9 +580,7 @@ def test_refresh_data_partial_cache_empty_falls_back_to_full(
     cache.delete(DashboardDataCache.get_cache_key(ba_slug))
 
     prog = ProgramFactory.create(business_area=afghanistan)
-    hh, _ = create_household(
-        household_args={"program": prog, "business_area": afghanistan}
-    )
+    hh, _ = create_household(household_args={"program": prog, "business_area": afghanistan})
 
     PaymentFactory.create(
         parent__status=PaymentPlan.Status.ACCEPTED,
@@ -591,9 +621,7 @@ def test_refresh_data_partial_update_combines_data(
     """Test partial refresh updates specified years and combines with existing cached data."""
     ba_slug = afghanistan.slug
     prog = ProgramFactory.create(business_area=afghanistan)
-    hh, _ = create_household(
-        household_args={"program": prog, "business_area": afghanistan, "size": 1}
-    )
+    hh, _ = create_household(household_args={"program": prog, "business_area": afghanistan, "size": 1})
 
     year_old = CURRENT_YEAR - 2
     year_mid = CURRENT_YEAR - 1
@@ -664,9 +692,7 @@ def test_refresh_data_partial_no_new_payments_for_years(
     """Test partial refresh when no new payments exist for the specified years_to_refresh."""
     ba_slug = afghanistan.slug
     prog = ProgramFactory.create(business_area=afghanistan)
-    hh, _ = create_household(
-        household_args={"program": prog, "business_area": afghanistan}
-    )
+    hh, _ = create_household(household_args={"program": prog, "business_area": afghanistan})
 
     year_cached = CURRENT_YEAR - 2
     PaymentFactory.create(
@@ -700,42 +726,8 @@ def test_refresh_data_partial_no_payments_at_all_for_ba(afghanistan: BusinessAre
     assert refreshed_data == []
 
 
-def _create_test_payment_for_queryset(
-    program_obj, 
-    business_area_obj,
-    *, 
-    pp_status=PaymentPlan.Status.ACCEPTED,
-    pp_is_removed=False,
-    prog_is_visible=True,
-    payment_is_removed=False,
-    payment_conflicted=False,
-    payment_excluded=False,
-    payment_status="Transaction Successful",
-    delivery_date=None,
-):
-    program_obj.is_visible = prog_is_visible
-    program_obj.save()
-
-    pp = PaymentPlanFactory.create(
-        program_cycle__program=program_obj,
-        status=pp_status,
-        is_removed=pp_is_removed,
-    )
-    payment = PaymentFactory.create(
-        parent=pp,
-        program=program_obj,
-        business_area=business_area_obj,
-        is_removed=payment_is_removed,
-        conflicted=payment_conflicted,
-        excluded=payment_excluded,
-        status=payment_status,
-        delivery_date=delivery_date or timezone.now(),
-    )
-    return payment, pp
-
-
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_get_base_payment_queryset_filters_plan_status():
+def test_get_base_payment_queryset_filters_plan_status() -> None:
     """Test _get_base_payment_queryset filtering based on PaymentPlan.Status."""
     ba = BusinessAreaFactory.create()
     prog = ProgramFactory.create(business_area=ba)
@@ -762,7 +754,7 @@ def test_get_base_payment_queryset_filters_plan_status():
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_get_base_payment_queryset_filters_boolean_flags():
+def test_get_base_payment_queryset_filters_boolean_flags() -> None:
     """Test _get_base_payment_queryset filtering on boolean flags."""
     ba = BusinessAreaFactory.create()
     prog = ProgramFactory.create(business_area=ba)
@@ -772,14 +764,11 @@ def test_get_base_payment_queryset_filters_boolean_flags():
     assert qs_visible.filter(pk=payment_visible_prog.pk).exists()
 
     prog_invisible_instance = ProgramFactory.create(business_area=ba, is_visible=False)
-    payment_invisible_prog, _ = _create_test_payment_for_queryset(
-        prog_invisible_instance, ba, prog_is_visible=False
-    )
+    payment_invisible_prog, _ = _create_test_payment_for_queryset(prog_invisible_instance, ba, prog_is_visible=False)
     qs_invisible = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
     assert not qs_invisible.filter(pk=payment_invisible_prog.pk).exists()
     prog.is_visible = True
     prog.save()
-
 
     payment_pp_not_removed, _ = _create_test_payment_for_queryset(prog, ba, pp_is_removed=False)
     qs_pp_not_removed = DashboardCacheBase._get_base_payment_queryset(business_area=ba)
@@ -815,7 +804,7 @@ def test_get_base_payment_queryset_filters_boolean_flags():
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_get_base_payment_queryset_filters_payment_status():
+def test_get_base_payment_queryset_filters_payment_status() -> None:
     """Test _get_base_payment_queryset filtering based on Payment.status."""
     ba = BusinessAreaFactory.create()
     prog = ProgramFactory.create(business_area=ba)
@@ -836,7 +825,7 @@ def test_get_base_payment_queryset_filters_payment_status():
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_get_base_payment_queryset_with_without_ba():
+def test_get_base_payment_queryset_with_without_ba() -> None:
     """Test _get_base_payment_queryset with and without business_area argument."""
     ba1 = BusinessAreaFactory.create(name="BA1")
     prog1 = ProgramFactory.create(business_area=ba1)

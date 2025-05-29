@@ -28,9 +28,7 @@ def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard
 @pytest.mark.django_db(databases=["default", "read_only"])
 @patch("hct_mis_api.apps.dashboard.celery_tasks.logger.error")
 @patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
-def test_generate_dash_report_task_business_area_not_found(
-    mock_refresh_data: Mock, mock_logger_error: Mock
-) -> None:
+def test_generate_dash_report_task_business_area_not_found(mock_refresh_data: Mock, mock_logger_error: Mock) -> None:
     """
     Test that generate_dash_report_task logs an error and does not call refresh_data
     if the business area is not found.
@@ -160,7 +158,7 @@ def test_update_recent_dashboard_figures_ba_error_continues(
     previous_year = current_year - 1
     years_to_refresh = [current_year, previous_year]
 
-    def ba_refresh_side_effect_func(slug, years_to_refresh):
+    def ba_refresh_side_effect_func(slug: str, years_to_refresh: list[int]) -> None:
         if slug == afghanistan.slug:
             raise Exception("BA refresh error for afghanistan")
         # For other BAs (e.g., iraq), the mock should behave normally (return None)
@@ -216,9 +214,7 @@ def test_update_recent_dashboard_figures_global_error_continues(
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 @patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
-def test_update_dashboard_figures_no_active_bas(
-    mock_ba_refresh: Mock, mock_global_refresh: Mock
-) -> None:
+def test_update_dashboard_figures_no_active_bas(mock_ba_refresh: Mock, mock_global_refresh: Mock) -> None:
     """
     Test update_dashboard_figures when there are no active business areas.
     It should not call BA refresh but should call global refresh.
@@ -234,9 +230,7 @@ def test_update_dashboard_figures_no_active_bas(
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 @patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
-def test_update_recent_dashboard_figures_no_active_bas(
-    mock_ba_refresh: Mock, mock_global_refresh: Mock
-) -> None:
+def test_update_recent_dashboard_figures_no_active_bas(mock_ba_refresh: Mock, mock_global_refresh: Mock) -> None:
     """
     Test update_recent_dashboard_figures when there are no active business areas.
     It should not call BA refresh but should call global refresh with year filters.
