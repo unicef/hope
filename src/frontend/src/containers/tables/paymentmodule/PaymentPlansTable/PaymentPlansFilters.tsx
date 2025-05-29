@@ -8,7 +8,7 @@ import {
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';
@@ -33,21 +33,21 @@ interface PaymentPlansFiltersProps {
 
 export const allowedStatusChoices = [
   //TODO: add pp status choices
-  PaymentPlanStatus.Accepted,
-  PaymentPlanStatus.Draft,
-  PaymentPlanStatus.Finished,
-  PaymentPlanStatus.InApproval,
-  PaymentPlanStatus.InAuthorization,
-  PaymentPlanStatus.InReview,
-  PaymentPlanStatus.Locked,
-  PaymentPlanStatus.LockedFsp,
-  PaymentPlanStatus.Open,
-  PaymentPlanStatus.Preparing,
-  PaymentPlanStatus.Processing,
-  PaymentPlanStatus.SteficonCompleted,
-  PaymentPlanStatus.SteficonError,
-  PaymentPlanStatus.SteficonRun,
-  PaymentPlanStatus.SteficonWait,
+  PaymentPlanStatusEnum.ACCEPTED,
+  PaymentPlanStatusEnum.DRAFT,
+  PaymentPlanStatusEnum.FINISHED,
+  PaymentPlanStatusEnum.IN_APPROVAL,
+  PaymentPlanStatusEnum.IN_AUTHORIZATION,
+  PaymentPlanStatusEnum.IN_REVIEW,
+  PaymentPlanStatusEnum.LOCKED,
+  PaymentPlanStatusEnum.LOCKED_FSP,
+  PaymentPlanStatusEnum.OPEN,
+  PaymentPlanStatusEnum.PREPARING,
+  PaymentPlanStatusEnum.PROCESSING,
+  PaymentPlanStatusEnum.STEFICON_COMPLETED,
+  PaymentPlanStatusEnum.STEFICON_ERROR,
+  PaymentPlanStatusEnum.STEFICON_RUN,
+  PaymentPlanStatusEnum.STEFICON_WAIT,
 ];
 
 export function PaymentPlansFilters({

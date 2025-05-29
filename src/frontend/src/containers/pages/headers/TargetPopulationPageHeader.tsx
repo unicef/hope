@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   PaymentPlanBuildStatus,
-  PaymentPlanStatus,
   useBusinessAreaDataQuery,
 } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -68,7 +68,7 @@ export function TargetPopulationPageHeader({
   let buttons;
 
   switch (paymentPlan.status) {
-    case PaymentPlanStatus.TpOpen:
+    case PaymentPlanStatusEnum.TP_OPEN:
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={paymentPlan}
@@ -79,10 +79,10 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case PaymentPlanStatus.TpLocked:
-    case PaymentPlanStatus.SteficonCompleted:
-    case PaymentPlanStatus.SteficonError:
-    case PaymentPlanStatus.SteficonRun:
+    case PaymentPlanStatusEnum.TP_LOCKED:
+    case PaymentPlanStatusEnum.STEFICON_COMPLETED:
+    case PaymentPlanStatusEnum.STEFICON_ERROR:
+    case PaymentPlanStatusEnum.STEFICON_RUN:
       buttons = (
         <LockedTargetPopulationHeaderButtons
           targetPopulation={paymentPlan}

@@ -6,10 +6,8 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { VerificationPaymentDetails } from '@components/payments/VerificationPaymentDetails';
 import { VerifyManual } from '@components/payments/VerifyManual';
 import { AdminButton } from '@core/AdminButton';
-import {
-  PaymentVerificationPlanStatus,
-  usePaymentVerificationChoicesQuery,
-} from '@generated/graphql';
+import { usePaymentVerificationChoicesQuery } from '@generated/graphql';
+import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { RestService } from '@restgenerated/services/RestService';
@@ -83,7 +81,7 @@ function VerificationPaymentDetailsPage(): ReactElement {
     >
       {verification?.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
-      verification?.status !== PaymentVerificationPlanStatus.Finished ? (
+      verification?.status !== PaymentVerificationPlanStatusEnum.FINISHED ? (
         <VerifyManual
           paymentVerificationId={payment.verification?.id}
           status={payment.verification?.status}

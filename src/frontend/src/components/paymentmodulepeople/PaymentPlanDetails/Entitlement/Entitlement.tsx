@@ -4,10 +4,8 @@ import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
@@ -190,17 +188,17 @@ export function Entitlement({
 
   const shouldDisableEntitlementSelect =
     !canApplySteficonRule ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     !isActiveProgram;
 
   const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED || !isActiveProgram;
 
   const shouldDisableExportXlsx =
     loadingExport ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting ||
+      PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING ||
     !isActiveProgram;
 
   return (
@@ -254,9 +252,9 @@ export function Entitlement({
                   disabled={
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
-                    paymentPlan.status !== PaymentPlanStatus.Locked ||
+                    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                     paymentPlan.backgroundActionStatus ===
-                      PaymentPlanBackgroundActionStatus.RuleEngineRun ||
+                      PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                     !isActiveProgram
                   }
                   data-cy="button-apply-steficon"

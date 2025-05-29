@@ -10,7 +10,7 @@ import { CreateVerificationPlan } from '@components/payments/CreateVerificationP
 import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
 import { PeopleVerificationsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationsTable';
-import { PaymentVerificationPlanStatus } from '@generated/graphql';
+import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Button } from '@mui/material';
@@ -120,8 +120,8 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =
-      statesArray.includes(PaymentVerificationPlanStatus.Finished) ||
-      statesArray.includes(PaymentVerificationPlanStatus.Active);
+      statesArray.includes(PaymentVerificationPlanStatusEnum.FINISHED) ||
+      statesArray.includes(PaymentVerificationPlanStatusEnum.ACTIVE);
 
     return showTable && statesArray.length > 0;
   };

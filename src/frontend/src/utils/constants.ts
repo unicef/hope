@@ -1,22 +1,20 @@
-import {
-  PaymentPlanStatus,
-  ProgramStatus,
-  PaymentPlanBackgroundActionStatus,
-} from '@generated/graphql';
+import { ProgramStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
 
 export const TARGETING_STATES = {
   NONE: 'None',
-  [PaymentPlanStatus.TpOpen]: 'Open',
-  [PaymentPlanStatus.TpLocked]: 'Locked',
-  // [PaymentPlanStatus.ReadyForCashAssist]: 'Ready For Cash Assist',
-  // [PaymentPlanStatus.ReadyForPaymentModule]: 'Ready For Payment Module',
-  [PaymentPlanStatus.Processing]: 'Processing',
-  [PaymentPlanStatus.SteficonWait]: 'Entitlement Formula Wait',
-  [PaymentPlanStatus.SteficonRun]: 'Entitlement Formula Run',
-  [PaymentPlanStatus.SteficonCompleted]: 'Entitlement Formula Completed',
-  [PaymentPlanStatus.SteficonError]: 'Entitlement Formula Error',
-  // [PaymentPlanStatus.Assigned]: 'Assigned',
+  [PaymentPlanStatusEnum.TP_OPEN]: 'Open',
+  [PaymentPlanStatusEnum.TP_LOCKED]: 'Locked',
+  // [PaymentPlanStatusEnum.ReadyForCashAssist]: 'Ready For Cash Assist',
+  // [PaymentPlanStatusEnum.ReadyForPaymentModule]: 'Ready For Payment Module',
+  [PaymentPlanStatusEnum.PROCESSING]: 'Processing',
+  [PaymentPlanStatusEnum.STEFICON_WAIT]: 'Entitlement Formula Wait',
+  [PaymentPlanStatusEnum.STEFICON_RUN]: 'Entitlement Formula Run',
+  [PaymentPlanStatusEnum.STEFICON_COMPLETED]: 'Entitlement Formula Completed',
+  [PaymentPlanStatusEnum.STEFICON_ERROR]: 'Entitlement Formula Error',
+  // [PaymentPlanStatusEnum.Assigned]: 'Assigned',
 };
 
 export const PROGRAM_STATES = {
@@ -26,28 +24,31 @@ export const PROGRAM_STATES = {
 };
 
 export const PAYMENT_PLAN_STATES = {
-  [PaymentPlanStatus.Open]: 'Open',
-  [PaymentPlanStatus.Locked]: 'Locked',
-  [PaymentPlanStatus.LockedFsp]: 'FSP Locked',
-  [PaymentPlanStatus.InApproval]: 'In Approval',
-  [PaymentPlanStatus.InAuthorization]: 'In Authorization',
-  [PaymentPlanStatus.InReview]: 'In Review',
-  [PaymentPlanStatus.Accepted]: 'Accepted',
-  [PaymentPlanStatus.Finished]: 'Finished',
+  [PaymentPlanStatusEnum.OPEN]: 'Open',
+  [PaymentPlanStatusEnum.LOCKED]: 'Locked',
+  [PaymentPlanStatusEnum.LOCKED_FSP]: 'FSP Locked',
+  [PaymentPlanStatusEnum.IN_APPROVAL]: 'In Approval',
+  [PaymentPlanStatusEnum.IN_AUTHORIZATION]: 'In Authorization',
+  [PaymentPlanStatusEnum.IN_REVIEW]: 'In Review',
+  [PaymentPlanStatusEnum.ACCEPTED]: 'Accepted',
+  [PaymentPlanStatusEnum.FINISHED]: 'Finished',
   ['ASSIGNED']: 'Assigned',
 };
 
 export const PAYMENT_PLAN_BACKGROUND_ACTION_STATES = {
-  [PaymentPlanBackgroundActionStatus.RuleEngineRun]: 'Entitlement Formula Run',
-  [PaymentPlanBackgroundActionStatus.RuleEngineError]:
+  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN]:
+    'Entitlement Formula Run',
+  [PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR]:
     'Entitlement Formula Error',
-  [PaymentPlanBackgroundActionStatus.XlsxExporting]: 'XLSX Exporting',
-  [PaymentPlanBackgroundActionStatus.XlsxExportError]: 'XLSX Export Error',
-  [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING]: 'XLSX Exporting',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR]:
+    'XLSX Export Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_ENTITLEMENTS]:
     'XLSX Importing Entitlements',
-  [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORTING_RECONCILIATION]:
     'XLSX Importing Reconciliation',
-  [PaymentPlanBackgroundActionStatus.XlsxImportError]: 'XLSX Import Error',
+  [PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR]:
+    'XLSX Import Error',
 };
 
 export const PAYMENT_PLAN_ACTIONS = {

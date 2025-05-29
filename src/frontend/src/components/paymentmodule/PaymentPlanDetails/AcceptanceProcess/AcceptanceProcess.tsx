@@ -4,10 +4,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  PaymentPlanStatus,
-  useExportPdfPpSummaryMutation,
-} from '@generated/graphql';
+import { useExportPdfPpSummaryMutation } from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -18,6 +15,7 @@ import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
@@ -61,8 +59,8 @@ function AcceptanceProcess({
 
   const canExportPdf =
     hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Accepted ||
-      paymentPlan.status === PaymentPlanStatus.Finished);
+    (paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
+      paymentPlan.status === PaymentPlanStatusEnum.FINISHED);
 
   return (
     <Box m={5}>

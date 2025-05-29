@@ -28,7 +28,7 @@ function SurveysPage(): ReactElement {
   const { data: categoryChoicesData } = useQuery({
     queryKey: ['surveyCategoryChoices', businessAreaSlug, programId],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsSurveysCategoryChoicesRetrieve({
+      RestService.restBusinessAreasProgramsSurveysCategoryChoicesList({
         businessAreaSlug,
         programSlug: programId,
       }),

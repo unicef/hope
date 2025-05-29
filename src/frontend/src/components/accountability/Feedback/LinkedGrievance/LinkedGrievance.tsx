@@ -19,13 +19,13 @@ function LinkedGrievance({ feedback }: LinkedGrievanceProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const grievanceDetailsPath = getGrievanceDetailsPath(
-    feedback.linkedGrievance?.id,
-    feedback.linkedGrievance?.category,
+    feedback.linkedGrievanceId,
+    Number(feedback.linkedGrievanceCategory),
     baseUrl,
   );
   return (
     <Grid size={{ xs: 4 }}>
-      {feedback.linkedGrievance ? (
+      {feedback.linkedGrievanceId ? (
         <Box p={3}>
           <ContainerColumnWithBorder>
             <Title>
@@ -34,7 +34,7 @@ function LinkedGrievance({ feedback }: LinkedGrievanceProps): ReactElement {
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>
                 <BlackLink to={grievanceDetailsPath}>
-                  {feedback.linkedGrievance.unicefId}
+                  {feedback.linkedGrievanceUnicefId}
                 </BlackLink>
               </LabelizedField>
             </OverviewContainer>

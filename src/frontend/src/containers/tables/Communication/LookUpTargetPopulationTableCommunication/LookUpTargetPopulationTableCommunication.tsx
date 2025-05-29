@@ -6,7 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsCommunication';
 import { LookUpTargetPopulationTableRowCommunication } from './LookUpTargetPopulationTableRowCommunication';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
@@ -55,7 +55,7 @@ const LookUpTargetPopulationTableCommunication = ({
         min: filter.createdAtRangeMin || null,
         max: filter.createdAtRangeMax || null,
       }),
-      statusNot: PaymentPlanStatus.Open,
+      statusNot: PaymentPlanStatusEnum.OPEN,
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
       programSlug: programId,
