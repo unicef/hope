@@ -8,6 +8,8 @@ import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { DeliveryMechanismPerPaymentPlan } from './DeliveryMechanismPerPaymentPlan';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
+import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
+import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 import type { PaymentPlanSupportingDocument } from './PaymentPlanSupportingDocument';
 import type { PaymentVerificationPlan } from './PaymentVerificationPlan';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
@@ -20,7 +22,7 @@ export type PaymentPlanDetail = {
      * Name
      */
     name?: string | null;
-    readonly status: string;
+    status: PaymentPlanStatusEnum;
     /**
      * Total Households Count [sys]
      */
@@ -233,7 +235,7 @@ export type PaymentPlanDetail = {
      * record revision number
      */
     version?: number;
-    backgroundActionStatus: string;
+    backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
     /**
      * Payment Plan start date
      */

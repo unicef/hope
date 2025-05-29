@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
+import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 export type PaymentPlan = {
     readonly id: string;
     unicefId?: string | null;
@@ -11,7 +12,7 @@ export type PaymentPlan = {
      * Name
      */
     name?: string | null;
-    readonly status: string;
+    status: PaymentPlanStatusEnum;
     /**
      * Target Criteria
      */
