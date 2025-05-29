@@ -48,7 +48,7 @@ class UserImportCSVTest(WebTest):
 
     @responses.activate
     def test_import_csv_with_kobo(self) -> None:
-        responses.add(responses.POST, f"{settings.KOBO_KF_URL}/authorized_application/users/", json={}, status=201)
+        responses.add(responses.POST, f"{settings.KOBO_URL}/authorized_application/users/", json={}, status=201)
 
         url = reverse("admin:account_user_import_csv")
         res = self.app.get(url, user=self.superuser)
@@ -128,29 +128,29 @@ class UserKoboActionsTest(WebTest):
     @responses.activate
     @override_config(KOBO_ADMIN_CREDENTIALS="kobo_admin:pwd")
     def test_create_kobo_user(self) -> None:
-        responses.add(responses.POST, f"{settings.KOBO_KF_URL}/authorized_application/users/", json={}, status=201)
+        responses.add(responses.POST, f"{settings.KOBO_URL}/authorized_application/users/", json={}, status=201)
         responses.add(
             responses.POST,
-            f"{settings.KOBO_KF_URL}/admin/login/",
-            headers={"Location": "https://kf-hope.unitst.org/admin/"},
+            f"{settings.KOBO_URL}/admin/login/",
+            headers={"Location": "https://kobo-hope-trn.unitst.org/admin/"},
             status=302,
         )
         responses.add(
             responses.GET,
-            f"{settings.KOBO_KF_URL}/admin/login/",
+            f"{settings.KOBO_URL}/admin/login/",
             body='<input type="text" name="csrfmiddlewaretoken" value="1111">',
             status=200,
         )
         kobo_username = get_valid_kobo_username(self.superuser)
         responses.add(
             responses.GET,
-            f"{settings.KOBO_KF_URL}/admin/auth/user/?q={kobo_username}&p=1",
+            f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=1",
             body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
             status=200,
         )
         responses.add(
             responses.GET,
-            f"{settings.KOBO_KF_URL}/admin/auth/user/?q={kobo_username}&p=2",
+            f"{settings.KOBO_URL}/admin/auth/user/?q={kobo_username}&p=2",
             body=f'action-checkbox. value="111"></td>< field-username <a>{self.superuser.username}</a></td>field-email">{self.superuser.email}</td>',
             status=200,
         )
