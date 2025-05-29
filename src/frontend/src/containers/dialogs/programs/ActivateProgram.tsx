@@ -1,10 +1,10 @@
 import { LoadingButton } from '@components/core/LoadingButton';
-import { ProgramStatus, useUpdateProgramMutation } from '@generated/graphql';
+import { useUpdateProgramMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +35,7 @@ export const ActivateProgram = ({
       variables: {
         programData: {
           id: program.id,
-          status: ProgramStatus.Active,
+          status: ProgramStatus.ACTIVE,
         },
         //TODO: add
         version: null,
@@ -46,7 +46,7 @@ export const ActivateProgram = ({
     if (!response.errors && response.data.updateProgram) {
       setSelectedProgram({
         ...selectedProgram,
-        status: Status791Enum.ACTIVE,
+        status: ProgramStatus.ACTIVE,
       });
 
       showMessage(t('Programme activated.'));

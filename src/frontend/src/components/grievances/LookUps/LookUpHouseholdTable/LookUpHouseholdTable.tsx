@@ -1,6 +1,5 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { TableWrapper } from '@core/TableWrapper';
-import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -14,6 +13,7 @@ import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { CountResponse } from '@restgenerated/models/CountResponse';
+import { HouseholdRdiMergeStatus } from '@generated/graphql';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;

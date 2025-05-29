@@ -1,3 +1,12 @@
+import { Bold } from '@components/core/Bold';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { BlackLink } from '@core/BlackLink';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { AllGrievanceTicketQuery } from '@generated/graphql';
 import {
   Box,
   Button,
@@ -11,25 +20,12 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { ReactElement, useEffect, useState } from 'react';
+import { grievanceTicketStatusToColor } from '@utils/utils';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  AllGrievanceTicketQuery,
-  useRelatedGrievanceTicketsLazyQuery,
-} from '@generated/graphql';
-import { Dialog } from '@containers/dialogs/Dialog';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { grievanceTicketStatusToColor } from '@utils/utils';
-import { BlackLink } from '@core/BlackLink';
-import { LoadingComponent } from '@core/LoadingComponent';
-import { StatusBox } from '@core/StatusBox';
-import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
-import { Bold } from '@components/core/Bold';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -65,17 +61,6 @@ function LinkedTicketsModal({
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [loadRelatedTickets, { data, loading }] =
-    useRelatedGrievanceTicketsLazyQuery({
-      variables: {
-        id: ticket.id,
-      },
-    });
-  useEffect(() => {
-    if (dialogOpen) {
-      loadRelatedTickets();
-    }
-  }, [dialogOpen, loadRelatedTickets]);
 
   const renderIssueTypeName = (row): string => {
     if (!row.issueType) {
@@ -140,10 +125,7 @@ function LinkedTicketsModal({
   };
 
   const renderRows = (): ReactElement => {
-    if (loading) return <LoadingComponent />;
-    if (!data) return null;
-
-    const { relatedTickets } = data?.grievanceTicket || {};
+    const { relatedTickets } = ticket || {};
     return (
       <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>
     );

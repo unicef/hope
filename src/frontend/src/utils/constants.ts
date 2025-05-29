@@ -1,7 +1,7 @@
-import { ProgramStatus } from '@generated/graphql';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
+import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 
 export const TARGETING_STATES = {
   NONE: 'None',
@@ -18,9 +18,9 @@ export const TARGETING_STATES = {
 };
 
 export const PROGRAM_STATES = {
-  [ProgramStatus.Active]: 'Active',
-  [ProgramStatus.Draft]: 'Draft',
-  [ProgramStatus.Finished]: 'Finished',
+  [ProgramStatus.ACTIVE]: 'Active',
+  [ProgramStatus.DRAFT]: 'Draft',
+  [ProgramStatus.FINISHED]: 'Finished',
 };
 
 export const PAYMENT_PLAN_STATES = {
