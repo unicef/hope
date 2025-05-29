@@ -13,11 +13,12 @@
     "preview": "vite preview",
     "download-dev-schema": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql",
     "download-dev-openapi": "wget --no-check-certificate -O data/openapi.yml http://localhost:8080/api/rest/",
+    "enhance-openapi-enums": "node enhance_openapi_enums.js",
     "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:3000/api/graphql/schema.graphql",
     "generate-types": "yarn download-dev-schema && graphql-codegen --config codegen.yml --debug",
     "generate-types-local": "yarn download-local-schema && graphql-codegen --config codegen.yml --debug",
-    "generate-rest-api-types": "npx openapi-typescript-codegen --input http://localhost:8080/api/rest/ --output src/restgenerated --useOptions  --exportCore false",
-    "generate-rest-api-types-camelcase": "yarn download-dev-openapi && node camelize_openapi.js && npx openapi-typescript-codegen --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase  --exportCore false"
+    "generate-rest-api-types": "yarn generate-rest-api-types-camelcase",
+    "generate-rest-api-types-camelcase": "yarn download-dev-openapi && node enhance_and_camelize_openapi.js && npx openapi-typescript-codegen --input data/openapi-camelcase.yml --output src/restgenerated --useOptions --postfixModels CamelCase --exportCore false"
   },
   "engines": {
     "node": ">=20.0.0"

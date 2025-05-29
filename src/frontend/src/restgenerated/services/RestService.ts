@@ -28,6 +28,7 @@ import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
+import type { PaginatedChoiceList } from '../models/PaginatedChoiceList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
@@ -51,7 +52,9 @@ import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
 import type { PaginatedRuleList } from '../models/PaginatedRuleList';
+import type { PaginatedSurveyCategoryChoiceList } from '../models/PaginatedSurveyCategoryChoiceList';
 import type { PaginatedSurveyList } from '../models/PaginatedSurveyList';
+import type { PaginatedSurveyRapidProFlowList } from '../models/PaginatedSurveyRapidProFlowList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
 import type { PaginatedUserList } from '../models/PaginatedUserList';
@@ -93,6 +96,7 @@ import type { RefuseRdi } from '../models/RefuseRdi';
 import type { RegistrationDataImportCreate } from '../models/RegistrationDataImportCreate';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
+import type { SampleSize } from '../models/SampleSize';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { Survey } from '../models/Survey';
 import type { SurveySampleSize } from '../models/SurveySampleSize';
@@ -636,19 +640,63 @@ export class RestService {
         });
     }
     /**
-     * @returns any No response body
+     * @returns PaginatedChoiceList
      * @throws ApiError
      */
-    public static restBusinessAreasActivityLogsActionChoicesRetrieve({
+    public static restBusinessAreasActivityLogsActionChoicesList({
         businessAreaSlug,
+        businessArea,
+        limit,
+        module,
+        objectId,
+        offset,
+        ordering,
+        programId,
+        search,
+        user,
+        userId,
     }: {
         businessAreaSlug: string,
-    }): CancelablePromise<any> {
+        businessArea?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        module?: string,
+        objectId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        user?: string,
+        userId?: string,
+    }): CancelablePromise<PaginatedChoiceList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/activity-logs/action-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'limit': limit,
+                'module': module,
+                'object_id': objectId,
+                'offset': offset,
+                'ordering': ordering,
+                'program_id': programId,
+                'search': search,
+                'user': user,
+                'user_id': userId,
             },
         });
     }
@@ -1950,22 +1998,66 @@ export class RestService {
         });
     }
     /**
-     * @returns any No response body
+     * @returns PaginatedChoiceList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsActivityLogsActionChoicesRetrieve({
+    public static restBusinessAreasProgramsActivityLogsActionChoicesList({
         businessAreaSlug,
         programSlug,
+        businessArea,
+        limit,
+        module,
+        objectId,
+        offset,
+        ordering,
+        programId,
+        search,
+        user,
+        userId,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-    }): CancelablePromise<any> {
+        businessArea?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        module?: string,
+        objectId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        user?: string,
+        userId?: string,
+    }): CancelablePromise<PaginatedChoiceList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/activity-logs/action-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'limit': limit,
+                'module': module,
+                'object_id': objectId,
+                'offset': offset,
+                'ordering': ordering,
+                'program_id': programId,
+                'search': search,
+                'user': user,
+                'user_id': userId,
             },
         });
     }
@@ -3568,7 +3660,7 @@ export class RestService {
         });
     }
     /**
-     * @returns MessageSampleSize
+     * @returns SampleSize
      * @throws ApiError
      */
     public static restBusinessAreasProgramsMessagesSampleSizeCreate({
@@ -3579,7 +3671,7 @@ export class RestService {
         businessAreaSlug: string,
         programSlug: string,
         requestBody: MessageSampleSize,
-    }): CancelablePromise<MessageSampleSize> {
+    }): CancelablePromise<SampleSize> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/sample-size/',
@@ -6118,16 +6210,64 @@ export class RestService {
         });
     }
     /**
-     * @returns Survey
+     * @returns PaginatedSurveyRapidProFlowList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsSurveysAvailableFlowsRetrieve({
+    public static restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug,
         programSlug,
+        businessArea,
+        createdAtRange,
+        createdBy,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        search,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-    }): CancelablePromise<Survey> {
+        businessArea?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `number_of_recipient` - Number of recipient
+         * * `-number_of_recipient` - Number of recipient (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-category' | '-created_at' | '-created_by' | '-number_of_recipient' | '-title' | '-unicef_id' | 'category' | 'created_at' | 'created_by' | 'number_of_recipient' | 'title' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedSurveyRapidProFlowList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/available-flows/',
@@ -6135,25 +6275,97 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
+            query: {
+                'business_area': businessArea,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'search': search,
+            },
         });
     }
     /**
-     * @returns Survey
+     * @returns PaginatedSurveyCategoryChoiceList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsSurveysCategoryChoicesRetrieve({
+    public static restBusinessAreasProgramsSurveysCategoryChoicesList({
         businessAreaSlug,
         programSlug,
+        businessArea,
+        createdAtRange,
+        createdBy,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        search,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-    }): CancelablePromise<Survey> {
+        businessArea?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `number_of_recipient` - Number of recipient
+         * * `-number_of_recipient` - Number of recipient (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-category' | '-created_at' | '-created_by' | '-number_of_recipient' | '-title' | '-unicef_id' | 'category' | 'created_at' | 'created_by' | 'number_of_recipient' | 'title' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedSurveyCategoryChoiceList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/category-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'search': search,
             },
         });
     }
@@ -6178,7 +6390,7 @@ export class RestService {
         });
     }
     /**
-     * @returns SurveySampleSize
+     * @returns SampleSize
      * @throws ApiError
      */
     public static restBusinessAreasProgramsSurveysSampleSizeCreate({
@@ -6189,7 +6401,7 @@ export class RestService {
         businessAreaSlug: string,
         programSlug: string,
         requestBody: SurveySampleSize,
-    }): CancelablePromise<SurveySampleSize> {
+    }): CancelablePromise<SampleSize> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/sample-size/',
