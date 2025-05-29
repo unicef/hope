@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, List, Tuple
 from unittest.mock import patch
 
+import pytest
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import (
@@ -366,6 +367,7 @@ class TestPaymentPlanMutation(APITestCase):
             self.assertEqual(TargetingCriteriaRule.objects.all().count(), 2)
             self.assertEqual(PaymentPlan.objects.all().count(), 2)
 
+    @pytest.mark.elasticsearch
     def test_assign_funds_commitments_mutation(self) -> None:
         ukr_ba = BusinessAreaFactory(name="Ukraine")
         FundsCommitmentFactory(

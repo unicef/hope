@@ -68,6 +68,7 @@ def capture_on_commit_callbacks(
             start_count = callback_count
 
 
+@pytest.mark.elasticsearch
 class TestRdiMergeTask(TestCase):
     fixtures = [
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",

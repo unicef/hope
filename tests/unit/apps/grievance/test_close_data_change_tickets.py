@@ -52,6 +52,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 @flaky
 class TestCloseDataChangeTickets(APITestCase):
     STATUS_CHANGE_MUTATION = """
