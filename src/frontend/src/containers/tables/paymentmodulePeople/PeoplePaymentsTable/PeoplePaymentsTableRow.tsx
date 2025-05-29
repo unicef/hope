@@ -2,7 +2,6 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '@components/core/WarningTooltip';
-import { PaymentStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
@@ -19,6 +18,7 @@ import { ReactElement, SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { PaymentStatus } from '@generated/graphql';
 
 export const StyledLink = styled.div`
   color: #000;
