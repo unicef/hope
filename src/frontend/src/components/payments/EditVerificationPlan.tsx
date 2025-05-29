@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
-  useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
@@ -40,6 +39,9 @@ import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
+import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -167,11 +169,16 @@ export const EditVerificationPlan = ({
       fetchPolicy: 'network-only',
     });
 
-  const { data } = useAllAdminAreasQuery({
-    variables: {
-      first: 100,
-      businessArea,
+  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
+    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+    queryFn: async () => {
+      return RestService.restAreasList({
+        limit: 100,
+        areaTypeAreaLevel: 2,
+        search: undefined,
+      });
     },
+    enabled: !!businessArea,
   });
 
   const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
@@ -212,10 +219,10 @@ export const EditVerificationPlan = ({
     showMessage(t('Verification plan edited.'));
   };
 
-  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
-    ? data.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
+  const mappedAdminAreas = adminAreasData?.results?.length
+    ? adminAreasData.results.map((area) => ({
+        value: area.id,
+        name: area.name || '',
       }))
     : [];
 

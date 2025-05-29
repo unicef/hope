@@ -101,18 +101,18 @@ export const NewTemplatePage = (): ReactElement => {
       return [];
     }
     return data.results.map((item) => {
-      const { name, pdu_data, label } = item;
-      const { rounds_names } = pdu_data;
+      const { name, pduData, label } = item;
+      const { roundsNames } = pduData;
       return {
         field: name,
         label,
-        rounds: rounds_names.map((_, roundIndex) => ({
+        rounds: roundsNames.map((_, roundIndex) => ({
           round: roundIndex + 1,
-          round_name: rounds_names[roundIndex],
+          roundName: roundsNames[roundIndex],
         })),
-        numberOfRounds: rounds_names.length,
+        numberOfRounds: roundsNames.length,
         roundNumber: 1,
-        roundName: rounds_names[0],
+        roundName: roundsNames[0],
       };
     });
   };

@@ -20,7 +20,7 @@ import {
 } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 
-export function CommunicationPage(): ReactElement {
+export const CommunicationPage = (): ReactElement => {
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
@@ -92,6 +92,6 @@ export function CommunicationPage(): ReactElement {
       />
     </>
   );
-}
+};
 
 export default withErrorBoundary(CommunicationPage, 'CommunicationPage');

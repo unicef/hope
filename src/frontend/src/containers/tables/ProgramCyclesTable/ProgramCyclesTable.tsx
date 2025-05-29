@@ -13,13 +13,13 @@ import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/He
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  fetchProgramCycles,
   finishProgramCycle,
-  PaginatedListResponse,
-  ProgramCycle,
   ProgramCyclesQuery,
   reactivateProgramCycle,
 } from '@api/programCycleApi';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
 import { BlackLink } from '@core/BlackLink';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
@@ -48,14 +48,22 @@ const ProgramCyclesTablePaymentModule = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { data, refetch, error, isLoading } = useQuery<
-    PaginatedListResponse<ProgramCycle>
-  >({
-    queryKey: ['programCycles', businessArea, program.id, queryVariables],
-    queryFn: async () => {
-      return fetchProgramCycles(businessArea, program.id, queryVariables);
-    },
-  });
+  const { data, refetch, error, isLoading } =
+    useQuery<PaginatedProgramCycleListList>({
+      queryKey: ['programCycles', businessArea, program.id, queryVariables],
+      queryFn: () => {
+        return RestService.restBusinessAreasProgramsCyclesList(
+          createApiParams(
+            {
+              businessAreaSlug: businessArea,
+              programSlug: program.id,
+            },
+            queryVariables,
+            { withPagination: true },
+          ),
+        );
+      },
+    });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({

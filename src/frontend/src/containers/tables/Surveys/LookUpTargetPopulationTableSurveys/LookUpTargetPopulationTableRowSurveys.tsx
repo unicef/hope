@@ -5,7 +5,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { PaymentPlanList } from '@restgenerated/models/PaymentPlanList';
+import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
 import {
   paymentPlanStatusMapping,
   paymentPlanStatusToColor,
@@ -14,7 +14,7 @@ import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface LookUpTargetPopulationTableRowSurveysProps {
-  targetPopulation: PaymentPlanList;
+  targetPopulation: TargetPopulationList;
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;

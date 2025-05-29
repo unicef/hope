@@ -16,6 +16,7 @@ from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdSmallSerializer,
 )
+from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.api.serializers import (
     FollowUpPaymentPlanSerializer,
     FullListSerializer,
@@ -25,6 +26,7 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.registration_data.api.serializers import (
     RegistrationDataImportListSerializer,
 )
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class FeedbackMessageSerializer(serializers.ModelSerializer):
@@ -53,6 +55,7 @@ class FeedbackListSerializer(serializers.ModelSerializer):
     individual_unicef_id = serializers.CharField(source="individual_lookup.unicef_id", allow_null=True)
     individual_id = serializers.CharField(source="individual_lookup_id", allow_null=True)
     linked_grievance_unicef_id = serializers.CharField(source="linked_grievance.unicef_id", allow_null=True)
+    linked_grievance_category = serializers.CharField(source="linked_grievance.category", allow_null=True)
     program_name = serializers.CharField(source="program.name", allow_null=True)
     created_by = serializers.SerializerMethodField()
     feedback_messages = FeedbackMessageSerializer(many=True, read_only=True)
@@ -69,6 +72,7 @@ class FeedbackListSerializer(serializers.ModelSerializer):
             "individual_id",
             "linked_grievance_id",
             "linked_grievance_unicef_id",
+            "linked_grievance_category",
             "program_name",
             "program_id",
             "created_by",
@@ -194,9 +198,11 @@ class MessageCreateSerializer(serializers.Serializer):
     sampling_type = serializers.ChoiceField(required=True, choices=Message.SamplingChoices)
     full_list_arguments = FullListSerializer()
     random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
-    payment_plan = serializers.CharField(required=False)
-    registration_data_import = serializers.CharField(required=False)
-    households = serializers.ListSerializer(child=serializers.CharField(), required=False)
+    payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
+    registration_data_import = serializers.PrimaryKeyRelatedField(
+        queryset=RegistrationDataImport.objects.all(), required=False
+    )
+    households = serializers.ListSerializer(child=serializers.UUIDField(), required=False)
 
 
 class AccountabilityFullListArgumentsSerializer(serializers.Serializer):
@@ -211,8 +217,8 @@ class AccountabilityCommunicationMessageAgeInput(serializers.Serializer):
 class AccountabilityRandomSamplingArgumentsSerializer(AccountabilityFullListArgumentsSerializer):
     confidence_interval = serializers.FloatField(required=True)
     margin_of_error = serializers.FloatField(required=True)
-    age = AccountabilityCommunicationMessageAgeInput(required=True)
-    sex = serializers.CharField(required=True)
+    age = AccountabilityCommunicationMessageAgeInput(required=False)
+    sex = serializers.CharField(required=False)
 
 
 class SurveySerializer(serializers.ModelSerializer):
@@ -279,3 +285,28 @@ class SurveyCategoryChoiceSerializer(serializers.Serializer):
 class SurveyRapidProFlowSerializer(serializers.Serializer):
     uuid: serializers.CharField = serializers.CharField()
     name: serializers.CharField = serializers.CharField()
+
+
+class SurveySampleSizeSerializer(serializers.Serializer):
+    payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
+    sampling_type = serializers.ChoiceField(required=True, choices=Survey.SAMPLING_CHOICES)
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False)
+
+
+class SampleSizeSerializer(serializers.Serializer):
+    number_of_recipients = serializers.IntegerField()
+    sample_size = serializers.IntegerField()
+
+
+class MessageSampleSizeSerializer(serializers.Serializer):
+    households = serializers.ListSerializer(
+        child=serializers.PrimaryKeyRelatedField(queryset=Household.objects.all()), required=False
+    )
+    payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
+    registration_data_import = serializers.PrimaryKeyRelatedField(
+        queryset=RegistrationDataImport.objects.all(), required=False
+    )
+    sampling_type = serializers.ChoiceField(required=True, choices=Message.SamplingChoices)
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False)

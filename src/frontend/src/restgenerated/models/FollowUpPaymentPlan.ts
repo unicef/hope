@@ -2,10 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PaymentPlanStatusEnum } from './PaymentPlanStatusEnum';
 export type FollowUpPaymentPlan = {
     readonly id: string;
     unicefId?: string | null;
-    status: string;
+    status: PaymentPlanStatusEnum;
     /**
      * Dispersion Start Date
      */

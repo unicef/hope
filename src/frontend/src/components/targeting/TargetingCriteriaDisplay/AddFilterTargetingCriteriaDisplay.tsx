@@ -1,11 +1,12 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
-import {
-  DataCollectingTypeType,
-  useAllCollectorFieldsAttributesQuery,
-} from '@generated/graphql';
+import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
+import { DataCollectingTypeEnum } from '@restgenerated/models/DataCollectingTypeEnum';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -17,9 +18,6 @@ import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
-import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -182,7 +180,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
   const isSocialWorkingProgram =
-    selectedProgram?.dataCollectingType?.type === DataCollectingTypeType.Social;
+    selectedProgram?.dataCollectingType?.type === DataCollectingTypeEnum.SOCIAL;
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;

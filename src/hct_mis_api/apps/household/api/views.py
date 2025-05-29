@@ -100,7 +100,8 @@ class HouseholdViewSet(
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
 
-    @action(detail=True, methods=["get"])
+    @extend_schema(responses={200: HouseholdMemberSerializer(many=True)})
+    @action(detail=True, methods=["get"], filter_backends=())
     def members(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         instance = self.get_object()
         individuals_ids = list(instance.individuals(manager="all_merge_status_objects").values_list("id", flat=True))

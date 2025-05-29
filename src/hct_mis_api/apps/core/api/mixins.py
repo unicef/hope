@@ -138,9 +138,7 @@ class ProgramMixin:
 
 
 class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
-    """
-    Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
-    """
+    #  Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
 
     def get_queryset(self) -> QuerySet:
         queryset = super().get_queryset()
@@ -156,9 +154,7 @@ class BusinessAreaProgramsAccessMixin(BusinessAreaMixin):
 
 
 class ProgramVisibilityMixin(ProgramMixin):
-    """
-    Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
-    """
+    #  Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
 
     def get_queryset(self) -> QuerySet:
         queryset = super().get_queryset()
@@ -174,9 +170,7 @@ class ProgramVisibilityMixin(ProgramMixin):
 
 
 class BusinessAreaVisibilityMixin(BusinessAreaMixin):
-    """
-    Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-    """
+    #  Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
 
     program_model_field = "program"
 
@@ -262,9 +256,7 @@ class AdminUrlSerializerMixin:
 
 
 class CountActionMixin:
-    """
-    Adds a count action to the viewset that returns the count of the queryset.
-    """
+    #  Adds a count action to the viewset that returns the count of the queryset.
 
     @extend_schema(
         responses={
@@ -281,10 +273,8 @@ class CountActionMixin:
 
 
 class PermissionsMixin:
-    """ "
-    Mixin to allow using the same viewset for both internal and external endpoints.
-    If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to variable token_permission.
-    """
+    #  Mixin to allow using the same viewset for both internal and external endpoints.
+    #  If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to variable token_permission.
 
     token_permission = Grant.API_READ_ONLY
 

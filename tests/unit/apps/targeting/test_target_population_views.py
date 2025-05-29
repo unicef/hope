@@ -138,7 +138,7 @@ class TestTargetPopulationViews:
         expected = {
             "name": self.tp1.name,
             # "id": str(self.tp1.id),
-            "status": self.tp1.get_status_display(),
+            "status": self.tp1.get_status_display().upper(),
             "created_by": self.tp1.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
             "total_households_count": self.tp1.total_households_count,
@@ -151,7 +151,7 @@ class TestTargetPopulationViews:
         expected_2 = {
             "name": self.tp2.name,
             # "id": str(self.tp2.id),
-            "status": self.tp2.get_status_display(),
+            "status": self.tp2.get_status_display().upper(),
             "created_by": self.tp2.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         }
@@ -161,7 +161,7 @@ class TestTargetPopulationViews:
         expected_3 = {
             "name": self.tp3.name,
             # "id": str(self.tp3.id),
-            "status": "Assigned",
+            "status": "ASSIGNED",
             "created_by": self.tp3.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         }

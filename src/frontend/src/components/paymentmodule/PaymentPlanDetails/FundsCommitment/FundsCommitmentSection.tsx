@@ -25,9 +25,9 @@ import React, { useState } from 'react';
 import {
   FundsCommitmentNode,
   PaymentPlanDocument,
-  PaymentPlanStatus,
   useAssignFundsCommitmentsPaymentPlanMutation,
 } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
@@ -50,7 +50,8 @@ interface FundsCommitmentSectionProps {
 const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   paymentPlan,
 }) => {
-  const initialFundsCommitment = paymentPlan?.fundsCommitments as FundsCommitmentNode | null;
+  const initialFundsCommitment =
+    paymentPlan?.fundsCommitments as FundsCommitmentNode | null;
   const initialFundsCommitmentItems =
     paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
       (el) => el.recSerialNumber,
@@ -73,7 +74,9 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     permissions,
   );
 
-  const handleFundsCommitmentChange = (newValue: FundsCommitmentNode | null) => {
+  const handleFundsCommitmentChange = (
+    newValue: FundsCommitmentNode | null,
+  ) => {
     setSelectedFundsCommitment(newValue);
     setSelectedItems([]);
   };
@@ -82,7 +85,8 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     paymentPlan?.availableFundsCommitments || [];
   const selectedCommitment = availableFundsCommitments.find(
     (commitment) =>
-      commitment.fundsCommitmentNumber === selectedFundsCommitment?.fundsCommitmentNumber,
+      commitment.fundsCommitmentNumber ===
+      selectedFundsCommitment?.fundsCommitmentNumber,
   );
 
   const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
@@ -149,15 +153,21 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
             <Typography variant="h6">{t('Funds Commitment')}</Typography>
           </Title>
         </Box>
-        {paymentPlan.status === PaymentPlanStatus.InReview ? (
+        {paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW ? (
           <>
             <Box mt={2}>
               <FormControl fullWidth size="small">
                 <Autocomplete
                   value={selectedFundsCommitment}
-                  onChange={(event, newValue) => handleFundsCommitmentChange(newValue as FundsCommitmentNode | null)}
+                  onChange={(event, newValue) =>
+                    handleFundsCommitmentChange(
+                      newValue as FundsCommitmentNode | null,
+                    )
+                  }
                   options={availableFundsCommitments}
-                  getOptionLabel={(option) => option.fundsCommitmentNumber || ''}
+                  getOptionLabel={(option) =>
+                    option.fundsCommitmentNumber || ''
+                  }
                   renderInput={(params) => (
                     <TextField {...params} label={t('Funds Commitment')} /> // The label is handled here
                   )}
@@ -166,7 +176,10 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                       {option.fundsCommitmentNumber}
                     </MenuItem>
                   )}
-                  isOptionEqualToValue={(option, value) => option.fundsCommitmentNumber === value?.fundsCommitmentNumber}
+                  isOptionEqualToValue={(option, value) =>
+                    option.fundsCommitmentNumber ===
+                    value?.fundsCommitmentNumber
+                  }
                   noOptionsText={t('No options')}
                   clearOnEscape
                 />
@@ -262,13 +275,15 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
           <>
             <Box mt={2}>
               {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
-                  <Typography variant="h6" fontWeight="bold" mb={2}>
-                    {t('Funds Commitment Number')}: {selectedCommitment.fundsCommitmentNumber} {paymentPlan.fundsCommitments.insufficientAmount && <WarningTooltip
-                      message={t(
-                        'Insufficient Commitment Amount',
-                      )}
-                    />}
-                  </Typography>
+                <Typography variant="h6" fontWeight="bold" mb={2}>
+                  {t('Funds Commitment Number')}:{' '}
+                  {selectedCommitment.fundsCommitmentNumber}{' '}
+                  {paymentPlan.fundsCommitments.insufficientAmount && (
+                    <WarningTooltip
+                      message={t('Insufficient Commitment Amount')}
+                    />
+                  )}
+                </Typography>
               )}
               {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
                 (item, index) => (

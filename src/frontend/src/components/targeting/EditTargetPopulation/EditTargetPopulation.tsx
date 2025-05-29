@@ -1,5 +1,5 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
@@ -131,7 +131,7 @@ const EditTargetPopulation = ({
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
             programCycleId: values.programCycleId.value,
-            ...(paymentPlan.status === PaymentPlanStatus.TpOpen && {
+            ...(paymentPlan.status === PaymentPlanStatusEnum.TP_OPEN && {
               name: values.name,
             }),
             ...getTargetingCriteriaVariables({

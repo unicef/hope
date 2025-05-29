@@ -5,7 +5,6 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
-from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.accountability.services.sampling import Sampling
@@ -44,11 +43,11 @@ class MessageCrudServices:
         message.number_of_recipients = result.number_of_recipients
         message.households.set(result.households)
 
-        if payment_plan_id := input_data.get("payment_plan"):
-            message.payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        if payment_plan := input_data.get("payment_plan"):
+            message.payment_plan = payment_plan
 
-        if registration_data_import_id := input_data.get("registration_data_import"):
-            message.registration_data_import = get_object_or_404(RegistrationDataImport, id=registration_data_import_id)
+        if registration_data_import := input_data.get("registration_data_import"):
+            message.registration_data_import = registration_data_import
 
         if message.number_of_recipients == 0:
             raise ValidationError("No recipients found for the given criteria")
@@ -68,18 +67,17 @@ class MessageCrudServices:
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
-        elif payment_plan_id := input_data.get("payment_plan"):
-            payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        elif payment_plan := input_data.get("payment_plan"):
             if payment_plan.status == PaymentPlan.Status.TP_OPEN:
                 return Household.objects.none()
             return Household.objects.filter(payment__parent=payment_plan).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
-        elif registration_data_import_id := input_data.get("registration_data_import"):
+        elif registration_data_import := input_data.get("registration_data_import"):
             return Household.objects.filter(
                 registration_data_import__status=RegistrationDataImport.MERGED,
-                registration_data_import_id=registration_data_import_id,
+                registration_data_import=registration_data_import,
             ).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,

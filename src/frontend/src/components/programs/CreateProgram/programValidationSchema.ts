@@ -45,7 +45,35 @@ export const programValidationSchema = (
     dataCollectingTypeCode: Yup.string().required(
       t('Data Collecting Type is required'),
     ),
-    beneficiaryGroup: Yup.string().required(t('Beneficiary Group is required')),
+    beneficiaryGroup: Yup.string()
+      .nullable()
+      .test({
+        name: 'conditional-required',
+        message: t('Beneficiary Group is required'),
+        test: function (value) {
+          // Get parent values from the validation context
+          const { dataCollectingTypeCode } = this.parent;
+
+          // Field should only be required when dataCollectingTypeCode is present
+          // Note: we can't check programHasRdi or isCopyProgramPage here as they're not part of the form values
+          if (!dataCollectingTypeCode) {
+            return true; // Not required if dataCollectingTypeCode is not set
+          }
+
+          // If this is a program with RDI or a copy (where the field might be disabled),
+          // always consider the validation passed, as we'll set a default value via useEffect
+          // The validation will be handled by the disabled state in the form
+          if (
+            this.options?.context?.programHasRdi ||
+            this.options?.context?.isCopy
+          ) {
+            return true;
+          }
+
+          // If required, check if value exists
+          return !!value;
+        },
+      }),
     description: Yup.string()
       .min(3, t('Too short'))
       .max(255, t('Too long'))

@@ -1,7 +1,7 @@
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
@@ -91,7 +91,7 @@ export function ImportXlsxPaymentPlanPaymentList({
   );
 
   const shouldDisableUpload =
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     !canUploadFile ||
     !isActiveProgram;
 
