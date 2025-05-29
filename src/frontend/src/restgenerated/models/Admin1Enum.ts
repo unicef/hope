@@ -14,13 +14,13 @@
  * * `HR49` - West Cheryl
  */
 export enum Admin1Enum {
-  HR52 = 'HR52',
-  UA67 = 'UA67',
-  AF35 = 'AF35',
-  AF53 = 'AF53',
-  UA16 = 'UA16',
-  UA40 = 'UA40',
-  AF49 = 'AF49',
-  HR95 = 'HR95',
-  HR49 = 'HR49',
+    HR52 = 'HR52',
+    UA67 = 'UA67',
+    AF35 = 'AF35',
+    AF53 = 'AF53',
+    UA16 = 'UA16',
+    UA40 = 'UA40',
+    AF49 = 'AF49',
+    HR95 = 'HR95',
+    HR49 = 'HR49',
 }
