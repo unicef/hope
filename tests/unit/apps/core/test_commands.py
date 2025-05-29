@@ -9,6 +9,7 @@ import pytest
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestCommands(TestCase):
     databases = "__all__"
 

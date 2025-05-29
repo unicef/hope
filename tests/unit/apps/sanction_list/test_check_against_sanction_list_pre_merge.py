@@ -30,6 +30,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
+@pytest.mark.elasticsearch
 class TestSanctionListPreMerge(TestCase):
     databases = "__all__"
     TEST_FILES_PATH = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"
