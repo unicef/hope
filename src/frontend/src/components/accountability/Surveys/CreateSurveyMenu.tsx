@@ -5,9 +5,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { ReactElement, useState, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SurveyCategory } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
+import { SurveyCategory } from '@generated/graphql';
 
 const StyledMenu = styled(Menu)(() => ({
   '.MuiPaper-root': {

@@ -3,7 +3,6 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { RegistrationDataImportStatus } from '@generated/graphql';
 import { CommunicationTabsValues } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { LookUpHouseholdFiltersCommunication } from './LookUpHouseholdFiltersCommunication';
@@ -14,6 +13,7 @@ import { useProgramContext } from 'src/programContext';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { RegistrationDataImportStatusEnum } from '@restgenerated/models/RegistrationDataImportStatusEnum';
 
 const BoxWithBorderBottom = styled(Box)`
   border-bottom: 1px solid #e4e4e4;
@@ -47,7 +47,7 @@ export function LookUpSelectionCommunication({
   const initialFilterRDI = {
     search: '',
     importedBy: '',
-    status: RegistrationDataImportStatus.Merged,
+    status: RegistrationDataImportStatusEnum.MERGED,
     totalHouseholdsCountWithValidPhoneNoMin: '',
     totalHouseholdsCountWithValidPhoneNoMax: '',
     importDateRangeMin: '',

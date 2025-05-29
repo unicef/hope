@@ -2,7 +2,6 @@ import { Grid2 as Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
