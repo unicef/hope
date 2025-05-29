@@ -5,9 +5,9 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { SurveysChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, Typography } from '@mui/material';
+import { PaginatedSurveyCategoryChoiceList } from '@restgenerated/models/PaginatedSurveyCategoryChoiceList';
 import { Survey } from '@restgenerated/models/Survey';
 import { choicesToDict, renderUserName } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -16,7 +16,7 @@ import { useProgramContext } from 'src/programContext';
 
 interface SurveyDetailsProps {
   survey: Survey;
-  choicesData: SurveysChoiceDataQuery;
+  choicesData: PaginatedSurveyCategoryChoiceList;
 }
 
 function SurveyDetails({
@@ -29,7 +29,7 @@ function SurveyDetails({
     selectedProgram: { name: programName },
   } = useProgramContext();
   const { category, title, createdBy, createdAt, body } = survey;
-  const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
+  const categoryDict = choicesToDict(choicesData.results);
 
   return (
     <ContainerColumnWithBorder>

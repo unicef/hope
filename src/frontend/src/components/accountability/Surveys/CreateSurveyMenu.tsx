@@ -7,7 +7,6 @@ import { ReactElement, useState, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
-import { SurveyCategory } from '@generated/graphql';
 
 const StyledMenu = styled(Menu)(() => ({
   '.MuiPaper-root': {
@@ -92,21 +91,21 @@ export function CreateSurveyMenu(): ReactElement {
         <StyledMenuItem data-cy="menu-item-rapid-pro">
           <ListItemText
             data-cy="menu-item-rapid-pro-text"
-            onClick={() => handleMenuItemClick(SurveyCategory.RapidPro)}
+            onClick={() => handleMenuItemClick('RAPID_PRO')}
             primary={t('New Survey with Rapid Pro')}
           />
         </StyledMenuItem>
         <StyledMenuItem data-cy="menu-item-sms-text">
           <ListItemText
             data-cy="menu-item-sms-text"
-            onClick={() => handleMenuItemClick(SurveyCategory.Sms)}
+            onClick={() => handleMenuItemClick('SMS')}
             primary={t('New Survey with SMS')}
           />
         </StyledMenuItem>
         <StyledMenuItem data-cy="menu-item-manual">
           <ListItemText
             data-cy="menu-item-manual-text"
-            onClick={() => handleMenuItemClick(SurveyCategory.Manual)}
+            onClick={() => handleMenuItemClick('MANUAL')}
             primary={t('New Survey with Manual Process')}
           />
         </StyledMenuItem>
