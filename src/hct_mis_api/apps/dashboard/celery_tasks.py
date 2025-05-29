@@ -46,13 +46,19 @@ def update_recent_dashboard_figures(self: Any) -> None:
     previous_year = current_year - 1
     years_to_refresh = [current_year, previous_year]
 
-    active_business_areas = BusinessArea.objects.using("read_only").filter(active=True)
+    active_business_areas = list(BusinessArea.objects.using("read_only").filter(active=True))
     for ba in active_business_areas:
-        set_sentry_business_area_tag(ba.slug)
-        DashboardDataCache.refresh_data(ba.slug, years_to_refresh=years_to_refresh)
+        try:
+            set_sentry_business_area_tag(ba.slug)
+            DashboardDataCache.refresh_data(ba.slug, years_to_refresh=years_to_refresh)
+        except Exception as e:
+            logger.error(f"Error refreshing recent dashboard data for {ba.slug}: {e}", exc_info=True)
 
-    set_sentry_business_area_tag("global")
-    DashboardGlobalDataCache.refresh_data(years_to_refresh=years_to_refresh)
+    try:
+        set_sentry_business_area_tag("global")
+        DashboardGlobalDataCache.refresh_data(years_to_refresh=years_to_refresh)
+    except Exception as e:
+        logger.error(f"Error refreshing recent global dashboard data: {e}", exc_info=True)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -64,9 +70,16 @@ def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
     """
     try:
         business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
+    except BusinessArea.DoesNotExist:
+        logger.error(f"Dashboard report generation failed: Business area with slug '{business_area_slug}' not found.")
+        return
+
+    try:
         set_sentry_business_area_tag(business_area.slug)
         DashboardDataCache.refresh_data(business_area.slug)
-    except BusinessArea.DoesNotExist:
-        raise ValueError(f"Business area with slug {business_area_slug} not found.")
     except Exception as e:
+        logger.error(
+            f"Error refreshing dashboard data for {business_area_slug} in generate_dash_report_task: {e}",
+            exc_info=True,
+        )
         raise self.retry(exc=e, countdown=60)

@@ -350,7 +350,9 @@ class DashboardDataCache(DashboardCacheBase):
         ]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
-        payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
+        payment_data_iter = cls._get_payment_data(base_payments_qs.all()).iterator(
+            chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE
+        )
 
         summary: defaultdict[tuple, CountrySummaryDict] = defaultdict(
             lambda: {
@@ -515,7 +517,10 @@ class DashboardGlobalDataCache(DashboardCacheBase):
         ]
         plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
 
-        payment_data_iter = cls._get_payment_data(base_payments_qs).iterator(chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE)
+        # Clone the queryset before passing to _get_payment_data to ensure it's fresh
+        payment_data_iter = cls._get_payment_data(base_payments_qs.all()).iterator(
+            chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE
+        )
 
         summary: defaultdict[tuple, GlobalSummaryDict] = defaultdict(
             lambda: {

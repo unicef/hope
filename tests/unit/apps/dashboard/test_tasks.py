@@ -4,6 +4,7 @@ from unittest.mock import Mock, call, patch
 
 import pytest
 
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import (
     generate_dash_report_task,
@@ -25,14 +26,24 @@ def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_generate_dash_report_task_business_area_not_found() -> None:
+@patch("hct_mis_api.apps.dashboard.celery_tasks.logger.error")
+@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+def test_generate_dash_report_task_business_area_not_found(
+    mock_refresh_data: Mock, mock_logger_error: Mock
+) -> None:
     """
-    Test that generate_dash_report_task logs an error if the business area is not found.
+    Test that generate_dash_report_task logs an error and does not call refresh_data
+    if the business area is not found.
     """
     non_existent_slug = "non-existent-area"
+    BusinessArea.objects.filter(slug=non_existent_slug).delete()  # Ensure it doesn't exist
 
-    with pytest.raises(ValueError, match=f"Business area with slug {non_existent_slug} not found."):
-        generate_dash_report_task(business_area_slug=non_existent_slug)
+    generate_dash_report_task(business_area_slug=non_existent_slug)
+
+    mock_logger_error.assert_called_once_with(
+        f"Dashboard report generation failed: Business area with slug '{non_existent_slug}' not found."
+    )
+    mock_refresh_data.assert_not_called()
 
 
 @pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
@@ -100,12 +111,12 @@ def test_generate_dash_report_task_retry_on_failure(afghanistan: BusinessArea) -
 @patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
 @patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
 def test_update_recent_dashboard_figures_success(
-    mock_ba_refresh: Mock, mock_global_refresh: Mock, afghanistan: BusinessArea, business_area_factory: Callable
+    mock_ba_refresh: Mock, mock_global_refresh: Mock, afghanistan: BusinessArea
 ) -> None:
     """
     Test that update_recent_dashboard_figures calls refresh_data with correct year filters.
     """
-    iraq = business_area_factory(slug="iraq", name="Iraq", active=True)
+    iraq = BusinessAreaFactory.create(slug="iraq", name="Iraq", active=True)
     afghanistan.active = True
     afghanistan.save()
 
@@ -136,12 +147,11 @@ def test_update_recent_dashboard_figures_ba_error_continues(
     mock_global_refresh: Mock,
     mock_logger_error: Mock,
     afghanistan: BusinessArea,
-    business_area_factory: Callable,
 ) -> None:
     """
     Test that update_recent_dashboard_figures continues if one BA refresh fails.
     """
-    iraq = business_area_factory(slug="iraq", name="Iraq", active=True)
+    iraq = BusinessAreaFactory.create(slug="iraq", name="Iraq", active=True)
     afghanistan.active = True
     afghanistan.save()
     BusinessArea.objects.exclude(slug__in=[afghanistan.slug, iraq.slug]).update(active=False)
@@ -150,10 +160,13 @@ def test_update_recent_dashboard_figures_ba_error_continues(
     previous_year = current_year - 1
     years_to_refresh = [current_year, previous_year]
 
-    mock_ba_refresh.side_effect = [
-        Exception("BA refresh error for afghanistan"),
-        None,
-    ]
+    def ba_refresh_side_effect_func(slug, years_to_refresh):
+        if slug == afghanistan.slug:
+            raise Exception("BA refresh error for afghanistan")
+        # For other BAs (e.g., iraq), the mock should behave normally (return None)
+        return None
+
+    mock_ba_refresh.side_effect = ba_refresh_side_effect_func
 
     update_recent_dashboard_figures.apply()
 
@@ -198,3 +211,43 @@ def test_update_recent_dashboard_figures_global_error_continues(
     mock_logger_error.assert_called_once_with(
         "Error refreshing recent global dashboard data: Global refresh error", exc_info=True
     )
+
+
+@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
+@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+def test_update_dashboard_figures_no_active_bas(
+    mock_ba_refresh: Mock, mock_global_refresh: Mock
+) -> None:
+    """
+    Test update_dashboard_figures when there are no active business areas.
+    It should not call BA refresh but should call global refresh.
+    """
+    BusinessArea.objects.all().update(active=False)
+
+    update_dashboard_figures.apply()
+
+    mock_ba_refresh.assert_not_called()
+    mock_global_refresh.assert_called_once_with()
+
+
+@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
+@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardGlobalDataCache.refresh_data")
+@patch("hct_mis_api.apps.dashboard.celery_tasks.DashboardDataCache.refresh_data")
+def test_update_recent_dashboard_figures_no_active_bas(
+    mock_ba_refresh: Mock, mock_global_refresh: Mock
+) -> None:
+    """
+    Test update_recent_dashboard_figures when there are no active business areas.
+    It should not call BA refresh but should call global refresh with year filters.
+    """
+    BusinessArea.objects.all().update(active=False)
+
+    current_year = date.today().year
+    previous_year = current_year - 1
+    years_to_refresh = [current_year, previous_year]
+
+    update_recent_dashboard_figures.apply()
+
+    mock_ba_refresh.assert_not_called()
+    mock_global_refresh.assert_called_once_with(years_to_refresh=years_to_refresh)
