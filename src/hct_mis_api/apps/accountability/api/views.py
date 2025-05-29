@@ -288,8 +288,8 @@ class MessageViewSet(
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    @action(detail=False, methods=["post"], url_path="sample-size")
     @extend_schema(responses=SampleSizeSerializer)
+    @action(detail=False, methods=["post"], url_path="sample-size")
     def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -387,19 +387,19 @@ class SurveyViewSet(
         serializer = self.get_serializer(survey)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
-    @action(detail=False, methods=["get"], url_path="category-choices")
     @extend_schema(responses=SurveyCategoryChoiceSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="category-choices")
     def category_choices(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return Response(to_choice_object(Survey.CATEGORY_CHOICES))
 
-    @action(detail=False, methods=["get"], url_path="available-flows")
     @extend_schema(responses=SurveyRapidProFlowSerializer(many=True))
+    @action(detail=False, methods=["get"], url_path="available-flows")
     def available_flows(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         api = RapidProAPI(self.business_area_slug, RapidProAPI.MODE_SURVEY)  # type: ignore
         return Response(api.get_flows())
 
-    @action(detail=False, methods=["post"], url_path="sample-size")
     @extend_schema(responses=SampleSizeSerializer)
+    @action(detail=False, methods=["post"], url_path="sample-size")
     def sample_size(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

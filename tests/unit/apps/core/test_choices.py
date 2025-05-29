@@ -9,14 +9,14 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 pytestmark = pytest.mark.django_db
 
 
-class TestFeedbackViewSet:
+class TestChoicesViewSet:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
         self.partner = PartnerFactory(name="unittest")
         self.user = UserFactory(partner=self.partner, first_name="Test", last_name="User")
         self.client = api_client(self.user)
 
-    def test_payment_verification_plan_sampling(self) -> None:
+    def test_get_payment_verification_plan_sampling(self) -> None:
         response_data = self.client.get(reverse("api:choices-payment-verification-plan-sampling")).data
         assert response_data is not None
         assert len(response_data) == 2
