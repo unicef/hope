@@ -1,13 +1,14 @@
+import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { AllProgramsQuery, ChoiceObject } from '@generated/graphql';
+import { Choice } from '@restgenerated/models/Choice';
 import { PaymentPlanBackgroundActionStatusEnum as PaymentPlanBackgroundActionStatus } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
-import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
+import _ from 'lodash';
 import camelCase from 'lodash/camelCase';
 import moment from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
   GRIEVANCE_CATEGORIES,
@@ -16,9 +17,6 @@ import {
   PROGRAM_STATES,
   TARGETING_STATES,
 } from './constants';
-import _ from 'lodash';
-import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { Choice } from '@restgenerated/models/Choice';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -840,32 +838,6 @@ export const getFlexFieldTextValue = (_key, value, fieldAttribute): string => {
   }
 
   return textValue;
-};
-
-export const handleValidationErrors = (
-  fieldName,
-  e,
-  setFieldError,
-  showMessage,
-): { nonValidationErrors: GraphQLError[] } => {
-  const validationErrors = e.graphQLErrors.filter(
-    (error) => error instanceof ValidationGraphQLError,
-  );
-  const nonValidationErrors = e.graphQLErrors.filter(
-    (error) => !(error instanceof ValidationGraphQLError),
-  );
-  for (const validationError of validationErrors) {
-    Object.entries(validationError.validationErrors[fieldName]).map(
-      // eslint-disable-next-line array-callback-return
-      (entry) => {
-        if (entry[0] === '__all__') {
-          showMessage((entry[1] as string[]).join('\n'));
-        }
-        setFieldError(entry[0], (entry[1] as string[]).join('\n'));
-      },
-    );
-  }
-  return { nonValidationErrors };
 };
 
 export function renderSomethingOrDash(something): number | string | boolean {
