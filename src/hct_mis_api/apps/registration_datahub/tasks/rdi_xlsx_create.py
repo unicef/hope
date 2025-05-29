@@ -78,8 +78,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.bank_accounts = defaultdict(dict)
         self.program = None
         self.pdu_flexible_attributes: Optional[QuerySet[FlexibleAttribute]] = None
-        self.households_to_ignore = [] # household ids (excel ids) to ignore when creating individuals
-        self.colided_households_pks = [] # households pks to add extra_rdis
+        self.households_to_ignore = []  # household ids (excel ids) to ignore when creating individuals
+        self.colided_households_pks = []  # households pks to add extra_rdis
         super().__init__()
 
     @cached_property
@@ -475,11 +475,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             )
 
     def check_collision(self, identification_key: Optional[str]) -> bool:
-        if self.program.collision_detection_enabled:
+        print("identification_key", identification_key)
+        if not self.program.collision_detection_enabled:
             return False
         if not identification_key:
             return False
-        collided_household_id = program.collision_detector(identification_key)
+        collided_household_id = self.program.collision_detector.detect_collision(identification_key)
         if not collided_household_id:
             return False
         self.colided_households_pks.append(collided_household_id)
@@ -580,6 +581,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             continue
                         if header == "identification_key_h_c":
                             identification_key = cell.value
+                            obj_to_create.identification_key = identification_key
 
                         is_not_image = current_field.get("type") != "IMAGE"
 
@@ -594,8 +596,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             continue
                         if is_not_required_and_empty:
                             continue
-
-
 
                         if header == "household_id":
                             temp_value = cell_value
@@ -683,15 +683,16 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
                         ) from e
 
-
                 obj_to_create.last_registration_date = obj_to_create.first_registration_date
                 obj_to_create.detail_id = row[0].row
                 obj_to_create.business_area = rdi.business_area
                 if sheet_title == "households":
-                    if not self.check_collision(identification_key): # Dont create household if collision
+                    if not self.check_collision(identification_key):  # Dont create household if collision
                         self.households[household_id] = obj_to_create
                     else:
-                        self.households_to_ignore.append(household_id) # When collision add to ignore all individuals connected to this hh
+                        self.households_to_ignore.append(
+                            household_id
+                        )  # When collision add to ignore all individuals connected to this hh
                 else:
                     if household_id in self.households_to_ignore:
                         continue

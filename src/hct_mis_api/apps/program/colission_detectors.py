@@ -14,8 +14,8 @@ class AbstractCollisionDetector:
     def detect_collision(self, identifiaction_key: str):
         raise NotImplementedError("Subclasses should implement this method")
 
-class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
 
+class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
     def __init__(self, context: "Program"):
         super().__init__(context)
         self.unique_identification_keys_dict = None
@@ -23,15 +23,22 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
     def initialize(self):
         if self.unique_identification_keys_dict is not None:
             return
+        self.unique_identification_keys_dict = dict()
         ids_with_uniquekey_list = list(
-            Household.objects.filter(program=self.program).values_list("id", "unique_identification_key").distinct(
-                "id"))
-        for (hh_id, key) in ids_with_uniquekey_list:
-            self.unique_identification_keys_dict[key] =str(hh_id)
+            Household.all_objects.filter(program=self.program, identification_key__isnull=False)
+            .values_list("id", "identification_key")
+            .distinct("id")
+        )
+        print("ids_with_uniquekey_list", ids_with_uniquekey_list)
+        for hh_id, key in ids_with_uniquekey_list:
+            self.unique_identification_keys_dict[key] = str(hh_id)
+
     def detect_collision(self, identifiaction_key: str):
         self.initialize()
+        print(f"Checking for collision with identification key: {identifiaction_key}")
+        print("self.unique_identification_keys_dict", self.unique_identification_keys_dict)
         return self.unique_identification_keys_dict.get(identifiaction_key, None)
 
 
-collision_detectors_registry = Registry()
+collision_detectors_registry = Registry(AbstractCollisionDetector)
 collision_detectors_registry.append(IdentificationKeyCollisionDetector)
