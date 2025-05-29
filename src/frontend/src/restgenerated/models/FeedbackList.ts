@@ -14,6 +14,7 @@ export type FeedbackList = {
     individualId: string | null;
     readonly linkedGrievanceId: string | null;
     linkedGrievanceUnicefId: string | null;
+    linkedGrievanceCategory: string | null;
     programName: string | null;
     readonly programId: string | null;
     readonly createdBy: string;
