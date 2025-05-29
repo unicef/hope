@@ -1436,16 +1436,10 @@ class TestSurveyViewSet:
         assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
 
         data = {
-            "sampling_type": "RANDOM",
-            "random_sampling_arguments": {
-                "age": {"max": 80, "min": 30},
-                "sex": "MALE",
-                "margin_of_error": 20.0,
-                "confidence_interval": 0.9,
-                "excluded_admin_areas": [],
-            },
+            "sampling_type": "FULL_LIST",
+            "full_list_arguments": {"excluded_admin_areas": []},
         }
 
         response = self.client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED
-        assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
+        assert response.json() == {"number_of_recipients": 1, "sample_size": 1}

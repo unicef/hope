@@ -55,6 +55,7 @@ class FeedbackListSerializer(serializers.ModelSerializer):
     individual_unicef_id = serializers.CharField(source="individual_lookup.unicef_id", allow_null=True)
     individual_id = serializers.CharField(source="individual_lookup_id", allow_null=True)
     linked_grievance_unicef_id = serializers.CharField(source="linked_grievance.unicef_id", allow_null=True)
+    linked_grievance_category = serializers.CharField(source="linked_grievance.category", allow_null=True)
     program_name = serializers.CharField(source="program.name", allow_null=True)
     created_by = serializers.SerializerMethodField()
     feedback_messages = FeedbackMessageSerializer(many=True, read_only=True)
@@ -71,6 +72,7 @@ class FeedbackListSerializer(serializers.ModelSerializer):
             "individual_id",
             "linked_grievance_id",
             "linked_grievance_unicef_id",
+            "linked_grievance_category",
             "program_name",
             "program_id",
             "created_by",
@@ -287,7 +289,7 @@ class SurveySampleSizeSerializer(serializers.Serializer):
     payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
     sampling_type = serializers.ChoiceField(required=True, choices=Survey.SAMPLING_CHOICES)
     full_list_arguments = AccountabilityFullListArgumentsSerializer(required=False)
-    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=True)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(required=False)
 
 
 class SampleSizeSerializer(serializers.Serializer):
