@@ -35,8 +35,6 @@ function SurveysPage(): ReactElement {
     enabled: !!businessAreaSlug && !!programId,
   });
 
-  // Since we've migrated to REST, we can directly use the categoryChoicesData
-  // without adapting it to match the GraphQL format
   const choicesData = categoryChoicesData || null;
 
   const initialFilter = {

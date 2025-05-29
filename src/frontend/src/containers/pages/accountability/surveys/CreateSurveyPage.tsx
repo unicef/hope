@@ -24,16 +24,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
-  AccountabilitySampleSizeQueryVariables,
   CreateSurveyAccountabilityMutationVariables,
   SamplingChoices,
   SurveyCategory,
-  useAccountabilitySampleSizeLazyQuery,
-  useCreateSurveyAccountabilityMutation,
 } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { SurveySampleSize } from '@restgenerated/models/SurveySampleSize';
+import { SurveySampleSizeSamplingTypeEnum } from '@restgenerated/models/SurveySampleSizeSamplingTypeEnum';
 import { LookUpSelectionSurveys } from '@components/accountability/Surveys/LookUpsSurveys/LookUpSelectionSurveys';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
@@ -64,43 +63,59 @@ const Border = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-function prepareVariables(
+function prepareSampleSizeRequest(
   selectedSampleSizeType,
   values,
-): AccountabilitySampleSizeQueryVariables {
+): SurveySampleSize {
   return {
-    input: {
-      paymentPlan: values.targetPopulation,
-      program: values.program,
-      samplingType: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
-      fullListArguments:
-        selectedSampleSizeType === 0
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
-          : null,
-      randomSamplingArguments:
-        selectedSampleSizeType === 1
-          ? {
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              excludedAdminAreas: values.adminCheckbox
-                ? values.excludedAdminAreasRandom
-                : [],
-              age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
-          : null,
-    },
+    value: values.program,
+    paymentPlan: values.targetPopulation,
+    samplingType:
+      selectedSampleSizeType === 0
+        ? SurveySampleSizeSamplingTypeEnum.FULL_LIST
+        : SurveySampleSizeSamplingTypeEnum.RANDOM,
+    fullListArguments:
+      selectedSampleSizeType === 0
+        ? {
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
+        : undefined,
+    randomSamplingArguments:
+      selectedSampleSizeType === 1
+        ? {
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            excludedAdminAreas: values.adminCheckbox
+              ? values.excludedAdminAreasRandom
+              : [],
+            age: values.ageCheckbox
+              ? { min: values.filterAgeMin, max: values.filterAgeMax }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
+        : undefined,
   };
 }
 
 const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      programSlug: string;
+      requestBody: any;
+    }) =>
+      RestService.restBusinessAreasProgramsSurveysCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+      }),
+  });
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -163,11 +178,37 @@ const CreateSurveyPage = (): ReactElement => {
       enabled: !!businessArea,
     });
 
-  const [loadSampleSize, { data: sampleSizesData }] =
-    useAccountabilitySampleSizeLazyQuery({
-      variables: prepareVariables(selectedSampleSizeType, formValues),
-      fetchPolicy: 'network-only',
-    });
+  const [sampleSizesData, setSampleSizesData] = useState<any>(null);
+  const [sampleSizeLoading, setSampleSizeLoading] = useState<boolean>(false);
+  const [sampleSizeError, setSampleSizeError] = useState<Error | null>(null);
+
+  const loadSampleSize = useCallback(async () => {
+    if (!businessArea || !programId) return;
+
+    try {
+      setSampleSizeLoading(true);
+      setSampleSizeError(null);
+
+      const requestBody = prepareSampleSizeRequest(
+        selectedSampleSizeType,
+        formValues,
+      );
+
+      const result =
+        await RestService.restBusinessAreasProgramsSurveysSampleSizeCreate({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          requestBody,
+        });
+
+      setSampleSizesData(result);
+    } catch (error) {
+      console.error('Error loading sample size data:', error);
+      setSampleSizeError(error as Error);
+    } finally {
+      setSampleSizeLoading(false);
+    }
+  }, [businessArea, programId, selectedSampleSizeType, formValues]);
 
   const [flowsData, setFlowsData] = useState(null);
   const [flowsLoading, setFlowsLoading] = useState(false);
@@ -260,6 +301,7 @@ const CreateSurveyPage = (): ReactElement => {
     !hasPermissions(PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE, permissions)
   )
     return <PermissionDenied />;
+
   if (adminAreasLoading || flowsLoading) return <LoadingComponent />;
 
   const validate = (values): { error?: string } => {
@@ -285,11 +327,23 @@ const CreateSurveyPage = (): ReactElement => {
       }))
     : [];
 
-  const getSampleSizePercentage = (): string =>
-    `(${getPercentage(
-      sampleSizesData?.accountabilitySampleSize?.sampleSize,
-      sampleSizesData?.accountabilitySampleSize?.numberOfRecipients,
-    )})`;
+  const getSampleSizePercentage = (): string => {
+    if (!sampleSizesData) return '(0%)';
+
+    const sampleSizeValue =
+      sampleSizesData.sample_size ||
+      sampleSizesData.sampleSize ||
+      sampleSizesData.numberOfSamples ||
+      0;
+
+    const totalRecipients =
+      sampleSizesData.number_of_recipients ||
+      sampleSizesData.numberOfRecipients ||
+      sampleSizesData.total ||
+      0;
+
+    return `(${getPercentage(sampleSizeValue, totalRecipients)})`;
+  };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -387,15 +441,29 @@ const CreateSurveyPage = (): ReactElement => {
                 category === SurveyCategory.Manual ? t('Save') : t('Send'),
             }).then(async () => {
               try {
+                const variables = prepareMutationVariables(values);
+                const requestBody = {
+                  title: variables.input.title,
+                  body: variables.input.body,
+                  category: variables.input.category,
+                  paymentPlan: variables.input.paymentPlan,
+                  program: variables.input.program,
+                  samplingType: variables.input.samplingType,
+                  fullListArguments: variables.input.fullListArguments,
+                  randomSamplingArguments:
+                    variables.input.randomSamplingArguments,
+                  flow: variables.input.flow,
+                };
+
                 const response = await mutate({
-                  variables: prepareMutationVariables(values),
+                  businessAreaSlug: businessArea,
+                  programSlug: programId,
+                  requestBody,
                 });
                 showMessage(t('Survey created.'));
-                navigate(
-                  `/${baseUrl}/accountability/surveys/${response.data.createSurvey.survey.id}`,
-                );
+                navigate(`/${baseUrl}/accountability/surveys/${response.id}`);
               } catch (e) {
-                e.graphQLErrors.map((x) => showMessage(x.message));
+                showMessage(e.message || 'Error creating survey');
               }
             });
           } else {
@@ -452,6 +520,14 @@ const CreateSurveyPage = (): ReactElement => {
                 )}
                 {activeStep === SurveySteps.SampleSize && (
                   <Box px={8}>
+                    {sampleSizeError && (
+                      <Box mb={3}>
+                        <Typography color="error">
+                          {t('Error loading sample size data')}:{' '}
+                          {sampleSizeError.message}
+                        </Typography>
+                      </Box>
+                    )}
                     <Box display="flex" alignItems="center">
                       <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
                         {t('Sample Size')}:
@@ -496,16 +572,22 @@ const CreateSurveyPage = (): ReactElement => {
                             fontWeight="fontWeightBold"
                           >
                             Sample size:{' '}
-                            {
-                              sampleSizesData?.accountabilitySampleSize
-                                ?.sampleSize
-                            }{' '}
-                            out of{' '}
-                            {
-                              sampleSizesData?.accountabilitySampleSize
-                                ?.numberOfRecipients
-                            }{' '}
-                            {getSampleSizePercentage()}
+                            {sampleSizeLoading ? (
+                              <span>{t('Loading...')}</span>
+                            ) : (
+                              <>
+                                {sampleSizesData?.sample_size ||
+                                  sampleSizesData?.sampleSize ||
+                                  sampleSizesData?.numberOfSamples ||
+                                  0}{' '}
+                                out of{' '}
+                                {sampleSizesData?.number_of_recipients ||
+                                  sampleSizesData?.numberOfRecipients ||
+                                  sampleSizesData?.total ||
+                                  0}{' '}
+                                {getSampleSizePercentage()}
+                              </>
+                            )}
                           </Box>
                         </Box>
                       </Box>
@@ -616,16 +698,22 @@ const CreateSurveyPage = (): ReactElement => {
                           fontWeight="fontWeightBold"
                         >
                           Sample size:{' '}
-                          {
-                            sampleSizesData?.accountabilitySampleSize
-                              ?.sampleSize
-                          }{' '}
-                          out of{' '}
-                          {
-                            sampleSizesData?.accountabilitySampleSize
-                              ?.numberOfRecipients
-                          }{' '}
-                          {getSampleSizePercentage()}
+                          {sampleSizeLoading ? (
+                            <span>{t('Loading...')}</span>
+                          ) : (
+                            <>
+                              {sampleSizesData?.sample_size ||
+                                sampleSizesData?.sampleSize ||
+                                sampleSizesData?.numberOfSamples ||
+                                0}{' '}
+                              out of{' '}
+                              {sampleSizesData?.number_of_recipients ||
+                                sampleSizesData?.numberOfRecipients ||
+                                sampleSizesData?.total ||
+                                0}{' '}
+                              {getSampleSizePercentage()}
+                            </>
+                          )}
                         </Box>
                       </Box>
                     </TabPanel>
@@ -683,7 +771,14 @@ const CreateSurveyPage = (): ReactElement => {
                         fontWeight="fontWeightBold"
                       >
                         {t('Number of selected recipients')}:{' '}
-                        {sampleSizesData?.accountabilitySampleSize?.sampleSize}
+                        {sampleSizeLoading ? (
+                          <span>{t('Loading...')}</span>
+                        ) : (
+                          sampleSizesData?.sample_size ||
+                          sampleSizesData?.sampleSize ||
+                          sampleSizesData?.numberOfSamples ||
+                          0
+                        )}
                       </Box>
                     </Grid>
                   </>

@@ -22,7 +22,7 @@ const EditTargetPopulationPage = (): ReactElement => {
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
-    queryKey: ['paymentPlan', businessArea, id, programId],
+    queryKey: ['targetPopulation', businessArea, id, programId],
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
         businessAreaSlug: businessArea,
