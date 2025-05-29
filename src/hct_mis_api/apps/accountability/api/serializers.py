@@ -198,9 +198,11 @@ class MessageCreateSerializer(serializers.Serializer):
     sampling_type = serializers.ChoiceField(required=True, choices=Message.SamplingChoices)
     full_list_arguments = FullListSerializer()
     random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
-    payment_plan = serializers.CharField(required=False)
-    registration_data_import = serializers.CharField(required=False)
-    households = serializers.ListSerializer(child=serializers.CharField(), required=False)
+    payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
+    registration_data_import = serializers.PrimaryKeyRelatedField(
+        queryset=RegistrationDataImport.objects.all(), required=False
+    )
+    households = serializers.ListSerializer(child=serializers.UUIDField(), required=False)
 
 
 class AccountabilityFullListArgumentsSerializer(serializers.Serializer):
