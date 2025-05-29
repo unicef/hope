@@ -175,6 +175,7 @@ def document_national_id(individual: Individual, program: Program, poland: Count
     )
 
 
+@pytest.mark.elasticsearch
 class TestUniversalIndividualUpdateService:
     def test_update_individual(
         self,

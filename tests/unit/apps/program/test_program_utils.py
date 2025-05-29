@@ -6,6 +6,8 @@ from unittest.mock import patch
 from django.core.cache import cache
 from django.test import TestCase
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
@@ -277,6 +279,7 @@ class TestEnrolHouseholdToProgram(TestCase):
             self.program2,
         )
 
+    @pytest.mark.elasticsearch
     def test_enroll_households_to_program_task(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
@@ -286,6 +289,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
+    @pytest.mark.elasticsearch
     def test_enroll_households_to_program_task_already_running(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()

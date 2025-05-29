@@ -5,6 +5,8 @@ from typing import Any
 from django.conf import settings
 from django.test import TestCase
 
+import pytest
+
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
@@ -27,6 +29,7 @@ class Capturing(list):
         sys.stdout = self._stdout
 
 
+@pytest.mark.elasticsearch
 class TestSouthSudanUpdateScript(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

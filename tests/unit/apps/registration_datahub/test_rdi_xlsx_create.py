@@ -81,6 +81,7 @@ class CellMock:
         self.coordinate = coordinate
 
 
+@pytest.mark.elasticsearch
 class TestRdiXlsxCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
