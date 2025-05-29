@@ -390,7 +390,7 @@ class TestPaymentPlanServices(APITestCase):
         p_force_failed = payments[2]
         p_manually_cancelled = payments[3]
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -440,7 +440,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -601,6 +601,13 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         self.assertEqual(pp_splits[0].split_payment_items.count(), 4)
         self.assertEqual(pp_splits[1].split_payment_items.count(), 8)
+
+        # split by no_split
+        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.NO_SPLIT)
+        pp_splits = pp.splits.all().order_by("order")
+        self.assertEqual(pp.splits.count(), 1)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.NO_SPLIT)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 12)
 
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
