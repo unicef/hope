@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import get_program_id_from_headers
 
 if TYPE_CHECKING:
+    from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
     from hct_mis_api.apps.account.models import User
@@ -368,12 +369,12 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
 
 
 def check_creator_or_owner_permission(
-    user: Union["User", "AnonymousUser"],
-    general_permission: str,
+    user: Union["User", "AnonymousUser", "AbstractBaseUser"],
+    general_permission: Union[str, Permissions],
     is_creator: bool,
-    creator_permission: str,
+    creator_permission: Union[str, Permissions],
     is_owner: bool,
-    owner_permission: str,
+    owner_permission: Union[str, Permissions],
     business_area: "BusinessArea",
     program: Optional["Program"],
 ) -> None:
