@@ -68,6 +68,7 @@ def capture_on_commit_callbacks(
             start_count = callback_count
 
 
+@pytest.mark.elasticsearch
 class TestRdiMergeTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
