@@ -40,6 +40,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestRdiKoboCreateTask(TestCase):
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:
