@@ -25,6 +25,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestAddIndividualService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
