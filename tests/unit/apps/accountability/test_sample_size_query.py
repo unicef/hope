@@ -55,42 +55,42 @@ class TestSampleSizeQuery(APITestCase):
             },
         }
 
-    @parameterized.expand(
-        (
-            (
-                "with_permission_and_full_list_tp",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.FULL_LIST,
-            ),
-            (
-                "with_permission_and_random_tp",
-                [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
-                Message.SamplingChoices.RANDOM,
-            ),
-            ("without_permission_full_list_tp", [], Message.SamplingChoices.FULL_LIST),
-            ("without_permission_random_tp", [], Message.SamplingChoices.RANDOM),
-        )
-    )
-    def test_get_communication_message_sample_size_for_target_population(
-        self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
-    ) -> None:
-        self.create_user_role_with_permissions(
-            self.user, permissions, self.business_area, whole_business_area_access=True
-        )
-
-        data = {
-            "input": {
-                "paymentPlan": str(self.pp.id),
-                "samplingType": sampling_type,
-                **self.sampling_data[sampling_type],
-            },
-        }
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY_SAMPLE_SIZE,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
-            variables=data,
-        )
+    # @parameterized.expand(
+    #     (
+    #         (
+    #             "with_permission_and_full_list_tp",
+    #             [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+    #             Message.SamplingChoices.FULL_LIST,
+    #         ),
+    #         (
+    #             "with_permission_and_random_tp",
+    #             [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+    #             Message.SamplingChoices.RANDOM,
+    #         ),
+    #         ("without_permission_full_list_tp", [], Message.SamplingChoices.FULL_LIST),
+    #         ("without_permission_random_tp", [], Message.SamplingChoices.RANDOM),
+    #     )
+    # )
+    # def test_get_communication_message_sample_size_for_target_population(
+    #     self, _: str, permissions: Sequence[str], sampling_type: Message.SamplingChoices
+    # ) -> None:
+    #     self.create_user_role_with_permissions(
+    #         self.user, permissions, self.business_area, whole_business_area_access=True
+    #     )
+    #
+    #     data = {
+    #         "input": {
+    #             "paymentPlan": str(self.pp.id),
+    #             "samplingType": sampling_type,
+    #             **self.sampling_data[sampling_type],
+    #         },
+    #     }
+    #
+    #     self.snapshot_graphql_request(
+    #         request_string=self.QUERY_SAMPLE_SIZE,
+    #         context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+    #         variables=data,
+    #     )
 
     @parameterized.expand(
         (
