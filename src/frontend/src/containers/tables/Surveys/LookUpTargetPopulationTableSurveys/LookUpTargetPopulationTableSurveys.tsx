@@ -1,6 +1,6 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
@@ -54,7 +54,7 @@ export function LookUpTargetPopulationTableSurveys({
         min: filter.createdAtRangeMin || null,
         max: filter.createdAtRangeMax || null,
       }),
-      statusNot: PaymentPlanStatus.Open,
+      statusNot: PaymentPlanStatusEnum.OPEN,
       isTargetPopulation: true,
       businessAreaSlug: businessArea,
       programSlug: programId,

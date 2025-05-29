@@ -1,3 +1,22 @@
+import { LookUpSelectionSurveys } from '@components/accountability/Surveys/LookUpsSurveys/LookUpSelectionSurveys';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { FormikEffect } from '@components/core/FormikEffect';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TabPanel } from '@components/core/TabPanel';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaperContainer } from '@components/targeting/PaperContainer';
+import {
+  CreateSurveyAccountabilityMutationVariables,
+  SamplingChoices,
+  SurveyCategory,
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -11,6 +30,18 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
+import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { SurveySampleSize } from '@restgenerated/models/SurveySampleSize';
+import { SurveySampleSizeSamplingTypeEnum } from '@restgenerated/models/SurveySampleSizeSamplingTypeEnum';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { SurveySteps, SurveyTabsValues } from '@utils/constants';
+import { getPercentage } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import {
   ReactElement,
@@ -23,38 +54,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import {
-  CreateSurveyAccountabilityMutationVariables,
-  SamplingChoices,
-  SurveyCategory,
-} from '@generated/graphql';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
-import { SurveySampleSize } from '@restgenerated/models/SurveySampleSize';
-import { SurveySampleSizeSamplingTypeEnum } from '@restgenerated/models/SurveySampleSizeSamplingTypeEnum';
-import { LookUpSelectionSurveys } from '@components/accountability/Surveys/LookUpsSurveys/LookUpSelectionSurveys';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useConfirmation } from '@components/core/ConfirmationDialog';
-import { FormikEffect } from '@components/core/FormikEffect';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { TabPanel } from '@components/core/TabPanel';
-import { PaperContainer } from '@components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { FormikSliderField } from '@shared/Formik/FormikSliderField';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { SurveySteps, SurveyTabsValues } from '@utils/constants';
-import { getPercentage } from '@utils/utils';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -63,10 +63,7 @@ const Border = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-function prepareSampleSizeRequest(
-  selectedSampleSizeType,
-  values,
-): SurveySampleSize {
+function prepareSampleSizeRequest(selectedSampleSizeType, values) {
   return {
     value: values.program,
     paymentPlan: values.targetPopulation,
@@ -220,12 +217,10 @@ const CreateSurveyPage = (): ReactElement => {
     try {
       setFlowsLoading(true);
       const result =
-        await RestService.restBusinessAreasProgramsSurveysAvailableFlowsRetrieve(
-          {
-            businessAreaSlug: businessArea,
-            programSlug: programId,
-          },
-        );
+        await RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
       setFlowsData({ surveyAvailableFlows: result });
       console.log('Available flows loaded:', result);
     } catch (error) {

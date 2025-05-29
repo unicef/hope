@@ -11,9 +11,11 @@ import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 
 interface LookUpProgrammesFiltersSurveysProps {
   filter;
+  //TODO: replace with the correct REST API
   choicesData: ProgrammeChoiceDataQuery;
   setFilter: (filter) => void;
   initialFilter;

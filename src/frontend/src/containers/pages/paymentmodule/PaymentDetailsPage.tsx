@@ -7,7 +7,8 @@ import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
 import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 import { AdminButton } from '@core/AdminButton';
-import { PaymentPlanStatus, PaymentStatus } from '@generated/graphql';
+import { PaymentStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -64,8 +65,8 @@ function PaymentDetailsPage(): ReactElement {
 
     if (
       (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
-        paymentPlanStatus === PaymentPlanStatus.Accepted) ||
-      paymentPlanStatus === PaymentPlanStatus.Finished
+        paymentPlanStatus === PaymentPlanStatusEnum.ACCEPTED) ||
+      paymentPlanStatus === PaymentPlanStatusEnum.FINISHED
     ) {
       const ButtonComponent =
         payment.status === PaymentStatus.ForceFailed

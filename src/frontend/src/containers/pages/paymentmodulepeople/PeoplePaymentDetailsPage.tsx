@@ -7,11 +7,8 @@ import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
 import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 import { AdminButton } from '@core/AdminButton';
-import {
-  PaymentPlanStatus,
-  PaymentStatus,
-  useCashAssistUrlPrefixQuery,
-} from '@generated/graphql';
+import { PaymentStatus, useCashAssistUrlPrefixQuery } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -74,8 +71,8 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
   const renderButton = (): ReactElement | null => {
     if (
       (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
-        paymentPlanStatus === PaymentPlanStatus.Accepted) ||
-      paymentPlanStatus === PaymentPlanStatus.Finished
+        paymentPlanStatus === PaymentPlanStatusEnum.ACCEPTED) ||
+      paymentPlanStatus === PaymentPlanStatusEnum.FINISHED
     ) {
       const ButtonComponent =
         payment.status === PaymentStatus.ForceFailed

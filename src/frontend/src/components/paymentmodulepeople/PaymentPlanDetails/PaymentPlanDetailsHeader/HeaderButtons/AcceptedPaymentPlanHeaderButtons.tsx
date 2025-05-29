@@ -16,10 +16,10 @@ import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
 import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import {
   Action,
-  PaymentPlanBackgroundActionStatus,
   useAllFinancialServiceProviderXlsxTemplatesQuery,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -60,7 +60,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     loadingExport ||
     !paymentPlan.canExportXlsx ||
     paymentPlan.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting;
+      PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING;
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 

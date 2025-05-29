@@ -1,7 +1,7 @@
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
-import { PaymentPlanBackgroundActionStatus } from '@generated/graphql';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Publish } from '@mui/icons-material';
@@ -36,9 +36,9 @@ interface ImportXlsxPaymentPlanPaymentListPerFspProps {
 
 const allowedState = [
   null,
-  PaymentPlanBackgroundActionStatus.XlsxExportError,
-  PaymentPlanBackgroundActionStatus.XlsxImportError,
-  PaymentPlanBackgroundActionStatus.RuleEngineError,
+  PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORT_ERROR,
+  PaymentPlanBackgroundActionStatusEnum.XLSX_IMPORT_ERROR,
+  PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_ERROR,
 ];
 
 export function ImportXlsxPaymentPlanPaymentListPerFsp({
@@ -56,9 +56,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
       permissions,
     ) &&
-    allowedState.includes(
-      paymentPlan.backgroundActionStatus as PaymentPlanBackgroundActionStatus,
-    ) &&
+    allowedState.includes(paymentPlan.backgroundActionStatus) &&
     paymentPlan.fspCommunicationChannel == 'XLSX';
 
   const {

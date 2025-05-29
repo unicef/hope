@@ -1,11 +1,4 @@
-import {
-  AllProgramsQuery,
-  ChoiceObject,
-  // TODO: Find REST API equivalent for PaymentPlanBuildStatus
-  PaymentPlanBuildStatus,
-  // TODO: Find REST API equivalent for PaymentStatus
-  PaymentStatus,
-} from '@generated/graphql';
+import { AllProgramsQuery, ChoiceObject } from '@generated/graphql';
 import { PaymentPlanBackgroundActionStatusEnum as PaymentPlanBackgroundActionStatus } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
@@ -171,12 +164,12 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case PaymentStatus.Pending:
+    case 'PENDING':
       return theme.hctPalette.orange;
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'DISTRIBUTION_SUCCESSFUL':
+    case 'TRANSACTION_SUCCESSFUL':
       return theme.hctPalette.green;
-    case PaymentStatus.PartiallyDistributed:
+    case 'PARTIALLY_DISTRIBUTED':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -188,14 +181,14 @@ export function paymentStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case PaymentStatus.Pending:
-    case PaymentStatus.SentToPaymentGateway:
-    case PaymentStatus.SentToFsp:
+    case 'PENDING':
+    case 'SENT_TO_PAYMENT_GATEWAY':
+    case 'SENT_TO_FSP':
       return theme.hctPalette.orange;
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'DISTRIBUTION_SUCCESSFUL':
+    case 'TRANSACTION_SUCCESSFUL':
       return theme.hctPalette.green;
-    case PaymentStatus.PartiallyDistributed:
+    case 'PARTIALLY_DISTRIBUTED':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -204,22 +197,22 @@ export function paymentStatusToColor(
 
 export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
-    case PaymentStatus.Pending:
+    case 'PENDING':
       return 'PENDING';
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'DISTRIBUTION_SUCCESSFUL':
+    case 'TRANSACTION_SUCCESSFUL':
       return 'DELIVERED FULLY';
-    case PaymentStatus.PartiallyDistributed:
+    case 'PARTIALLY_DISTRIBUTED':
       return 'DELIVERED PARTIALLY';
-    case PaymentStatus.NotDistributed:
+    case 'NOT_DISTRIBUTED':
       return 'NOT DELIVERED';
-    case PaymentStatus.ForceFailed:
+    case 'FORCE_FAILED':
       return 'FORCE FAILED';
-    case PaymentStatus.ManuallyCancelled:
+    case 'MANUALLY_CANCELLED':
       return 'MANUALLY CANCELLED';
-    case PaymentStatus.SentToPaymentGateway:
+    case 'SENT_TO_PAYMENT_GATEWAY':
       return 'SENT TO PAYMENT GATEWAY';
-    case PaymentStatus.SentToFsp:
+    case 'SENT_TO_FSP':
       return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
@@ -359,10 +352,10 @@ export function paymentPlanBuildStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBuildStatus.Ok]: theme.hctPalette.green,
-    [PaymentPlanBuildStatus.Failed]: theme.hctPalette.red,
-    [PaymentPlanBuildStatus.Building]: theme.hctPalette.orange,
-    [PaymentPlanBuildStatus.Pending]: theme.hctPalette.gray,
+    OK: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    BUILDING: theme.hctPalette.orange,
+    PENDING: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
