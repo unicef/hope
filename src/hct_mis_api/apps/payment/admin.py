@@ -391,7 +391,7 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
 
         error_message = f"Delivery Mechanism {delivery_mechanism} is not supported by Financial Service Provider {financial_service_provider}"
         # to work both in inline and standalone
-        if delivery_mechanisms := self.data.get("delivery_mechanisms"):
+        if delivery_mechanisms := self.data.getlist("delivery_mechanisms"):
             if delivery_mechanism and str(delivery_mechanism.id) not in delivery_mechanisms:
                 raise ValidationError(error_message)
         else:
