@@ -481,6 +481,7 @@ from hct_mis_api.config.fragments.debug_toolbar import *  # noqa: F403, F401, E4
 from hct_mis_api.config.fragments.drf import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.drf_spectacular import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.es import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.kobo import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.matomo import *  # noqa: F403, F401, E402
