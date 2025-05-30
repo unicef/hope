@@ -11,10 +11,8 @@ import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPla
 import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
 import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
-import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
@@ -41,10 +39,10 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
     refetchInterval: (query) => {
       const data = query.state.data;
       if (
-        data?.status === PaymentPlanStatus.Preparing ||
+        data?.status === PaymentPlanStatusEnum.PREPARING ||
         (data?.backgroundActionStatus !== null &&
           data?.backgroundActionStatus !==
-            PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+            PaymentPlanBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
       ) {
         return 3000;
       }
@@ -64,17 +62,18 @@ export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const { status } = paymentPlan;
 
   const shouldDisplayEntitlement =
-    status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
+    status !== PaymentPlanStatusEnum.OPEN &&
+    status !== PaymentPlanStatusEnum.ACCEPTED;
 
-  const shouldDisplayFsp = status !== PaymentPlanStatus.Open;
+  const shouldDisplayFsp = status !== PaymentPlanStatusEnum.OPEN;
   const shouldDisplayReconciliationSummary =
-    status === PaymentPlanStatus.Accepted ||
-    status === PaymentPlanStatus.Finished;
+    status === PaymentPlanStatusEnum.ACCEPTED ||
+    status === PaymentPlanStatusEnum.FINISHED;
 
   const shouldDisplayFundsCommitment =
-    status === PaymentPlanStatus.InReview ||
-    status === PaymentPlanStatus.Accepted ||
-    status === PaymentPlanStatus.Finished;
+    status === PaymentPlanStatusEnum.IN_REVIEW ||
+    status === PaymentPlanStatusEnum.ACCEPTED ||
+    status === PaymentPlanStatusEnum.FINISHED;
 
   if (!paymentPlan) return null;
 

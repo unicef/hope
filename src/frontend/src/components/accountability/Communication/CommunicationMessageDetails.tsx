@@ -2,12 +2,12 @@ import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
-import { AccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { MessageDetail } from '@restgenerated/models/MessageDetail';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -17,7 +17,7 @@ const StyledBox = styled(Paper)`
 `;
 
 interface CommunicationMessageDetailsProps {
-  message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];
+  message: MessageDetail;
 }
 
 const CommunicationMessageDetails = ({

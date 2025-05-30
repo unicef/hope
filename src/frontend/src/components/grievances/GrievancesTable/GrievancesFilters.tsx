@@ -4,14 +4,12 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import {
-  GrievancesChoiceDataQuery,
-  useGrievanceTicketAreaScopeQuery,
-} from '@generated/graphql';
+import { useGrievanceTicketAreaScopeQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AccountBalance } from '@mui/icons-material';
 import { Grid2 as Grid, MenuItem } from '@mui/material';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
@@ -31,7 +29,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 interface GrievancesFiltersProps {
   filter;
-  choicesData: GrievancesChoiceDataQuery;
+  choicesData: GrievanceChoices;
   selectedTab: number;
   setFilter: (filter) => void;
   initialFilter;

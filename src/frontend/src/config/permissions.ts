@@ -237,10 +237,10 @@ export const PERMISSIONS = {
 
 export function hasPermissions(
   permission: string | string[],
-  allowedPermissions: string[],
+  allowedPermissions: string[] | null,
 ): boolean {
   // checks to see if has one permission or at least one from the array
-  if (!allowedPermissions) return false;
+  if (!allowedPermissions || allowedPermissions === null) return false;
   if (Array.isArray(permission)) {
     return allowedPermissions.some((perm) => permission.includes(perm));
   }
@@ -249,9 +249,9 @@ export function hasPermissions(
 
 export function hasPermissionInModule(
   module: string,
-  allowedPermissions: string[],
+  allowedPermissions: string[] | null,
 ): boolean {
-  if (!allowedPermissions) return false;
+  if (!allowedPermissions || allowedPermissions === null) return false;
   return allowedPermissions.some((perm) => perm.includes(module));
 }
 
@@ -261,9 +261,10 @@ export function hasCreatorOrOwnerPermissions(
   creatorPermission: string,
   isOwner: boolean,
   ownerPermission: string,
-  allowedPermissions: string[],
+  allowedPermissions: string[] | null,
 ): boolean {
   // use where we have to check 3 different permissions, for ex. grievances
+  if (!allowedPermissions || allowedPermissions === null) return false;
   return (
     allowedPermissions.includes(generalPermission) ||
     (isCreator && allowedPermissions.includes(creatorPermission)) ||

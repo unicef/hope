@@ -1,7 +1,7 @@
 import { Grid2 as Grid, Tooltip } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, useFormikContext } from 'formik';
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useDataCollectionTypeChoiceDataQuery,
@@ -89,6 +89,25 @@ const ProgramForm = ({
   ]);
 
   const isCopyProgramPage = location.pathname.includes('duplicate');
+
+  useEffect(() => {
+    const isFieldDisabled =
+      !values.dataCollectingTypeCode || programHasRdi || isCopyProgramPage;
+
+    if (isFieldDisabled) {
+      const nonEmptyValue =
+        mappedBeneficiaryGroupsData[0]?.value || 'disabled-value';
+
+      setFieldValue('beneficiaryGroup', nonEmptyValue, false);
+    }
+  }, [
+    values.dataCollectingTypeCode,
+    programHasRdi,
+    isCopyProgramPage,
+    mappedBeneficiaryGroupsData,
+    setFieldValue,
+  ]);
+
   if (!data || !dataCollectionTypeChoicesData || !beneficiaryGroupsData)
     return null;
 
@@ -178,7 +197,11 @@ const ProgramForm = ({
             title={
               !values.dataCollectingTypeCode
                 ? 'Select Data Collecting Type first'
-                : ''
+                : programHasRdi
+                  ? 'Field disabled because program has RDI'
+                  : isCopyProgramPage
+                    ? 'Field disabled for duplicate programs'
+                    : ''
             }
             placement="top"
           >
@@ -187,8 +210,12 @@ const ProgramForm = ({
                 name="beneficiaryGroup"
                 label={t('Beneficiary Group')}
                 fullWidth
-                required
                 variant="outlined"
+                required={
+                  !!values.dataCollectingTypeCode &&
+                  !programHasRdi &&
+                  !isCopyProgramPage
+                }
                 choices={mappedBeneficiaryGroupsData}
                 component={FormikSelectField}
                 data-cy="input-beneficiary-group"

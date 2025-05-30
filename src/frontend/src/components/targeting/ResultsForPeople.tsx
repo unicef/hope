@@ -2,7 +2,6 @@ import { Pointer } from '@components/core/Pointer';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
-import { PaymentPlanBuildStatus } from '@generated/graphql';
 import {
   Button,
   Dialog,
@@ -66,7 +65,7 @@ function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   };
   const handleClose = () => setOpenDialog(false);
 
-  if (targetPopulation.backgroundActionStatus !== PaymentPlanBuildStatus.Ok) {
+  if (targetPopulation.backgroundActionStatus != null) {
     return null;
   }
 

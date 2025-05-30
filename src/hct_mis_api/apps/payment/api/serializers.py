@@ -307,7 +307,7 @@ class PaymentVerificationPlanListSerializer(serializers.ModelSerializer):
 
 
 class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    status = serializers.SerializerMethodField()
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
@@ -339,12 +339,17 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "admin_url",
         )
 
-    def get_last_approval_process_by(self, obj: PaymentPlan) -> Optional[str]:
+    @staticmethod
+    def get_last_approval_process_by(obj: PaymentPlan) -> Optional[str]:
         return str(obj.last_approval_process_by) if obj.last_approval_process_by else None
+
+    @staticmethod
+    def get_status(obj: PaymentPlan) -> str:
+        return obj.get_status_display().upper()
 
 
 class PaymentPlanListSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    status = serializers.SerializerMethodField()
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     created_by = serializers.SerializerMethodField()
 
@@ -371,8 +376,13 @@ class PaymentPlanListSerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
-    def get_created_by(self, obj: PaymentPlan) -> str:
+    @staticmethod
+    def get_created_by(obj: PaymentPlan) -> str:
         return f"{obj.created_by.first_name} {obj.created_by.last_name}"
+
+    @staticmethod
+    def get_status(obj: PaymentPlan) -> str:
+        return obj.get_status_display().upper()
 
 
 class FinancialServiceProviderSerializer(serializers.ModelSerializer):
@@ -919,7 +929,8 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "admin_url",
         )
 
-    def get_failed_wallet_validation_collectors_ids(self, obj: PaymentPlan) -> List[str]:
+    @staticmethod
+    def get_failed_wallet_validation_collectors_ids(obj: PaymentPlan) -> List[str]:
         fsp = getattr(obj, "financial_service_provider", None)
         dm = getattr(obj, "delivery_mechanism", None)
         if not fsp or not dm:
@@ -931,6 +942,10 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             )
             .values_list("collector__unicef_id", flat=True)
         )
+
+    @staticmethod
+    def get_status(obj: PaymentPlan) -> str:
+        return obj.get_status_display().upper() if obj.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES else "ASSIGNED"
 
 
 class PaymentVerificationDetailsSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):

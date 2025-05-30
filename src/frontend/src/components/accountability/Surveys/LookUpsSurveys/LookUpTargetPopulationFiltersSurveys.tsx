@@ -2,7 +2,7 @@ import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import {
   createHandleApplyFilterChange,
   paymentPlanStatusMapping,
@@ -56,8 +56,8 @@ function LookUpTargetPopulationFiltersSurveys({
   };
 
   const preparedStatusChoices = isAccountability
-    ? Object.values(PaymentPlanStatus).filter((key) => key !== 'OPEN')
-    : Object.values(PaymentPlanStatus);
+    ? Object.values(PaymentPlanStatusEnum).filter((key) => key !== 'OPEN')
+    : Object.values(PaymentPlanStatusEnum);
 
   return (
     <FiltersSection

@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
-  useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useCreatePaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
@@ -40,6 +39,9 @@ import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
 import { Tabs, Tab } from '@core/Tabs';
 import { RapidProFlowsLoader } from './RapidProFlowsLoader';
+import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -140,11 +142,16 @@ export const CreateVerificationPlan = ({
       fetchPolicy: 'network-only',
     });
 
-  const { data } = useAllAdminAreasQuery({
-    variables: {
-      first: 100,
-      businessArea,
+  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
+    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+    queryFn: async () => {
+      return RestService.restAreasList({
+        limit: 100,
+        areaTypeAreaLevel: 2,
+        search: undefined,
+      });
     },
+    enabled: !!businessArea,
   });
 
   const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
@@ -189,10 +196,10 @@ export const CreateVerificationPlan = ({
     }
   };
 
-  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
-    ? data.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
+  const mappedAdminAreas = adminAreasData?.results?.length
+    ? adminAreasData.results.map((area) => ({
+        value: area.id,
+        name: area.name || '',
       }))
     : [];
 
@@ -298,7 +305,10 @@ export const CreateVerificationPlan = ({
                       aria-label="full width tabs example"
                     >
                       <Tab data-cy="tab-full-list" label={t('FULL LIST')} />
-                      <Tab data-cy="tab-random-sampling" label={t('RANDOM SAMPLING')} />
+                      <Tab
+                        data-cy="tab-random-sampling"
+                        label={t('RANDOM SAMPLING')}
+                      />
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
@@ -342,9 +352,21 @@ export const CreateVerificationPlan = ({
                           style={{ flexDirection: 'row' }}
                           data-cy="checkbox-verification-channel"
                           choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
-                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
+                            {
+                              value: 'RAPIDPRO',
+                              name: 'RAPIDPRO',
+                              dataCy: 'radio-rapidpro',
+                            },
+                            {
+                              value: 'XLSX',
+                              name: 'XLSX',
+                              dataCy: 'radio-xlsx',
+                            },
+                            {
+                              value: 'MANUAL',
+                              name: 'MANUAL',
+                              dataCy: 'radio-manual',
+                            },
                           ]}
                           component={FormikRadioGroup}
                           alignItems="center"
@@ -447,7 +469,7 @@ export const CreateVerificationPlan = ({
                             </Grid>
                           )}
                           {values.sexCheckbox && (
-                            <Grid size={{ xs:5 }}>
+                            <Grid size={{ xs: 5 }}>
                               <Box mt={6}>
                                 <Field
                                   name="filterSex"
@@ -490,9 +512,17 @@ export const CreateVerificationPlan = ({
                         style={{ flexDirection: 'row' }}
                         alignItems="center"
                         choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
-                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
-                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
+                          {
+                            value: 'RAPIDPRO',
+                            name: 'RAPIDPRO',
+                            dataCy: 'radio-rapidpro',
+                          },
+                          { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
+                          {
+                            value: 'MANUAL',
+                            name: 'MANUAL',
+                            dataCy: 'radio-manual',
+                          },
                         ]}
                         component={FormikRadioGroup}
                       />
@@ -518,7 +548,12 @@ export const CreateVerificationPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button data-cy="button-cancel" onClick={() => setOpen(false)}>CANCEL</Button>
+                  <Button
+                    data-cy="button-cancel"
+                    onClick={() => setOpen(false)}
+                  >
+                    CANCEL
+                  </Button>
                   <LoadingButton
                     loading={loading}
                     type="submit"

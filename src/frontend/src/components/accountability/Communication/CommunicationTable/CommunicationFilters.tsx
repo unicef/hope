@@ -2,7 +2,7 @@ import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { Grid2 as Grid } from '@mui/material';
 import { CreatedByAutocompleteRestFilter } from '@shared/autocompletes/CreatedByAutocompleteRestFilter';
-import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
+import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -52,7 +52,7 @@ export function CommunicationFilters({
     >
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid size={{ xs: 4 }}>
-          <TargetPopulationAutocomplete
+          <TargetPopulationAutocompleteRestFilter
             name="targetPopulation"
             value={filter.targetPopulation}
             filter={filter}

@@ -11,9 +11,9 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
   PaymentPlanDocument,
-  PaymentPlanStatus,
   useImportXlsxPpListMutation,
 } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { DropzoneField } from '@core/DropzoneField';
 import { useProgramContext } from '../../../../programContext';
 import { LoadingButton } from '@core/LoadingButton';
@@ -78,7 +78,7 @@ export function ImportXlsxPaymentPlanPaymentList({
   );
 
   const shouldDisableUpload =
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     !canUploadFile ||
     !isActiveProgram;
 

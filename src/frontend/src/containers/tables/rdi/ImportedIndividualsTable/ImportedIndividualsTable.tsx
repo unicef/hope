@@ -95,6 +95,7 @@ function ImportedIndividualsTable({
       {isMerged ? (
         <UniversalRestQueryTable
           title={title}
+          isOnPaper={false}
           headCells={adjustedMergedIndividualsHeadCells}
           query={RestService.restBusinessAreasProgramsIndividualsList}
           queryVariables={queryVariables}
@@ -110,6 +111,7 @@ function ImportedIndividualsTable({
       ) : (
         <UniversalRestQueryTable
           queryVariables={queryVariables}
+          isOnPaper={false}
           setQueryVariables={setQueryVariables}
           query={RestService.restBusinessAreasProgramsIndividualsList}
           title={title}

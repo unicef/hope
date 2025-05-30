@@ -10,13 +10,12 @@ import { CreateVerificationPlan } from '@components/payments/CreateVerificationP
 import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
 import { PeopleVerificationsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationsTable';
-import {
-  PaymentVerificationPlanStatus,
-  useCashPlanVerificationSamplingChoicesQuery,
-} from '@generated/graphql';
+import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Button } from '@mui/material';
+import { Choice } from '@restgenerated/models/Choice';
+import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -33,7 +32,6 @@ import { useProgramContext } from '../../../programContext';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
-import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 const Container = styled.div`
   display: flex;
@@ -90,8 +88,13 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
       }),
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useCashPlanVerificationSamplingChoicesQuery();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery<
+    Array<Choice>
+  >({
+    queryKey: ['samplingChoices', businessArea],
+    queryFn: () => RestService.restChoicesPaymentVerificationPlanSamplingList(),
+  });
+
   const { isSocialDctType } = useProgramContext();
 
   if (isLoading || choicesLoading) return <LoadingComponent />;
@@ -117,8 +120,8 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
 
   const canSeeVerificationRecords = (): boolean => {
     const showTable =
-      statesArray.includes(PaymentVerificationPlanStatus.Finished) ||
-      statesArray.includes(PaymentVerificationPlanStatus.Active);
+      statesArray.includes(PaymentVerificationPlanStatusEnum.FINISHED) ||
+      statesArray.includes(PaymentVerificationPlanStatusEnum.ACTIVE);
 
     return showTable && statesArray.length > 0;
   };
