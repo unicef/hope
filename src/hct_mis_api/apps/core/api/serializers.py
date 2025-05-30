@@ -6,16 +6,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 class BusinessAreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessArea
-        fields = (
-            "id",
-            "name",
-            "code",
-            "long_name",
-            "slug",
-            "parent",
-            "is_split",
-            "active",
-        )
+        fields = ("id", "name", "code", "long_name", "slug", "parent", "is_split", "active", "screen_beneficiary")
 
 
 class DataCollectingTypeSerializer(serializers.ModelSerializer):

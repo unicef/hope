@@ -2,12 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { DataCollectingTypeEnum } from './DataCollectingTypeEnum';
+import type { FeedbackIssueTypeEnum } from './FeedbackIssueTypeEnum';
 export type DataCollectingType = {
-  readonly id: number;
-  label: string;
-  code: string;
-  type: DataCollectingTypeEnum;
-  householdFiltersAvailable?: boolean;
-  individualFiltersAvailable?: boolean;
+    readonly id: number;
+    label: string;
+    code: string;
+    type: FeedbackIssueTypeEnum;
+    householdFiltersAvailable?: boolean;
+    individualFiltersAvailable?: boolean;
 };
+
