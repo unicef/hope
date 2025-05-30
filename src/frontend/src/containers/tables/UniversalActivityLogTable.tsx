@@ -1,8 +1,10 @@
 import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { ActivityLogTable } from '@components/core/ActivityLogTable/ActivityLogTable';
-import { LogEntryNode, useAllLogEntriesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from 'src/restgenerated';
+import { ActivityLogEntry } from '@components/core/ActivityLogTable/types';
+import { useQuery } from '@tanstack/react-query';
 
 const TableWrapper = styled.div`
   display: flex;
@@ -11,68 +13,67 @@ const TableWrapper = styled.div`
   padding: 20px;
   padding-bottom: 0;
 `;
+
 interface UniversalActivityLogTableProps {
   objectId: string;
 }
+
 export function UniversalActivityLogTable({
   objectId,
 }: UniversalActivityLogTableProps): ReactElement {
   const [page, setPage] = useState(0);
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug } = useBaseUrl();
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { data, refetch } = useAllLogEntriesQuery({
-    variables: {
-      businessArea,
-      objectId: objectId,
-      first: rowsPerPage,
-    },
-    fetchPolicy: 'network-only',
+
+  const { data: logsData } = useQuery({
+    queryKey: ['activityLogs', businessAreaSlug, objectId, page, rowsPerPage],
+    queryFn: () =>
+      RestService.restBusinessAreasActivityLogsList({
+        businessAreaSlug,
+        objectId: objectId,
+        limit: rowsPerPage,
+        offset: page * rowsPerPage,
+      }),
+    enabled: !!(businessAreaSlug && objectId),
   });
 
-  if (!data) {
+  const { data: countData } = useQuery({
+    queryKey: ['activityLogsCount', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasActivityLogsCountRetrieve({
+        businessAreaSlug,
+      }),
+    enabled: !!businessAreaSlug,
+  });
+
+  if (!logsData) {
     return null;
   }
-  const { edges } = data.allLogEntries;
-  const logEntries = edges.map((edge) => edge.node as LogEntryNode);
+
+  const logEntries: ActivityLogEntry[] = logsData.results.map(
+    (entry, index) => ({
+      ...entry,
+      id: `${entry.objectId}-${entry.timestamp}-${index}`,
+      userDisplayName: entry.user || '',
+    }),
+  );
+
+  const totalCount = countData?.count ?? 0;
+
   return (
     <TableWrapper>
       <ActivityLogTable
-        totalCount={data.allLogEntries.totalCount}
+        totalCount={totalCount}
         rowsPerPage={rowsPerPage}
         logEntries={logEntries}
         page={page}
         onChangePage={(event, newPage) => {
-          const variables = {
-            objectId: objectId,
-            businessArea,
-            first: undefined,
-            last: undefined,
-            after: undefined,
-            before: undefined,
-          };
-          if (newPage < page) {
-            variables.last = rowsPerPage;
-            variables.before = edges[0].cursor;
-          } else {
-            variables.after = edges[edges.length - 1].cursor;
-            variables.first = rowsPerPage;
-          }
           setPage(newPage);
-          refetch(variables);
         }}
         onChangeRowsPerPage={(event) => {
           const value = parseInt(event.target.value, 10);
           setRowsPerPage(value);
           setPage(0);
-          const variables = {
-            objectId: objectId,
-            businessArea,
-            first: rowsPerPage,
-            after: undefined,
-            last: undefined,
-            before: undefined,
-          };
-          refetch(variables);
         }}
       />
     </TableWrapper>

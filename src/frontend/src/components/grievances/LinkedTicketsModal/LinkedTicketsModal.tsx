@@ -6,7 +6,6 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { AllGrievanceTicketQuery } from '@generated/graphql';
 import {
   Box,
   Button,
@@ -20,6 +19,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { grievanceTicketStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,7 +42,7 @@ const StyledDialog = styled(Dialog)`
 `;
 
 interface LinkedTicketsModalProps {
-  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
+  ticket: GrievanceTicketList;
   categoryChoices: { [id: number]: string };
   statusChoices: { [id: number]: string };
   canViewDetails: boolean;
