@@ -159,7 +159,6 @@ class GrievanceTicketViewSet(
 class GrievanceTicketGlobalViewSet(
     BusinessAreaVisibilityMixin,
     GrievancePermissionsMixin,
-    GrievanceMutationMixin,
     SerializerActionMixin,
     CountActionMixin,
     ListModelMixin,
@@ -167,6 +166,7 @@ class GrievanceTicketGlobalViewSet(
     CreateModelMixin,
     UpdateModelMixin,
     BaseViewSet,
+    GrievanceMutationMixin,
     DataChangeValidator,
 ):
     queryset = GrievanceTicket.objects.all()
@@ -216,7 +216,7 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
-        "partial_update": [Permissions.GRIEVANCES_UPDATE],
+        "partial_update": [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
         "status_change": [Permissions.GRIEVANCES_SET_IN_PROGRESS, Permissions.GRIEVANCES_SET_ON_HOLD],
         "create_note": [Permissions.GRIEVANCES_ADD_NOTE],
         "approve_individual_data_change": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],

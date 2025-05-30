@@ -585,7 +585,7 @@ class TestGrievanceTicketUpdate:
         )
 
     def test_update_grievance_ticket_hh_update(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program)
         data = {
             "description": "this is new description",
             "assigned_to": str(self.user.id),
