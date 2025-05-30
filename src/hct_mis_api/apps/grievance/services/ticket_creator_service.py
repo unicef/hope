@@ -140,11 +140,6 @@ class TicketCreatorService:
         admin = input_data.pop("admin", None)
         program = input_data.pop("program", None)
 
-        if program:
-            program = get_object_or_404(Program, pk=program)
-        else:
-            program = None
-
         new_ticket = GrievanceTicket.objects.create(
             **input_data,
             admin2=admin,

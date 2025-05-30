@@ -273,22 +273,27 @@ class GrievanceTicketGlobalViewSet(
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user: AbstractUser = request.user  # type: ignore
+        input_data = serializer.validated_data
 
         # check if user has access to the program
-        if program := serializer.validated_data.get("program"):
+        if program := input_data.get("program"):
             if not check_permissions(
-                self.request.user,
+                user,
                 self.get_permissions_for_action(),
                 business_area=self.business_area,
                 program=program.slug,
             ):
                 raise PermissionDenied
 
-        if serializer.validated_data.get("documentation"):
-            request.user.has_perm(Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)  # type: ignore
-
-        user: AbstractUser = request.user  # type: ignore
-        input_data = serializer.validated_data
+        if input_data.get("documentation"):
+            if not check_permissions(
+                    user,
+                    [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+                    business_area=self.business_area,
+                    program=program.slug,
+            ):
+                raise PermissionDenied
 
         if input_data.get("category") in (
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
@@ -405,7 +410,14 @@ class GrievanceTicketGlobalViewSet(
             )
 
         if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
-            user.has_perm(Permissions.GRIEVANCE_ASSIGN, grievance_ticket.business_area)  # type: ignore
+            if not check_permissions(
+                    user,
+                    [Permissions.GRIEVANCE_ASSIGN],
+                    business_area=self.business_area,
+                    program=grievance_ticket.programs.first(),
+            ):
+                raise PermissionDenied
+
             notifications.append(
                 GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
             )
