@@ -193,7 +193,7 @@ class TestGrievanceTicketCreate:
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
-            ([Permissions.GRIEVANCES_CREATE], status.HTTP_200_OK),
+            ([Permissions.GRIEVANCES_CREATE], status.HTTP_201_CREATED),
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
@@ -257,8 +257,7 @@ class TestGrievanceTicketCreate:
         resp_data = response.json()
 
         assert response.status_code == expected_status
-        if expected_status == status.HTTP_200_OK:
-            assert response.status_code == status.HTTP_201_CREATED
+        if expected_status == status.HTTP_201_CREATED:
             assert len(resp_data) == 1
             assert GrievanceTicket.objects.all().count() == 1
             assert TicketAddIndividualDetails.objects.all().count() == 1
