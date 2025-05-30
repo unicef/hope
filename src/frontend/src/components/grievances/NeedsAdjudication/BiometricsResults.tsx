@@ -3,8 +3,8 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useGrievanceTicketLazyQuery } from '@generated/graphql';
 import { usePermissions } from '@hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import PersonIcon from '@mui/icons-material/Person';
 import {
   Box,
@@ -17,6 +17,8 @@ import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import { RestService } from 'src/restgenerated';
+import { useMutation } from '@tanstack/react-query';
 
 export interface Individual {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
@@ -63,12 +65,17 @@ export const BiometricsResults = ({
   );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { businessAreaSlug } = useBaseUrl();
 
-  const [loadData] = useGrievanceTicketLazyQuery({
-    variables: {
-      id: ticketId,
+  const { mutateAsync: loadData } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id: ticketId,
+      }),
+    onError: (error) => {
+      console.error('Failed to load grievance ticket data:', error);
     },
-    fetchPolicy: 'cache-and-network',
   });
 
   return (

@@ -162,7 +162,7 @@ export const DrawerItems = ({
     selectedProgram?.beneficiaryGroup,
   );
 
-  const { isAccountabilityApplicable } = businessAreaData.businessArea;
+  const { isAccountabilityApplicable } = businessAreaData;
   const flags = {
     isAccountabilityApplicable,
   };

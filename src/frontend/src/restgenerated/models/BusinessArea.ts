@@ -15,5 +15,6 @@ export type BusinessArea = {
      * Enable screen beneficiary against sanction list
      */
     screenBeneficiary?: boolean;
+    isAccountabilityApplicable?: boolean;
 };
 
