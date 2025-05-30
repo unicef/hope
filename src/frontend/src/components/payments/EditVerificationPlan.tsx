@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import {
-  useAllRapidProFlowsLazyQuery,
   useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '@generated/graphql';
@@ -126,7 +125,7 @@ export const EditVerificationPlan = ({
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId: programSlug } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   useEffect(() => {
@@ -161,13 +160,20 @@ export const EditVerificationPlan = ({
 
   const [formValues, setFormValues] = useState(initialValues);
 
-  const [loadRapidProFlows, { data: rapidProFlows }] =
-    useAllRapidProFlowsLazyQuery({
-      variables: {
+  const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
+    queryKey: ['rapidProFlows', businessArea, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
-      },
-      fetchPolicy: 'network-only',
-    });
+        programSlug: programSlug,
+      }),
+    enabled: false,
+  });
+
+  const rapidProFlows = rapidProFlowsData
+    ? { allRapidProFlows: rapidProFlowsData.results }
+    : null;
+  const loadRapidProFlows = refetchRapidProFlows;
 
   const { data: adminAreasData } = useQuery<PaginatedAreaList>({
     queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
@@ -387,7 +393,7 @@ export const EditVerificationPlan = ({
                               rapidProFlows
                                 ? rapidProFlows.allRapidProFlows.map(
                                     (flow) => ({
-                                      value: flow.id,
+                                      value: flow.uuid,
                                       name: flow.name,
                                     }),
                                   )

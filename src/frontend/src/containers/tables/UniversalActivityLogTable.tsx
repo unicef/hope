@@ -67,7 +67,7 @@ export function UniversalActivityLogTable({
         rowsPerPage={rowsPerPage}
         logEntries={logEntries}
         page={page}
-        onChangePage={(event, newPage) => {
+        onChangePage={(_event, newPage) => {
           setPage(newPage);
         }}
         onChangeRowsPerPage={(event) => {
