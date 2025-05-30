@@ -190,8 +190,17 @@ class TestGrievanceTicketCreate:
             kwargs={"business_area_slug": self.afghanistan.slug},
         )
 
-    def test_create_grievance_ticket_add_individual(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_CREATE], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_create_grievance_ticket_add_individual(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
         data = {
             "description": "Test",
             "assigned_to": str(self.user.id),
@@ -246,10 +255,13 @@ class TestGrievanceTicketCreate:
         assert TicketAddIndividualDetails.objects.all().count() == 0
         response = self.api_client.post(self.list_url, data, format="json")
         resp_data = response.json()
-        assert response.status_code == status.HTTP_201_CREATED
-        assert len(resp_data) == 1
-        assert GrievanceTicket.objects.all().count() == 1
-        assert TicketAddIndividualDetails.objects.all().count() == 1
+
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            assert response.status_code == status.HTTP_201_CREATED
+            assert len(resp_data) == 1
+            assert GrievanceTicket.objects.all().count() == 1
+            assert TicketAddIndividualDetails.objects.all().count() == 1
 
     def test_create_grievance_ticket_update_household(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
