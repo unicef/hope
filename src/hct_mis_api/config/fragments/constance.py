@@ -141,7 +141,7 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "QUICK_LINKS": (
-        """Kobo,https://kf-hope.unitst.org/
+        """Kobo,https://kobo-hope-trn.unitst.org/
 Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/
 elasticsearch,hope-elasticsearch-coordinating-only:9200
 Datamart,https://datamart.unicef.io
