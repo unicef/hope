@@ -1,7 +1,7 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
+import { TargetPopulationAutocompleteRestFilter } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -59,7 +59,7 @@ export function SurveysFilters({
           />
         </Grid>
         <Grid size={{ xs: 4 }}>
-          <TargetPopulationAutocomplete
+          <TargetPopulationAutocompleteRestFilter
             name="targetPopulation"
             value={filter.targetPopulation}
             filter={filter}

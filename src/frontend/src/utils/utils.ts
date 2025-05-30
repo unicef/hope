@@ -1,12 +1,7 @@
-import {
-  AllProgramsQuery,
-  ChoiceObject,
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanBuildStatus,
-  PaymentPlanStatus,
-  PaymentStatus,
-  ProgramStatus,
-} from '@generated/graphql';
+import { AllProgramsQuery, ChoiceObject } from '@generated/graphql';
+import { PaymentPlanBackgroundActionStatusEnum as PaymentPlanBackgroundActionStatus } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
 import camelCase from 'lodash/camelCase';
@@ -23,6 +18,7 @@ import {
 } from './constants';
 import _ from 'lodash';
 import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { Choice } from '@restgenerated/models/Choice';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -31,6 +27,19 @@ const Gender = new Map([
   ['NOT_COLLECTED', 'Not Collected'],
   ['NOT_ANSWERED', 'Not Answered'],
 ]);
+
+export function restChoicesToDict(choices: Choice[] | null): {
+  [key: string]: string;
+} {
+  if (!choices || !choices.length) return {};
+  return choices.reduce(
+    (dict, choice) => {
+      dict[choice.value] = choice.name;
+      return dict;
+    },
+    {} as { [key: string]: string },
+  );
+}
 
 const IdentificationType = new Map([
   ['NA', 'N/A'],
@@ -96,11 +105,11 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case ProgramStatus.Draft:
+    case ProgramStatus.DRAFT:
       return theme.hctPalette.gray;
-    case ProgramStatus.Active:
+    case ProgramStatus.ACTIVE:
       return theme.hctPalette.green;
-    case ProgramStatus.Finished:
+    case ProgramStatus.FINISHED:
       return theme.hctPalette.gray;
     default:
       return theme.hctPalette.orange;
@@ -155,12 +164,12 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case PaymentStatus.Pending:
+    case 'PENDING':
       return theme.hctPalette.orange;
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'DISTRIBUTION_SUCCESSFUL':
+    case 'TRANSACTION_SUCCESSFUL':
       return theme.hctPalette.green;
-    case PaymentStatus.PartiallyDistributed:
+    case 'PARTIALLY_DISTRIBUTED':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -172,14 +181,14 @@ export function paymentStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case PaymentStatus.Pending:
-    case PaymentStatus.SentToPaymentGateway:
-    case PaymentStatus.SentToFsp:
+    case 'PENDING':
+    case 'SENT_TO_PAYMENT_GATEWAY':
+    case 'SENT_TO_FSP':
       return theme.hctPalette.orange;
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'DISTRIBUTION_SUCCESSFUL':
+    case 'TRANSACTION_SUCCESSFUL':
       return theme.hctPalette.green;
-    case PaymentStatus.PartiallyDistributed:
+    case 'PARTIALLY_DISTRIBUTED':
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -188,22 +197,22 @@ export function paymentStatusToColor(
 
 export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
-    case PaymentStatus.Pending:
+    case 'PENDING':
       return 'PENDING';
-    case PaymentStatus.DistributionSuccessful:
-    case PaymentStatus.TransactionSuccessful:
+    case 'DISTRIBUTION_SUCCESSFUL':
+    case 'TRANSACTION_SUCCESSFUL':
       return 'DELIVERED FULLY';
-    case PaymentStatus.PartiallyDistributed:
+    case 'PARTIALLY_DISTRIBUTED':
       return 'DELIVERED PARTIALLY';
-    case PaymentStatus.NotDistributed:
+    case 'NOT_DISTRIBUTED':
       return 'NOT DELIVERED';
-    case PaymentStatus.ForceFailed:
+    case 'FORCE_FAILED':
       return 'FORCE FAILED';
-    case PaymentStatus.ManuallyCancelled:
+    case 'MANUALLY_CANCELLED':
       return 'MANUALLY CANCELLED';
-    case PaymentStatus.SentToPaymentGateway:
+    case 'SENT_TO_PAYMENT_GATEWAY':
       return 'SENT TO PAYMENT GATEWAY';
-    case PaymentStatus.SentToFsp:
+    case 'SENT_TO_FSP':
       return 'SENT TO FSP';
     default:
       return 'UNSUCCESSFUL';
@@ -212,21 +221,21 @@ export function paymentStatusDisplayMap(status: string): string {
 
 export function targetPopulationStatusDisplayMap(status: string): string {
   switch (status) {
-    case PaymentPlanStatus.TpOpen:
+    case PaymentPlanStatus.TP_OPEN:
       return 'OPEN';
-    case PaymentPlanStatus.Draft:
+    case PaymentPlanStatus.DRAFT:
       return 'READY FOR PAYMENT MODULE';
-    case PaymentPlanStatus.TpLocked:
+    case PaymentPlanStatus.TP_LOCKED:
       return 'LOCKED';
-    case PaymentPlanStatus.Processing:
+    case PaymentPlanStatus.PROCESSING:
       return 'PROCESSING';
-    case PaymentPlanStatus.SteficonWait:
+    case PaymentPlanStatus.STEFICON_WAIT:
       return 'STEFICON WAIT';
-    case PaymentPlanStatus.SteficonRun:
+    case PaymentPlanStatus.STEFICON_RUN:
       return 'STEFICON RUN';
-    case PaymentPlanStatus.SteficonError:
+    case PaymentPlanStatus.STEFICON_ERROR:
       return 'STEFICON ERROR';
-    case PaymentPlanStatus.SteficonCompleted:
+    case PaymentPlanStatus.STEFICON_COMPLETED:
       return 'STEFICON COMPLETED';
 
     //   if other PP statuses ==> ASSIGNED
@@ -314,23 +323,23 @@ export function paymentPlanStatusToColor(
 ): string {
   const colorsMap = {
     ['ASSIGNED']: theme.hctPalette.gray,
-    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
-    [PaymentPlanStatus.Draft]: theme.hctPalette.green,
-    [PaymentPlanStatus.Finished]: theme.hctPalette.gray,
-    [PaymentPlanStatus.InApproval]: theme.hctPalette.blue,
-    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.blue,
-    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
-    [PaymentPlanStatus.Locked]: theme.hctPalette.red,
-    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.red,
-    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Preparing]: theme.hctPalette.blue,
-    [PaymentPlanStatus.Processing]: theme.hctPalette.blue,
-    [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
-    [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
-    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
-    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.orange,
-    [PaymentPlanStatus.TpLocked]: theme.hctPalette.red,
-    [PaymentPlanStatus.TpOpen]: theme.hctPalette.gray,
+    [PaymentPlanStatus.ACCEPTED]: theme.hctPalette.green,
+    [PaymentPlanStatus.DRAFT]: theme.hctPalette.green,
+    [PaymentPlanStatus.FINISHED]: theme.hctPalette.gray,
+    [PaymentPlanStatus.IN_APPROVAL]: theme.hctPalette.blue,
+    [PaymentPlanStatus.IN_AUTHORIZATION]: theme.hctPalette.blue,
+    [PaymentPlanStatus.IN_REVIEW]: theme.hctPalette.blue,
+    [PaymentPlanStatus.LOCKED]: theme.hctPalette.red,
+    [PaymentPlanStatus.LOCKED_FSP]: theme.hctPalette.red,
+    [PaymentPlanStatus.OPEN]: theme.hctPalette.gray,
+    [PaymentPlanStatus.PREPARING]: theme.hctPalette.blue,
+    [PaymentPlanStatus.PROCESSING]: theme.hctPalette.blue,
+    [PaymentPlanStatus.STEFICON_COMPLETED]: theme.hctPalette.green,
+    [PaymentPlanStatus.STEFICON_ERROR]: theme.palette.error.main,
+    [PaymentPlanStatus.STEFICON_RUN]: theme.hctPalette.blue,
+    [PaymentPlanStatus.STEFICON_WAIT]: theme.hctPalette.orange,
+    [PaymentPlanStatus.TP_LOCKED]: theme.hctPalette.red,
+    [PaymentPlanStatus.TP_OPEN]: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -343,10 +352,10 @@ export function paymentPlanBuildStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBuildStatus.Ok]: theme.hctPalette.green,
-    [PaymentPlanBuildStatus.Failed]: theme.hctPalette.red,
-    [PaymentPlanBuildStatus.Building]: theme.hctPalette.orange,
-    [PaymentPlanBuildStatus.Pending]: theme.hctPalette.gray,
+    OK: theme.hctPalette.green,
+    FAILED: theme.hctPalette.red,
+    BUILDING: theme.hctPalette.orange,
+    PENDING: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -394,21 +403,21 @@ export function paymentPlanBackgroundActionStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanBackgroundActionStatus.RuleEngineRun]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.RuleEngineError]:
+    [PaymentPlanBackgroundActionStatus.RULE_ENGINE_RUN]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.RULE_ENGINE_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XlsxExporting]: theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxExportError]:
+    [PaymentPlanBackgroundActionStatus.XLSX_EXPORTING]: theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.XLSX_EXPORT_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.XlsxImportingEntitlements]:
+    [PaymentPlanBackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxImportingReconciliation]:
+    [PaymentPlanBackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.XlsxImportError]:
+    [PaymentPlanBackgroundActionStatus.XLSX_IMPORT_ERROR]:
       theme.palette.error.main,
-    [PaymentPlanBackgroundActionStatus.SendToPaymentGateway]:
+    [PaymentPlanBackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY]:
       theme.hctPalette.gray,
-    [PaymentPlanBackgroundActionStatus.SendToPaymentGatewayError]:
+    [PaymentPlanBackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR]:
       theme.palette.error.main,
   };
   if (status in colorsMap) {
@@ -600,11 +609,11 @@ export function choicesToDict(choices: ChoiceObject[]): {
   }, {});
 }
 
-export function programStatusToPriority(status: ProgramStatus): number {
+export function programStatusToPriority(status: string): number {
   switch (status) {
-    case ProgramStatus.Draft:
+    case ProgramStatus.DRAFT:
       return 1;
-    case ProgramStatus.Active:
+    case ProgramStatus.ACTIVE:
       return 2;
     default:
       return 3;

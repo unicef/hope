@@ -4,14 +4,9 @@
 /* eslint-disable */
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
-import type { BulkGrievanceTicketsAddNote } from '../models/BulkGrievanceTicketsAddNote';
-import type { BulkUpdateGrievanceTicketsAssignees } from '../models/BulkUpdateGrievanceTicketsAssignees';
-import type { BulkUpdateGrievanceTicketsPriority } from '../models/BulkUpdateGrievanceTicketsPriority';
-import type { BulkUpdateGrievanceTicketsUrgency } from '../models/BulkUpdateGrievanceTicketsUrgency';
 import type { BusinessArea } from '../models/BusinessArea';
 import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
-import type { CreateGrievanceTicket } from '../models/CreateGrievanceTicket';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { FeedbackCreate } from '../models/FeedbackCreate';
 import type { FeedbackDetail } from '../models/FeedbackDetail';
@@ -20,32 +15,25 @@ import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FspChoices } from '../models/FspChoices';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
-import type { GrievanceCreateNote } from '../models/GrievanceCreateNote';
-import type { GrievanceDeleteHouseholdApproveStatus } from '../models/GrievanceDeleteHouseholdApproveStatus';
-import type { GrievanceHouseholdDataChangeApprove } from '../models/GrievanceHouseholdDataChangeApprove';
-import type { GrievanceIndividualDataChangeApprove } from '../models/GrievanceIndividualDataChangeApprove';
-import type { GrievanceNeedsAdjudicationApprove } from '../models/GrievanceNeedsAdjudicationApprove';
-import type { GrievanceReassignRole } from '../models/GrievanceReassignRole';
-import type { GrievanceStatusChange } from '../models/GrievanceStatusChange';
 import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
-import type { GrievanceUpdateApproveStatus } from '../models/GrievanceUpdateApproveStatus';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
-import type { HouseholdMember } from '../models/HouseholdMember';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
 import type { MessageCreate } from '../models/MessageCreate';
 import type { MessageDetail } from '../models/MessageDetail';
+import type { MessageSampleSize } from '../models/MessageSampleSize';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
 import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
+import type { PaginatedChoiceList } from '../models/PaginatedChoiceList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
-import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
+import type { PaginatedHouseholdMemberList } from '../models/PaginatedHouseholdMemberList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
 import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
@@ -64,7 +52,9 @@ import type { PaginatedProjectList } from '../models/PaginatedProjectList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
 import type { PaginatedRuleList } from '../models/PaginatedRuleList';
+import type { PaginatedSurveyCategoryChoiceList } from '../models/PaginatedSurveyCategoryChoiceList';
 import type { PaginatedSurveyList } from '../models/PaginatedSurveyList';
+import type { PaginatedSurveyRapidProFlowList } from '../models/PaginatedSurveyRapidProFlowList';
 import type { PaginatedTargetPopulationListList } from '../models/PaginatedTargetPopulationListList';
 import type { PaginatedTPHouseholdListList } from '../models/PaginatedTPHouseholdListList';
 import type { PaginatedUserList } from '../models/PaginatedUserList';
@@ -75,7 +65,6 @@ import type { PatchedPaymentVerificationUpdate } from '../models/PatchedPaymentV
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
-import type { PatchedUpdateGrievanceTicket } from '../models/PatchedUpdateGrievanceTicket';
 import type { PaymentDetail } from '../models/PaymentDetail';
 import type { PaymentPlan } from '../models/PaymentPlan';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
@@ -107,12 +96,13 @@ import type { RefuseRdi } from '../models/RefuseRdi';
 import type { RegistrationDataImportCreate } from '../models/RegistrationDataImportCreate';
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
+import type { SampleSize } from '../models/SampleSize';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { Survey } from '../models/Survey';
+import type { SurveySampleSize } from '../models/SurveySampleSize';
 import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
-import type { TicketNote } from '../models/TicketNote';
 import type { TPHouseholdList } from '../models/TPHouseholdList';
 import type { UserChoices } from '../models/UserChoices';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -557,7 +547,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedBusinessAreaList
      * @throws ApiError
      */
@@ -590,7 +579,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
@@ -652,25 +640,67 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
-     * @returns any No response body
+     * @returns PaginatedChoiceList
      * @throws ApiError
      */
-    public static restBusinessAreasActivityLogsActionChoicesRetrieve({
+    public static restBusinessAreasActivityLogsActionChoicesList({
         businessAreaSlug,
+        businessArea,
+        limit,
+        module,
+        objectId,
+        offset,
+        ordering,
+        programId,
+        search,
+        user,
+        userId,
     }: {
         businessAreaSlug: string,
-    }): CancelablePromise<any> {
+        businessArea?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        module?: string,
+        objectId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        user?: string,
+        userId?: string,
+    }): CancelablePromise<PaginatedChoiceList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/activity-logs/action-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
             },
+            query: {
+                'business_area': businessArea,
+                'limit': limit,
+                'module': module,
+                'object_id': objectId,
+                'offset': offset,
+                'ordering': ordering,
+                'program_id': programId,
+                'search': search,
+                'user': user,
+                'user_id': userId,
+            },
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -705,7 +735,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -793,7 +822,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -815,7 +843,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -839,7 +866,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -867,7 +893,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -895,7 +920,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -913,9 +937,6 @@ export class RestService {
         });
     }
     /**
-     * "
-     * Mixin to allow using the same viewset for both internal and external endpoints.
-     * If the request is authenticated with a token, it will use the HOPEPermission and check permission assigned to variable token_permission.
      * @returns PaginatedAreaListList
      * @throws ApiError
      */
@@ -962,7 +983,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
      */
@@ -1181,230 +1201,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns PaginatedGrievanceTicketDetailList
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsCreate({
-        businessAreaSlug,
-        requestBody,
-        admin1,
-        admin2,
-        area,
-        areaStartswith,
-        assignedTo,
-        cashPlan,
-        category,
-        createdAtAfter,
-        createdAtBefore,
-        createdBy,
-        documentNumber,
-        documentType,
-        fsp,
-        grievanceStatus,
-        grievanceType,
-        household,
-        id,
-        idStartswith,
-        isActiveProgram,
-        isCrossArea,
-        issueType,
-        limit,
-        offset,
-        orderBy,
-        ordering,
-        preferredLanguage,
-        priority,
-        program,
-        registrationDataImport,
-        scoreMax,
-        scoreMin,
-        search,
-        status,
-        urgency,
-    }: {
-        businessAreaSlug: string,
-        requestBody: CreateGrievanceTicket,
-        admin1?: string,
-        admin2?: string,
-        area?: string,
-        areaStartswith?: string,
-        assignedTo?: string,
-        cashPlan?: string,
-        /**
-         * * `8` - Needs Adjudication
-         * * `1` - Payment Verification
-         * * `9` - System Flagging
-         * * `2` - Data Change
-         * * `4` - Grievance Complaint
-         * * `5` - Negative Feedback
-         * * `7` - Positive Feedback
-         * * `6` - Referral
-         * * `3` - Sensitive Grievance
-         */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-        createdAtAfter?: string,
-        createdAtBefore?: string,
-        createdBy?: string,
-        documentNumber?: string,
-        documentType?: string,
-        fsp?: string,
-        grievanceStatus?: string,
-        grievanceType?: string,
-        household?: string,
-        id?: string,
-        idStartswith?: string,
-        isActiveProgram?: boolean,
-        isCrossArea?: boolean,
-        /**
-         * * `16` - Add Individual
-         * * `13` - Household Data Update
-         * * `14` - Individual Data Update
-         * * `15` - Withdraw Individual
-         * * `17` - Withdraw Household
-         * * `2` - Bribery, corruption or kickback
-         * * `1` - Data breach
-         * * `8` - Conflict of interest
-         * * `3` - Fraud and forgery
-         * * `4` - Fraud involving misuse of programme funds by third party
-         * * `9` - Gross mismanagement
-         * * `5` - Harassment and abuse of authority
-         * * `6` - Inappropriate staff conduct
-         * * `12` - Miscellaneous
-         * * `10` - Personal disputes
-         * * `11` - Sexual harassment and sexual exploitation
-         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
-         * * `18` - Payment Related Complaint
-         * * `19` - FSP Related Complaint
-         * * `20` - Registration Related Complaint
-         * * `21` - Other Complaint
-         * * `22` - Partner Related Complaint
-         * * `23` - Unique Identifiers Similarity
-         * * `24` - Biographical Data Similarity
-         * * `25` - Biometrics Similarity
-         */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Ordering
-         *
-         * * `unicef_id` - Unicef id
-         * * `-unicef_id` - Unicef id (descending)
-         * * `status` - Status
-         * * `-status` - Status (descending)
-         * * `assigned_to__last_name` - Assigned to  last name
-         * * `-assigned_to__last_name` - Assigned to  last name (descending)
-         * * `category` - Category
-         * * `-category` - Category (descending)
-         * * `created_at` - Created at
-         * * `-created_at` - Created at (descending)
-         * * `households_count` - Households count
-         * * `-households_count` - Households count (descending)
-         * * `user_modified` - User modified
-         * * `-user_modified` - User modified (descending)
-         * * `household_unicef_id` - Household unicef id
-         * * `-household_unicef_id` - Household unicef id (descending)
-         * * `issue_type` - Issue type
-         * * `-issue_type` - Issue type (descending)
-         * * `priority` - Priority
-         * * `-priority` - Priority (descending)
-         * * `urgency` - Urgency
-         * * `-urgency` - Urgency (descending)
-         * * `total_days` - Total days
-         * * `-total_days` - Total days (descending)
-         * * `linked_tickets` - Linked tickets
-         * * `-linked_tickets` - Linked tickets (descending)
-         */
-        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        preferredLanguage?: string,
-        /**
-         * * `0` - Not set
-         * * `1` - High
-         * * `2` - Medium
-         * * `3` - Low
-         */
-        priority?: 0 | 1 | 2 | 3,
-        program?: string,
-        registrationDataImport?: string,
-        scoreMax?: string,
-        scoreMin?: string,
-        search?: string,
-        /**
-         * * `1` - New
-         * * `2` - Assigned
-         * * `6` - Closed
-         * * `5` - For Approval
-         * * `3` - In Progress
-         * * `4` - On Hold
-         */
-        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
-        /**
-         * * `0` - Not set
-         * * `1` - Very urgent
-         * * `2` - Urgent
-         * * `3` - Not urgent
-         */
-        urgency?: 0 | 1 | 2 | 3,
-    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-            },
-            query: {
-                'admin1': admin1,
-                'admin2': admin2,
-                'area': area,
-                'area__startswith': areaStartswith,
-                'assigned_to': assignedTo,
-                'cash_plan': cashPlan,
-                'category': category,
-                'created_at_after': createdAtAfter,
-                'created_at_before': createdAtBefore,
-                'created_by': createdBy,
-                'document_number': documentNumber,
-                'document_type': documentType,
-                'fsp': fsp,
-                'grievance_status': grievanceStatus,
-                'grievance_type': grievanceType,
-                'household': household,
-                'id': id,
-                'id__startswith': idStartswith,
-                'is_active_program': isActiveProgram,
-                'is_cross_area': isCrossArea,
-                'issue_type': issueType,
-                'limit': limit,
-                'offset': offset,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'preferred_language': preferredLanguage,
-                'priority': priority,
-                'program': program,
-                'registration_data_import': registrationDataImport,
-                'score_max': scoreMax,
-                'score_min': scoreMin,
-                'search': search,
-                'status': status,
-                'urgency': urgency,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1428,1179 +1224,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsPartialUpdate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody?: PatchedUpdateGrievanceTicket,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'PATCH',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsApproveDeleteHouseholdCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody: GrievanceDeleteHouseholdApproveStatus,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-delete-household/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsApproveHouseholdDataChangeCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody: GrievanceHouseholdDataChangeApprove,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-household-data-change/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsApproveIndividualDataChangeCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody: GrievanceIndividualDataChangeApprove,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-individual-data-change/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsApproveNeedsAdjudicationCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody?: GrievanceNeedsAdjudicationApprove,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-needs-adjudication/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsApprovePaymentDetailsCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody: GrievanceUpdateApproveStatus,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-payment-details/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * action for approve_add_individual, approve_delete_individual, approve_system_flagging
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody: GrievanceUpdateApproveStatus,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-status-update/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns TicketNote
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsCreateNoteCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody: GrievanceCreateNote,
-    }): CancelablePromise<TicketNote> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/create-note/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsReassignRoleCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody: GrievanceReassignRole,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/reassign-role/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns GrievanceTicketDetail
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsStatusChangeCreate({
-        businessAreaSlug,
-        id,
-        requestBody,
-    }: {
-        businessAreaSlug: string,
-        /**
-         * A UUID string identifying this Grievance Ticket.
-         */
-        id: string,
-        requestBody: GrievanceStatusChange,
-    }): CancelablePromise<GrievanceTicketDetail> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/status-change/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns PaginatedGrievanceTicketDetailList
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
-        businessAreaSlug,
-        requestBody,
-        admin1,
-        admin2,
-        area,
-        areaStartswith,
-        assignedTo,
-        cashPlan,
-        category,
-        createdAtAfter,
-        createdAtBefore,
-        createdBy,
-        documentNumber,
-        documentType,
-        fsp,
-        grievanceStatus,
-        grievanceType,
-        household,
-        id,
-        idStartswith,
-        isActiveProgram,
-        isCrossArea,
-        issueType,
-        limit,
-        offset,
-        orderBy,
-        ordering,
-        preferredLanguage,
-        priority,
-        program,
-        registrationDataImport,
-        scoreMax,
-        scoreMin,
-        search,
-        status,
-        urgency,
-    }: {
-        businessAreaSlug: string,
-        requestBody: BulkGrievanceTicketsAddNote,
-        admin1?: string,
-        admin2?: string,
-        area?: string,
-        areaStartswith?: string,
-        assignedTo?: string,
-        cashPlan?: string,
-        /**
-         * * `8` - Needs Adjudication
-         * * `1` - Payment Verification
-         * * `9` - System Flagging
-         * * `2` - Data Change
-         * * `4` - Grievance Complaint
-         * * `5` - Negative Feedback
-         * * `7` - Positive Feedback
-         * * `6` - Referral
-         * * `3` - Sensitive Grievance
-         */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-        createdAtAfter?: string,
-        createdAtBefore?: string,
-        createdBy?: string,
-        documentNumber?: string,
-        documentType?: string,
-        fsp?: string,
-        grievanceStatus?: string,
-        grievanceType?: string,
-        household?: string,
-        id?: string,
-        idStartswith?: string,
-        isActiveProgram?: boolean,
-        isCrossArea?: boolean,
-        /**
-         * * `16` - Add Individual
-         * * `13` - Household Data Update
-         * * `14` - Individual Data Update
-         * * `15` - Withdraw Individual
-         * * `17` - Withdraw Household
-         * * `2` - Bribery, corruption or kickback
-         * * `1` - Data breach
-         * * `8` - Conflict of interest
-         * * `3` - Fraud and forgery
-         * * `4` - Fraud involving misuse of programme funds by third party
-         * * `9` - Gross mismanagement
-         * * `5` - Harassment and abuse of authority
-         * * `6` - Inappropriate staff conduct
-         * * `12` - Miscellaneous
-         * * `10` - Personal disputes
-         * * `11` - Sexual harassment and sexual exploitation
-         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
-         * * `18` - Payment Related Complaint
-         * * `19` - FSP Related Complaint
-         * * `20` - Registration Related Complaint
-         * * `21` - Other Complaint
-         * * `22` - Partner Related Complaint
-         * * `23` - Unique Identifiers Similarity
-         * * `24` - Biographical Data Similarity
-         * * `25` - Biometrics Similarity
-         */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Ordering
-         *
-         * * `unicef_id` - Unicef id
-         * * `-unicef_id` - Unicef id (descending)
-         * * `status` - Status
-         * * `-status` - Status (descending)
-         * * `assigned_to__last_name` - Assigned to  last name
-         * * `-assigned_to__last_name` - Assigned to  last name (descending)
-         * * `category` - Category
-         * * `-category` - Category (descending)
-         * * `created_at` - Created at
-         * * `-created_at` - Created at (descending)
-         * * `households_count` - Households count
-         * * `-households_count` - Households count (descending)
-         * * `user_modified` - User modified
-         * * `-user_modified` - User modified (descending)
-         * * `household_unicef_id` - Household unicef id
-         * * `-household_unicef_id` - Household unicef id (descending)
-         * * `issue_type` - Issue type
-         * * `-issue_type` - Issue type (descending)
-         * * `priority` - Priority
-         * * `-priority` - Priority (descending)
-         * * `urgency` - Urgency
-         * * `-urgency` - Urgency (descending)
-         * * `total_days` - Total days
-         * * `-total_days` - Total days (descending)
-         * * `linked_tickets` - Linked tickets
-         * * `-linked_tickets` - Linked tickets (descending)
-         */
-        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        preferredLanguage?: string,
-        /**
-         * * `0` - Not set
-         * * `1` - High
-         * * `2` - Medium
-         * * `3` - Low
-         */
-        priority?: 0 | 1 | 2 | 3,
-        program?: string,
-        registrationDataImport?: string,
-        scoreMax?: string,
-        scoreMin?: string,
-        search?: string,
-        /**
-         * * `1` - New
-         * * `2` - Assigned
-         * * `6` - Closed
-         * * `5` - For Approval
-         * * `3` - In Progress
-         * * `4` - On Hold
-         */
-        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
-        /**
-         * * `0` - Not set
-         * * `1` - Very urgent
-         * * `2` - Urgent
-         * * `3` - Not urgent
-         */
-        urgency?: 0 | 1 | 2 | 3,
-    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/bulk-add-note/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-            },
-            query: {
-                'admin1': admin1,
-                'admin2': admin2,
-                'area': area,
-                'area__startswith': areaStartswith,
-                'assigned_to': assignedTo,
-                'cash_plan': cashPlan,
-                'category': category,
-                'created_at_after': createdAtAfter,
-                'created_at_before': createdAtBefore,
-                'created_by': createdBy,
-                'document_number': documentNumber,
-                'document_type': documentType,
-                'fsp': fsp,
-                'grievance_status': grievanceStatus,
-                'grievance_type': grievanceType,
-                'household': household,
-                'id': id,
-                'id__startswith': idStartswith,
-                'is_active_program': isActiveProgram,
-                'is_cross_area': isCrossArea,
-                'issue_type': issueType,
-                'limit': limit,
-                'offset': offset,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'preferred_language': preferredLanguage,
-                'priority': priority,
-                'program': program,
-                'registration_data_import': registrationDataImport,
-                'score_max': scoreMax,
-                'score_min': scoreMin,
-                'search': search,
-                'status': status,
-                'urgency': urgency,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns PaginatedGrievanceTicketDetailList
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate({
-        businessAreaSlug,
-        requestBody,
-        admin1,
-        admin2,
-        area,
-        areaStartswith,
-        assignedTo,
-        cashPlan,
-        category,
-        createdAtAfter,
-        createdAtBefore,
-        createdBy,
-        documentNumber,
-        documentType,
-        fsp,
-        grievanceStatus,
-        grievanceType,
-        household,
-        id,
-        idStartswith,
-        isActiveProgram,
-        isCrossArea,
-        issueType,
-        limit,
-        offset,
-        orderBy,
-        ordering,
-        preferredLanguage,
-        priority,
-        program,
-        registrationDataImport,
-        scoreMax,
-        scoreMin,
-        search,
-        status,
-        urgency,
-    }: {
-        businessAreaSlug: string,
-        requestBody: BulkUpdateGrievanceTicketsAssignees,
-        admin1?: string,
-        admin2?: string,
-        area?: string,
-        areaStartswith?: string,
-        assignedTo?: string,
-        cashPlan?: string,
-        /**
-         * * `8` - Needs Adjudication
-         * * `1` - Payment Verification
-         * * `9` - System Flagging
-         * * `2` - Data Change
-         * * `4` - Grievance Complaint
-         * * `5` - Negative Feedback
-         * * `7` - Positive Feedback
-         * * `6` - Referral
-         * * `3` - Sensitive Grievance
-         */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-        createdAtAfter?: string,
-        createdAtBefore?: string,
-        createdBy?: string,
-        documentNumber?: string,
-        documentType?: string,
-        fsp?: string,
-        grievanceStatus?: string,
-        grievanceType?: string,
-        household?: string,
-        id?: string,
-        idStartswith?: string,
-        isActiveProgram?: boolean,
-        isCrossArea?: boolean,
-        /**
-         * * `16` - Add Individual
-         * * `13` - Household Data Update
-         * * `14` - Individual Data Update
-         * * `15` - Withdraw Individual
-         * * `17` - Withdraw Household
-         * * `2` - Bribery, corruption or kickback
-         * * `1` - Data breach
-         * * `8` - Conflict of interest
-         * * `3` - Fraud and forgery
-         * * `4` - Fraud involving misuse of programme funds by third party
-         * * `9` - Gross mismanagement
-         * * `5` - Harassment and abuse of authority
-         * * `6` - Inappropriate staff conduct
-         * * `12` - Miscellaneous
-         * * `10` - Personal disputes
-         * * `11` - Sexual harassment and sexual exploitation
-         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
-         * * `18` - Payment Related Complaint
-         * * `19` - FSP Related Complaint
-         * * `20` - Registration Related Complaint
-         * * `21` - Other Complaint
-         * * `22` - Partner Related Complaint
-         * * `23` - Unique Identifiers Similarity
-         * * `24` - Biographical Data Similarity
-         * * `25` - Biometrics Similarity
-         */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Ordering
-         *
-         * * `unicef_id` - Unicef id
-         * * `-unicef_id` - Unicef id (descending)
-         * * `status` - Status
-         * * `-status` - Status (descending)
-         * * `assigned_to__last_name` - Assigned to  last name
-         * * `-assigned_to__last_name` - Assigned to  last name (descending)
-         * * `category` - Category
-         * * `-category` - Category (descending)
-         * * `created_at` - Created at
-         * * `-created_at` - Created at (descending)
-         * * `households_count` - Households count
-         * * `-households_count` - Households count (descending)
-         * * `user_modified` - User modified
-         * * `-user_modified` - User modified (descending)
-         * * `household_unicef_id` - Household unicef id
-         * * `-household_unicef_id` - Household unicef id (descending)
-         * * `issue_type` - Issue type
-         * * `-issue_type` - Issue type (descending)
-         * * `priority` - Priority
-         * * `-priority` - Priority (descending)
-         * * `urgency` - Urgency
-         * * `-urgency` - Urgency (descending)
-         * * `total_days` - Total days
-         * * `-total_days` - Total days (descending)
-         * * `linked_tickets` - Linked tickets
-         * * `-linked_tickets` - Linked tickets (descending)
-         */
-        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        preferredLanguage?: string,
-        /**
-         * * `0` - Not set
-         * * `1` - High
-         * * `2` - Medium
-         * * `3` - Low
-         */
-        priority?: 0 | 1 | 2 | 3,
-        program?: string,
-        registrationDataImport?: string,
-        scoreMax?: string,
-        scoreMin?: string,
-        search?: string,
-        /**
-         * * `1` - New
-         * * `2` - Assigned
-         * * `6` - Closed
-         * * `5` - For Approval
-         * * `3` - In Progress
-         * * `4` - On Hold
-         */
-        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
-        /**
-         * * `0` - Not set
-         * * `1` - Very urgent
-         * * `2` - Urgent
-         * * `3` - Not urgent
-         */
-        urgency?: 0 | 1 | 2 | 3,
-    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/bulk-update-assignee/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-            },
-            query: {
-                'admin1': admin1,
-                'admin2': admin2,
-                'area': area,
-                'area__startswith': areaStartswith,
-                'assigned_to': assignedTo,
-                'cash_plan': cashPlan,
-                'category': category,
-                'created_at_after': createdAtAfter,
-                'created_at_before': createdAtBefore,
-                'created_by': createdBy,
-                'document_number': documentNumber,
-                'document_type': documentType,
-                'fsp': fsp,
-                'grievance_status': grievanceStatus,
-                'grievance_type': grievanceType,
-                'household': household,
-                'id': id,
-                'id__startswith': idStartswith,
-                'is_active_program': isActiveProgram,
-                'is_cross_area': isCrossArea,
-                'issue_type': issueType,
-                'limit': limit,
-                'offset': offset,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'preferred_language': preferredLanguage,
-                'priority': priority,
-                'program': program,
-                'registration_data_import': registrationDataImport,
-                'score_max': scoreMax,
-                'score_min': scoreMin,
-                'search': search,
-                'status': status,
-                'urgency': urgency,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns PaginatedGrievanceTicketDetailList
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsBulkUpdatePriorityCreate({
-        businessAreaSlug,
-        requestBody,
-        admin1,
-        admin2,
-        area,
-        areaStartswith,
-        assignedTo,
-        cashPlan,
-        category,
-        createdAtAfter,
-        createdAtBefore,
-        createdBy,
-        documentNumber,
-        documentType,
-        fsp,
-        grievanceStatus,
-        grievanceType,
-        household,
-        id,
-        idStartswith,
-        isActiveProgram,
-        isCrossArea,
-        issueType,
-        limit,
-        offset,
-        orderBy,
-        ordering,
-        preferredLanguage,
-        priority,
-        program,
-        registrationDataImport,
-        scoreMax,
-        scoreMin,
-        search,
-        status,
-        urgency,
-    }: {
-        businessAreaSlug: string,
-        requestBody: BulkUpdateGrievanceTicketsPriority,
-        admin1?: string,
-        admin2?: string,
-        area?: string,
-        areaStartswith?: string,
-        assignedTo?: string,
-        cashPlan?: string,
-        /**
-         * * `8` - Needs Adjudication
-         * * `1` - Payment Verification
-         * * `9` - System Flagging
-         * * `2` - Data Change
-         * * `4` - Grievance Complaint
-         * * `5` - Negative Feedback
-         * * `7` - Positive Feedback
-         * * `6` - Referral
-         * * `3` - Sensitive Grievance
-         */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-        createdAtAfter?: string,
-        createdAtBefore?: string,
-        createdBy?: string,
-        documentNumber?: string,
-        documentType?: string,
-        fsp?: string,
-        grievanceStatus?: string,
-        grievanceType?: string,
-        household?: string,
-        id?: string,
-        idStartswith?: string,
-        isActiveProgram?: boolean,
-        isCrossArea?: boolean,
-        /**
-         * * `16` - Add Individual
-         * * `13` - Household Data Update
-         * * `14` - Individual Data Update
-         * * `15` - Withdraw Individual
-         * * `17` - Withdraw Household
-         * * `2` - Bribery, corruption or kickback
-         * * `1` - Data breach
-         * * `8` - Conflict of interest
-         * * `3` - Fraud and forgery
-         * * `4` - Fraud involving misuse of programme funds by third party
-         * * `9` - Gross mismanagement
-         * * `5` - Harassment and abuse of authority
-         * * `6` - Inappropriate staff conduct
-         * * `12` - Miscellaneous
-         * * `10` - Personal disputes
-         * * `11` - Sexual harassment and sexual exploitation
-         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
-         * * `18` - Payment Related Complaint
-         * * `19` - FSP Related Complaint
-         * * `20` - Registration Related Complaint
-         * * `21` - Other Complaint
-         * * `22` - Partner Related Complaint
-         * * `23` - Unique Identifiers Similarity
-         * * `24` - Biographical Data Similarity
-         * * `25` - Biometrics Similarity
-         */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Ordering
-         *
-         * * `unicef_id` - Unicef id
-         * * `-unicef_id` - Unicef id (descending)
-         * * `status` - Status
-         * * `-status` - Status (descending)
-         * * `assigned_to__last_name` - Assigned to  last name
-         * * `-assigned_to__last_name` - Assigned to  last name (descending)
-         * * `category` - Category
-         * * `-category` - Category (descending)
-         * * `created_at` - Created at
-         * * `-created_at` - Created at (descending)
-         * * `households_count` - Households count
-         * * `-households_count` - Households count (descending)
-         * * `user_modified` - User modified
-         * * `-user_modified` - User modified (descending)
-         * * `household_unicef_id` - Household unicef id
-         * * `-household_unicef_id` - Household unicef id (descending)
-         * * `issue_type` - Issue type
-         * * `-issue_type` - Issue type (descending)
-         * * `priority` - Priority
-         * * `-priority` - Priority (descending)
-         * * `urgency` - Urgency
-         * * `-urgency` - Urgency (descending)
-         * * `total_days` - Total days
-         * * `-total_days` - Total days (descending)
-         * * `linked_tickets` - Linked tickets
-         * * `-linked_tickets` - Linked tickets (descending)
-         */
-        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        preferredLanguage?: string,
-        /**
-         * * `0` - Not set
-         * * `1` - High
-         * * `2` - Medium
-         * * `3` - Low
-         */
-        priority?: 0 | 1 | 2 | 3,
-        program?: string,
-        registrationDataImport?: string,
-        scoreMax?: string,
-        scoreMin?: string,
-        search?: string,
-        /**
-         * * `1` - New
-         * * `2` - Assigned
-         * * `6` - Closed
-         * * `5` - For Approval
-         * * `3` - In Progress
-         * * `4` - On Hold
-         */
-        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
-        /**
-         * * `0` - Not set
-         * * `1` - Very urgent
-         * * `2` - Urgent
-         * * `3` - Not urgent
-         */
-        urgency?: 0 | 1 | 2 | 3,
-    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/bulk-update-priority/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-            },
-            query: {
-                'admin1': admin1,
-                'admin2': admin2,
-                'area': area,
-                'area__startswith': areaStartswith,
-                'assigned_to': assignedTo,
-                'cash_plan': cashPlan,
-                'category': category,
-                'created_at_after': createdAtAfter,
-                'created_at_before': createdAtBefore,
-                'created_by': createdBy,
-                'document_number': documentNumber,
-                'document_type': documentType,
-                'fsp': fsp,
-                'grievance_status': grievanceStatus,
-                'grievance_type': grievanceType,
-                'household': household,
-                'id': id,
-                'id__startswith': idStartswith,
-                'is_active_program': isActiveProgram,
-                'is_cross_area': isCrossArea,
-                'issue_type': issueType,
-                'limit': limit,
-                'offset': offset,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'preferred_language': preferredLanguage,
-                'priority': priority,
-                'program': program,
-                'registration_data_import': registrationDataImport,
-                'score_max': scoreMax,
-                'score_min': scoreMin,
-                'search': search,
-                'status': status,
-                'urgency': urgency,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
-     * @returns PaginatedGrievanceTicketDetailList
-     * @throws ApiError
-     */
-    public static restBusinessAreasGrievanceTicketsBulkUpdateUrgencyCreate({
-        businessAreaSlug,
-        requestBody,
-        admin1,
-        admin2,
-        area,
-        areaStartswith,
-        assignedTo,
-        cashPlan,
-        category,
-        createdAtAfter,
-        createdAtBefore,
-        createdBy,
-        documentNumber,
-        documentType,
-        fsp,
-        grievanceStatus,
-        grievanceType,
-        household,
-        id,
-        idStartswith,
-        isActiveProgram,
-        isCrossArea,
-        issueType,
-        limit,
-        offset,
-        orderBy,
-        ordering,
-        preferredLanguage,
-        priority,
-        program,
-        registrationDataImport,
-        scoreMax,
-        scoreMin,
-        search,
-        status,
-        urgency,
-    }: {
-        businessAreaSlug: string,
-        requestBody: BulkUpdateGrievanceTicketsUrgency,
-        admin1?: string,
-        admin2?: string,
-        area?: string,
-        areaStartswith?: string,
-        assignedTo?: string,
-        cashPlan?: string,
-        /**
-         * * `8` - Needs Adjudication
-         * * `1` - Payment Verification
-         * * `9` - System Flagging
-         * * `2` - Data Change
-         * * `4` - Grievance Complaint
-         * * `5` - Negative Feedback
-         * * `7` - Positive Feedback
-         * * `6` - Referral
-         * * `3` - Sensitive Grievance
-         */
-        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
-        createdAtAfter?: string,
-        createdAtBefore?: string,
-        createdBy?: string,
-        documentNumber?: string,
-        documentType?: string,
-        fsp?: string,
-        grievanceStatus?: string,
-        grievanceType?: string,
-        household?: string,
-        id?: string,
-        idStartswith?: string,
-        isActiveProgram?: boolean,
-        isCrossArea?: boolean,
-        /**
-         * * `16` - Add Individual
-         * * `13` - Household Data Update
-         * * `14` - Individual Data Update
-         * * `15` - Withdraw Individual
-         * * `17` - Withdraw Household
-         * * `2` - Bribery, corruption or kickback
-         * * `1` - Data breach
-         * * `8` - Conflict of interest
-         * * `3` - Fraud and forgery
-         * * `4` - Fraud involving misuse of programme funds by third party
-         * * `9` - Gross mismanagement
-         * * `5` - Harassment and abuse of authority
-         * * `6` - Inappropriate staff conduct
-         * * `12` - Miscellaneous
-         * * `10` - Personal disputes
-         * * `11` - Sexual harassment and sexual exploitation
-         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
-         * * `18` - Payment Related Complaint
-         * * `19` - FSP Related Complaint
-         * * `20` - Registration Related Complaint
-         * * `21` - Other Complaint
-         * * `22` - Partner Related Complaint
-         * * `23` - Unique Identifiers Similarity
-         * * `24` - Biographical Data Similarity
-         * * `25` - Biometrics Similarity
-         */
-        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Ordering
-         *
-         * * `unicef_id` - Unicef id
-         * * `-unicef_id` - Unicef id (descending)
-         * * `status` - Status
-         * * `-status` - Status (descending)
-         * * `assigned_to__last_name` - Assigned to  last name
-         * * `-assigned_to__last_name` - Assigned to  last name (descending)
-         * * `category` - Category
-         * * `-category` - Category (descending)
-         * * `created_at` - Created at
-         * * `-created_at` - Created at (descending)
-         * * `households_count` - Households count
-         * * `-households_count` - Households count (descending)
-         * * `user_modified` - User modified
-         * * `-user_modified` - User modified (descending)
-         * * `household_unicef_id` - Household unicef id
-         * * `-household_unicef_id` - Household unicef id (descending)
-         * * `issue_type` - Issue type
-         * * `-issue_type` - Issue type (descending)
-         * * `priority` - Priority
-         * * `-priority` - Priority (descending)
-         * * `urgency` - Urgency
-         * * `-urgency` - Urgency (descending)
-         * * `total_days` - Total days
-         * * `-total_days` - Total days (descending)
-         * * `linked_tickets` - Linked tickets
-         * * `-linked_tickets` - Linked tickets (descending)
-         */
-        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        preferredLanguage?: string,
-        /**
-         * * `0` - Not set
-         * * `1` - High
-         * * `2` - Medium
-         * * `3` - Low
-         */
-        priority?: 0 | 1 | 2 | 3,
-        program?: string,
-        registrationDataImport?: string,
-        scoreMax?: string,
-        scoreMin?: string,
-        search?: string,
-        /**
-         * * `1` - New
-         * * `2` - Assigned
-         * * `6` - Closed
-         * * `5` - For Approval
-         * * `3` - In Progress
-         * * `4` - On Hold
-         */
-        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
-        /**
-         * * `0` - Not set
-         * * `1` - Very urgent
-         * * `2` - Urgent
-         * * `3` - Not urgent
-         */
-        urgency?: 0 | 1 | 2 | 3,
-    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/bulk-update-urgency/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-            },
-            query: {
-                'admin1': admin1,
-                'admin2': admin2,
-                'area': area,
-                'area__startswith': areaStartswith,
-                'assigned_to': assignedTo,
-                'cash_plan': cashPlan,
-                'category': category,
-                'created_at_after': createdAtAfter,
-                'created_at_before': createdAtBefore,
-                'created_by': createdBy,
-                'document_number': documentNumber,
-                'document_type': documentType,
-                'fsp': fsp,
-                'grievance_status': grievanceStatus,
-                'grievance_type': grievanceType,
-                'household': household,
-                'id': id,
-                'id__startswith': idStartswith,
-                'is_active_program': isActiveProgram,
-                'is_cross_area': isCrossArea,
-                'issue_type': issueType,
-                'limit': limit,
-                'offset': offset,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'preferred_language': preferredLanguage,
-                'priority': priority,
-                'program': program,
-                'registration_data_import': registrationDataImport,
-                'score_max': scoreMax,
-                'score_min': scoreMin,
-                'search': search,
-                'status': status,
-                'urgency': urgency,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns GrievanceChoices
      * @throws ApiError
      */
@@ -2618,7 +1241,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -2636,7 +1258,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns PaginatedHouseholdListList
      * @throws ApiError
      */
@@ -2805,7 +1426,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns HouseholdChoices
      * @throws ApiError
      */
@@ -2823,7 +1443,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -2841,7 +1460,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns PaginatedIndividualListList
      * @throws ApiError
      */
@@ -2998,7 +1616,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns IndividualChoices
      * @throws ApiError
      */
@@ -3016,7 +1633,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's area limits.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3034,7 +1650,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedPaymentPlanList
      * @throws ApiError
      */
@@ -3155,7 +1770,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaymentPlanBulkAction
      * @throws ApiError
      */
@@ -3320,7 +1934,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedLogEntryList
      * @throws ApiError
      */
@@ -3385,17 +1998,48 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
-     * @returns any No response body
+     * @returns PaginatedChoiceList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsActivityLogsActionChoicesRetrieve({
+    public static restBusinessAreasProgramsActivityLogsActionChoicesList({
         businessAreaSlug,
         programSlug,
+        businessArea,
+        limit,
+        module,
+        objectId,
+        offset,
+        ordering,
+        programId,
+        search,
+        user,
+        userId,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-    }): CancelablePromise<any> {
+        businessArea?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        module?: string,
+        objectId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        user?: string,
+        userId?: string,
+    }): CancelablePromise<PaginatedChoiceList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/activity-logs/action-choices/',
@@ -3403,10 +2047,21 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
+            query: {
+                'business_area': businessArea,
+                'limit': limit,
+                'module': module,
+                'object_id': objectId,
+                'offset': offset,
+                'ordering': ordering,
+                'program_id': programId,
+                'search': search,
+                'user': user,
+                'user_id': userId,
+            },
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3427,7 +2082,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedProgramCycleListList
      * @throws ApiError
      */
@@ -3503,7 +2157,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleCreate
      * @throws ApiError
      */
@@ -3528,7 +2181,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleList
      * @throws ApiError
      */
@@ -3555,7 +2207,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleUpdate
      * @throws ApiError
      */
@@ -3586,7 +2237,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ProgramCycleUpdate
      * @throws ApiError
      */
@@ -3617,7 +2267,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns void
      * @throws ApiError
      */
@@ -3644,7 +2293,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -3671,7 +2319,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -3698,7 +2345,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3719,7 +2365,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns PaginatedFeedbackListList
      * @throws ApiError
      */
@@ -3810,7 +2455,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -3835,7 +2479,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackDetail
      * @throws ApiError
      */
@@ -3862,7 +2505,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackUpdate
      * @throws ApiError
      */
@@ -3893,7 +2535,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns FeedbackMessage
      * @throws ApiError
      */
@@ -3924,7 +2565,6 @@ export class RestService {
         });
     }
     /**
-     * Applies BusinessAreaMixin and also filters the queryset based on the user's partner's permissions across programs.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -3945,7 +2585,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedGrievanceTicketListList
      * @throws ApiError
      */
@@ -4167,7 +2806,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -4188,7 +2826,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedHouseholdListList
      * @throws ApiError
      */
@@ -4360,7 +2997,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns HouseholdDetail
      * @throws ApiError
      */
@@ -4387,14 +3023,15 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
-     * @returns HouseholdMember
+     * @returns PaginatedHouseholdMemberList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsHouseholdsMembersRetrieve({
+    public static restBusinessAreasProgramsHouseholdsMembersList({
         businessAreaSlug,
         id,
         programSlug,
+        limit,
+        offset,
     }: {
         businessAreaSlug: string,
         /**
@@ -4402,7 +3039,15 @@ export class RestService {
          */
         id: string,
         programSlug: string,
-    }): CancelablePromise<HouseholdMember> {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+    }): CancelablePromise<PaginatedHouseholdMemberList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/{id}/members/',
@@ -4411,10 +3056,13 @@ export class RestService {
                 'id': id,
                 'program_slug': programSlug,
             },
+            query: {
+                'limit': limit,
+                'offset': offset,
+            },
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -4592,7 +3240,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns any No response body
      * @throws ApiError
      */
@@ -4619,7 +3266,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -4640,7 +3286,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns PaginatedIndividualListList
      * @throws ApiError
      */
@@ -4800,7 +3445,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns IndividualDetail
      * @throws ApiError
      */
@@ -4827,7 +3471,6 @@ export class RestService {
         });
     }
     /**
-     * Applies ProgramMixin and also filters the queryset based on the user's partner's area limits for the program.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -4848,7 +3491,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedMessageListList
      * @throws ApiError
      */
@@ -4948,7 +3590,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns MessageDetail
      * @throws ApiError
      */
@@ -4973,7 +3614,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns MessageDetail
      * @throws ApiError
      */
@@ -5000,7 +3640,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -5021,7 +3660,30 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns SampleSize
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsMessagesSampleSizeCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: MessageSampleSize,
+    }): CancelablePromise<SampleSize> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/messages/sample-size/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns PaginatedPaymentPlanListList
      * @throws ApiError
      */
@@ -5145,7 +3807,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanCreateUpdate
      * @throws ApiError
      */
@@ -5170,7 +3831,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -5208,7 +3868,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentDetail
      * @throws ApiError
      */
@@ -5235,7 +3894,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -5262,7 +3920,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RevertMarkPaymentAsFailed
      * @throws ApiError
      */
@@ -5293,7 +3950,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -5396,7 +4052,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -5423,7 +4078,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanCreateUpdate
      * @throws ApiError
      */
@@ -5454,7 +4108,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns void
      * @throws ApiError
      */
@@ -5481,7 +4134,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -5512,7 +4164,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns AcceptanceProcess
      * @throws ApiError
      */
@@ -5543,7 +4194,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns AcceptanceProcess
      * @throws ApiError
      */
@@ -5574,7 +4224,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -5605,7 +4254,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -5632,7 +4280,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -5663,7 +4310,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -5694,7 +4340,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -5721,7 +4366,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanExportAuthCode
      * @throws ApiError
      */
@@ -5752,7 +4396,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -5779,7 +4422,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -5806,7 +4448,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns AcceptanceProcess
      * @throws ApiError
      */
@@ -5837,7 +4478,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -5864,7 +4504,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlanDetail
      * @throws ApiError
      */
@@ -5895,7 +4534,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns AcceptanceProcess
      * @throws ApiError
      */
@@ -5926,7 +4564,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -5953,7 +4590,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -5980,7 +4616,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -6007,7 +4642,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns SplitPaymentPlan
      * @throws ApiError
      */
@@ -6038,7 +4672,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -6065,7 +4698,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -6092,7 +4724,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -6113,7 +4744,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedPaymentVerificationPlanListList
      * @throws ApiError
      */
@@ -6364,7 +4994,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentDetail
      * @throws ApiError
      */
@@ -6428,7 +5057,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -6452,7 +5080,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6479,7 +5106,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6544,7 +5170,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6578,7 +5203,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6612,7 +5236,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6646,7 +5269,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6680,7 +5302,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6714,7 +5335,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6748,7 +5368,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentVerificationPlanDetails
      * @throws ApiError
      */
@@ -6782,7 +5401,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -7093,7 +5711,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedRegistrationDataImportListList
      * @throws ApiError
      */
@@ -7199,7 +5816,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RegistrationDataImportDetail
      * @throws ApiError
      */
@@ -7224,7 +5840,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RegistrationDataImportDetail
      * @throws ApiError
      */
@@ -7251,7 +5866,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -7278,7 +5892,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -7305,7 +5918,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -7332,7 +5944,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns RefuseRdi
      * @throws ApiError
      */
@@ -7363,7 +5974,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -7384,7 +5994,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -7405,7 +6014,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Choice
      * @throws ApiError
      */
@@ -7426,7 +6034,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns any No response body
      * @throws ApiError
      */
@@ -7447,7 +6054,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedSurveyList
      * @throws ApiError
      */
@@ -7528,7 +6134,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Survey
      * @throws ApiError
      */
@@ -7553,7 +6158,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Survey
      * @throws ApiError
      */
@@ -7580,7 +6184,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Survey
      * @throws ApiError
      */
@@ -7607,17 +6210,64 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns Survey
+     * @returns PaginatedSurveyRapidProFlowList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsSurveysAvailableFlowsRetrieve({
+    public static restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug,
         programSlug,
+        businessArea,
+        createdAtRange,
+        createdBy,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        search,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-    }): CancelablePromise<Survey> {
+        businessArea?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `number_of_recipient` - Number of recipient
+         * * `-number_of_recipient` - Number of recipient (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-category' | '-created_at' | '-created_by' | '-number_of_recipient' | '-title' | '-unicef_id' | 'category' | 'created_at' | 'created_by' | 'number_of_recipient' | 'title' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedSurveyRapidProFlowList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/available-flows/',
@@ -7625,20 +6275,79 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
+            query: {
+                'business_area': businessArea,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'search': search,
+            },
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
-     * @returns Survey
+     * @returns PaginatedSurveyCategoryChoiceList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsSurveysCategoryChoicesRetrieve({
+    public static restBusinessAreasProgramsSurveysCategoryChoicesList({
         businessAreaSlug,
         programSlug,
+        businessArea,
+        createdAtRange,
+        createdBy,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        search,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-    }): CancelablePromise<Survey> {
+        businessArea?: string,
+        createdAtRange?: string,
+        createdBy?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `number_of_recipient` - Number of recipient
+         * * `-number_of_recipient` - Number of recipient (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-category' | '-created_at' | '-created_by' | '-number_of_recipient' | '-title' | '-unicef_id' | 'category' | 'created_at' | 'created_by' | 'number_of_recipient' | 'title' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedSurveyCategoryChoiceList> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/category-choices/',
@@ -7646,10 +6355,21 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
             },
+            query: {
+                'business_area': businessArea,
+                'created_at_range': createdAtRange,
+                'created_by': createdBy,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'search': search,
+            },
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -7670,7 +6390,30 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
+     * @returns SampleSize
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsSurveysSampleSizeCreate({
+        businessAreaSlug,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        requestBody: SurveySampleSize,
+    }): CancelablePromise<SampleSize> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/surveys/sample-size/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns PaginatedTargetPopulationListList
      * @throws ApiError
      */
@@ -7796,7 +6539,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationCreate
      * @throws ApiError
      */
@@ -7821,7 +6563,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationDetail
      * @throws ApiError
      */
@@ -7848,7 +6589,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationCreate
      * @throws ApiError
      */
@@ -7879,7 +6619,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns void
      * @throws ApiError
      */
@@ -7906,7 +6645,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns ApplyEngineFormula
      * @throws ApiError
      */
@@ -7937,7 +6675,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TargetPopulationCopy
      * @throws ApiError
      */
@@ -7968,7 +6705,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -7995,7 +6731,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -8022,7 +6757,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -8049,7 +6783,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaymentPlan
      * @throws ApiError
      */
@@ -8076,7 +6809,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedTPHouseholdListList
      * @throws ApiError
      */
@@ -8114,7 +6846,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns TPHouseholdList
      * @throws ApiError
      */
@@ -8144,7 +6875,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -8168,7 +6898,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -8422,7 +7151,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns PaginatedUserList
      * @throws ApiError
      */
@@ -8514,7 +7242,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns UserChoices
      * @throws ApiError
      */
@@ -8532,7 +7259,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -8550,7 +7276,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns Profile
      * @throws ApiError
      */
@@ -8573,7 +7298,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns BusinessArea
      * @throws ApiError
      */
@@ -8591,7 +7315,6 @@ export class RestService {
         });
     }
     /**
-     * Adds a count action to the viewset that returns the count of the queryset.
      * @returns CountResponse
      * @throws ApiError
      */
@@ -8659,6 +7382,18 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/payment-record-delivery-type/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentVerificationPlanSamplingList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-verification-plan-sampling/',
         });
     }
     /**

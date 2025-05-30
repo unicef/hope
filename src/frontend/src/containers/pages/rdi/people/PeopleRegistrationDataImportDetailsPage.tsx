@@ -144,6 +144,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
               <TabPanel value={selectedTab} index={0}>
                 <ImportedPeopleTable
                   showCheckbox
+                  isOnPaper={false}
                   rdiId={id}
                   rdi={data?.registrationDataImport}
                   isMerged={isMerged}

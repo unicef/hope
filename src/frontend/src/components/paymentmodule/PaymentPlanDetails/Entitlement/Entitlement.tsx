@@ -5,10 +5,6 @@ import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GetApp } from '@mui/icons-material';
@@ -35,6 +31,8 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -191,17 +189,17 @@ function Entitlement({
 
   const shouldDisableEntitlementSelect =
     !canApplySteficonRule ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     !isActiveProgram;
 
   const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED || !isActiveProgram;
 
   const shouldDisableExportXlsx =
     loadingExport ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting ||
+      PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING ||
     !isActiveProgram;
 
   return (
@@ -255,9 +253,9 @@ function Entitlement({
                   disabled={
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
-                    paymentPlan.status !== PaymentPlanStatus.Locked ||
+                    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
                     paymentPlan.backgroundActionStatus ===
-                      PaymentPlanBackgroundActionStatus.RuleEngineRun ||
+                      PaymentPlanBackgroundActionStatusEnum.RULE_ENGINE_RUN ||
                     !isActiveProgram
                   }
                   data-cy="button-apply-steficon"

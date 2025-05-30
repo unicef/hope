@@ -880,7 +880,8 @@ class TestMessageViewSet:
         self.program_active = ProgramFactory(
             name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
         )
-        self.hh_1 = HouseholdFactory(program=self.program_active)
+        hoh1 = IndividualFactory(household=None)
+        self.hh_1 = HouseholdFactory(program=self.program_active, head_of_household=hoh1)
         self.msg_1 = CommunicationMessageFactory(
             program=self.program_active,
             business_area=self.afghanistan,
@@ -895,6 +896,13 @@ class TestMessageViewSet:
                 program_cycle=self.program_active.cycles.first(),
             ),
         )
+        self.payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            business_area=self.afghanistan,
+            program_cycle=self.program_active.cycles.first(),
+        )
+        self.payment = PaymentFactory(parent=self.payment_plan, program=self.program_active, household=self.hh_1)
         # Message without Program
         CommunicationMessageFactory(
             program=None,
@@ -1105,6 +1113,36 @@ class TestMessageViewSet:
                 format="json",
             )
         assert "No recipients found for the given criteria" in str(e.value)
+
+    def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+        url = reverse(
+            "api:accountability:messages-sample-size",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+        data = {
+            "payment_plan": str(self.payment_plan.pk),
+            "sampling_type": "RANDOM",
+            "random_sampling_arguments": {
+                "age": {"max": 80, "min": 30},
+                "sex": "MALE",
+                "margin_of_error": 20.0,
+                "confidence_interval": 0.9,
+                "excluded_admin_areas": [],
+            },
+        }
+
+        response = self.client.post(url, data=data, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
 
 
 class TestSurveyViewSet:
@@ -1369,3 +1407,39 @@ class TestSurveyViewSet:
         assert response.status_code == status.HTTP_200_OK
         resp_data = response.json()
         assert len(resp_data) == 2
+
+    def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_CREATE], self.afghanistan, self.program_active
+        )
+        url = reverse(
+            "api:accountability:surveys-sample-size",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program_active.slug,
+            },
+        )
+        data = {
+            "payment_plan": str(self.payment_plan.pk),
+            "sampling_type": "RANDOM",
+            "random_sampling_arguments": {
+                "age": {"max": 80, "min": 30},
+                "sex": "MALE",
+                "margin_of_error": 20.0,
+                "confidence_interval": 0.9,
+                "excluded_admin_areas": [],
+            },
+        }
+
+        response = self.client.post(url, data=data, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
+
+        data = {
+            "sampling_type": "FULL_LIST",
+            "full_list_arguments": {"excluded_admin_areas": []},
+        }
+
+        response = self.client.post(url, data=data, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.json() == {"number_of_recipients": 1, "sample_size": 1}

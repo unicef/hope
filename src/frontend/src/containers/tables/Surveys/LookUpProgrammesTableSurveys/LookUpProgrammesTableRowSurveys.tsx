@@ -6,12 +6,12 @@ import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { ProgramList } from '@restgenerated/models/ProgramList';
 import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 
 interface LookUpProgrammesTableRowSurveysProps {
-  program: ProgramDetail;
+  program: ProgramList;
   choicesData: ProgrammeChoiceDataQuery;
   radioChangeHandler: (program) => void;
   selectedProgram: string;

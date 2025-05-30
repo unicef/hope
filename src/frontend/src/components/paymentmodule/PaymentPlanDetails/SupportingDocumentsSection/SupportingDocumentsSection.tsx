@@ -10,7 +10,7 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { PaymentPlanStatus } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -81,13 +81,13 @@ export const SupportingDocumentsSection = ({
 
   const canUploadFile =
     hasPermissions(PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Locked ||
-      paymentPlan.status === PaymentPlanStatus.Open);
+    (paymentPlan.status === PaymentPlanStatusEnum.LOCKED ||
+      paymentPlan.status === PaymentPlanStatusEnum.OPEN);
 
   const canRemoveFile =
     hasPermissions(PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Locked ||
-      paymentPlan.status === PaymentPlanStatus.Open);
+    (paymentPlan.status === PaymentPlanStatusEnum.LOCKED ||
+      paymentPlan.status === PaymentPlanStatusEnum.OPEN);
 
   const canDownloadFile = hasPermissions(
     PERMISSIONS.PM_DOWNLOAD_SUPPORTING_DOCUMENT,

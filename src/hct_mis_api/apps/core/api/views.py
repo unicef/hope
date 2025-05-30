@@ -91,6 +91,12 @@ class ChoicesViewSet(ViewSet):
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-verification-plan-sampling")
+    def payment_verification_plan_sampling(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.SAMPLING_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
     @action(detail=False, methods=["get"], url_path="payment-record-delivery-type")
     def payment_record_delivery_type(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(DeliveryMechanism.get_choices()), many=True).data

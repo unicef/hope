@@ -6,6 +6,7 @@ import type { CurrencyEnum } from './CurrencyEnum';
 import type { DeliveryMechanism } from './DeliveryMechanism';
 import type { FinancialServiceProvider } from './FinancialServiceProvider';
 import type { FollowUpPaymentPlan } from './FollowUpPaymentPlan';
+import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgroundActionStatusEnum';
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
@@ -17,7 +18,7 @@ export type TargetPopulationDetail = {
      * Name
      */
     name?: string | null;
-    status: string;
+    readonly status: string;
     /**
      * Total Households Count [sys]
      */
@@ -226,7 +227,7 @@ export type TargetPopulationDetail = {
     readonly createdBy: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    backgroundActionStatus: string;
+    backgroundActionStatus: PaymentPlanBackgroundActionStatusEnum;
     /**
      * Payment Plan start date
      */
