@@ -11,5 +11,9 @@ export type BusinessArea = {
     parent?: string | null;
     isSplit?: boolean;
     active?: boolean;
+    /**
+     * Enable screen beneficiary against sanction list
+     */
+    screenBeneficiary?: boolean;
 };
 

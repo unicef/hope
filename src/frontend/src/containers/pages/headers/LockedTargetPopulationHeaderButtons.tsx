@@ -1,9 +1,9 @@
 import { LoadingButton } from '@components/core/LoadingButton';
-import { BusinessAreaDataQuery } from '@generated/graphql';
-import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FileCopy } from '@mui/icons-material';
 import { Box, Button, Tooltip } from '@mui/material';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
@@ -31,7 +31,7 @@ export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;
-  businessAreaData: BusinessAreaDataQuery;
+  businessAreaData: BusinessArea;
 }
 
 export function LockedTargetPopulationHeaderButtons({
