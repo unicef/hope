@@ -26,6 +26,7 @@ from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.permissions import (
     Permissions,
     check_creator_or_owner_permission,
+    check_permissions,
 )
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
@@ -273,14 +274,15 @@ class GrievanceTicketGlobalViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # if program := serializer.validated_data.get("program"):
-        #     if not check_permissions(
-        #         self.request.user,
-        #         self.get_permissions_for_action(),
-        #         business_area=self.business_area,
-        #         program=program.slug,
-        #     ):
-        #         raise PermissionDenied
+        # check if user has access to the program
+        if program := serializer.validated_data.get("program"):
+            if not check_permissions(
+                self.request.user,
+                self.get_permissions_for_action(),
+                business_area=self.business_area,
+                program=program.slug,
+            ):
+                raise PermissionDenied
 
         if serializer.validated_data.get("documentation"):
             request.user.has_perm(Permissions.GRIEVANCE_DOCUMENTS_UPLOAD, self.business_area)  # type: ignore
