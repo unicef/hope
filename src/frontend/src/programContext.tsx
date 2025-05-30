@@ -34,7 +34,8 @@ export function ProgramProvider({
   const isStandardDctType =
     selectedProgram?.dataCollectingType?.type?.toUpperCase() === 'STANDARD';
 
-  const programHasPdu = selectedProgram?.pduFields?.length > 0;
+  const programHasPdu =
+    selectedProgram?.pduFields && selectedProgram.pduFields.length > 0;
 
   // Set isActiveProgram to true if All Programs is selected
   if (selectedProgram === null) {

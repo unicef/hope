@@ -46,7 +46,7 @@ export function PeopleFilter({
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup || null;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -72,7 +72,7 @@ export function PeopleFilter({
     DataCollectingTypeType.Social;
 
   const individualTableOrderOptions =
-    generateTableOrderOptionsMember(beneficiaryGroup);
+    generateTableOrderOptionsMember(beneficiaryGroup) || [];
 
   return (
     <FiltersSection
@@ -102,11 +102,11 @@ export function PeopleFilter({
               fullWidth
               disableClearable
             >
-              {choicesData?.documentTypeChoices.map(({ name, value }) => (
+              {choicesData?.documentTypeChoices?.map(({ name, value }) => (
                 <MenuItem key={value} value={value}>
                   {name}
                 </MenuItem>
-              ))}
+              )) || null}
             </SelectFilter>
           </Grid>
           <Grid size={{ xs: 6 }}>
