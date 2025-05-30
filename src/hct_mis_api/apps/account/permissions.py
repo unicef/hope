@@ -380,7 +380,9 @@ def check_creator_or_owner_permission(
 ) -> None:
     scope = program or business_area
     if not user.is_authenticated or not (
-        user.has_perm(general_permission, scope)
+        check_permissions(
+            user, [general_permission], business_area=business_area, program=program.slug if program else None  # type: ignore
+        )
         or (is_creator and user.has_perm(creator_permission, scope))
         or (is_owner and user.has_perm(owner_permission, scope))
     ):

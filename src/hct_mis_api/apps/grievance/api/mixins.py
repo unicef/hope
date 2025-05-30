@@ -549,7 +549,9 @@ class GrievanceMutationMixin:
         GrievanceNotification.send_all_notifications(messages)
         return grievance_ticket
 
-    def get_permissions(self, status: int, current_status: int, is_feedback: bool) -> List[Permissions]:
+    def get_permissions_for_status_change(
+        self, status: int, current_status: int, is_feedback: bool
+    ) -> List[Permissions]:
         permissions = self.MOVE_TO_STATUS_PERMISSION_MAPPING.get(status, {})
         feedback_permissions = permissions.get("feedback", [])
         any_permissions = permissions.get("any", [])

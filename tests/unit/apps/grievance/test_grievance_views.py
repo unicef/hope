@@ -585,7 +585,9 @@ class TestGrievanceTicketUpdate:
         )
 
     def test_update_grievance_ticket_hh_update(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program)
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
+        )
         data = {
             "description": "this is new description",
             "assigned_to": str(self.user.id),
@@ -608,7 +610,9 @@ class TestGrievanceTicketUpdate:
         assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New"
 
     def test_update_grievance_ticket_complaint(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
+        )
         url = reverse(
             "api:grievance-tickets:grievance-tickets-global-detail",
             kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grv_2.pk)},
@@ -935,7 +939,10 @@ class TestGrievanceTicketApprove:
 
     def test_approve_add_individual(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.afghanistan, self.program
+            self.user,
+            [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE, Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
+            self.afghanistan,
+            self.program,
         )
         response = self.api_client.post(
             reverse(
