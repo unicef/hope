@@ -1,11 +1,14 @@
 import { FC, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { TextField, Autocomplete } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useProgramContext } from '../../../programContext';
-import { AllUsersForFiltersQuery } from '@generated/graphql';
+import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
+import { User } from '@restgenerated/models/User';
+import styled from 'styled-components';
 
-const StyledAutocomplete = styled(Autocomplete)`
+const StyledAutocomplete = styled(Autocomplete<User, false, boolean, false>)<{
+  fullWidth?: boolean;
+}>`
   width: ${(props) => (props.fullWidth ? '100%' : '180px')}
     .MuiFormControl-marginDense {
     margin-top: 4px;
@@ -22,9 +25,9 @@ const StyledAutocomplete = styled(Autocomplete)`
 
 interface AssignedToDropdownProps {
   fullWidth?: boolean;
-  onFilterChange?: (selectedValue: any, ids?: any) => void;
-  value?: any;
-  optionsData: any;
+  onFilterChange?: (selectedValue: User | null, ids?: any) => void;
+  value?: User | null;
+  optionsData: PaginatedUserList;
   setInputValue: (value: string) => void;
   ids?: any;
   label?: string;
@@ -50,43 +53,42 @@ export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
     setInputValue(debouncedInputText);
   }, [debouncedInputText, setInputValue]);
 
-  const sortedOptions = [...optionsData].sort((a, b) => {
-    const emailA = a.node?.email?.toLowerCase();
-    const emailB = b.node?.email?.toLowerCase();
+  const sortedOptions = [...optionsData.results].sort((a, b) => {
+    const emailA = a?.email?.toLowerCase();
+    const emailB = b?.email?.toLowerCase();
     return emailA.localeCompare(emailB);
   });
 
-  const handleOpen = (e) => {
+  const handleOpen = (e: any) => {
     e.stopPropagation();
     setOpen(true);
   };
 
-  const handleClose = (e, reason: string) => {
+  const handleClose = (e: any, reason: string) => {
     e.preventDefault();
     e.stopPropagation();
     setOpen(false);
     if (reason !== 'select-option') setInputText('');
   };
 
-  const handleChange = (e, selectedValue) => {
+  const handleChange = (e: any, selectedValue: User | null) => {
     e.preventDefault();
     e.stopPropagation();
     if (ids) {
-      onFilterChange(selectedValue, ids);
+      onFilterChange?.(selectedValue, ids);
     } else {
-      onFilterChange(selectedValue);
+      onFilterChange?.(selectedValue);
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
     setInputText(e.target.value);
   };
 
   return (
-    // @ts-ignore
-    <StyledAutocomplete<AllUsersForFiltersQuery['allUsers']['edges']>
+    <StyledAutocomplete
       fullWidth={fullWidth}
       open={open}
       disableClearable={disableClearable}
@@ -94,9 +96,11 @@ export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
       onChange={handleChange}
       onOpen={handleOpen}
       onClose={handleClose}
-      isOptionEqualToValue={(option, value1) => option.node.id === value1.id}
-      getOptionLabel={(option) =>
-        option.node ? `${option.node.email}` : `${value?.email}`
+      isOptionEqualToValue={(option: User, value1: User) =>
+        option.id === value1.id
+      }
+      getOptionLabel={(option: User) =>
+        option ? `${option.email}` : `${value?.email || ''}`
       }
       value={value}
       options={sortedOptions}
