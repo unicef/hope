@@ -99,7 +99,7 @@ class TestGrievanceTicketCreate:
         )
         self.area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="dffgh565556")
 
-        self.program = ProgramFactory(
+        self.program_2 = ProgramFactory(
             status=Program.ACTIVE,
             business_area=BusinessArea.objects.first(),
         )
@@ -191,16 +191,17 @@ class TestGrievanceTicketCreate:
         )
 
     @pytest.mark.parametrize(
-        "permissions, expected_status",
+        "permissions, expected_status, create_perm_for_program",
         [
-            ([Permissions.GRIEVANCES_CREATE], status.HTTP_201_CREATED),
-            ([], status.HTTP_403_FORBIDDEN),
+            ([Permissions.GRIEVANCES_CREATE], status.HTTP_201_CREATED, True),
+            ([], status.HTTP_403_FORBIDDEN, True),
+            ([Permissions.GRIEVANCES_CREATE], status.HTTP_403_FORBIDDEN, False),
         ],
     )
     def test_create_grievance_ticket_add_individual(
-        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+        self, permissions: list, expected_status: int, create_perm_for_program: bool, create_user_role_with_permissions: Any
     ) -> None:
-        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program if create_perm_for_program else self.program_2)
         data = {
             "description": "Test",
             "assigned_to": str(self.user.id),
@@ -208,6 +209,13 @@ class TestGrievanceTicketCreate:
             "category": 2,
             "consent": True,
             "language": "PL",
+            "program": str(self.program.pk),
+            "documentation": [
+                # {
+                #     # "file": SimpleUploadedFile(name="test_file123.pdf", content=b"abc", content_type="application/pdf"),
+                #     "name": "test_file123.pdf"
+                # }
+            ],
             "extras": {
                 "issue_type": {
                     "add_individual_issue_type_extras": {
