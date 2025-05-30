@@ -915,19 +915,28 @@ export const getFilterFromQueryParams = (
   initialFilter: Filter = {},
 ): Filter => {
   const filter: Filter = { ...initialFilter };
-  const searchParams = new URLSearchParams(location.search);
-  for (const [key, value] of searchParams.entries()) {
-    if (key in filter) {
-      const existingValue = filter[key];
-      if (Array.isArray(existingValue)) {
-        const values = value.split(',');
-        filter[key] = [...existingValue, ...values];
-      } else {
-        filter[key] =
-          value !== 'true' && value !== 'false' ? value : value === 'true';
+
+  try {
+    const searchParams = new URLSearchParams(location.search);
+
+    for (const [key, value] of searchParams.entries()) {
+      if (key in filter) {
+        const existingValue = filter[key];
+
+        if (Array.isArray(existingValue)) {
+          const values = value.split(',');
+          filter[key] = [...existingValue, ...values];
+        } else {
+          filter[key] =
+            value !== 'true' && value !== 'false' ? value : value === 'true';
+        }
       }
     }
+  } catch (error) {
+    console.error('Error parsing query parameters:', error);
+    return { ...initialFilter };
   }
+
   return filter;
 };
 
