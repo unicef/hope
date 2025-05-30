@@ -501,12 +501,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
 
         household_map = cls._get_household_data(household_ids)
 
-        if not base_payments_qs.exists() and is_partial_refresh_attempt:
-            final_result_list = existing_data_for_other_years
-            serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
-            cls.store_data(identifier, serialized_data)
-            return serialized_data
-
         plan_group_fields = [
             "year",
             "business_area_name",

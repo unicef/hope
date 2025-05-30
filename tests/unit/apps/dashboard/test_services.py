@@ -1,7 +1,7 @@
 import calendar
 import json
 from decimal import Decimal
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Type
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -371,7 +371,7 @@ def test_dashboard_reconciliation_verification_consistency(
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_dashboard_data_cache_refresh_data_non_existent_business_area() -> None:
+def test_refresh_data_non_existent_ba() -> None:
     """Test refresh_data for DashboardDataCache with a non-existent business area slug."""
     slug = "non-existent-slug"
     cache_key = DashboardDataCache.get_cache_key(slug)
@@ -387,7 +387,7 @@ def test_dashboard_data_cache_refresh_data_non_existent_business_area() -> None:
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_get_pwd_count_expression_logic() -> None:
+def test_pwd_count_expression() -> None:
     """Test the get_pwd_count_expression for various PWD count scenarios."""
     ba = BusinessAreaFactory()
     hh1 = HouseholdFactory(
@@ -441,7 +441,7 @@ def test_get_pwd_count_expression_logic() -> None:
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_get_payment_plan_counts_logic() -> None:
+def test_payment_plan_counts() -> None:
     """Test _get_payment_plan_counts with different grouping criteria."""
     ba = BusinessAreaFactory()
     prog_a_sector_x = ProgramFactory(business_area=ba, sector="SectorX", name="ProgramA")
@@ -527,7 +527,7 @@ def test_get_payment_plan_counts_logic() -> None:
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_dashboard_data_cache_refresh_data_no_payments(afghanistan: BusinessArea) -> None:
+def test_refresh_data_no_payments_ba(afghanistan: BusinessArea) -> None:
     """Test refresh_data for DashboardDataCache when a business area has no payments."""
     Payment.objects.filter(
         program__business_area=afghanistan,
@@ -550,7 +550,7 @@ def test_dashboard_data_cache_refresh_data_no_payments(afghanistan: BusinessArea
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_dashboard_global_data_cache_refresh_data_no_payments() -> None:
+def test_refresh_data_no_payments_global() -> None:
     """Test refresh_data for DashboardGlobalDataCache when there are no payments globally."""
     Payment.objects.filter(
         parent__status__in=["ACCEPTED", "FINISHED"],
@@ -572,7 +572,7 @@ def test_dashboard_global_data_cache_refresh_data_no_payments() -> None:
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_refresh_data_partial_cache_empty_falls_back_to_full(
+def test_partial_refresh_empty_cache_fallback(
     afghanistan: BusinessArea,
 ) -> None:
     """Test partial refresh falls back to full refresh if cache is empty."""
@@ -614,14 +614,33 @@ def test_refresh_data_partial_cache_empty_falls_back_to_full(
     assert {CURRENT_YEAR, CURRENT_YEAR - 1} == global_years_in_result
 
 
+@pytest.mark.parametrize(
+    "cache_class_under_test, is_global_scenario",
+    [
+        (DashboardGlobalDataCache, True),
+        (DashboardDataCache, False),
+    ],
+)
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_refresh_data_partial_update_combines_data(
+def test_partial_refresh_combines_data(
+    cache_class_under_test: Type[DashboardCacheBase],
+    is_global_scenario: bool,
     afghanistan: BusinessArea,
 ) -> None:
     """Test partial refresh updates specified years and combines with existing cached data."""
-    ba_slug = afghanistan.slug
-    prog = ProgramFactory.create(business_area=afghanistan)
-    hh, _ = create_household(household_args={"program": prog, "business_area": afghanistan, "size": 1})
+
+    if is_global_scenario:
+        cache_identifier = GLOBAL_SLUG
+        payment_ba = afghanistan
+        prog = ProgramFactory.create(business_area=payment_ba)
+        common_currency = "USD"
+    else:
+        payment_ba = BusinessAreaFactory()
+        cache_identifier = payment_ba.slug
+        prog = ProgramFactory.create(business_area=payment_ba)
+        common_currency = "AFG"
+
+    hh, _ = create_household(household_args={"program": prog, "business_area": payment_ba, "size": 1})
 
     year_old = CURRENT_YEAR - 2
     year_mid = CURRENT_YEAR - 1
@@ -629,13 +648,12 @@ def test_refresh_data_partial_update_combines_data(
 
     common_fsp = FinancialServiceProviderFactory()
     common_delivery_type = DeliveryMechanismFactory()
-    common_currency = "AFG"
 
     PaymentFactory.create(
         parent__status=PaymentPlan.Status.ACCEPTED,
         household=hh,
         program=prog,
-        business_area=afghanistan,
+        business_area=payment_ba,
         delivery_date=timezone.datetime(year_old, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("100.00"),
         status="Transaction Successful",
@@ -643,8 +661,11 @@ def test_refresh_data_partial_update_combines_data(
         delivery_type=common_delivery_type,
         currency=common_currency,
     )
-    DashboardDataCache.refresh_data(ba_slug)
-    cached_data_step1 = DashboardDataCache.get_data(ba_slug)
+    if is_global_scenario:
+        cache_class_under_test.refresh_data(identifier=cache_identifier)
+    else:
+        cache_class_under_test.refresh_data(cache_identifier)
+    cached_data_step1 = cache_class_under_test.get_data(cache_identifier)
     assert cached_data_step1 is not None, "cached_data_step1 should not be None after refresh"
     assert len(cached_data_step1) == 1
     assert cached_data_step1[0]["year"] == year_old
@@ -654,7 +675,7 @@ def test_refresh_data_partial_update_combines_data(
         parent__status=PaymentPlan.Status.ACCEPTED,
         household=hh,
         program=prog,
-        business_area=afghanistan,
+        business_area=payment_ba,
         delivery_date=timezone.datetime(year_mid, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("200.00"),
         status="Transaction Successful",
@@ -666,7 +687,7 @@ def test_refresh_data_partial_update_combines_data(
         parent__status=PaymentPlan.Status.ACCEPTED,
         household=hh,
         program=prog,
-        business_area=afghanistan,
+        business_area=payment_ba,
         delivery_date=timezone.datetime(year_new, 1, 1, tzinfo=timezone.utc),
         delivered_quantity_usd=Decimal("300.00"),
         status="Transaction Successful",
@@ -675,8 +696,14 @@ def test_refresh_data_partial_update_combines_data(
         currency=common_currency,
     )
 
-    refreshed_data = DashboardDataCache.refresh_data(ba_slug, years_to_refresh=[year_mid, year_new])
+    if is_global_scenario:
+        refreshed_data = cache_class_under_test.refresh_data(
+            identifier=cache_identifier, years_to_refresh=[year_mid, year_new]
+        )
+    else:
+        refreshed_data = cache_class_under_test.refresh_data(cache_identifier, years_to_refresh=[year_mid, year_new])
 
+    assert refreshed_data is not None, "Refreshed data should not be None"
     assert len(refreshed_data) == 3, "Should contain data for all three years"
 
     data_map = {item["year"]: item for item in refreshed_data}
@@ -686,7 +713,40 @@ def test_refresh_data_partial_update_combines_data(
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_refresh_data_partial_no_new_payments_for_years(
+def test_partial_refresh_global_no_new_payments(
+    afghanistan: BusinessArea,
+) -> None:
+    """Test partial refresh for global cache when no new payments exist for the specified years_to_refresh."""
+    prog = ProgramFactory.create(business_area=afghanistan)
+    hh, _ = create_household(household_args={"program": prog, "business_area": afghanistan})
+
+    year_cached = CURRENT_YEAR - 2
+    PaymentFactory.create(
+        parent__status=PaymentPlan.Status.ACCEPTED,
+        household=hh,
+        program=prog,
+        business_area=afghanistan,
+        delivery_date=timezone.datetime(year_cached, 1, 1, tzinfo=timezone.utc),
+        delivered_quantity_usd=Decimal("50.00"),
+    )
+    DashboardGlobalDataCache.refresh_data(identifier=GLOBAL_SLUG)
+    cached_data_step1 = DashboardGlobalDataCache.get_data(GLOBAL_SLUG)
+    assert cached_data_step1 is not None
+    assert len(cached_data_step1) == 1
+    assert cached_data_step1[0]["year"] == year_cached
+
+    years_to_refresh_recent = [CURRENT_YEAR, CURRENT_YEAR - 1]
+    refreshed_data = DashboardGlobalDataCache.refresh_data(
+        identifier=GLOBAL_SLUG, years_to_refresh=years_to_refresh_recent
+    )
+
+    assert len(refreshed_data) == 1, "Should only contain the old cached data"
+    assert refreshed_data[0]["year"] == year_cached
+    assert Decimal(refreshed_data[0]["total_delivered_quantity_usd"]) == Decimal("50.00")
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_partial_refresh_ba_no_new_payments(
     afghanistan: BusinessArea,
 ) -> None:
     """Test partial refresh when no new payments exist for the specified years_to_refresh."""
@@ -714,7 +774,7 @@ def test_refresh_data_partial_no_new_payments_for_years(
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_refresh_data_partial_no_payments_at_all_for_ba(afghanistan: BusinessArea) -> None:
+def test_partial_refresh_ba_no_payments_at_all(afghanistan: BusinessArea) -> None:
     """Test partial refresh when the BA has no payments at all (even for other years)."""
     ba_slug = afghanistan.slug
     Payment.objects.filter(business_area=afghanistan).delete()
@@ -727,7 +787,7 @@ def test_refresh_data_partial_no_payments_at_all_for_ba(afghanistan: BusinessAre
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_get_base_payment_queryset_filters_plan_status() -> None:
+def test_base_queryset_filter_plan_status() -> None:
     """Test _get_base_payment_queryset filtering based on PaymentPlan.Status."""
     ba = BusinessAreaFactory.create()
     prog = ProgramFactory.create(business_area=ba)
@@ -754,7 +814,7 @@ def test_get_base_payment_queryset_filters_plan_status() -> None:
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_get_base_payment_queryset_filters_boolean_flags() -> None:
+def test_base_queryset_filter_bool_flags() -> None:
     """Test _get_base_payment_queryset filtering on boolean flags."""
     ba = BusinessAreaFactory.create()
     prog = ProgramFactory.create(business_area=ba)
@@ -804,7 +864,7 @@ def test_get_base_payment_queryset_filters_boolean_flags() -> None:
 
 
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
-def test_get_base_payment_queryset_filters_payment_status() -> None:
+def test_base_queryset_filter_payment_status() -> None:
     """Test _get_base_payment_queryset filtering based on Payment.status."""
     ba = BusinessAreaFactory.create()
     prog = ProgramFactory.create(business_area=ba)
