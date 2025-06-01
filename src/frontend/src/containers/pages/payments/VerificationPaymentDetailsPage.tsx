@@ -6,7 +6,6 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { VerificationPaymentDetails } from '@components/payments/VerificationPaymentDetails';
 import { VerifyManual } from '@components/payments/VerifyManual';
 import { AdminButton } from '@core/AdminButton';
-import { usePaymentVerificationChoicesQuery } from '@generated/graphql';
 import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -40,12 +39,10 @@ function VerificationPaymentDetailsPage(): ReactElement {
         },
       ),
   });
-  const { data: choicesData, loading: choicesLoading } =
-    usePaymentVerificationChoicesQuery();
   const { baseUrl } = useBaseUrl();
-  if (loading || choicesLoading) return <LoadingComponent />;
+  if (loading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!payment || !choicesData || permissions === null) return null;
+  if (!payment || permissions === null) return null;
 
   const { paymentVerificationPlans } = payment?.parent || {};
   const verificationPlansAmount = paymentVerificationPlans?.length;
@@ -87,6 +84,8 @@ function VerificationPaymentDetailsPage(): ReactElement {
           status={payment.verification?.status}
           enabled={payment.verification.isManuallyEditable}
           receivedAmount={payment.verification.receivedAmount}
+          cashOrPaymentPlanId={paymentId}
+          verificationPlanId={paymentPlanId}
         />
       ) : null}
     </PageHeader>

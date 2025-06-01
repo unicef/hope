@@ -3,14 +3,17 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
-import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import { useAllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -20,9 +23,6 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { RestService } from '@restgenerated/services/RestService';
-import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 const Container = styled.div`
   padding: 20px;
@@ -58,10 +58,10 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   });
 
   const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
       queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });
