@@ -15,7 +15,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DividerLine } from '@core/DividerLine';
 import { renderUserName } from '@utils/utils';
-import { UserNode } from '@generated/graphql';
+import { User } from '@restgenerated/models/User';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -41,7 +41,7 @@ const MessageIconContainer = styled(Box)`
 
 export interface MessageDialogProps {
   comment: string;
-  author: Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>;
+  author: Pick<User, 'id' | 'email' | 'firstName' | 'lastName'>;
   date: string;
 }
 export function MessageDialog({

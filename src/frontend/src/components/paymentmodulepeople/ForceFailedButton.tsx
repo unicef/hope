@@ -63,9 +63,8 @@ export function ForceFailedButton({
         id: paymentId,
       });
       setOpenModal(false);
-      showMessage(t('Payment has been marked as failed.'));
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e.message || t('Failed to mark payment as failed'));
     }
   };
 

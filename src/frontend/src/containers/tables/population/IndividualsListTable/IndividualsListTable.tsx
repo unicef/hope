@@ -1,9 +1,5 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import {
-  HouseholdChoiceDataQuery,
-  IndividualRdiMergeStatus,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
@@ -15,12 +11,13 @@ import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface IndividualsListTableProps {
   filter;
   businessArea: string;
   canViewDetails: boolean;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
 }
 
 export function IndividualsListTable({
@@ -49,7 +46,7 @@ export function IndividualsListTable({
         min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
         max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
       }),
-      rdiMergeStatus: IndividualRdiMergeStatus.Merged,
+      rdiMergeStatus: 'MERGED',
     }),
     [
       filter.ageMin,
