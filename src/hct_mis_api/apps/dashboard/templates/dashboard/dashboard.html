@@ -80,7 +80,7 @@
 
         function fetchDataForCountry() {
             dc.config.defaultColors(d3.schemePaired);
-            const decimalnumberFormatter = d3.format(",.2f");
+            const decimalNumberFormatter = d3.format(",.2f");
             const simplenumberFormatter = d3.format(",");
             const truncateLabel = (label, maxLength = 28) => {
                 return label.length > maxLength ?
@@ -240,7 +240,7 @@
                             const percentage = totalFspSum > 0 ? ((d.value / totalFspSum) * 100).toFixed(0) : '0';
                             return `${truncateLabel(d.key)}: ${percentage}%`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`);
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)}`);
 
                     const deliveryChart = dc
                         .pieChart("#payments-by-delivery")
@@ -255,7 +255,7 @@
                             const percentage = totalDeliverySum > 0 ? ((d.value / totalDeliverySum) * 100).toFixed(0) : '0';
                             return `${d.key} ${percentage}%`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`);
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)}`);
 
                     const sectorChart = dc
                         .rowChart("#payments-by-sector")
@@ -266,9 +266,9 @@
                         .label((d) => {
                             const totalSectorSum = sectorGroup.all().reduce((sum, g) => sum + g.value, 0);
                             const percentage = totalSectorSum > 0 ? ((d.value / totalSectorSum) * 100).toFixed(0) : '0';
-                            return `${d.key}: ${decimalnumberFormatter(d.value)} USD (${percentage}%)`;
+                            return `${d.key}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
 
@@ -282,9 +282,9 @@
                         .label((d) => {
                             const totalProgramSum = programGroup.all().reduce((sum, g) => sum + g.value, 0);
                             const percentage = totalProgramSum > 0 ? ((d.value / totalProgramSum) * 100).toFixed(0) : '0';
-                            return `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${percentage}%)`;
+                            return `${truncateLabel(d.key)}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .labelOffsetX(10)
                         .useViewBoxResizing(true)
                         .xAxis()
@@ -318,7 +318,7 @@
                             const percentage = totalMonthSum > 0 ? ((d.value / totalMonthSum) * 100).toFixed(0) : '0';
                             return `${d.key} ${percentage}%`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .ordering((d) => monthOrder[d.key])
                         .xAxis()
                         .ticks(3);
@@ -333,9 +333,9 @@
                         .label((d) => {
                             const totalAdmin1Sum = admin1Group.all().reduce((sum, g) => sum + g.value, 0);
                             const percentage = totalAdmin1Sum > 0 ? ((d.value / totalAdmin1Sum) * 100).toFixed(0) : '0';
-                            return `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${percentage}%)`;
+                            return `${truncateLabel(d.key)}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
 
@@ -496,17 +496,17 @@
                         document.getElementById("number-of-payments").innerHTML =
                             `${simplenumberFormatter(totalPaymentsCount)}`;
                         document.getElementById("outstanding-payments").innerHTML =
-                            `${decimalnumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
+                            `${decimalNumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
                         document.getElementById("total-amount-paid").innerHTML =
-                            `${decimalnumberFormatter(totalSuccessfulUSD)} USD`;
+                            `${decimalNumberFormatter(totalSuccessfulUSD)} USD`;
                         document.getElementById("planned-payments-amount").innerHTML =
-                            `${decimalnumberFormatter(plannedPaymentsAmount)} USD`;
+                            `${decimalNumberFormatter(plannedPaymentsAmount)} USD`;
                         
                         let disbursedPaymentsHtml = '';
                         const disbursedCurrencyTotals = disbursedPaymentsByCurrencyGroup.all();
                         disbursedCurrencyTotals.forEach(item => {
                             if (item.value.sum > 0 && item.key !== 'UNK') {
-                                disbursedPaymentsHtml += `<p class="text-xs mb-1">${decimalnumberFormatter(item.value.sum)} ${item.key}</p>`;
+                                disbursedPaymentsHtml += `<p class="text-xs mb-1">${decimalNumberFormatter(item.value.sum)} ${item.key}</p>`;
                             }
                         });
                         if (disbursedPaymentsHtml === '') {
@@ -524,12 +524,12 @@
                             `${simplenumberFormatter(childrenReached)}`;
                         
                         document.querySelector(".reconciliation-percentage-value").innerHTML =
-                            `${decimalnumberFormatter(reconciliationPercentage)}`;
+                            `${decimalNumberFormatter(reconciliationPercentage)}`;
                         document.querySelector(".reconciliation-amount-value").innerHTML =
-                            `${decimalnumberFormatter(reconciledPaymentsValueUSD)}`;
+                            `${decimalNumberFormatter(reconciledPaymentsValueUSD)}`;
                         document.querySelector(
                                 ".pending-reconciliation-percentage",
-                            ).innerHTML =`${decimalnumberFormatter(verificationPercentage)}%`;
+                            ).innerHTML =`${decimalNumberFormatter(verificationPercentage)}%`;
                     }
 
                     function filterByYear(year) {

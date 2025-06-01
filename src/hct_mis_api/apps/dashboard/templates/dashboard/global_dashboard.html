@@ -51,7 +51,7 @@
 
         function fetchDataForCountry() {
             dc.config.defaultColors(d3.schemePaired);
-            const decimalnumberFormatter = d3.format(",.2f");
+            const decimalNumberFormatter = d3.format(",.2f");
             const simplenumberFormatter = d3.format(",");
             const truncateLabel = (label, maxLength = 25) => {
                 return label.length > maxLength ?
@@ -171,7 +171,7 @@
                             const percentage = totalDeliverySum > 0 ? ((d.value / totalDeliverySum) * 100).toFixed(0) : '0';
                             return `${d.key} ${percentage}%`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)}`)
                         .xAxis()
                         .ticks(3);
 
@@ -184,9 +184,9 @@
                         .label((d) => {
                             const totalSectorSum = sectorGroup.all().reduce((sum, g) => sum + g.value, 0);
                             const percentage = totalSectorSum > 0 ? ((d.value / totalSectorSum) * 100).toFixed(0) : '0';
-                            return `${d.key}: ${decimalnumberFormatter(d.value)} USD (${percentage}%)`;
+                            return `${d.key}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
 
@@ -204,7 +204,7 @@
                         .margins({ top: 30, right: 25, bottom: 95, left: 90 })
                         .outerPadding(0.5)
                         .ordering((d) => -d.key)
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .colors(d3.scaleOrdinal().range(d3.schemePaired))
                         .colorAccessor((d) => d.key)
                         .yAxisPadding(90)
@@ -228,9 +228,9 @@
                         .label((d) => {
                             const totalRegionSum = regionGroup.all().reduce((sum, g) => sum + g.value, 0);
                             const percentage = totalRegionSum > 0 ? ((d.value / totalRegionSum) * 100).toFixed(0) : '0';
-                            return `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${percentage}%)`;
+                            return `${truncateLabel(d.key)}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
                         })
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
 
@@ -365,9 +365,9 @@
                         document.getElementById("number-of-payments").innerHTML =
                             `${simplenumberFormatter(totalPaymentsCount)}`;
                         document.getElementById("outstanding-payments").innerHTML =
-                            `${decimalnumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
+                            `${decimalNumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
                         document.getElementById("total-amount-paid").innerHTML =
-                            `${decimalnumberFormatter(totalSuccessfulUSD)} USD`;
+                            `${decimalNumberFormatter(totalSuccessfulUSD)} USD`;
                         document.getElementById("households-reached").innerHTML =
                             `${simplenumberFormatter(householdsReached)}`;
                         document.getElementById("individuals-reached").innerHTML =
@@ -378,12 +378,12 @@
                             `${simplenumberFormatter(childrenReached)}`;
 
                         document.querySelector(".reconciliation-percentage-value").innerHTML =
-                            `${decimalnumberFormatter(reconciliationPercentage)}`;
+                            `${decimalNumberFormatter(reconciliationPercentage)}`;
                         document.querySelector(".reconciliation-amount-value").innerHTML =
-                            `${decimalnumberFormatter(reconciledPaymentsValueUSD)}`;
+                            `${decimalNumberFormatter(reconciledPaymentsValueUSD)}`;
                         document.querySelector(
                                 ".pending-reconciliation-percentage",
-                            ).innerHTML =`${decimalnumberFormatter(verificationPercentage)}%`;
+                            ).innerHTML =`${decimalNumberFormatter(verificationPercentage)}%`;
                     }
 
                     function filterByYear(year) {
