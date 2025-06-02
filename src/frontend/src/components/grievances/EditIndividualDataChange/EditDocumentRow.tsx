@@ -3,7 +3,7 @@ import { Delete } from '@mui/icons-material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
-import { Fragment, ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
