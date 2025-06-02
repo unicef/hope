@@ -20,6 +20,8 @@ import { useProgramContext } from '../../../../programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import SurveyDetails from '@components/accountability/Surveys/SurveyDetails';
+import { Survey } from '@restgenerated/models/Survey';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 
 function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
@@ -27,19 +29,17 @@ function SurveyDetailsPage(): ReactElement {
   const { id } = useParams();
   const { baseUrl, programId } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
+
   const {
     data,
     isLoading: loading,
     error,
-  } = useQuery({
-    queryKey: ['survey', id, baseUrl, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsSurveysRetrieve({
-        businessAreaSlug: baseUrl,
-        programSlug: programId,
-        id: id,
-      }),
-  });
+  } = useHopeDetailsQuery<Survey>(
+    id,
+    RestService.restBusinessAreasProgramsSurveysRetrieve,
+    {},
+  );
+
   const { data: choicesData, isLoading: choicesLoading } = useQuery({
     queryKey: ['surveyCategoryChoices', baseUrl, programId],
     queryFn: () =>

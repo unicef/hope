@@ -23,6 +23,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 
 const Container = styled.div`
   padding: 20px;
@@ -47,15 +48,11 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
     data: individual,
     isLoading: loadingIndividual,
     error,
-  } = useQuery<IndividualDetail>({
-    queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        id: id,
-      }),
-  });
+  } = useHopeDetailsQuery<IndividualDetail>(
+    id,
+    RestService.restBusinessAreasProgramsIndividualsRetrieve,
+    {},
+  );
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<IndividualChoices>({
