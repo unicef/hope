@@ -217,7 +217,7 @@ class GrievanceTicketGlobalViewSet(
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
         "partial_update": [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
-        "status_change": [Permissions.GRIEVANCES_SET_IN_PROGRESS, Permissions.GRIEVANCES_SET_ON_HOLD],
+        "status_change": [Permissions.GRIEVANCES_UPDATE],
         "create_note": [Permissions.GRIEVANCES_ADD_NOTE],
         "approve_individual_data_change": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
         "approve_household_data_change": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
@@ -459,7 +459,10 @@ class GrievanceTicketGlobalViewSet(
         )
 
         GrievanceNotification.send_all_notifications(notifications)
-        return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
+        return Response(
+            GrievanceTicketDetailSerializer(grievance_ticket, context={"request": request}).data,
+            status=status.HTTP_202_ACCEPTED,
+        )
 
     @extend_schema(request=GrievanceCreateNoteSerializer, responses={201: TicketNoteSerializer})
     @action(detail=True, methods=["post"], url_path="create-note")

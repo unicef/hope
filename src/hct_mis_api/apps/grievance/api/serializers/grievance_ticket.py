@@ -559,7 +559,7 @@ class CreateGrievanceDocumentSerializer(serializers.Serializer):
 
 
 class UpdateGrievanceDocumentSerializer(serializers.Serializer):
-    id = serializers.PrimaryKeyRelatedField(required=True, queryset=GrievanceDocument.objects.all())
+    id = serializers.UUIDField(required=True)
     name = serializers.CharField(required=True)
     file = serializers.FileField(use_url=False, required=True)
 
@@ -587,7 +587,8 @@ class UpdateGrievanceTicketSerializer(serializers.Serializer):
     documentation = CreateGrievanceDocumentSerializer(many=True, required=False)
     documentation_to_update = UpdateGrievanceDocumentSerializer(many=True, required=False)
     documentation_to_delete = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=GrievanceDocument.objects.all()), required=False
+        child=serializers.UUIDField(),
+        required=False,
     )
 
 
