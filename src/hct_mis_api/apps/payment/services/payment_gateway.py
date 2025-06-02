@@ -98,9 +98,10 @@ class PaymentPayloadSerializer(serializers.Serializer):
     first_name = serializers.CharField(required=False, allow_blank=True)
     full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
-    service_provider_code = serializers.CharField(required=False, allow_blank=True)
+    origination_currency = serializers.CharField(required=True)
     delivery_mechanism = serializers.CharField(required=True)
     account_type = serializers.CharField(required=True)
+    account = serializers.DictField(required=False)
 
 
 class PaymentSerializer(ReadOnlyModelSerializer):
@@ -121,7 +122,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
         account_data = collector_data.get("account_data", {})
 
-        base_data = {
+        payload_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
             "origination_currency": obj.currency,
@@ -133,12 +134,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "full_name": collector_data.get("full_name", ""),
             "middle_name": collector_data.get("middle_name", ""),
         }
-
-        payload = PaymentPayloadSerializer(data=base_data)
-        if not payload.is_valid():
-            raise PaymentGatewayAPI.PaymentGatewayAPIException(payload.errors)
-
-        payload_data = payload.data
 
         if account_data:
             if financial_institution_code := account_data.get("code"):
@@ -179,7 +174,11 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
             payload_data["account"] = account_data
 
-        return payload_data
+        payload = PaymentPayloadSerializer(data=payload_data)
+        if not payload.is_valid():
+            raise PaymentGatewayAPI.PaymentGatewayAPIException(payload.errors)
+
+        return payload.data
 
     class Meta:
         model = Payment
@@ -577,11 +576,11 @@ class PaymentGatewayService:
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         for payment in pending_payments:
                             self.update_payment(payment, pg_payment_records, instruction, payment_plan, exchange_rate)
+                        payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled:
                     payment_plan.status_finished()
                     payment_plan.save()
-                    payment_plan.update_money_fields()
                     for instruction in payment_instructions:
                         self.change_payment_instruction_status(PaymentInstructionStatus.FINALIZED, instruction)
 

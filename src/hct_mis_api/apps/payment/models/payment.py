@@ -563,7 +563,6 @@ class PaymentPlan(
     def update_money_fields(self) -> None:
         """update money fields only for PaymentPlan with currency"""
         if self.status not in self.PRE_PAYMENT_PLAN_STATUSES:
-            self.exchange_rate = self.get_exchange_rate()
             payments = self.eligible_payments.aggregate(
                 total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
                 total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
@@ -581,7 +580,6 @@ class PaymentPlan(
 
             self.save(
                 update_fields=[
-                    "exchange_rate",
                     "total_entitled_quantity",
                     "total_entitled_quantity_usd",
                     "total_delivered_quantity",
