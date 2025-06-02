@@ -383,7 +383,7 @@ def check_creator_or_owner_permission(
         check_permissions(
             user, [general_permission], business_area=business_area, program=program.slug if program else None  # type: ignore
         )
-    # TODO: does it okay? user.has_perm()
+        # TODO: does it okay? user.has_perm()
         or (is_creator and user.has_perm(creator_permission, scope))
         or (is_owner and user.has_perm(owner_permission, scope))
     ):
