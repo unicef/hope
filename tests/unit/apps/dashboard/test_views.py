@@ -257,7 +257,9 @@ def test_dashboard_data_view_global_slug_cache_miss(
         }
     ]
 
-    with patch.object(DashboardGlobalDataCache, "refresh_data", return_value=mock_global_data) as mock_refresh:
+    with patch.object(
+        DashboardGlobalDataCache, "refresh_data", autospec=True, return_value=mock_global_data
+    ) as mock_refresh:
         response = client.get(global_url)
         mock_refresh.assert_called_once_with("global")
 

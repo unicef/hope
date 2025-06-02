@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 from typing import Any
 
 from hct_mis_api.apps.core.celery import app
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 @sentry_tags
 def update_dashboard_figures(self: Any) -> None:
     """
-    Celery task that runs every 6 hours to refresh dashboard data for allactive BA.
+    Celery task that runs periodically (e.g., daily) to refresh all dashboard data.
     """
     business_areas_with_households = BusinessArea.objects.using("read_only").filter(active=True)
 
@@ -26,10 +27,38 @@ def update_dashboard_figures(self: Any) -> None:
         try:
             set_sentry_business_area_tag(business_area.slug)
             DashboardDataCache.refresh_data(business_area.slug)
-
         except Exception as e:
             raise self.retry(exc=e)
+
+    set_sentry_business_area_tag("global")
     DashboardGlobalDataCache.refresh_data()
+
+
+@app.task(bind=True, default_retry_delay=300, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def update_recent_dashboard_figures(self: Any) -> None:
+    """
+    Celery task to refresh dashboard data for recent years (current and previous).
+    Runs more frequently (e.g., hourly).
+    """
+    current_year = date.today().year
+    previous_year = current_year - 1
+    years_to_refresh = [current_year, previous_year]
+
+    active_business_areas = list(BusinessArea.objects.using("read_only").filter(active=True))
+    for ba in active_business_areas:
+        try:
+            set_sentry_business_area_tag(ba.slug)
+            DashboardDataCache.refresh_data(ba.slug, years_to_refresh=years_to_refresh)
+        except Exception as e:
+            logger.error(f"Error refreshing recent dashboard data for {ba.slug}: {e}", exc_info=True)
+
+    try:
+        set_sentry_business_area_tag("global")
+        DashboardGlobalDataCache.refresh_data(years_to_refresh=years_to_refresh)
+    except Exception as e:
+        logger.error(f"Error refreshing recent global dashboard data: {e}", exc_info=True)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
@@ -37,14 +66,20 @@ def update_dashboard_figures(self: Any) -> None:
 @sentry_tags
 def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
     """
-    Celery task to refresh dashboard data for a specific business area.
+    Celery task to refresh dashboard data for a specific business area (full refresh).
     """
     try:
         business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
+    except BusinessArea.DoesNotExist:
+        logger.error(f"Dashboard report generation failed: Business area with slug '{business_area_slug}' not found.")
+        return
+
+    try:
         set_sentry_business_area_tag(business_area.slug)
         DashboardDataCache.refresh_data(business_area.slug)
-
-    except BusinessArea.DoesNotExist:
-        raise ValueError(f"Business area with slug {business_area_slug} not found.")
     except Exception as e:
+        logger.error(
+            f"Error refreshing dashboard data for {business_area_slug} in generate_dash_report_task: {e}",
+            exc_info=True,
+        )
         raise self.retry(exc=e, countdown=60)
