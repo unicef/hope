@@ -7,10 +7,6 @@ import {
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
-import {
-  GrievancesChoiceDataQuery,
-  HouseholdChoiceDataQuery,
-} from '@generated/graphql';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -22,6 +18,8 @@ import { ReactElement, ReactNode } from 'react';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -36,8 +34,8 @@ interface IndividualBioDataProps {
   individual: IndividualDetail;
   baseUrl: string;
   businessArea: string;
-  choicesData: HouseholdChoiceDataQuery;
-  grievancesChoices: GrievancesChoiceDataQuery;
+  choicesData: IndividualChoices;
+  grievancesChoices: GrievanceChoices;
 }
 export const IndividualBioData = ({
   individual,

@@ -1,6 +1,5 @@
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentStatus, PaymentVerificationStatus } from '@generated/graphql';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { useBusinessArea } from '@hooks/useBusinessArea';
 import {
@@ -40,18 +39,15 @@ export function PaymentDetails({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   let paymentVerification: PaymentDetail['verification'] = null;
-  if (
-    payment.verification &&
-    payment.verification.status !== PaymentVerificationStatus.Pending
-  ) {
+  if (payment.verification && payment.verification.status !== 'PENDING') {
     paymentVerification = payment.verification;
   }
 
   const showFailureReason = [
-    PaymentStatus.NotDistributed,
-    PaymentStatus.ForceFailed,
-    PaymentStatus.TransactionErroneous,
-  ].includes(payment.status as PaymentStatus);
+    'NOT_DISTRIBUTED',
+    'FORCE_FAILED',
+    'TRANSACTION_ERRONEOUS',
+  ].includes(payment.status);
 
   return (
     <>

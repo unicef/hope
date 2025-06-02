@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  AllUsersForFiltersQuery,
-  useAllUsersForFiltersQuery,
-  useBulkUpdateGrievanceAssigneeMutation,
-} from '@generated/graphql';
+import { useBulkUpdateGrievanceAssigneeMutation } from '@generated/graphql';
 import { AssignedToDropdown } from '../AssignedToDropdown';
 import { BulkBaseModal } from './BulkBaseModal';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import { User } from '@restgenerated/models/User';
+import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -33,29 +33,31 @@ export function BulkAssignModal({
 }: BulkAssignModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] =
-    useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
+  const [value, setValue] = useState<User | null>(null);
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
   const [inputValue, setInputValue] = useState('');
-  const { data: usersData } = useAllUsersForFiltersQuery({
-    variables: {
-      businessArea,
-      first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: inputValue,
-    },
+
+  const { data: usersData } = useQuery({
+    queryKey: ['users', businessArea, inputValue],
+    queryFn: () =>
+      RestService.restBusinessAreasUsersList({
+        businessAreaSlug: businessArea,
+        limit: 20,
+        orderBy: ['first_name', 'last_name', 'email'],
+        search: inputValue,
+      }),
   });
-  const optionsData = usersData?.allUsers?.edges || [];
-  const onFilterChange = (data): void => {
-    if (data) {
-      setValue(data);
-    }
+
+  const optionsData: PaginatedUserList = usersData || { results: [] };
+
+  const onFilterChange = (data: User | null): void => {
+    setValue(data);
   };
   const onSave = async (): Promise<void> => {
     try {
       await mutate({
         variables: {
-          assignedTo: value.node.id,
+          assignedTo: value?.id,
           businessAreaSlug: businessArea,
           grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
         },

@@ -1,20 +1,20 @@
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore';
 import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
-import { useBusinessAreaDataQuery } from '@generated/graphql';
-import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
 export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
@@ -23,8 +23,12 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
   const { programId } = useBaseUrl();
 
   const { businessArea } = useBaseUrl();
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({
+        slug: businessArea,
+      }),
   });
 
   const {
@@ -78,7 +82,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
         permissions={permissions}
-        screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
+        screenBeneficiary={businessAreaData?.screenBeneficiary}
       />
     </>
   );

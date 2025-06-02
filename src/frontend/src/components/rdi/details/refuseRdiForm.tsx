@@ -45,7 +45,7 @@ const RefuseRdiForm = ({
           onClose();
           showMessage('RDI refused');
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          showMessage(e.message || 'Failed to refuse RDI');
         }
       }}
     >

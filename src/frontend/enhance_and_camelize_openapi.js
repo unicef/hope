@@ -58,9 +58,8 @@ function generateEnumName(endpoint) {
 function findFieldMappings(openApiSchema, enumName, endpoint) {
   const fields = [];
 
-  // Extract the main concept from the endpoint
+  // Extract the endpoint parts
   const endpointParts = endpoint.split('-');
-  const mainConcept = endpointParts[0]; // e.g., 'payment' from 'payment-plan-status'
   const lastConcept = endpointParts[endpointParts.length - 1]; // e.g., 'status' from 'payment-plan-status'
 
   // Create more specific field name patterns

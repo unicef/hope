@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { UserNode } from '@generated/graphql';
+import { User } from '@sentry/react';
 
-export const headCells: HeadCell<UserNode>[] = [
+export const headCells: HeadCell<User>[] = [
   {
     disablePadding: false,
     label: '',

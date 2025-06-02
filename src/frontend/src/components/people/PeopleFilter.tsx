@@ -3,11 +3,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import {
-  DataCollectingTypeType,
-  IndividualChoiceDataQuery,
-  ProgramNode,
-} from '@generated/graphql';
+import { DataCollectingTypeType } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
@@ -19,11 +15,13 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../programContext';
+import { ProgramList } from '@restgenerated/models/ProgramList';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 interface PeopleFilterProps {
   filter;
-  programs?: ProgramNode[];
-  choicesData: IndividualChoiceDataQuery;
+  programs?: ProgramList[];
+  choicesData: IndividualChoices;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;

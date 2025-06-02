@@ -5,7 +5,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
-import { DataCollectingTypeEnum } from '@restgenerated/models/DataCollectingTypeEnum';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -180,7 +179,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
   const isSocialWorkingProgram =
-    selectedProgram?.dataCollectingType?.type === DataCollectingTypeEnum.SOCIAL;
+    selectedProgram?.dataCollectingType?.type === 'SOCIAL';
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;
