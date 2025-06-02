@@ -2,15 +2,13 @@ import { Box, Button } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  PaymentVerificationPlanVerificationChannel,
-  useExportXlsxPaymentVerificationPlanFileMutation,
-  useInvalidPaymentVerificationPlanMutation,
-} from '@generated/graphql';
 import { PaymentVerificationPlanStatusEnum } from '@restgenerated/models/PaymentVerificationPlanStatusEnum';
 import { PERMISSIONS, hasPermissions } from '../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { ActivateVerificationPlan } from './ActivateVerificationPlan';
@@ -39,12 +37,31 @@ export function VerificationPlanActions({
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const { businessArea, programId: programSlug } = useBaseUrl();
 
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPaymentVerificationPlanFileMutation();
+  const exportXlsxMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsExportXlsxCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: planNode.id,
+          programSlug: programSlug,
+          verificationPlanId: verificationPlan.id,
+        },
+      ),
+  });
 
-  const [mutateInvalid, { loading: loadingInvalid }] =
-    useInvalidPaymentVerificationPlanMutation();
+  const invalidVerificationPlanMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsInvalidVerificationPlanCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: planNode.id,
+          programSlug: programSlug,
+          verificationPlanId: verificationPlan.id,
+        },
+      ),
+  });
 
   if (!verificationPlan || !permissions) return null;
 
@@ -54,8 +71,7 @@ export function VerificationPlanActions({
     verificationPlan.status === PaymentVerificationPlanStatusEnum.ACTIVE;
 
   const verificationChannelXLSX =
-    verificationPlan.verificationChannel ===
-    PaymentVerificationPlanVerificationChannel.Xlsx;
+    verificationPlan.verificationChannel === 'XLSX';
 
   const canEdit = hasPermissions(
     PERMISSIONS.PAYMENT_VERIFICATION_UPDATE,
@@ -115,6 +131,7 @@ export function VerificationPlanActions({
               <Box alignItems="center" display="flex">
                 <ActivateVerificationPlan
                   paymentVerificationPlanId={verificationPlan.id}
+                  cashOrPaymentPlanId={planNode.id}
                 />
               </Box>
             )}
@@ -127,9 +144,10 @@ export function VerificationPlanActions({
                 {canExport && (
                   <Box p={2}>
                     <LoadingButton
-                      loading={loadingExport}
+                      loading={exportXlsxMutation.isPending}
                       disabled={
-                        loadingExport || verificationPlan.xlsxFileExporting
+                        exportXlsxMutation.isPending ||
+                        verificationPlan.xlsxFileExporting
                       }
                       color="primary"
                       variant="outlined"
@@ -137,18 +155,16 @@ export function VerificationPlanActions({
                       data-cy="export-xlsx"
                       onClick={async () => {
                         try {
-                          await mutateExport({
-                            variables: {
-                              paymentVerificationPlanId: verificationPlan.id,
-                            },
-                          });
+                          await exportXlsxMutation.mutateAsync();
                           showMessage(
                             t(
                               'Exporting XLSX started. Please check your email.',
                             ),
                           );
-                        } catch (e) {
-                          e.graphQLErrors.map((x) => showMessage(x.message));
+                        } catch (error) {
+                          showMessage(
+                            error?.message || t('Error while exporting'),
+                          );
                         }
                       }}
                     >
@@ -187,34 +203,37 @@ export function VerificationPlanActions({
                 )}
 
                 {canFinish && verificationPlan.xlsxFileImported && (
-                  <FinishVerificationPlan verificationPlan={verificationPlan} />
+                  <FinishVerificationPlan
+                    verificationPlan={verificationPlan}
+                    cashOrPaymentPlanId={planNode.id}
+                  />
                 )}
                 {canDiscard &&
                   !verificationPlan.xlsxFileWasDownloaded &&
                   !verificationPlan.xlsxFileImported && (
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
+                      cashOrPaymentPlanId={planNode.id}
                     />
                   )}
                 {canMarkInvalid && (
                   <Box p={2}>
                     <LoadingButton
-                      loading={loadingInvalid}
+                      loading={invalidVerificationPlanMutation.isPending}
                       color="primary"
                       variant="outlined"
                       data-cy="button-mark-as-invalid"
                       onClick={async () => {
                         try {
-                          await mutateInvalid({
-                            variables: {
-                              paymentVerificationPlanId: verificationPlan.id,
-                            },
-                          });
+                          await invalidVerificationPlanMutation.mutateAsync();
                           showMessage(
                             t('Verification plan marked as invalid.'),
                           );
-                        } catch (e) {
-                          e.graphQLErrors.map((x) => showMessage(x.message));
+                        } catch (error) {
+                          showMessage(
+                            error?.message ||
+                              t('Error while marking as invalid'),
+                          );
                         }
                       }}
                     >
@@ -228,11 +247,15 @@ export function VerificationPlanActions({
             {!verificationChannelXLSX && (
               <>
                 {canFinish && (
-                  <FinishVerificationPlan verificationPlan={verificationPlan} />
+                  <FinishVerificationPlan
+                    verificationPlan={verificationPlan}
+                    cashOrPaymentPlanId={planNode.id}
+                  />
                 )}
                 {canDiscard && (
                   <DiscardVerificationPlan
                     paymentVerificationPlanId={verificationPlan.id}
+                    cashOrPaymentPlanId={planNode.id}
                   />
                 )}
               </>

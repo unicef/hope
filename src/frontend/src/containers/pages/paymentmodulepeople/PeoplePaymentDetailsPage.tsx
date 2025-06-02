@@ -7,7 +7,6 @@ import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
 import { PaymentDetails } from '@components/paymentmodulepeople/PaymentDetails';
 import { AdminButton } from '@core/AdminButton';
-import { PaymentStatus, useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -24,9 +23,6 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { paymentPlanId, paymentId } = useParams();
   const { businessArea, programId } = useBaseUrl();
-  const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
-    fetchPolicy: 'cache-first',
-  });
   const { data: payment, isLoading: loading } = useQuery<PaymentDetail>({
     queryKey: [
       'paymentPlan',
@@ -47,12 +43,12 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
   const paymentPlanIsFollowUp = payment?.parent?.isFollowUp;
   const permissions = usePermissions();
   const { baseUrl } = useBaseUrl();
-  if (loading || caLoading) return <LoadingComponent />;
+  if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
 
-  if (!payment || !caData) return null;
+  if (!payment) return null;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
@@ -75,7 +71,7 @@ export const PeoplePaymentDetailsPage = (): ReactElement => {
       paymentPlanStatus === PaymentPlanStatusEnum.FINISHED
     ) {
       const ButtonComponent =
-        payment.status === PaymentStatus.ForceFailed
+        payment.status === 'FORCE_FAILED'
           ? RevertForceFailedButton
           : ForceFailedButton;
       return <ButtonComponent paymentId={payment.id} />;

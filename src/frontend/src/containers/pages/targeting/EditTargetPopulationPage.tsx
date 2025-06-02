@@ -2,10 +2,10 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { useBusinessAreaDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -40,8 +40,12 @@ const EditTargetPopulationPage = (): ReactElement => {
     refetchIntervalInBackground: true,
   });
 
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({
+        slug: businessArea,
+      }),
   });
 
   if (loading && !paymentPlan) return <LoadingComponent />;
@@ -53,7 +57,7 @@ const EditTargetPopulationPage = (): ReactElement => {
   return (
     <EditTargetPopulation
       paymentPlan={paymentPlan}
-      screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
+      screenBeneficiary={businessAreaData?.screenBeneficiary}
     />
   );
 };

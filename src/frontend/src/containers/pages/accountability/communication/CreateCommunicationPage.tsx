@@ -12,7 +12,6 @@ import {
   CreateAccountabilityCommunicationMessageMutationVariables,
   SamplingChoices,
   useCreateAccountabilityCommunicationMessageMutation,
-  useSurveyAvailableFlowsLazyQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -201,12 +200,28 @@ const CreateCommunicationPage = (): ReactElement => {
     }
   }, [activeStep, formValues, loadSampleSize]);
 
-  const [
-    loadAvailableFlows,
-    { data: flowsData, loading: flowsLoading, error: flowsError },
-  ] = useSurveyAvailableFlowsLazyQuery({
-    fetchPolicy: 'network-only',
-  });
+  const [flowsData, setFlowsData] = useState(null);
+  const [flowsLoading, setFlowsLoading] = useState(false);
+  const [flowsError, setFlowsError] = useState(null);
+
+  const loadAvailableFlows = useCallback(async () => {
+    if (!businessArea || !programId) return;
+
+    try {
+      setFlowsLoading(true);
+      const result =
+        await RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
+      setFlowsData({ surveyAvailableFlows: result });
+    } catch (error) {
+      console.error('Error loading available flows:', error);
+      setFlowsError(error);
+    } finally {
+      setFlowsLoading(false);
+    }
+  }, [businessArea, programId]);
 
   useEffect(() => {
     loadAvailableFlows();

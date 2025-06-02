@@ -1,3 +1,13 @@
+import { Bold } from '@components/core/Bold';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { BlackLink } from '@core/BlackLink';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { useAllGrievanceTicketQuery } from '@generated/graphql';
 import {
   Box,
   Button,
@@ -11,28 +21,16 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
+import { choicesToDict, grievanceTicketStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { Dialog } from '@containers/dialogs/Dialog';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { grievanceTicketStatusToColor, choicesToDict } from '@utils/utils';
-import {
-  GrievancesChoiceDataQuery,
-  useAllGrievanceTicketQuery,
-} from '@generated/graphql';
-import { BlackLink } from '@core/BlackLink';
-import { ContentLink } from '@core/ContentLink';
-import { LabelizedField } from '@core/LabelizedField';
-import { StatusBox } from '@core/StatusBox';
-import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
-import { Bold } from '@components/core/Bold';
 import { useProgramContext } from 'src/programContext';
-import { HouseholdSimple } from '@restgenerated/models/HouseholdSimple';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import styled from 'styled-components';
+import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -52,7 +50,7 @@ interface LinkedGrievancesModalProps {
   household: HouseholdDetail | HouseholdSimple;
   businessArea: string;
   baseUrl: string;
-  grievancesChoices: GrievancesChoiceDataQuery;
+  grievancesChoices: GrievanceChoices;
 }
 
 export function LinkedGrievancesModal({
