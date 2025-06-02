@@ -23,3 +23,4 @@ class DashboardBaseSerializer(serializers.Serializer):
     total_delivered_quantity = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
     country = serializers.CharField(required=False)
     region = serializers.CharField(required=False)
+    total_planned_usd = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
