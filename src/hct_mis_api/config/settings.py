@@ -96,10 +96,6 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 
-KOBO_KF_URL = env("KOBO_KF_URL")
-KOBO_KC_URL = env("KOBO_KC_URL")
-KOBO_MASTER_API_TOKEN = env("KOBO_MASTER_API_TOKEN")
-
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = env("ENV")
 
@@ -485,6 +481,7 @@ from hct_mis_api.config.fragments.debug_toolbar import *  # noqa: F403, F401, E4
 from hct_mis_api.config.fragments.drf import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.drf_spectacular import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.es import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.kobo import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.mailjet import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.matomo import *  # noqa: F403, F401, E402

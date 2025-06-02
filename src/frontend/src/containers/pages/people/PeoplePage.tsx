@@ -22,7 +22,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 export const PeoplePage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { programHasPdu } = useProgramContext();
+  const { programHasPdu = false } = useProgramContext();
   const { businessArea } = useBaseUrl();
   const isNewTemplateJustCreated =
     location.state?.isNewTemplateJustCreated || false;
