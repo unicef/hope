@@ -47,7 +47,7 @@ export function EditDocumentationRow({
         setFieldValue={setFieldValue}
         isEdited={isEdited}
       />
-      <Grid size={{ xs:1 }} />
+      <Grid size={{ xs: 1 }} />
       <Grid>
         <Button
           onClick={() => {
@@ -72,13 +72,13 @@ export function EditDocumentationRow({
         </DisabledDiv>
       </Grid>
       {document.contentType.includes('image') ? (
-        <Grid size={{ xs:1 }}>
+        <Grid size={{ xs: 1 }}>
           <PhotoModal showRotate={false} src={document.filePath} />
         </Grid>
       ) : (
-        <Grid size={{ xs:1 }} />
+        <Grid size={{ xs: 1 }} />
       )}
-      <Grid size={{ xs:1 }}>
+      <Grid size={{ xs: 1 }}>
         {!removed ? (
           <Box ml={2} display="flex" align-items="center">
             <IconButton
@@ -94,6 +94,7 @@ export function EditDocumentationRow({
             >
               <Edit />
             </IconButton>
+            !isEditTicket && (
             <IconButton
               onClick={() => {
                 setFieldValue(
@@ -104,6 +105,7 @@ export function EditDocumentationRow({
             >
               <Delete />
             </IconButton>
+            )
           </Box>
         ) : (
           <Box display="flex" alignItems="center" height={48} color="red">

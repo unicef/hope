@@ -1,4 +1,10 @@
-import { Box, Button, FormHelperText, Grid2 as Grid, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid2 as Grid,
+  Typography,
+} from '@mui/material';
 import { Field, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -367,7 +373,7 @@ export const EditGrievancePage = (): ReactElement => {
                           </LabelizedField>
                         </Grid>
                         {showIssueType(values) ? (
-                          <Grid size={{ xs:6 }}>
+                          <Grid size={{ xs: 6 }}>
                             <LabelizedField label={t('Issue Type')}>
                               {selectedIssueType(
                                 values,
@@ -379,13 +385,13 @@ export const EditGrievancePage = (): ReactElement => {
                         {values.category && (
                           <>
                             <DividerLine />
-                            <Grid size={{ xs:6 }}>
+                            <Grid size={{ xs: 6 }}>
                               <LabelizedField label={t('Category Description')}>
                                 {categoryDescription}
                               </LabelizedField>
                             </Grid>
                             {issueTypeDescription && (
-                              <Grid size={{ xs:6 }}>
+                              <Grid size={{ xs: 6 }}>
                                 <LabelizedField
                                   label={t('Issue Type Description')}
                                 >
@@ -396,7 +402,7 @@ export const EditGrievancePage = (): ReactElement => {
                             <DividerLine />
                           </>
                         )}
-                        <Grid container size={{ xs: 12 }} >
+                        <Grid container size={{ xs: 12 }}>
                           <Grid size={{ xs: 3 }}>
                             <LabelizedField
                               label={`${beneficiaryGroup?.groupLabel}`}
@@ -468,7 +474,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikTextField}
                             />
                           </Grid>
-                          <Grid size={{ xs:6 }}>
+                          <Grid size={{ xs: 6 }}>
                             <Field
                               name="admin"
                               disabled={Boolean(ticket.admin)}
@@ -476,7 +482,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikAdminAreaAutocomplete}
                             />
                           </Grid>
-                          <Grid size={{ xs:6 }}>
+                          <Grid size={{ xs: 6 }}>
                             <Field
                               name="area"
                               fullWidth
@@ -486,7 +492,7 @@ export const EditGrievancePage = (): ReactElement => {
                               component={FormikTextField}
                             />
                           </Grid>
-                          <Grid size={{ xs:6 }}>
+                          <Grid size={{ xs: 6 }}>
                             <Field
                               name="language"
                               multiline
@@ -547,22 +553,24 @@ export const EditGrievancePage = (): ReactElement => {
                                 )}
                               </Typography>
                             </Title>
-                            <ExistingDocumentationFieldArray
-                              values={values}
-                              setFieldValue={setFieldValue}
-                              errors={errors}
-                              ticket={ticket}
-                            />
-                            <NewDocumentationFieldArray
-                              values={values}
-                              setFieldValue={setFieldValue}
-                              errors={errors}
-                            />
+                            <Grid container spacing={3}>
+                              <ExistingDocumentationFieldArray
+                                values={values}
+                                setFieldValue={setFieldValue}
+                                errors={errors}
+                                ticket={ticket}
+                              />
+                              <NewDocumentationFieldArray
+                                values={values}
+                                setFieldValue={setFieldValue}
+                                errors={errors}
+                              />
+                            </Grid>
                           </Box>
                         )}
                       </BoxPadding>
                       <BoxPadding>
-                        <Grid size={{ xs:6 }}>
+                        <Grid size={{ xs: 6 }}>
                           <Box py={3}>
                             <LookUpLinkedTickets
                               values={values}
@@ -576,7 +584,7 @@ export const EditGrievancePage = (): ReactElement => {
                           ticket.issueType?.toString() ===
                             GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                           <BoxWithBottomBorders>
-                            <Grid size={{ xs:6 }}>
+                            <Grid size={{ xs: 6 }}>
                               <Box py={3}>
                                 <LookUpPaymentRecord
                                   values={values}
@@ -695,7 +703,7 @@ export const EditGrievancePage = (): ReactElement => {
                     </ContainerColumnWithBorder>
                   </NewTicket>
                 </Grid>
-                <Grid size={{ xs:6 }}>
+                <Grid size={{ xs: 6 }}>
                   <NewTicket>
                     <OtherRelatedTicketsCreate values={values} />
                   </NewTicket>

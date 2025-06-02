@@ -464,7 +464,7 @@ export const CreateGrievancePage = (): ReactElement => {
                     <NewTicket>
                       <Grid container spacing={3}>
                         <TicketsAlreadyExist values={values} />
-                        <Grid size={{ xs:6 }}>
+                        <Grid size={{ xs: 6 }}>
                           <OtherRelatedTicketsCreate values={values} />
                         </Grid>
                       </Grid>
