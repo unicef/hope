@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from typing import Any
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from django import forms
 from django.contrib.admin.options import get_content_type_for_model
@@ -199,11 +199,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
 
-    @patch(
-        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
-        return_value=2.0,
-    )
-    def test_update_money_fields(self, get_exchange_rate_mock: Any) -> None:
+    def test_update_money_fields(self) -> None:
         pp = PaymentPlanFactory()
         PaymentFactory(
             parent=pp,
@@ -225,7 +221,6 @@ class TestPaymentPlanModel(TestCase):
         pp.update_money_fields()
 
         pp.refresh_from_db()
-        self.assertEqual(pp.exchange_rate, 2.0)
         self.assertEqual(pp.total_entitled_quantity, 200.00)
         self.assertEqual(pp.total_entitled_quantity_usd, 400.00)
         self.assertEqual(pp.total_delivered_quantity, 100.00)
