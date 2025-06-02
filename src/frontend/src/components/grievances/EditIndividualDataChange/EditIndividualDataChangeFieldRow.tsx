@@ -79,10 +79,10 @@ export const EditIndividualDataChangeFieldRow = ({
           field={field}
         />
       ) : (
-        <Grid size={{ xs:4 }} />
+        <Grid size={{ xs: 4 }} />
       )}
       {itemValue.fieldName && (
-        <Grid size={{ xs:1 }}>
+        <Grid size={{ xs: 1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
