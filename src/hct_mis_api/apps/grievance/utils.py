@@ -6,12 +6,10 @@ from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, QuerySet
-from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -26,12 +24,6 @@ from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
 
 logger = logging.getLogger(__name__)
-
-
-def get_individual(individual_id: str) -> Individual:
-    decoded_selected_individual_id = decode_id_string(individual_id)
-    individual = get_object_or_404(Individual.objects.select_related("household"), id=decoded_selected_individual_id)
-    return individual
 
 
 def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individuals: QuerySet[Individual]) -> None:
@@ -99,7 +91,7 @@ def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTi
 
 def update_grievance_documents(documents: List[Dict]) -> None:
     for document in documents:
-        current_document = GrievanceDocument.objects.filter(id=decode_id_string(document["id"])).first()
+        current_document = GrievanceDocument.objects.filter(id=document["id"]).first()
         if current_document:
             os.remove(current_document.file.path)
 
@@ -113,10 +105,8 @@ def update_grievance_documents(documents: List[Dict]) -> None:
             current_document.save()
 
 
-def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None:
-    documents_to_delete = GrievanceDocument.objects.filter(
-        grievance_ticket_id=ticket_id, id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
-    )
+def delete_grievance_documents(ticket_id: str, documents_to_delete: List[str]) -> None:
+    documents_to_delete = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=documents_to_delete)
 
     for document in documents_to_delete:
         os.remove(document.file.path)

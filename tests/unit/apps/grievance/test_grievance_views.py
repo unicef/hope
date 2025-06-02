@@ -9,13 +9,16 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.grievance.constants import PRIORITY_MEDIUM, URGENCY_NOT_URGENT
 from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceDocumentFactory,
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
     TicketDeleteHouseholdDetailsFactory,
@@ -629,9 +632,10 @@ class TestGrievanceTicketUpdate:
         create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
         )
+        grv_doc = GrievanceDocumentFactory(grievance_ticket=self.household_data_change_grievance_ticket, file_size=123)
         data = {
             "description": "this is new description",
-            "assigned_to": str(self.user.id),
+            "assigned_to": str(UserFactory().id),
             "admin": str(self.household_data_change_grievance_ticket.admin2.id),
             "language": self.household_data_change_grievance_ticket.language,
             "area": self.household_data_change_grievance_ticket.area,
@@ -644,6 +648,12 @@ class TestGrievanceTicketUpdate:
                     }
                 }
             },
+            "documentation_to_delete": [str(grv_doc.pk)],
+            # "documentation_to_update": [{"id": str(grv_doc_2.pk), "name": "new name", "file": mock_file}],
+            "priority": PRIORITY_MEDIUM,
+            "urgency": URGENCY_NOT_URGENT,
+            "partner": str(PartnerFactory().id),
+            "program": str(ProgramFactory().id),
         }
         response = self.api_client.patch(self.list_details, data, format="json")
         resp_data = response.json()
@@ -700,7 +710,7 @@ class TestGrievanceTicketUpdate:
         )
         create_user_role_with_permissions(
             self.user,
-            [Permissions.GRIEVANCES_SET_IN_PROGRESS, Permissions.GRIEVANCES_SET_ON_HOLD],
+            [Permissions.GRIEVANCES_SET_ON_HOLD, Permissions.GRIEVANCES_UPDATE],
             self.afghanistan,
             self.program,
         )
@@ -712,6 +722,157 @@ class TestGrievanceTicketUpdate:
         response = self.api_client.post(url, {"status": 4}, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json()["status"] == 4
+
+    def test_grievance_status_change_validation_error(self, create_user_role_with_permissions: Any) -> None:
+        grv = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            admin2=self.area,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_IN_PROGRESS,
+            created_by=self.user,
+            assigned_to=self.user,
+        )
+        grv.programs.set([self.program])
+        grv.save()
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grv.pk)},
+        )
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_UPDATE],
+            self.afghanistan,
+            self.program,
+        )
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_ASSIGNED}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Feedback tickets are not allowed to be created through this mutation." in response.json()
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_UPDATE], status.HTTP_202_ACCEPTED),
+            ([Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_AS_CREATOR], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_grievance_status_change_assigned_to(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        grv = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            admin2=self.area,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=self.user,
+            assigned_to=None,
+        )
+        grv.programs.set([self.program])
+        grv.save()
+        TicketHouseholdDataUpdateDetailsFactory(
+            ticket=grv,
+            household=self.household_one,
+            household_data={
+                "village": {"value": "Test Village", "approve_status": True},
+            },
+        )
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grv.pk)},
+        )
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+            self.program,
+        )
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_ASSIGNED}, format="json")
+        assert response.status_code == expected_status
+
+    def test_grievance_status_change_close_na_without_access(self, create_user_role_with_permissions: Any) -> None:
+        program_2 = ProgramFactory()
+        household_one = HouseholdFactory.build(
+            registration_data_import__imported_by__partner=self.user.partner,
+            program=self.program,
+            admin2=self.area_1,
+        )
+        household_one.household_collection.save()
+        household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = household_one.program
+        household_one.registration_data_import.save()
+
+        household_2 = HouseholdFactory.build(
+            registration_data_import__imported_by__partner=self.user.partner,
+            program=program_2,
+            admin2=self.area_2,
+        )
+        household_2.household_collection.save()
+        household_2.registration_data_import.imported_by.save()
+        household_2.registration_data_import.program = household_2.program
+        household_2.registration_data_import.save()
+
+        individuals_to_create = [
+            {
+                "full_name": "Benjamin Butler",
+                "given_name": "Benjamin",
+                "family_name": "Butler",
+                "phone_no": "(953)682-4596",
+                "birth_date": "1943-07-30",
+                "unicef_id": "IND-123-123",
+                "photo": ContentFile(b"111", name="foo1.png"),
+            },
+            {
+                "full_name": "Robin Ford",
+                "given_name": "Robin",
+                "family_name": "Ford",
+                "phone_no": "+18663567905",
+                "birth_date": "1946-02-15",
+                "unicef_id": "IND-222-222",
+                "photo": ContentFile(b"222", name="foo2.png"),
+            },
+        ]
+
+        first_individual = IndividualFactory(household=household_one, program=self.program, **individuals_to_create[0])
+        second_individual = IndividualFactory(household=household_2, program=program_2, **individuals_to_create[1])
+        household_one.head_of_household = first_individual
+        household_one.save()
+        household_2.head_of_household = second_individual
+        household_2.save()
+        na_grv = GrievanceTicketFactory(
+            description="needs_adjudication_grievance_ticket",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            admin2=self.area_1,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        na_grv.programs.set([self.program])
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
+            ticket=na_grv,
+            golden_records_individual=first_individual,
+            possible_duplicate=second_individual,
+            selected_individual=second_individual,
+        )
+        ticket_details.selected_distinct.add(first_individual)
+        ticket_details.possible_duplicates.add(second_individual)
+        ticket_details.selected_individuals.add(second_individual, first_individual)
+
+        # assign Individual to different Program
+        second_individual.program = program_2
+        second_individual.save()
+        area_limits = AdminAreaLimitedTo.objects.create(partner=self.user.partner, program=program_2)
+        area_limits.areas.set([self.area_1])
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
+        )
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK],
+            self.afghanistan,
+            self.program,
+        )
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_create_ticket_note(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_ADD_NOTE], self.afghanistan, self.program)
