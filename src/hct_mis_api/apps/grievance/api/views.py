@@ -288,10 +288,10 @@ class GrievanceTicketGlobalViewSet(
 
         if input_data.get("documentation"):
             if not check_permissions(
-                    user,
-                    [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
-                    business_area=self.business_area,
-                    program=program.slug,
+                user,
+                [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+                business_area=self.business_area,
+                program=program.slug,
             ):
                 raise PermissionDenied
 
@@ -335,12 +335,6 @@ class GrievanceTicketGlobalViewSet(
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=str(grievance_ticket.id))
 
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
-
-        if grievance_ticket.category in (
-            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-        ):
-            raise ValidationError("Feedback tickets are not allowed to be created through this mutation.")
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
             raise ValidationError("Grievance Ticket in status Closed is not editable")
@@ -411,10 +405,10 @@ class GrievanceTicketGlobalViewSet(
 
         if new_status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
             if not check_permissions(
-                    user,
-                    [Permissions.GRIEVANCE_ASSIGN],
-                    business_area=self.business_area,
-                    program=grievance_ticket.programs.first(),
+                user,
+                [Permissions.GRIEVANCE_ASSIGN],
+                business_area=self.business_area,
+                program=grievance_ticket.programs.first(),
             ):
                 raise PermissionDenied
 

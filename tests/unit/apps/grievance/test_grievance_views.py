@@ -199,9 +199,15 @@ class TestGrievanceTicketCreate:
         ],
     )
     def test_create_grievance_ticket_add_individual(
-        self, permissions: list, expected_status: int, create_perm_for_program: bool, create_user_role_with_permissions: Any
+        self,
+        permissions: list,
+        expected_status: int,
+        create_perm_for_program: bool,
+        create_user_role_with_permissions: Any,
     ) -> None:
-        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program if create_perm_for_program else self.program_2)
+        create_user_role_with_permissions(
+            self.user, permissions, self.afghanistan, self.program if create_perm_for_program else self.program_2
+        )
         data = {
             "description": "Test",
             "assigned_to": str(self.user.id),
@@ -212,8 +218,8 @@ class TestGrievanceTicketCreate:
             "program": str(self.program.pk),
             "documentation": [
                 # {
-                #     # "file": SimpleUploadedFile(name="test_file123.pdf", content=b"abc", content_type="application/pdf"),
-                #     "name": "test_file123.pdf"
+                #     # "file": SimpleUploadedFile(name="123.pdf", content=b"abc", content_type="application/pdf"),
+                #     "name": "123.pdf"
                 # }
             ],
             "extras": {
@@ -416,6 +422,22 @@ class TestGrievanceTicketCreate:
         assert len(resp_data) == 1
         assert GrievanceTicket.objects.all().count() == 1
         assert TicketComplaintDetails.objects.all().count() == 1
+
+    def test_create_grievance_ticket_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+        data = {
+            "description": "Test Feedback",
+            "category": GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_FSP_COMPLAINT,
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {},
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketComplaintDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Feedback tickets are not allowed to be created through this mutation." in response.json()
 
 
 class TestGrievanceTicketUpdate:
@@ -651,6 +673,25 @@ class TestGrievanceTicketUpdate:
         }
         response = self.api_client.patch(url, data, format="json")
         assert response.status_code == status.HTTP_200_OK
+
+    def test_update_grievance_ticket_validation_error(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
+        )
+        data = {
+            "extras": {
+                "household_data_update_issue_type_extras": {
+                    "household_data": {
+                        "village": "Test New",
+                    }
+                }
+            },
+        }
+        self.household_data_change_grievance_ticket.status = GrievanceTicket.STATUS_CLOSED
+        self.household_data_change_grievance_ticket.save()
+        response = self.api_client.patch(self.list_details, data, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Grievance Ticket in status Closed is not editable" in response.json()
 
     def test_grievance_status_change(self, create_user_role_with_permissions: Any) -> None:
         url = reverse(

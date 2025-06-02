@@ -2,7 +2,6 @@ import abc
 from typing import Dict, List, Optional
 
 from django.contrib.auth.models import AbstractUser
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from hct_mis_api.apps.accountability.models import Feedback
@@ -26,7 +25,6 @@ from hct_mis_api.apps.grievance.services.ticket_based_on_payment_record_services
 )
 from hct_mis_api.apps.grievance.utils import create_grievance_documents
 from hct_mis_api.apps.grievance.validators import validate_grievance_documents_size
-from hct_mis_api.apps.program.models import Program
 
 
 class TicketDetailsCreator(abc.ABC):
