@@ -10,14 +10,14 @@ import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import {
-  PaymentPlanDocument,
-  useExcludeHouseholdsPpMutation,
-} from '@generated/graphql';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanExcludeBeneficiaries } from '@restgenerated/models/PaymentPlanExcludeBeneficiaries';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { StyledTextField } from '@shared/StyledTextField';
 import { ButtonTooltip } from '@core/ButtonTooltip';
@@ -80,7 +80,25 @@ export function ExcludeSection({
   const [errors, setErrors] = useState<string[]>([]);
   const [isEdit, setEdit] = useState(false);
 
-  const [mutate, { error }] = useExcludeHouseholdsPpMutation();
+  const queryClient = useQueryClient();
+  const { businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: mutate, error } = useMutation({
+    mutationFn: (data: PaymentPlanExcludeBeneficiaries) =>
+      RestService.restBusinessAreasProgramsPaymentPlansExcludeBeneficiariesCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+          requestBody: data,
+        },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
+    },
+  });
 
   const handleIdsChange = (event): void => {
     if (event.target.value === '') {
@@ -99,27 +117,15 @@ export function ExcludeSection({
     const idsToSave = excludedIds.filter((id) => !deletedIds.includes(id));
     try {
       await mutate({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-          excludedHouseholdsIds: idsToSave,
-          exclusionReason: values.exclusionReason || null,
-        },
-        refetchQueries: () => [
-          {
-            query: PaymentPlanDocument,
-            variables: { id: paymentPlan.id },
-            fetchPolicy: 'network-only',
-          },
-          'AllPaymentsForTable',
-        ],
-        awaitRefetchQueries: true,
+        excludedHouseholdsIds: idsToSave,
+        exclusionReason: values.exclusionReason || undefined,
       });
       if (!error) {
         showMessage(t('Beneficiaries exclusion started'));
         setExclusionsOpen(false);
       }
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e.message || 'An error occurred');
     }
   };
 

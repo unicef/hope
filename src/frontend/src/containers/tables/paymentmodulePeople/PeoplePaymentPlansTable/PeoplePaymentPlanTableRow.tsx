@@ -1,6 +1,5 @@
 import { Box, TableCell } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -29,10 +28,6 @@ export const PeoplePaymentPlanTableRow = ({
   const handleClick = (): void => {
     navigate(paymentPlanPath);
   };
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
-
-  if (!statusChoicesData) return null;
 
   const followUpLinks = (): ReactElement => {
     if (!plan.followUps?.edges?.length) return <>-</>;

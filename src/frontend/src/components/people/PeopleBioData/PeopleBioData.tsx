@@ -1,7 +1,6 @@
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { DisabilityEnum } from '@restgenerated/models/DisabilityEnum';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
@@ -20,6 +19,7 @@ import { LinkedGrievancesModal } from '../../population/LinkedGrievancesModal/Li
 import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 import { Overview } from '@components/payments/Overview';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const BorderBox = styled.div`
   border-bottom: 1px solid #e1e1e1;
@@ -30,7 +30,7 @@ interface PeopleBioDataProps {
   baseUrl: string;
   businessArea: string;
   choicesData: IndividualChoices;
-  grievancesChoices: GrievancesChoiceDataQuery;
+  grievancesChoices: GrievanceChoices;
 }
 export const PeopleBioData = ({
   individual,

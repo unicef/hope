@@ -1,9 +1,6 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
-import {
-  FspChoices,
-  useAllCollectorFieldsAttributesQuery,
-} from '@generated/graphql';
+import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
@@ -55,6 +52,7 @@ import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndi
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { FspChoices } from '@restgenerated/models/FspChoices';
 
 const ButtonBox = styled.div`
   width: 300px;
