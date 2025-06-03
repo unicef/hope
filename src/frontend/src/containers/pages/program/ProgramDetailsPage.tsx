@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
-import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 
 const Container = styled.div`
   && {
@@ -55,11 +54,14 @@ function ProgramDetailsPage(): ReactElement {
     data: program,
     isLoading: loading,
     error,
-  } = useHopeDetailsQuery<ProgramDetail>(
-    id,
-    RestService.restBusinessAreasProgramsRetrieve,
-    {},
-  );
+  } = useQuery<ProgramDetail>({
+    queryKey: ['program', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
+  });
 
   const { data: businessAreaData, isLoading: businessAreaDataLoading } =
     useQuery<BusinessArea>({
