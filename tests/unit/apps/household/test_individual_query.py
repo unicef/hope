@@ -31,10 +31,14 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType, Individual
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    DeliveryMechanism,
+    FinancialInstitution,
+)
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -130,7 +134,7 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
                 "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
-                "registration_id": 1,
+                "detail_id": 1,
             },
             {
                 "full_name": "Robin Ford",
@@ -811,9 +815,8 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         familyName
         phoneNo
         birthDate
-        deliveryMechanismsData {
+        accounts {
             name
-            isValid
             individualTabData
         }
       }
@@ -828,6 +831,9 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
+        cls.financial_institution = FinancialInstitution.objects.create(
+            id=123, name="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
 
         cls.program = ProgramFactory(
             name="Test Program for Individual Query",
@@ -850,25 +856,27 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
             ],
         )
         cls.individual = individuals[0]
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=cls.individual,
-            delivery_mechanism=cls.dm_atm_card,
+            account_type=AccountType.objects.get(key="bank"),
             data={
-                "card_number__atm_card": "123",
-                "card_expiry_date__atm_card": "2022-01-01",
-                "name_of_cardholder__atm_card": "Marek",
+                "card_number": "123",
+                "card_expiry_date": "2022-01-01",
+                "name_of_cardholder": "Marek",
             },
-            is_valid=True,
+            number="123",
+            financial_institution=cls.financial_institution,
         )
-        DeliveryMechanismDataFactory(
+        AccountFactory(
             individual=cls.individual,
-            delivery_mechanism=cls.dm_mobile_money,
+            account_type=AccountType.objects.get(key="mobile"),
             data={
-                "service_provider_code__mobile_money": "ABC",
-                "delivery_phone_number__mobile_money": "123456789",
-                "provider__mobile_money": "Provider",
+                "service_provider_code": "ABC",
+                "delivery_phone_number": "123456789",
+                "provider": "Provider",
             },
-            is_valid=False,
+            number="321",
+            financial_institution=cls.financial_institution,
         )
 
     @parameterized.expand(
@@ -888,7 +896,7 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
             ),
         ]
     )
-    def test_individual_query_delivery_mechanisms_data(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_individual_query_accounts(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(

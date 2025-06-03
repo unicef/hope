@@ -7,8 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
 import { useProgramContext } from '../../../programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function Exclusions({
+function Exclusions({
   initialOpen = false,
 }: {
   initialOpen?: boolean;
@@ -79,3 +80,5 @@ export function Exclusions({
     </PaperContainer>
   );
 }
+
+export default withErrorBoundary(Exclusions, 'Exclusions');

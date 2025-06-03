@@ -100,7 +100,7 @@ dev-dependencies = [
     "pytest<8.0.0,>=7.4.4",
     "pytest-django<5.0.0,>=4.5.2",
     "pytest-echo<2.0.0,>=1.7.1",
-    "selenium==4.24.0",
+    "selenium==4.29.0",
     "webdriver-manager==4.0.2",
     "requests-mock<2.0.0,>=1.9.3",
     "responses<1.0,>=0.22",
@@ -113,7 +113,6 @@ dev-dependencies = [
     "unittest-xml-reporting<4.0.0,>=3.2.0",
     "watchdog<3.0.0,>=2.1.8",
     "wasmer<2.0.0,>=1.1.0",
-    "types-selenium<4.0.0,>=3.141.9",
     "pre-commit<4.0.0,>=3.1.1",
     "pytest-rerunfailures<14.0,>=13.0",
     "pytest-randomly<4.0.0,>=3.15.0",
@@ -132,7 +131,7 @@ distribution = true
 
 [project]
 name = "hope"
-version = "3.1.13"
+version = "3.2.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = [
     { name = "Tivix" },

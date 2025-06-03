@@ -14,6 +14,7 @@ import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
 import { adjustHeadCells } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
@@ -36,7 +37,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export function LookUpHouseholdTableCommunication({
+function LookUpHouseholdTableCommunication({
   businessArea,
   filter,
   choicesData,
@@ -178,3 +179,8 @@ export function LookUpHouseholdTableCommunication({
     <TableWrapper>{renderTable()}</TableWrapper>
   );
 }
+
+export default withErrorBoundary(
+  LookUpHouseholdTableCommunication,
+  'LookUpHouseholdTableCommunication',
+);

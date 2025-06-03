@@ -13,12 +13,13 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export interface EditHouseholdDataChangeProps {
   values;
   setFieldValue;
 }
-export function EditHouseholdDataChange({
+function EditHouseholdDataChange({
   values,
   setFieldValue,
 }: EditHouseholdDataChangeProps): ReactElement {
@@ -50,7 +51,7 @@ export function EditHouseholdDataChange({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+    useAllEditHouseholdFieldsQuery({ fetchPolicy: 'network-only' });
 
   const householdFieldsDict =
     householdFieldsData?.allEditHouseholdFieldsAttributes;
@@ -110,3 +111,8 @@ export function EditHouseholdDataChange({
     )
   );
 }
+
+export default withErrorBoundary(
+  EditHouseholdDataChange,
+  'EditHouseholdDataChange',
+);

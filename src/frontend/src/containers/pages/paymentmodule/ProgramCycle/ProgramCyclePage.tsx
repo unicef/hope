@@ -10,8 +10,8 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import { useProgramContext } from '../../../../programContext';
 import { TableWrapper } from '@core/TableWrapper';
 import { ProgramCyclesTablePaymentModule } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesTablePaymentModule';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -53,31 +53,23 @@ export const ProgramCyclePage = (): ReactElement => {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ProgramCyclePage.tsx');
-      }}
-      componentName="ProgramCyclePage"
-    >
-      <>
-        <PageHeader title={t('Payment Module')} />
-        <ProgramCyclesFilters
-          filter={filter}
-          setFilter={setFilter}
-          initialFilter={initialFilter}
-          appliedFilter={appliedFilter}
-          setAppliedFilter={setAppliedFilter}
+    <>
+      <PageHeader title={t('Payment Module')} />
+      <ProgramCyclesFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
+      <TableWrapper>
+        <ProgramCyclesTablePaymentModule
+          program={selectedProgram}
+          filters={appliedFilter}
+          adjustedHeadCells={adjustedHeadCells}
         />
-        <TableWrapper>
-          <ProgramCyclesTablePaymentModule
-            program={selectedProgram}
-            filters={appliedFilter}
-            adjustedHeadCells={adjustedHeadCells}
-          />
-        </TableWrapper>
-      </>
-    </UniversalErrorBoundary>
+      </TableWrapper>
+    </>
   );
 };
+export default withErrorBoundary(ProgramCyclePage, 'ProgramCyclePage');

@@ -12,13 +12,14 @@ import { UniversalTable } from '../UniversalTable';
 import { headCells } from './FeedbackTableHeadCells';
 import { FeedbackTableRow } from './FeedbackTableRow';
 import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface FeedbackTableProps {
   filter;
   canViewDetails: boolean;
 }
 
-export function FeedbackTable({
+function FeedbackTable({
   filter,
   canViewDetails,
 }: FeedbackTableProps): ReactElement {
@@ -88,3 +89,5 @@ export function FeedbackTable({
     </TableWrapper>
   );
 }
+
+export default withErrorBoundary(FeedbackTable, 'FeedbackTable');

@@ -61,6 +61,7 @@ class AutocompleteWidget(forms.Widget):
         choices: Tuple = (),
         using: Optional[Any] = None,
         pk_field: str = "id",
+        business_area: Optional[UUID] = None,
     ) -> None:
         self.model = model
         self.pk_field = pk_field
@@ -68,6 +69,7 @@ class AutocompleteWidget(forms.Widget):
         self.db = using
         self.choices = choices
         self.attrs = {} if attrs is None else attrs.copy()
+        self.business_area = business_area
 
     class Media:
         extra = "" if settings.DEBUG else ".min"
@@ -101,12 +103,15 @@ class AutocompleteWidget(forms.Widget):
         }
 
     def get_url(self) -> str:
-        return reverse("admin:autocomplete")
+        url = reverse("admin:autocomplete")
+        if self.business_area:
+            url += f"?business_area={self.business_area}"  #
+        return url
 
     def get_context(self, name: str, value: Any, attrs: Optional[Dict[str, Any]]) -> Dict:
         return {
             "widget": {
-                "query_string": "",
+                "query_string": f"business_area__exact={self.business_area}" if self.business_area else "",
                 "lookup_kwarg": "term",
                 "url": self.get_url(),
                 "target_opts": {
@@ -471,7 +476,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 url = reverse("admin:steficon_rule_change", args=[self.object.id])
                 return HttpResponseRedirect(url)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
@@ -501,7 +506,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             )
             return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 

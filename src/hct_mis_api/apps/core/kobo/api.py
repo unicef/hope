@@ -89,7 +89,7 @@ class KoboAPI:
 
         if not token:
             msg = f"KOBO Token is not set for business area {self.business_area}"
-            logger.error(msg)
+            logger.warning(msg)
             raise TokenNotProvided(msg)
 
         self._client.headers.update({"Authorization": f"token {token}"})
@@ -99,7 +99,7 @@ class KoboAPI:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
         return response.json()
 
@@ -129,7 +129,7 @@ class KoboAPI:
             try:
                 asset_response.raise_for_status()
             except requests.exceptions.HTTPError as e:
-                logger.exception(e)
+                logger.warning(e)
                 raise
             asset_response_dict = asset_response.json()
             asset_uid = asset_response_dict.get("uid")
@@ -164,7 +164,7 @@ class KoboAPI:
 
     def get_all_projects_data(self) -> List:
         if not self.business_area:
-            logger.error("Business area is not provided")
+            logger.warning("Business area is not provided")
             raise ValueError("Business area is not provided")
         projects_url = self._get_url("assets/")
 
@@ -192,6 +192,6 @@ class KoboAPI:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
         return BytesIO(response.content)

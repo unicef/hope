@@ -1,35 +1,45 @@
 {% extends 'admin/base_site.html' %}
 {% load hope i18n admin_urls static admin_modify %}
+{% block extrahead %}
+    {{ block.super }}
+    {{ form.media }}
+{% endblock %}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        &rsaquo; <a
+            href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        &rsaquo; <a
+            href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        &rsaquo; Withdraw households from list
+    </div>
+{% endblock %}
 {% block content %}
 <form method="post">
     {% csrf_token %}
-    {% if step == "1" %}
+    {% if step == "0" %}
+        <h3>Please Select Business Area</h3>
+        <input type="hidden" name="step" value="1">
+        {{ form.business_area }}
+        <div><input type="submit" value="Next"></div>
+    {% elif step == "1" %}
         <input type="hidden" name="step" value="2">
-        <form method="post">{% csrf_token %}
-        <div>
-          <label for="program_id">Program ID (encoded):</label>
-          <input type="text" id="program_id" name="program_id" required>
-        </div>
-        <br/>
-        <div>
-          <label for="household_list">Household IDs:</label><br/><br/>
-          <textarea id="household_list" name="household_list" required rows="8" cols="100"></textarea>
-        </div>
-        <br/>
-        <div>
-          <label for="tag">Tag:</label>
-          <input type="text" id="tag" name="tag" required>
-        </div>
-        <br/>
-        <button type="submit">Submit</button>
-        </form>
+        <input type="hidden" name="business_area" value="{{ business_area }}">
+        {{ form.program.label_tag }}<br>
+        {{ form.program }}<br>
+        {{ form.household_list.label_tag }}<br>
+        {{ form.household_list }}<br>
+        {{ form.tag.label_tag }}<br>
+        {{ form.tag }}
+        <div><input type="submit" value="Submit"></div>
     {% elif step == "2" %}
         <input type="hidden" name="step" value="3">
         <input type="hidden" name="household_list" value="{{ household_list }}">
         <input type="hidden" name="tag" value="{{ tag }}">
-        <input type="hidden" name="program_id" value="{{ program_id }}">
+        <input type="hidden" name="program" value="{{ program }}">
+        <input type="hidden" name="business_area" value="{{ business_area }}">
         <p>This action will result in withdrawing {{ household_count }} households</p>
-        <button type="submit">Confirm</button>
+        <div><input type="submit" value="Confirm"></div>
     {% endif %}
 </form>
 {% endblock content %}

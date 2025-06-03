@@ -254,9 +254,7 @@ def get_combined_attributes() -> Dict:
 
     flex_attrs = serialize_flex_attributes()
     return {
-        **FieldFactory.from_scopes(
-            [Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR, Scope.DELIVERY_MECHANISM]
-        )
+        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
         .apply_business_area()
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
@@ -293,7 +291,7 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
     except AttributeError as e:
         if default != raise_attribute_error:
             return default
-        logger.exception(e)
+        logger.warning(e)
         raise
 
 

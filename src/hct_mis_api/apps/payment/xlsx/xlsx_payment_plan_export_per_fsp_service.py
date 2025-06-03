@@ -7,7 +7,6 @@ from typing import List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
-from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 
@@ -21,7 +20,6 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -168,17 +166,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
         if self.payment_generate_token_and_order_numbers:
             payment = generate_token_and_order_numbers(payment)
+
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
             for column_name in fsp_template_columns
         ]
-        delivery_mechanism_data = payment.collector.delivery_mechanisms_data.filter(
-            delivery_mechanism=payment.delivery_type
-        ).first()
         core_fields_row = [
-            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(
-                payment, column_name, delivery_mechanism_data
-            )
+            FinancialServiceProviderXlsxTemplate.get_column_from_core_field(payment, column_name)
             for column_name in fsp_template_core_fields
         ]
         payment_row.extend(core_fields_row)
@@ -233,72 +227,42 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 # add xlsx to zip
                 zip_file.writestr(filename, tmp.read())
 
-    def create_workbooks_per_fsp(
-        self,
-        delivery_mechanism_per_payment_plan_list: QuerySet["DeliveryMechanismPerPaymentPlan"],
-        zip_file: zipfile.ZipFile,
-        password: Optional[str] = None,
-    ) -> None:
-        for delivery_mechanism_per_payment_plan in delivery_mechanism_per_payment_plan_list:
-            fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-            delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
-            wb, ws_fsp = self.open_workbook(fsp.name)
-            fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
-            payment_ids = list(
-                self.payment_plan.eligible_payments.filter(financial_service_provider=fsp)
-                .order_by("unicef_id")
-                .values_list("id", flat=True)
-            )
-            ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
-            self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
-            self._adjust_column_width_from_col(ws_fsp)
-            self.save_workbook(
-                zip_file,
-                wb,
-                f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism_per_payment_plan.delivery_mechanism}.xlsx",
-                password,
-            )
-
     def create_workbooks_per_split(
         self,
-        delivery_mechanism_per_payment_plan_list: QuerySet["DeliveryMechanismPerPaymentPlan"],
         zip_file: zipfile.ZipFile,
         password: Optional[str] = None,
     ) -> None:
         # there should be only one delivery mechanism/fsp in order to generate split file
         # this is guarded in SplitPaymentPlanMutation
 
-        delivery_mechanism_per_payment_plan: DeliveryMechanismPerPaymentPlan = (
-            delivery_mechanism_per_payment_plan_list.first()  # type: ignore
-        )
-        fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-        delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
-        for i, split in enumerate(self.payment_plan.splits.all().order_by("order")):
-            wb, ws_fsp = self.open_workbook(f"{fsp.name}-chunk{i + 1}")
+        fsp: FinancialServiceProvider = self.payment_plan.financial_service_provider
+        delivery_mechanism: DeliveryMechanism = self.payment_plan.delivery_mechanism
+        splits = self.payment_plan.splits.all().order_by("order")
+        splits_count = splits.count()
+        for i, split in enumerate(splits):
+            filename = fsp.name
+            if splits_count > 1:
+                filename += f"-chunk{i + 1}"
+            wb, ws_fsp = self.open_workbook(filename)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
-            payment_ids = list(split.payments.all().order_by("unicef_id").values_list("id", flat=True))
+            payment_ids = list(split.split_payment_items.all().order_by("unicef_id").values_list("id", flat=True))
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
             self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
+            workbook_name = (
+                f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism}"
+            )
+            if splits_count > 1:
+                workbook_name += f"_chunk{i + 1}"
+            workbook_name += ".xlsx"
             self.save_workbook(
                 zip_file,
                 wb,
-                f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism_per_payment_plan.delivery_mechanism}_chunk{i + 1}.xlsx",
+                workbook_name,
                 password,
             )
 
     def export_per_fsp(self, user: "User") -> None:
-        delivery_mechanism_per_payment_plan_list = self.payment_plan.delivery_mechanisms.select_related(
-            "financial_service_provider"
-        )
-
-        if not delivery_mechanism_per_payment_plan_list.exists():
-            msg = (
-                f"Not possible to generate export file. "
-                f"There aren't any FSP(s) assigned to Payment Plan {self.payment_plan.unicef_id}."
-            )
-            log_and_raise(msg)
-
         with NamedTemporaryFile(suffix=".zip") as tmp_zip:
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
 
@@ -317,10 +281,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 if self.export_fsp_auth_code:
                     zip_file.setpassword(password.encode("utf-8"))
 
-                if self.payment_plan.splits.exists():
-                    self.create_workbooks_per_split(delivery_mechanism_per_payment_plan_list, zip_file, xlsx_password)
-                else:
-                    self.create_workbooks_per_fsp(delivery_mechanism_per_payment_plan_list, zip_file, xlsx_password)
+                self.create_workbooks_per_split(zip_file, xlsx_password)
 
             file_temp_obj = FileTemp(
                 object_id=self.payment_plan.pk,
