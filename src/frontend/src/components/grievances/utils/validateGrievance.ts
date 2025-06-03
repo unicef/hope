@@ -32,7 +32,9 @@ export function validate(
         values.individualData.documents
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.type || !doc.number) {
+            // Handle nested structure: doc.value.{country, key, number} or direct structure
+            const docValue = doc.value || doc;
+            if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualData =
                 'Document type, country and number are required';
             }
@@ -120,7 +122,9 @@ export function validate(
         values.individualDataUpdateFieldsDocuments
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.type || !doc.number) {
+            // Handle nested structure: doc.value.{country, key, number}
+            const docValue = doc.value || doc;
+            if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualDataUpdateFieldsDocuments =
                 'Document type, country and number are required';
             }
@@ -130,7 +134,9 @@ export function validate(
         values.individualDataUpdateFieldsDocumentsToEdit
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.type || !doc.number) {
+            // Handle nested structure: doc.value.{country, key, number}
+            const docValue = doc.value || doc;
+            if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualDataUpdateFieldsDocumentsToEdit =
                 'Document type, country and number are required';
             }
@@ -140,7 +146,10 @@ export function validate(
         values.individualDataUpdateFieldsIdentities
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.partner || !doc.number) {
+            // Handle nested structure: doc.value.{country, partner, number}
+            const docValue = doc.value || doc;
+            const partner = docValue.partner || docValue.agency; // For backward compatibility
+            if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentities =
                 'Identity partner, country and number are required';
             }
@@ -150,7 +159,10 @@ export function validate(
         values.individualDataUpdateFieldsIdentitiesToEdit
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.partner || !doc.number) {
+            // Handle nested structure: doc.value.{country, partner, number}
+            const docValue = doc.value || doc;
+            const partner = docValue.partner || docValue.agency; // For backward compatibility
+            if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
             }
@@ -353,7 +365,9 @@ export function validateUsingSteps(
       if (values.individualDataUpdateFieldsDocuments?.length) {
         values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
           const doc = values.individualDataUpdateFieldsDocuments[index];
-          if (!doc.country || !doc.key || !doc.number) {
+          // Handle nested structure: doc.value.{country, key, number}
+          const docValue = doc.value || doc;
+          if (!docValue.country || !docValue.key || !docValue.number) {
             errors.individualDataUpdateFieldsDocuments =
               'Document type, country and number are required';
           }
@@ -363,7 +377,8 @@ export function validateUsingSteps(
         values.individualDataUpdateFieldsDocumentsToEdit.forEach(
           (el, index) => {
             const doc = values.individualDataUpdateFieldsDocumentsToEdit[index];
-            if (!doc.country || !doc.key || !doc.number) {
+            const docValue = doc.value || doc;
+            if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualDataUpdateFieldsDocumentsToEdit =
                 'Document type, country and number are required';
             }
@@ -373,8 +388,9 @@ export function validateUsingSteps(
       if (values.individualDataUpdateFieldsIdentities?.length) {
         values.individualDataUpdateFieldsIdentities.forEach((el, index) => {
           const doc = values.individualDataUpdateFieldsIdentities[index];
-          const partner = doc.partner || doc.partner; // For backward compatibility
-          if (!doc.country || !partner || !doc.number) {
+          const docValue = doc.value || doc;
+          const partner = docValue.partner || docValue.agency;
+          if (!docValue.country || !partner || !docValue.number) {
             errors.individualDataUpdateFieldsIdentities =
               'Identity partner, country and number are required';
           }
@@ -385,8 +401,9 @@ export function validateUsingSteps(
           (el, index) => {
             const doc =
               values.individualDataUpdateFieldsIdentitiesToEdit[index];
-            const partner = doc.partner || doc.partner; // For backward compatibility
-            if (!doc.country || !partner || !doc.number) {
+            const docValue = doc.value || doc;
+            const partner = docValue.partner || docValue.agency;
+            if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
             }
@@ -444,7 +461,8 @@ export function validateUsingSteps(
     if (individualData?.documents?.length) {
       individualData.documents.forEach((_el, index) => {
         const doc = values.individualData.documents[index];
-        if (!doc.country || !doc.key || !doc.number) {
+        const docValue = doc.value || doc;
+        if (!docValue.country || !docValue.key || !docValue.number) {
           errors.individualDataUpdateFieldsDocuments =
             'Document type, country and number are required';
         }
@@ -454,7 +472,9 @@ export function validateUsingSteps(
     if (individualData?.identities?.length) {
       individualData.identities.forEach((_el, index) => {
         const doc = values.individualData.identities[index];
-        if (!doc.country || !doc.partner || !doc.number) {
+        const docValue = doc.value || doc;
+        const partner = docValue.partner || docValue.agency;
+        if (!docValue.country || !partner || !docValue.number) {
           errors.individualDataUpdateFieldsIdentities =
             'Identity partner, country and number are required';
         }
