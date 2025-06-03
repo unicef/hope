@@ -52,6 +52,8 @@ class APIBusinessAreaTests(HOPEApiTestCase):
                 "parent": None,
                 "is_split": self.business_area.is_split,
                 "active": self.business_area.active,
+                "screen_beneficiary": self.business_area.screen_beneficiary,
+                "is_accountability_applicable": self.business_area.is_accountability_applicable,
             },
             response.json()["results"],
         )
@@ -65,6 +67,8 @@ class APIBusinessAreaTests(HOPEApiTestCase):
                 "parent": None,
                 "is_split": business_area1.is_split,
                 "active": business_area1.active,
+                "screen_beneficiary": self.business_area.screen_beneficiary,
+                "is_accountability_applicable": self.business_area.is_accountability_applicable,
             },
             response.json()["results"],
         )
@@ -78,6 +82,8 @@ class APIBusinessAreaTests(HOPEApiTestCase):
                 "parent": str(business_area2.parent.id),
                 "is_split": business_area2.is_split,
                 "active": business_area2.active,
+                "screen_beneficiary": self.business_area.screen_beneficiary,
+                "is_accountability_applicable": self.business_area.is_accountability_applicable,
             },
             response.json()["results"],
         )
