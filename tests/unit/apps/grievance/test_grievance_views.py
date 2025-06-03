@@ -1371,6 +1371,100 @@ class TestGrievanceTicketApprove:
         assert ticket_details.selected_individuals.all().count() == 1
         assert individuals[1] in ticket_details.selected_individuals.all()
 
+    def test_approve_needs_adjudication_more(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.afghanistan, self.program
+        )
+        partner = PartnerFactory()
+        household_one = HouseholdFactory.build(
+            registration_data_import__imported_by__partner=partner,
+            program=self.program,
+            admin2=self.area_1,
+        )
+        household_one.household_collection.save()
+        household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = household_one.program
+        household_one.registration_data_import.save()
+
+        individuals_to_create = [
+            {
+                "full_name": "Benjamin Butler",
+                "given_name": "Benjamin",
+                "family_name": "Butler",
+                "phone_no": "(953)682-4596",
+                "birth_date": "1943-07-30",
+                "unicef_id": "IND-123-123",
+                "photo": ContentFile(b"111", name="foo1.png"),
+            },
+            {
+                "full_name": "Robin Ford",
+                "given_name": "Robin",
+                "family_name": "Ford",
+                "phone_no": "+18663567905",
+                "birth_date": "1946-02-15",
+                "unicef_id": "IND-222-222",
+                "photo": ContentFile(b"222", name="foo2.png"),
+            },
+        ]
+
+        individuals = [
+            IndividualFactory(household=household_one, program=self.program, **individual)
+            for individual in individuals_to_create
+        ]
+        first_individual = individuals[0]
+        second_individual = individuals[1]
+        household_one.head_of_household = first_individual
+        household_one.save()
+        na_grv = GrievanceTicketFactory(
+            description="needs_adjudication_grievance_ticket",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            admin2=self.area_1,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        na_grv.programs.set([self.program])
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
+            ticket=na_grv,
+            golden_records_individual=first_individual,
+            possible_duplicate=second_individual,
+            selected_individual=None,
+        )
+        ticket_details.possible_duplicates.add(first_individual, second_individual)
+        assert ticket_details.selected_individuals.all().count() == 0
+
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
+            ),
+            {"clear_individual_ids": [str(individuals[1].id)], "version": na_grv.version},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in response.json()
+
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
+            ),
+            {"selected_individual_id": str(individuals[1].id)},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in response.json()
+
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
+            ),
+            {"distinct_individual_ids": [str(individuals[1].id)]},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in response.json()
+
     def test_approve_payment_details(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION], self.afghanistan, self.program
