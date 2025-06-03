@@ -706,6 +706,14 @@ class Household(
         blank=True, null=True, help_text="Household flex registrations record [sys]"
     )
 
+    extra_rdis = models.ManyToManyField(to="registration_data.RegistrationDataImport", blank=True,
+                                        related_name="extra_hh_rdis",
+                                        help_text="This relation is filed when collision of Household happens.")
+    identification_key = models.CharField(null=True, blank=True, max_length=255,
+                                          help_text="Key used to identify Collisions in the system")
+    collision_flag = models.BooleanField(default=False,
+                                         help_text="Flag used to identify if the household is in collision state")
+
     class Meta:
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
