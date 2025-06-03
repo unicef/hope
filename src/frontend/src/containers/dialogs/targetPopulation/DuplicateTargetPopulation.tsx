@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { ReactElement } from 'react';
 import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
 
@@ -89,7 +90,7 @@ export const DuplicateTargetPopulation = ({
         onSubmit={async (values) => {
           try {
             const programCycleId = values.programCycleId.value;
-            const res = await mutate({
+            const res = (await mutate({
               id: targetPopulationId,
               businessAreaSlug: businessArea,
               programSlug: programId,
@@ -98,10 +99,10 @@ export const DuplicateTargetPopulation = ({
                 targetPopulationId,
                 programCycleId,
               },
-            });
+            })) as unknown as TargetPopulationDetail;
             setOpen(false);
             showMessage(t('Target Population Duplicated'));
-            navigate(`/${baseUrl}/target-population/${res.targetPopulationId}`);
+            navigate(`/${baseUrl}/target-population/${res.id}`);
           } catch (e) {
             showMessage(e.message);
           }
