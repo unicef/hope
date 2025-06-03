@@ -50,7 +50,6 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-
     def execute(self, registration_data_import_id: str) -> None:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -63,12 +62,18 @@ class RdiMergeTask:
             household_ids_from_extra_rdis = Household.extra_rdis.through.objects.filter(
                 registrationdataimport=obj_hct
             ).values_list("household_id", flat=True)
-            household_ids_from_extra_rdis = PendingHousehold.objects.filter(
-                id__in=household_ids_from_extra_rdis, rdi_merge_status=PendingHousehold.PENDING
-            ).values_list("id", flat=True)
-            individuals_from_extra_rdis = PendingIndividual.objects.filter(
-                household__in=household_ids_from_extra_rdis, rdi_merge_status=PendingIndividual.PENDING
-            ).values_list("id", flat=True)
+            household_ids_from_extra_rdis = list(
+                PendingHousehold.objects.filter(
+                    id__in=household_ids_from_extra_rdis, rdi_merge_status=PendingHousehold.PENDING
+                ).values_list("id", flat=True)
+            )
+            individuals_from_extra_rdis = list(
+                PendingIndividual.objects.filter(
+                    household__in=household_ids_from_extra_rdis, rdi_merge_status=PendingIndividual.PENDING
+                ).values_list("id", flat=True)
+            )
+            individual_ids.extend(individuals_from_extra_rdis)
+            household_ids.extend(household_ids_from_extra_rdis)
             try:
                 with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
@@ -120,6 +125,9 @@ class RdiMergeTask:
                     )
                     PendingIndividual.objects.filter(id__in=individual_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    self._update_rdi_id_for_extra_rdi(
+                        obj_hct.id, household_ids_from_extra_rdis, individuals_from_extra_rdis
                     )
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
@@ -192,7 +200,6 @@ class RdiMergeTask:
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
                     obj_hct.update_duplicates_against_population_statistics()
-
                     # create household and individual collections - only for Program Population Import
                     if obj_hct.data_source == RegistrationDataImport.PROGRAM_POPULATION:
                         self._update_household_collections(households, obj_hct)
@@ -286,3 +293,26 @@ class RdiMergeTask:
                     individuals_to_update.append(individual_from_collection)
                     individuals_to_update.append(individual)
         Individual.all_objects.bulk_update(individuals_to_update, ["individual_collection"])
+
+    def _update_rdi_id_for_extra_rdi(
+        self, rdi_id: str, household_ids_from_extra_rdis: list, individuals_from_extra_rdis: list
+    ) -> None:
+        """
+        This function replace registration_data_import_id for households that were created from extra RDI.
+        (if rdi with extra_rdi_was the one merged as first)
+        """
+        old_rdi_ids = Household.all_objects.filter(id__in=household_ids_from_extra_rdis).values_list(
+            "id", "registration_data_import_id"
+        )
+        extra_rdis_to_create = []
+        for household_id, old_rdi_id in old_rdi_ids:
+            extra_rdis_to_create.append(
+                Household.extra_rdis.through(household_id=household_id, registrationdataimport_id=old_rdi_id)
+            )
+        Household.extra_rdis.through.objects.bulk_create(extra_rdis_to_create)
+        Household.all_objects.filter(id__in=household_ids_from_extra_rdis).update(registration_data_import_id=rdi_id)
+        Individual.all_objects.filter(id__in=individuals_from_extra_rdis).update(registration_data_import_id=rdi_id)
+
+        Household.extra_rdis.through.filter(
+            registrationdataimport_id=rdi_id, household_id__in=household_ids_from_extra_rdis
+        ).delete()

@@ -685,7 +685,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create.detail_id = row[0].row
                 obj_to_create.business_area = rdi.business_area
                 if sheet_title == "households":
-                    if not self.check_collision(identification_key):  # Dont create household if collision
+                    if not self._check_collision(identification_key):  # Dont create household if collision
                         self.households[household_id] = obj_to_create
                     else:
                         self.households_to_ignore.append(
