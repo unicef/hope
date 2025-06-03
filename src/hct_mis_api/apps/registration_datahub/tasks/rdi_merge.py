@@ -50,100 +50,6 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-    HOUSEHOLD_FIELDS = (
-        "consent_sign",
-        "consent",
-        "consent_sharing",
-        "residence_status",
-        "country_origin",
-        "zip_code",
-        "size",
-        "address",
-        "country",
-        "female_age_group_0_5_count",
-        "female_age_group_6_11_count",
-        "female_age_group_12_17_count",
-        "female_age_group_18_59_count",
-        "female_age_group_60_count",
-        "pregnant_count",
-        "male_age_group_0_5_count",
-        "male_age_group_6_11_count",
-        "male_age_group_12_17_count",
-        "male_age_group_18_59_count",
-        "male_age_group_60_count",
-        "female_age_group_0_5_disabled_count",
-        "female_age_group_6_11_disabled_count",
-        "female_age_group_12_17_disabled_count",
-        "female_age_group_18_59_disabled_count",
-        "female_age_group_60_disabled_count",
-        "male_age_group_0_5_disabled_count",
-        "male_age_group_6_11_disabled_count",
-        "male_age_group_12_17_disabled_count",
-        "male_age_group_18_59_disabled_count",
-        "male_age_group_60_disabled_count",
-        "other_sex_group_count",
-        "unknown_sex_group_count",
-        "first_registration_date",
-        "last_registration_date",
-        "flex_fields",
-        "start",
-        "deviceid",
-        "name_enumerator",
-        "org_enumerator",
-        "org_name_enumerator",
-        "village",
-        "registration_method",
-        "currency",
-        "unhcr_id",
-        "geopoint",
-        "returnee",
-        "fchild_hoh",
-        "child_hoh",
-        "detail_id",
-        "collect_type",
-    )
-
-    INDIVIDUAL_FIELDS = (
-        "id",
-        "photo",
-        "full_name",
-        "given_name",
-        "middle_name",
-        "family_name",
-        "relationship",
-        "sex",
-        "birth_date",
-        "estimated_birth_date",
-        "marital_status",
-        "phone_no",
-        "phone_no_alternative",
-        "email",
-        "disability",
-        "flex_fields",
-        "first_registration_date",
-        "last_registration_date",
-        "deduplication_batch_status",
-        "deduplication_batch_results",
-        "observed_disability",
-        "seeing_disability",
-        "hearing_disability",
-        "physical_disability",
-        "memory_disability",
-        "selfcare_disability",
-        "comms_disability",
-        "who_answers_phone",
-        "who_answers_alt_phone",
-        "pregnant",
-        "work_status",
-        "detail_id",
-        "disability_certificate_picture",
-        "preferred_language",
-        "age_at_registration",
-        "payment_delivery_phone_no",
-        "wallet_name",
-        "blockchain_name",
-        "wallet_address",
-    )
 
     def execute(self, registration_data_import_id: str) -> None:
         try:
@@ -154,6 +60,15 @@ class RdiMergeTask:
             )
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
+            household_ids_from_extra_rdis = Household.extra_rdis.through.objects.filter(
+                registrationdataimport=obj_hct
+            ).values_list("household_id", flat=True)
+            household_ids_from_extra_rdis = PendingHousehold.objects.filter(
+                id__in=household_ids_from_extra_rdis, rdi_merge_status=PendingHousehold.PENDING
+            ).values_list("id", flat=True)
+            individuals_from_extra_rdis = PendingIndividual.objects.filter(
+                household__in=household_ids_from_extra_rdis, rdi_merge_status=PendingIndividual.PENDING
+            ).values_list("id", flat=True)
             try:
                 with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
@@ -163,7 +78,7 @@ class RdiMergeTask:
                         f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
                     )
                     kobo_submissions = []
-                    for household in households:
+                    for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
                         kobo_submission_uuid = household.kobo_submission_uuid
                         kobo_asset_id = household.detail_id
                         kobo_submission_time = household.kobo_submission_time

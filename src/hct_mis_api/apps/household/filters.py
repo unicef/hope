@@ -444,7 +444,11 @@ class IndividualFilter(FilterSet):
             return qs
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import__pk=decode_id_string(value))
+        rdi_id = decode_id_string(value)
+        extra_households = Household.extra_rdis.through.objects.filter(registrationdataimport=rdi_id).values_list(
+            "household_id", flat=True)
+        return queryset.filter(
+            Q(registration_data_import__pk=rdi_id) | Q(household__id__in=extra_households)).distinct()
 
     def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
         if value is True:

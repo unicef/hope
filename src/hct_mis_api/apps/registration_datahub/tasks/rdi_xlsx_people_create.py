@@ -74,6 +74,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         collectors_to_create = []
         for index_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
+                if int(index_id) not in self.households:
+                    continue
                 collector.household_id = self.households.get(int(index_id)).pk
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
@@ -95,7 +97,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 header = header_cell.value
                 combined_fields = self.COMBINED_FIELDS
                 current_field = combined_fields.get(header, {})
-
+                if header == "identification_key_h_c":
+                    identification_key = cell.value
+                    obj_to_create.identification_key = identification_key
                 if not current_field and header not in complex_fields[sheet_title]:
                     continue
                 is_not_image = current_field.get("type") != "IMAGE"
