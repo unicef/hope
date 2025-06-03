@@ -24,14 +24,14 @@ from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import JSONBSet, decode_id_string_required
+from hct_mis_api.apps.core.utils import JSONBSet
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.admin.mixins import HouseholdWithDrawnMixin
 from hct_mis_api.apps.household.celery_tasks import (
     enroll_households_to_program_task,
     mass_withdraw_households_from_list_task,
 )
-from hct_mis_api.apps.household.forms import MassEnrollForm
+from hct_mis_api.apps.household.forms import MassEnrollForm, WithdrawHouseholdsForm
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -79,14 +79,6 @@ class HouseholdRepresentationInline(admin.TabularInline):
 
 class HouseholdWithdrawFromListMixin:
     @staticmethod
-    def get_program_from_encoded_id(program_id: str) -> Optional[Program]:
-        try:
-            decoded_program_id = decode_id_string_required(program_id)
-            return Program.objects.filter(id=decoded_program_id).first()
-        except Exception:
-            return None
-
-    @staticmethod
     def get_household_queryset_from_list(household_id_list: list, program: Program) -> QuerySet:
         return Household.objects.filter(
             unicef_id__in=household_id_list,
@@ -130,65 +122,57 @@ class HouseholdWithdrawFromListMixin:
 
     @staticmethod
     def get_and_set_context_data(request: HttpRequest, context: dict) -> None:
-        household_list = request.POST.get("household_list")
-        tag = request.POST.get("tag")
-        program_id = request.POST.get("program_id")
-        context["household_list"] = household_list
-        context["tag"] = tag
-        context["program_id"] = program_id
+        context["household_list"] = request.POST.get("household_list")
+        context["tag"] = request.POST.get("tag")
+        context["program"] = request.POST.get("program")
+        context["business_area"] = request.POST.get("business_area")
 
     def withdraw_households_from_list(self, request: HttpRequest) -> Optional[HttpResponse]:
+        step = request.POST.get("step", "0")
         context = self.get_common_context(request, title="Withdraw households from list")
-        if request.method == "POST":
-            step = request.POST.get("step")
-            if step == "1":
-                context["step"] = "2"
+
+        if step == "0":
+            context["form"] = WithdrawHouseholdsForm()
+            context["step"] = "0"
+            return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+
+        if step == "1":
+            business_area = request.POST.get("business_area")
+            request.session["business_area"] = business_area
+            context.update(
+                {
+                    "form": WithdrawHouseholdsForm(request.POST, business_area=business_area),
+                    "business_area": business_area,
+                    "step": "1",
+                }
+            )
+            return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+
+        business_area = request.session.get("business_area")
+        form = WithdrawHouseholdsForm(request.POST, business_area=business_area)
+        context["form"] = form
+
+        if form.is_valid():
+            household_id_list = [hh_id.strip() for hh_id in form.cleaned_data["household_list"].split(",")]
+            program = form.cleaned_data["program"]
+            tag = form.cleaned_data["tag"]
+
+            if step == "2":
+                context.update(
+                    {
+                        "step": "2",
+                        "household_count": self.get_household_queryset_from_list(household_id_list, program).count(),
+                    }
+                )
                 self.get_and_set_context_data(request, context)
                 return TemplateResponse(
-                    request,
-                    "admin/household/household/withdraw_households_from_list.html",
-                    context,
+                    request, "admin/household/household/withdraw_households_from_list.html", context
                 )
-            elif step == "2":
-                context["step"] = "2"
-                self.get_and_set_context_data(request, context)
-                household_id_list = self.split_list_of_ids(context["household_list"])
-                program = self.get_program_from_encoded_id(context["program_id"])
-                if not program:
-                    self.message_user(
-                        request,
-                        f"Program with ID '{context['program_id']}' not found.",
-                        level=messages.ERROR,
-                    )
-                    return HttpResponseRedirect(reverse("admin:household_household_changelist"))
 
-                context["household_count"] = self.get_household_queryset_from_list(
-                    household_id_list,
-                    program,
-                ).count()
-                return TemplateResponse(
-                    request,
-                    "admin/household/household/withdraw_households_from_list.html",
-                    context,
-                )
-            else:
-                household_list = request.POST.get("household_list", "")
-                tag = request.POST.get("tag", "")
-                program_id = request.POST.get("program_id", "")
-
-                program = self.get_program_from_encoded_id(program_id)
-                household_id_list = self.split_list_of_ids(household_list)
-                household_count = self.get_household_queryset_from_list(
-                    household_id_list,
-                    program,  # type: ignore
-                ).count()
-
-                mass_withdraw_households_from_list_task.delay(household_id_list, tag, program.id)  # type: ignore
-                self.message_user(request, f"{household_count} Households are being withdrawn.")
-
+            if step == "3":
+                mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))
+                self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
-
-        context["step"] = "1"
         return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
 
 
@@ -236,7 +220,7 @@ class HouseholdAdmin(
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
-    filter_horizontal = ("representatives", "programs")
+    filter_horizontal = ("representatives",)
     raw_id_fields = (
         "admin_area",
         "admin1",

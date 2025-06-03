@@ -10,6 +10,7 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ProgrammesFilterProps {
   filter;
@@ -19,7 +20,7 @@ interface ProgrammesFilterProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export function ProgrammesFilters({
+function ProgrammesFilters({
   filter,
   choicesData,
   setFilter,
@@ -177,3 +178,5 @@ export function ProgrammesFilters({
     </FiltersSection>
   );
 }
+
+export default withErrorBoundary(ProgrammesFilters, 'ProgrammesFilters');

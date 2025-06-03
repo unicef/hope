@@ -8576,6 +8576,40 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Gender group with other sex',
+                'labels': [
+                    {
+                        'label': 'Gender group with other sex',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'other_sex_group_count',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Gender group with unknown sex',
+                'labels': [
+                    {
+                        'label': 'Gender group with unknown sex',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'unknown_sex_group_count',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
                     {
                         'labelEn': 'Adult',
                         'labels': [

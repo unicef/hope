@@ -21,20 +21,19 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
     RealProgramFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
+    DeliveryMechanism,
     FinancialServiceProvider,
-    Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSupportingDocument,
@@ -45,6 +44,8 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
 )
+from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
+from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
 
 def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:
@@ -288,6 +289,28 @@ class TestPaymentPlanQueries(APITestCase):
       }
     """
 
+    PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY = """
+      query PaymentPlan($id: ID!) {
+        paymentPlan(id: $id) {
+          status
+          availableFundsCommitments {
+              fundsCommitmentNumber
+              fundsCommitmentItems {
+                  paymentPlan {
+                      name
+                  }
+                  fundsCommitmentItem
+                  recSerialNumber
+              }
+          }
+          fundsCommitments {
+              fundsCommitmentNumber
+              insufficientAmount
+          }
+        }
+      }
+    """
+
     PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA = """
     query PaymentPlan($id: ID!) {
       paymentPlan(id: $id) {
@@ -306,6 +329,7 @@ class TestPaymentPlanQueries(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        generate_delivery_mechanisms()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
@@ -315,12 +339,17 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         with freeze_time("2020-10-10"):
+            cls.cash_dm = DeliveryMechanism.objects.get(code="cash")
             program = RealProgramFactory(
                 name="Test All PP QS",
                 cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
                 cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
             )
             cls.program_cycle = program.cycles.first()
+            cls.financial_service_provider = FinancialServiceProviderFactory(
+                communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+                payment_gateway_id="test123",
+            )
             cls.pp = PaymentPlanFactory(
                 name="Main Payment Plan",
                 program_cycle=cls.program_cycle,
@@ -329,12 +358,13 @@ class TestPaymentPlanQueries(APITestCase):
                 is_follow_up=False,
                 created_by=cls.user,
                 currency="PLN",
+                delivery_mechanism=cls.cash_dm,
+                financial_service_provider=cls.financial_service_provider,
+                exchange_rate=2.0,
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
-            cash_dm = DeliveryMechanismFactory(code="cash", is_active=True)
-            referral_dm = DeliveryMechanismFactory(code="referral", is_active=True)
-            DeliveryMechanismPerPaymentPlanFactory(payment_plan=cls.pp, delivery_mechanism=cash_dm)
+            referral_dm = DeliveryMechanism.objects.get(code="referral")
             PaymentVerificationSummaryFactory(payment_plan=cls.pp, status="ACTIVE")
 
             hoh1 = IndividualFactory(household=None)
@@ -365,7 +395,6 @@ class TestPaymentPlanQueries(APITestCase):
                 currency="PLN",
                 fsp_auth_code=None,
             )
-
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(
                 name="PaymentPlan with conflicts",
@@ -375,6 +404,9 @@ class TestPaymentPlanQueries(APITestCase):
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
                 created_by=cls.user,
                 currency="UAH",
+                delivery_mechanism=referral_dm,
+                financial_service_provider=cls.financial_service_provider,
+                exchange_rate=2.0,
             )
             cls.pp_conflicted.unicef_id = "PP-02"
             cls.pp_conflicted.save()
@@ -432,14 +464,6 @@ class TestPaymentPlanQueries(APITestCase):
                     size=10,
                     content_type="image/jpeg",
                 ),
-            )
-            DeliveryMechanismPerPaymentPlanFactory(
-                payment_plan=cls.pp_conflicted,
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-                financial_service_provider__payment_gateway_id="test123",
-                created_by=cls.user,
-                sent_by=cls.user,
-                delivery_mechanism=referral_dm,
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
@@ -989,6 +1013,10 @@ class TestPaymentPlanQueries(APITestCase):
         user = UserFactory.create(username="abc")
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
+        fsp = FinancialServiceProviderFactory(
+            communication_channel=communication_channel,
+            payment_gateway_id="1243",
+        )
         payment_plan = PaymentPlanFactory(
             name="Test Finished PP",
             status=PaymentPlan.Status.FINISHED,
@@ -998,25 +1026,8 @@ class TestPaymentPlanQueries(APITestCase):
             is_follow_up=False,
             created_by=user,
             currency="PLN",
-        )
-        dm_pp = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=payment_plan,
-            financial_service_provider__communication_channel=communication_channel,
-            financial_service_provider__payment_gateway_id="1243",
-            created_by=user,
-            sent_by=user,
-        )
-        PaymentFactory(
-            parent=payment_plan,
-            status=Payment.STATUS_SENT_TO_FSP,
-            conflicted=True,
-            entitlement_quantity=00.00,
-            entitlement_quantity_usd=00.00,
-            delivered_quantity=00.00,
-            delivered_quantity_usd=00.00,
-            financial_service_provider=dm_pp.financial_service_provider,
-            currency="PLN",
-            fsp_auth_code="987",
+            financial_service_provider=fsp,
+            delivery_mechanism=self.cash_dm,
         )
 
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
@@ -1062,4 +1073,187 @@ class TestPaymentPlanQueries(APITestCase):
             request_string=self.PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA,
             context={"user": self.user},
             variables={"businessArea": "afghanistan", "id": encode_id_base64(payment_plan.id, "PaymentPlan")},
+        )
+
+    @freeze_time("2020-10-10")
+    def test_payment_plan_funds_commitments(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            name="FC TEST",
+            status=PaymentPlan.Status.IN_REVIEW,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            created_by=self.user,
+            currency="PLN",
+            total_entitled_quantity=200,
+            total_entitled_quantity_usd=100,
+        )
+
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+
+        # 1
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="123",
+            funds_commitment_item="001",
+            rec_serial_number="0001",
+            commitment_amount_local=50,
+            commitment_amount_usd=50,
+            currency_code="PLN",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="123",
+            funds_commitment_item="002",
+            rec_serial_number="0002",
+            commitment_amount_local=160,
+            commitment_amount_usd=50,
+            currency_code="PLN",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="345",
+            funds_commitment_item="001",
+            rec_serial_number="0003",
+            commitment_amount_local=50,
+            commitment_amount_usd=50,
+            currency_code="UYU",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="345",
+            funds_commitment_item="002",
+            rec_serial_number="0004",
+            commitment_amount_local=50,
+            commitment_amount_usd=50,
+            currency_code="UYU",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="678",
+            funds_commitment_item="001",
+            rec_serial_number="0005",
+            commitment_amount_local=50,
+            commitment_amount_usd=30,
+            currency_code="UYU",
+        )
+        FundsCommitmentFactory(
+            business_area=self.business_area.code,
+            funds_commitment_number="678",
+            funds_commitment_item="002",
+            rec_serial_number="0006",
+            commitment_amount_local=50,
+            commitment_amount_usd=80,
+            currency_code="PLN",
+        )
+
+        # 2
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        fc1 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="123", funds_commitment_item="001"
+        )
+        fc1.payment_plan = payment_plan
+        fc1.save()
+        # 3 insufficientAmount True, local
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        fc2 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="123", funds_commitment_item="002"
+        )
+        fc2.payment_plan = payment_plan
+        fc2.save()
+        # 4 insufficientAmount False, local
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        payment_plan2 = PaymentPlanFactory(
+            name="FC TEST2",
+            status=PaymentPlan.Status.IN_REVIEW,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            created_by=self.user,
+            currency="PLN",
+            total_entitled_quantity=200,
+            total_entitled_quantity_usd=100,
+        )
+        encoded_payment_plan_id = encode_id_base64(payment_plan2.id, "PaymentPlan")
+
+        fc3 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="345", funds_commitment_item="001"
+        )
+        fc3.payment_plan = payment_plan2
+        fc3.save()
+        # 5 insufficientAmount True, currency not match -> usd
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        fc4 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="345", funds_commitment_item="002"
+        )
+        fc4.payment_plan = payment_plan2
+        fc4.save()
+        # 6 insufficientAmount False, currency not match -> usd
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        payment_plan3 = PaymentPlanFactory(
+            name="FC TEST3",
+            status=PaymentPlan.Status.IN_REVIEW,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            created_by=self.user,
+            currency="PLN",
+            total_entitled_quantity=200,
+            total_entitled_quantity_usd=100,
+        )
+        encoded_payment_plan_id = encode_id_base64(payment_plan3.id, "PaymentPlan")
+
+        fc5 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="678", funds_commitment_item="001"
+        )
+        fc5.payment_plan = payment_plan3
+        fc5.save()
+        # 7 insufficientAmount True, more than 1 currency -> usd
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+        fc6 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="678", funds_commitment_item="002"
+        )
+        fc6.payment_plan = payment_plan3
+        fc6.save()
+        # insufficientAmount False, more than 1 currency -> usd
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_FUNDS_COMMITMENTS_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
         )

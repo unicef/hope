@@ -135,7 +135,6 @@ export const fakeGrievanceTicket = {
     photo: null,
     workStatus: 'NOT_PROVIDED',
     enrolledInNutritionProgramme: null,
-    administrationOfRutf: null,
     headingHousehold: {
       id: 'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
       headOfHousehold: {

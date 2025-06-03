@@ -4,10 +4,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     DeliveryMechanism,
     FinancialInstitution,
     FinancialInstitutionMapping,
@@ -74,9 +75,9 @@ class TestMigrateAccountServiceProviderCodes(TestCase):
             },
         ]:
             collector = IndividualFactory(household=None, registration_data_import=cls.nigeria_uba_rdi)
-            DeliveryMechanismDataFactory(
+            AccountFactory(
                 individual=collector,
-                delivery_mechanism=cls.dm_transfer_to_account,
+                account_type=AccountType.objects.get(key="bank"),
                 data={
                     "bank_account_number__transfer_to_account": "123",
                     "bank_name__transfer_to_account": mapping["uba_institution_name"],  # type: ignore
@@ -101,9 +102,9 @@ class TestMigrateAccountServiceProviderCodes(TestCase):
             },
         ]:
             collector = IndividualFactory(household=None, registration_data_import=cls.nigeria_uba_rdi)
-            DeliveryMechanismDataFactory(
+            AccountFactory(
                 individual=collector,
-                delivery_mechanism=cls.dm_transfer_to_account,
+                account_type=AccountType.objects.get(key="bank"),
                 data={
                     "bank_account_number__transfer_to_account": "123",
                     "bank_name__transfer_to_account": mapping["uba_institution_name"],

@@ -63,4 +63,4 @@ def extract(records_ids: Iterable[int], raise_exception: bool = False) -> Any:
         except Exception as e:
             if raise_exception:
                 raise
-            logger.exception(e)
+            logger.warning(e)

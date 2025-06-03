@@ -11,8 +11,15 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+    generate_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     PaymentPlan,
 )
@@ -29,6 +36,13 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.user = UserFactory()
+        generate_delivery_mechanisms()
+        cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
+        cls.fsp = FinancialServiceProviderFactory(
+            name="Test FSP 1",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            vision_vendor_number=123456789,
+        )
 
     def test_get_column_value_registration_token_empty(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -40,7 +54,14 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             created_by=self.user,
         )
         DocumentTypeFactory(key="registration_token")
-        payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            collector=individual,
+            currency="PLN",
+            financial_service_provider=self.fsp,
+            delivery_type=self.dm_cash,
+        )
         create_payment_plan_snapshot_data(payment_plan)
 
         result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, "registration_token")
@@ -71,7 +92,14 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             business_area=self.business_area,
             created_by=self.user,
         )
-        payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=household,
+            collector=individual,
+            currency="PLN",
+            financial_service_provider=self.fsp,
+            delivery_type=self.dm_cash,
+        )
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
         document_type = DocumentTypeFactory(key="registration_token")
         document = DocumentFactory(individual=primary, type=document_type)

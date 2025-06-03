@@ -4,7 +4,7 @@ from django.db import transaction
 
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.payment.models import (
-    DeliveryMechanismData,
+    Account,
     FinancialInstitution,
     FinancialInstitutionMapping,
     FinancialServiceProvider,
@@ -2600,8 +2600,8 @@ def migrate_account_service_provider_codes() -> None:
         business_area__slug="nigeria", data_source="Flex Registration"
     )
     for rdi in nigeria_uba_rdis:
-        for ind in rdi.individuals.filter(delivery_mechanisms_data__isnull=False):
-            for account in ind.delivery_mechanisms_data.all():
+        for ind in rdi.individuals.filter(accounts__isnull=False):
+            for account in ind.accounts.all():
                 ubabank_code = account.data.get("bank_code__transfer_to_account")
                 bank_name = account.data.get("bank_name__transfer_to_account")
 
@@ -2639,8 +2639,8 @@ def migrate_account_service_provider_codes() -> None:
     accounts_to_update = []
     nigeria_eco_rdis = RegistrationDataImport.objects.filter(business_area__slug="nigeria", data_source="Excel")
     for rdi in nigeria_eco_rdis:
-        for ind in rdi.individuals.filter(delivery_mechanisms_data__isnull=False):
-            for account in ind.delivery_mechanisms_data.all():
+        for ind in rdi.individuals.filter(accounts__isnull=False):
+            for account in ind.accounts.all():
                 data = account.data
                 ecobank_code = data.get("bank_code__transfer_to_account")
                 data["bank_code_eco__transfer_to_account"] = ecobank_code
@@ -2692,7 +2692,7 @@ def migrate_account_service_provider_codes() -> None:
                         print(f"No HOPE mapping for eco_bank_code: {ecobank_code} [{bank_name}]")
 
     if accounts_to_update:
-        DeliveryMechanismData.objects.bulk_update(accounts_to_update, ["data"])
+        Account.objects.bulk_update(accounts_to_update, ["data"])
         print(f"Updated {len(accounts_to_update)} ECO BANK accounts \n\n")
 
     print(f"Used {len(used_hope_mappings)} HOPE mappings: {used_hope_mappings} \n\n")

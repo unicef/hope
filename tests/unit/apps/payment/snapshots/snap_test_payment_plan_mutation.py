@@ -7,6 +7,97 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestPaymentPlanMutation::test_assign_funds_commitments_mutation 1'] = {
+    'data': {
+        'assignFundsCommitments': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'assignFundsCommitments'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanMutation::test_assign_funds_commitments_mutation 2'] = {
+    'data': {
+        'assignFundsCommitments': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Payment plan must be in review',
+            'path': [
+                'assignFundsCommitments'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanMutation::test_assign_funds_commitments_mutation 3'] = {
+    'data': {
+        'assignFundsCommitments': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Chosen Funds Commitments are already assigned to different Payment Plan',
+            'path': [
+                'assignFundsCommitments'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanMutation::test_assign_funds_commitments_mutation 4'] = {
+    'data': {
+        'assignFundsCommitments': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Chosen Funds Commitments have wrong Business Area',
+            'path': [
+                'assignFundsCommitments'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanMutation::test_assign_funds_commitments_mutation 5'] = {
+    'data': {
+        'assignFundsCommitments': {
+            'paymentPlan': {
+                'name': 'FCTP1',
+                'status': 'IN_REVIEW'
+            }
+        }
+    }
+}
+
 snapshots['TestPaymentPlanMutation::test_copy_target_criteria_mutation_0_without_permission 1'] = {
     'data': {
         'copyTargetingCriteria': None
