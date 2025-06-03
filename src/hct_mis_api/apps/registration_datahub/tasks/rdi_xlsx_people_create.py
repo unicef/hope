@@ -181,10 +181,15 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         obj_to_create.detail_id = row[0].row
         obj_to_create.business_area = registration_data_import.business_area
         if sheet_title == "households":
-            obj_to_create.set_admin_areas()
-            obj_to_create.save()
-            self.households[self.index_id] = obj_to_create
+            if not self._check_collision(identification_key):  # Dont create household if collision
+                obj_to_create.set_admin_areas()
+                obj_to_create.save()
+                self.households[self.index_id] = obj_to_create
+            else:
+                self.households_to_ignore.append(self.index_id)
         else:
+            if self.index_id in self.households_to_ignore:
+                return
             obj_to_create = self._validate_birth_date(obj_to_create)
             obj_to_create.age_at_registration = calculate_age_at_registration(
                 registration_data_import.created_at, str(obj_to_create.birth_date)
@@ -286,6 +291,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_collectors()
         self._create_bank_accounts_infos()
         self._create_accounts()
+        print("*" * 50)
+        print("self.colided_households_pks", self.colided_households_pks)
+        self.registration_data_import.extra_hh_rdis.add(*self.colided_households_pks)
 
     @transaction.atomic()
     def execute(
