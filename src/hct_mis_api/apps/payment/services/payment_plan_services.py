@@ -699,10 +699,11 @@ class PaymentPlanService:
         self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
         self.payment_plan.save(update_fields=["exchange_rate"])
         payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
-
+        split = self.payment_plan.splits.first()
         follow_up_payments = [
             Payment(
                 parent=self.payment_plan,
+                parent_split=split,
                 source_payment=payment,
                 program_id=self.payment_plan.program_cycle.program_id,
                 is_follow_up=True,
