@@ -723,6 +723,48 @@ class TestGrievanceTicketUpdate:
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json()["status"] == 4
 
+    def test_grievance_status_change_invalid_status(self, create_user_role_with_permissions: Any) -> None:
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grv_2.pk)},
+        )
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_SET_ON_HOLD, Permissions.GRIEVANCES_UPDATE],
+            self.afghanistan,
+            self.program,
+        )
+        response = self.api_client.post(url, {"status": 22}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "New status is incorrect" in response.json()
+
+    def test_grievance_status_change_other_statuses(self, create_user_role_with_permissions: Any) -> None:
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grv_2.pk)},
+        )
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_SET_ON_HOLD,
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_SEND_BACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            ],
+            self.afghanistan,
+            self.program,
+        )
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_FOR_APPROVAL}, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_IN_PROGRESS}, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+
+        self.api_client.post(url, {"status": GrievanceTicket.STATUS_FOR_APPROVAL}, format="json")
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in response.json()
+
     def test_grievance_status_change_validation_error(self, create_user_role_with_permissions: Any) -> None:
         grv = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
@@ -1066,7 +1108,7 @@ class TestGrievanceTicketApprove:
                     {"value": self.national_id.id, "approve_status": False},
                     {"value": self.birth_certificate.id, "approve_status": False},
                 ],
-                "flex_fields": {},
+                "flex_fields": {"flex_aaa": {"approve_status": True}},
             },
         )
 
@@ -1124,7 +1166,7 @@ class TestGrievanceTicketApprove:
             "approved_payment_channels_to_create": [],
             "approved_payment_channels_to_edit": [],
             "approved_payment_channels_to_remove": [],
-            "flex_fields_approve_data": {},
+            "flex_fields_approve_data": {"flex_aaa": False},
         }
         response = self.api_client.post(
             reverse(
@@ -1208,6 +1250,50 @@ class TestGrievanceTicketApprove:
         assert "id" in resp_data
         details.refresh_from_db()
         assert details.approve_status is True
+
+    def test_approve_delete_household_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.afghanistan, self.program
+        )
+        grievance_ticket = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
+            admin2=self.area_1,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        grievance_ticket.programs.set([self.program])
+        TicketDeleteHouseholdDetailsFactory(
+            ticket=grievance_ticket,
+            household=self.household_one,
+            approve_status=False,
+        )
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-delete-household",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
+            ),
+            {"approve_status": True, "reason_hh_id": self.household_one.unicef_id, "version": grievance_ticket.version},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            f"The provided household {self.household_one.unicef_id} is the same as the one being withdrawn."
+            in response.json()
+        )
+
+        self.household_one.withdrawn = True
+        self.household_one.save()
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-delete-household",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
+            ),
+            {"approve_status": True, "reason_hh_id": self.household_one.unicef_id, "version": grievance_ticket.version},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert f"The provided household {self.household_one.unicef_id} has to be active." in response.json()
 
     def test_approve_needs_adjudication(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1417,7 +1503,7 @@ class TestGrievanceTicketApprove:
                 "household_id": str(household.id),
                 "individual_id": str(individual_1.id),
                 "new_individual_id": str(individual_2.id),
-                "role": ROLE_PRIMARY,
+                "role": "HEAD",
                 "version": grievance_ticket.version,
             },
             format="json",
