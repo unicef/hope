@@ -370,20 +370,17 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
 
 def check_creator_or_owner_permission(
     user: Union["User", "AnonymousUser", "AbstractBaseUser"],
-    general_permission: Union[str, Permissions],
+    general_permission: str,
     is_creator: bool,
-    creator_permission: Union[str, Permissions],
+    creator_permission: str,
     is_owner: bool,
-    owner_permission: Union[str, Permissions],
+    owner_permission: str,
     business_area: "BusinessArea",
     program: Optional["Program"],
 ) -> None:
     scope = program or business_area
     if not user.is_authenticated or not (
-        check_permissions(
-            user, [general_permission], business_area=business_area, program=program.slug if program else None  # type: ignore
-        )
-        # TODO: does it okay? user.has_perm()
+        user.has_perm(general_permission, scope)
         or (is_creator and user.has_perm(creator_permission, scope))
         or (is_owner and user.has_perm(owner_permission, scope))
     ):

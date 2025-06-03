@@ -55,93 +55,15 @@ class GrievancePermissionsMixin:
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
                 Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
             ],
-            "partial_update": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "status_change": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "create_note": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "approve_individual_data_change": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "approve_household_data_change": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "approve_status_update": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "approve_delete_household": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "approve_needs_adjudication": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "approve_payment_details": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
-            "reassign_role": [
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
-                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
-            ],
         }
+        filters = Q()
         action = self.action
+        if action not in permissions_map:
+            return filters
+
         sensitive_category_filter = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
         created_by_filter = {"created_by": self.request.user}
         assigned_to_filter = {"assigned_to": self.request.user}
-
-        filters = Q()
 
         # program-nested viewset
         if hasattr(self, "program"):
