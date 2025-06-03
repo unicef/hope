@@ -7,7 +7,7 @@ def migrate_bank_account_info() -> None:
         key="bank", defaults=dict(label="Bank", unique_fields=["number"])
     )
     # Chunk size
-    CHUNK_SIZE = 1000
+    CHUNK_SIZE = 10000
 
     # Get the distinct bank account IDs in a memory-safe way
     def yield_bank_account_id_chunks():  # type: ignore
