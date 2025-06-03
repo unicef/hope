@@ -301,6 +301,8 @@ class RdiMergeTask:
         This function replace registration_data_import_id for households that were created from extra RDI.
         (if rdi with extra_rdi_was the one merged as first)
         """
+        if not household_ids_from_extra_rdis:
+            return
         old_rdi_ids = Household.all_objects.filter(id__in=household_ids_from_extra_rdis).values_list(
             "id", "registration_data_import_id"
         )
@@ -313,6 +315,6 @@ class RdiMergeTask:
         Household.all_objects.filter(id__in=household_ids_from_extra_rdis).update(registration_data_import_id=rdi_id)
         Individual.all_objects.filter(id__in=individuals_from_extra_rdis).update(registration_data_import_id=rdi_id)
 
-        Household.extra_rdis.through.filter(
+        Household.extra_rdis.through.objects.filter(
             registrationdataimport_id=rdi_id, household_id__in=household_ids_from_extra_rdis
         ).delete()
