@@ -39,7 +39,6 @@ export { CountryOriginEnum as CountryOriginEnumCamelCase } from './models/Countr
 export { CurrenciesEnum as CurrenciesEnumCamelCase } from './models/CurrenciesEnum';
 export { CurrencyEnum as CurrencyEnumCamelCase } from './models/CurrencyEnum';
 export type { DataCollectingType as DataCollectingTypeCamelCase } from './models/DataCollectingType';
-export { DataCollectingTypeEnum as DataCollectingTypeEnumCamelCase } from './models/DataCollectingTypeEnum';
 export { DataSourceEnum as DataSourceEnumCamelCase } from './models/DataSourceEnum';
 export { DeduplicationBatchStatusEnum as DeduplicationBatchStatusEnumCamelCase } from './models/DeduplicationBatchStatusEnum';
 export type { DeduplicationEngineSimilarityPairIndividual as DeduplicationEngineSimilarityPairIndividualCamelCase } from './models/DeduplicationEngineSimilarityPairIndividual';

@@ -5,7 +5,6 @@ import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
-import { DataCollectingTypeEnum } from '@restgenerated/models/DataCollectingTypeEnum';
 
 const customRender = (
   ui: ReactElement,
@@ -66,7 +65,7 @@ export const fakeContextProgram = {
       individualFiltersAvailable: true,
       label: 'data collecting type',
       code: '123',
-      type: DataCollectingTypeEnum.STANDARD,
+      type: 'STANDARD',
       children: null,
     },
     beneficiaryGroup: {

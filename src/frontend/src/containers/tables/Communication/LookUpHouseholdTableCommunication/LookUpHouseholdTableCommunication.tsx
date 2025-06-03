@@ -1,7 +1,6 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells } from '@utils/utils';
@@ -13,11 +12,13 @@ import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { HouseholdList } from '@restgenerated/models/HouseholdList';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
   filter;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
   setFieldValue;
   selectedHousehold?;
   setSelectedIndividual?;
@@ -177,7 +178,7 @@ function LookUpHouseholdTableCommunication({
 
   const renderTable = (): ReactElement => (
     <UniversalRestTable
-      renderRow={(row) => (
+      renderRow={(row: HouseholdList) => (
         <LookUpHouseholdTableRowCommunication
           key={(row as any).id}
           household={row}

@@ -1,23 +1,23 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { TableWrapper } from '@core/TableWrapper';
-import { IndividualRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { IndividualList } from '@restgenerated/models/IndividualList';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
+import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells, decodeIdString } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
-import { createApiParams } from '@utils/apiUtils';
 import styled from 'styled-components';
 import {
   headCellsSocialProgram,
   headCellsStandardProgram,
 } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
-import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -95,7 +95,7 @@ export function LookUpIndividualTable({
       programId: isAllPrograms ? filter.program : programId,
       isActiveProgram: filter.programState === 'active' ? true : null,
       withdrawn: false,
-      rdiMergeStatus: IndividualRdiMergeStatus.Merged,
+      rdiMergeStatus: RdiMergeStatusEnum.MERGED,
     }),
     [
       filter.ageMin,

@@ -1,17 +1,17 @@
-import { Box, Button, Grid2 as Grid } from '@mui/material';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { partnerAccessChoices } from '@components/programs/constants';
+import { ButtonTooltip } from '@core/ButtonTooltip';
+import { DividerLine } from '@core/DividerLine';
+import { AllAreasTreeQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
+import { Box, Button, Grid2 as Grid } from '@mui/material';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Field, FieldArray } from 'formik';
 import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { AllAreasTreeQuery, ProgramPartnerAccess } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ButtonTooltip } from '@core/ButtonTooltip';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { DividerLine } from '@core/DividerLine';
-import { partnerAccessChoices } from '@components/programs/constants';
-import { LoadingButton } from '@components/core/LoadingButton';
 
 interface PartnersStepProps {
   values;
@@ -41,7 +41,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
 
   useEffect(() => {
     if (
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess &&
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS' &&
       values.partners.length === 0
     ) {
       setFieldValue('partners', [
@@ -53,7 +53,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
     }
 
     if (
-      values.partnerAccess !== ProgramPartnerAccess.SelectedPartnersAccess &&
+      values.partnerAccess !== 'SELECTED_PARTNERS_ACCESS' &&
       values.partners.length > 0
     ) {
       setFieldValue('partners', []);
@@ -88,7 +88,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
           />
         </Grid>
       </Box>
-      {values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess && (
+      {values.partnerAccess === 'SELECTED_PARTNERS_ACCESS' && (
         <>
           <DividerLine />
           <FieldArray

@@ -5,15 +5,15 @@ import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopu
 import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
-import { useBusinessAreaDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   getTargetingCriteriaVariables,
   HhIndIdValidation,
@@ -69,8 +69,12 @@ const CreateTargetPopulationPage = (): ReactElement => {
   const permissions = usePermissions();
   const navigate = useNavigate();
 
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({
+        slug: businessArea,
+      }),
   });
 
   if (permissions === null) return null;
@@ -78,7 +82,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
 
-  const screenBeneficiary = businessAreaData?.businessArea?.screenBeneficiary;
+  const screenBeneficiary = businessAreaData?.screenBeneficiary;
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Targeting Name is required'))

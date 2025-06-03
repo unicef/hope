@@ -14,34 +14,48 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { getPercentage } from '@utils/utils';
-import { useFinishPaymentVerificationPlanMutation } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { useProgramContext } from '../../programContext';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
+  cashOrPaymentPlanId: string;
 }
 
 export function FinishVerificationPlan({
   verificationPlan,
+  cashOrPaymentPlanId,
 }: FinishVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const [mutate] = useFinishPaymentVerificationPlanMutation();
+  const { businessArea, programId: programSlug } = useBaseUrl();
+
+  const finishVerificationPlanMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsFinishVerificationPlanCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          verificationPlanId: verificationPlan.id,
+        },
+      ),
+  });
 
   const finish = async (): Promise<void> => {
     try {
-      await mutate({
-        variables: { paymentVerificationPlanId: verificationPlan.id },
-        refetchQueries: ['AllPaymentVerifications'],
-        awaitRefetchQueries: true,
-      });
+      await finishVerificationPlanMutation.mutateAsync();
       setFinishDialogOpen(false);
       showMessage(t('Verification plan has been finished'));
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+
+      // TODO: Implement proper React Query cache invalidation if needed
+    } catch (error) {
+      showMessage(error?.message || t('Error while submitting'));
     }
   };
 
