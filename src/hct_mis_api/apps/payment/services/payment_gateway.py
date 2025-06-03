@@ -446,7 +446,7 @@ class PaymentGatewayService:
 
         if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                payments = list(split.split_payment_items.order_by("unicef_id"))
+                payments = list(split.split_payment_items.eligible().order_by("unicef_id"))
                 _add_records(payments, split)
 
     def sync_fsps(self) -> None:
@@ -569,9 +569,11 @@ class PaymentGatewayService:
             if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
                 payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
                 for instruction in payment_instructions:
-                    pending_payments = instruction.split_payment_items.filter(
-                        status__in=self.PENDING_UPDATE_PAYMENT_STATUSES
-                    ).order_by("unicef_id")
+                    pending_payments = (
+                        instruction.split_payment_items.eligible()
+                        .filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES)
+                        .order_by("unicef_id")
+                    )
                     if pending_payments.exists():
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         for payment in pending_payments:
@@ -603,7 +605,7 @@ class PaymentGatewayService:
         payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
 
         for instruction in payment_instructions:
-            payments = instruction.split_payment_items.all().order_by("unicef_id")
+            payments = instruction.split_payment_items.eligible().all().order_by("unicef_id")
             pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
             for payment in payments:
                 self.update_payment(payment, pg_payment_records, instruction, payment_plan, exchange_rate)

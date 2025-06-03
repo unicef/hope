@@ -47,11 +47,18 @@ def migrate_bank_account_info() -> None:
     for id_chunk in yield_bank_account_id_chunks():  # type: ignore
         chunk_count += 1
         print(f"Chunk {chunk_count}")
-        for bai in BankAccountInfo.all_objects.filter(id__in=id_chunk).iterator(chunk_size=CHUNK_SIZE):
-            dmd, _ = Account.objects.get_or_create(
+        for bai in (
+            BankAccountInfo.all_objects.filter(id__in=id_chunk)
+            .select_related("individual")
+            .iterator(chunk_size=CHUNK_SIZE)
+        ):
+            dmd, _ = Account.all_objects.get_or_create(
                 individual_id=bai.individual_id,
                 account_type=bank_account_type,
                 number=bai.bank_account_number or "",
+                defaults=dict(
+                    rdi_merge_status=bai.individual.rdi_merge_status,
+                ),
             )
             dmd.data.update(
                 dict(
