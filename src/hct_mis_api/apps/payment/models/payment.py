@@ -2205,3 +2205,29 @@ class PaymentPlanSupportingDocument(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class FinancialInstitution(TimeStampedModel):
+    class FinancialInstitutionType(models.TextChoices):
+        BANK = "bank", "Bank"
+        TELCO = "telco", "Telco"
+        OTHER = "other", "Other"
+
+    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return f"{self.id} {self.name}: {self.type}"  # pragma: no cover
+
+
+class FinancialInstitutionMapping(TimeStampedModel):
+    financial_service_provider = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE)
+    financial_institution = models.ForeignKey(FinancialInstitution, on_delete=models.CASCADE)
+    code = models.CharField(max_length=30)
+
+    class Meta:
+        unique_together = ("financial_service_provider", "financial_institution")
+
+    def __str__(self) -> str:
+        return f"{self.financial_institution} to {self.financial_service_provider}: {self.code}"
