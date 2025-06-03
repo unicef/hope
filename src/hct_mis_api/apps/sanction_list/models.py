@@ -5,9 +5,20 @@ from django.db import models
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
+class SanctionList(TimeStampedUUIDModel):
+    name = models.CharField(max_length=85)
+    description = models.CharField(max_length=256, blank=True, null=True)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
 class SanctionListIndividualQuerySet(models.QuerySet):
     def delete(self) -> Tuple[int, Dict[str, int]]:
-        return (super().update(active=False), {})
+        return super().update(active=False), {}
 
     def hard_delete(self) -> Tuple[int, Dict[str, int]]:
         return super().delete()

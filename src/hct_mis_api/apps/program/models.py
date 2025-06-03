@@ -237,6 +237,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     deduplication_set_id = models.UUIDField(blank=True, null=True, help_text="Program deduplication set id [sys]")
 
+    # sanction_lists = MultipleStrategyClassField(registry=sanction_list_registry)
+
     objects = SoftDeletableIsVisibleManager()
 
     def clean(self) -> None:
