@@ -281,6 +281,71 @@ class TestGrievanceTicketUpdate:
         assert response.status_code == status.HTTP_200_OK
         assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New"
 
+    def test_update_grievance_ticket_with_no_area_access(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
+        )
+        areas = [self.area_1]
+        admin_area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
+            program=self.program,
+            partner=self.user.partner,
+        )
+        admin_area_limits.areas.set(areas)
+        data = {"description": "just description"}
+        response = self.api_client.patch(self.list_details, data, format="json")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()["detail"] == "No GrievanceTicket matches the given query."
+
+    def test_update_grievance_ticket_as_creator(self, create_user_role_with_permissions: Any) -> None:
+        assert self.household_data_change_grievance_ticket.created_by == self.user
+        data = {
+            "description": "just description",
+            "extras": {
+                "household_data_update_issue_type_extras": {
+                    "household_data": {
+                        "village": "Test V",
+                        "size": 33,
+                        "country": "AFG",
+                    }
+                }
+            },
+        }
+        response = self.api_client.patch(self.list_details, data, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # added permission as creator and should be able to update ticket
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR], self.afghanistan, self.program
+        )
+        response = self.api_client.patch(self.list_details, data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert "id" in response.json()
+
+    def test_update_grievance_ticket_as_owner(self, create_user_role_with_permissions: Any) -> None:
+        assert self.household_data_change_grievance_ticket.assigned_to == self.user
+        data = {
+            "description": "just description",
+            "extras": {
+                "household_data_update_issue_type_extras": {
+                    "household_data": {
+                        "village": "Test New One",
+                        "size": 22,
+                        "country": "AFG",
+                    }
+                }
+            },
+        }
+        response = self.api_client.patch(self.list_details, data, format="json")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+        # added permission as owner and should be able to update ticket
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER], self.afghanistan, self.program
+        )
+        response = self.api_client.patch(self.list_details, data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert "id" in response.json()
+
     def test_update_grievance_ticket_complaint(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program

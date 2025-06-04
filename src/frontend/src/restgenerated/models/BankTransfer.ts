@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { FeedbackIssueTypeEnum } from './FeedbackIssueTypeEnum';
 export type BankTransfer = {
-    type: string;
+    type: FeedbackIssueTypeEnum;
     bankName: string;
     bankAccountNumber: string;
     bankBranchName: string;
