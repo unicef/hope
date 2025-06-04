@@ -9,6 +9,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { useProgramContext } from '../../../../programContext';
 import { TableWrapper } from '@core/TableWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramCyclesTablePaymentModule } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesTablePaymentModule';
 import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -27,6 +28,7 @@ export const ProgramCyclePage = (): ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
+  const { isAllPrograms } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [filter, setFilter] = useState(
@@ -49,6 +51,7 @@ export const ProgramCyclePage = (): ReactElement => {
 
   if (permissions === null) return null;
   if (!selectedProgram) return null;
+  if (isAllPrograms) return <PermissionDenied />;
   if (!hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
