@@ -117,7 +117,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         )
 
     def eligible(self) -> QuerySet:
-        return self.exclude(Q(conflicted=True) | Q(excluded=True))
+        return self.exclude(Q(conflicted=True) | Q(excluded=True) | Q(has_valid_wallet=False))
 
 
 class PaymentManager(SoftDeletableManager):

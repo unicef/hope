@@ -27,7 +27,11 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    FILTERABLE_TYPES,
+    TYPE_STRING,
+    Scope,
+)
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
@@ -307,18 +311,14 @@ def get_fields_attr_generators(
             )
 
 
-def get_collector_fields_attr_generator() -> Generator:
-    yield from FieldFactory.from_scope(Scope.DELIVERY_MECHANISM)
-
-
 def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     try:
         assets = KoboAPI(business_area_slug).get_single_project_data(uid)
     except ObjectDoesNotExist as e:
-        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
     except AttributeError as error:
-        logger.exception(error)
+        logger.warning(error)
         raise GraphQLError(str(error)) from error
 
     return reduce_asset(assets)
@@ -328,10 +328,10 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
     try:
         assets = KoboAPI(business_area_slug).get_all_projects_data()
     except ObjectDoesNotExist as e:
-        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
     except AttributeError as error:
-        logger.exception(error)
+        logger.warning(error)
         raise GraphQLError(str(error)) from error
 
     return reduce_assets_list(assets, only_deployed=only_deployed)
@@ -455,8 +455,25 @@ class Query(graphene.ObjectType):
         parent,
         info: Any,
     ) -> List[Any]:
+        from hct_mis_api.apps.payment.models.payment import AccountType
+
+        account_types = AccountType.objects.all()
+        definitions = [
+            {
+                "id": f"{account_type.key}__{field}",
+                "type": TYPE_STRING,
+                "name": f"{account_type.key}__{field}",
+                "lookup": f"{account_type.key}__{field}",
+                "label": {"English(EN)": f"{account_type.key.title()} {field.title()}"},
+                "hint": "",
+                "required": False,
+                "choices": [],
+            }
+            for account_type in account_types
+            for field in account_type.unique_fields
+        ]
         return sort_by_attr(
-            (attr for attr in get_collector_fields_attr_generator()),
+            (attr for attr in definitions),
             "label.English(EN)",
         )
 

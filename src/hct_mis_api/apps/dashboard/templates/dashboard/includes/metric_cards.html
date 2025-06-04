@@ -3,6 +3,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-financing icon-blue"></span>
         {% translate "Total Amount Paid" %}
+        <span class="info-icon" id="info-icon-total-amount-paid" aria-label="Info about Total Amount Paid">ⓘ
+            <div class="tooltip" id="tooltip-total-amount-paid" role="tooltip">{% translate "Sum of USD value for payments that are Delivered Fully or Delivered Partially." %}</div>
+        </span>
     </h3>
     <div id="total-amount-paid" class="text-cyan-700  text-base font-bold"></div>
 </div>
@@ -10,6 +13,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-preparedness icon-blue"></span>
         {% translate "Number of Payments" %}
+        <span class="info-icon" id="info-icon-number-of-payments" aria-label="Info about Number of Payments">ⓘ
+            <div class="tooltip" id="tooltip-number-of-payments" role="tooltip">{% translate "Total count of all payments processed, regardless of their status." %}</div>
+        </span>
     </h3>
     <div id="number-of-payments" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "payments" %}</p>
@@ -18,6 +24,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-financing icon-blue"></span>
         {% translate "Outstanding Payment" %}
+        <span class="info-icon" id="info-icon-outstanding-payment" aria-label="Info about Outstanding Payment">ⓘ
+            <div class="tooltip" id="tooltip-outstanding-payment" role="tooltip">{% translate "Sum of USD value for payments that are Sent to Payment Gateway, Sent to FSP, or Pending." %}</div>
+        </span>
     </h3>
     <div id="outstanding-payments" class="text-cyan-700  text-base font-bold"></div>
 </div>
@@ -25,6 +34,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-house icon-blue"></span>
         {% translate "Households Reached" %}
+        <span class="info-icon" id="info-icon-households-reached" aria-label="Info about Households Reached">ⓘ
+            <div class="tooltip" id="tooltip-households-reached" role="tooltip">{% translate "Total count of unique households that have received at least one payment." %}</div>
+        </span>
     </h3>
     <div id="households-reached" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "households" %}</p>
@@ -33,6 +45,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-people-targeted icon-blue"></span>
         {% translate "Individuals Reached" %}
+        <span class="info-icon" id="info-icon-individuals-reached" aria-label="Info about Individuals Reached">ⓘ
+            <div class="tooltip" id="tooltip-individuals-reached" role="tooltip">{% translate "This is an approximate figure on individuals registered. For more accuracy, check programme-specific statistics" %}</div>
+        </span>
     </h3>
     <div id="individuals-reached" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "persons" %}</p>
@@ -41,6 +56,9 @@
     <h3 class="text-xs font-bold">
         <span class="icon icon-children icon-blue"></span>
         {% translate "Children Reached" %}
+        <span class="info-icon" id="info-icon-children-reached" aria-label="Info about Children Reached">ⓘ
+            <div class="tooltip" id="tooltip-children-reached" role="tooltip">{% translate "Total count of children (based on household demographics) within households that have received payments." %}</div>
+        </span>
     </h3>
     <div id="children-reached" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "children" %}</p>
@@ -49,6 +67,9 @@
     <h3 class="text-sm font-bold">
         <span class="icon icon-users icon-blue"></span>
         {% translate "PWD Reached" %}
+        <span class="info-icon" id="info-icon-pwd-reached" aria-label="Info about PWD Reached">ⓘ
+            <div class="tooltip" id="tooltip-pwd-reached" role="tooltip">{% translate "Total count of persons with disabilities (based on household demographics) within households that have received payments." %}</div>
+        </span>
     </h3>
     <div id="pwd-reached" class="text-cyan-700  text-base font-bold"></div>
     <p class="text-xs italic">{% translate "of persons with disabilities" %}</p>
@@ -57,14 +78,23 @@
     <h3 class="text-sm font-bold">
         <span class="icon icon-report icon-blue"></span>
         {% translate "Reconciliation" %}
+        <span class="info-icon" id="info-icon-reconciliation" aria-label="Info about Reconciliation">ⓘ
+            <div class="tooltip" id="tooltip-reconciliation" role="tooltip">{% translate "Reconciliation percentage is the ratio of the count of payments (with statuses: Sent to Payment Gateway, Sent to FSP, Distribution Successful, Partially Distributed, or Transaction Successful) to the total count of all payments." %}</div>
+        </span>
     </h3>
-    <div class="text-cyan-700 text-base font-bold reconciliation-percentage">%</div>
-    <p class="text-xs italic">{% translate "of payments reconciled" %}</p>
+    <div class="text-cyan-700 text-base font-bold">
+        <span class="reconciliation-percentage-value"></span>%
+        
+    </div>
+    <p class="text-xs italic">{% translate "of payments reconciled" %} (<span class="reconciliation-amount-value"></span> USD)</p>
 </div>
 <div class="col-span-1 bg-white p-4 rounded shadow flex flex-col justify-center items-center">
     <h3 class="text-sm font-bold">
         <span class="icon icon-report icon-blue"></span>
         {% translate "Verification" %}
+        <span class="info-icon" id="info-icon-verification" aria-label="Info about Verification">ⓘ
+            <div class="tooltip" id="tooltip-verification" role="tooltip">{% translate "Verification percentage represents the ratio of the number of finished Payment Plans to the total number of Payment Plans, for the data currently displayed in the dashboard (after filters are applied). A Payment Plan is considered \"finished\" for this calculation if it has an associated \"FINISHED\" PaymentVerificationPlan status ." %}</div>
+        </span>
     </h3>
     <div class="text-cyan-700  text-base font-bold  pending-reconciliation-percentage">%</div>
     <p class="text-xs italic">{% translate "of payments plans verified" %}</p>

@@ -101,7 +101,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                     str(ticket_details.ticket.registration_data_import.program.deduplication_set_id),
                 )
             except service.api.API_EXCEPTION_CLASS:
-                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
+                logger.warning("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:

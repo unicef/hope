@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useHouseholdFlexFieldsQuery } from '@generated/graphql';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 
 export function HouseholdFlexFieldPhotoModal({ field }): ReactElement {

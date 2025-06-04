@@ -7,9 +7,9 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentPlansTable from '@containers/tables/paymentmodule/PaymentPlansTable/PaymentPlansTable';
 
 const initialFilter = {
   search: '',
@@ -21,7 +21,7 @@ const initialFilter = {
   isFollowUp: '',
 };
 
-export function PaymentModulePage(): ReactElement {
+function PaymentModulePage(): ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const location = useLocation();
@@ -39,33 +39,25 @@ export function PaymentModulePage(): ReactElement {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PaymentModulePage.tsx');
-      }}
-      componentName="PaymentModulePage"
-    >
-      <>
-        <PageHeader title={t('Payment Module')} />
-        <PaymentPlansFilters
-          filter={filter}
-          setFilter={setFilter}
-          initialFilter={initialFilter}
-          appliedFilter={appliedFilter}
-          setAppliedFilter={setAppliedFilter}
+    <>
+      <PageHeader title={t('Payment Module')} />
+      <PaymentPlansFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
+      <TableWrapper>
+        <PaymentPlansTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.PM_VIEW_DETAILS,
+            permissions,
+          )}
         />
-        <TableWrapper>
-          <PaymentPlansTable
-            filter={appliedFilter}
-            canViewDetails={hasPermissions(
-              PERMISSIONS.PM_VIEW_DETAILS,
-              permissions,
-            )}
-          />
-        </TableWrapper>
-      </>
-    </UniversalErrorBoundary>
+      </TableWrapper>
+    </>
   );
 }
+export default withErrorBoundary(PaymentModulePage, 'PaymentModulePage');

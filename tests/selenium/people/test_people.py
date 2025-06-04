@@ -321,7 +321,6 @@ class TestPeople:
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].find_element(By.TAG_NAME, "input").click()
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].find_element(By.TAG_NAME, "input").click()
         pageGrievanceDetailsPage.getButtonApproval().click()
-        pageGrievanceDetailsPage.getButtonConfirm().click()
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceDetailsPage.getButtonConfirm().click()
         assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text

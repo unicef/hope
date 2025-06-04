@@ -321,7 +321,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                         except Exception:
                             raise
                 except Exception as e:
-                    logger.exception(e)
+                    logger.warning(e)
                     context["form"] = form
                     context["errors"] = [str(e)]
                     self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)

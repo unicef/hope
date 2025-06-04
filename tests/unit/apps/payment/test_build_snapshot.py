@@ -8,13 +8,18 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
+    AccountFactory,
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    DeliveryMechanism,
+    FinancialServiceProvider,
+)
 from hct_mis_api.apps.payment.services import payment_household_snapshot_service
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -27,8 +32,14 @@ class TestBuildSnapshot(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        cls.fsp = FinancialServiceProviderFactory(
+            name="Test FSP 1",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            vision_vendor_number=123456789,
+        )
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
 
         with freeze_time("2020-10-10"):
             program = RealProgramFactory()
@@ -52,13 +63,13 @@ class TestBuildSnapshot(TestCase):
             )
             cls.hoh1.household = cls.hh1
             cls.hoh1.save()
-            DeliveryMechanismDataFactory(
+            AccountFactory(
                 individual=cls.hoh1,
-                delivery_mechanism=cls.dm_atm_card,
+                account_type=AccountType.objects.get(key="bank"),
                 data={
-                    "card_number__atm_card": "123",
-                    "card_expiry_date__atm_card": "2022-01-01",
-                    "name_of_cardholder__atm_card": "Marek",
+                    "number": "123",
+                    "expiry_date": "2022-01-01",
+                    "name_of_cardholder": "Marek",
                 },
             )
             cls.p1 = PaymentFactory(
@@ -71,6 +82,8 @@ class TestBuildSnapshot(TestCase):
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
                 currency="PLN",
+                financial_service_provider=cls.fsp,
+                delivery_type=cls.dm_atm_card,
             )
             cls.p2 = PaymentFactory(
                 parent=cls.pp,
@@ -82,6 +95,8 @@ class TestBuildSnapshot(TestCase):
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
                 currency="PLN",
+                financial_service_provider=cls.fsp,
+                delivery_type=cls.dm_atm_card,
             )
 
     def test_build_snapshot(self) -> None:
@@ -96,14 +111,11 @@ class TestBuildSnapshot(TestCase):
         self.assertEqual(len(self.p2.household_snapshot.snapshot_data["individuals"]), self.hh2.individuals.count())
         self.assertIsNotNone(self.p1.household_snapshot.snapshot_data["primary_collector"])
         self.assertEqual(
-            self.p1.household_snapshot.snapshot_data["primary_collector"].get("delivery_mechanisms_data", {}),
+            self.p1.household_snapshot.snapshot_data["primary_collector"].get("account_data", {}),
             {
-                "atm_card": {
-                    "card_expiry_date__atm_card": "2022-01-01",
-                    "card_number__atm_card": "123",
-                    "full_name": self.hoh1.full_name,
-                    "name_of_cardholder__atm_card": "Marek",
-                }
+                "expiry_date": "2022-01-01",
+                "number": "123",
+                "name_of_cardholder": "Marek",
             },
         )
 

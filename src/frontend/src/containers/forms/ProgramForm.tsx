@@ -14,13 +14,14 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchBeneficiaryGroups } from '@api/programsApi';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ProgramFormPropTypes {
   values;
   programHasRdi?: boolean;
 }
 
-export const ProgramForm = ({
+const ProgramForm = ({
   values,
   programHasRdi,
 }: ProgramFormPropTypes): ReactElement => {
@@ -264,3 +265,5 @@ export const ProgramForm = ({
     </Form>
   );
 };
+
+export default withErrorBoundary(ProgramForm, 'ProgramForm');

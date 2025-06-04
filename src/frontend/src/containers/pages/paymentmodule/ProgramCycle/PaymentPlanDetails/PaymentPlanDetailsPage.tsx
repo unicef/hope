@@ -1,34 +1,34 @@
-import React, { ReactElement, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { usePermissions } from '@hooks/usePermissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
+import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
+import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
+import { PaymentPlanDetails } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetails';
+import { PaymentPlanDetailsHeader } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsHeader';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { PermissionDenied } from '@core/PermissionDenied';
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   usePaymentPlanQuery,
 } from '@generated/graphql';
-import { LoadingComponent } from '@core/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
-import { isPermissionDeniedError } from '@utils/utils';
-import { PermissionDenied } from '@core/PermissionDenied';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
-import { PaymentPlanDetailsHeader } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsHeader';
-import { PaymentPlanDetails } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetails';
-import { AcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess';
-import { Entitlement } from '@components/paymentmodule/PaymentPlanDetails/Entitlement';
-import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
-import { ExcludeSection } from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection';
-import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
-import { PaymentsTable } from '@containers/tables/paymentmodule/PaymentsTable';
-import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
-import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { isPermissionDeniedError } from '@utils/utils';
+import { ReactElement, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import PaymentsTable from '@containers/tables/paymentmodule/PaymentsTable/PaymentsTable';
+import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
+import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
+import ExcludeSection from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection/ExcludeSection';
+import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 
-export const PaymentPlanDetailsPage = (): ReactElement => {
+const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
-  const location = useLocation();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data, loading, startPolling, stopPolling, error } =
     usePaymentPlanQuery({
@@ -37,8 +37,6 @@ export const PaymentPlanDetailsPage = (): ReactElement => {
       },
       fetchPolicy: 'network-only',
     });
-
-
 
   const status = data?.paymentPlan?.status;
   const backgroundActionStatus = data?.paymentPlan?.backgroundActionStatus;
@@ -74,54 +72,53 @@ export const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatus.Accepted ||
     status === PaymentPlanStatus.Finished;
 
+  const shouldDisplayFundsCommitment =
+    status === PaymentPlanStatus.InReview ||
+    status === PaymentPlanStatus.Accepted ||
+    status === PaymentPlanStatus.Finished;
+
   const { paymentPlan } = data;
   if (!paymentPlan) return null;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PaymentPlanDetailsPage.tsx');
-      }}
-      componentName="PaymentPlanDetailsPage"
-    >
-      <Box display="flex" flexDirection="column">
-        <PaymentPlanDetailsHeader
-          paymentPlan={paymentPlan}
-          permissions={permissions}
-        />
-        <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-        {status !== PaymentPlanStatus.Preparing && (
-          <>
-            <AcceptanceProcess paymentPlan={paymentPlan} />
-            {shouldDisplayEntitlement && (
-              <Entitlement
-                paymentPlan={paymentPlan}
-                permissions={permissions}
-              />
-            )}
-            {shouldDisplayFsp && (
-              <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
-            )}
-            <ExcludeSection paymentPlan={paymentPlan} />
-            <SupportingDocumentsSection paymentPlan={paymentPlan} />
-            <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-            <PaymentsTable
-              businessArea={businessArea}
-              paymentPlan={paymentPlan}
-              permissions={permissions}
-              canViewDetails
-            />
-            {shouldDisplayReconciliationSummary && (
-              <ReconciliationSummary paymentPlan={paymentPlan} />
-            )}
-          </>
-        )}
-        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <UniversalActivityLogTable objectId={paymentPlan?.id} />
-        )}
-      </Box>
-    </UniversalErrorBoundary>
+    <Box display="flex" flexDirection="column">
+      <PaymentPlanDetailsHeader
+        paymentPlan={paymentPlan}
+        permissions={permissions}
+      />
+      <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
+      {status !== PaymentPlanStatus.Preparing && (
+        <>
+          <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayFundsCommitment && (
+            <FundsCommitmentSection paymentPlan={paymentPlan} />
+          )}
+          {shouldDisplayEntitlement && (
+            <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+          )}
+          {shouldDisplayFsp && <FspSection paymentPlan={paymentPlan} />}
+          <ExcludeSection paymentPlan={paymentPlan} />
+          <SupportingDocumentsSection paymentPlan={paymentPlan} />
+          <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+          <PaymentsTable
+            businessArea={businessArea}
+            paymentPlan={paymentPlan}
+            permissions={permissions}
+            canViewDetails
+          />
+          {shouldDisplayReconciliationSummary && (
+            <ReconciliationSummary paymentPlan={paymentPlan} />
+          )}
+        </>
+      )}
+      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+        <UniversalActivityLogTable objectId={paymentPlan?.id} />
+      )}
+    </Box>
   );
 };
+
+export default withErrorBoundary(
+  PaymentPlanDetailsPage,
+  'PaymentPlanDetailsPage',
+);

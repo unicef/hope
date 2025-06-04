@@ -78,13 +78,9 @@ export const AllHouseholdsForPopulationTable = gql`
           totalCashReceived
           currency
           lastRegistrationDate
-          programs {
-            edges {
-              node {
-                id
-                name
-              }
-            }
+          program {
+            id
+            name
           }
           program {
             id

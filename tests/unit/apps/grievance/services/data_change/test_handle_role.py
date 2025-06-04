@@ -26,7 +26,6 @@ class TestHandleRole(TestCase):
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = household.program
         household.registration_data_import.save()
-        household.programs.add(program)
         individual = IndividualFactory(household=household, program=program)
         household.head_of_household = individual
         household.save()

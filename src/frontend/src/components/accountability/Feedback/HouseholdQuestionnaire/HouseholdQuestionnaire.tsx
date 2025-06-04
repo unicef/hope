@@ -6,12 +6,13 @@ import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface HouseholdQuestionnaireProps {
   values;
 }
 
-export function HouseholdQuestionnaire({
+function HouseholdQuestionnaire({
   values,
 }: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl } = useBaseUrl();
@@ -122,3 +123,8 @@ export function HouseholdQuestionnaire({
     </Grid>
   );
 }
+
+export default withErrorBoundary(
+  HouseholdQuestionnaire,
+  'HouseholdQuestionnaire',
+);

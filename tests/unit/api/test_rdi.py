@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
+from hct_mis_api.apps.payment.models import FinancialInstitution, PendingAccount
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
     get_program_with_dct_type_and_name,
@@ -65,6 +66,9 @@ class PushToRDITests(HOPEApiTestCase):
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
+        cls.fi = FinancialInstitution.objects.create(
+            name="mbank", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
@@ -98,6 +102,14 @@ class PushToRDITests(HOPEApiTestCase):
                                 "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                             }
                         ],
+                        "accounts": [
+                            {
+                                "account_type": "bank",
+                                "number": "123",
+                                "financial_institution": self.fi.id,
+                                "data": {"field_name": "field_value"},
+                            }
+                        ],
                     },
                     {
                         "relationship": NON_BENEFICIARY,
@@ -126,6 +138,12 @@ class PushToRDITests(HOPEApiTestCase):
 
         self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
+        account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
+        self.assertIsNotNone(account)
+        self.assertEqual(account.account_type.key, "bank")
+        self.assertEqual(account.financial_institution.id, self.fi.id)
+        self.assertEqual(account.number, "123")
+        self.assertEqual(account.data, {"field_name": "field_value"})
 
         self.assertEqual(hh.primary_collector.program_id, self.program.id)
         self.assertEqual(hh.head_of_household.program_id, self.program.id)

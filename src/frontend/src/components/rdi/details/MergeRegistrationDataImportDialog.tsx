@@ -18,12 +18,13 @@ import {
 } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
 }
 
-export function MergeRegistrationDataImportDialog({
+function MergeRegistrationDataImportDialog({
   registration,
 }: MergeRegistrationDataImportDialogProps): ReactElement {
   const { t } = useTranslation();
@@ -112,3 +113,8 @@ export function MergeRegistrationDataImportDialog({
     </span>
   );
 }
+
+export default withErrorBoundary(
+  MergeRegistrationDataImportDialog,
+  'MergeRegistrationDataImportDialog',
+);

@@ -18,7 +18,6 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -96,8 +95,18 @@ class TestActionPaymentPlanMutation(APITestCase):
             finance_release_number_required=3,
         )
 
+        cls.financial_service_provider = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="Abc",
+        )
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        cls.financial_service_provider.delivery_mechanisms.set([dm_cash])
         cls.payment_plan = PaymentPlanFactory.create(
-            business_area=cls.business_area, program_cycle=ProgramCycleFactory(), created_by=cls.user
+            business_area=cls.business_area,
+            program_cycle=ProgramCycleFactory(),
+            created_by=cls.user,
+            delivery_mechanism=dm_cash,
+            financial_service_provider=cls.financial_service_provider,
         )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
         household, individuals = create_household_and_individuals(
@@ -109,17 +118,6 @@ class TestActionPaymentPlanMutation(APITestCase):
         )
         IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
 
-        cls.financial_service_provider = FinancialServiceProviderFactory(
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id="Abc",
-        )
-        dm_cash = DeliveryMechanism.objects.get(code="cash")
-        cls.financial_service_provider.delivery_mechanisms.set([dm_cash])
-        DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=cls.payment_plan,
-            delivery_mechanism=dm_cash,
-            financial_service_provider=cls.financial_service_provider,
-        )
         PaymentFactory(parent=cls.payment_plan, collector=individuals[0], currency="PLN")
 
     @parameterized.expand(

@@ -83,6 +83,9 @@ export const AllPaymentPlansForTable = gql`
             }
           }
           status
+          paymentVerificationSummary {
+            status
+          }
           createdBy {
             id
             firstName

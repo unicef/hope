@@ -1,17 +1,17 @@
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useProgrammeChoiceDataQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { Button } from '@mui/material';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { useProgrammeChoiceDataQuery } from '@generated/graphql';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { getFilterFromQueryParams } from '@utils/utils';
 import { ProgrammesTable } from '../../tables/ProgrammesTable';
-import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import ProgrammesFilter from '@containers/tables/ProgrammesTable/ProgrammesFilter';
 
 const initialFilter = {
   search: '',
@@ -26,7 +26,7 @@ const initialFilter = {
   dataCollectingType: '',
 };
 
-export function ProgramsPage(): ReactElement {
+function ProgramsPage(): ReactElement {
   const location = useLocation();
 
   const [filter, setFilter] = useState(
@@ -68,16 +68,9 @@ export function ProgramsPage(): ReactElement {
   );
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ProgramsPage.tsx');
-      }}
-      componentName="ProgramsPage"
-    >
+    <>
       {hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions) && toolbar}
-      <ProgrammesFilters
+      <ProgrammesFilter
         filter={filter}
         choicesData={choicesData}
         setFilter={setFilter}
@@ -90,6 +83,7 @@ export function ProgramsPage(): ReactElement {
         choicesData={choicesData}
         filter={appliedFilter}
       />
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(ProgramsPage, 'ProgramsPage');

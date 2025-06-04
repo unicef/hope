@@ -97,15 +97,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         AreaFactory(name="City Test", area_type=area_type, p_code="dffgh565556")
         AreaFactory(name="City Example", area_type=area_type, p_code="fggtyjyj")
 
-        program_one = ProgramFactory(
-            name="Test program ONE",
-            business_area=BusinessArea.objects.first(),
-        )
-        program_two = ProgramFactory(
-            name="Test program TWO",
-            business_area=BusinessArea.objects.first(),
-        )
-
         cls.program = ProgramFactory(
             status=Program.ACTIVE,
             business_area=BusinessArea.objects.first(),
@@ -118,7 +109,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = household_one.program
         household_one.registration_data_import.save()
-        household_one.programs.add(program_one)
 
         household_two = HouseholdFactory.build(program=cls.program, unicef_id="HH-0002")
         household_two.household_collection.save()
@@ -126,7 +116,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.program = household_two.program
         household_two.registration_data_import.save()
-        household_two.programs.add(program_two)
 
         cls.individuals_to_create = [
             {
