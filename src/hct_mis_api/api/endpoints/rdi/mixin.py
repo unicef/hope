@@ -13,6 +13,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
+    Household,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -40,6 +41,19 @@ class Totals:
 
 
 class HouseholdUploadMixin:
+    def _manage_collision(
+        self, household: Household, registration_data_import: RegistrationDataImport
+    ) -> Optional[str]:
+        """
+        Detects collisions in the provided households data against the existing population.
+        """
+        program = registration_data_import.program
+        if not program.collision_detection_enabled or not program.collision_detector:
+            return None
+        colision_detector = program.collision_detector
+        household_id = colision_detector.detect_collision(household)
+        return household_id
+
     def save_document(self, member: PendingIndividual, doc: Dict) -> None:
         PendingDocument.objects.create(
             document_number=doc["document_number"],
@@ -88,6 +102,8 @@ class HouseholdUploadMixin:
 
     def save_households(self, rdi: RegistrationDataImport, households_data: List[Dict]) -> Totals:
         totals = Totals(0, 0)
+        print("#" * 1000)
+        household_ids_to_add_extra_rdis = []
         for household_data in households_data:
             totals.households += 1
             members: list[dict] = household_data.pop("members")
@@ -97,10 +113,19 @@ class HouseholdUploadMixin:
             if country_origin := household_data.get("country_origin"):
                 household_data["country_origin"] = Country.objects.get(iso_code2=country_origin)
 
-            hh = PendingHousehold.objects.create(
+            hh = PendingHousehold(
                 registration_data_import=rdi, program=rdi.program, business_area=rdi.business_area, **household_data
             )
+            print("*" * 1000)
+
+            if collided_household_id := self._manage_collision(hh, rdi):
+                totals.individuals += len(members)
+                household_ids_to_add_extra_rdis.append(collided_household_id)
+                continue
+
+            hh.save()
             for member_data in members:
                 self.save_member(rdi, hh, member_data)
                 totals.individuals += 1
+        rdi.extra_hh_rdis.add(*household_ids_to_add_extra_rdis)
         return totals

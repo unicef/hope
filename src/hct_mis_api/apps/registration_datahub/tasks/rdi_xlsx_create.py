@@ -425,6 +425,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         collectors_to_create = []
         for hh_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
+                if int(hh_id) not in self.households:
+                    continue
                 collector.household_id = self.households.get(hh_id).pk
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
@@ -603,6 +605,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 obj_to_create.household = self.households.get(household_id)
 
                         if header in complex_fields[sheet_title]:
+                            if household_id in self.households_to_ignore:
+                                continue
                             fn_complex: Callable = complex_fields[sheet_title][header]
                             value = fn_complex(
                                 value=cell_value,
@@ -685,7 +689,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create.detail_id = row[0].row
                 obj_to_create.business_area = rdi.business_area
                 if sheet_title == "households":
-                    if not self._check_collision(identification_key):  # Dont create household if collision
+                    if not self._check_collision(obj_to_create):  # Dont create household if collision
                         self.households[household_id] = obj_to_create
                     else:
                         self.households_to_ignore.append(
