@@ -2194,7 +2194,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [
             Scope.GLOBAL,
             Scope.TARGETING,
-            Scope.KOBO_IMPORT,
             Scope.INDIVIDUAL_UPDATE,
             Scope.XLSX_PEOPLE,
             Scope.PEOPLE_UPDATE,

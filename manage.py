@@ -6,13 +6,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-HOMEBREW_PREFIX = os.environ.get("HOMEBREW_PREFIX", "/opt/homebrew")
-os.environ.setdefault("DYLD_FALLBACK_LIBRARY_PATH", f"{HOMEBREW_PREFIX}/lib")
-SHELL = f"{HOMEBREW_PREFIX}/bin/bash"
-
 
 def start(cmd: str, cwd: str | Path | None = None) -> subprocess.Popen:
-    return subprocess.Popen(cmd, shell=True, cwd=cwd, env=os.environ.copy(), executable=SHELL)
+    return subprocess.Popen(cmd, shell=True, cwd=cwd, env=os.environ.copy())
 
 
 def run_dev() -> None:
@@ -20,9 +16,9 @@ def run_dev() -> None:
     try:
         node = str(Path(os.environ.get("NVM_BIN", "")) / "node") if os.environ.get("NVM_BIN") else "node"
         yarn_js = shutil.which("yarn")
-        subprocess.check_call(f"{node} {yarn_js}", shell=True, cwd="src/frontend", executable=SHELL)
+        subprocess.check_call(f"{node} {yarn_js}", shell=True, cwd="src/frontend")
         processes.append(start(f"{node} {yarn_js} dev", cwd="src/frontend"))
-        subprocess.check_call("uv sync --no-install-package hope", shell=True, executable=SHELL)
+        subprocess.check_call("uv sync --no-install-package hope", shell=True)
         processes.append(start(f"{sys.executable} manage.py runserver 127.0.0.1:8080"))
         processes.append(
             start(

@@ -425,7 +425,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         collectors_to_create = []
         for hh_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
-                if int(hh_id) not in self.households:
+                if hh_id not in self.households:
                     continue
                 collector.household_id = self.households.get(hh_id).pk
                 collectors_to_create.append(collector)
