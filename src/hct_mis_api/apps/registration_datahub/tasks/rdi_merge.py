@@ -59,9 +59,11 @@ class RdiMergeTask:
             )
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
-            household_ids_from_extra_rdis = Household.extra_rdis.through.objects.filter(
-                registrationdataimport=obj_hct
-            ).values_list("household_id", flat=True)
+            household_ids_from_extra_rdis = list(
+                Household.extra_rdis.through.objects.filter(registrationdataimport=obj_hct).values_list(
+                    "household_id", flat=True
+                )
+            )
             household_ids_from_extra_rdis = list(
                 PendingHousehold.objects.filter(
                     id__in=household_ids_from_extra_rdis, rdi_merge_status=PendingHousehold.PENDING
