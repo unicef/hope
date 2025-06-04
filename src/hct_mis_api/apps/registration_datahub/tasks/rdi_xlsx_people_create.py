@@ -115,6 +115,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     continue
 
                 if header in complex_fields[sheet_title]:
+                    if self.index_id in self.households_to_ignore:
+                        continue
                     fn_complex: Callable = complex_fields[sheet_title][header]
                     value = fn_complex(
                         value=cell_value,
@@ -181,7 +183,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         obj_to_create.detail_id = row[0].row
         obj_to_create.business_area = registration_data_import.business_area
         if sheet_title == "households":
-            if not self._check_collision(identification_key):  # Dont create household if collision
+            if not self._check_collision(obj_to_create):  # Dont create household if collision
                 obj_to_create.set_admin_areas()
                 obj_to_create.save()
                 self.households[self.index_id] = obj_to_create

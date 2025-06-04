@@ -15,7 +15,7 @@ class AbstractCollisionDetector:
         if not self.program.collision_detection_enabled:
             raise ValueError("Collision detection is not enabled for this program")
 
-    def detect_collision(self, identifiaction_key: str) -> Optional[str]:
+    def detect_collision(self, household: Household) -> Optional[str]:
         raise NotImplementedError("Subclasses should implement this method")
 
 
@@ -36,9 +36,9 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         for hh_id, key in ids_with_uniquekey_list:
             self.unique_identification_keys_dict[key] = str(hh_id)
 
-    def detect_collision(self, identification_key: str) -> Optional[str]:
+    def detect_collision(self, household: Household) -> Optional[str]:
         self.initialize()
-        return self.unique_identification_keys_dict.get(identification_key, None)
+        return self.unique_identification_keys_dict.get(household.identification_key, None)
 
 
 collision_detectors_registry = Registry(AbstractCollisionDetector)
