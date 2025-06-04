@@ -102,7 +102,6 @@ class HouseholdUploadMixin:
 
     def save_households(self, rdi: RegistrationDataImport, households_data: List[Dict]) -> Totals:
         totals = Totals(0, 0)
-        print("#" * 1000)
         household_ids_to_add_extra_rdis = []
         for household_data in households_data:
             totals.households += 1
@@ -116,7 +115,6 @@ class HouseholdUploadMixin:
             hh = PendingHousehold(
                 registration_data_import=rdi, program=rdi.program, business_area=rdi.business_area, **household_data
             )
-            print("*" * 1000)
 
             if collided_household_id := self._manage_collision(hh, rdi):
                 totals.individuals += len(members)
