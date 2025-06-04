@@ -43,7 +43,7 @@ export const ProgramCyclesTablePaymentModule = ({
   const queryClient = useQueryClient();
 
   // Don't fetch data when viewing "all programs"
-  const shouldFetchData = !isAllPrograms && program?.id;
+  const shouldFetchData = Boolean(!isAllPrograms && program?.id);
 
   const { data, refetch, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
