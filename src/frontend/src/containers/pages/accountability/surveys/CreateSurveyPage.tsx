@@ -20,7 +20,7 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -54,7 +54,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { SurveySteps, SurveyTabsValues } from '@utils/constants';
 import { getPercentage } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -96,7 +96,7 @@ function prepareVariables(
   };
 }
 
-export const CreateSurveyPage = (): ReactElement => {
+const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
@@ -104,7 +104,6 @@ export const CreateSurveyPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
-  const location = useLocation();
   const { pathname } = location;
   const parts = pathname.split('/');
   const categoryIndex = parts.indexOf('create') + 1;
@@ -343,14 +342,7 @@ export const CreateSurveyPage = (): ReactElement => {
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'CreateSurveyPage.tsx');
-      }}
-      componentName="CreateSurveyPage"
-    >
+    <>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -713,6 +705,8 @@ export const CreateSurveyPage = (): ReactElement => {
           </>
         )}
       </Formik>
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(CreateSurveyPage, 'CreateSurveyPage');

@@ -3,8 +3,8 @@ import { act } from 'react';
 
 import wait from 'waait';
 import { render } from '../../../../testUtils/testUtils';
-import { PaymentVerificationTable } from '.';
 import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
+import PaymentVerificationTable from './PaymentVerificationTable';
 
 describe('containers/tables/payments/PaymentVerificationTable', () => {
   it('should render with data', async () => {

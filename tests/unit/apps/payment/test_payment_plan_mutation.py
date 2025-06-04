@@ -3,7 +3,11 @@ from unittest.mock import patch
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -32,6 +36,8 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
 )
+from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
+from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
@@ -84,6 +90,18 @@ mutation setSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonR
 COPY_TARGETING_CRITERIA = """
 mutation CopyTargetingCriteriaMutation($paymentPlanId: ID!, $programCycleId: ID!, $name: String!) {
   copyTargetingCriteria(name: $name, paymentPlanId: $paymentPlanId, programCycleId: $programCycleId){
+    paymentPlan{
+      name
+      status
+    }
+  }
+}
+"""
+
+
+ASSIGN_FUNDS_COMMITMENTS = """
+mutation AssignFundsCommitmentsMutation($paymentPlanId: ID!, $fundCommitmentItemsIds: [String]) {
+  assignFundsCommitments(paymentPlanId: $paymentPlanId, fundCommitmentItemsIds: $fundCommitmentItemsIds){
     paymentPlan{
       name
       status
@@ -290,7 +308,7 @@ class TestPaymentPlanMutation(APITestCase):
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
-            arguments=["Yes"],
+            arguments=[True],
         )
 
         payment_plan = PaymentPlanFactory(
@@ -347,3 +365,109 @@ class TestPaymentPlanMutation(APITestCase):
             self.assertEqual(TargetingCollectorBlockRuleFilter.objects.all().count(), 2)
             self.assertEqual(TargetingCriteriaRule.objects.all().count(), 2)
             self.assertEqual(PaymentPlan.objects.all().count(), 2)
+
+    def test_assign_funds_commitments_mutation(self) -> None:
+        ukr_ba = BusinessAreaFactory(name="Ukraine")
+        FundsCommitmentFactory(
+            funds_commitment_number="123",
+            funds_commitment_item="001",
+            business_area=self.business_area.code,
+            office=self.business_area,
+        )
+        FundsCommitmentFactory(
+            funds_commitment_number="123", funds_commitment_item="002", business_area=ukr_ba.code, office=ukr_ba
+        )
+        FundsCommitmentFactory(
+            funds_commitment_number="345",
+            funds_commitment_item="001",
+            business_area=self.business_area.code,
+            office=self.business_area,
+        )
+        FundsCommitmentFactory(
+            funds_commitment_number="345",
+            funds_commitment_item="002",
+            business_area=self.business_area.code,
+            office=self.business_area,
+        )
+
+        payment_plan = PaymentPlanFactory(
+            name="FCTP1",
+            status=PaymentPlan.Status.LOCKED,
+            program_cycle=self.cycle,
+            created_by=self.user,
+        )
+        payment_plan2 = PaymentPlanFactory(
+            name="FCTP2",
+            status=PaymentPlan.Status.LOCKED,
+            program_cycle=self.cycle,
+            created_by=self.user,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=ASSIGN_FUNDS_COMMITMENTS,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={
+                "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
+                "fundCommitmentItemsIds": [],
+            },
+        )
+
+        self.create_user_role_with_permissions(self.user, [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ASSIGN_FUNDS_COMMITMENTS,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={
+                "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
+                "fundCommitmentItemsIds": [],
+            },
+        )
+
+        payment_plan.status = PaymentPlan.Status.IN_REVIEW
+        payment_plan.save()
+
+        fc1 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="123", funds_commitment_item="001"
+        )
+        fc1.payment_plan = payment_plan2
+        fc1.save()
+        self.snapshot_graphql_request(
+            request_string=ASSIGN_FUNDS_COMMITMENTS,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={
+                "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
+                "fundCommitmentItemsIds": [fc1.rec_serial_number],
+            },
+        )
+
+        fc2 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="123", funds_commitment_item="002"
+        )
+        self.snapshot_graphql_request(
+            request_string=ASSIGN_FUNDS_COMMITMENTS,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={
+                "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
+                "fundCommitmentItemsIds": [fc2.rec_serial_number],
+            },
+        )
+
+        fc3 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="345", funds_commitment_item="001"
+        )
+        fc3.payment_plan = payment_plan
+        fc3.save()
+        fc4 = FundsCommitmentItem.objects.get(
+            funds_commitment_group__funds_commitment_number="345", funds_commitment_item="002"
+        )
+        self.snapshot_graphql_request(
+            request_string=ASSIGN_FUNDS_COMMITMENTS,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={
+                "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
+                "fundCommitmentItemsIds": [fc4.rec_serial_number],
+            },
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.funds_commitments.count(), 1)
+        self.assertEqual(payment_plan.funds_commitments.first(), fc4)

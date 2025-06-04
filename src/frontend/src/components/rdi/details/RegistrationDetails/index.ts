@@ -1,1 +1,0 @@
-export { RegistrationDetails } from './RegistrationDetails';

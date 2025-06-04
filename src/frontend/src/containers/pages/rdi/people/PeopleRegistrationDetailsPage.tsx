@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -17,8 +17,8 @@ import {
   useHouseholdChoiceDataQuery,
   useIndividualQuery,
 } from '@generated/graphql';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const Container = styled.div`
   padding: 20px;
@@ -29,11 +29,10 @@ const Container = styled.div`
   }
 `;
 
-export const PeopleRegistrationDetailsPage = (): ReactElement => {
+const PeopleRegistrationDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const location = useLocation();
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
@@ -69,14 +68,7 @@ export const PeopleRegistrationDetailsPage = (): ReactElement => {
   ];
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PeopleRegistrationDetailsPage.tsx');
-      }}
-      componentName="PeopleRegistrationDetailsPage"
-    >
+    <>
       <PageHeader
         title={`${t('Individual ID')}: ${individual.importId}`}
         breadCrumbs={breadCrumbsItems}
@@ -95,6 +87,10 @@ export const PeopleRegistrationDetailsPage = (): ReactElement => {
           flexFieldsData={flexFieldsData}
         />
       </Container>
-    </UniversalErrorBoundary>
+    </>
   );
 };
+export default withErrorBoundary(
+  PeopleRegistrationDetailsPage,
+  'PeopleRegistrationDetailsPage',
+);

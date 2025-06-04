@@ -27,7 +27,7 @@ class transaction_celery_task:  # used as decorator
                 with transaction.atomic():
                     return func(*args, **kwargs)
             except Exception as e:
-                logger.error(e)
+                logger.exception(e)
 
         task_func = app.task(*self.task_args, **self.task_kwargs)(wrapper_func)
         return task_func
@@ -55,7 +55,7 @@ def upload_new_kobo_template_and_update_flex_fields_task_with_retry(self: Any, x
         else:
             exc.xlsx_kobo_template_object.status = XLSXKoboTemplate.UNSUCCESSFUL
     except Exception as e:
-        logger.exception(e)
+        logger.warning(e)
         raise
 
 

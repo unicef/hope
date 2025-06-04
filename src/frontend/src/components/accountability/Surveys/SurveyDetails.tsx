@@ -10,13 +10,14 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface SurveyDetailsProps {
   survey: SurveyQuery['survey'];
   choicesData: SurveysChoiceDataQuery;
 }
 
-export function SurveyDetails({
+function SurveyDetails({
   survey,
   choicesData,
 }: SurveyDetailsProps): ReactElement {
@@ -77,7 +78,7 @@ export function SurveyDetails({
             </LabelizedField>
           </Grid>
           {body && (
-            <Grid size={{ xs:8 }}>
+            <Grid size={{ xs: 8 }}>
               <LabelizedField label={t('Message')} value={body} />
             </Grid>
           )}
@@ -86,3 +87,5 @@ export function SurveyDetails({
     </ContainerColumnWithBorder>
   );
 }
+
+export default withErrorBoundary(SurveyDetails, 'SurveyDetails');

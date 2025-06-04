@@ -26,13 +26,14 @@ import { GreyText } from '@core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function ExcludeSection({
+function ExcludeSection({
   initialOpen = false,
   paymentPlan,
 }: ExcludeSectionProps): ReactElement {
@@ -307,7 +308,7 @@ export function ExcludeSection({
                 component={FormikTextField}
               />
             </Grid>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <Box mr={2}>
                 <StyledTextField
                   label={`${beneficiaryGroup?.groupLabelPlural} Ids`}
@@ -379,7 +380,7 @@ export function ExcludeSection({
               <Box display="flex" flexDirection="column">
                 {isExclusionsOpen && exclusionReason && !isEdit ? (
                   <Grid container>
-                    <Grid size={{ xs:8 }}>
+                    <Grid size={{ xs: 8 }}>
                       <Box display="flex" flexDirection="column">
                         <Box
                           display="flex"
@@ -414,7 +415,7 @@ export function ExcludeSection({
                 {renderInputAndApply()}
                 <Grid container size={{ xs: 6 }}>
                   {errors?.map((formError) => (
-                    <Grid key={formError}  size={{ xs: 12 }}>
+                    <Grid key={formError} size={{ xs: 12 }}>
                       <FormHelperText key={formError} error>
                         {formError}
                       </FormHelperText>
@@ -423,7 +424,7 @@ export function ExcludeSection({
                 </Grid>
                 <Grid container direction="column" size={{ xs: 3 }}>
                   {excludedIds.map((id) => (
-                    <Grid key={id}  size={{ xs: 12 }}>
+                    <Grid key={id} size={{ xs: 12 }}>
                       <ExcludedItem
                         key={id}
                         id={id}
@@ -443,3 +444,5 @@ export function ExcludeSection({
     </Formik>
   );
 }
+
+export default withErrorBoundary(ExcludeSection, 'ExcludeSection');

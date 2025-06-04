@@ -4,25 +4,47 @@
     {{ business_area_slug }} {% translate "Dashboard" %}
 {% endblock %}
 {% block content %}
-    <div class="grid grid-cols-6 grid-rows-2 gap-1 justify-items-stretch">
+    <!-- Top Row: Disbursed and Planned Amounts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="bg-white p-4 rounded shadow flex flex-col justify-center items-center">
+            <h3 class="text-sm font-semibold">
+                <span class="icon icon-financing icon-blue"></span>
+                {% translate "Total Disbursed Payments" %}
+                <span class="info-icon" id="info-icon-total-disbursed-payments" aria-label="Info about Total Disbursed Payments">ⓘ
+                    <div class="tooltip" id="tooltip-total-disbursed-payments" role="tooltip">{% translate "The sum of total amount paid and outstanding payments" %}</div>
+                </span>
+            </h3>
+            <div id="total-disbursed-payments" class="text-cyan-700 !important text-base font-bold"></div>
+        </div>
+        <div class="bg-white p-4 rounded shadow flex flex-col justify-center items-center">
+            <h3 class="text-xs font-bold">
+                <span class="icon icon-file-text icon-blue"></span>
+                {% translate "Planned Payments Amount" %}
+                <span class="info-icon" id="info-icon-planned-payments-amount" aria-label="Info about Planned Payments Amount">ⓘ
+                    <div class="tooltip" id="tooltip-planned-payments-amount" role="tooltip">{% translate "Total entitlement quantities that are still pending approval or authorization" %}</div>
+                </span>
+            </h3>
+            <div id="planned-payments-amount" class="text-cyan-700 text-base font-bold">0.00 USD</div>
+        </div>
+    </div>
+
+    <!-- Main Section: Months chart and other metric cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <!-- Months Chart -->
-        <div class="row-span-2 bg-white p-4 rounded shadow">
+        <div class="lg:col-span-1 bg-white p-4 rounded shadow">
             <h3 class="text-sm font-semibold">
                 <span class="icon icon-calendar icon-blue"></span>
                 {% translate "Months" %}
             </h3>
             <div id="payments-by-month" class="dc-chart w-full h-full"></div>
         </div>
-        <div class="col-span-1 bg-white p-4 rounded shadow flex flex-col justify-center items-center">
-            <h3 class="text-sm font-semibold">
-                <span class="icon icon-financing icon-blue"></span>
-                {% translate "In local currency" %}
-            </h3>
-            <div id="total-amount-paid-local"
-                 class="text-cyan-700 !important text-base font-bold"></div>
+
+        <!-- Other Metric Cards -->
+        <div class="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
+            {% include "dashboard/includes/metric_cards.html" %}
         </div>
-        {% include "dashboard/includes/metric_cards.html" %}
     </div>
+
     <div class="flex flex-grow grid grid-cols-3 gap-2 mt-8 justify-center">
         <!-- Payments by Sector -->
         <div class="bg-white p-3 rounded shadow">
@@ -58,7 +80,7 @@
 
         function fetchDataForCountry() {
             dc.config.defaultColors(d3.schemePaired);
-            const decimalnumberFormatter = d3.format(",.2f");
+            const decimalNumberFormatter = d3.format(",.2f");
             const simplenumberFormatter = d3.format(",");
             const truncateLabel = (label, maxLength = 28) => {
                 return label.length > maxLength ?
@@ -76,11 +98,10 @@
             }
 
             const url = "{{household_data_url}}";
-            const pendingList = ["Sent to Payment Gateway", "Sent to FSP"];
+            const pendingList = ["Sent to Payment Gateway", "Sent to FSP", "Pending"];
             const successfulList = [
                 "Distribution Successful",
                 "Partially Distributed",
-                "Pending",
                 "Transaction Successful",
             ];
 
@@ -96,7 +117,17 @@
 
                 d3.json(url).then((data) => {
                     if (!data || data.length === 0) {
-                        console.error("No data available or data is undefined.");
+                        console.warn("No data available. Displaying 0 for all metrics.");
+                        [
+                            "payments-by-fsp",
+                            "payments-by-delivery",
+                            "payments-by-sector",
+                            "volume-by-program",
+                            "payments-by-admin1",
+                            "payments-by-month",
+                        ].forEach(hideSpinner);
+                        const ndx = crossfilter([]);
+                        updateTopMetrics(ndx);
                         return;
                     }
 
@@ -104,6 +135,7 @@
                         currency: item.currency || "USD",
                         delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0,
                         delivered_quantity: Number.parseFloat(item.total_delivered_quantity) || 0.0,
+                        total_planned_usd: Number.parseFloat(item.total_planned_usd) || 0.0,
                         payments: item.payments || 0,
                         individuals: item.individuals || 0,
                         households: item.households || 0,
@@ -133,6 +165,23 @@
                     const programDim = ndx.dimension((d) => d.program);
                     const monthDim = ndx.dimension((d) => d.month);
                     const admin1Dim = ndx.dimension((d) => d.admin1);
+                    const currencyDim = ndx.dimension((d) => d.currency || "UNK");
+
+                    const disbursedPaymentsByCurrencyGroup = currencyDim.group().reduce(
+                        (p, v) => { 
+                            if (pendingList.includes(v.payment_status) || successfulList.includes(v.payment_status)) {
+                                p.sum += v.delivered_quantity || 0;
+                            }
+                            return p;
+                        },
+                        (p, v) => {
+                            if (pendingList.includes(v.payment_status) || successfulList.includes(v.payment_status)) {
+                                p.sum -= v.delivered_quantity || 0;
+                            }
+                            return p;
+                        },
+                        () => ({ sum: 0 })
+                    );
 
                     const fspGroup = fspDim
                         .group()
@@ -150,6 +199,23 @@
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd)
                         .order((d) => -d);
+
+                    const successfulPaymentsByCurrencyGroup = currencyDim.group().reduce(
+                        (p, v) => { 
+                            if (successfulList.includes(v.payment_status)) {
+                                p.sum += v.delivered_quantity || 0;
+                            }
+                            return p;
+                        },
+                        (p, v) => {
+                            if (successfulList.includes(v.payment_status)) {
+                                p.sum -= v.delivered_quantity || 0;
+                            }
+                            return p;
+                        },
+                        () => ({ sum: 0 })
+                    );
+
                     const topProgramGroup = {
                             all: () => programGroup.all().slice(0, 30), // Top 30 programs
                         };
@@ -159,8 +225,6 @@
                     const monthGroup = monthDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
-                    const localCurrency =
-                        processedPayments.find((item) => item.currency)?.currency || "USD";
 
                     // Define charts
                     const fspChart = dc
@@ -171,11 +235,12 @@
                         .innerRadius(40)
                         .renderLabel(true)
                         .useViewBoxResizing(true)
-                        .label(
-                            (d) =>
-                            `${truncateLabel(d.key)}: ${((d.value / fspGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`);
+                        .label((d) => {
+                            const totalFspSum = fspGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalFspSum > 0 ? ((d.value / totalFspSum) * 100).toFixed(0) : '0';
+                            return `${truncateLabel(d.key)}: ${percentage}%`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)}`);
 
                     const deliveryChart = dc
                         .pieChart("#payments-by-delivery")
@@ -185,11 +250,12 @@
                         .innerRadius(30)
                         .renderLabel(true)
                         .useViewBoxResizing(true)
-                        .label(
-                            (d) =>
-                            `${d.key} ${((d.value / deliveryGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`);
+                        .label((d) => {
+                            const totalDeliverySum = deliveryGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalDeliverySum > 0 ? ((d.value / totalDeliverySum) * 100).toFixed(0) : '0';
+                            return `${d.key} ${percentage}%`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)}`);
 
                     const sectorChart = dc
                         .rowChart("#payments-by-sector")
@@ -197,11 +263,12 @@
                         .group(sectorGroup)
                         .elasticX(true)
                         .height(400)
-                        .label(
-                            (d) =>
-                            `${d.key}: ${decimalnumberFormatter(d.value)} USD (${((d.value / sectorGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .label((d) => {
+                            const totalSectorSum = sectorGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalSectorSum > 0 ? ((d.value / totalSectorSum) * 100).toFixed(0) : '0';
+                            return `${d.key}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
 
@@ -212,11 +279,12 @@
                         .elasticX(true)
                         .height(400)
                         .margins({ top: 10, right: 20, bottom: 30, left: 5 }) 
-                        .label(
-                            (d) =>
-                            `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / programGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .label((d) => {
+                            const totalProgramSum = programGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalProgramSum > 0 ? ((d.value / totalProgramSum) * 100).toFixed(0) : '0';
+                            return `${truncateLabel(d.key)}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .labelOffsetX(10)
                         .useViewBoxResizing(true)
                         .xAxis()
@@ -245,11 +313,12 @@
                         .height(400)
                         .margins({ top: 0, right: 0, bottom: 30, left: 5 }) 
                         .useViewBoxResizing(true)
-                        .label(
-                            (d) =>
-                            `${d.key} ${((d.value / monthGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .label((d) => {
+                            const totalMonthSum = monthGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalMonthSum > 0 ? ((d.value / totalMonthSum) * 100).toFixed(0) : '0';
+                            return `${d.key} ${percentage}%`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .ordering((d) => monthOrder[d.key])
                         .xAxis()
                         .ticks(3);
@@ -261,40 +330,79 @@
                         .elasticX(true)
                         .height(400)
                         .margins({ top: 0, right: 20, bottom: 30, left: 5 }) 
-                        .label(
-                            (d) =>
-                            `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / admin1Group.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .label((d) => {
+                            const totalAdmin1Sum = admin1Group.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalAdmin1Sum > 0 ? ((d.value / totalAdmin1Sum) * 100).toFixed(0) : '0';
+                            return `${truncateLabel(d.key)}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
 
                     function updateTopMetrics() {
                         const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
-                        const reconciliationData = ndx.groupAll().reduce(
+
+                        const pendingPaymentsGroupUSD = ndx
+                            .groupAll()
+                            .reduce(
+                                (p, v) => {
+                                    if (pendingList.includes(v.payment_status)) {
+                                        p.count += 1;
+                                        p.sum += v.delivered_quantity_usd || 0;
+                                    }
+                                    return p;
+                                },
+                                (p, v) => {
+                                    if (pendingList.includes(v.payment_status)) {
+                                        p.count -= 1;
+                                        p.sum -= v.delivered_quantity_usd || 0;
+                                    }
+                                    return p;
+                                },
+                                () => ({
+                                    count: 0,
+                                    sum: 0,
+                                }),
+                            )
+                            .value();
+
+                        const nonPendingPaymentSum = ndx.groupAll().reduce(
                             (p, v) => {
-                                if (v.payment_status !== "Pending") {
-                                    p.reconciled += 1;
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value += (v.payments || 0);
                                 }
-                                p.total += 1;
                                 return p;
                             },
                             (p, v) => {
-                                if (v.payment_status !== "Pending") {
-                                    p.reconciled -= 1;
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value -= (v.payments || 0);
                                 }
-                                p.total -= 1;
                                 return p;
                             },
-                            () => ({
-                                reconciled: 0,
-                                total: 0,
-                            })
-                        ).value();
-                        const reconciliationPercentage = reconciliationData.total > 0
-                                ? (reconciliationData.reconciled / reconciliationData.total) * 100
-                                : 0;
-                                const paymentPlanMetrics = ndx.groupAll().reduce(
+                            () => ({ value: 0 })
+                        ).value().value;
+
+                        const reconciliationPercentage = totalPaymentsCount > 0 ?
+                            (nonPendingPaymentSum / totalPaymentsCount) * 100 :
+                            0;
+                        
+                        const reconciledPaymentsValueUSD = ndx.groupAll().reduce(
+                            (p, v) => { 
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value += (v.delivered_quantity_usd || 0);
+                                }
+                                return p;
+                            },
+                            (p, v) => { 
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value -= (v.delivered_quantity_usd || 0);
+                                }
+                                return p;
+                            },
+                            () => ({ value: 0 }) 
+                        ).value().value;
+
+                        const paymentPlanMetrics = ndx.groupAll().reduce(
                                     (p, v) => {
                                         p.finished += v.finished_payment_plans || 0;
                                         p.total += v.total_payment_plans || 0;
@@ -309,7 +417,6 @@
                                 ).value();
                         const finishedPaymentPlans = paymentPlanMetrics.finished;
                         const totalPaymentPlans = paymentPlanMetrics.total;
-                        
                         const verificationPercentage = totalPaymentPlans > 0 
                             ? (finishedPaymentPlans / totalPaymentPlans) * 100 
                             : 0;
@@ -336,56 +443,8 @@
                                 }),
                             )
                             .value();
-                        const successfulPaymentsGroup = ndx
-                            .groupAll()
-                            .reduce(
-                                (p, v) => {
-                                    if (successfulList.includes(v.payment_status)) {
-                                        p.count += 1;
-                                        p.sum += v.delivered_quantity || 0;
-                                    }
-                                    return p;
-                                },
-                                (p, v) => {
-                                    if (successfulList.includes(v.payment_status)) {
-                                        p.count -= 1;
-                                        p.sum -= v.delivered_quantity || 0;
-                                    }
-                                    return p;
-                                },
-                                () => ({
-                                    count: 0,
-                                    sum: 0,
-                                }),
-                            )
-                            .value();
-
                         const totalSuccessfulUSD = successfulPaymentsGroupUSD.sum;
-                        const totalSuccessful = successfulPaymentsGroup.sum;
                         const successfulPaymentsCountUSD = successfulPaymentsGroupUSD.count;
-                        const pendingPaymentsGroupUSD = ndx
-                            .groupAll()
-                            .reduce(
-                                (p, v) => {
-                                    if (pendingList.includes(v.payment_status)) {
-                                        p.count += 1;
-                                        p.sum += v.delivered_quantity_usd || 0;
-                                    }
-                                    return p;
-                                },
-                                (p, v) => {
-                                    if (pendingList.includes(v.payment_status)) {
-                                        p.count -= 1;
-                                        p.sum -= v.delivered_quantity_usd || 0;
-                                    }
-                                    return p;
-                                },
-                                () => ({
-                                    count: 0,
-                                    sum: 0,
-                                }),
-                            )
-                            .value();
                         const pendingPaymentsGroup = ndx
                             .groupAll()
                             .reduce(
@@ -429,15 +488,32 @@
                                 () => 0,
                             )
                             .value();
+                        
+                        const plannedPaymentsAmount = ndx.groupAll()
+                            .reduceSum(d => d.total_planned_usd || 0)
+                            .value();
 
                         document.getElementById("number-of-payments").innerHTML =
                             `${simplenumberFormatter(totalPaymentsCount)}`;
                         document.getElementById("outstanding-payments").innerHTML =
-                            `${decimalnumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
+                            `${decimalNumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
                         document.getElementById("total-amount-paid").innerHTML =
-                            `${decimalnumberFormatter(totalSuccessfulUSD)} USD`;
-                        document.getElementById("total-amount-paid-local").innerHTML =
-                            `${decimalnumberFormatter(totalSuccessful)} ${localCurrency}`;
+                            `${decimalNumberFormatter(totalSuccessfulUSD)} USD`;
+                        document.getElementById("planned-payments-amount").innerHTML =
+                            `${decimalNumberFormatter(plannedPaymentsAmount)} USD`;
+                        
+                        let disbursedPaymentsHtml = '';
+                        const disbursedCurrencyTotals = disbursedPaymentsByCurrencyGroup.all();
+                        disbursedCurrencyTotals.forEach(item => {
+                            if (item.value.sum > 0 && item.key !== 'UNK') {
+                                disbursedPaymentsHtml += `<p class="text-xs mb-1">${decimalNumberFormatter(item.value.sum)} ${item.key}</p>`;
+                            }
+                        });
+                        if (disbursedPaymentsHtml === '') {
+                            disbursedPaymentsHtml = '<p class="text-xs text-gray-500">No disbursed payments</p>';
+                        }
+                        document.getElementById("total-disbursed-payments").innerHTML = disbursedPaymentsHtml;
+
                         document.getElementById("households-reached").innerHTML =
                             `${simplenumberFormatter(householdsReached)}`;
                         document.getElementById("individuals-reached").innerHTML =
@@ -446,16 +522,19 @@
                             `${simplenumberFormatter(pwdReached)}`;
                         document.getElementById("children-reached").innerHTML =
                             `${simplenumberFormatter(childrenReached)}`;
-                        document.querySelector(".reconciliation-percentage").innerHTML =
-                            `${decimalnumberFormatter(reconciliationPercentage)}%`;
+                        
+                        document.querySelector(".reconciliation-percentage-value").innerHTML =
+                            `${decimalNumberFormatter(reconciliationPercentage)}`;
+                        document.querySelector(".reconciliation-amount-value").innerHTML =
+                            `${decimalNumberFormatter(reconciledPaymentsValueUSD)}`;
                         document.querySelector(
                                 ".pending-reconciliation-percentage",
-                            ).innerHTML =`${decimalnumberFormatter(verificationPercentage)}%`;
+                            ).innerHTML =`${decimalNumberFormatter(verificationPercentage)}%`;
                     }
 
                     function filterByYear(year) {
                         yearDim.filter(year);
-                        updateTopMetrics();
+                        updateTopMetrics(ndx);
                         if (isChartsInitialized) dc.redrawAll();
                     }
 
@@ -502,9 +581,11 @@
                     if (uniqueYears.includes(currentYear)) changeYear(currentYear);
                     else if (uniqueYears.length > 0) changeYear(uniqueYears[0]);
 
+                    updateTopMetrics(ndx);
+
                     for (const chart of dc.chartRegistry.list()) {
                         chart.on("filtered", () => {
-                            updateTopMetrics();
+                            updateTopMetrics(ndx);
                         });
                     }
                     hideSpinner("payments-by-fsp");
@@ -520,6 +601,41 @@
             createDashboard();
         }
         fetchDataForCountry();
+
+        function setupTooltipToggle(iconId, tooltipId) {
+            const icon = document.getElementById(iconId);
+            const tooltip = document.getElementById(tooltipId);
+            if (icon && tooltip) {
+                icon.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const isActive = icon.classList.contains('active');
+                    document.querySelectorAll('.info-icon.active').forEach(activeIcon => {
+                        if (activeIcon !== icon) {
+                            activeIcon.classList.remove('active');
+                        }
+                    });
+                    icon.classList.toggle('active', !isActive);
+                });
+            }
+        }
+
+        setupTooltipToggle('info-icon-total-amount-paid', 'tooltip-total-amount-paid');
+        setupTooltipToggle('info-icon-outstanding-payment', 'tooltip-outstanding-payment');
+        setupTooltipToggle('info-icon-reconciliation', 'tooltip-reconciliation');
+        setupTooltipToggle('info-icon-verification', 'tooltip-verification');
+        setupTooltipToggle('info-icon-total-disbursed-payments', 'tooltip-total-disbursed-payments');
+        setupTooltipToggle('info-icon-number-of-payments', 'tooltip-number-of-payments');
+        setupTooltipToggle('info-icon-households-reached', 'tooltip-households-reached');
+        setupTooltipToggle('info-icon-individuals-reached', 'tooltip-individuals-reached');
+        setupTooltipToggle('info-icon-children-reached', 'tooltip-children-reached');
+        setupTooltipToggle('info-icon-pwd-reached', 'tooltip-pwd-reached');
+        setupTooltipToggle('info-icon-planned-payments-amount', 'tooltip-planned-payments-amount');
+
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.info-icon.active').forEach(icon => {
+                icon.classList.remove('active');
+            });
+        });
     });
     </script>
 {% endblock %}

@@ -1,5 +1,5 @@
 import { Form, Formik } from 'formik';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import * as Yup from 'yup';
@@ -19,12 +19,11 @@ import {
 import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const EditPaymentPlanPage = (): ReactElement => {
+const EditPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { paymentPlanId } = useParams();
   const { t } = useTranslation();
   const { data: paymentPlanData, loading: loadingPaymentPlan } =
@@ -110,37 +109,30 @@ export const EditPaymentPlanPage = (): ReactElement => {
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'EditPaymentPlanPage.tsx');
-      }}
-      componentName="EditPaymentPlanPage"
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
     >
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ submitForm, values }) => (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <EditPaymentPlanHeader
-              paymentPlan={paymentPlan}
-              handleSubmit={submitForm}
-              baseUrl={baseUrl}
-              permissions={permissions}
-            />
-            <PaymentPlanTargeting
-              allTargetPopulations={allTargetPopulationsData}
-              loading={loadingTargetPopulations}
-              disabled
-            />
-            <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
-          </Form>
-        )}
-      </Formik>
-    </UniversalErrorBoundary>
+      {({ submitForm, values }) => (
+        <Form>
+          <AutoSubmitFormOnEnter />
+          <EditPaymentPlanHeader
+            paymentPlan={paymentPlan}
+            handleSubmit={submitForm}
+            baseUrl={baseUrl}
+            permissions={permissions}
+          />
+          <PaymentPlanTargeting
+            allTargetPopulations={allTargetPopulationsData}
+            loading={loadingTargetPopulations}
+            disabled
+          />
+          <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
+        </Form>
+      )}
+    </Formik>
   );
 };
+
+export default withErrorBoundary(EditPaymentPlanPage, 'EditPaymentPlanPage');

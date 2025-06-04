@@ -87,9 +87,9 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         cls.individual2_repr_in_target_program = individuals2_repr[0]
 
     def test_enroll_households_to_program_task(self) -> None:
-        self.assertEqual(self.program_target.household_set.count(), 1)
+        self.assertEqual(self.program_target.households.count(), 1)
         self.assertEqual(self.program_target.individuals.count(), 1)
-        self.assertEqual(self.program_source.household_set.count(), 2)
+        self.assertEqual(self.program_source.households.count(), 2)
         self.assertEqual(self.program_source.individuals.count(), 2)
 
         self.assertIsNone(self.household1.household_collection)
@@ -105,9 +105,9 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         self.household1.refresh_from_db()
         self.household2.refresh_from_db()
 
-        self.assertEqual(self.program_target.household_set.count(), 2)
+        self.assertEqual(self.program_target.households.count(), 2)
         self.assertEqual(self.program_target.individuals.count(), 2)
-        self.assertEqual(self.program_source.household_set.count(), 2)
+        self.assertEqual(self.program_source.households.count(), 2)
         self.assertEqual(self.program_source.individuals.count(), 2)
 
         self.assertIsNotNone(self.household1.household_collection)

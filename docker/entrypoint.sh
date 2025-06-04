@@ -17,14 +17,12 @@ else
       python manage.py runserver 0.0.0.0:8000
       ;;
     "celery-beat")
-      waitforit -host=backend -port=8000 --timeout 300 && \
       celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler hct_mis_api.apps.core.models:CustomDatabaseScheduler
       ;;
     "celery-worker")
-      watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hct_mis_api.apps.core.celery worker -E -l info -Q default,priority
+      watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hct_mis_api.apps.core.celery worker -E -l info -Q default,priority --max-tasks-per-child=4 --concurrency=4
       ;;
     "celery-flower")
-      waitforit -host=backend -port=8000 --timeout 300 && \
       celery -A hct_mis_api.apps.core.celery flower --port=5555
       ;;
     *)

@@ -1,6 +1,4 @@
-from django.utils import timezone
-
-from pytz import utc
+import datetime
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -49,7 +47,7 @@ class TestCreateFollowUpPaymentPlan(APITestCase):
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),
-                "dispersionStartDate": timezone.datetime(2022, 8, 25, tzinfo=utc),
-                "dispersionEndDate": timezone.datetime(2022, 8, 30, tzinfo=utc),
+                "dispersionStartDate": datetime.date(2022, 8, 25),
+                "dispersionEndDate": datetime.date(2022, 8, 30),
             },
         )

@@ -8,10 +8,7 @@ from hct_mis_api.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.household.models import PendingIndividual
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    PendingDeliveryMechanismData,
-)
+from hct_mis_api.apps.payment.models import AccountType, PendingAccount
 from hct_mis_api.apps.registration_datahub.value_caster import (
     BooleanValueCaster,
     DateValueCaster,
@@ -31,11 +28,7 @@ class RdiBaseCreateTask:
     def __init__(self) -> None:
         self.COMBINED_FIELDS = get_combined_attributes()
         self.FLEX_FIELDS = serialize_flex_attributes()
-        self.delivery_mechanisms_data = defaultdict(dict)
-        self.delivery_mechanisms_required_fields_map = (
-            DeliveryMechanism.get_delivery_mechanisms_to_xlsx_fields_mapping()
-        )
-        self.available_delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True).in_bulk(field_name="code")
+        self.accounts = defaultdict(dict)
 
     def _cast_value(self, value: Any, header: str) -> Any:
         if isinstance(value, str):
@@ -66,34 +59,33 @@ class RdiBaseCreateTask:
         header: str,
         row_num: int,
         individual: PendingIndividual,
-        *args: Any,
-        **kwargs: Any,
     ) -> None:
         if value is None:
             return
 
-        name = header.replace("pp_", "")
+        name = header.replace("_i_c", "").replace("pp_", "")
 
-        self.delivery_mechanisms_data[f"individual_{row_num}"]["individual"] = individual
-        for delivery_mechanism, required_fields in self.delivery_mechanisms_required_fields_map.items():
-            if name in required_fields:
-                name = name.replace("_i_c", "")
-                if delivery_mechanism not in self.delivery_mechanisms_data[f"individual_{row_num}"]:
-                    self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism] = {name: value}
-                else:
-                    self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism].update({name: value})
+        self.accounts[f"individual_{row_num}"]["individual"] = individual
+        _account_prefix, account_type, field_name = name.split("__")
+        if account_type not in self.accounts[f"individual_{row_num}"]:
+            self.accounts[f"individual_{row_num}"][account_type] = {field_name: value}
+        else:
+            self.accounts[f"individual_{row_num}"][account_type].update({field_name: value})
 
-    def _create_delivery_mechanisms_data(self) -> None:
+    def _create_accounts(self) -> None:
+        account_types_dict = {obj.key: obj for obj in AccountType.objects.all()}
+
         imported_delivery_mechanism_data = []
-        for _, data in self.delivery_mechanisms_data.items():
+        for _, data in self.accounts.items():
             individual = data.pop("individual")
-            for delivery_type, values in data.items():
+            for account_type, values in data.items():
                 imported_delivery_mechanism_data.append(
-                    PendingDeliveryMechanismData(
+                    PendingAccount(
                         individual=individual,
-                        delivery_mechanism=self.available_delivery_mechanisms[delivery_type],
+                        account_type=account_types_dict[account_type],
+                        number=values.get("number", None),
                         data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
                 )
-        PendingDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
+        PendingAccount.objects.bulk_create(imported_delivery_mechanism_data)

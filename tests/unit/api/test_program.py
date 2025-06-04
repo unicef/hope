@@ -199,6 +199,7 @@ class APIGlobalProgramTests(HOPEApiTestCase):
                 "sector": program.sector,
                 "status": program.status,
                 "start_date": program.start_date.strftime("%Y-%m-%d"),
+                "beneficiary_group": str(program.beneficiary_group.id),
             }
 
         cls.program_from_another_ba_expected_response = expected_response(

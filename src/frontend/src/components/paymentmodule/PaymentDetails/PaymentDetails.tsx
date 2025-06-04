@@ -1,3 +1,4 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -37,7 +38,7 @@ interface PaymentDetailsProps {
   canViewHouseholdDetails: boolean;
 }
 
-export function PaymentDetails({
+function PaymentDetails({
   payment,
   canViewActivityLog,
   canViewHouseholdDetails,
@@ -310,3 +311,4 @@ export function PaymentDetails({
     </>
   );
 }
+export default withErrorBoundary(PaymentDetails, 'PaymentDetails');
