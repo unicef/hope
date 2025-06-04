@@ -1,6 +1,12 @@
+from typing import TYPE_CHECKING, Optional
+
 from strategy_field.registry import Registry
 
 from hct_mis_api.apps.household.models import Household
+
+# only for typing purposes
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import Program
 
 
 class AbstractCollisionDetector:
@@ -9,16 +15,16 @@ class AbstractCollisionDetector:
         if not self.program.collision_detection_enabled:
             raise ValueError("Collision detection is not enabled for this program")
 
-    def detect_collision(self, identifiaction_key: str):
+    def detect_collision(self, identifiaction_key: str) -> Optional[str]:
         raise NotImplementedError("Subclasses should implement this method")
 
 
 class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
     def __init__(self, context: "Program"):
         super().__init__(context)
-        self.unique_identification_keys_dict = None
+        self.unique_identification_keys_dict: Optional[dict[str, str]] = None
 
-    def initialize(self):
+    def initialize(self) -> None:
         if self.unique_identification_keys_dict is not None:
             return
         self.unique_identification_keys_dict = dict()
@@ -27,15 +33,12 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             .values_list("id", "identification_key")
             .distinct("id")
         )
-        print("ids_with_uniquekey_list", ids_with_uniquekey_list)
         for hh_id, key in ids_with_uniquekey_list:
             self.unique_identification_keys_dict[key] = str(hh_id)
 
-    def detect_collision(self, identifiaction_key: str):
+    def detect_collision(self, identification_key: str) -> Optional[str]:
         self.initialize()
-        print(f"Checking for collision with identification key: {identifiaction_key}")
-        print("self.unique_identification_keys_dict", self.unique_identification_keys_dict)
-        return self.unique_identification_keys_dict.get(identifiaction_key, None)
+        return self.unique_identification_keys_dict.get(identification_key, None)
 
 
 collision_detectors_registry = Registry(AbstractCollisionDetector)

@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
+    extra_rdis_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_drivers_license_document_number_query,
@@ -28,7 +29,6 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_unhcr_id_issuer_query,
     get_unhcr_id_number_query,
     registration_data_import_query,
-    extra_rdis_query,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -2211,9 +2211,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "Filter for targeting by extra RDIs",
         "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
         "associated_with": _HOUSEHOLD,
-        "scope": [
-            Scope.TARGETING, Scope.XLSX_PEOPLE
-        ],
+        "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
         "xlsx_field": "extra_rdis_",
     },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
