@@ -38,15 +38,19 @@ export const ProgramCyclesTablePaymentModule = ({
     ...filters,
   });
 
-  const { businessArea } = useBaseUrl();
+  const { businessArea, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  // Don't fetch data when viewing "all programs"
+  const shouldFetchData = !isAllPrograms && program?.id;
 
   const { data, refetch, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
     queryFn: async () => {
       return fetchProgramCycles(businessArea, program.id, queryVariables);
     },
+    enabled: shouldFetchData,
   });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
@@ -59,6 +63,7 @@ export const ProgramCyclesTablePaymentModule = ({
           queryKey: ['programCycles', businessArea, program.id],
         });
       },
+      mutationKey: ['finishProgramCycle', businessArea, program.id],
     });
 
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
@@ -71,6 +76,7 @@ export const ProgramCyclesTablePaymentModule = ({
           queryKey: ['programCycles', businessArea, program.id],
         });
       },
+      mutationKey: ['reactivateProgramCycle', businessArea, program.id],
     });
 
   useEffect(() => {
