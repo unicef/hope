@@ -216,15 +216,47 @@ class GrievanceTicketGlobalViewSet(
             Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
-        "partial_update": [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+        "partial_update": [
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+        ],
         "status_change": [Permissions.GRIEVANCES_UPDATE],
-        "create_note": [Permissions.GRIEVANCES_ADD_NOTE],
-        "approve_individual_data_change": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
-        "approve_household_data_change": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
-        "approve_status_update": [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
-        "approve_delete_household": [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
-        "approve_needs_adjudication": [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
-        "approve_payment_details": [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION],
+        "create_note": [
+            Permissions.GRIEVANCES_ADD_NOTE,
+            Permissions.GRIEVANCES_ADD_NOTE_AS_CREATOR,
+            Permissions.GRIEVANCES_ADD_NOTE_AS_OWNER,
+        ],
+        "approve_individual_data_change": [
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        ],
+        "approve_household_data_change": [
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        ],
+        "approve_status_update": [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        ],
+        "approve_delete_household": [
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        ],
+        "approve_needs_adjudication": [
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        ],
+        "approve_payment_details": [
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR,
+            Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER,
+        ],
         "reassign_role": [Permissions.GRIEVANCES_UPDATE],
         "bulk_update_assignee": [Permissions.GRIEVANCES_UPDATE],
         "bulk_update_priority": [Permissions.GRIEVANCES_UPDATE],
@@ -316,11 +348,7 @@ class GrievanceTicketGlobalViewSet(
     @extend_schema(responses={200: GrievanceTicketDetailSerializer})
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         grievance_ticket = self.get_object()
-        serializer = self.get_serializer(grievance_ticket, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        input_data = serializer.validated_data
         user = request.user
-
         check_creator_or_owner_permission(
             user,
             Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
@@ -331,6 +359,9 @@ class GrievanceTicketGlobalViewSet(
             self.business_area,
             grievance_ticket.programs.first(),
         )
+        serializer = self.get_serializer(grievance_ticket, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
 
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=str(grievance_ticket.id))
 
