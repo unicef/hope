@@ -165,12 +165,18 @@ class HouseholdFilter(FilterSet):
         return qs.filter(Q(id__in=es_ids) | inner_query).distinct()
 
     def _get_elasticsearch_query_for_households(self, search: str) -> Dict:
+        business_area = self.request.parser_context["kwargs"]["business_area_slug"]
+        program_slug = self.request.parser_context["kwargs"].get("program_slug")
+        filters = [{"term": {"business_area": business_area}}]
+        if program_slug:
+            filters.append({"term": {"program_id": program_slug}})  # TODO: program slug or ID?
         query: Dict[str, Any] = {
             "size": "100",
             "_source": False,
             "query": {
                 "bool": {
                     "minimum_should_match": 1,
+                    "filter": filters,
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
@@ -188,9 +194,6 @@ class HouseholdFilter(FilterSet):
                 }
             },
         }
-        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:  # pragma: no cover
-            business_area = self.request.parser_context["kwargs"]["business_area_slug"]
-            query["query"]["bool"]["filter"] = [{"term": {"business_area": business_area}}]
         return query
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
@@ -371,12 +374,15 @@ class IndividualFilter(FilterSet):
 
     def _get_elasticsearch_query_for_individuals(self, search: str) -> Dict:
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
+        filters = [{"term": {"business_area": business_area}}]
+        if program_slug := self.request.parser_context["kwargs"].get("program_slug"):
+            filters.append({"term": {"program_id": program_slug}})  # TODO: program slug or ID?
         return {
-            "size": "100",
+            "size": 100,
             "_source": False,
             "query": {
                 "bool": {
-                    "filter": {"term": {"business_area": business_area}},
+                    "filter": filters,
                     "minimum_should_match": 1,
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
