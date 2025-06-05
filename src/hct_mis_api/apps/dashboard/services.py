@@ -25,10 +25,10 @@ from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
-CACHE_TIMEOUT = 60 * 60 * 6
+CACHE_TIMEOUT = 60 * 60 * 24
 GLOBAL_SLUG = "global"
-DEFAULT_ITERATOR_CHUNK_SIZE = 2000
-HOUSEHOLD_BATCH_SIZE = 2000
+DEFAULT_ITERATOR_CHUNK_SIZE = 2500
+HOUSEHOLD_BATCH_SIZE = 2500
 
 
 class CountrySummaryDict(TypedDict):
@@ -484,29 +484,24 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             )
             return list(all_distinct_years_query)
 
-        if years_to_refresh is None:  # Explicit full refresh
+        if years_to_refresh is None:
             actual_years_to_process = get_all_db_years()
-            # data_from_cache_for_other_years remains empty
-        else:  # Explicit partial refresh (years_to_refresh is a list, possibly empty)
+        else:
             cache_key = cls.get_cache_key(identifier)
             cached_data_str = cache.get(cache_key)
-            if cached_data_str:  # Cache hit: true partial refresh
+            if cached_data_str:
                 all_cached_data = json.loads(cached_data_str)
                 data_from_cache_for_other_years = [
                     item for item in all_cached_data if item.get("year") not in years_to_refresh
                 ]
-                actual_years_to_process = years_to_refresh  # Process only specified years
-            else:  # Cache miss: fallback to full refresh behavior
+                actual_years_to_process = years_to_refresh
+            else:
                 actual_years_to_process = get_all_db_years()
-                # data_from_cache_for_other_years remains empty
 
         if not actual_years_to_process and not data_from_cache_for_other_years:
-            # No years to process from DB (or specified list) AND no data from other years in cache.
-            # This means the final dataset will be empty.
             cls.store_data(identifier, [])
             return []
 
-        # Loop through each year and process data for it
         for year_to_process in actual_years_to_process:
             base_payments_qs_for_year_scope = cls._get_base_payment_queryset()
             date_field_expr = Coalesce("delivery_date", "entitlement_date", "status_date")
@@ -516,7 +511,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
             ).filter(_temp_processing_year=year_to_process)
 
             if not current_year_payments_qs.exists():
-                continue  # Skip if no payments for this year
+                continue
 
             household_ids: Set[UUID] = set(
                 hh_id
@@ -556,7 +551,7 @@ class DashboardGlobalDataCache(DashboardCacheBase):
 
             for payment in payment_data_iter:
                 key = (
-                    payment.get("year"),  # This should match year_to_process
+                    payment.get("year"),
                     payment.get("business_area_name", "Unknown Country"),
                     payment.get("region_name", "Unknown Region"),
                     payment.get("sector_name", "Unknown Sector"),
@@ -626,7 +621,6 @@ class DashboardGlobalDataCache(DashboardCacheBase):
                         "total_planned_usd": totals["planned_sum_for_group"],
                     }
                 )
-        # End of loop for year_to_process
 
         if is_explicit_partial_refresh:
             final_data_to_cache = all_newly_processed_data + data_from_cache_for_other_years
