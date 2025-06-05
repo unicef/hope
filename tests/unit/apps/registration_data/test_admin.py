@@ -33,6 +33,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class RegistrationDataImportAdminDeleteTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -94,6 +95,7 @@ class RegistrationDataImportAdminDeleteTest(TestCase):
         self.assertEqual(PendingDocument.objects.count(), 0)
 
 
+@pytest.mark.elasticsearch
 class RegistrationDataImportAdminDeleteMergedTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

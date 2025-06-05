@@ -6,6 +6,7 @@ exclude =
     # No need to traverse virtualenv
     .venv,
     venv,
+    .tox,
     # No need to traverse our git directory
     .git,
     # There's no value in checking cache directories
@@ -22,6 +23,7 @@ exclude =
     snapshots,
     __pypackages__,
     frontend,
+    uv-cache,
 
 ignore =
     # black formatting related

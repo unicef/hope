@@ -134,6 +134,7 @@ HOUSEHOLD_QUERY = """
     """
 
 
+@pytest.mark.elasticsearch
 @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
 class TestHouseholdQuery(APITestCase):
     databases = "__all__"
