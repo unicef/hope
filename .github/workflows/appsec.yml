@@ -1,0 +1,152 @@
+name: AppSec
+
+on:
+  push:
+    branches:
+    - appsec
+  pull_request:
+    branches:
+    - appsec
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/frontend/node_modules
+            src/frontend/.yarn
+            src/frontend/.yarn/cache
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: yarn install --frozen-lockfile
+        working-directory: src/frontend
+      - run: yarn lint
+        working-directory: src/frontend
+      - run: yarn test --watchAll=false
+        working-directory: src/frontend
+
+  build_and_push_dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: DockerHub login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Determine Branch Name
+        id: branch_name
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          fi
+
+      - name: Push dev
+        run: |
+          docker buildx create --use
+
+          tags="-t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev"
+
+          if [ -n "${{ env.BRANCH_NAME }}" ]; then
+            tags="$tags -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dev"
+          fi
+
+          docker buildx build \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
+            $tags \
+            -f ./docker/Dockerfile \
+            --target dev \
+            --push \
+            ./
+
+  appsec_tests:
+    runs-on: ubuntu-latest
+    needs: [build_and_push_dev]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Package Source code
+      continue-on-error: true
+      run: |
+          zip -r output.zip src
+
+    #- name: Upload zipped folder
+    #  uses: actions/upload-artifact@v4
+    #  with:
+    #      name: zipped-folder
+    #      path: output.zip
+    - name: Veracode Pipeline
+      id: pipeline-scan
+      uses: veracode/Veracode-pipeline-scan-action@v1.0.18
+      continue-on-error: true
+      with:
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
+          file: "output.zip" 
+          store_baseline_file: FALES
+  #  - name: Veracode Pipeline
+  #    continue-on-error: true
+  #    run: |
+  #      curl -sSO https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
+  #      unzip -o pipeline-scan-LATEST.zip
+  #      java -jar pipeline-scan.jar -vid '${{ secrets.API_ID }}' -vkey '${{ secrets.API_KEY }}' --file "target/dvja-1.0-SNAPSHOT.war" --fail_on_severity "Very High, High"
+  #      rm -rf pipeline-scan-LATEST.zip pipeline-scan.jar
+    - name: Veracode Upload And Scan
+      uses: veracode/veracode-uploadandscan-action@0.2.7
+      continue-on-error: true
+      with:
+          appname: 'Hope'
+          createprofile: false
+          filepath: 'output.zip'
+          vid: '${{ secrets.VERACODE_API_ID }}'
+          vkey: '${{ secrets.VERACODE_API_KEY }}'
+ 
+    - name: Veracode SCA
+      continue-on-error: true
+      env:
+       SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
+       SRCCLR_SCAN_COLLECTORS: "yarn, pip"
+      run: |
+        echo "Scanning JS Project"
+        curl -sSL  https://download.sourceclear.com/ci.sh | bash -s scan src/frontend/ --allow-dirty
+        echo "Scanning Python Project"
+        curl -sSL  https://download.sourceclear.com/ci.sh | bash -s scan src/hct_mis_api/ --allow-dirty
+    - name: DockerHub login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Veracode Container Scan 
+      uses: veracode/container_iac_secrets_scanning@v1.0.4
+      continue-on-error: true
+      with:
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
+          command: "scan" 
+          type: "image"
+          source: ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dev
+          format: "json"
+          debug: false
+          fail_build: true
