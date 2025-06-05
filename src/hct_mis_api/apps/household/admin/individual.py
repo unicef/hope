@@ -9,6 +9,7 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from admin_cursor_paginator import CursorPaginatorAdmin
@@ -54,7 +55,17 @@ logger = logging.getLogger(__name__)
 class IndividualAccountInline(admin.TabularInline):
     model = Account
     extra = 0
-    fields = ("account_type", "data")
+    fields = ("account_type", "number", "data", "view_link")
+
+    readonly_fields = ("view_link",)
+
+    def view_link(self, obj: Any) -> str:
+        if obj.pk:
+            url = reverse("admin:payment_account_change", args=[obj.pk])
+            return format_html('<a href="{}" target="_blank">View</a>', url)
+        return ""
+
+    view_link.short_description = "View"
 
 
 @admin.register(Individual)
