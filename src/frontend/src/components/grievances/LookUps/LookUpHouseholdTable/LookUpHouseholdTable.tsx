@@ -1,19 +1,19 @@
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { TableWrapper } from '@core/TableWrapper';
-import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { CountResponse } from '@restgenerated/models/CountResponse';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
+import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { adjustHeadCells } from '@utils/utils';
 import { MouseEvent, ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
-import { PaginatedHouseholdListList } from '@restgenerated/models/PaginatedHouseholdListList';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
-import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -78,7 +78,7 @@ export function LookUpHouseholdTable({
       admin2: filter.admin2,
       residenceStatus: filter.residenceStatus,
       withdrawn: matchWithdrawnValue(),
-      rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
+      rdiMergeStatus: RdiMergeStatusEnum.MERGED,
     };
   }, [
     businessArea,

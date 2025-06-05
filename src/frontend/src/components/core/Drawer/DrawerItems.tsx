@@ -1,4 +1,3 @@
-import { useBusinessAreaDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -23,6 +22,9 @@ import {
 } from './menuItems';
 import { useProgramContext } from 'src/programContext';
 import { BeneficiaryGroup } from '@restgenerated/models/BeneficiaryGroup';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -64,9 +66,13 @@ export const DrawerItems = ({
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const permissions = usePermissions();
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-    fetchPolicy: 'cache-first',
+
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({
+        slug: businessArea,
+      }),
   });
 
   const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
@@ -156,7 +162,7 @@ export const DrawerItems = ({
     selectedProgram?.beneficiaryGroup,
   );
 
-  const { isAccountabilityApplicable } = businessAreaData.businessArea;
+  const { isAccountabilityApplicable } = businessAreaData;
   const flags = {
     isAccountabilityApplicable,
   };
