@@ -45,7 +45,7 @@ export function DocumentField({
 
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid size={{ xs: 3 }}>
+      <Grid size={{ xs: 2 }}>
         <Field
           name={`${docFieldName}.key`}
           fullWidth
@@ -57,7 +57,7 @@ export function DocumentField({
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid size={{ xs:2 }}>
+      <Grid size={{ xs: 2 }}>
         <Field
           name={`${docFieldName}.country`}
           fullWidth
@@ -88,7 +88,7 @@ export function DocumentField({
         />
       </Grid>
       {!isEdited ? (
-        <Grid size={{ xs:1 }}>
+        <Grid size={{ xs: 1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
