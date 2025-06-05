@@ -130,7 +130,6 @@ jobs:
           vkey: ${{ secrets.VERACODE_API_KEY }}
           command: "scan" 
           type: "directory"
-          source: './'
           format: "table"
     - name: Veracode SCA2
       continue-on-error: true
@@ -156,6 +155,6 @@ jobs:
           command: "scan" 
           type: "image"
           source: ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dev
-          format: "table"
+          format: "json"
           debug: false
           fail_build: true
