@@ -465,141 +465,174 @@ class DashboardGlobalDataCache(DashboardCacheBase):
     def refresh_data(
         cls, identifier: str = GLOBAL_SLUG, years_to_refresh: Optional[List[int]] = None
     ) -> List[Dict[str, Any]]:
-        existing_data_for_other_years: List[Dict[str, Any]] = []
-        is_partial_refresh_attempt = bool(years_to_refresh)
+        all_newly_processed_data: List[Dict[str, Any]] = []
+        is_explicit_partial_refresh = years_to_refresh is not None
 
-        if is_partial_refresh_attempt and years_to_refresh:
+        actual_years_to_process: List[int]
+        data_from_cache_for_other_years: List[Dict[str, Any]] = []
+
+        def get_all_db_years() -> List[int]:
+            """Helper to fetch all distinct, valid years from payment data."""
+            date_field_expr_for_years = Coalesce("delivery_date", "entitlement_date", "status_date")
+            all_distinct_years_query = (
+                Payment.objects.using("read_only")
+                .annotate(_year_val=ExtractYear(date_field_expr_for_years))
+                .filter(_year_val__isnull=False)
+                .values_list("_year_val", flat=True)
+                .distinct()
+                .order_by("_year_val")
+            )
+            return list(all_distinct_years_query)
+
+        if years_to_refresh is None:  # Explicit full refresh
+            actual_years_to_process = get_all_db_years()
+            # data_from_cache_for_other_years remains empty
+        else:  # Explicit partial refresh (years_to_refresh is a list, possibly empty)
             cache_key = cls.get_cache_key(identifier)
             cached_data_str = cache.get(cache_key)
-            if cached_data_str:
+            if cached_data_str:  # Cache hit: true partial refresh
                 all_cached_data = json.loads(cached_data_str)
-                existing_data_for_other_years = [
+                data_from_cache_for_other_years = [
                     item for item in all_cached_data if item.get("year") not in years_to_refresh
                 ]
-            else:
-                is_partial_refresh_attempt = False
-                years_to_refresh = None
+                actual_years_to_process = years_to_refresh  # Process only specified years
+            else:  # Cache miss: fallback to full refresh behavior
+                actual_years_to_process = get_all_db_years()
+                # data_from_cache_for_other_years remains empty
 
-        base_payments_qs = cls._get_base_payment_queryset()
+        if not actual_years_to_process and not data_from_cache_for_other_years:
+            # No years to process from DB (or specified list) AND no data from other years in cache.
+            # This means the final dataset will be empty.
+            cls.store_data(identifier, [])
+            return []
 
-        if is_partial_refresh_attempt and years_to_refresh:
-            date_field_expr: Union[F, Coalesce] = Coalesce("delivery_date", "entitlement_date", "status_date")
-            if base_payments_qs.exists():
-                base_payments_qs = base_payments_qs.annotate(_temp_refresh_year=ExtractYear(date_field_expr)).filter(
-                    _temp_refresh_year__in=years_to_refresh
-                )
+        # Loop through each year and process data for it
+        for year_to_process in actual_years_to_process:
+            base_payments_qs_for_year_scope = cls._get_base_payment_queryset()
+            date_field_expr = Coalesce("delivery_date", "entitlement_date", "status_date")
 
-        household_ids: Set[UUID] = set(
-            hh_id for hh_id in base_payments_qs.values_list("household_id", flat=True).distinct() if hh_id is not None
-        )
+            current_year_payments_qs = base_payments_qs_for_year_scope.annotate(
+                _temp_processing_year=ExtractYear(date_field_expr)
+            ).filter(_temp_processing_year=year_to_process)
 
-        if not household_ids:
-            final_result_list = existing_data_for_other_years if is_partial_refresh_attempt else []
-            serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
-            cls.store_data(identifier, serialized_data)
-            return serialized_data
+            if not current_year_payments_qs.exists():
+                continue  # Skip if no payments for this year
 
-        household_map = cls._get_household_data(household_ids)
-
-        plan_group_fields = [
-            "year",
-            "business_area_name",
-            "region_name",
-            "sector_name",
-            "delivery_type_name",
-            "payment_status",
-        ]
-        plan_counts = cls._get_payment_plan_counts(base_payments_qs, plan_group_fields)
-
-        # Clone the queryset before passing to _get_payment_data to ensure it's fresh
-        payment_data_iter = cls._get_payment_data(base_payments_qs.all()).iterator(
-            chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE
-        )
-
-        summary: defaultdict[tuple, GlobalSummaryDict] = defaultdict(
-            lambda: {
-                "total_usd": 0.0,
-                "total_payments": 0,
-                "individuals": 0,
-                "children_counts": 0,
-                "pwd_counts": 0,
-                "reconciled_count": 0,
-                "finished_payment_plans": 0,
-                "total_payment_plans": 0,
-                "planned_sum_for_group": 0.0,
-                "_seen_households": set(),
-            }
-        )
-
-        for payment in payment_data_iter:
-            key = (
-                payment.get("year"),
-                payment.get("business_area_name", "Unknown Country"),
-                payment.get("region_name", "Unknown Region"),
-                payment.get("sector_name", "Unknown Sector"),
-                payment.get("delivery_type_name", "Unknown Delivery Type"),
-                payment.get("payment_status", "Unknown Status"),
+            household_ids: Set[UUID] = set(
+                hh_id
+                for hh_id in current_year_payments_qs.values_list("household_id", flat=True).distinct()
+                if hh_id is not None
             )
-            current_summary = summary[key]
+            household_map = cls._get_household_data(household_ids)
 
-            plan_key_values = [
-                payment.get("year"),
-                payment.get("business_area_name", "Unknown Country"),
-                payment.get("region_name", "Unknown Region"),
-                payment.get("sector_name", "Unknown Sector"),
-                payment.get("delivery_type_name", "Unknown Delivery Type"),
-                payment.get("payment_status", "Unknown Status"),
+            plan_group_fields = [
+                "year",
+                "business_area_name",
+                "region_name",
+                "sector_name",
+                "delivery_type_name",
+                "payment_status",
             ]
-            plan_key = tuple(plan_key_values)
+            plan_counts = cls._get_payment_plan_counts(current_year_payments_qs, plan_group_fields)
 
-            if current_summary["total_payments"] == 0:
-                current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
-                current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+            payment_data_iter = cls._get_payment_data(current_year_payments_qs.all()).iterator(
+                chunk_size=DEFAULT_ITERATOR_CHUNK_SIZE
+            )
 
-            current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
-            current_summary["total_payments"] += 1
-            current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
-            current_summary["planned_sum_for_group"] += float(payment.get("total_planned_usd_for_this_payment") or 0.0)
-
-            household_id = payment.get("household_id_val")
-            if (
-                household_id
-                and isinstance(household_id, UUID)
-                and household_id not in current_summary["_seen_households"]
-            ):
-                h_data = household_map.get(household_id, {})
-                current_summary["individuals"] += int(h_data.get("size", 0))
-                current_summary["children_counts"] += int(h_data.get("children_count", 0))
-                current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
-                current_summary["_seen_households"].add(household_id)
-
-        newly_processed_result_list = []
-        for (year, country, region, sector, delivery_type, status), totals in summary.items():
-            newly_processed_result_list.append(
-                {
-                    "year": year,
-                    "country": country,
-                    "region": region,
-                    "sector": sector,
-                    "delivery_types": delivery_type,
-                    "status": status,
-                    "total_delivered_quantity_usd": totals["total_usd"],
-                    "payments": totals["total_payments"],
-                    "households": len(totals["_seen_households"]),
-                    "individuals": totals["individuals"],
-                    "children_counts": totals["children_counts"],
-                    "pwd_counts": totals["pwd_counts"],
-                    "reconciled": totals["reconciled_count"],
-                    "finished_payment_plans": totals["finished_payment_plans"],
-                    "total_payment_plans": totals["total_payment_plans"],
-                    "total_planned_usd": totals["planned_sum_for_group"],
+            summary_for_year: defaultdict[tuple, GlobalSummaryDict] = defaultdict(
+                lambda: {
+                    "total_usd": 0.0,
+                    "total_payments": 0,
+                    "individuals": 0,
+                    "children_counts": 0,
+                    "pwd_counts": 0,
+                    "reconciled_count": 0,
+                    "finished_payment_plans": 0,
+                    "total_payment_plans": 0,
+                    "planned_sum_for_group": 0.0,
+                    "_seen_households": set(),
                 }
             )
 
-        final_result_list = newly_processed_result_list
-        if is_partial_refresh_attempt:
-            final_result_list.extend(existing_data_for_other_years)
+            for payment in payment_data_iter:
+                key = (
+                    payment.get("year"),  # This should match year_to_process
+                    payment.get("business_area_name", "Unknown Country"),
+                    payment.get("region_name", "Unknown Region"),
+                    payment.get("sector_name", "Unknown Sector"),
+                    payment.get("delivery_type_name", "Unknown Delivery Type"),
+                    payment.get("payment_status", "Unknown Status"),
+                )
+                current_summary = summary_for_year[key]
 
-        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_result_list, many=True).data)
+                plan_key_values = [
+                    payment.get("year"),
+                    payment.get("business_area_name", "Unknown Country"),
+                    payment.get("region_name", "Unknown Region"),
+                    payment.get("sector_name", "Unknown Sector"),
+                    payment.get("delivery_type_name", "Unknown Delivery Type"),
+                    payment.get("payment_status", "Unknown Status"),
+                ]
+                plan_key = tuple(plan_key_values)
+
+                if current_summary["total_payments"] == 0:
+                    current_summary["finished_payment_plans"] = plan_counts["finished"].get(plan_key, 0)
+                    current_summary["total_payment_plans"] = plan_counts["total"].get(plan_key, 0)
+
+                current_summary["total_usd"] += float(payment.get("payment_quantity_usd") or 0.0)
+                current_summary["total_payments"] += 1
+                current_summary["reconciled_count"] += int(payment.get("reconciled", 0))
+                current_summary["planned_sum_for_group"] += float(
+                    payment.get("total_planned_usd_for_this_payment") or 0.0
+                )
+
+                household_id = payment.get("household_id_val")
+                if (
+                    household_id
+                    and isinstance(household_id, UUID)
+                    and household_id not in current_summary["_seen_households"]
+                ):
+                    h_data = household_map.get(household_id, {})
+                    current_summary["individuals"] += int(h_data.get("size", 0))
+                    current_summary["children_counts"] += int(h_data.get("children_count", 0))
+                    current_summary["pwd_counts"] += int(h_data.get("pwd_count", 0))
+                    current_summary["_seen_households"].add(household_id)
+
+            for (
+                year_val_from_key,
+                country,
+                region,
+                sector,
+                delivery_type,
+                status,
+            ), totals in summary_for_year.items():
+                all_newly_processed_data.append(
+                    {
+                        "year": year_val_from_key,
+                        "country": country,
+                        "region": region,
+                        "sector": sector,
+                        "delivery_types": delivery_type,
+                        "status": status,
+                        "total_delivered_quantity_usd": totals["total_usd"],
+                        "payments": totals["total_payments"],
+                        "households": len(totals["_seen_households"]),
+                        "individuals": totals["individuals"],
+                        "children_counts": totals["children_counts"],
+                        "pwd_counts": totals["pwd_counts"],
+                        "reconciled": totals["reconciled_count"],
+                        "finished_payment_plans": totals["finished_payment_plans"],
+                        "total_payment_plans": totals["total_payment_plans"],
+                        "total_planned_usd": totals["planned_sum_for_group"],
+                    }
+                )
+        # End of loop for year_to_process
+
+        if is_explicit_partial_refresh:
+            final_data_to_cache = all_newly_processed_data + data_from_cache_for_other_years
+        else:
+            final_data_to_cache = all_newly_processed_data
+
+        serialized_data = cast(List[Dict[str, Any]], DashboardBaseSerializer(final_data_to_cache, many=True).data)
         cls.store_data(identifier, serialized_data)
         return serialized_data
