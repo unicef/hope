@@ -122,8 +122,17 @@ jobs:
           filepath: 'output.zip'
           vid: '${{ secrets.VERACODE_API_ID }}'
           vkey: '${{ secrets.VERACODE_API_KEY }}'
- 
-    - name: Veracode SCA
+    - name: Veracode SCA 
+      uses: veracode/container_iac_secrets_scanning@v1.0.4
+      continue-on-error: true
+      with:
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
+          command: "scan" 
+          type: "directory"
+          source: './'
+          format: "table"
+    - name: Veracode SCA2
       continue-on-error: true
       env:
        SRCCLR_API_TOKEN: ${{ secrets.SRCCLR_API_TOKEN }}
@@ -147,6 +156,6 @@ jobs:
           command: "scan" 
           type: "image"
           source: ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dev
-          format: "json"
+          format: "table"
           debug: false
           fail_build: true
