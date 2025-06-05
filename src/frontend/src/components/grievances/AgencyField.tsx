@@ -48,7 +48,7 @@ export function AgencyField({
           label={t('Partner')}
           component={FormikSelectField}
           choices={identityTypeChoices}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
@@ -60,7 +60,7 @@ export function AgencyField({
           label={t('Country')}
           component={FormikSelectField}
           choices={countryChoices}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
@@ -71,12 +71,12 @@ export function AgencyField({
           variant="outlined"
           label={t('Identity Number')}
           component={FormikTextField}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
       {!isEdited ? (
-        <Grid size={{ xs:1 }}>
+        <Grid size={{ xs: 1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
