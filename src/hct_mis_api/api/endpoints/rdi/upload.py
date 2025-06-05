@@ -105,8 +105,8 @@ class DocumentSerializer(serializers.ModelSerializer):
 class AccountSerializer(serializers.ModelSerializer):
     account_type = serializers.SlugRelatedField(slug_field="key", required=True, queryset=AccountType.objects.all())
     number = serializers.CharField(allow_blank=True, required=False)
-    financial_institution = serializers.SlugRelatedField(
-        slug_field="code", required=False, queryset=FinancialInstitution.objects.all()
+    financial_institution = serializers.PrimaryKeyRelatedField(
+        required=False, queryset=FinancialInstitution.objects.all()
     )
     data = serializers.JSONField(required=False, default=dict)  # type: ignore
 
