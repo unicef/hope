@@ -98,10 +98,10 @@ export function EditIdentityRow({
           <LabelizedField label={t('ID Number')} value={identity.node.number} />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs:1 }}>
+      <Grid size={{ xs: 1 }}>
         {!removed ? (
           !isEditTicket && (
-            <Box display="flex" align-items="center">
+            <Box display="flex" alignItems="center">
               <IconButton
                 onClick={() => {
                   setFieldValue(
