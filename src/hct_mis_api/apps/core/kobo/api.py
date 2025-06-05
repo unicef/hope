@@ -28,7 +28,7 @@ class TokenInvalid(Exception):
 
 
 class KoboRequestsSession(requests.Session):
-    AUTH_DOMAINS = [urlparse(settings.KOBO_KF_URL).hostname, urlparse(settings.KOBO_KC_URL).hostname]
+    AUTH_DOMAINS = [urlparse(settings.KOBO_URL).hostname]
 
     def should_strip_auth(self, old_url: str, new_url: str) -> bool:
         new_parsed = urlparse(new_url)
@@ -41,10 +41,10 @@ class KoboAPI:
     def __init__(self, business_area_slug: Optional[str] = None):
         if business_area_slug is not None:
             self.business_area = BusinessArea.objects.get(slug=business_area_slug)
-            self.KPI_URL = self.business_area.kobo_url or settings.KOBO_KF_URL
+            self.KPI_URL = self.business_area.kobo_url or settings.KOBO_URL
         else:
             self.business_area = None
-            self.KPI_URL = settings.KOBO_KF_URL
+            self.KPI_URL = settings.KOBO_URL
 
         self._get_token()
 

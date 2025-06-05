@@ -1059,7 +1059,9 @@ class TestTargeting:
         pageTargetingDetails.getLockButton().click()
         pageTargetingDetails.getLockPopupButton().click()
         pageTargetingDetails.waitForLabelStatus("LOCKED")
+        pageTargetingDetails.screenshot("targeting_locked.png")
         pageTargetingDetails.getButtonMarkReady().click()
+        pageTargetingDetails.screenshot("targeting_lockedgetButtonMarkReady.png")
         pageTargetingDetails.getButtonPopupMarkReady().click()
         pageTargetingDetails.waitForLabelStatus("READY FOR PAYMENT MODULE")
 
