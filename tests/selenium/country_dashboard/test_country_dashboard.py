@@ -67,6 +67,15 @@ class TestSmokeCountryDashboard:
         DashboardDataCache.refresh_data(business_area.slug)
         pageCountryDashboard.getNavCountryDashboard().click()
         pageCountryDashboard.switch_to_dashboard_iframe()
+
+        from selenium.webdriver.support.ui import WebDriverWait
+
+        wait = WebDriverWait(pageCountryDashboard.driver, 20)
+        wait.until(
+            lambda driver: pageCountryDashboard.get_total_amount_paid().text != ""
+            and pageCountryDashboard.get_total_amount_paid().text != "0.00 USD"
+        )
+
         assert pageCountryDashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."
         assert (
             pageCountryDashboard.get_total_amount_paid_local().text != ""
