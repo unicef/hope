@@ -1,0 +1,16 @@
+<p>
+<div class="mkdocs-ezglossary-refs list">
+    {% set counter = 0 %}
+    <ul>
+    {% for entry in entries %}
+        {% set counter = counter + 1 %}
+        <li>
+            <a title="{{ entry.page.title }}"
+               href="{{ root }}{{ entry.page.url }}#{{ entry.target }}">
+                {{ entry.page.title }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+</p>
