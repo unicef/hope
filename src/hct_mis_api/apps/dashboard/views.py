@@ -14,10 +14,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from hct_mis_api.apps.account.models import UserRole
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import generate_dash_report_task
 from hct_mis_api.apps.dashboard.services import (
+    GLOBAL_SLUG,
     DashboardCacheBase,
     DashboardDataCache,
     DashboardGlobalDataCache,
@@ -25,8 +27,6 @@ from hct_mis_api.apps.dashboard.services import (
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 log = logging.getLogger(__name__)
-
-CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 
 
 class DashboardDataView(APIView):
@@ -44,10 +44,27 @@ class DashboardDataView(APIView):
         If data is not cached or needs updating, refresh it.
         """
         is_global = business_area_slug.lower() == "global"
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         data_cache: Type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
 
-        if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
+        has_permission = False
+        business_area_obj = None
+
+        if is_global:
+            if (
+                request.user.is_superuser
+                or UserRole.objects.filter(
+                    user=request.user,
+                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
+                    business_area__active=True,
+                ).exists()
+            ):
+                has_permission = True
+        else:
+            business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
+            if check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj):
+                has_permission = True
+
+        if not has_permission:
             return Response(
                 {
                     "detail": _(
@@ -59,9 +76,10 @@ class DashboardDataView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        data = data_cache.get_data(business_area_slug)
+        cache_identifier = GLOBAL_SLUG if is_global else business_area_slug
+        data = data_cache.get_data(cache_identifier)
         if not data:
-            data = data_cache.refresh_data(business_area_slug if not is_global else "global")
+            data = data_cache.refresh_data(cache_identifier)
 
         return Response(data, status=status.HTTP_200_OK)
 
@@ -111,16 +129,40 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        is_global = business_area_slug.lower() == "global"
 
-        if not check_permissions(self.request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
-            context["error_message"] = _("You do not have permission to view this dashboard.")
+        has_permission = False
+        business_area_obj = None
+
+        if is_global:
+            if (
+                self.request.user.is_superuser
+                or UserRole.objects.filter(
+                    user=self.request.user,
+                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
+                    business_area__active=True,
+                ).exists()
+            ):
+                has_permission = True
+        else:
+            business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
+            if check_permissions(
+                self.request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj
+            ):
+                has_permission = True
+
+        if not has_permission:
+            context["error_message"] = _(
+                "You do not have permission to view the global dashboard."
+                if is_global
+                else "You do not have permission to view this dashboard."
+            )
             context["has_permission"] = False
         else:
             context["business_area_slug"] = business_area_slug
             context["household_data_url"] = reverse("api:household-data", args=[business_area_slug])
             context["has_permission"] = True
-        # Dynamically switch template for "Global" dashboard
-        if business_area_slug.lower() == "global":
+
+        if is_global:
             self.template_name = "dashboard/global_dashboard.html"
         return context
