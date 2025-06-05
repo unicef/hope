@@ -11,14 +11,15 @@ import {
 import { GetApp } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import {
-  Action,
   useAllFinancialServiceProviderXlsxTemplatesQuery,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
@@ -40,21 +41,55 @@ export function AcceptedPaymentPlanHeaderButtons({
   const [open, setOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
+  const { businessArea, programId } = useBaseUrl();
   const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery();
-  const { mutatePaymentPlanAction: sendXlsxPassword, loading: loadingSend } =
-    usePaymentPlanAction(Action.SendXlsxPassword, paymentPlan.id, () =>
-      showMessage(t('Password has been sent.')),
-    );
+
+  const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
+    {
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: paymentPlan.id,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(t('Password has been sent.'));
+      },
+      onError: (error) => {
+        showMessage(
+          error.message || t('An error occurred while sending the password'),
+        );
+      },
+    },
+  );
 
   const [mutateExport, { loading: loadingExport }] =
     useExportXlsxPpListPerFspMutation();
 
   const {
-    mutatePaymentPlanAction: sendToPaymentGateway,
-    loading: LoadingSendToPaymentGateway,
-  } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () =>
-    showMessage(t('Sending to Payment Gateway started')),
-  );
+    mutateAsync: sendToPaymentGateway,
+    isPending: LoadingSendToPaymentGateway,
+  } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansSendToPaymentGatewayRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+        },
+      ),
+    onSuccess: () => {
+      showMessage(t('Sending to Payment Gateway started'));
+    },
+    onError: (error) => {
+      showMessage(
+        error.message ||
+          t('An error occurred while sending to payment gateway'),
+      );
+    },
+  });
 
   const shouldDisableExportXlsx =
     loadingExport ||

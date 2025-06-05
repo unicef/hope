@@ -1,38 +1,33 @@
-import { Grid2 as Grid } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import FeedbackDetails from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
 import FeedbackDetailsToolbar from '@components/accountability/Feedback/FeedbackDetailsToolbar';
 import LinkedGrievance from '@components/accountability/Feedback/LinkedGrievance/LinkedGrievance';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { isPermissionDeniedError } from '@utils/utils';
-import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import FeedbackDetails from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import { usePermissions } from '@hooks/usePermissions';
+import { Grid2 as Grid } from '@mui/material';
 import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { isPermissionDeniedError } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 
 function FeedbackDetailsPage(): ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { businessAreaSlug } = useBaseUrl();
 
   const {
     data: feedback,
     isLoading,
     error,
-  } = useQuery<FeedbackDetail>({
-    queryKey: ['businessAreasFeedbacksRetrieve', businessAreaSlug, id],
-    queryFn: () =>
-      RestService.restBusinessAreasFeedbacksRetrieve({
-        businessAreaSlug,
-        id: id,
-      }),
-  });
+  } = useHopeDetailsQuery<FeedbackDetail>(
+    id,
+    RestService.restBusinessAreasFeedbacksRetrieve,
+    {},
+  );
 
   if (isLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;

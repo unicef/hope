@@ -1,5 +1,4 @@
 import { StatusBox } from '@core/StatusBox';
-import { ProgramStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -33,7 +32,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../programContext';
-import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 interface PopperComponentProps {
@@ -169,7 +168,7 @@ export const GlobalProgramSelect = () => {
       },
       id: 'all',
       name: 'All Programmes',
-      status: Status791Enum.ACTIVE,
+      status: ProgramStatus.ACTIVE,
       dataCollectingType: null,
       pduFields: null,
       programmeCode: null,
@@ -274,7 +273,7 @@ export const GlobalProgramSelect = () => {
           },
           id: 'all',
           name: 'All Programmes',
-          status: Status791Enum.ACTIVE,
+          status: ProgramStatus.ACTIVE,
           dataCollectingType: null,
           pduFields: null,
           programmeCode: null,
@@ -297,9 +296,9 @@ export const GlobalProgramSelect = () => {
         first: 10,
         orderBy: 'name',
         status: [
-          ProgramStatus.Active,
-          ProgramStatus.Draft,
-          ProgramStatus.Finished,
+          ProgramStatus.ACTIVE,
+          ProgramStatus.DRAFT,
+          ProgramStatus.FINISHED,
         ],
         name: inputValue,
       });

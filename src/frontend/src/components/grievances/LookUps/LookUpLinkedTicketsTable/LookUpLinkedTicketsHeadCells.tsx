@@ -1,13 +1,11 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { AllGrievanceTicketQuery } from '@generated/graphql';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
-export const headCells: HeadCell<
-AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']
->[] = [
+export const headCells: HeadCell<GrievanceTicketList>[] = [
   {
     disablePadding: false,
     label: 'Ticket ID',
-    id: 'id',
+    id: 'unicefId',
     numeric: false,
     dataCy: 'ticket-id',
   },
@@ -28,7 +26,7 @@ AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'householdId',
+    id: 'household',
     numeric: false,
     dataCy: 'householdId',
   },

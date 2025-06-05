@@ -11,14 +11,17 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { HouseholdAdditionalRegistrationInformation } from '@components/population/HouseholdAdditionalRegistrationInformation/HouseholdAdditionalRegistrationInformation';
 import { HouseholdDetails } from '@components/population/HouseholdDetails';
 import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHouseholdTable/PaymentsHouseholdTable';
+import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
+import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
 import { AdminButton } from '@core/AdminButton';
 import { useAllHouseholdsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { Theme } from '@mui/material/styles';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
@@ -30,9 +33,7 @@ import styled from 'styled-components';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
-import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
-import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const Container = styled.div`
   padding: 20px;
@@ -65,7 +66,6 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
 
   const location = useLocation();
   const permissions = usePermissions();
-  const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -73,15 +73,11 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     data: household,
     isLoading: householdLoading,
     error,
-  } = useQuery<HouseholdDetail>({
-    queryKey: ['household', businessArea, id, programId],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
-        businessAreaSlug: businessArea,
-        id,
-        programSlug: programId,
-      }),
-  });
+  } = useHopeDetailsQuery<HouseholdDetail>(
+    id,
+    RestService.restBusinessAreasProgramsHouseholdsRetrieve,
+    {},
+  );
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllHouseholdsFlexFieldsAttributesQuery();

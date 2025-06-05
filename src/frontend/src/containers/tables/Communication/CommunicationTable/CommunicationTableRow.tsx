@@ -2,14 +2,13 @@ import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { renderUserName } from '@utils/utils';
-import { CommunicationMessageNode } from '@generated/graphql';
+import type { MessageList } from '@restgenerated/models/MessageList';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
 interface CommunicationTableRowProps {
-  message: CommunicationMessageNode;
+  message: MessageList;
   canViewDetails: boolean;
 }
 
@@ -39,7 +38,7 @@ export function CommunicationTableRow({
       </TableCell>
       <TableCell align="left">{message.title}</TableCell>
       <TableCell align="left">{message.numberOfRecipients}</TableCell>
-      <TableCell align="left">{renderUserName(message.createdBy)}</TableCell>
+      <TableCell align="left">{message.createdBy}</TableCell>
       <TableCell align="left">
         <UniversalMoment>{message.createdAt}</UniversalMoment>
       </TableCell>

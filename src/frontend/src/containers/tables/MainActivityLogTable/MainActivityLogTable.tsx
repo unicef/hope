@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import Collapse from '@mui/material/Collapse';
 import { Box, IconButton, Paper } from '@mui/material';
 import TablePagination from '@mui/material/TablePagination';
-import { AllLogEntriesQuery, LogEntryNode } from '@generated/graphql';
+import type { LogEntry } from '@restgenerated/models/LogEntry';
+import type { Choice } from '@restgenerated/models/Choice';
 import {
   ButtonPlaceHolder,
   Row,
@@ -42,13 +43,13 @@ const PaperContainer = styled(Paper)`
 `;
 
 interface MainActivityLogTableProps {
-  logEntries: LogEntryNode[];
+  logEntries: LogEntry[];
   totalCount: number;
   rowsPerPage: number;
   page: number;
   onChangePage: (event: unknown, newPage: number) => void;
   onChangeRowsPerPage: (event: ChangeEvent<HTMLInputElement>) => void;
-  actionChoices: AllLogEntriesQuery['logEntryActionChoices'];
+  actionChoices: Choice[];
   loading: boolean;
 }
 export function MainActivityLogTable({
@@ -111,14 +112,12 @@ export function MainActivityLogTable({
             ))}
             <ButtonPlaceHolder />
           </Row>
-          {logEntries.map((value) => (
+          {logEntries.map((value, index) => (
             <MainActivityLogTableRow
-              key={value.id}
+              key={`${value.objectId}-${value.timestamp}-${index}`}
               actionChoicesDict={choicesDict}
-              logEntry={
-                value as AllLogEntriesQuery['allLogEntries']['edges'][number]['node']
-              }
-              data-cy={`log-entry-row-${value.id}`}
+              logEntry={value}
+              data-cy={`log-entry-row-${value.objectId}-${index}`}
             />
           ))}
         </Table>

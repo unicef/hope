@@ -1,7 +1,6 @@
 import { Grid2 as Grid, Theme, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useProgramContext } from '../../../programContext';
 import { formatCurrencyWithSymbol } from '@utils/utils';
 import { ContentLink } from '@core/ContentLink';
@@ -15,6 +14,7 @@ import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievances
 import { ReactElement } from 'react';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { Overview } from '@components/payments/Overview';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 const Container = styled.div<{ theme?: Theme }>`
   display: flex;
@@ -38,7 +38,7 @@ interface HouseholdDetailsProps {
   household: HouseholdDetail;
   baseUrl: string;
   businessArea: string;
-  grievancesChoices: GrievancesChoiceDataQuery;
+  grievancesChoices: GrievanceChoices;
 }
 export function HouseholdDetails({
   household,

@@ -8,7 +8,6 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { PaymentStatus, PaymentVerificationStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
@@ -39,18 +38,15 @@ function PaymentDetails({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   let paymentVerification: PaymentDetail['verification'] = null;
-  if (
-    payment.verification &&
-    payment.verification.status !== PaymentVerificationStatus.Pending
-  ) {
+  if (payment.verification && payment.verification.status !== 'PENDING') {
     paymentVerification = payment.verification;
   }
 
   const showFailureReason = [
-    PaymentStatus.NotDistributed,
-    PaymentStatus.ForceFailed,
-    PaymentStatus.TransactionErroneous,
-  ].includes(payment.status as PaymentStatus);
+    'NOT_DISTRIBUTED',
+    'FORCE_FAILED',
+    'TRANSACTION_ERRONEOUS',
+  ].includes(payment.status);
 
   return (
     <>

@@ -163,7 +163,6 @@ function PaymentPlanVerificationDetailsPage(): ReactElement {
             canCreatePaymentVerificationPlan={
               paymentPlan.canCreatePaymentVerificationPlan
             }
-            version={paymentPlan.version}
             isPaymentPlan={true}
           />
         )}
