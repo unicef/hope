@@ -755,7 +755,7 @@ def generate_delivery_mechanisms() -> None:
             "transfer_type": "CASH",
             "account_type": account_types["bank"],
         },
-        {"code": "cash", "name": "Cash", "transfer_type": "CASH", "account_type": account_types["bank"]},
+        {"code": "cash", "name": "Cash", "transfer_type": "CASH", "account_type": None},
         {"code": "cash_by_fsp", "name": "Cash by FSP", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {"code": "cheque", "name": "Cheque", "transfer_type": "CASH", "account_type": account_types["bank"]},
         {
@@ -788,7 +788,7 @@ def generate_delivery_mechanisms() -> None:
             "name": "Transfer to Account",
             "transfer_type": "CASH",
             "account_type": account_types["bank"],
-            "required_fields": ["name", "number"],
+            "required_fields": ["name", "number", "code"],
         },
         {"code": "voucher", "name": "Voucher", "transfer_type": "VOUCHER", "account_type": account_types["bank"]},
         {
@@ -829,3 +829,8 @@ def generate_delivery_mechanisms() -> None:
             DeliveryMechanismConfig.objects.get_or_create(
                 fsp=fsp, delivery_mechanism=delivery_mechanism, required_fields=dm.get("required_fields", [])
             )
+        FinancialServiceProvider.objects.get_or_create(
+            name="United Bank for Africa - Nigeria",
+            vision_vendor_number="2300117733",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        )
