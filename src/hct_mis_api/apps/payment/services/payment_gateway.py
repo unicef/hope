@@ -100,7 +100,7 @@ class PaymentPayloadSerializer(serializers.Serializer):
     destination_currency = serializers.CharField(required=True)
     origination_currency = serializers.CharField(required=True)
     delivery_mechanism = serializers.CharField(required=True)
-    account_type = serializers.CharField(required=True)
+    account_type = serializers.CharField(required=False, allow_blank=True)
     account = serializers.DictField(required=False)
 
 
