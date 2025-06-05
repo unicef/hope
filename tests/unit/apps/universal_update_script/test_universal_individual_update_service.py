@@ -218,6 +218,7 @@ class TestUniversalIndividualUpdateService:
         universal_update.save()
         universal_update.document_types.add(DocumentType.objects.first())
         universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
+        DeliveryMechanism.objects.create(name="Cash", code="cash")
         service = UniversalIndividualUpdateService(universal_update)
         template_file = service.generate_xlsx_template()
 
