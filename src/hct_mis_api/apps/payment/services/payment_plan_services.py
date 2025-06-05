@@ -17,7 +17,11 @@ from psycopg2._psycopg import IntegrityError
 from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import chunks, decode_id_string
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -31,12 +35,12 @@ from hct_mis_api.apps.payment.celery_tasks import (
     send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
-    Account,
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
+    PaymentDataCollector,
     PaymentPlan,
     PaymentPlanSplit,
 )
@@ -52,7 +56,6 @@ from hct_mis_api.apps.targeting.models import (
 )
 from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
-from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
@@ -203,9 +206,17 @@ class PaymentPlanService:
         self.payment_plan.currency = input_data["currency"]
         self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
         self.payment_plan.dispersion_end_date = dispersion_end_date
+        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
 
         self.payment_plan.save(
-            update_fields=("status_date", "status", "currency", "dispersion_start_date", "dispersion_end_date")
+            update_fields=(
+                "status_date",
+                "status",
+                "currency",
+                "dispersion_start_date",
+                "dispersion_end_date",
+                "exchange_rate",
+            )
         )
         self.payment_plan.program_cycle.set_active()
 
@@ -393,20 +404,12 @@ class PaymentPlanService:
                 msg = f"Couldn't find a primary collector in {household['unicef_id']}"
                 logging.exception(msg)
                 raise GraphQLError(msg)
+            collector = Individual.objects.get(id=collector_id)
 
             has_valid_wallet = True
             if payment_plan.delivery_mechanism and payment_plan.financial_service_provider:
-                wallet = Account.objects.filter(
-                    individual_id=collector_id, account_type=payment_plan.delivery_mechanism.account_type
-                ).first()
-                if not wallet:
-                    wallet = Account.objects.create(
-                        individual_id=collector_id,
-                        account_type=payment_plan.delivery_mechanism.account_type,
-                        rdi_merge_status=MergeStatusModel.MERGED,
-                    )
-                has_valid_wallet = wallet.validate(
-                    payment_plan.financial_service_provider, payment_plan.delivery_mechanism
+                has_valid_wallet = PaymentDataCollector.validate_account(
+                    payment_plan.financial_service_provider, payment_plan.delivery_mechanism, collector
                 )
 
             payments_to_create.append(
@@ -419,7 +422,7 @@ class PaymentPlanService:
                     status_date=timezone.now(),
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
-                    collector_id=collector_id,
+                    collector=collector,
                     financial_service_provider=payment_plan.financial_service_provider,
                     delivery_type=payment_plan.delivery_mechanism,
                     has_valid_wallet=has_valid_wallet,
@@ -693,11 +696,14 @@ class PaymentPlanService:
         return self.payment_plan
 
     def create_follow_up_payments(self) -> None:
+        self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
+        self.payment_plan.save(update_fields=["exchange_rate"])
         payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
-
+        split = self.payment_plan.splits.first()
         follow_up_payments = [
             Payment(
                 parent=self.payment_plan,
+                parent_split=split,
                 source_payment=payment,
                 program_id=self.payment_plan.program_cycle.program_id,
                 is_follow_up=True,
@@ -751,6 +757,7 @@ class PaymentPlanService:
             delivery_mechanism=source_pp.delivery_mechanism,
             financial_service_provider=source_pp.financial_service_provider,
         )
+        PaymentPlanSplit.objects.create(payment_plan=follow_up_pp)
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
 
@@ -803,6 +810,9 @@ class PaymentPlanService:
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
                 payments_chunks.append(list(payments))
+
+        elif split_type == PaymentPlanSplit.SplitType.NO_SPLIT:
+            payments_chunks = [list(payments)]
 
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:

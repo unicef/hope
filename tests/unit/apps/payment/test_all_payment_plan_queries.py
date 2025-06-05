@@ -360,6 +360,7 @@ class TestPaymentPlanQueries(APITestCase):
                 currency="PLN",
                 delivery_mechanism=cls.cash_dm,
                 financial_service_provider=cls.financial_service_provider,
+                exchange_rate=2.0,
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
@@ -405,6 +406,7 @@ class TestPaymentPlanQueries(APITestCase):
                 currency="UAH",
                 delivery_mechanism=referral_dm,
                 financial_service_provider=cls.financial_service_provider,
+                exchange_rate=2.0,
             )
             cls.pp_conflicted.unicef_id = "PP-02"
             cls.pp_conflicted.save()
