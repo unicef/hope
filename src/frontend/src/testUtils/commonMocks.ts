@@ -93,6 +93,9 @@ export const utilsMock = {
   programStatusToColor: vi.fn(() => 'primary'),
   formatCurrency: vi.fn((amount) => `$${amount?.toLocaleString() || '0'}`),
   columnToOrderBy: vi.fn((column) => column || 'name'),
+  decodeIdString: vi.fn((id) => id),
+  programCycleStatusToColor: vi.fn(() => 'primary'),
+  individualStatusToColor: vi.fn(() => '#000000'),
 };
 
 /**
@@ -114,7 +117,22 @@ export const mockRestService = () => {
       restBusinessAreasProgramsHouseholdsMembersList: vi.fn(),
       restBusinessAreasProgramsList: vi.fn(),
       restBusinessAreasProgramsCountRetrieve: vi.fn(),
-      restBusinessAreasUsersProfileRetrieve: vi.fn(),
+      restBusinessAreasUsersProfileRetrieve: vi.fn(() =>
+        Promise.resolve({
+          id: 'test-user',
+          username: 'testuser',
+          permissions: ['can_view_programs'],
+        }),
+      ),
+      restBusinessAreasProgramsCyclesList: vi.fn(),
+      restBusinessAreasProgramsCyclesRetrieve: vi.fn(),
+      restBusinessAreasProgramsCyclesCreate: vi.fn(),
+      restBusinessAreasProgramsCyclesUpdate: vi.fn(),
+      restBusinessAreasProgramsCyclesPartialUpdate: vi.fn(),
+      restBusinessAreasProgramsCyclesDestroy: vi.fn(),
+      restBusinessAreasProgramsCyclesFinishCreate: vi.fn(),
+      restBusinessAreasProgramsCyclesReactivateCreate: vi.fn(),
+      restBusinessAreasProgramsCyclesCountRetrieve: vi.fn(),
       // Add other commonly used RestService methods as needed
     },
   }));
@@ -154,4 +172,24 @@ export const setupCommonMocks = () => {
   mockReactRouterDom();
   mockUtils();
   mockRestService();
+
+  // Mock program cycle API
+  vi.mock('src/api/programCycleApi', () => ({
+    finishProgramCycle: vi.fn(),
+    reactivateProgramCycle: vi.fn(),
+  }));
+
+  // Mock useSnackbar
+  vi.mock('@hooks/useSnackBar', () => ({
+    useSnackbar: () => ({
+      showMessage: vi.fn(),
+    }),
+  }));
+
+  // Mock useTranslation
+  vi.mock('react-i18next', () => ({
+    useTranslation: () => ({
+      t: vi.fn((key) => key),
+    }),
+  }));
 };
