@@ -32,6 +32,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import get_program_id_from_headers
 
 if TYPE_CHECKING:
+    from django.contrib.auth.base_user import AbstractBaseUser
     from django.contrib.auth.models import AnonymousUser
 
     from hct_mis_api.apps.account.models import User
@@ -368,20 +369,20 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
 
 
 def check_creator_or_owner_permission(
-    user: Union["User", "AnonymousUser"],
-    general_permission: str,
+    user: Union["User", "AnonymousUser", "AbstractBaseUser"],
+    general_permission: Permissions,
     is_creator: bool,
-    creator_permission: str,
+    creator_permission: Permissions,
     is_owner: bool,
-    owner_permission: str,
+    owner_permission: Permissions,
     business_area: "BusinessArea",
     program: Optional["Program"],
 ) -> None:
     scope = program or business_area
     if not user.is_authenticated or not (
-        user.has_perm(general_permission, scope)
-        or (is_creator and user.has_perm(creator_permission, scope))
-        or (is_owner and user.has_perm(owner_permission, scope))
+        user.has_perm(general_permission.value, scope)
+        or (is_creator and user.has_perm(creator_permission.value, scope))
+        or (is_owner and user.has_perm(owner_permission.value, scope))
     ):
         raise PermissionDenied("Permission Denied")
 

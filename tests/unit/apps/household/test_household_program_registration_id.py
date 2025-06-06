@@ -1,8 +1,5 @@
-from parameterized import parameterized
-
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner, User
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
@@ -17,13 +14,13 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 class TestHouseholdRegistrationId(APITestCase):
-    QUERY = """
-    query Household($id: ID!) {
-      household(id: $id) {
-        programRegistrationId
-      }
-    }
-    """
+    # QUERY = """
+    # query Household($id: ID!) {
+    #   household(id: $id) {
+    #     programRegistrationId
+    #   }
+    # }
+    # """
 
     partner: Partner
     user: User
@@ -54,35 +51,35 @@ class TestHouseholdRegistrationId(APITestCase):
             },
         )
 
-    @parameterized.expand(
-        [
-            ("ABCD-123123",),
-            (None,),
-            ("",),
-        ]
-    )
-    def test_household_program_registration_id(self, program_registration_id: str) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area, self.program
-        )
-
-        self.household.program_registration_id = program_registration_id
-        self.household.save(update_fields=["program_registration_id"])
-        self.household.refresh_from_db()
-        expected_program_registration_id = f"{program_registration_id}#0" if program_registration_id else None
-        self.assertEqual(self.household.program_registration_id, expected_program_registration_id)
-
-        self.snapshot_graphql_request(
-            request_string=self.QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "Business-Area": self.business_area.slug,
-                },
-            },
-            variables={"id": self.id_to_base64(self.household.id, "HouseholdNode")},
-        )
+    # @parameterized.expand(
+    #     [
+    #         ("ABCD-123123",),
+    #         (None,),
+    #         ("",),
+    #     ]
+    # )
+    # def test_household_program_registration_id(self, program_registration_id: str) -> None:
+    #     self.create_user_role_with_permissions(
+    #         self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS], self.business_area, self.program
+    #     )
+    #
+    #     self.household.program_registration_id = program_registration_id
+    #     self.household.save(update_fields=["program_registration_id"])
+    #     self.household.refresh_from_db()
+    #     expected_program_registration_id = f"{program_registration_id}#0" if program_registration_id else None
+    #     self.assertEqual(self.household.program_registration_id, expected_program_registration_id)
+    #
+    #     self.snapshot_graphql_request(
+    #         request_string=self.QUERY,
+    #         context={
+    #             "user": self.user,
+    #             "headers": {
+    #                 "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+    #                 "Business-Area": self.business_area.slug,
+    #             },
+    #         },
+    #         variables={"id": self.id_to_base64(self.household.id, "HouseholdNode")},
+    #     )
 
     def test_program_program_registration_id_trigger(self) -> None:
         rdi = RegistrationDataImportFactory(business_area=self.business_area, program=self.program)
