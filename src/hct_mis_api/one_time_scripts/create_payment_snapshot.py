@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def create_payment_snapshot() -> None:
     start_time = timezone.now()
-    print("*** Starting Payment Snapshot creations ***\n", "*" * 60)
+    print("*** Starting Payment Snapshot creations ***\n")
     print(f"Found Payments without snapshot: {Payment.all_objects.filter(household_snapshot__isnull=True).count()}")
 
     for ba in BusinessArea.objects.all().only("id", "name"):

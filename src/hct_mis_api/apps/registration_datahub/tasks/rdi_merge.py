@@ -50,101 +50,6 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-    HOUSEHOLD_FIELDS = (
-        "consent_sign",
-        "consent",
-        "consent_sharing",
-        "residence_status",
-        "country_origin",
-        "zip_code",
-        "size",
-        "address",
-        "country",
-        "female_age_group_0_5_count",
-        "female_age_group_6_11_count",
-        "female_age_group_12_17_count",
-        "female_age_group_18_59_count",
-        "female_age_group_60_count",
-        "pregnant_count",
-        "male_age_group_0_5_count",
-        "male_age_group_6_11_count",
-        "male_age_group_12_17_count",
-        "male_age_group_18_59_count",
-        "male_age_group_60_count",
-        "female_age_group_0_5_disabled_count",
-        "female_age_group_6_11_disabled_count",
-        "female_age_group_12_17_disabled_count",
-        "female_age_group_18_59_disabled_count",
-        "female_age_group_60_disabled_count",
-        "male_age_group_0_5_disabled_count",
-        "male_age_group_6_11_disabled_count",
-        "male_age_group_12_17_disabled_count",
-        "male_age_group_18_59_disabled_count",
-        "male_age_group_60_disabled_count",
-        "other_sex_group_count",
-        "unknown_sex_group_count",
-        "first_registration_date",
-        "last_registration_date",
-        "flex_fields",
-        "start",
-        "deviceid",
-        "name_enumerator",
-        "org_enumerator",
-        "org_name_enumerator",
-        "village",
-        "registration_method",
-        "currency",
-        "unhcr_id",
-        "geopoint",
-        "returnee",
-        "fchild_hoh",
-        "child_hoh",
-        "detail_id",
-        "collect_type",
-    )
-
-    INDIVIDUAL_FIELDS = (
-        "id",
-        "photo",
-        "full_name",
-        "given_name",
-        "middle_name",
-        "family_name",
-        "relationship",
-        "sex",
-        "birth_date",
-        "estimated_birth_date",
-        "marital_status",
-        "phone_no",
-        "phone_no_alternative",
-        "email",
-        "disability",
-        "flex_fields",
-        "first_registration_date",
-        "last_registration_date",
-        "deduplication_batch_status",
-        "deduplication_batch_results",
-        "observed_disability",
-        "seeing_disability",
-        "hearing_disability",
-        "physical_disability",
-        "memory_disability",
-        "selfcare_disability",
-        "comms_disability",
-        "who_answers_phone",
-        "who_answers_alt_phone",
-        "pregnant",
-        "work_status",
-        "detail_id",
-        "disability_certificate_picture",
-        "preferred_language",
-        "age_at_registration",
-        "payment_delivery_phone_no",
-        "wallet_name",
-        "blockchain_name",
-        "wallet_address",
-    )
-
     def execute(self, registration_data_import_id: str) -> None:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -154,6 +59,23 @@ class RdiMergeTask:
             )
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
+            household_ids_from_extra_rdis = list(
+                Household.extra_rdis.through.objects.filter(registrationdataimport=obj_hct).values_list(
+                    "household_id", flat=True
+                )
+            )
+            household_ids_from_extra_rdis = list(
+                PendingHousehold.objects.filter(
+                    id__in=household_ids_from_extra_rdis, rdi_merge_status=PendingHousehold.PENDING
+                ).values_list("id", flat=True)
+            )
+            individuals_from_extra_rdis = list(
+                PendingIndividual.objects.filter(
+                    household__in=household_ids_from_extra_rdis, rdi_merge_status=PendingIndividual.PENDING
+                ).values_list("id", flat=True)
+            )
+            individual_ids.extend(individuals_from_extra_rdis)
+            household_ids.extend(household_ids_from_extra_rdis)
             try:
                 with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
@@ -163,7 +85,7 @@ class RdiMergeTask:
                         f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
                     )
                     kobo_submissions = []
-                    for household in households:
+                    for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
                         kobo_submission_uuid = household.kobo_submission_uuid
                         kobo_asset_id = household.detail_id
                         kobo_submission_time = household.kobo_submission_time
@@ -205,6 +127,9 @@ class RdiMergeTask:
                     )
                     PendingIndividual.objects.filter(id__in=individual_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    self._update_rdi_id_for_extra_rdi(
+                        obj_hct.id, household_ids_from_extra_rdis, individuals_from_extra_rdis
                     )
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
@@ -277,7 +202,6 @@ class RdiMergeTask:
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
                     obj_hct.update_duplicates_against_population_statistics()
-
                     # create household and individual collections - only for Program Population Import
                     if obj_hct.data_source == RegistrationDataImport.PROGRAM_POPULATION:
                         self._update_household_collections(households, obj_hct)
@@ -371,3 +295,28 @@ class RdiMergeTask:
                     individuals_to_update.append(individual_from_collection)
                     individuals_to_update.append(individual)
         Individual.all_objects.bulk_update(individuals_to_update, ["individual_collection"])
+
+    def _update_rdi_id_for_extra_rdi(
+        self, rdi_id: str, household_ids_from_extra_rdis: list, individuals_from_extra_rdis: list
+    ) -> None:
+        """
+        This function replace registration_data_import_id for households that were created from extra RDI.
+        (if rdi with extra_rdi_was the one merged as first)
+        """
+        if not household_ids_from_extra_rdis:
+            return
+        old_rdi_ids = Household.all_objects.filter(id__in=household_ids_from_extra_rdis).values_list(
+            "id", "registration_data_import_id"
+        )
+        extra_rdis_to_create = []
+        for household_id, old_rdi_id in old_rdi_ids:
+            extra_rdis_to_create.append(
+                Household.extra_rdis.through(household_id=household_id, registrationdataimport_id=old_rdi_id)
+            )
+        Household.extra_rdis.through.objects.bulk_create(extra_rdis_to_create)
+        Household.all_objects.filter(id__in=household_ids_from_extra_rdis).update(registration_data_import_id=rdi_id)
+        Individual.all_objects.filter(id__in=individuals_from_extra_rdis).update(registration_data_import_id=rdi_id)
+
+        Household.extra_rdis.through.objects.filter(
+            registrationdataimport_id=rdi_id, household_id__in=household_ids_from_extra_rdis
+        ).delete()

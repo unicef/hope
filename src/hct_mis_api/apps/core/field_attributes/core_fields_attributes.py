@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
+    extra_rdis_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_drivers_license_document_number_query,
@@ -2178,6 +2179,39 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "program_registration_id_h_c",
         "scope": [Scope.KOBO_IMPORT],
+    },
+    {
+        "id": "7003a190-f71f-4ba1-b0f5-fd805097b33c",
+        "type": TYPE_STRING,
+        "name": "identification_key",
+        "lookup": "identification_key",
+        "required": False,
+        "label": {"English(EN)": "Identification key"},
+        "hint": "Field used to identify collisions",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "identification_key_h_c",
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.INDIVIDUAL_UPDATE,
+            Scope.XLSX_PEOPLE,
+            Scope.PEOPLE_UPDATE,
+        ],
+    },
+    {
+        "id": "730295f6-a6a3-48cf-abe3-7b304b40c886",
+        "type": TYPE_SELECT_MANY,
+        "name": "extra_rdis",
+        "lookup": "extra_rdis",
+        "get_query": extra_rdis_query,
+        "required": False,
+        "label": {"English(EN)": "Extra RDIs"},
+        "hint": "Filter for targeting by extra RDIs",
+        "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
+        "associated_with": _HOUSEHOLD,
+        "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
+        "xlsx_field": "extra_rdis_",
     },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 

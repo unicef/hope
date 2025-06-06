@@ -266,3 +266,9 @@ def registration_data_import_query(comparison_method: str, args: Any, is_social_
     from django.db.models import Q
 
     return Q(registration_data_import__pk__in=args)
+
+
+def extra_rdis_query(comparison_method: str, args: Any, is_social_worker_query: bool = False) -> Q:
+    from django.db.models import Q
+
+    return Q(extra_rdis__in=args)
