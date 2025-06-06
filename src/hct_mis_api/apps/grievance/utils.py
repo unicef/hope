@@ -99,7 +99,7 @@ def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTi
 
 def update_grievance_documents(documents: List[Dict]) -> None:
     for document in documents:
-        current_document = GrievanceDocument.objects.filter(id=decode_id_string(document["id"])).first()
+        current_document = GrievanceDocument.objects.filter(id=document["id"]).first()
         if current_document:
             os.remove(current_document.file.path)
 
@@ -113,10 +113,8 @@ def update_grievance_documents(documents: List[Dict]) -> None:
             current_document.save()
 
 
-def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None:
-    documents_to_delete = GrievanceDocument.objects.filter(
-        grievance_ticket_id=ticket_id, id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
-    )
+def delete_grievance_documents(ticket_id: str, documents_to_delete: List[str]) -> None:
+    documents_to_delete = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=documents_to_delete)
 
     for document in documents_to_delete:
         os.remove(document.file.path)

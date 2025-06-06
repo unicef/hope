@@ -2,15 +2,13 @@ from datetime import date, datetime
 from typing import Any, Dict, List
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-from graphql import GraphQLError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
+from hct_mis_api.apps.core.utils import to_snake_case
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task,
@@ -67,9 +65,7 @@ class IndividualDataUpdateService(DataChangeService):
     def save(self) -> List[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
-        individual_encoded_id = individual_data_update_issue_type_extras.get("individual")
-        individual_id = decode_id_string(individual_encoded_id)
-        individual = get_object_or_404(Individual, id=individual_id)
+        individual = individual_data_update_issue_type_extras.get("individual")
         individual_data = individual_data_update_issue_type_extras.get("individual_data", {})
         documents = individual_data.pop("documents", [])
         documents_to_remove = individual_data.pop("documents_to_remove", [])
@@ -247,19 +243,17 @@ class IndividualDataUpdateService(DataChangeService):
             field: data.get("value") for field, data in flex_fields_with_additional_data.items() if is_approved(data)
         }
         documents = [document["value"] for document in individual_data.pop("documents", []) if is_approved(document)]
-        documents_to_remove_encoded = individual_data.pop("documents_to_remove", [])
+        documents_to_remove_list = individual_data.pop("documents_to_remove", [])
         documents_to_remove = [
-            decode_id_string(document_data["value"])
-            for document_data in documents_to_remove_encoded
-            if is_approved(document_data)
+            document_data["value"] for document_data in documents_to_remove_list if is_approved(document_data)
         ]
         documents_to_edit = [
             document for document in individual_data.pop("documents_to_edit", []) if is_approved(document)
         ]
         identities = [identity["value"] for identity in individual_data.pop("identities", []) if is_approved(identity)]
-        identities_to_remove_encoded = individual_data.pop("identities_to_remove", [])
+        identities_to_remove_list = individual_data.pop("identities_to_remove", [])
         identities_to_remove = [
-            identity_data["value"] for identity_data in identities_to_remove_encoded if is_approved(identity_data)
+            identity_data["value"] for identity_data in identities_to_remove_list if is_approved(identity_data)
         ]
         identities_to_edit = [
             identity for identity in individual_data.pop("identities_to_edit", []) if is_approved(identity)
@@ -267,10 +261,8 @@ class IndividualDataUpdateService(DataChangeService):
         payment_channels = [
             identity["value"] for identity in individual_data.pop("payment_channels", []) if is_approved(identity)
         ]
-        payment_channels_to_remove_encoded = individual_data.pop("payment_channels_to_remove", [])
-        payment_channels_to_remove = [
-            decode_id_string(data["value"]) for data in payment_channels_to_remove_encoded if is_approved(data)
-        ]
+        payment_channels_to_remove_list = individual_data.pop("payment_channels_to_remove", [])
+        payment_channels_to_remove = [data["value"] for data in payment_channels_to_remove_list if is_approved(data)]
         payment_channels_to_edit = [
             identity["value"]
             for identity in individual_data.pop("payment_channels_to_edit", [])
@@ -336,7 +328,7 @@ class IndividualDataUpdateService(DataChangeService):
             and new_individual.relationship != HEAD
         ):
             if household.individuals.filter(relationship=HEAD).count() > 1:
-                raise GraphQLError("There is one head of household. First, you need to change its role.")
+                raise ValidationError("There is one head of household. First, you need to change its role.")
             household = Household.objects.select_for_update().get(id=household.id)
             household.head_of_household = new_individual
             household.save()
