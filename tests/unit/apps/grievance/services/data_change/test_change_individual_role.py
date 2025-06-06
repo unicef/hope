@@ -26,6 +26,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestChangeIndividualRole(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:

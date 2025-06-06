@@ -79,6 +79,7 @@ class CellMock:
         self.coordinate = coordinate
 
 
+@pytest.mark.elasticsearch
 class TestRdiXlsxCreateTask(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 

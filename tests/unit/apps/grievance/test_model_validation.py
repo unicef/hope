@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.http import QueryDict
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -101,7 +102,11 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
             "delivery_mechanism": self.dm_transfer_to_account.id,
             "xlsx_template": fsp_xls_template.id,
         }
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone)
+        form_data_standalone_query_dict = QueryDict(mutable=True)
+        for key, value in form_data_standalone.items():
+            form_data_standalone_query_dict[key] = value
+
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone_query_dict)
         self.assertTrue(form.is_valid())
         form.clean()
 
@@ -112,13 +117,21 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
             "xlsx_template": fsp_xls_template.id,
             "delivery_mechanisms": [str(self.dm_transfer_to_account.id)],
         }
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline)
+
+        form_data_inline_query_dict = QueryDict(mutable=True)
+        for key, value in form_data_inline.items():
+            if isinstance(value, list):
+                form_data_inline_query_dict.setlist(key, value)
+                continue
+            form_data_inline_query_dict[key] = value
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
+        print(form.errors)
         self.assertTrue(form.is_valid())
         form.clean()
 
         # test delivery mechanism not supported
         fsp.delivery_mechanisms.remove(self.dm_transfer_to_account)
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone)
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone_query_dict)
         self.assertFalse(form.is_valid())
         with self.assertRaisesMessage(
             ValidationError,
@@ -133,7 +146,10 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
             "xlsx_template": fsp_xls_template.id,
             "delivery_mechanisms": ["12313213123"],
         }
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline)
+        form_data_inline_query_dict = QueryDict(mutable=True)
+        for key, value in form_data_inline.items():
+            form_data_inline_query_dict[key] = value
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
         self.assertFalse(form.is_valid())
         with self.assertRaisesMessage(
             ValidationError,

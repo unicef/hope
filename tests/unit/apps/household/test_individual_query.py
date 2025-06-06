@@ -49,6 +49,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
+@pytest.mark.elasticsearch
 class TestIndividualQuery(APITestCase):
     databases = "__all__"
 
@@ -413,7 +414,7 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": "Jenna Franklin"},
+            variables={"search": "Jenna Franklin", "program": self.id_to_base64(self.program.id, "ProgramNode")},
         )
 
     def test_individual_query_draft(self) -> None:
@@ -686,6 +687,7 @@ class TestIndividualQuery(APITestCase):
         )
 
 
+@pytest.mark.elasticsearch
 class TestIndividualWithFlexFieldsQuery(APITestCase):
     databases = "__all__"
 
@@ -804,6 +806,7 @@ class TestIndividualWithFlexFieldsQuery(APITestCase):
         )
 
 
+@pytest.mark.elasticsearch
 class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
     databases = "__all__"
 
@@ -832,7 +835,7 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
         cls.financial_institution = FinancialInstitution.objects.create(
-            code="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+            id=123, name="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
         )
 
         cls.program = ProgramFactory(

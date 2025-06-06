@@ -134,6 +134,7 @@ HOUSEHOLD_QUERY = """
     """
 
 
+@pytest.mark.elasticsearch
 @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
 class TestHouseholdQuery(APITestCase):
     databases = "__all__"
@@ -404,7 +405,10 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{household.unicef_id}"},
+            variables={
+                "search": f"{household.unicef_id}",
+                "program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+            },
         )
 
     @parameterized.expand(

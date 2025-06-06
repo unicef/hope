@@ -141,7 +141,7 @@ CONSTANCE_CONFIG = {
         str,
     ),
     "QUICK_LINKS": (
-        """Kobo,https://kf-hope.unitst.org/
+        """Kobo,https://kobo-hope-trn.unitst.org/
 Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/
 elasticsearch,hope-elasticsearch-coordinating-only:9200
 Datamart,https://datamart.unicef.io
@@ -160,11 +160,6 @@ Clear Cache,clear-cache/
     "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH": (
         False,
         "Use elastic search for households search",
-        bool,
-    ),
-    "USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA": (
-        False,
-        "Use business area during elastic search for households search",
         bool,
     ),
     "AUTO_MERGE_AFTER_AUTO_RDI_IMPORT": (

@@ -111,13 +111,11 @@ class TestBuildSnapshot(TestCase):
         self.assertEqual(len(self.p2.household_snapshot.snapshot_data["individuals"]), self.hh2.individuals.count())
         self.assertIsNotNone(self.p1.household_snapshot.snapshot_data["primary_collector"])
         self.assertEqual(
-            self.p1.household_snapshot.snapshot_data["primary_collector"].get("accounts_data", {}),
+            self.p1.household_snapshot.snapshot_data["primary_collector"].get("account_data", {}),
             {
-                "bank": {
-                    "expiry_date": "2022-01-01",
-                    "number": "123",
-                    "name_of_cardholder": "Marek",
-                }
+                "expiry_date": "2022-01-01",
+                "number": "123",
+                "name_of_cardholder": "Marek",
             },
         )
 
