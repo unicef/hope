@@ -2,9 +2,10 @@ from datetime import date, datetime
 from typing import Any, Dict, List
 
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
+
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
