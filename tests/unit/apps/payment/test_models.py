@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from typing import Any
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from django import forms
 from django.contrib.admin.options import get_content_type_for_model
@@ -53,6 +53,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
     Payment,
+    PaymentDataCollector,
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
@@ -198,11 +199,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
 
-    @patch(
-        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
-        return_value=2.0,
-    )
-    def test_update_money_fields(self, get_exchange_rate_mock: Any) -> None:
+    def test_update_money_fields(self) -> None:
         pp = PaymentPlanFactory()
         PaymentFactory(
             parent=pp,
@@ -224,7 +221,6 @@ class TestPaymentPlanModel(TestCase):
         pp.update_money_fields()
 
         pp.refresh_from_db()
-        self.assertEqual(pp.exchange_rate, 2.0)
         self.assertEqual(pp.total_entitled_quantity, 200.00)
         self.assertEqual(pp.total_entitled_quantity_usd, 400.00)
         self.assertEqual(pp.total_delivered_quantity, 100.00)
@@ -888,7 +884,7 @@ class TestAccountModel(TestCase):
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.financial_institution = FinancialInstitution.objects.create(
-            code="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+            name="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
         )
 
     def test_str(self) -> None:
@@ -897,11 +893,24 @@ class TestAccountModel(TestCase):
 
     def test_get_associated_object(self) -> None:
         dmd = AccountFactory(data={"test": "test"}, individual=self.ind)
-        self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value), dmd.data)
         self.assertEqual(
-            dmd.get_associated_object(FspNameMapping.SourceModel.HOUSEHOLD.value), dmd.individual.household
+            PaymentDataCollector.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value, self.ind, dmd),
+            dmd.data,
         )
-        self.assertEqual(dmd.get_associated_object(FspNameMapping.SourceModel.INDIVIDUAL.value), dmd.individual)
+        self.assertEqual(
+            PaymentDataCollector.get_associated_object(
+                FspNameMapping.SourceModel.HOUSEHOLD.value,
+                self.ind,
+            ),
+            dmd.individual.household,
+        )
+        self.assertEqual(
+            PaymentDataCollector.get_associated_object(
+                FspNameMapping.SourceModel.INDIVIDUAL.value,
+                self.ind,
+            ),
+            dmd.individual,
+        )
 
     def test_delivery_data(self) -> None:
         dmd = AccountFactory(
@@ -915,10 +924,10 @@ class TestAccountModel(TestCase):
             financial_institution=self.financial_institution,
         )
 
-        fsp2 = FinancialServiceProviderFactory()  # no dm config
+        fsp2 = FinancialServiceProviderFactory()  # no dm config (no required fields), just unpack dmd.data
         self.assertEqual(
-            dmd.delivery_data(fsp2, self.dm_atm_card),
-            {},
+            PaymentDataCollector.delivery_data(fsp2, self.dm_atm_card, self.ind),
+            dmd.data,
         )
 
         dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
@@ -961,7 +970,7 @@ class TestAccountModel(TestCase):
         self.hh.__class__.my_custom_hh_address = property(my_custom_hh_address)
 
         self.assertEqual(
-            dmd.delivery_data(self.fsp, self.dm_atm_card),
+            PaymentDataCollector.delivery_data(self.fsp, self.dm_atm_card, self.ind),
             {
                 "number": "test",
                 "expiry_date": "12.12.2024",
@@ -969,12 +978,12 @@ class TestAccountModel(TestCase):
                 "custom_ind_name": f"{dmd.individual.full_name} Custom",
                 "custom_hh_address": f"{self.hh.address} Custom",
                 "address": self.hh.address,
-                "financial_institution": "ABC",
+                "financial_institution": str(self.financial_institution.id),
             },
         )
 
     def test_validate(self) -> None:
-        dmd = AccountFactory(
+        AccountFactory(
             data={
                 "number": "test",
                 "expiry_date": "12.12.2024",
@@ -983,7 +992,7 @@ class TestAccountModel(TestCase):
             individual=self.ind,
             account_type=AccountType.objects.get(key="bank"),
         )
-        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), True)
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), True)
 
         dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
         dm_config.required_fields.extend(["address"])
@@ -992,7 +1001,7 @@ class TestAccountModel(TestCase):
         FspNameMapping.objects.create(
             external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
         )
-        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), True)
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), True)
 
         dm_config.required_fields.extend(["missing_field"])
         dm_config.save()
@@ -1003,7 +1012,7 @@ class TestAccountModel(TestCase):
             source=FspNameMapping.SourceModel.INDIVIDUAL,
             fsp=self.fsp,
         )
-        self.assertEqual(dmd.validate(self.fsp, self.dm_atm_card), False)
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), False)
 
     def test_validate_uniqueness(self) -> None:
         AccountFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
