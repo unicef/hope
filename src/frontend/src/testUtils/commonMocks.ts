@@ -39,6 +39,13 @@ export const mockUseProgramContext = (
 export const mockReactRouterDom = () => {
   vi.mock('react-router-dom', () => ({
     useNavigate: () => vi.fn(),
+    useLocation: () => ({
+      pathname: '/test-path',
+      search: '',
+      hash: '',
+      state: null,
+      key: 'test-key',
+    }),
     Link: ({ children, to, ...props }: any) =>
       React.createElement('a', { href: to, ...props }, children),
   }));
@@ -71,24 +78,21 @@ export const utilsMock = {
       .padStart(2, '0'),
   ),
   isPermissionDeniedError: vi.fn((error) => error?.response?.status === 403),
-  dateToIsoString: vi.fn((date, type) => {
-    if (!date) return null;
-    // Simple mock implementation
-    if (typeof date === 'string') return date;
-    return date.toISOString ? date.toISOString() : date;
-  }),
+  dateToIsoString: vi.fn((date) => date?.toISOString?.() || date),
   choicesToDict: vi.fn((choices) => {
     if (!choices) return {};
     return choices.reduce((acc, choice) => {
-      acc[choice.value] = choice.label;
+      acc[choice.value] = choice.name;
       return acc;
     }, {});
   }),
-  populationStatusToColor: vi.fn(() => 'success'),
-  sexToCapitalize: vi.fn((sex) => {
-    if (!sex) return '';
-    return sex.charAt(0).toUpperCase() + sex.slice(1).toLowerCase();
-  }),
+  populationStatusToColor: vi.fn(() => 'primary'),
+  sexToCapitalize: vi.fn(
+    (sex) => sex?.charAt(0).toUpperCase() + sex?.slice(1).toLowerCase(),
+  ),
+  programStatusToColor: vi.fn(() => 'primary'),
+  formatCurrency: vi.fn((amount) => `$${amount?.toLocaleString() || '0'}`),
+  columnToOrderBy: vi.fn((column) => column || 'name'),
 };
 
 /**
@@ -108,6 +112,9 @@ export const mockRestService = () => {
       restBusinessAreasProgramsHouseholdsCountRetrieve: vi.fn(),
       restBusinessAreasProgramsIndividualsList: vi.fn(),
       restBusinessAreasProgramsHouseholdsMembersList: vi.fn(),
+      restBusinessAreasProgramsList: vi.fn(),
+      restBusinessAreasProgramsCountRetrieve: vi.fn(),
+      restBusinessAreasUsersProfileRetrieve: vi.fn(),
       // Add other commonly used RestService methods as needed
     },
   }));
