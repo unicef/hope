@@ -614,7 +614,7 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_collision(self) -> None:
         program = Program.objects.get(pk=self.program.id)
         program.collision_detection_enabled = True
-        program.collision_detector = "hct_mis_api.apps.program.collission_detectors.IdentificationKeyCollisionDetector"
+        program.collision_detector = "hct_mis_api.apps.program.collision_detectors.IdentificationKeyCollisionDetector"
         program.save()
         input_data = {
             "program": str(self.program.id),
