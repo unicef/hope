@@ -1,22 +1,22 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`HouseholdTable renders correctly after data is fetched 1`] = `
-<DocumentFragment>
+exports[`HouseholdTable > should render HouseholdTable correctly 1`] = `
+<div>
   <div
-    class="sc-gNZgCX jsJGUw"
+    class="sc-hoLldG jpoMAa"
   >
     <div
-      class="sc-jZTQcj iLgara"
+      class="sc-kAFUCS lphlKm"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dkBYrC fTGYZp css-1gtchvp-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dACwDz CMNRa css-1gtchvp-MuiPaper-root"
         style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
       >
         <div
-          class="MuiTableContainer-root sc-fuExOL css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-groBii css-70zvr5-MuiTableContainer-root"
         >
           <div
-            class="sc-gjXmFk jFeMAy MuiBox-root css-0"
+            class="sc-hLyRwt iDVDRO MuiBox-root css-0"
           >
             <div
               class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-16wdp7y-MuiToolbar-root"
@@ -29,11 +29,11 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
               </h6>
             </div>
             <div
-              class="sc-gjXmFk jFeMAy MuiBox-root css-1ruxp1v"
+              class="sc-hLyRwt iDVDRO MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-kXOizl sc-hORkcV clOSwk gttDmo css-14k3lwa-MuiTable-root"
+            class="MuiTable-root sc-kHNKno sc-iLBnws kXlVOB hmIXYn css-14k3lwa-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-1a7iywq-MuiTableHead-root"
@@ -47,7 +47,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -71,7 +71,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -96,7 +96,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -121,7 +121,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -146,7 +146,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -171,7 +171,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -196,7 +196,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -221,7 +221,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -246,7 +246,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                   scope="col"
                 >
                   <span
-                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jHswkR fTFVdP css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                    class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-kieALA btCSSC css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -271,532 +271,74 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
               class="MuiTableBody-root css-gmh7jj-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-jbAkgO eOiLNZ css-1o8lslm-MuiTableRow-root"
-                data-cy="household-table-row"
-                role="checkbox"
+                class="MuiTableRow-root sc-dHKmnV knhesH css-1o8lslm-MuiTableRow-root"
+                data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <a
-                    class="sc-FEMpB gVfMNY"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTo1ZGIzMTI2OS1mNzNhLTRmN2EtOWViNS1lNTQ1MTkzZTFlOGM="
-                  >
-                    HH-0
-                  </a>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="sc-fLDLck ejpeUT"
-                  >
-                    <div
-                      class="sc-dycHyt eujgg status-box-container"
-                      data-cy="status-container"
-                    >
-                      ACTIVE
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  3
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  USD 0.00
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  <time
-                    datetime="1736940739000"
-                  >
-                    15 Jan 2025
-                  </time>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-jbAkgO eOiLNZ css-1o8lslm-MuiTableRow-root"
-                data-cy="household-table-row"
-                role="checkbox"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <a
-                    class="sc-FEMpB gVfMNY"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTozY2IxYWFmYi03NWZhLTQxYTItODQ3OS02Njc0NTkyZGQ0NmI="
-                  >
-                    HH-1
-                  </a>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="sc-fLDLck ejpeUT"
-                  >
-                    <div
-                      class="sc-dycHyt eujgg status-box-container"
-                      data-cy="status-container"
-                    >
-                      ACTIVE
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  4
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  NON_HOST
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  USD 0.00
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  <time
-                    datetime="1738732311000"
-                  >
-                    5 Feb 2025
-                  </time>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-jbAkgO eOiLNZ css-1o8lslm-MuiTableRow-root"
-                data-cy="household-table-row"
-                role="checkbox"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <a
-                    class="sc-FEMpB gVfMNY"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTowN2FmNzUxNi0wN2QwLTQ3ZWEtOGYzZC05NjBiMDQ2ZWE1NDY="
-                  >
-                    HH-2
-                  </a>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="sc-fLDLck ejpeUT"
-                  >
-                    <div
-                      class="sc-dycHyt eujgg status-box-container"
-                      data-cy="status-container"
-                    >
-                      ACTIVE
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  5
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  OTHERS_OF_CONCERN
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  USD 0.00
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  <time
-                    datetime="1736457069000"
-                  >
-                    9 Jan 2025
-                  </time>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-jbAkgO eOiLNZ css-1o8lslm-MuiTableRow-root"
-                data-cy="household-table-row"
-                role="checkbox"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <a
-                    class="sc-FEMpB gVfMNY"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDE="
-                  >
-                    HH-24-0000.0003
-                  </a>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="sc-fLDLck ejpeUT"
-                  >
-                    <div
-                      class="sc-dycHyt eujgg status-box-container"
-                      data-cy="status-container"
-                    >
-                      ACTIVE
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  4
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  USD 0.00
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  <time
-                    datetime="1741039992346"
-                  >
-                    3 Mar 2025
-                  </time>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-jbAkgO eOiLNZ css-1o8lslm-MuiTableRow-root"
-                data-cy="household-table-row"
-                role="checkbox"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <a
-                    class="sc-FEMpB gVfMNY"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTphYTAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDI="
-                  >
-                    HH-24-0000.0004
-                  </a>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="sc-fLDLck ejpeUT"
-                  >
-                    <div
-                      class="sc-dycHyt eujgg status-box-container"
-                      data-cy="status-container"
-                    >
-                      ACTIVE
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  4
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  USD 0.00
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  <time
-                    datetime="1741039992346"
-                  >
-                    3 Mar 2025
-                  </time>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-jbAkgO eOiLNZ css-1o8lslm-MuiTableRow-root"
-                data-cy="household-table-row"
-                role="checkbox"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <a
-                    class="sc-FEMpB gVfMNY"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTo0MGYwMmU1ZC01YjgxLTRiZDUtYjI0NC1mYTE3ZmI5YTVkODU="
-                  >
-                    HH-3
-                  </a>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="sc-fLDLck ejpeUT"
-                  >
-                    <div
-                      class="sc-dycHyt eujgg status-box-container"
-                      data-cy="status-container"
-                    >
-                      ACTIVE
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  6
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  HOST
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  USD 0.00
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  <time
-                    datetime="1738035349000"
-                  >
-                    28 Jan 2025
-                  </time>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-jbAkgO eOiLNZ css-1o8lslm-MuiTableRow-root"
-                data-cy="household-table-row"
-                role="checkbox"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                  <div
-                    class="MuiBox-root css-12z0wuy"
-                  />
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <a
-                    class="sc-FEMpB gVfMNY"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZTRmOGMwNjctNjcwOC00NjZmLWFjYmMtZGE2OTkxZjE0MjY2/population/household/SG91c2Vob2xkTm9kZTo1ZjE4NmRiMS03ZjZhLTRlZjktOWQzMC1jYTAzYmRkMWI3YTM="
-                  >
-                    HH-4
-                  </a>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  <div
-                    class="sc-fLDLck ejpeUT"
-                  >
-                    <div
-                      class="sc-dycHyt eujgg status-box-container"
-                      data-cy="status-container"
-                    >
-                      ACTIVE
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                />
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  3
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  -
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-19syksp-MuiTableCell-root"
-                >
-                  HOST
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  USD 0.00
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-3ssuu9-MuiTableCell-root"
-                >
-                  <time
-                    datetime="1737427784000"
-                  >
-                    21 Jan 2025
-                  </time>
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-eiwqOE cwaEOw css-1o8lslm-MuiTableRow-root"
-                style="height: 350px;"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dPKAra gMDMFe css-1dc80h3-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-frmfij hKihFW css-1dc80h3-MuiTableCell-root"
                   colspan="9"
-                />
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-dHKmnV knhesH css-1o8lslm-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-frmfij hKihFW css-1dc80h3-MuiTableCell-root"
+                  colspan="9"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-dHKmnV knhesH css-1o8lslm-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-frmfij hKihFW css-1dc80h3-MuiTableCell-root"
+                  colspan="9"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-dHKmnV knhesH css-1o8lslm-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-frmfij hKihFW css-1dc80h3-MuiTableCell-root"
+                  colspan="9"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-dHKmnV knhesH css-1o8lslm-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-frmfij hKihFW css-1dc80h3-MuiTableCell-root"
+                  colspan="9"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -862,6 +404,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                 aria-label="Go to previous page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
+                id=":r3:"
                 tabindex="-1"
                 title="Go to previous page"
                 type="button"
@@ -882,6 +425,7 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
                 aria-label="Go to next page"
                 class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-colorInherit MuiIconButton-sizeMedium css-h7cjts-MuiButtonBase-root-MuiIconButton-root"
                 disabled=""
+                id=":r4:"
                 tabindex="-1"
                 title="Go to next page"
                 type="button"
@@ -904,5 +448,5 @@ exports[`HouseholdTable renders correctly after data is fetched 1`] = `
       </div>
     </div>
   </div>
-</DocumentFragment>
+</div>
 `;
