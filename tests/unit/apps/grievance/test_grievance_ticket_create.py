@@ -405,5 +405,3 @@ class TestGrievanceTicketCreate:
         response = self.api_client.post(self.list_url, data, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Feedback tickets are not allowed to be created through this mutation." in response.json()
-
-# TODO: add more tests from old GraphQL
