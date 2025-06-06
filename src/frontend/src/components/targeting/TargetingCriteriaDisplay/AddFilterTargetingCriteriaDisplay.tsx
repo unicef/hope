@@ -148,6 +148,13 @@ const AddFilterTargetingCriteriaDisplay = ({
   };
 
   const addCriteria = (values): void => {
+    if (!helpers) {
+      console.error(
+        'AddFilterTargetingCriteriaDisplay: helpers not available in read-only mode',
+      );
+      return closeModal();
+    }
+
     const criteria = {
       householdsFiltersBlocks: [...values.householdsFiltersBlocks],
       individualsFiltersBlocks: [...values.individualsFiltersBlocks],
@@ -198,7 +205,7 @@ const AddFilterTargetingCriteriaDisplay = ({
       <Box display="flex" flexDirection="column">
         <Title>
           <div />
-          {isEdit && (
+          {isEdit && helpers && (
             <>
               {!!rules.length && (
                 <Button
@@ -254,7 +261,7 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}
-                        removeFunction={() => helpers.remove(index)}
+                        removeFunction={() => helpers?.remove(index)}
                       />
 
                       {index === rules.length - 1 ||
@@ -268,13 +275,27 @@ const AddFilterTargetingCriteriaDisplay = ({
                 : null}
 
               {!rules.length && (
-                <AddCriteria
-                  onClick={handleAddFilter}
-                  data-cy="button-target-population-add-criteria"
-                >
-                  <AddCircleOutline />
-                  <p>{t('Add Filter')}</p>
-                </AddCriteria>
+                <>
+                  {isEdit && helpers ? (
+                    <AddCriteria
+                      onClick={handleAddFilter}
+                      data-cy="button-target-population-add-criteria"
+                    >
+                      <AddCircleOutline />
+                      <p>{t('Add Filter')}</p>
+                    </AddCriteria>
+                  ) : (
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      py={4}
+                      sx={{ color: 'text.secondary', fontStyle: 'italic' }}
+                    >
+                      {t('No targeting criteria defined')}
+                    </Box>
+                  )}
+                </>
               )}
             </Box>
             <ExcludeCheckboxes

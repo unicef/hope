@@ -1308,3 +1308,12 @@ export function deepUnderscore(data) {
   }
   return data;
 }
+
+export const fieldNameToLabel = (fieldName: string): string => {
+  if (!fieldName) return '';
+
+  return fieldName
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};

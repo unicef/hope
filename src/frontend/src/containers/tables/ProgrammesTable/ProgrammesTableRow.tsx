@@ -32,7 +32,7 @@ function ProgrammesTableRow({
   };
 
   const programSectorChoiceDict = choicesToDict(
-    choicesData.programSectorChoices,
+    choicesData?.programSectorChoices,
   );
 
   return (

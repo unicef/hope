@@ -2,5 +2,7 @@ import importlib.metadata
 
 
 def get_full_version() -> str:
-    version = importlib.metadata.version("hope")
-    return version
+    try:
+        return importlib.metadata.version("hope")
+    except:
+        return '1.0.0'
