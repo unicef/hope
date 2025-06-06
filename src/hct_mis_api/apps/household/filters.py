@@ -169,7 +169,8 @@ class HouseholdFilter(FilterSet):
         program_slug = self.request.parser_context["kwargs"].get("program_slug")
         filters = [{"term": {"business_area": business_area}}]
         if program_slug:
-            filters.append({"term": {"program_id": program_slug}})  # TODO: program slug or ID?
+            program = Program.objects.get(slug=program_slug, business_area__slug=business_area)
+            filters.append({"term": {"program_id": str(program.pk)}})
         query: Dict[str, Any] = {
             "size": "100",
             "_source": False,
@@ -376,7 +377,8 @@ class IndividualFilter(FilterSet):
         business_area = self.request.parser_context["kwargs"]["business_area_slug"]
         filters = [{"term": {"business_area": business_area}}]
         if program_slug := self.request.parser_context["kwargs"].get("program_slug"):
-            filters.append({"term": {"program_id": program_slug}})  # TODO: program slug or ID?
+            program = Program.objects.get(slug=program_slug, business_area__slug=business_area)
+            filters.append({"term": {"program_id": str(program.pk)}})
         return {
             "size": 100,
             "_source": False,
