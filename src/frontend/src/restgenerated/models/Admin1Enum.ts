@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR52` - Griffithport
- * * `UA67` - New Caitlinville
- * * `AF35` - New James
- * * `AF53` - New Zachary
- * * `UA16` - Orozcochester
- * * `UA40` - Port Katherine
- * * `AF49` - Smithland
- * * `HR95` - South Rachaelfurt
- * * `HR49` - West Cheryl
+ * * `HR32` - Andrewville
+ * * `AF99` - East Ashleymouth
+ * * `HR83` - Garciatown
+ * * `HR48` - Jeffreyside
+ * * `AF66` - Lake Amy
+ * * `AF50` - Lake David
+ * * `UA29` - Lisatown
+ * * `UA42` - New Aaronborough
+ * * `UA19` - Ramirezberg
  */
 export enum Admin1Enum {
-    HR52 = 'HR52',
-    UA67 = 'UA67',
-    AF35 = 'AF35',
-    AF53 = 'AF53',
-    UA16 = 'UA16',
-    UA40 = 'UA40',
-    AF49 = 'AF49',
-    HR95 = 'HR95',
-    HR49 = 'HR49',
+    HR32 = 'HR32',
+    AF99 = 'AF99',
+    HR83 = 'HR83',
+    HR48 = 'HR48',
+    AF66 = 'AF66',
+    AF50 = 'AF50',
+    UA29 = 'UA29',
+    UA42 = 'UA42',
+    UA19 = 'UA19',
 }

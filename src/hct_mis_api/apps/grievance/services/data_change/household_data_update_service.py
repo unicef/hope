@@ -2,13 +2,12 @@ from datetime import date, datetime
 from typing import List
 
 from django.contrib.auth.models import AbstractUser
-from django.shortcuts import get_object_or_404
 
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
+from hct_mis_api.apps.core.utils import to_snake_case
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
@@ -34,9 +33,7 @@ class HouseholdDataUpdateService(DataChangeService):
     def save(self) -> List[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
-        household_encoded_id = household_data_update_issue_type_extras.get("household")
-        household_id = decode_id_string(household_encoded_id)
-        household = get_object_or_404(Household, id=household_id)
+        household = household_data_update_issue_type_extras.get("household")
         household_data = household_data_update_issue_type_extras.get("household_data", {})
         to_date_string(household_data, "start")
         to_date_string(household_data, "end")
