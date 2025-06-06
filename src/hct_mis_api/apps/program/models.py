@@ -27,7 +27,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.program.collission_detectors import collision_detectors_registry
+from hct_mis_api.apps.program.collision_detectors import collision_detectors_registry
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
