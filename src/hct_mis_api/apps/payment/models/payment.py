@@ -65,6 +65,7 @@ from hct_mis_api.apps.utils.models import (
     MergeStatusModel,
     PendingManager,
     SignatureMixin,
+    TimeStampedModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -562,7 +563,6 @@ class PaymentPlan(
     def update_money_fields(self) -> None:
         """update money fields only for PaymentPlan with currency"""
         if self.status not in self.PRE_PAYMENT_PLAN_STATUSES:
-            self.exchange_rate = self.get_exchange_rate()
             payments = self.eligible_payments.aggregate(
                 total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
                 total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
@@ -580,7 +580,6 @@ class PaymentPlan(
 
             self.save(
                 update_fields=[
-                    "exchange_rate",
                     "total_entitled_quantity",
                     "total_entitled_quantity_usd",
                     "total_delivered_quantity",
@@ -1419,7 +1418,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
         collector_data = primary_collector or alternate_collector or dict()
-        delivery_mechanism_data = collector_data.get("accounts_data", {})
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
@@ -1456,10 +1454,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 "transaction_status_blockchain_link",
             ),
             "fsp_auth_code": (payment, "fsp_auth_code"),
-            "account_data": (
-                delivery_mechanism_data,
-                payment.delivery_type.account_type.key if hasattr(payment, "delivery_type") else None,
-            ),
+            "account_data": (collector_data, "account_data"),
         }
         additional_columns = {
             "admin_level_2": (cls.get_admin_level_2, [snapshot_data]),
@@ -1896,22 +1891,21 @@ class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, related_name="household_snapshot")
 
 
-class FinancialInstitution(TimeStampedUUIDModel):
+class FinancialInstitution(TimeStampedModel):
     class FinancialInstitutionType(models.TextChoices):
         BANK = "bank", "Bank"
         TELCO = "telco", "Telco"
         OTHER = "other", "Other"
 
-    code = models.CharField(
-        max_length=30,
-        unique=True,
-    )
-    description = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
 
+    def __str__(self) -> str:
+        return f"{self.id} {self.name}: {self.type}"  # pragma: no cover
 
-class FinancialInstitutionMapping(TimeStampedUUIDModel):
+
+class FinancialInstitutionMapping(TimeStampedModel):
     financial_service_provider = models.ForeignKey(FinancialServiceProvider, on_delete=models.CASCADE)
     financial_institution = models.ForeignKey(FinancialInstitution, on_delete=models.CASCADE)
     code = models.CharField(max_length=30)
@@ -1969,14 +1963,6 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
 
-    def get_associated_object(self, associated_with: str) -> Any:
-        associated_objects = {
-            FspNameMapping.SourceModel.INDIVIDUAL.value: self.individual,
-            FspNameMapping.SourceModel.HOUSEHOLD.value: self.individual.household,
-            FspNameMapping.SourceModel.ACCOUNT.value: self.data,
-        }
-        return associated_objects.get(associated_with)
-
     @cached_property
     def unique_delivery_data_for_account_type(self) -> Dict:
         delivery_data = {}
@@ -1990,71 +1976,9 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
         return delivery_data
 
-    def delivery_data(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> Dict:
-        delivery_data = {}
-
-        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
-        collector_country = self.individual.household.country
-        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
-            dm_config = country_config
-        else:
-            dm_config = dm_configs.first()
-        if not dm_config:
-            return {}
-
-        for field in dm_config.required_fields:
-            if fsp_name_mapping := fsp_names_mappings.get(field, None):
-                internal_field = fsp_name_mapping.hope_name
-                associated_object = self.get_associated_object(fsp_name_mapping.source)
-            else:
-                internal_field = field
-                associated_object = self.data
-            if isinstance(associated_object, dict):
-                value = associated_object.get(internal_field, None)
-                delivery_data[field] = value and str(value)
-            else:
-                delivery_data[field] = getattr(associated_object, internal_field, None)
-
-        if self.number:
-            delivery_data["number"] = self.number
-        if self.financial_institution:
-            delivery_data["financial_institution"] = self.financial_institution.code
-
-        return delivery_data
-
-    def validate(self, fsp: "FinancialServiceProvider", delivery_mechanism: "DeliveryMechanism") -> bool:
-        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
-        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
-        collector_country = self.individual.household.country
-        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
-            dm_config = country_config
-        else:
-            dm_config = dm_configs.first()
-        if not dm_config:
-            logger.error(f"DeliveryMechanismConfig not found for {fsp}, {delivery_mechanism}")
-            return True
-
-        for field in dm_config.required_fields:
-            if fsp_name_mapping := fsp_names_mappings.get(field, None):
-                field = fsp_name_mapping.hope_name
-                associated_object = self.get_associated_object(fsp_name_mapping.source)
-            else:
-                associated_object = self.data
-            if isinstance(associated_object, dict):
-                value = associated_object.get(field, None)
-            else:
-                value = getattr(associated_object, field, None)
-
-            if value in [None, ""]:
-                return False
-
-        return True
-
-    @classmethod
-    def validate_uniqueness(cls, qs: QuerySet["Account"]) -> None:
-        for dmd in qs:
-            dmd.update_unique_field()
+    @property
+    def unique_fields(self) -> List[str]:
+        return self.account_type.unique_fields
 
     def update_unique_field(self) -> None:
         if hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
@@ -2082,9 +2006,109 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
                     self.is_unique = False
                     self.save(update_fields=["unique_key", "is_unique"])
 
-    @property
-    def unique_fields(self) -> List[str]:
-        return self.account_type.unique_fields
+    @classmethod
+    def validate_uniqueness(cls, qs: QuerySet["Account"]) -> None:
+        for dmd in qs:
+            dmd.update_unique_field()
+
+
+class PaymentDataCollector(Account):
+    @classmethod
+    def get_associated_object(
+        cls,
+        associated_with: str,
+        collector: Individual,
+        account: Optional[Account] = None,
+    ) -> Any:
+        associated_objects = {
+            FspNameMapping.SourceModel.INDIVIDUAL.value: collector,
+            FspNameMapping.SourceModel.HOUSEHOLD.value: collector.household,
+            FspNameMapping.SourceModel.ACCOUNT.value: account.data if account else {},
+        }
+        return associated_objects.get(associated_with)
+
+    @classmethod
+    def delivery_data(
+        cls,
+        fsp: "FinancialServiceProvider",
+        delivery_mechanism: "DeliveryMechanism",
+        collector: "Individual",
+    ) -> Dict:
+        delivery_data = {}
+        account = collector.accounts.filter(account_type=delivery_mechanism.account_type).first()
+
+        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
+        collector_country = collector.household and collector.household.country
+        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
+            dm_config = country_config
+        else:
+            dm_config = dm_configs.first()
+        if not dm_config:
+            return account.data if account else {}
+
+        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
+
+        for field in dm_config.required_fields:
+            if fsp_name_mapping := fsp_names_mappings.get(field, None):
+                internal_field = fsp_name_mapping.hope_name
+                associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
+            else:
+                internal_field = field
+                associated_object = account.data if account else {}
+            if isinstance(associated_object, dict):
+                value = associated_object.get(internal_field, None)
+                delivery_data[field] = value and str(value)
+            else:
+                delivery_data[field] = getattr(associated_object, internal_field, None)
+
+        if account:
+            if account.number:
+                delivery_data["number"] = account.number
+            if account.financial_institution:
+                delivery_data["financial_institution"] = str(account.financial_institution.id)
+
+        return delivery_data
+
+    @classmethod
+    def validate_account(
+        cls,
+        fsp: "FinancialServiceProvider",
+        delivery_mechanism: "DeliveryMechanism",
+        collector: Individual,
+    ) -> bool:
+        account = collector.accounts.filter(account_type=delivery_mechanism.account_type).first()
+
+        fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
+        dm_configs = DeliveryMechanismConfig.objects.filter(fsp=fsp, delivery_mechanism=delivery_mechanism)
+
+        collector_country = collector.household and collector.household.country
+        if collector_country and (country_config := dm_configs.filter(country=collector_country).first()):
+            dm_config = country_config
+        else:
+            dm_config = dm_configs.first()
+        if not dm_config:
+            return True
+
+        for field in dm_config.required_fields:
+            if fsp_name_mapping := fsp_names_mappings.get(field, None):
+                field = fsp_name_mapping.hope_name
+                associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
+            else:
+                associated_object = account.data if account else {}
+            if isinstance(associated_object, dict):
+                value = associated_object.get(field, None)
+            else:
+                value = getattr(associated_object, field, None)
+
+            if value in [None, ""]:
+                return False
+
+        return True
+
+    class Meta:
+        proxy = True
+        verbose_name = "Payment Data Collector"
+        verbose_name_plural = "Payment Data Collectors"
 
 
 class PendingAccount(Account):
@@ -2111,7 +2135,7 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         "payment.AccountType",
         on_delete=models.PROTECT,
         related_name="delivery_mechanisms",
-        null=True,  # TODO MB make not nullable after migrations
+        null=True,
         blank=True,
     )
 

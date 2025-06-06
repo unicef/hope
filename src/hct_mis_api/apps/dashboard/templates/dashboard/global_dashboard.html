@@ -33,6 +33,14 @@
             </h3>
             <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
         </div>
+        <!-- Payments by Region -->
+        <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-sm font-semibold">
+                <span class="icon icon-map icon-blue"></span> {# Using a map icon as an example #}
+                {% translate "Payments by Region" %}
+            </h3>
+            <div id="payments-by-region" class="dc-chart w-full h-full"></div>
+        </div>
     </div>
 {% endblock %}
 {% block scripts %}
@@ -43,7 +51,7 @@
 
         function fetchDataForCountry() {
             dc.config.defaultColors(d3.schemePaired);
-            const decimalnumberFormatter = d3.format(",.2f");
+            const decimalNumberFormatter = d3.format(",.2f");
             const simplenumberFormatter = d3.format(",");
             const truncateLabel = (label, maxLength = 25) => {
                 return label.length > maxLength ?
@@ -61,11 +69,10 @@
             }
 
             const url = "{{household_data_url}}";
-            const pendingList = ["Sent to Payment Gateway", "Sent to FSP"];
+            const pendingList = ["Sent to Payment Gateway", "Sent to FSP", "Pending"];
             const successfulList = [
                 "Distribution Successful",
                 "Partially Distributed",
-                "Pending",
                 "Transaction Successful",
             ];
 
@@ -74,16 +81,39 @@
                     "payments-by-delivery",
                     "payments-by-sector",
                     "payments-by-country",
+                    "payments-by-region",
                 ].forEach(showSpinner);
 
                 d3.json(url).then((data) => {
+
                     if (!data || data.length === 0) {
-                        console.error("No data available or data is undefined.");
+                        console.warn("No data available. Displaying 0 for all metrics.");
+                        [
+                            "payments-by-delivery",
+                            "payments-by-sector",
+                            "payments-by-country",
+                            "payments-by-region",
+                        ].forEach(hideSpinner);
+                        const ndx = crossfilter([]);
+                        updateTopMetrics(ndx);
                         return;
                     }
 
+                    const regionNameMap = {
+                        "EAPR": "(EAPRO) East Asia and Pacific Regional Office",
+                        "ECAR": "(ECARO) Europe and Central Asia Region Office",
+                        "ESAR": "(ESARO) Eastern and Southern Africa Regional Office",
+                        "GLOBAL": "Global",
+                        "HQ": "Headquarters",
+                        "LACR": "(LACRO) Latin America and Carribbean Regional Office",
+                        "MENAR": "(MENARO) Middle East Northern Africa Regional Office",
+                        "SAR": "(ROSA) Regional Office South Asia",
+                        "WCAR": "(WCARO) West and Central Africa Regional Office",
+                        "Unknown Region": "Unknown Region" 
+                    };
+
                     const processedPayments = data.map((item) => ({
-                        delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0,
+                        delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0, 
                         payments: item.payments || 0,
                         individuals: item.individuals || 0,
                         households: item.households || 0,
@@ -96,6 +126,7 @@
                         sector: item.sector || "Unknown sector",
                         payment_status: item.status || "Unknown status",
                         country: item.country || "Unknown Country",
+                        region: regionNameMap[item.region] || item.region || "Unknown Region",
                         fsp: item.fsp || "Unknown fsp",
                         delivery_types: item.delivery_types || "Unknown delivery type",
                         pwd_counts: item.pwd_counts || 0,
@@ -109,6 +140,7 @@
                     const deliveryDim = ndx.dimension((d) => d.delivery_types);
                     const sectorDim = ndx.dimension((d) => d.sector);
                     const countryDim = ndx.dimension((d) => d.country);
+                    const regionDim = ndx.dimension((d) => d.region);
 
                     const deliveryGroup = deliveryDim
                         .group()
@@ -118,6 +150,10 @@
                         .reduceSum((d) => d.delivered_quantity_usd);
                   
                     const countryGroup = countryDim
+                        .group()
+                        .reduceSum((d) => d.delivered_quantity_usd);
+                    
+                    const regionGroup = regionDim
                         .group()
                         .reduceSum((d) => d.delivered_quantity_usd);
 
@@ -130,11 +166,12 @@
                         .height(400)
                         .margins({ top: 10, right: 5, bottom: 30, left: 4 })
                         .useViewBoxResizing(true)
-                        .label(
-                            (d) =>
-                            `${d.key} ${((d.value / deliveryGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)}`)
+                        .label((d) => {
+                            const totalDeliverySum = deliveryGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalDeliverySum > 0 ? ((d.value / totalDeliverySum) * 100).toFixed(0) : '0';
+                            return `${d.key} ${percentage}%`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)}`)
                         .xAxis()
                         .ticks(3);
 
@@ -144,11 +181,12 @@
                         .group(sectorGroup)
                         .elasticX(true)
                         .margins({ top: 10, right: 5, bottom: 30, left: 4 })
-                        .label(
-                            (d) =>
-                            `${d.key}: ${decimalnumberFormatter(d.value)} USD (${((d.value / sectorGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
-                        )
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .label((d) => {
+                            const totalSectorSum = sectorGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalSectorSum > 0 ? ((d.value / totalSectorSum) * 100).toFixed(0) : '0';
+                            return `${d.key}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .xAxis()
                         .ticks(3);
 
@@ -166,7 +204,7 @@
                         .margins({ top: 30, right: 25, bottom: 95, left: 90 })
                         .outerPadding(0.5)
                         .ordering((d) => -d.key)
-                        .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
                         .colors(d3.scaleOrdinal().range(d3.schemePaired))
                         .colorAccessor((d) => d.key)
                         .yAxisPadding(90)
@@ -179,12 +217,85 @@
                             .style("text-anchor", "start")
                             .attr("dx", "2");
                             });
+                    
+                    const regionChart = dc
+                        .rowChart("#payments-by-region")
+                        .dimension(regionDim)
+                        .group(regionGroup)
+                        .elasticX(true)
+                        .height(400)
+                        .margins({ top: 10, right: 5, bottom: 30, left: 4 })
+                        .label((d) => {
+                            const totalRegionSum = regionGroup.all().reduce((sum, g) => sum + g.value, 0);
+                            const percentage = totalRegionSum > 0 ? ((d.value / totalRegionSum) * 100).toFixed(0) : '0';
+                            return `${truncateLabel(d.key)}: ${decimalNumberFormatter(d.value)} USD (${percentage}%)`;
+                        })
+                        .title((d) => `${d.key}: ${decimalNumberFormatter(d.value)} USD`)
+                        .xAxis()
+                        .ticks(3);
+
                         function updateTopMetrics() {
-                        const totalReconciledCount = ndx.groupAll().reduceSum(d => d.reconciled || 0).value();
                         const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
-                        const reconciliationPercentage = totalPaymentsCount > 0
-                                ? (totalReconciledCount / totalPaymentsCount) * 100
-                                : 0;
+
+                        const pendingPaymentsGroupUSD = ndx
+                            .groupAll()
+                            .reduce(
+                                (p, v) => {
+                                    if (pendingList.includes(v.payment_status)) {
+                                        p.count += 1;
+                                        p.sum += v.delivered_quantity_usd || 0;
+                                    }
+                                    return p;
+                                },
+                                (p, v) => {
+                                    if (pendingList.includes(v.payment_status)) {
+                                        p.count -= 1;
+                                        p.sum -= v.delivered_quantity_usd || 0;
+                                    }
+                                    return p;
+                                },
+                                () => ({
+                                    count: 0,
+                                    sum: 0,
+                                }),
+                            )
+                            .value();
+
+                        const nonPendingPaymentSum = ndx.groupAll().reduce(
+                            (p, v) => {
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value += (v.payments || 0);
+                                }
+                                return p;
+                            },
+                            (p, v) => {
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value -= (v.payments || 0);
+                                }
+                                return p;
+                            },
+                            () => ({ value: 0 })
+                        ).value().value;
+
+                        const reconciliationPercentage = totalPaymentsCount > 0 ?
+                            (nonPendingPaymentSum / totalPaymentsCount) * 100 :
+                            0;
+
+                        const reconciledPaymentsValueUSD = ndx.groupAll().reduce(
+                            (p, v) => {
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value += (v.delivered_quantity_usd || 0);
+                                }
+                                return p;
+                            },
+                            (p, v) => { 
+                                if (((pendingList.includes(v.payment_status) && v.payment_status !== 'Pending') || successfulList.includes(v.payment_status))) {
+                                    p.value -= (v.delivered_quantity_usd || 0);
+                                }
+                                return p;
+                            },
+                            () => ({ value: 0 }) 
+                        ).value().value;
 
                         const paymentPlanMetrics = ndx.groupAll().reduce(
                                     (p, v) => {
@@ -230,29 +341,6 @@
 
                         const totalSuccessfulUSD = successfulPaymentsGroupUSD.sum;
                         const successfulPaymentsCountUSD = successfulPaymentsGroupUSD.count;
-                        const pendingPaymentsGroupUSD = ndx
-                            .groupAll()
-                            .reduce(
-                                (p, v) => {
-                                    if (pendingList.includes(v.payment_status)) {
-                                        p.count += 1;
-                                        p.sum += v.delivered_quantity_usd || 0;
-                                    }
-                                    return p;
-                                },
-                                (p, v) => {
-                                    if (pendingList.includes(v.payment_status)) {
-                                        p.count -= 1;
-                                        p.sum -= v.delivered_quantity_usd || 0;
-                                    }
-                                    return p;
-                                },
-                                () => ({
-                                    count: 0,
-                                    sum: 0,
-                                }),
-                            )
-                            .value();
                         const householdsReached = idDim
                             .groupAll()
                             .reduceSum((d) => d.households)
@@ -277,9 +365,9 @@
                         document.getElementById("number-of-payments").innerHTML =
                             `${simplenumberFormatter(totalPaymentsCount)}`;
                         document.getElementById("outstanding-payments").innerHTML =
-                            `${decimalnumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
+                            `${decimalNumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
                         document.getElementById("total-amount-paid").innerHTML =
-                            `${decimalnumberFormatter(totalSuccessfulUSD)} USD`;
+                            `${decimalNumberFormatter(totalSuccessfulUSD)} USD`;
                         document.getElementById("households-reached").innerHTML =
                             `${simplenumberFormatter(householdsReached)}`;
                         document.getElementById("individuals-reached").innerHTML =
@@ -288,16 +376,19 @@
                             `${simplenumberFormatter(pwdReached)}`;
                         document.getElementById("children-reached").innerHTML =
                             `${simplenumberFormatter(childrenReached)}`;
-                        document.querySelector(".reconciliation-percentage").innerHTML =
-                            `${decimalnumberFormatter(reconciliationPercentage)}%`;
+
+                        document.querySelector(".reconciliation-percentage-value").innerHTML =
+                            `${decimalNumberFormatter(reconciliationPercentage)}`;
+                        document.querySelector(".reconciliation-amount-value").innerHTML =
+                            `${decimalNumberFormatter(reconciledPaymentsValueUSD)}`;
                         document.querySelector(
                                 ".pending-reconciliation-percentage",
-                            ).innerHTML =`${decimalnumberFormatter(verificationPercentage)}%`;
+                            ).innerHTML =`${decimalNumberFormatter(verificationPercentage)}%`;
                     }
 
                     function filterByYear(year) {
                         yearDim.filter(year);
-                        updateTopMetrics();
+                        updateTopMetrics(ndx);
                         if (isChartsInitialized) dc.redrawAll();
                     }
 
@@ -344,14 +435,17 @@
                     if (uniqueYears.includes(currentYear)) changeYear(currentYear);
                     else if (uniqueYears.length > 0) changeYear(uniqueYears[0]);
 
+                    updateTopMetrics(ndx);
+
                     for (const chart of dc.chartRegistry.list()) {
                         chart.on("filtered", () => {
-                            updateTopMetrics();
+                            updateTopMetrics(ndx);
                         });
                     }
                     hideSpinner("payments-by-delivery");
                     hideSpinner("payments-by-sector");
                     hideSpinner("payments-by-country");
+                    hideSpinner("payments-by-region");
                     dc.renderAll();
                     isChartsInitialized = true;
                 });
@@ -359,6 +453,40 @@
             createDashboard();
         }
         fetchDataForCountry();
+
+        function setupTooltipToggle(iconId, tooltipId) {
+            const icon = document.getElementById(iconId);
+            const tooltip = document.getElementById(tooltipId);
+            if (icon && tooltip) {
+                icon.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const isActive = icon.classList.contains('active');
+                    document.querySelectorAll('.info-icon.active').forEach(activeIcon => {
+                        if (activeIcon !== icon) {
+                            activeIcon.classList.remove('active');
+                        }
+                    });
+                    icon.classList.toggle('active', !isActive);
+                });
+            }
+        }
+
+        setupTooltipToggle('info-icon-total-amount-paid', 'tooltip-total-amount-paid');
+        setupTooltipToggle('info-icon-outstanding-payment', 'tooltip-outstanding-payment');
+        setupTooltipToggle('info-icon-reconciliation', 'tooltip-reconciliation');
+        setupTooltipToggle('info-icon-verification', 'tooltip-verification');
+        setupTooltipToggle('info-icon-number-of-payments', 'tooltip-number-of-payments');
+        setupTooltipToggle('info-icon-households-reached', 'tooltip-households-reached');
+        setupTooltipToggle('info-icon-individuals-reached', 'tooltip-individuals-reached');
+        setupTooltipToggle('info-icon-children-reached', 'tooltip-children-reached');
+        setupTooltipToggle('info-icon-pwd-reached', 'tooltip-pwd-reached');
+
+        // Hide tooltips when clicking anywhere else on the document
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.info-icon.active').forEach(icon => {
+                icon.classList.remove('active');
+            });
+        });
     });
     </script>
 {% endblock %}
