@@ -268,3 +268,105 @@ class TestProgramCreate:
             "end_date": None,
         }
         assert response.json() == expected_response
+
+    def test_create_program_with_partners_data(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_partners_data = {
+            **self.valid_input_data_standard,
+            "partner_access": Program.SELECTED_PARTNERS_ACCESS,
+            "partners": [
+                {
+                    "partner": str(self.partner.id),
+                    "areas": [str(self.area1.id)],
+                },
+                {
+                    "partner": str(self.partner2.id),
+                    "areas": [],
+                },
+            ],
+        }
+
+        # TODO: the below code is needed due to the temporary solution on the partners access in program actions
+        RoleAssignmentFactory(partner=self.partner, business_area=self.afghanistan, program=None)
+        RoleAssignmentFactory(partner=self.partner2, business_area=self.afghanistan, program=None)
+        # TODO: remove the above code when the partners access in program actions is implemented properly
+
+        response = self.client.post(self.list_url, input_data_with_partners_data)
+        assert response.status_code == status.HTTP_201_CREATED
+        program = Program.objects.get(pk=response.json()["id"])
+        assert response.json() == {
+            **self.expected_response_standard,
+            "id": str(program.id),
+            "programme_code": program.programme_code,
+            "slug": program.slug,
+            "partners": [
+                {
+                    "id": self.partner.id,
+                    "name": self.partner.name,
+                    "areas": [
+                        {
+                            "id": str(self.area1.id),
+                            "level": self.area1.level,
+                        },
+                    ],
+                    "area_access": "ADMIN_AREA",
+                },
+                {
+                    "id": self.partner2.id,
+                    "name": self.partner2.name,
+                    "areas": [
+                        {
+                            "id": str(self.area1.id),
+                            "level": self.area1.level,
+                        },
+                        {
+                            "id": str(self.area2.id),
+                            "level": self.area2.level,
+                        },
+                    ],
+                    "area_access": "BUSINESS_AREA",
+                },
+                *self.expected_response_standard["partners"],
+            ],
+            "partner_access": Program.SELECTED_PARTNERS_ACCESS,
+        }
+
+    def test_create_program_with_invalid_partners_data(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_partners_data = {
+            **self.valid_input_data_standard,
+            "partner_access": Program.SELECTED_PARTNERS_ACCESS,
+            "partners": [  # missing user's partner on the list
+                {
+                    "partner": str(self.partner2.id),
+                    "areas": [],
+                },
+            ],
+        }
+
+        response = self.client.post(self.list_url, input_data_with_partners_data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "partners" in response.json()
+        assert response.json()["partners"][0] == "Please assign access to your partner before saving the Program."
+
+    def test_create_program_with_invalid_partners_data_and_partner_access(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_partners_data = {
+            **self.valid_input_data_standard,
+            "partner_access": Program.ALL_PARTNERS_ACCESS,  # cannot specify partners_data with ALL_PARTNERS_ACCESS
+            "partners": [
+                {
+                    "partner": str(self.partner.id),
+                    "areas": [str(self.area1.id)],
+                },
+                {
+                    "partner": str(self.partner2.id),
+                    "areas": [],
+                },
+            ],
+        }
+
+        response = self.client.post(self.list_url, input_data_with_partners_data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "partners" in response.json()
+        assert response.json()["partners"][0] == "You cannot specify partners for the chosen access type."
