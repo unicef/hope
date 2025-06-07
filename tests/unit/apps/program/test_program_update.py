@@ -627,4 +627,591 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
+    def test_update_pdu_fields(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
 
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                # "PDU Field To Be Preserved" remains unchanged
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                },
+                # "PDU Field To Be Removed" is removed
+                # "PDU Field To Be Updated" is updated
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 2 # After update, one field is removed
+
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field Updated"
+        assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.BOOL
+        assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 3
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"]
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is True
+
+        self.program.refresh_from_db()
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                    "name": self.pdu_field_to_be_preserved.name,
+                },
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                    "name": self.pdu_field_to_be_updated.name,
+                },
+            ],
+            "version": self.program.version,
+        }
+
+    def test_update_pdu_fields_and_add_new(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                # "PDU Field To Be Preserved" remains unchanged
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                },
+                # "PDU Field To Be Removed" is removed
+                # "PDU Field To Be Updated" is updated
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                },
+                # New PDU field to be added
+                {
+                    "label": "New PDU Field",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["Round 1 New", "Round 2 New"],
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3 # After update, one field is removed, one is updated, and one new is added
+
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field Updated"
+        assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.BOOL
+        assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 3
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"]
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is True
+        new_pdu_field = FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").first()
+        assert new_pdu_field.label["English(EN)"] == "New PDU Field"
+        assert new_pdu_field.pdu_data.subtype == PeriodicFieldData.STRING
+        assert new_pdu_field.pdu_data.number_of_rounds == 2
+        assert new_pdu_field.pdu_data.rounds_names == ["Round 1 New", "Round 2 New"]
+
+        self.program.refresh_from_db()
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(new_pdu_field.id),
+                    "label": "New PDU Field",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["Round 1 New", "Round 2 New"],
+                    },
+                    "name": new_pdu_field.name,
+                },
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                    "name": self.pdu_field_to_be_preserved.name,
+                },
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                    "name": self.pdu_field_to_be_updated.name,
+                },
+            ],
+            "version": self.program.version,
+        }
+
+    def test_update_pdu_fields_invalid_data(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                },
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                },
+                {
+                    "label": "New PDU Field",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 1,
+                        "rounds_names": ["Round 1 New", "Round 2 New"],
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Number of rounds does not match the number of round names." in response.json()
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3 # No change
+
+        # Check that the fields are not updated
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"
+        assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.STRING
+        assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 2
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 To Be Updated", "Round 2 To Be Updated"]
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is False
+        assert FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False
+
+    def test_update_pdu_fields_invalid_data_duplicated_field_names_in_input(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                },
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                },
+                {
+                    "label": "PDU Field Updated",  # Duplicate label
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["Round 1 New", "Round 2 New"],
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Time Series Field names must be unique." in response.json()
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
+
+        # Check that the fields are not updated
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is False
+        assert FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False
+
+
+    def test_update_pdu_fields_add_field_with_same_field_name_in_different_program(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        # pdu data with NEW field with name that already exists in the database but in different program -> no fail
+        program2 = ProgramFactory(name="TestProgram2", business_area=self.afghanistan)
+        pdu_data_existing = PeriodicFieldDataFactory()
+        FlexibleAttributeForPDUFactory(
+            program=program2,
+            label="PDU Field Existing",
+            pdu_data=pdu_data_existing,
+        )
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                },
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                },
+                {
+                    "label": "PDU Field Existing",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["Round 1 New", "Round 2 New"],
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3 # After update, one field is removed, one is updated, and one new is added
+
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field Updated"
+        assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.BOOL
+        assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 3
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"]
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is True
+        new_pdu_field = FlexibleAttribute.objects.filter(program=self.program, name="pdu_field_existing").first()
+        assert FlexibleAttribute.objects.filter(name="pdu_field_existing").count() == 2
+
+        assert new_pdu_field.label["English(EN)"] == "PDU Field Existing"
+        assert new_pdu_field.pdu_data.subtype == PeriodicFieldData.STRING
+        assert new_pdu_field.pdu_data.number_of_rounds == 2
+        assert new_pdu_field.pdu_data.rounds_names == ["Round 1 New", "Round 2 New"]
+
+        self.program.refresh_from_db()
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(new_pdu_field.id),
+                    "label": "PDU Field Existing",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["Round 1 New", "Round 2 New"],
+                    },
+                    "name": new_pdu_field.name,
+                },
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                    "name": self.pdu_field_to_be_preserved.name,
+                },
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                    "name": self.pdu_field_to_be_updated.name,
+                },
+            ],
+            "version": self.program.version,
+        }
+
+    def test_update_pdu_fields_with_same_name_in_different_program(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        # pdu data with NEW field with name that already exists in the database but in different program -> no fail
+        program2 = ProgramFactory(name="TestProgram2", business_area=self.afghanistan)
+        pdu_data_existing = PeriodicFieldDataFactory()
+        FlexibleAttributeForPDUFactory(
+            program=program2,
+            label="PDU Field Existing",
+            pdu_data=pdu_data_existing,
+        )
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                },
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Existing",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 2 # After update, one field is removed
+
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field Existing"
+        assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.BOOL
+        assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 3
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"]
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is True
+
+        self.program.refresh_from_db()
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field Existing",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
+                    },
+                    "name": self.pdu_field_to_be_updated.name,
+                },
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                    "name": self.pdu_field_to_be_preserved.name,
+                },
+            ],
+            "version": self.program.version,
+        }
+
+    def test_update_pdu_fields_when_program_has_RDI(self, create_user_role_with_permissions: Callable) -> None:
+        # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields - only possible to increase number of rounds and add names for new rounds
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field - NAME WILL NOT BE UPDATED",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,  # subtype will NOT be updated
+                        "number_of_rounds": 4,  # number of rounds will be increased
+                        "rounds_names": ["Round 1 To Be Updated", "Round 2 To Be Updated", "Round 3 New", "Round 4 New"],  # can only add new rounds, cannot change existing names
+                    },
+                },
+                {
+                    "label": "New PDU Field",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["Round 1 New", "Round 2 New"],
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # no field can be removed or added for program with RDI
+
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"  # not updated
+        assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.STRING  # not updated
+        assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 4  # updated
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 To Be Updated", "Round 2 To Be Updated", "Round 3 New", "Round 4 New"]  # updated
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is False  # not removed
+        assert FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False  # new field not added
+
+        self.program.refresh_from_db()
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_preserved.id),
+                    "label": "PDU Field To Be Preserved",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_preserved.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_preserved.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_preserved.rounds_names,
+                    },
+                    "name": self.pdu_field_to_be_preserved.name,
+                },
+                {
+                    "id": str(self.pdu_field_to_be_removed.id),
+                    "label": "PDU Field To Be Removed",
+                    "pdu_data": {
+                        "subtype": self.pdu_data_to_be_removed.subtype,
+                        "number_of_rounds": self.pdu_data_to_be_removed.number_of_rounds,
+                        "rounds_names": self.pdu_data_to_be_removed.rounds_names,
+                    },
+                    "name": self.pdu_field_to_be_removed.name,
+                },
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field To Be Updated",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 4,
+                        "rounds_names": ["Round 1 To Be Updated", "Round 2 To Be Updated", "Round 3 New", "Round 4 New"],
+                    },
+                    "name": self.pdu_field_to_be_updated.name,
+                },
+            ],
+            "version": self.program.version,
+        }
+
+    def test_update_pdu_fields_invalid_when_program_has_RDI_decrease_rounds(self, create_user_role_with_permissions: Callable) -> None:
+        # round number CANNOT be decreased for Program with RDI
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field - NAME WILL NOT BE UPDATED",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,  # subtype will NOT be updated
+                        "number_of_rounds": 1,  # number of rounds will NOT be decreased
+                        "rounds_names": ["Round 1 To Be Updated"],
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "It is not possible to decrease the number of rounds for a Program with RDI or TP." in response.json()
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
+
+        # Check that the fields are not updated
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"
+        assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.STRING
+        assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 2
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 To Be Updated", "Round 2 To Be Updated"]
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is False
+
+    def test_update_pdu_fields_invalid_when_program_has_RDI_change_rounds_names(self, create_user_role_with_permissions: Callable) -> None:
+        # names for existing rounds cannot be changed for Program with RDI
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "pdu_fields": [
+                {
+                    "id": str(self.pdu_field_to_be_updated.id),
+                    "label": "PDU Field - NAME WILL NOT BE UPDATED",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,  # subtype will NOT be updated
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],  # cannot change existing names
+                    },
+                },
+            ],
+        }
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "It is not possible to change the names of existing rounds for a Program with RDI or TP." in response.json()
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
+
+        # Check that the fields are not updated
+        self.pdu_field_to_be_updated.refresh_from_db()
+        assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"
+        assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.STRING
+        assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 2
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 To Be Updated", "Round 2 To Be Updated"]
+        self.pdu_field_to_be_removed.refresh_from_db()
+        assert self.pdu_field_to_be_removed.is_removed is False
