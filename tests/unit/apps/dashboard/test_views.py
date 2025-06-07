@@ -1,11 +1,13 @@
 from typing import Callable, Dict, Optional
 from unittest.mock import Mock, patch
 
+from django.core.cache import cache
+from django.http import Http404
 from django.test import RequestFactory
+from django.urls import reverse
 
 import pytest
 from rest_framework import status
-from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
@@ -14,6 +16,8 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.dashboard.services import DashboardGlobalDataCache
 from hct_mis_api.apps.dashboard.views import DashboardReportView
 
 pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
@@ -182,8 +186,8 @@ def test_dashboard_report_view_context_without_permission(afghanistan: Callable,
 @pytest.mark.parametrize(
     "business_area_slug, expected_url_key, expected_status, permission_granted",
     [
-        ("afghanistan", "list_url", status.HTTP_403_FORBIDDEN, False),  # Without permission
-        ("afghanistan", "list_url", status.HTTP_200_OK, True),  # With permission
+        ("afghanistan", "list_url", status.HTTP_403_FORBIDDEN, False),
+        ("afghanistan", "list_url", status.HTTP_200_OK, True),
     ],
 )
 def test_dashboard_data_view_permissions(
@@ -214,3 +218,93 @@ def test_dashboard_data_view_permissions(
     assert response.status_code == expected_status
     if expected_status == status.HTTP_200_OK:
         assert response["Content-Type"] == "application/json"
+
+
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_dashboard_data_view_global_slug_cache_miss(
+    setup_client: Dict[str, Optional[object]],
+    populate_dashboard_cache: Callable,
+) -> None:
+    """Test DashboardDataView with 'global' slug and cache miss."""
+    client = setup_client["client"]
+    user = setup_client["user"]
+    global_url = setup_client["global_url"]
+
+    populate_dashboard_cache(setup_client["business_area"])
+    user.is_superuser = True
+    user.save()
+    client.force_authenticate(user=user)
+
+    cache.delete(DashboardGlobalDataCache.get_cache_key("global"))
+
+    mock_global_data = [
+        {
+            "year": 2023,
+            "country": "Global Summary",
+            "payments": 10,
+            "total_delivered_quantity_usd": "1000.00",
+            "households": 1,
+            "individuals": 1,
+            "children_counts": 0,
+            "pwd_counts": 0,
+            "sector": "Cash",
+            "status": "OK",
+            "delivery_types": "Mobile",
+            "reconciled": 0,
+            "finished_payment_plans": 0,
+            "total_payment_plans": 0,
+            "region": "Global Region",
+        }
+    ]
+
+    with patch.object(
+        DashboardGlobalDataCache, "refresh_data", autospec=True, return_value=mock_global_data
+    ) as mock_refresh:
+        response = client.get(global_url)
+        mock_refresh.assert_called_once_with("global")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response["Content-Type"] == "application/json"
+    assert len(response.data) > 0, "Mocked data was not returned or was empty"
+    assert response.data == mock_global_data, "Response data does not match mocked data"
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_report_view_global_slug(
+    rf: RequestFactory,
+) -> None:
+    """Test DashboardReportView context and template for 'global' slug."""
+    user = UserFactory(is_superuser=True, is_staff=True)
+    assert user.is_superuser, "UserFactory did not create a superuser."
+    assert user.is_authenticated, "UserFactory user is not authenticated."
+
+    request = rf.get(reverse("api:dashboard", kwargs={"business_area_slug": "global"}))
+    request.user = user
+
+    view = DashboardReportView()
+    view.setup(request, business_area_slug="global")
+    context = view.get_context_data(business_area_slug="global")
+
+    assert view.template_name == "dashboard/global_dashboard.html"
+    assert (
+        context.get("has_permission") is True
+    ), f"Permission denied for global report. User superuser: {request.user.is_superuser}, User authenticated: {request.user.is_authenticated}. Error: {context.get('error_message')}"
+    assert context["business_area_slug"] == "global"
+    assert context["household_data_url"] == reverse("api:household-data", args=["global"])
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_report_view_business_area_not_found_http404(rf: RequestFactory) -> None:
+    """Test DashboardReportView raises Http404 for a non-existent business_area_slug."""
+    user = UserFactory()
+    non_existent_slug = "absolutely-does-not-exist"
+    BusinessArea.objects.filter(slug=non_existent_slug).delete()
+
+    request = rf.get(reverse("api:dashboard", kwargs={"business_area_slug": non_existent_slug}))
+    request.user = user
+
+    view = DashboardReportView()
+    view.setup(request, business_area_slug=non_existent_slug)
+
+    with pytest.raises(Http404):
+        view.get_context_data(business_area_slug=non_existent_slug)

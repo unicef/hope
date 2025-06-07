@@ -55,7 +55,7 @@ TASKS_SCHEDULES = {
     },
     "update_dashboard_figures_task": {
         "task": "hct_mis_api.apps.dashboard.celery_tasks.update_dashboard_figures",
-        "schedule": crontab(hour="*/24"),
+        "schedule": crontab(hour="*/6"),
     },
     "invalidate_permissions_cache_for_user_if_expired_role": {
         "task": "hct_mis_api.apps.account.celery_tasks.invalidate_permissions_cache_for_user_if_expired_role",
