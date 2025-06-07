@@ -334,3 +334,168 @@ class TestProgramUpdate:
         self.program.refresh_from_db()
         assert self.program.programme_code == self.initial_program_data["programme_code"]
 
+    def test_update_data_collecting_type(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "data_collecting_type": dct_2.code,
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.program.refresh_from_db()
+        assert self.program.data_collecting_type == dct_2
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "data_collecting_type": dct_2.code,
+            "version": self.program.version,
+        }
+
+    def test_update_data_collecting_type_invalid(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        dct_invalid = DataCollectingTypeFactory(label="DCT_INVALID", code="dct_invalid", type=DataCollectingType.Type.STANDARD)
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "data_collecting_type": dct_invalid.code,
+        }
+
+        # DCT inactive
+        dct_invalid.active = False
+        dct_invalid.save()
+        response_for_inactive = self.client.put(self.update_url, payload)
+        assert response_for_inactive.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_inactive.json()
+        assert response_for_inactive.json()["data_collecting_type"][0] == "Only active Data Collecting Type can be used in Program."
+        self.program.refresh_from_db()
+        assert self.program.data_collecting_type == self.dct_standard
+
+        # DCT deprecated
+        dct_invalid.active = True
+        dct_invalid.deprecated = True
+        dct_invalid.save()
+        response_for_deprecated = self.client.put(self.update_url, payload)
+        assert response_for_deprecated.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_deprecated.json()
+        assert response_for_deprecated.json()["data_collecting_type"][0] == "Deprecated Data Collecting Type cannot be used in Program."
+        self.program.refresh_from_db()
+        assert self.program.data_collecting_type == self.dct_standard
+
+        # DCT limited to another BA
+        dct_invalid.deprecated = False
+        dct_invalid.save()
+        ukraine = create_ukraine()
+        dct_invalid.limit_to.add(ukraine)
+        response_for_limited = self.client.put(self.update_url, payload)
+        assert response_for_limited.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_limited.json()
+        assert response_for_limited.json()["data_collecting_type"][0] == "This Data Collecting Type is not available for this Business Area."
+        self.program.refresh_from_db()
+        assert self.program.data_collecting_type == self.dct_standard
+
+    def test_update_data_collecting_type_for_active_program(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
+
+        self.program.status = Program.ACTIVE
+        self.program.save()
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "data_collecting_type": dct_2.code,
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response.json()
+        assert response.json()["data_collecting_type"][0] == "Data Collecting Type can be updated only for Draft Programs."
+        self.program.refresh_from_db()
+        assert self.program.data_collecting_type == self.dct_standard
+
+    def test_update_data_collecting_type_for_program_with_population(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
+
+        create_household_and_individuals(
+            household_data={
+                "program": self.program,
+            },
+            individuals_data=[{}, {}],
+        )
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "data_collecting_type": dct_2.code,
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response.json()
+        assert response.json()["data_collecting_type"][0] == "Data Collecting Type can be updated only for Program without any households."
+        self.program.refresh_from_db()
+        assert self.program.data_collecting_type == self.dct_standard
+
+    def test_update_data_collecting_type_invalid_with_beneficiary_group(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "data_collecting_type": self.dct_social.code,
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "beneficiary_group" in response.json()
+        assert response.json()["beneficiary_group"][0] == "Selected combination of data collecting type and beneficiary group is invalid."
+
+        self.program.refresh_from_db()
+        assert self.program.data_collecting_type == self.dct_standard
+
+    def test_update_beneficiary_group(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        bg_2 = BeneficiaryGroupFactory(name="Beneficiary Group 2", master_detail=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "beneficiary_group": str(bg_2.id),
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.program.refresh_from_db()
+        assert self.program.beneficiary_group == bg_2
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "beneficiary_group": str(bg_2.id),
+            "version": self.program.version,
+        }
+
+    def test_update_beneficiary_group_invalid_with_data_collecting_type(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "beneficiary_group": str(self.bg_sw.id),
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "beneficiary_group" in response.json()
+        assert response.json()["beneficiary_group"][0] == "Selected combination of data collecting type and beneficiary group is invalid."
+
+        self.program.refresh_from_db()
+        assert self.program.beneficiary_group == self.bg_household
+
+    def test_update_beneficiary_group_invalid_with_population(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        bg_2 = BeneficiaryGroupFactory(name="Beneficiary Group 2", master_detail=True)
+
+        RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "beneficiary_group": str(bg_2.id),
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "beneficiary_group" in response.json()
+        assert response.json()["beneficiary_group"][0] == "Beneficiary Group cannot be updated if Program has population."
+
+        self.program.refresh_from_db()
+        assert self.program.beneficiary_group == self.bg_household
