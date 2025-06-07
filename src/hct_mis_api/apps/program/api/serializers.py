@@ -286,6 +286,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             "registration_imports_total_count",
             "target_populations_count",
             "population_goal",
+            "version",
         )
 
     def get_registration_imports_total_count(self, obj: Program) -> int:
@@ -317,10 +318,12 @@ class PDUDataSerializer(serializers.Serializer):
     number_of_rounds = serializers.IntegerField(min_value=1)
     rounds_names = serializers.ListField(child=serializers.CharField(max_length=100, allow_blank=True))
 
-class PDUFieldsSerializer(serializers.Serializer):
+class PDUFieldsCreateSerializer(serializers.Serializer):
     label = serializers.CharField()
     pdu_data = PDUDataSerializer(required=True)
 
+class PDUFieldsUpdateSerializer(PDUFieldsCreateSerializer):
+    id = serializers.CharField(required=False)
 
 class ProgramCreateSerializer(serializers.ModelSerializer):
     programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True)
@@ -328,8 +331,10 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
     partners = PartnersDataSerializer(many=True)
-    pdu_fields = PDUFieldsSerializer(many=True)
+    pdu_fields = PDUFieldsCreateSerializer(many=True)
     slug = serializers.CharField(read_only=True)
+    version = serializers.IntegerField(read_only=True)
+    status = serializers.CharField(read_only=True)
 
     class Meta:
         model = Program
@@ -352,6 +357,8 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             "pdu_fields",
             "partners",
             "partner_access",
+            "version",
+            "status",
         )
 
     def validate_programme_code(self, value: str) -> str:
@@ -445,9 +452,11 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
-    pdu_fields = PDUFieldsSerializer(many=True)
-    version = serializers.IntegerField(required=False, read_only=True)
+    pdu_fields = PDUFieldsUpdateSerializer(many=True)
+    version = serializers.IntegerField(required=False)
     slug = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=True)
+    partner_access = serializers.CharField(read_only=True)
 
     class Meta:
         model = Program
@@ -468,6 +477,8 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             "end_date",
             "pdu_fields",
             "version",
+            "status",
+            "partner_access",
         )
 
     def validate_programme_code(self, value: str) -> str:
@@ -492,7 +503,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
 
         # validate DCT
         if not data_collecting_type.active:
-            raise serializers.ValidationError("Only active DataCollectingType can be used in Program.")
+            raise serializers.ValidationError("Only active Data Collecting Type can be used in Program.")
         elif data_collecting_type.deprecated:
             raise serializers.ValidationError("Deprecated Data Collecting Type cannot be used in Program.")
 
@@ -503,7 +514,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Data Collecting Type can be updated only for Draft Programs.")
             else:
                 if Household.objects.filter(program=self.instance).exists():
-                    raise serializers.ValidationError("Data Collecting Type can be updated only for Program without any households")
+                    raise serializers.ValidationError("Data Collecting Type can be updated only for Program without any households.")
         return value
 
     def validate_beneficiary_group(self, value: BeneficiaryGroup) -> BeneficiaryGroup:
@@ -628,7 +639,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
     partners = PartnersDataSerializer(many=True)
-    pdu_fields = PDUFieldsSerializer(many=True)
+    pdu_fields = PDUFieldsCreateSerializer(many=True)
     slug = serializers.CharField(read_only=True)
 
     class Meta:
