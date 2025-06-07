@@ -1,8 +1,13 @@
+import copy
 import logging
 from typing import Any
 
+from django.db import transaction
 from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
-
+from hct_mis_api.apps.program.celery_tasks import (
+    copy_program_task,
+    populate_pdu_new_rounds_with_null_values_task,
+)
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -10,7 +15,8 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
-from rest_framework.mixins import DestroyModelMixin, ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import DestroyModelMixin, ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
+    UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -23,6 +29,8 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
 )
+from hct_mis_api.apps.activity_log.models import log_create
+
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
@@ -33,6 +41,7 @@ from hct_mis_api.apps.core.api.mixins import (
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import FlexibleAttributeForPDUService
 from hct_mis_api.apps.program.api.caches import (
     BeneficiaryGroupKeyConstructor,
     ProgramCycleKeyConstructor,
@@ -42,14 +51,17 @@ from hct_mis_api.apps.program.api.filters import ProgramCycleFilter, ProgramFilt
 from hct_mis_api.apps.program.api.serializers import (
     BeneficiaryGroupSerializer,
     ProgramCycleCreateSerializer,
-    ProgramCycleDeleteSerializer,
     ProgramCycleListSerializer,
     ProgramCycleUpdateSerializer,
     ProgramDetailSerializer,
-    ProgramListSerializer,
+    ProgramListSerializer, ProgramCreateSerializer, ProgramUpdateSerializer, ProgramCopySerializer,
+    ProgramUpdatePartnerAccessSerializer,
 )
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
+from hct_mis_api.apps.program.utils import create_program_partner_access, remove_program_partner_access, \
+    copy_program_object
 from hct_mis_api.apps.program.validators import ProgramDeletionValidator
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
 
 logger = logging.getLogger(__name__)
 
@@ -57,16 +69,23 @@ logger = logging.getLogger(__name__)
 class ProgramViewSet(
     SerializerActionMixin,
     BusinessAreaMixin,
-    ProgramDeletionValidator,
     CountActionMixin,
     RetrieveModelMixin,
     ListModelMixin,
+    CreateModelMixin,
+    UpdateModelMixin,
     DestroyModelMixin,
     BaseViewSet,
 ):
     permissions_by_action = {
         "retrieve": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
         "list": [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "create": [Permissions.PROGRAMME_CREATE],
+        "update": [Permissions.PROGRAMME_UPDATE],
+        "activate": [Permissions.PROGRAMME_ACTIVATE],
+        "finish": [Permissions.PROGRAMME_FINISH],
+        "update_partner_access": [Permissions.PROGRAMME_UPDATE],
+        "copy": [Permissions.PROGRAMME_DUPLICATE],
         "destroy": [Permissions.PROGRAMME_REMOVE],
         "payments": [Permissions.PM_VIEW_PAYMENT_LIST],
     }
@@ -74,6 +93,10 @@ class ProgramViewSet(
     serializer_classes_by_action = {
         "list": ProgramListSerializer,
         "retrieve": ProgramDetailSerializer,
+        "create": ProgramCreateSerializer,
+        "update": ProgramUpdateSerializer,
+        "update_partner_access": ProgramUpdatePartnerAccessSerializer,
+        "copy": ProgramCopySerializer,
         "payments": PaymentListSerializer,
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -108,9 +131,178 @@ class ProgramViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
+    @action(detail=True, methods=["post"])
+    def activate(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        program = self.get_object()
+        if program.status == Program.ACTIVE:
+            raise ValidationError("Program is already active.")
+
+        program.status = Program.ACTIVE
+        program.save(update_fields=["status"])
+        return Response(status=status.HTTP_200_OK, data={"message": "Program Activated"})
+
+    @action(detail=True, methods=["post"])
+    def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        program = self.get_object()
+        if program.status != Program.ACTIVE:
+            raise ValidationError("Only active Program can be finished.")
+        # check payment plans
+        if (
+            PaymentPlan.objects.filter(program_cycle__in=program.cycles.all())
+            .exclude(
+                status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
+            ).exists()
+        ):
+            raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+
+        # check for active cycles
+        if program.cycles.filter(status=ProgramCycle.ACTIVE).exists():
+            raise ValidationError("Cannot finish Program with active cycles")
+
+        if program.end_date is None:
+            raise ValidationError("Cannot finish programme without end date")
+
+        program.status = Program.FINISHED
+        program.save(update_fields=["status"])
+
+        if program.biometric_deduplication_enabled:
+            BiometricDeduplicationService().delete_deduplication_set(program)
+
+        return Response(status=status.HTTP_200_OK, data={"message": "Program Finished"})
+
+    @transaction.atomic
+    def perform_create(self, serializer: BaseSerializer[Any]) -> None:
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        partners_data = data.pop("partners", [])
+        pdu_fields = data.pop("pdu_fields", [])
+
+        program = Program(
+            **data,
+            status=Program.DRAFT,
+            business_area=self.business_area,
+        )
+        if not program.programme_code:
+            program.programme_code = program.generate_programme_code()
+        program.slug = program.generate_slug()
+
+        program.full_clean()
+        program.save()
+
+        ProgramCycle.objects.create(
+            program=program,
+            start_date=program.start_date,
+            end_date=None,
+            status=ProgramCycle.DRAFT,
+            created_by=self.request.user,
+        )
+        # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
+        if program.partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            create_program_partner_access(partners_data, program, program.partner_access)
+
+        if pdu_fields:
+            FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
+
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, None, program)
+
+        serializer.instance = program
+
+    @transaction.atomic
+    def perform_update(self, serializer: BaseSerializer[Any]) -> None:
+        program = self.get_object()
+        old_program = copy.deepcopy(program)
+
+        if program.status == Program.FINISHED:
+            raise ValidationError("Cannot update a finished Program.")
+
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        pdu_fields = data.pop("pdu_fields", [])
+
+        for attrib, value in data.items():
+            if hasattr(program, attrib):
+                setattr(program, attrib, value)
+        program.full_clean()
+        program.save()
+
+        if pdu_fields:
+            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
+            populate_pdu_new_rounds_with_null_values_task.delay(str(program.id))
+
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
+
+    @transaction.atomic
+    @action(detail=True, methods=["post"])
+    def update_partner_access(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        program = self.get_object()
+        old_program = copy.deepcopy(program)
+        old_partner_access = old_program.partner_access
+
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        partners_data = data.pop("partners", [])
+        partner_access = data.pop("partner_access", None)
+
+        program.partner_access = partner_access
+        # update partner access for ALL_PARTNERS_ACCESS type if it was not changed but the partners need to be refetched
+        if partner_access == old_partner_access and partner_access == Program.ALL_PARTNERS_ACCESS:
+            create_program_partner_access([], program, partner_access)
+        # update partner access only for SELECTED_PARTNERS_ACCESS type, since update to NONE and ALL are handled through signal
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            partners_data = create_program_partner_access(partners_data, program, partner_access)
+            remove_program_partner_access(partners_data, program)
+        program.save()
+
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
+
+        return Response(status=status.HTTP_200_OK, data={"message": "Partner access updated."})
+
+    @transaction.atomic
+    @action(detail=True, methods=["post"])
+    def copy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        program = self.get_object()
+        old_program = copy.deepcopy(program)
+
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        partners_data = data.pop("partners", [])
+        partner_access = data.get("partner_access", None)
+        pdu_fields = data.pop("pdu_fields", [])
+
+        program = copy_program_object(str(program.id), data, self.request.user)
+
+        # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            create_program_partner_access(partners_data, program, partner_access)
+
+        transaction.on_commit(
+            lambda: copy_program_task.delay(
+                copy_from_program_id=str(old_program.id), new_program_id=str(program.id), user_id=str(self.request.user.id)
+            )
+        )
+
+        if pdu_fields:
+            FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
+
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, None, program)
+
+        serializer.instance = program
+        return Response(status=status.HTTP_201_CREATED, data={"message": "Program copy initiated."})
+
     def perform_destroy(self, instance: Program) -> None:
-        self.validate(program=instance)
-        super().perform_destroy(instance)
+        old_program = copy.deepcopy(instance)
+        if instance.status != Program.DRAFT:
+            raise ValidationError("Only Draft Program can be deleted.")
+
+        instance.delete()
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, instance.pk, old_program, instance)
 
     @extend_schema(
         responses={
@@ -144,7 +336,6 @@ class ProgramCycleViewSet(
         "create": ProgramCycleCreateSerializer,
         "update": ProgramCycleUpdateSerializer,
         "partial_update": ProgramCycleUpdateSerializer,
-        "destroy": ProgramCycleDeleteSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS],
