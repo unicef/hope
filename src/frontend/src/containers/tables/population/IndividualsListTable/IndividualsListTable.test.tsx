@@ -7,6 +7,7 @@ import { IndividualsListTable } from './IndividualsListTable';
 import { RestService } from '@restgenerated/services/RestService';
 import { SexEnum } from '@restgenerated/models/SexEnum';
 import { RelationshipEnum } from '@restgenerated/models/RelationshipEnum';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
 // Setup common mocks (useBaseUrl, useProgramContext, react-router-dom, utils, RestService)
 setupCommonMocks();
@@ -28,6 +29,16 @@ describe('IndividualsListTable', () => {
         birthDate: '1998-01-15',
         relationship: RelationshipEnum.HEAD,
         status: 'ACTIVE',
+        role: 'PRIMARY',
+        relationshipDisplay: 'Head of household (self)',
+        deduplicationBatchStatusDisplay: 'Unique in batch',
+        biometricDeduplicationBatchStatusDisplay: 'Not processed',
+        deduplicationGoldenRecordStatusDisplay: 'Unique',
+        biometricDeduplicationGoldenRecordStatusDisplay: 'Not processed',
+        deduplicationBatchResults: [],
+        biometricDeduplicationBatchResults: [],
+        deduplicationGoldenRecordResults: [],
+        biometricDeduplicationGoldenRecordResults: [],
         household: {
           id: 'household-1',
           unicefId: 'HH-001',
@@ -36,61 +47,27 @@ describe('IndividualsListTable', () => {
             name: 'District 1',
           },
         },
-        sanctionListPossibleMatch: false,
-        sanctionListConfirmedMatch: false,
-        lastRegistrationDate: '2023-01-15T10:30:00Z',
-        firstRegistrationDate: '2023-01-15T10:30:00Z',
-        documents: [],
-        identities: [],
-        phoneNo: '',
-        phoneNoValid: false,
-        email: '',
-        maritalStatus: '',
-        workStatus: '',
-        observedDisability: [],
-        disability: '',
-        pregnant: false,
-        deduplicationBatchStatus: '',
-        deduplicationGoldenRecordStatus: '',
-        deduplicationBatchResults: null,
-        deduplicationGoldenRecordResults: null,
-        importId: null,
         program: {
           id: 'test-program',
           name: 'Test Program',
           slug: 'test-program',
+          status: Status791Enum.ACTIVE,
         },
+        lastRegistrationDate: '2023-01-15T10:30:00Z',
       },
     ],
     count: 1,
   };
 
   const mockChoicesData = {
-    sexChoices: [
-      { value: SexEnum.MALE, label: 'Male' },
-      { value: SexEnum.FEMALE, label: 'Female' },
+    documentTypeChoices: [
+      { value: 'NATIONAL_ID', label: 'National ID' },
+      { value: 'PASSPORT', label: 'Passport' },
     ],
-    relationshipChoices: [
-      { value: RelationshipEnum.HEAD, label: 'Head of Household' },
-      { value: RelationshipEnum.WIFE_HUSBAND, label: 'Wife/Husband' },
-      { value: RelationshipEnum.SON_DAUGHTER, label: 'Son/Daughter' },
+    residenceStatusChoices: [
+      { value: 'RESIDENT', label: 'Resident' },
+      { value: 'REFUGEE', label: 'Refugee' },
     ],
-    statusChoices: [
-      { value: 'ACTIVE', label: 'Active' },
-      { value: 'INACTIVE', label: 'Inactive' },
-    ],
-    maritalStatusChoices: [],
-    workStatusChoices: [],
-    observedDisabilityChoices: [],
-    severityOfDisabilityChoices: [],
-    residenceStatusChoices: [],
-    commsDisabilityChoices: [],
-    hearingDisabilityChoices: [],
-    memoryDisabilityChoices: [],
-    physicalDisabilityChoices: [],
-    seeingDisabilityChoices: [],
-    selfcareDisabilityChoices: [],
-    pregnancyChoices: [],
   };
 
   const defaultFilter = {
@@ -130,6 +107,47 @@ describe('IndividualsListTable', () => {
           filter={defaultFilter}
           businessArea="test-area"
           canViewDetails={true}
+          choicesData={mockChoicesData}
+        />
+      </QueryClientProvider>,
+    );
+
+    expect(container).toMatchSnapshot();
+  });
+
+  it('should handle empty data', () => {
+    const emptyMockData = {
+      next: null,
+      previous: null,
+      results: [],
+      count: 0,
+    };
+
+    vi.mocked(
+      RestService.restBusinessAreasProgramsIndividualsList,
+    ).mockResolvedValue(emptyMockData);
+
+    const { container } = renderWithProviders(
+      <QueryClientProvider client={queryClient}>
+        <IndividualsListTable
+          filter={defaultFilter}
+          businessArea="test-area"
+          canViewDetails={true}
+          choicesData={mockChoicesData}
+        />
+      </QueryClientProvider>,
+    );
+
+    expect(container).toMatchSnapshot();
+  });
+
+  it('should handle no view details permission', () => {
+    const { container } = renderWithProviders(
+      <QueryClientProvider client={queryClient}>
+        <IndividualsListTable
+          filter={defaultFilter}
+          businessArea="test-area"
+          canViewDetails={false}
           choicesData={mockChoicesData}
         />
       </QueryClientProvider>,
