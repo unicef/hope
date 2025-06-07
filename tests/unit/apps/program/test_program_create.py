@@ -136,3 +136,135 @@ class TestProgramCreate:
                 "slug": program.slug,  # slug is auto-generated
             }
             assert response.json() == expected_response
+
+    def test_create_program_with_programme_code(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_program_code = {
+            **self.valid_input_data_standard,
+            "programme_code": "T3st",
+        }
+        response = self.client.post(self.list_url, input_data_with_program_code)
+        assert response.status_code == status.HTTP_201_CREATED
+        program = Program.objects.get(pk=response.json()["id"])
+        expected_response = {
+            **self.expected_response_standard,
+            "id": str(program.id),
+            "programme_code": "T3ST",  # programme_code is uppercased
+            "slug": "t3st",  # slug is a slugified version of program_code
+        }
+        assert response.json() == expected_response
+
+    def test_create_program_with_programme_code_invalid(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_program_code = {
+            **self.valid_input_data_standard,
+            "programme_code": "T#ST",  # Invalid program code
+        }
+        response = self.client.post(self.list_url, input_data_with_program_code)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "programme_code" in response.json()
+        assert "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -" in response.json()["programme_code"][0]
+
+    def test_create_program_with_programme_code_existing(self, create_user_role_with_permissions: Any) -> None:
+        ProgramFactory(programme_code="T3ST", business_area=self.afghanistan)
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_program_code = {
+            **self.valid_input_data_standard,
+            "programme_code": "T3st",
+        }
+        response = self.client.post(self.list_url, input_data_with_program_code)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "programme_code" in response.json()
+        assert response.json()["programme_code"][0] == "Programme code is already used."
+
+    def test_create_program_with_missing_data(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        missing_input_data = {
+            **self.valid_input_data_standard,
+        }
+        missing_input_data.pop("name")
+        response = self.client.post(self.list_url, missing_input_data,)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "name" in response.json()
+        assert response.json()["name"][0] == "This field is required."
+
+    def test_create_program_with_invalid_data_collecting_type(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        dct_invalid = DataCollectingTypeFactory(label="Invalid", code="invalid", type=DataCollectingType.Type.STANDARD)
+        invalid_input_data = {
+            **self.valid_input_data_standard,
+            "data_collecting_type": dct_invalid.code,  # Using an inactive DCT
+        }
+
+        # DCT inactive
+        dct_invalid.active = False
+        dct_invalid.save()
+        response_for_inactive = self.client.post(self.list_url, invalid_input_data)
+        assert response_for_inactive.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_inactive.json()
+        assert response_for_inactive.json()["data_collecting_type"][0] == "Only active Data Collecting Type can be used in Program."
+
+        # DCT deprecated
+        dct_invalid.active = True
+        dct_invalid.deprecated = True
+        dct_invalid.save()
+        response_for_deprecated = self.client.post(self.list_url, invalid_input_data)
+        assert response_for_deprecated.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_deprecated.json()
+        assert response_for_deprecated.json()["data_collecting_type"][0] == "Deprecated Data Collecting Type cannot be used in Program."
+
+        # DCT limited to another BA
+        dct_invalid.deprecated = False
+        dct_invalid.save()
+        ukraine = create_ukraine()
+        dct_invalid.limit_to.add(ukraine)
+        response_for_limited = self.client.post(self.list_url, invalid_input_data)
+        assert response_for_limited.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_limited.json()
+        assert response_for_limited.json()["data_collecting_type"][0] == "This Data Collecting Type is not available for this Business Area."
+
+        # DCT valid
+        dct_invalid.limit_to.add(self.afghanistan)
+        response_for_valid = self.client.post(self.list_url, invalid_input_data)
+        assert response_for_valid.status_code == status.HTTP_201_CREATED
+
+    def test_create_program_with_invalid_beneficiary_group(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        invalid_input_data = {
+            **self.valid_input_data_standard,
+            "beneficiary_group": str(self.bg_sw.id),  # Invalid DCT and BG combination
+        }
+        response = self.client.post(self.list_url, invalid_input_data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "beneficiary_group" in response.json()
+        assert response.json()["beneficiary_group"][0] == "Selected combination of data collecting type and beneficiary group is invalid."
+
+    def test_create_program_with_invalid_dates(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        invalid_input_data = {
+            **self.valid_input_data_standard,
+            "start_date": "2033-01-01",  # Start date after end date
+            "end_date": "2030-12-31",
+        }
+        response = self.client.post(self.list_url, invalid_input_data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "end_date" in response.json()
+        assert response.json()["end_date"][0] == "End date cannot be earlier than the start date."
+
+    def test_create_program_without_end_date(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        invalid_input_data = {
+            **self.valid_input_data_standard,
+            "end_date": None,
+        }
+        response = self.client.post(self.list_url, invalid_input_data)
+        assert response.status_code == status.HTTP_201_CREATED
+        program = Program.objects.get(pk=response.json()["id"])
+        expected_response = {
+            **self.expected_response_standard,
+            "id": str(program.id),
+            "programme_code": program.programme_code,
+            "slug": program.slug,
+            "end_date": None,
+        }
+        assert response.json() == expected_response
