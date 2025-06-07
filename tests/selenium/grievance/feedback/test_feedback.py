@@ -1,10 +1,8 @@
-from django.conf import settings
-from django.core.management import call_command
-
 import pytest
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.accountability.fixtures import generate_feedback
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, Country
@@ -35,7 +33,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def add_feedbacks() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
+    generate_feedback()
     yield
 
 
@@ -439,9 +437,7 @@ class TestFeedback:
         pageFeedback.getRow(0).click()
         assert "-" in pageFeedbackDetails.getProgramme().text
         pageFeedbackDetails.getButtonEdit().click()
-        from hct_mis_api.apps.program.models import Program
 
-        print(Program.objects.all())
         pageNewFeedback.selectProgramme("Draft Program")
         pageNewFeedback.getDescription().click()
         pageNewFeedback.getDescription().send_keys(Keys.CONTROL, "a")

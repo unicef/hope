@@ -4,26 +4,26 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useExportPdfPpSummaryMutation,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
 `;
 
 interface AcceptanceProcessProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AcceptanceProcess({
@@ -33,38 +33,42 @@ export function AcceptanceProcess({
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId: programSlug } = useBaseUrl();
 
-  const { edges } = paymentPlan.approvalProcess;
+  const { approvalProcess } = paymentPlan;
   const [showAll, setShowAll] = useState(false);
-  const [mutate, { loading: exportPdfLoading }] =
-    useExportPdfPpSummaryMutation();
+
+  const exportPdfMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansExportPdfPaymentPlanSummaryRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programSlug,
+          id: paymentPlan.id,
+        },
+      ),
+  });
 
   const matchDataSize = (
-    data: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'],
-  ): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] =>
-    showAll ? data : [data[0]];
+    data: PaymentPlanDetail['approvalProcess'],
+  ): PaymentPlanDetail['approvalProcess'] => (showAll ? data : [data[0]]);
 
-  if (!edges.length) {
+  if (!approvalProcess.length) {
     return null;
   }
   const handleExportPdf = async (): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-        },
-      });
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-    } finally {
+      await exportPdfMutation.mutateAsync();
       showMessage(t('PDF generated. Please check your email.'));
+    } catch (e) {
+      showMessage(e.message || t('Failed to export PDF'));
     }
   };
 
   const canExportPdf =
     hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Accepted ||
-      paymentPlan.status === PaymentPlanStatus.Finished);
+    (paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
+      paymentPlan.status === PaymentPlanStatusEnum.FINISHED);
 
   return (
     <Box m={5}>
@@ -75,7 +79,7 @@ export function AcceptanceProcess({
           </Title>
           {canExportPdf && (
             <LoadingButton
-              loading={exportPdfLoading}
+              loading={exportPdfMutation.isPending}
               color="primary"
               variant="contained"
               onClick={handleExportPdf}
@@ -85,14 +89,14 @@ export function AcceptanceProcess({
             </LoadingButton>
           )}
         </Box>
-        {matchDataSize(edges).map((edge) => (
+        {matchDataSize(approvalProcess).map((process, index) => (
           <AcceptanceProcessRow
-            key={edge.node.id}
-            acceptanceProcess={edge.node}
+            key={index}
+            acceptanceProcess={process}
             paymentPlan={paymentPlan}
           />
         ))}
-        {edges.length > 1 && (
+        {approvalProcess.length > 1 && (
           <ButtonContainer>
             <Button
               variant="outlined"

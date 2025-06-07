@@ -1,21 +1,12 @@
 import abc
 from typing import Dict, List, Optional
 
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import (
-    decode_and_get_object,
-    decode_id_string,
-    decode_id_string_required,
-)
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -34,7 +25,6 @@ from hct_mis_api.apps.grievance.services.ticket_based_on_payment_record_services
 )
 from hct_mis_api.apps.grievance.utils import create_grievance_documents
 from hct_mis_api.apps.grievance.validators import validate_grievance_documents_size
-from hct_mis_api.apps.program.models import Program
 
 
 class TicketDetailsCreator(abc.ABC):
@@ -97,7 +87,7 @@ class TicketCreatorService:
     def create(self, user: AbstractUser, business_area: BusinessArea, input_data: Dict) -> List[GrievanceTicket]:
         documents = input_data.pop("documentation", None)
         extras = input_data.pop("extras", {})
-        linked_tickets = [decode_id_string_required(encoded_id) for encoded_id in input_data.pop("linked_tickets", [])]
+        linked_tickets = input_data.pop("linked_tickets", [])
         linked_feedback_id = input_data.pop("linked_feedback_id", None)
 
         grievance_ticket = self._create_ticket(business_area, input_data, user)
@@ -143,20 +133,10 @@ class TicketCreatorService:
         linked_feedback.save()
 
     def _create_ticket(self, business_area: BusinessArea, input_data: Dict, user: AbstractUser) -> GrievanceTicket:
-        partner = decode_and_get_object(input_data.pop("partner", None), Partner, False)
-        assigned_to = decode_and_get_object(input_data.pop("assigned_to", None), get_user_model(), False)
+        partner = input_data.pop("partner", None)
+        assigned_to = input_data.pop("assigned_to", None)
         admin = input_data.pop("admin", None)
         program = input_data.pop("program", None)
-
-        if admin:
-            admin = get_object_or_404(Area, id=decode_id_string(admin))
-        else:
-            admin = None
-
-        if program:
-            program = get_object_or_404(Program, pk=decode_id_string(program))
-        else:
-            program = None
 
         new_ticket = GrievanceTicket.objects.create(
             **input_data,

@@ -1,26 +1,3 @@
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid2 as Grid,
-  Typography,
-} from '@mui/material';
-import { Field, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  GrievanceTicketDocument,
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllEditPeopleFieldsQuery,
-  useAllProgramsForChoicesQuery,
-  useGrievanceTicketQuery,
-  useGrievanceTicketStatusChangeMutation,
-  useGrievancesChoiceDataQuery,
-  useMeQuery,
-  useUpdateGrievanceMutation,
-} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { BlackLink } from '@components/core/BlackLink';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -32,6 +9,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { Title } from '@components/core/Title';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ExistingDocumentationFieldArray } from '@components/grievances/Documentation/ExistingDocumentationFieldArray';
 import { NewDocumentationFieldArray } from '@components/grievances/Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '@components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
@@ -50,25 +28,38 @@ import {
 import { validate } from '@components/grievances/utils/validateGrievance';
 import { validationSchema } from '@components/grievances/utils/validationSchema';
 import {
-  PERMISSIONS,
-  hasCreatorOrOwnerPermissions,
-  hasPermissions,
-} from '../../../config/permissions';
+  GrievanceTicketDocument,
+  useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
+  useGrievanceTicketStatusChangeMutation,
+  useUpdateGrievanceMutation,
+} from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid2 as Grid,
+  Typography,
+} from '@mui/material';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useQuery } from '@tanstack/react-query';
 import {
-  getGrievanceCategoryDescriptions,
-  getGrievanceIssueTypeDescriptions,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
   GRIEVANCE_TICKET_STATES,
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
 } from '@utils/constants';
 import {
   choicesToDict,
@@ -76,10 +67,20 @@ import {
   isPermissionDeniedError,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
-import { useProgramContext } from 'src/programContext';
+import { Field, Formik } from 'formik';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import {
+  PERMISSIONS,
+  hasCreatorOrOwnerPermissions,
+  hasPermissions,
+} from '../../../config/permissions';
+import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { createApiParams } from '@utils/apiUtils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -96,7 +97,8 @@ const BoxWithBottomBorders = styled.div`
 const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessAreaSlug, programSlug, isAllPrograms } =
+    useBaseUrl();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -105,20 +107,39 @@ const EditGrievancePage = (): ReactElement => {
 
   const {
     data: ticketData,
-    loading: ticketLoading,
+    isLoading: ticketLoading,
     error,
-  } = useGrievanceTicketQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
+  } = useQuery<GrievanceTicketDetail>({
+    queryKey: ['businessAreaProgram', businessAreaSlug, id],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id: id,
+      }),
   });
 
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryFn: () => {
+        return RestService.restBusinessAreasUsersProfileRetrieve({
+          businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
+        });
+      },
+      staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+      gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    },
+  );
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+      }),
+  });
 
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
@@ -131,12 +152,18 @@ const EditGrievancePage = (): ReactElement => {
   const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
     useAllEditPeopleFieldsQuery();
 
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
@@ -183,8 +210,8 @@ const EditGrievancePage = (): ReactElement => {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const currentUserId = currentUserData.me.id;
-  const ticket = ticketData.grievanceTicket;
+  const currentUserId = currentUserData.id;
+  const ticket = ticketData;
 
   const isCreator = ticket.createdBy?.id === currentUserId;
   const isOwner = ticket.assignedTo?.id === currentUserId;
@@ -257,9 +284,10 @@ const EditGrievancePage = (): ReactElement => {
     baseUrl,
   );
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData?.results?.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   const individualFieldsDictForValidation = isSocialDctType
     ? peopleFieldsDict
@@ -270,7 +298,11 @@ const EditGrievancePage = (): ReactElement => {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const { variables } = prepareVariables(businessArea, values, ticket);
+          const { variables } = prepareVariables(
+            businessAreaSlug,
+            values,
+            ticket,
+          );
           await mutate({
             variables,
             refetchQueries: () => [

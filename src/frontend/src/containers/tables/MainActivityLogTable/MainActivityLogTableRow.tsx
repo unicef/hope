@@ -5,7 +5,7 @@ import moment from 'moment';
 import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
-import { AllLogEntriesQuery, LogEntryAction } from '@generated/graphql';
+import type { LogEntry } from '@restgenerated/models/LogEntry';
 import {
   ButtonPlaceHolder,
   Cell,
@@ -50,7 +50,7 @@ function snakeToFieldReadable(str: string): string {
   );
 }
 interface ObjectRepresentationsProps {
-  logEntry: AllLogEntriesQuery['allLogEntries']['edges'][number]['node'];
+  logEntry: LogEntry;
 }
 
 function ObjectRepresentations({
@@ -90,8 +90,8 @@ function ObjectRepresentations({
   };
   if (
     !(model in modelToUrlDict) ||
-    logEntry.action === LogEntryAction.Delete ||
-    logEntry.action === LogEntryAction.SoftDelete
+    logEntry.action === 'DELETE' ||
+    logEntry.action === 'SOFT_DELETE'
   ) {
     return <>{logEntry.objectId}</>;
   }
@@ -101,7 +101,7 @@ function ObjectRepresentations({
 }
 
 interface LogRowProps {
-  logEntry: AllLogEntriesQuery['allLogEntries']['edges'][number]['node'];
+  logEntry: LogEntry;
   actionChoicesDict: { [id: string]: string };
 }
 
@@ -120,12 +120,10 @@ export function MainActivityLogTableRow({
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
-          {logEntry.user
-            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : 'System'}
+          {logEntry.user || 'System'}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="content-type-cell">
-          {logEntry.contentType.name}
+          {logEntry.contentType.model}
         </Cell>
         <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />
@@ -157,12 +155,10 @@ export function MainActivityLogTableRow({
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
-          {logEntry.user
-            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : 'System'}
+          {logEntry.user || 'System'}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="content-type-cell">
-          {logEntry.contentType.name}
+          {logEntry.contentType.model}
         </Cell>
         <Cell weight={headCells[3].weight} data-cy="object-representation-cell">
           <ObjectRepresentations logEntry={logEntry} />

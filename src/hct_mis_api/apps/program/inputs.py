@@ -1,7 +1,7 @@
 import graphene
 
 
-class ProgramPartnerThroughInput(graphene.InputObjectType):
+class ProgramPartnerAccessInput(graphene.InputObjectType):
     partner = graphene.String()
     areas = graphene.List(graphene.String)
     area_access = graphene.String(description="'ADMIN_AREA' or 'BUSINESS_AREA'")
@@ -33,7 +33,7 @@ class CreateProgramInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
     data_collecting_type_code = graphene.String()
     beneficiary_group = graphene.String()
-    partners = graphene.List(ProgramPartnerThroughInput)
+    partners = graphene.List(ProgramPartnerAccessInput)
     partner_access = graphene.String()
     programme_code = graphene.String()
     pdu_fields = graphene.List(PDUFieldInput)
@@ -60,7 +60,7 @@ class UpdateProgramInput(graphene.InputObjectType):
 
 class UpdateProgramPartnersInput(graphene.InputObjectType):
     id = graphene.String(required=True)
-    partners = graphene.List(ProgramPartnerThroughInput)
+    partners = graphene.List(ProgramPartnerAccessInput)
     partner_access = graphene.String()
 
 
@@ -78,7 +78,7 @@ class CopyProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
     data_collecting_type_code = graphene.String()
-    partners = graphene.List(ProgramPartnerThroughInput)
+    partners = graphene.List(ProgramPartnerAccessInput)
     partner_access = graphene.String()
     programme_code = graphene.String()
     pdu_fields = graphene.List(PDUFieldInput)

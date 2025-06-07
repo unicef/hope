@@ -3,7 +3,6 @@ import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import {
   AllGrievanceTicketDocument,
-  AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -23,18 +22,17 @@ import { AssignedToDropdown } from './AssignedToDropdown';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 
 interface GrievancesTableRowProps {
-  ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
+  ticket: GrievanceTicketList;
   statusChoices: { [id: number]: string };
   categoryChoices: { [id: number]: string };
   canViewDetails: boolean;
   issueTypeChoicesData;
   priorityChoicesData;
   urgencyChoicesData;
-  checkboxClickHandler: (
-    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-  ) => void;
+  checkboxClickHandler: (ticket: GrievanceTicketList) => void;
   isSelected: boolean;
   optionsData;
   setInputValue;
@@ -122,7 +120,6 @@ export function GrievancesTableRow({
 
   const mappedPrograms = getMappedPrograms();
 
-  //TODO: add target to the query
   const getTargetUnicefId = (_ticket) => {
     return isSocialDctType || isAllPrograms
       ? _ticket?.targetId

@@ -2,10 +2,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  GrievanceTicketQuery,
-  useApproveHouseholdDataChangeMutation,
-} from '@generated/graphql';
+import { useApproveHouseholdDataChangeMutation } from '@generated/graphql';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -13,12 +10,13 @@ import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import RequestedHouseholdDataChangeTable from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export function RequestedHouseholdDataChange({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
@@ -35,11 +33,11 @@ export function RequestedHouseholdDataChange({
   };
   const [mutate] = useApproveHouseholdDataChangeMutation();
   const householdData = {
-    ...ticket.householdDataUpdateTicketDetails.householdData,
+    ...ticket.ticketDetails.householdData,
   };
   let allApprovedCount = 0;
-  const flexFields = householdData?.flex_fields || {};
-  delete householdData.flex_fields;
+  const flexFields = householdData?.flexFields || {};
+  delete householdData.flexFields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(

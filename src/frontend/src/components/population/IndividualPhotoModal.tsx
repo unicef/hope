@@ -1,9 +1,10 @@
-import { IndividualNode, useIndividualPhotosQuery } from '@generated/graphql';
+import { useIndividualPhotosQuery } from '@generated/graphql';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 interface IndividualPhotoModalProps {
-  individual: IndividualNode;
+  individual: IndividualDetail;
 }
 
 export function IndividualPhotoModal({

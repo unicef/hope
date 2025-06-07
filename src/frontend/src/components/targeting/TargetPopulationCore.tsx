@@ -63,7 +63,7 @@ export const TargetPopulationCore = ({
   );
 
   const recordInfo =
-    targetPopulation.buildStatus === PaymentPlanBuildStatus.Ok ? (
+    targetPopulation.backgroundActionStatus === PaymentPlanBuildStatus.Ok ? (
       recordsTable
     ) : (
       <PaperContainer>
@@ -104,16 +104,12 @@ export const TargetPopulationCore = ({
           </Typography>
           <Box mt={2}>
             <Grid container>
-              <Grid size={{ xs:6 }}>
-                {targetPopulation?.excludedIds}
-              </Grid>
+              <Grid size={{ xs: 6 }}>{targetPopulation?.excludedIds}</Grid>
             </Grid>
           </Box>
           <Box mt={2}>
             <Grid container>
-              <Grid size={{ xs:6 }}>
-                {targetPopulation?.exclusionReason}
-              </Grid>
+              <Grid size={{ xs: 6 }}>{targetPopulation?.exclusionReason}</Grid>
             </Grid>
           </Box>
         </PaperContainer>

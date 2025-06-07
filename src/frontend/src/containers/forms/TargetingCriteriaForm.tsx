@@ -1,9 +1,6 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
-import {
-  useAllCollectorFieldsAttributesQuery,
-  useAvailableFspsForDeliveryMechanismsQuery,
-} from '@generated/graphql';
+import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
@@ -53,6 +50,9 @@ import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaColle
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
 import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { FspChoices } from '@restgenerated/models/FspChoices';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -227,8 +227,18 @@ export const TargetingCriteriaForm = ({
     useAllCollectorFieldsAttributesQuery({
       fetchPolicy: 'cache-first',
     });
-  const { data: availableFspsForDeliveryMechanismData } =
-    useAvailableFspsForDeliveryMechanismsQuery();
+  const { data: availableFspsForDeliveryMechanismData } = useQuery<
+    FspChoices[]
+  >({
+    queryKey: [
+      'businessAreasAvailableFspsForDeliveryMechanismsList',
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -334,9 +344,7 @@ export const TargetingCriteriaForm = ({
         enableReinitialize
       >
         {({ submitForm, values, resetForm, setFieldValue, errors }) => {
-          const fsps =
-            availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms ||
-            [];
+          const fsps = availableFspsForDeliveryMechanismData || [];
           const mappedDeliveryMechanisms = fsps.map((el) => ({
             name: el.deliveryMechanism.name,
             value: el.deliveryMechanism.code,

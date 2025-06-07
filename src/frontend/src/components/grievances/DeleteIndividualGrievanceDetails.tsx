@@ -5,7 +5,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
@@ -20,6 +19,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export type RoleReassignData = {
   role: IndividualRoleInHouseholdRole | string;
@@ -31,7 +31,7 @@ export function DeleteIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
@@ -45,11 +45,11 @@ export function DeleteIndividualGrievanceDetails({
     ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
   const isOneIndividual = ticket?.household?.activeIndividualsCount === 1;
   const primaryCollectorRolesCount =
-    ticket?.individual?.householdsAndRoles.filter(
+    ticket?.individual?.rolesInHouseholds.filter(
       (el) => el.role === IndividualRoleInHouseholdRole.Primary,
     ).length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
+    ticket.ticketDetails.roleReassignData,
   )?.filter(
     (el: RoleReassignData) =>
       el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
@@ -128,7 +128,7 @@ export function DeleteIndividualGrievanceDetails({
           }
         }
         if (fieldAttribute?.type === 'DATE') {
-          textValue = <UniversalMoment>{textValue}</UniversalMoment>;
+          textValue = <UniversalMoment>{textValue as string}</UniversalMoment>;
         }
         return (
           <Grid key={key} size={{ xs: 6 }}>
@@ -136,7 +136,7 @@ export function DeleteIndividualGrievanceDetails({
               label={
                 snakeKey === 'sex' ? t('GENDER') : snakeKey.replace(/_/g, ' ')
               }
-              value={textValue}
+              value={<>{textValue}</>}
             />
           </Grid>
         );
@@ -159,7 +159,7 @@ export function DeleteIndividualGrievanceDetails({
   let dialogText = t(
     `You did not approve the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
   );
-  if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+  if (!ticket.ticketDetails.approveStatus) {
     dialogText = t(
       `You are approving the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
     );
@@ -183,8 +183,7 @@ export function DeleteIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus:
-                          !ticket.deleteIndividualTicketDetails?.approveStatus,
+                        approveStatus: !ticket.ticketDetails?.approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -193,10 +192,10 @@ export function DeleteIndividualGrievanceDetails({
                         },
                       ],
                     });
-                    if (ticket.deleteIndividualTicketDetails.approveStatus) {
+                    if (ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Disapproved'));
                     }
-                    if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+                    if (!ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
@@ -205,14 +204,12 @@ export function DeleteIndividualGrievanceDetails({
                 })
               }
               variant={
-                ticket.deleteIndividualTicketDetails?.approveStatus
-                  ? 'outlined'
-                  : 'contained'
+                ticket.ticketDetails?.approveStatus ? 'outlined' : 'contained'
               }
               color="primary"
               disabled={!approveEnabled}
             >
-              {ticket.deleteIndividualTicketDetails?.approveStatus
+              {ticket.ticketDetails?.approveStatus
                 ? t('Disapprove')
                 : t('Approve')}
             </Button>

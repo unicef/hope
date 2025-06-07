@@ -5,6 +5,8 @@
 export type AreaList = {
     readonly id: string;
     name: string;
-    p_code?: string | null;
+    pCode?: string | null;
+    areaType: string;
+    readonly updatedAt: string;
 };
 

@@ -1,17 +1,15 @@
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid } from '@mui/material';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldArray } from 'formik';
-import { useLocation } from 'react-router-dom';
-import {
-  AllAddIndividualFieldsQuery,
-  IndividualQuery,
-} from '@generated/graphql';
-import { EditIdentityRow } from './EditIdentityRow';
 import { ReactElement } from 'react';
+import { useLocation } from 'react-router-dom';
+import { EditIdentityRow } from './EditIdentityRow';
 
 export interface ExistingIdentityFieldArrayProps {
   setFieldValue;
   values;
-  individual: IndividualQuery['individual'];
+  individual: IndividualDetail;
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
 }
 

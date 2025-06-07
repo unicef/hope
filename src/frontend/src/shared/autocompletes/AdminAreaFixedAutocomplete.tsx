@@ -1,8 +1,9 @@
 import { Autocomplete, Box, TextField, CircularProgress } from '@mui/material';
-import  { useState, useEffect, ReactElement } from 'react';
+import { useState, useEffect, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useAllAdminAreasQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 
@@ -28,29 +29,35 @@ export const AdminAreaFixedAutocomplete = ({
   const debouncedInputText = useDebounce(inputValue, 800);
   const [, setNewValue] = useState(null);
   const { businessArea } = useBaseUrl();
-  const { data, loading, error } = useAllAdminAreasQuery({
-    variables: {
-      name: debouncedInputText,
-      businessArea,
-      first: 50,
-      level: level === 1 ? 1 : 2,
-      parentId: parentId || '',
-    },
-    fetchPolicy: 'cache-and-network',
+  const {
+    data: areasData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['adminAreas', debouncedInputText, businessArea, level, parentId],
+    queryFn: () =>
+      RestService.restAreasList({
+        search: debouncedInputText,
+        areaTypeAreaLevel: level === 1 ? 1 : 2,
+        parentId: parentId || undefined,
+        limit: 50,
+      }),
   });
 
+  const loading = isLoading;
+
   useEffect(() => {
-    if (data) {
+    if (areasData) {
       setNewValue(
         typeof value === 'string'
-          ? data.allAdminAreas.edges.find((item) => item.node.name === value)
+          ? areasData.results.find((item) => item.name === value)
           : value,
       );
     }
-  }, [data, value]);
+  }, [areasData, value]);
 
   const handleOnChange = (event, selectedValue, reason): void => {
-    setInputValue(selectedValue?.node?.name);
+    setInputValue(selectedValue?.name);
     onChange(event, selectedValue, reason);
     if (additionalOnChange) {
       additionalOnChange();
@@ -61,26 +68,28 @@ export const AdminAreaFixedAutocomplete = ({
   };
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div>
+        Error: {error instanceof Error ? error.message : 'An error occurred'}
+      </div>
+    );
   }
 
   return (
     <Box mt={1}>
       <StyledAutocomplete
-        options={data?.allAdminAreas.edges || []}
+        options={areasData?.results || []}
         defaultValue={
-          data && typeof value === 'string'
-            ? data.allAdminAreas.edges.find((item) => item.node.id === value)
+          areasData && typeof value === 'string'
+            ? areasData.results.find((item) => item.id === value)
             : value
         }
-        getOptionLabel={(option: any) =>
-          option.node ? `${option.node.name}` : ''
-        }
+        getOptionLabel={(option: any) => (option ? `${option.name}` : '')}
         // eslint-disable-next-line
         isOptionEqualToValue={(option: any, value: any) =>
           typeof value === 'string'
-            ? option?.node?.id === value
-            : option?.node?.id === value?.node?.id
+            ? option?.id === value
+            : option?.id === value?.id
         }
         onChange={handleOnChange}
         disabled={disabled}

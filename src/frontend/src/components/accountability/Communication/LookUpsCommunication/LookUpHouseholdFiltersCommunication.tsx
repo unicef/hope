@@ -3,7 +3,6 @@ import GroupIcon from '@mui/icons-material/Group';
 import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { generateTableOrderOptionsGroup } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
@@ -13,10 +12,11 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
-  choicesData: HouseholdChoiceDataQuery;
+  choicesData: HouseholdChoices;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;

@@ -1,27 +1,10 @@
-import { api } from './api';
-import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
-
-export const fetchPaymentPlansManagerial = async (
-  businessAreaSlug,
-  params = {},
-): Promise<PaymentPlan[]> => {
-  const paramsWithNoLimit = {
-    ...params,
-    limit: 10000,
-    offset: 0,
-  };
-  const response = await api.get(
-    `${businessAreaSlug}/payments/payment-plans-managerial/`,
-    paramsWithNoLimit,
-  );
-  return response;
-};
+import { api, handleApiResponse, handleMutationError } from './api';
 
 interface BulkActionPaymentPlansManagerialProps {
   businessAreaSlug: string;
   ids: string[];
   action: string;
-  comment: string;
+  comment?: string;
 }
 
 export const bulkActionPaymentPlansManagerial = async ({
@@ -30,21 +13,24 @@ export const bulkActionPaymentPlansManagerial = async ({
   action,
   comment,
 }: BulkActionPaymentPlansManagerialProps) => {
-  const payload: { ids: typeof ids; action: typeof action; comment?: string } =
-    {
-      ids,
-      action,
-    };
+  const payload: { ids: string[]; action: string; comment?: string } = {
+    ids,
+    action,
+  };
 
   if (comment) {
     payload.comment = comment;
   }
 
-  const response = await api.post(
-    `${businessAreaSlug}/payments/payment-plans-managerial/bulk-action/`,
-    payload,
-  );
-  return response.data;
+  try {
+    const response = await api.post(
+      `${businessAreaSlug}/payments/payment-plans-managerial/bulk-action/`,
+      payload,
+    );
+    return response.data;
+  } catch (error) {
+    handleMutationError(error, 'perform bulk action on payment plans');
+  }
 };
 
 export const deleteSupportingDocument = async (
@@ -52,15 +38,14 @@ export const deleteSupportingDocument = async (
   programId: string,
   paymentPlanId: string,
   fileId: string,
-) => {
+): Promise<{ success: boolean }> => {
   try {
     await api.delete(
       `${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/`,
     );
     return { success: true };
-  } catch (error: any) {
-    const errorMessage = error?.message || 'An unknown error occurred';
-    throw new Error(`Failed to delete supporting document: ${errorMessage}`);
+  } catch (error) {
+    handleMutationError(error, 'delete supporting document');
   }
 };
 
@@ -70,7 +55,7 @@ export const uploadSupportingDocument = async (
   paymentPlanId: string,
   file: File,
   title: string,
-) => {
+): Promise<any> => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('title', title);
@@ -80,9 +65,9 @@ export const uploadSupportingDocument = async (
       `${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/`,
       formData,
     );
-    return response.data; // Return the response data
+    return response.data;
   } catch (error) {
-    throw new Error(`Failed to upload supporting document: ${error.message}`);
+    handleMutationError(error, 'upload supporting document');
   }
 };
 
@@ -93,15 +78,11 @@ export const fetchSupportingDocument = async (
   fileId: string,
   fileName: string,
 ): Promise<any> => {
-  try {
-    const response = await api.get(
+  return handleApiResponse(
+    api.get(
       `${businessAreaSlug}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/download/`,
       {},
       fileName,
-    );
-    return response;
-  } catch (error: any) {
-    const errorMessage = error?.message || 'An unknown error occurred';
-    throw new Error(`Failed to fetch supporting document: ${errorMessage}`);
-  }
+    ),
+  );
 };

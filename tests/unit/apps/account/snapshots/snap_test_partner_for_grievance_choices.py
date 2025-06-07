@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['PartnerForGrievanceTest::test_partner_choices_with_program 1'] = {
@@ -14,7 +13,13 @@ snapshots['PartnerForGrievanceTest::test_partner_choices_with_program 1'] = {
                 'name': 'Partner with access to Test Program'
             },
             {
-                'name': 'UNICEF'
+                'name': 'Partner with with access to All Programs'
+            },
+            {
+                'name': 'UNICEF HQ'
+            },
+            {
+                'name': 'UNICEF Partner for afghanistan'
             }
         ]
     }
@@ -30,10 +35,13 @@ snapshots['PartnerForGrievanceTest::test_partner_choices_without_program_and_wit
                 'name': 'Partner with access to Test Program for Household'
             },
             {
-                'name': 'Partner with with access to Test Program Any'
+                'name': 'Partner with with access to All Programs'
             },
             {
-                'name': 'UNICEF'
+                'name': 'UNICEF HQ'
+            },
+            {
+                'name': 'UNICEF Partner for afghanistan'
             }
         ]
     }
@@ -46,7 +54,13 @@ snapshots['PartnerForGrievanceTest::test_partner_choices_without_program_but_wit
                 'name': 'Partner with access to Test Program for Household'
             },
             {
-                'name': 'UNICEF'
+                'name': 'Partner with with access to All Programs'
+            },
+            {
+                'name': 'UNICEF HQ'
+            },
+            {
+                'name': 'UNICEF Partner for afghanistan'
             }
         ]
     }
@@ -59,7 +73,13 @@ snapshots['PartnerForGrievanceTest::test_partner_choices_without_program_but_wit
                 'name': 'Partner with access to Test Program for Household'
             },
             {
-                'name': 'UNICEF'
+                'name': 'Partner with with access to All Programs'
+            },
+            {
+                'name': 'UNICEF HQ'
+            },
+            {
+                'name': 'UNICEF Partner for afghanistan'
             }
         ]
     }

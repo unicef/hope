@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestUpdateProgramPartners::test_update_full_area_access_flag 1'] = {
@@ -35,7 +34,31 @@ snapshots['TestUpdateProgramPartners::test_update_full_area_access_flag 1'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'WFP'
                     }
                 ]
             }
@@ -68,7 +91,19 @@ snapshots['TestUpdateProgramPartners::test_update_full_area_access_flag 2'] = {
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     },
                     {
                         'areaAccess': 'BUSINESS_AREA',
@@ -119,6 +154,75 @@ snapshots['TestUpdateProgramPartners::test_update_program_partners_0_valid 1'] =
                         'areas': [
                             {
                                 'name': 'Area1'
+                            }
+                        ],
+                        'name': 'Other Partner'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
+                    },
+                    {
+                        'areaAccess': 'ADMIN_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area1'
+                            },
+                            {
+                                'name': 'AreaToBeUnselected'
+                            }
+                        ],
+                        'name': 'WFP'
+                    }
+                ]
+            }
+        }
+    }
+}
+
+snapshots['TestUpdateProgramPartners::test_update_program_partners_0_valid 2'] = {
+    'data': {
+        'updateProgramPartners': {
+            'program': {
+                'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'Other Partner'
+                    },
+                    {
+                        'areaAccess': 'ADMIN_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area1'
                             },
                             {
                                 'name': 'Area2'
@@ -136,7 +240,19 @@ snapshots['TestUpdateProgramPartners::test_update_program_partners_0_valid 1'] =
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     },
                     {
                         'areaAccess': 'ADMIN_AREA',
@@ -149,6 +265,102 @@ snapshots['TestUpdateProgramPartners::test_update_program_partners_0_valid 1'] =
                             }
                         ],
                         'name': 'WFP'
+                    }
+                ]
+            }
+        }
+    }
+}
+
+snapshots['TestUpdateProgramPartners::test_update_program_partners_0_valid 3'] = {
+    'data': {
+        'updateProgramPartners': {
+            'program': {
+                'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'Other Partner'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
+                    },
+                    {
+                        'areaAccess': 'ADMIN_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area1'
+                            },
+                            {
+                                'name': 'Area2'
+                            }
+                        ],
+                        'name': 'WFP'
+                    }
+                ]
+            }
+        }
+    }
+}
+
+snapshots['TestUpdateProgramPartners::test_update_program_partners_0_valid 4'] = {
+    'data': {
+        'updateProgramPartners': {
+            'program': {
+                'partnerAccess': 'NONE_PARTNERS_ACCESS',
+                'partners': [
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ]
             }
@@ -224,7 +436,31 @@ snapshots['TestUpdateProgramPartners::test_update_program_partners_all_partners_
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'WFP'
                     }
                 ]
             }
@@ -260,7 +496,31 @@ snapshots['TestUpdateProgramPartners::test_update_program_partners_all_partners_
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'WFP'
                     }
                 ]
             }
@@ -296,7 +556,7 @@ snapshots['TestUpdateProgramPartners::test_update_program_partners_all_partners_
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'Partner without role in in BA'
+                        'name': 'Partner not allowed in BA'
                     },
                     {
                         'areaAccess': 'BUSINESS_AREA',
@@ -308,7 +568,31 @@ snapshots['TestUpdateProgramPartners::test_update_program_partners_all_partners_
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'WFP'
                     }
                 ]
             }
@@ -332,7 +616,19 @@ snapshots['TestUpdateProgramPartners::test_update_program_partners_authenticated
                                 'name': 'Area in AFG 2'
                             }
                         ],
-                        'name': 'UNICEF'
+                        'name': 'UNICEF HQ'
+                    },
+                    {
+                        'areaAccess': 'BUSINESS_AREA',
+                        'areas': [
+                            {
+                                'name': 'Area in AFG 1'
+                            },
+                            {
+                                'name': 'Area in AFG 2'
+                            }
+                        ],
+                        'name': 'UNICEF Partner for afghanistan'
                     }
                 ]
             }

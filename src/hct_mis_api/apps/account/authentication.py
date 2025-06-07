@@ -9,7 +9,7 @@ from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
 from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import ACTIVE, Role, User, UserRole
+from hct_mis_api.apps.account.models import ACTIVE, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ def create_user(
     user.set_unusable_password()
     user.save()
     if business_area_code:
-        basic_user_role = UserRole()
+        basic_user_role = RoleAssignment()
         basic_user_role.role = Role.objects.filter(name="Basic User").first()
         basic_user_role.business_area = BusinessArea.objects.get(code=business_area_code)
         basic_user_role.user = user

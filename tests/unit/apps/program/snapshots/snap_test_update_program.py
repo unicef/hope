@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle_or_end_date 1'] = {

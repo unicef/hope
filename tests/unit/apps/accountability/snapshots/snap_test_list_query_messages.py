@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestListQueryMessage::test_list_communication_message_recipients_0_with_view_details_permission 1'] = {

@@ -1,54 +1,82 @@
-import { Grid2 as Grid } from '@mui/material';
-import { useParams } from 'react-router-dom';
-import {
-  useGrievancesChoiceDataQuery,
-  useGrievanceTicketQuery,
-  useMeQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
-import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/GrievancesSidebar';
-import { Notes } from '@components/grievances/Notes/Notes';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { isPermissionDeniedError } from '@utils/utils';
-import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { grievancePermissions } from './grievancePermissions';
-import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
 import GrievancesApproveSection from '@components/grievances/GrievancesApproveSection/GrievancesApproveSection';
 import GrievancesDetails from '@components/grievances/GrievancesDetails/GrievancesDetails';
+import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/GrievancesSidebar';
+import { Notes } from '@components/grievances/Notes/Notes';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { Grid2 as Grid } from '@mui/material';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { isPermissionDeniedError } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useParams } from 'react-router-dom';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
+import { grievancePermissions } from './grievancePermissions';
 
 const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const permissions = usePermissions();
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
-  const { data, loading, error } = useGrievanceTicketQuery({
-    variables: { id },
-    fetchPolicy: 'network-only',
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryFn: () => {
+        return RestService.restBusinessAreasUsersProfileRetrieve({
+          businessAreaSlug: businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
+        });
+      },
+      staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+      gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    },
+  );
+
+  const {
+    data: grievanceTicket,
+    isLoading: loading,
+    error,
+  } = useQuery<GrievanceTicketDetail>({
+    queryKey: ['businessAreasGrievanceTicketsRetrieve', businessAreaSlug, id],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id: id,
+      }),
   });
 
   const { baseUrl } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<GrievanceChoices>({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug,
+        }),
+    });
 
   if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data?.grievanceTicket ||
+    !grievanceTicket ||
     !choicesData ||
     !currentUserData ||
     permissions === null
   )
     return null;
 
-  const ticket = data?.grievanceTicket;
-  const currentUserId = currentUserData?.me?.id;
+  const ticket = grievanceTicket;
+  const currentUserId = currentUserData?.id;
   const isCreator = currentUserId === ticket?.createdBy?.id;
   const isOwner = currentUserId === ticket?.assignedTo?.id;
 

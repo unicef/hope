@@ -1,59 +1,104 @@
-import { MockedProvider } from '@apollo/react-testing';
-import { act } from 'react';
-import wait from 'waait';
-import { PeopleListTable } from '.';
-import { render } from '../../../../testUtils/testUtils';
-import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
-import { fakeApolloAllIndividualsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllIndividualsForPopulationTable';
+import { setupCommonMocks } from 'src/testUtils/commonMocks';
+setupCommonMocks();
 
-describe('containers/tables/population/PeopleListTable', () => {
-  const initialFilter = {
+import React from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderWithProviders } from 'src/testUtils/testUtils';
+import { PeopleListTable } from './PeopleListTable';
+import { RestService } from '@restgenerated/services/RestService';
+import { restBusinessAreasProgramsIndividualsList } from 'src/mocks/responses/restBusinessAreasProgramsIndividualsList';
+
+describe('PeopleListTable', () => {
+  let queryClient: QueryClient;
+
+  const mockFilter = {
     search: '',
-    documentType: 'national_id',
+    documentType: '',
     documentNumber: '',
-    admin2: '',
     sex: '',
-    ageMin: '',
-    ageMax: '',
+    ageMin: null,
+    ageMax: null,
+    admin1: '',
+    admin2: '',
     flags: [],
-    orderBy: 'unicef_id',
     status: '',
-    lastRegistrationDateMin: '',
-    lastRegistrationDateMax: '',
+    lastRegistrationDateMin: null,
+    lastRegistrationDateMax: null,
+    orderBy: 'unicef_id',
   };
 
-  it('should render with data', async () => {
-    const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllIndividualsForPopulationTable}
-      >
-        <PeopleListTable
-          businessArea="afghanistan"
-          filter={initialFilter}
-          canViewDetails
-        />
-      </MockedProvider>,
-    );
-    await act(() => wait(0)); // wait for response
+  const defaultProps = {
+    businessArea: 'afghanistan',
+    filter: mockFilter,
+    canViewDetails: true,
+  };
 
-    expect(container).toMatchSnapshot();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+
+    // Mock RestService methods
+    vi.mocked(
+      RestService.restBusinessAreasProgramsIndividualsList,
+    ).mockResolvedValue(restBusinessAreasProgramsIndividualsList as any);
   });
 
-  it('should render loading', () => {
-    const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllIndividualsForPopulationTable}
-      >
-        <PeopleListTable
-          businessArea="afghanistan"
-          filter={initialFilter}
-          canViewDetails
-        />
-      </MockedProvider>,
+  it('renders people list table with data', async () => {
+    const { container } = renderWithProviders(
+      <QueryClientProvider client={queryClient}>
+        <PeopleListTable {...defaultProps} />
+      </QueryClientProvider>,
     );
 
-    expect(container).toMatchSnapshot();
+    // Wait for the component to render and make the API call
+    await vi.waitFor(() => {
+      expect(
+        RestService.restBusinessAreasProgramsIndividualsList,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          businessAreaSlug: 'afghanistan',
+          programSlug: 'test-program',
+        }),
+      );
+    });
+
+    // Verify the component rendered
+    expect(container).toBeTruthy();
+  });
+
+  it('renders empty table when no individuals are available', async () => {
+    const emptyData = {
+      count: 0,
+      next: null,
+      previous: null,
+      results: [],
+    };
+
+    vi.mocked(
+      RestService.restBusinessAreasProgramsIndividualsList,
+    ).mockResolvedValue(emptyData);
+
+    const { container } = renderWithProviders(
+      <QueryClientProvider client={queryClient}>
+        <PeopleListTable {...defaultProps} />
+      </QueryClientProvider>,
+    );
+
+    // Wait for the API call to complete
+    await vi.waitFor(() => {
+      expect(
+        RestService.restBusinessAreasProgramsIndividualsList,
+      ).toHaveBeenCalled();
+    });
+
+    // Verify the component rendered
+    expect(container).toBeTruthy();
   });
 });

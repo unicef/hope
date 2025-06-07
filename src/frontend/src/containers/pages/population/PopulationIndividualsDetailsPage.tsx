@@ -1,26 +1,19 @@
-import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
-import { IndividualAccounts } from '@components/population/IndividualAccounts';
-import { IndividualFlags } from '@components/population/IndividualFlags';
-import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
-import { AdminButton } from '@core/AdminButton';
-import {
-  IndividualNode,
-  useAllIndividualsFlexFieldsAttributesQuery,
-  useGrievancesChoiceDataQuery,
-  useHouseholdChoiceDataQuery,
-  useIndividualQuery,
-} from '@generated/graphql';
+import { useAllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
@@ -30,6 +23,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 
 const Container = styled.div`
   padding: 20px;
@@ -50,31 +44,50 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data, loading, error } = useIndividualQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const {
+    data: individual,
+    isLoading: loadingIndividual,
+    error,
+  } = useHopeDetailsQuery<IndividualDetail>(
+    id,
+    RestService.restBusinessAreasProgramsIndividualsRetrieve,
+    {},
+  );
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
 
-  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
+    useQuery({
+      queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
       queryFn: () =>
-        fetchPeriodicFields(businessArea, programId, { limit: 1000 }),
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          limit: 1000,
+        }),
     });
 
   if (
-    loading ||
+    loadingIndividual ||
     choicesLoading ||
     flexFieldsDataLoading ||
     grievancesChoicesLoading ||
@@ -85,7 +98,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data ||
+    !individual ||
     !choicesData ||
     !flexFieldsData ||
     !grievancesChoices ||
@@ -113,8 +126,6 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
     ];
   }
 
-  const { individual } = data;
-
   return (
     <>
       <PageHeader
@@ -129,32 +140,34 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            <IndividualFlags individual={individual} />
-            <AdminButton adminUrl={individual?.adminUrl} />
+            {/*<IndividualFlags individual={individual} />  TODO REST refactor*/}
+            {/* //TODO: Rest refactor */}
+            {/* <AdminButton adminUrl={individual?.adminUrl} /> */}
           </>
         }
       >
         <Box mr={2}>
-          {individual?.photo ? (
-            <IndividualPhotoModal individual={individual as IndividualNode} />
-          ) : null}
+          {/* //TODO: Rest refactor */}
+          {/* {individual?.photo ? (
+            <IndividualPhotoModal individual={individual} />
+          ) : null} */}
         </Box>
       </PageHeader>
       <Container>
         <IndividualBioData
           baseUrl={baseUrl}
           businessArea={businessArea}
-          individual={individual as IndividualNode}
+          individual={individual}
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
         />
-        <IndividualAccounts individual={individual as IndividualNode} />
+        <IndividualAccounts individual={individual} />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}
-          individual={individual as IndividualNode}
+          individual={individual}
         />
         <ProgrammeTimeSeriesFields
-          individual={individual as IndividualNode}
+          individual={individual}
           periodicFieldsData={periodicFieldsData}
         />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (

@@ -1,3 +1,4 @@
+import { Title } from '@components/core/Title';
 import {
   Box,
   Paper,
@@ -8,13 +9,11 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { Title } from '@components/core/Title';
-import { HouseholdNode } from '@generated/graphql';
 import { useProgramContext } from 'src/programContext';
-import { LabelizedField } from '@components/core/LabelizedField';
+import styled from 'styled-components';
 
 const GreyTableCell = styled(TableCell)`
   background-color: #eeeeee;
@@ -24,7 +23,7 @@ const OverviewPaper = styled(Paper)`
   padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
 export interface HouseholdCompositionTableProps {
-  household: HouseholdNode;
+  household: HouseholdDetail;
 }
 
 export function HouseholdCompositionTable({
@@ -141,17 +140,18 @@ export function HouseholdCompositionTable({
         </TableBody>
       </Table>
       <Box display="flex" mt={2}>
+        {/* TODO: Add the following fields */}
         <Box mr={2}>
-          <LabelizedField
+          {/* <LabelizedField
             label={t('Unknown')}
-            value={household?.unknownSexGroupCount}
-          />
+            value={household?.count}
+          /> */}
         </Box>
         <Box>
-          <LabelizedField
+          {/* <LabelizedField
             label={t('Other')}
             value={household?.otherSexGroupCount}
-          />
+          /> */}
         </Box>
       </Box>
     </OverviewPaper>

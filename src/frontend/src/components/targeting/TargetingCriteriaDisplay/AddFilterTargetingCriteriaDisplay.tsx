@@ -1,12 +1,11 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
-import {
-  DataCollectingTypeType,
-  PaymentPlanQuery,
-  useAllCollectorFieldsAttributesQuery,
-} from '@generated/graphql';
+import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -18,8 +17,6 @@ import TargetingCriteriaDisplayDisabled, {
   ContentWrapper,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
-import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -75,7 +72,7 @@ const AddCriteria = styled.div`
 interface AddFilterTargetingCriteriaDisplayProps {
   rules?;
   helpers?;
-  targetPopulation?: PaymentPlanQuery['paymentPlan'];
+  targetPopulation?: TargetPopulationDetail;
   isEdit?: boolean;
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
@@ -151,6 +148,13 @@ const AddFilterTargetingCriteriaDisplay = ({
   };
 
   const addCriteria = (values): void => {
+    if (!helpers) {
+      console.error(
+        'AddFilterTargetingCriteriaDisplay: helpers not available in read-only mode',
+      );
+      return closeModal();
+    }
+
     const criteria = {
       householdsFiltersBlocks: [...values.householdsFiltersBlocks],
       individualsFiltersBlocks: [...values.individualsFiltersBlocks],
@@ -182,7 +186,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
   const isSocialWorkingProgram =
-    selectedProgram?.dataCollectingType?.type === DataCollectingTypeType.Social;
+    selectedProgram?.dataCollectingType?.type === 'SOCIAL';
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;
@@ -201,7 +205,7 @@ const AddFilterTargetingCriteriaDisplay = ({
       <Box display="flex" flexDirection="column">
         <Title>
           <div />
-          {isEdit && (
+          {isEdit && helpers && (
             <>
               {!!rules.length && (
                 <Button
@@ -257,7 +261,7 @@ const AddFilterTargetingCriteriaDisplay = ({
                         }
                         criteria={criteria}
                         editFunction={() => editCriteria(criteria, index)}
-                        removeFunction={() => helpers.remove(index)}
+                        removeFunction={() => helpers?.remove(index)}
                       />
 
                       {index === rules.length - 1 ||
@@ -271,13 +275,27 @@ const AddFilterTargetingCriteriaDisplay = ({
                 : null}
 
               {!rules.length && (
-                <AddCriteria
-                  onClick={handleAddFilter}
-                  data-cy="button-target-population-add-criteria"
-                >
-                  <AddCircleOutline />
-                  <p>{t('Add Filter')}</p>
-                </AddCriteria>
+                <>
+                  {isEdit && helpers ? (
+                    <AddCriteria
+                      onClick={handleAddFilter}
+                      data-cy="button-target-population-add-criteria"
+                    >
+                      <AddCircleOutline />
+                      <p>{t('Add Filter')}</p>
+                    </AddCriteria>
+                  ) : (
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      py={4}
+                      sx={{ color: 'text.secondary', fontStyle: 'italic' }}
+                    >
+                      {t('No targeting criteria defined')}
+                    </Box>
+                  )}
+                </>
               )}
             </Box>
             <ExcludeCheckboxes

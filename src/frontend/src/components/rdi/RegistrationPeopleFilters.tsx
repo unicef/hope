@@ -3,7 +3,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '@generated/graphql';
-import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
+import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { NumberTextField } from '@core/NumberTextField';
@@ -70,7 +70,7 @@ const RegistrationPeopleFilters = ({
           />
         </Grid>
         <Grid size={{ xs: 4 }}>
-          <AssigneeAutocomplete
+          <AssigneeAutocompleteRestFilter
             name="importedBy"
             label={t('Imported By')}
             filter={filter}

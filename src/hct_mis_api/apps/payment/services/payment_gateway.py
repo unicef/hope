@@ -110,6 +110,15 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Payment
+        fields = (
+            "remote_id",
+            "record_code",
+            "payload",
+            "extra_data",
+        )
+
     def get_extra_data(self, obj: Payment) -> Dict:
         return {}
 
@@ -179,15 +188,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             raise PaymentGatewayAPI.PaymentGatewayAPIException(payload.errors)
 
         return payload.data
-
-    class Meta:
-        model = Payment
-        fields = [
-            "remote_id",
-            "record_code",
-            "payload",
-            "extra_data",
-        ]
 
 
 @dataclasses.dataclass()
@@ -581,6 +581,7 @@ class PaymentGatewayService:
                         payment_plan.update_money_fields()
 
                 if payment_plan.is_reconciled:
+                    # TODO: MB to check if we need it here
                     payment_plan.status_finished()
                     payment_plan.save()
                     for instruction in payment_instructions:
