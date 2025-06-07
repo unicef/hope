@@ -110,6 +110,7 @@ class TestProgramDetail:
         partner_unicef_in_afg = Partner.objects.get(name="UNICEF Partner for afghanistan")
 
         assert response_data["id"] == str(self.program.id)
+        assert response_data["version"] == self.program.version
         assert response_data["programme_code"] == self.program.programme_code
         assert response_data["slug"] == self.program.slug
         assert response_data["name"] == self.program.name
