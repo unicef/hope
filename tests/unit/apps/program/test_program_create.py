@@ -5,11 +5,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import (
-    AdminAreaLimitedToFactory,
     PartnerFactory,
     UserFactory, RoleAssignmentFactory,
 )
-from hct_mis_api.apps.account.models import Partner, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import (
     FlexibleAttributeForPDUFactory,
@@ -17,20 +15,16 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData, FlexibleAttribute
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import (
-    ProgramCycleFactory,
     ProgramFactory, BeneficiaryGroupFactory,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 pytestmark = pytest.mark.django_db
 
 class TestProgramCreate:
     @pytest.fixture(autouse=True)
-    def setup(self, api_client: Any, create_partner_role_with_permissions: Any) -> None:
+    def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
         self.list_url = reverse(
             "api:programs:programs-list",
@@ -70,13 +64,13 @@ class TestProgramCreate:
             "population_goal": 1000,
             "cash_plus": False,
             "frequency_of_payments": Program.REGULAR,
+            "administrative_areas_of_implementation": "",
             "partner_access": Program.ALL_PARTNERS_ACCESS,
             "partners": [],
             "pdu_fields": [],
         }
         self.expected_response_standard = {
             **self.valid_input_data_standard,
-            "administrative_areas_of_implementation": "",
             "description": "",
             "budget": "1000000.00",  # budget is formatted as a string
             "partners": [
@@ -134,6 +128,7 @@ class TestProgramCreate:
                 "id": str(program.id),
                 "programme_code": program.programme_code,  # programme_code is auto-generated
                 "slug": program.slug,  # slug is auto-generated
+                "version": program.version,
             }
             assert response.json() == expected_response
 
@@ -151,6 +146,7 @@ class TestProgramCreate:
             "id": str(program.id),
             "programme_code": "T3ST",  # programme_code is uppercased
             "slug": "t3st",  # slug is a slugified version of program_code
+            "version": program.version,
         }
         assert response.json() == expected_response
 
@@ -266,6 +262,7 @@ class TestProgramCreate:
             "programme_code": program.programme_code,
             "slug": program.slug,
             "end_date": None,
+            "version": program.version,
         }
         assert response.json() == expected_response
 
@@ -299,6 +296,7 @@ class TestProgramCreate:
             "id": str(program.id),
             "programme_code": program.programme_code,
             "slug": program.slug,
+            "version": program.version,
             "partners": [
                 {
                     "id": self.partner.id,
@@ -435,6 +433,7 @@ class TestProgramCreate:
             "id": str(program.id),
             "programme_code": program.programme_code,
             "slug": program.slug,
+            "version": program.version,
         }
 
     def test_create_program_with_invalid_pdu_fields(self, create_user_role_with_permissions: Any) -> None:
@@ -569,4 +568,5 @@ class TestProgramCreate:
             "id": str(program.id),
             "programme_code": program.programme_code,
             "slug": program.slug,
+            "version": program.version,
         }
