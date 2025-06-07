@@ -570,6 +570,7 @@ def create_program_partner_access(
             RoleAssignment.objects.filter(
                 partner_id=partner_data["partner"],
                 business_area=program.business_area,
+                program=None,
             )
             .values_list("role_id", flat=True)
             .distinct()
@@ -581,6 +582,7 @@ def create_program_partner_access(
                 program=program,
                 role_id=role_id,
             )
+        # TODO: end of temporary solution - to remove after role assignment is implemented in UI
         if areas := partner_data.get("areas"):  # create area limits if it is not a full-area-access
             area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
                 partner_id=partner_data["partner"],
