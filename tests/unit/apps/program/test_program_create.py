@@ -370,3 +370,203 @@ class TestProgramCreate:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "partners" in response.json()
         assert response.json()["partners"][0] == "You cannot specify partners for the chosen access type."
+
+    def test_create_program_with_pdu_fields(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_pdu_fields = {
+            **self.valid_input_data_standard,
+            "pdu_fields": [
+                {
+                    "label": "PDU Field 1",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1", "", "Round 2"],
+                    }
+                },
+                {
+                    "label": "PDU Field 2",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["", ""],
+                    }
+                },
+            ]
+        }
+        response = self.client.post(self.list_url, input_data_with_pdu_fields)
+        assert response.status_code == status.HTTP_201_CREATED
+        program = Program.objects.get(pk=response.json()["id"])
+        assert FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=program).count() == 2
+        pdu_field_1 = FlexibleAttribute.objects.get(
+            type=FlexibleAttribute.PDU,
+            program=program,
+            name="pdu_field_1",
+        )
+        pdu_field_2 = FlexibleAttribute.objects.get(
+            type=FlexibleAttribute.PDU,
+            program=program,
+            name="pdu_field_2",
+        )
+        assert response.json() == {
+            **self.expected_response_standard,
+            "pdu_fields": [
+                {
+                    "id": str(pdu_field_1.id),
+                    "label": "PDU Field 1",
+                    "name": "pdu_field_1",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1", "", "Round 2"],
+                    }
+                },
+                {
+                    "id": str(pdu_field_2.id),
+                    "label": "PDU Field 2",
+                    "name": "pdu_field_2",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["", ""],
+                    }
+                },
+            ],
+            "id": str(program.id),
+            "programme_code": program.programme_code,
+            "slug": program.slug,
+        }
+
+    def test_create_program_with_invalid_pdu_fields(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_invalid_pdu_fields = {
+            **self.valid_input_data_standard,
+            "pdu_fields": [
+                {
+                    "label": "PDU Field 1",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["Round 1", "", "Round 2"], # Number of rounds does not match rounds_names length
+                    }
+                },
+                {
+                    "label": "PDU Field 2",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["", ""],
+                    }
+                },
+            ]
+        }
+        response = self.client.post(self.list_url, input_data_with_invalid_pdu_fields)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU).count() == 0
+        assert "Number of rounds does not match the number of round names." in response.json()
+
+    def test_create_program_with_invalid_pdu_fields_duplicated_names(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        input_data_with_invalid_pdu_fields = {
+            **self.valid_input_data_standard,
+            "pdu_fields": [
+                {
+                    "label": "PDU Field 1",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1", "", "Round 2"],
+                    }
+                },
+                {
+                    "label": "PDU Field 1",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["", ""],
+                    }
+                },
+            ]
+        }
+        response = self.client.post(self.list_url, input_data_with_invalid_pdu_fields)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU).count() == 0
+        assert "Time Series Field names must be unique." in response.json()
+
+    def test_create_program_with_valid_pdu_fields_existing_field_name_in_different_program(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        # pdu data with field name that already exists in the database but in different program -> no fail
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DATE,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        program = ProgramFactory(business_area=self.afghanistan, name="Test Program 1")
+        FlexibleAttributeForPDUFactory(
+            program=program,
+            label="PDU Field 1",
+            pdu_data=pdu_data,
+        )
+        input_data_with_valid_pdu_fields = {
+            **self.valid_input_data_standard,
+            "pdu_fields": [
+                {
+                    "label": "PDU Field 1",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1", "", "Round 2"],
+                    }
+                },
+                {
+                    "label": "PDU Field 2",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["", ""],
+                    }
+                },
+            ]
+        }
+        response = self.client.post(self.list_url, input_data_with_valid_pdu_fields)
+        assert response.status_code == status.HTTP_201_CREATED
+        program = Program.objects.get(pk=response.json()["id"])
+        assert FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=program).count() == 2
+        pdu_field_1 = FlexibleAttribute.objects.get(
+            type=FlexibleAttribute.PDU,
+            program=program,
+            name="pdu_field_1",
+        )
+        pdu_field_2 = FlexibleAttribute.objects.get(
+            type=FlexibleAttribute.PDU,
+            program=program,
+            name="pdu_field_2",
+        )
+        assert response.json() == {
+            **self.expected_response_standard,
+            "pdu_fields": [
+                {
+                    "id": str(pdu_field_1.id),
+                    "label": "PDU Field 1",
+                    "name": "pdu_field_1",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.STRING,
+                        "number_of_rounds": 3,
+                        "rounds_names": ["Round 1", "", "Round 2"],
+                    }
+                },
+                {
+                    "id": str(pdu_field_2.id),
+                    "label": "PDU Field 2",
+                    "name": "pdu_field_2",
+                    "pdu_data": {
+                        "subtype": PeriodicFieldData.BOOL,
+                        "number_of_rounds": 2,
+                        "rounds_names": ["", ""],
+                    }
+                },
+            ],
+            "id": str(program.id),
+            "programme_code": program.programme_code,
+            "slug": program.slug,
+        }
