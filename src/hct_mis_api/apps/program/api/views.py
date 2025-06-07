@@ -60,7 +60,6 @@ from hct_mis_api.apps.program.api.serializers import (
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.program.utils import create_program_partner_access, remove_program_partner_access, \
     copy_program_object
-from hct_mis_api.apps.program.validators import ProgramDeletionValidator
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
 
 logger = logging.getLogger(__name__)
@@ -139,7 +138,7 @@ class ProgramViewSet(
 
         program.status = Program.ACTIVE
         program.save(update_fields=["status"])
-        return Response(status=status.HTTP_200_OK, data={"message": "Program Activated"})
+        return Response(status=status.HTTP_200_OK, data={"message": "Program Activated."})
 
     @action(detail=True, methods=["post"])
     def finish(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -157,10 +156,10 @@ class ProgramViewSet(
 
         # check for active cycles
         if program.cycles.filter(status=ProgramCycle.ACTIVE).exists():
-            raise ValidationError("Cannot finish Program with active cycles")
+            raise ValidationError("Cannot finish Program with active cycles.")
 
         if program.end_date is None:
-            raise ValidationError("Cannot finish programme without end date")
+            raise ValidationError("Cannot finish programme without end date.")
 
         program.status = Program.FINISHED
         program.save(update_fields=["status"])
@@ -168,7 +167,7 @@ class ProgramViewSet(
         if program.biometric_deduplication_enabled:
             BiometricDeduplicationService().delete_deduplication_set(program)
 
-        return Response(status=status.HTTP_200_OK, data={"message": "Program Finished"})
+        return Response(status=status.HTTP_200_OK, data={"message": "Program Finished."})
 
     @transaction.atomic
     def perform_create(self, serializer: BaseSerializer[Any]) -> None:
@@ -233,6 +232,8 @@ class ProgramViewSet(
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
 
+        serializer.instance = program
+
     @transaction.atomic
     @action(detail=True, methods=["post"])
     def update_partner_access(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -258,6 +259,8 @@ class ProgramViewSet(
         program.save()
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
+
+        serializer.instance = program
 
         return Response(status=status.HTTP_200_OK, data={"message": "Partner access updated."})
 
