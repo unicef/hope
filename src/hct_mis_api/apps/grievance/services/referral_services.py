@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional, Tuple
 
-from hct_mis_api.apps.core.utils import decode_and_get_object
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketReferralDetails
 from hct_mis_api.apps.household.models import Household, Individual
 
@@ -41,10 +40,8 @@ def update_referral_service(grievance_ticket: GrievanceTicket, extras: Dict, inp
 def fetch_household_and_individual(extras: Dict) -> Tuple[Optional[Household], Optional[Individual]]:
     category_extras = extras.get("category", {})
     feedback_ticket_extras = category_extras.get("referral_ticket_extras", {})
-    individual_encoded_id = feedback_ticket_extras.get("individual")
-    individual = decode_and_get_object(individual_encoded_id, Individual, False)
-    household_encoded_id = feedback_ticket_extras.get("household")
-    household = decode_and_get_object(household_encoded_id, Household, False)
+    individual = feedback_ticket_extras.get("individual")
+    household = feedback_ticket_extras.get("household")
     return household, individual
 
 

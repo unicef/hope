@@ -28,15 +28,16 @@ export function ExistingDocumentFieldArray({
         render={(arrayHelpers) => (
           <>
             {individual.documents.edges.map((item) => (
-              <EditDocumentRow
-                key={item.node.id}
-                setFieldValue={setFieldValue}
-                values={values}
-                document={item}
-                id={item.node.id}
-                arrayHelpers={arrayHelpers}
-                addIndividualFieldsData={addIndividualFieldsData}
-              />
+              <Grid size={{ xs: 12 }} key={item.node.id}>
+                <EditDocumentRow
+                  setFieldValue={setFieldValue}
+                  values={values}
+                  document={item}
+                  id={item.node.id}
+                  arrayHelpers={arrayHelpers}
+                  addIndividualFieldsData={addIndividualFieldsData}
+                />
+              </Grid>
             ))}
           </>
         )}
