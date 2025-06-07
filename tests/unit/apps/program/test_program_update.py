@@ -499,3 +499,132 @@ class TestProgramUpdate:
 
         self.program.refresh_from_db()
         assert self.program.beneficiary_group == self.bg_household
+
+    def test_update_start_and_end_dates(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        program_cycle = ProgramCycle.objects.filter(program=self.program).first()
+        program_cycle.start_date = "2030-06-01"
+        program_cycle.end_date = "2030-06-20"
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "start_date": "2030-01-01",
+            "end_date": "2033-12-31",
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.program.refresh_from_db()
+        assert self.program.start_date.strftime('%Y-%m-%d') == payload["start_date"]
+        assert self.program.end_date.strftime('%Y-%m-%d') == payload["end_date"]
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "start_date": payload["start_date"],
+            "end_date": payload["end_date"],
+            "version": self.program.version,
+        }
+
+    def test_update_end_date_and_start_date_invalid_end_date_before_start_date(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "start_date": "2033-01-01",
+            "end_date": "2032-12-31",
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "end_date" in response.json()
+        assert "End date cannot be earlier than the start date." in response.json()["end_date"][0]
+
+        self.program.refresh_from_db()
+        assert self.program.start_date.strftime('%Y-%m-%d') == self.initial_program_data["start_date"]
+        assert self.program.end_date.strftime('%Y-%m-%d') == self.initial_program_data["end_date"]
+
+    def test_update_end_date_and_start_date_invalid_end_date_before_last_cycle(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        program_cycle = ProgramCycle.objects.filter(program=self.program).first()
+        program_cycle.start_date = "2030-06-01"
+        program_cycle.end_date = "2030-06-20"
+        program_cycle.save()
+        ProgramCycleFactory(program=self.program, start_date="2032-01-01", end_date="2033-12-31")
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "start_date": "2030-01-01", # Start date is valid
+            "end_date": "2033-06-30", # End date is before the latest cycle's end_date
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "end_date" in response.json()
+        assert "End date must be the same as or after the latest cycle." in response.json()["end_date"][0]
+
+        self.program.refresh_from_db()
+        assert self.program.start_date.strftime('%Y-%m-%d') == self.initial_program_data["start_date"]
+        assert self.program.end_date.strftime('%Y-%m-%d') == self.initial_program_data["end_date"]
+
+    def test_update_end_date_and_start_date_invalid_start_date_after_first_cycle(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        program_cycle = ProgramCycle.objects.filter(program=self.program).first()
+        program_cycle.start_date = "2030-06-01"
+        program_cycle.end_date = "2030-06-20"
+        program_cycle.save()
+        ProgramCycleFactory(program=self.program, start_date="2032-01-01", end_date="2033-12-31")
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "start_date": "2030-07-01", # Start date is after the earliest cycle's start_date
+            "end_date": "2034-12-31", # End date is valid
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "start_date" in response.json()
+        assert "Start date must be the same as or before the earliest cycle." in response.json()["start_date"][0]
+
+        self.program.refresh_from_db()
+        assert self.program.start_date.strftime('%Y-%m-%d') == self.initial_program_data["start_date"]
+        assert self.program.end_date.strftime('%Y-%m-%d') == self.initial_program_data["end_date"]
+
+    def test_update_multiple_fields(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "name": "Test Program Updated Multiple Fields",
+            "programme_code": "NEWP",
+            "description": "Updated description.",
+            "budget": 200000,
+            "population_goal": 200,
+            "cash_plus": True,
+            "frequency_of_payments": Program.ONE_OFF,
+
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.program.refresh_from_db()
+        assert self.program.name == "Test Program Updated Multiple Fields"
+        assert self.program.programme_code == "NEWP"
+        assert self.program.slug == "newp"
+        assert self.program.description == "Updated description."
+        assert self.program.budget == 200000
+        assert self.program.population_goal == 200
+        assert self.program.cash_plus is True
+        assert self.program.frequency_of_payments == Program.ONE_OFF
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "name": "Test Program Updated Multiple Fields",
+            "programme_code": "NEWP",
+            "slug": "newp",
+            "description": "Updated description.",
+            "budget": "200000.00",
+            "population_goal": 200,
+            "cash_plus": True,
+            "frequency_of_payments": Program.ONE_OFF,
+            "version": self.program.version,
+        }
+
+
