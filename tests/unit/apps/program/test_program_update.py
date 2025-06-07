@@ -248,3 +248,89 @@ class TestProgramUpdate:
                 "version": self.program.version,
             }
 
+    def test_update_program_with_no_changes(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = copy.deepcopy(self.base_payload_for_update_without_changes)
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+
+        old_program_instance = self.program
+        self.program.refresh_from_db()
+        assert self.program == old_program_instance
+        assert response.json() == {
+                **self.base_expected_response_without_changes,
+                "version": self.program.version,
+            }
+
+    def test_update_programme_code(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "programme_code": "NEWP",
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.program.refresh_from_db()
+        assert self.program.programme_code == "NEWP"
+        assert self.program.slug == "newp"
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "programme_code": "NEWP",
+            "slug": "newp",
+            "version": self.program.version,
+        }
+
+    def test_update_programme_code_with_empty(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "programme_code": None,
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_200_OK
+
+        self.program.refresh_from_db()
+        assert self.program.programme_code != self.initial_program_data["programme_code"]
+        assert self.program.slug != self.initial_program_data["programme_code"]
+        assert response.json() == {
+            **self.base_expected_response_without_changes,
+            "programme_code": self.program.programme_code,
+            "slug": self.program.slug,
+            "version": self.program.version,
+        }
+
+    def test_update_programme_code_invalid(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "programme_code":" T#ST",
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "programme_code" in response.json()
+        assert "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -" in response.json()["programme_code"][0]
+
+        self.program.refresh_from_db()
+        assert self.program.programme_code == self.initial_program_data["programme_code"]
+
+    def test_update_programme_code_existing(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        ProgramFactory(programme_code="T3ST", business_area=self.afghanistan)
+
+        payload = {
+            **self.base_payload_for_update_without_changes,
+            "programme_code":" T3ST",
+        }
+        response = self.client.put(self.update_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "programme_code" in response.json()
+        assert response.json()["programme_code"][0] == "Programme code is already used."
+
+        self.program.refresh_from_db()
+        assert self.program.programme_code == self.initial_program_data["programme_code"]
+
