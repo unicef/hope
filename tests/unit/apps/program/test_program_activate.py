@@ -20,7 +20,7 @@ class TestProgramActivate:
     @pytest.fixture(autouse=True)
     def setup(self, api_client) -> None:
         self.afghanistan = create_afghanistan()
-        self.partner = PartnerFactory()
+        self.partner = PartnerFactory(name="Test Partner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
 

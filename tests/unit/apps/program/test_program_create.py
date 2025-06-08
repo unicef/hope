@@ -37,6 +37,9 @@ class TestProgramCreate:
         self.unicef_hq = PartnerFactory(name="UNICEF HQ", parent=self.unicef_partner)
         self.unicef_partner_in_afghanistan = PartnerFactory(name="UNICEF Partner for afghanistan", parent=self.unicef_partner)
 
+        self.partner.allowed_business_areas.add(self.afghanistan)
+        self.partner2.allowed_business_areas.add(self.afghanistan)
+
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
 
