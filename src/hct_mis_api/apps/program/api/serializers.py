@@ -615,23 +615,6 @@ class ProgramUpdatePartnerAccessSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def to_representation(self, obj):
-        """
-        Override to_representation to include the partners in the correct format.
-        """
-        representation = super().to_representation(obj)
-        partners_qs = (
-            Partner.objects.filter(
-                Q(role_assignments__program=obj)
-                | (Q(role_assignments__program=None) & Q(role_assignments__business_area=obj.business_area))
-            )
-            .annotate(partner_program=Value(obj.id))
-            .order_by("name")
-            .distinct()
-        )
-        representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
-        return representation
-
 
 class ProgramCopySerializer(serializers.ModelSerializer):
     programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True)
@@ -738,25 +721,6 @@ class ProgramCopySerializer(serializers.ModelSerializer):
                 {"partners": "You cannot specify partners for the chosen access type."}
             )
         return data
-
-    def to_representation(self, obj):
-        """
-        Override to_representation to include the partners in the correct format.
-        """
-        representation = super().to_representation(obj)
-        partners_qs = (
-            Partner.objects.filter(
-                Q(role_assignments__program=obj)
-                | (Q(role_assignments__program=None) & Q(role_assignments__business_area=obj.business_area))
-            )
-            .annotate(partner_program=Value(obj.id))
-            .order_by("name")
-            .distinct()
-        )
-        representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
-        representation["pdu_fields"] = PeriodicFieldSerializer(FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"), many=True).data
-        return representation
-
 
 class ProgramSmallSerializer(serializers.ModelSerializer):
     class Meta:

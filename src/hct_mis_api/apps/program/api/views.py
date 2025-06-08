@@ -260,8 +260,6 @@ class ProgramViewSet(
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, old_program, program)
 
-        serializer.instance = program
-
         return Response(status=status.HTTP_200_OK, data={"message": "Partner access updated."})
 
     @transaction.atomic
@@ -296,8 +294,7 @@ class ProgramViewSet(
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, None, program)
 
-        serializer.instance = program
-        return Response(status=status.HTTP_201_CREATED, data={"message": "Program copy initiated."})
+        return Response(status=status.HTTP_201_CREATED, data={"message": "Program copied successfully. New Program slug: {}".format(program.slug)})
 
     def perform_destroy(self, instance: Program) -> None:
         old_program = copy.deepcopy(instance)
