@@ -220,3 +220,44 @@ class TestProgramCopy:
         assert pdu_field_original.pdu_data.subtype == PeriodicFieldData.STRING
         assert pdu_field_original.pdu_data.number_of_rounds == 1
         assert pdu_field_original.pdu_data.rounds_names == ["R1"]
+
+    def test_copy_program_new_programme_code_generation(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "programme_code": None,
+        }
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        new_program_slug = response.json()["message"].split(": ")[-1]
+        new_program = Program.objects.get(slug=new_program_slug, business_area=self.afghanistan)
+        assert new_program.programme_code != self.program_to_copy.programme_code
+        assert new_program.slug != self.program_to_copy.slug
+
+    def test_copy_program_existing_programme_code(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "programme_code": self.program_to_copy.programme_code,
+        }
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        assert "programme_code" in response.json()
+        assert response.json()["programme_code"][0] == "Programme code is already used."
+
+    def test_copy_program_invalid_programme_code(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "programme_code": "T#ST",
+        }
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        assert "programme_code" in response.json()
+        assert "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -" in response.json()["programme_code"][0]
