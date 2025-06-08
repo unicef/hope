@@ -261,3 +261,65 @@ class TestProgramCopy:
 
         assert "programme_code" in response.json()
         assert "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -" in response.json()["programme_code"][0]
+
+    def test_copy_program_incompatible_dct(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "data_collecting_type": self.dct_incompatible.code,
+            "beneficiary_group": str(self.bg_incompatible_with_dct_compatible.id)
+        }
+
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response.json()
+        assert "Data Collecting Type must be compatible with the original Program." in response.json()["data_collecting_type"][0]
+
+    def test_copy_program_dct_invalid(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+        payload = {
+            **self.base_copy_payload,
+            "data_collecting_type": self.dct_compatible.code,
+        }
+
+        # DCT inactive
+        self.dct_compatible.active = False
+        self.dct_compatible.save()
+        response_for_inactive = self.client.post(self.copy_url, payload)
+        assert response_for_inactive.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_inactive.json()
+        assert response_for_inactive.json()["data_collecting_type"][0] == "Only active Data Collecting Type can be used in Program."
+
+        # DCT deprecated
+        self.dct_compatible.active = True
+        self.dct_compatible.deprecated = True
+        self.dct_compatible.save()
+        response_for_deprecated = self.client.post(self.copy_url, payload)
+        assert response_for_deprecated.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_deprecated.json()
+        assert response_for_deprecated.json()["data_collecting_type"][0] == "Deprecated Data Collecting Type cannot be used in Program."
+
+        # DCT limited to another BA
+        self.dct_compatible.deprecated = False
+        self.dct_compatible.save()
+        ukraine = create_ukraine()
+        self.dct_compatible.limit_to.add(ukraine)
+        response_for_limited = self.client.post(self.copy_url, payload)
+        assert response_for_limited.status_code == status.HTTP_400_BAD_REQUEST
+        assert "data_collecting_type" in response_for_limited.json()
+        assert response_for_limited.json()["data_collecting_type"][0] == "This Data Collecting Type is not available for this Business Area."
+
+    def test_copy_program_invalid_dct_bg_combination(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "data_collecting_type": self.dct_compatible.code,
+            "beneficiary_group": str(self.bg_incompatible_with_dct_compatible.id)  # BG for Social (master_detail=False)
+        }
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        assert "beneficiary_group" in response.json()
+        assert "Selected combination of data collecting type and beneficiary group is invalid." in response.json()["beneficiary_group"][0]
