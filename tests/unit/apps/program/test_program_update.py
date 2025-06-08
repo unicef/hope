@@ -82,7 +82,7 @@ class TestProgramUpdate:
             partner=self.partner,
             business_area=self.afghanistan,
             program=self.program,
-            role=role_with_all_permissions
+            role=role_with_all_permissions,
         )
 
         self.update_url = reverse(
