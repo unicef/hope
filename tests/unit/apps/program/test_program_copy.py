@@ -323,3 +323,105 @@ class TestProgramCopy:
 
         assert "beneficiary_group" in response.json()
         assert "Selected combination of data collecting type and beneficiary group is invalid." in response.json()["beneficiary_group"][0]
+
+    def test_copy_program_all_partners_access(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "partner_access": Program.ALL_PARTNERS_ACCESS,
+        }
+
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        new_program_slug = response.json()["message"].split(": ")[-1]
+        new_program = Program.objects.get(slug=new_program_slug, business_area=self.afghanistan)
+        assert new_program.partner_access == Program.ALL_PARTNERS_ACCESS
+        assert new_program.role_assignments.count() == 3
+        assert set(
+            new_program.role_assignments.values_list("partner", flat=True)
+        ) == {self.partner.id, self.partner1_for_assign.id, self.partner2_for_assign.id}
+
+    def test_copy_program_all_partners_access_with_partners_data(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "partner_access": Program.ALL_PARTNERS_ACCESS,
+            "partners": [
+                {"partner": str(self.partner.id), "areas": [str(self.area1.id)]},
+                {"partner": str(self.partner2_for_assign.id), "areas": []},
+            ],
+        }
+
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "partners" in response.json()
+        assert "You cannot specify partners for the chosen access type." in response.json()["partners"][0]
+
+    def test_copy_program_none_partners_access_with_partners_data(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "partner_access": Program.NONE_PARTNERS_ACCESS,
+            "partners": [
+                {"partner": str(self.partner.id), "areas": [str(self.area1.id)]},
+                {"partner": str(self.partner2_for_assign.id), "areas": []},
+            ],
+        }
+
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "partners" in response.json()
+        assert "You cannot specify partners for the chosen access type." in response.json()["partners"][0]
+
+    def test_copy_program_selected_access(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "partner_access": Program.SELECTED_PARTNERS_ACCESS,
+            "partners": [
+                {"partner": str(self.partner.id), "areas": [str(self.area1.id)]},
+                {"partner": str(self.partner2_for_assign.id), "areas": []},
+            ],
+        }
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        new_program_slug = response.json()["message"].split(": ")[-1]
+        new_program = Program.objects.get(slug=new_program_slug, business_area=self.afghanistan)
+        assert new_program.partner_access == Program.SELECTED_PARTNERS_ACCESS
+        assert new_program.role_assignments.count() == 2
+        assert set(
+            new_program.role_assignments.values_list("partner", flat=True)
+        ) == {self.partner.id, self.partner2_for_assign.id}
+        assert AdminAreaLimitedTo.objects.filter(program=new_program).count() == 1
+        assert AdminAreaLimitedTo.objects.filter(
+            program=new_program,
+            partner=self.partner,
+        ).count() == 1
+        assert AdminAreaLimitedTo.objects.filter(
+            program=new_program,
+            partner=self.partner2_for_assign,
+        ).count() == 0
+
+    def test_copy_program_selected_access_without_partner(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True)
+
+        payload = {
+            **self.base_copy_payload,
+            "partner_access": Program.SELECTED_PARTNERS_ACCESS,
+            "partners": [
+                {"partner": str(self.partner1_for_assign.id), "areas": [str(self.area1.id)]},
+                {"partner": str(self.partner2_for_assign.id), "areas": []},
+            ],
+        }
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        assert "partners" in response.json()
+        assert "Please assign access to your partner before saving the Program." in response.json()["partners"][0]
+
