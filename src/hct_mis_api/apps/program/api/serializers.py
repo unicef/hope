@@ -623,15 +623,12 @@ class ProgramCopySerializer(serializers.ModelSerializer):
     end_date = serializers.DateField(allow_null=True)
     partners = PartnersDataSerializer(many=True)
     pdu_fields = PDUFieldsCreateSerializer(many=True)
-    slug = serializers.CharField(read_only=True)
 
     class Meta:
         model = Program
         fields = (
-            "id",
             "programme_code",
             "name",
-            "slug",
             "sector",
             "description",
             "budget",
@@ -640,6 +637,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             "cash_plus",
             "frequency_of_payments",
             "data_collecting_type",
+            "beneficiary_group",
             "start_date",
             "end_date",
             "pdu_fields",
@@ -679,7 +677,8 @@ class ProgramCopySerializer(serializers.ModelSerializer):
         original_program = self.instance
 
         # validate DCT
-        data_collecting_type = DataCollectingType.objects.get(code=data["data_collecting_type"])
+        data_collecting_type = data["data_collecting_type"]
+        beneficiary_group = data["beneficiary_group"]
         if not original_program.data_collecting_type:
             raise serializers.ValidationError(
                 {"data_collecting_type": "The original Program must have a Data Collecting Type."}
@@ -691,7 +690,6 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             )
 
         # validate DCT and BG combination
-        beneficiary_group = BeneficiaryGroup.objects.get(id=data["beneficiary_group"])
         if (
             data_collecting_type.type == DataCollectingType.Type.SOCIAL
             and beneficiary_group.master_detail
