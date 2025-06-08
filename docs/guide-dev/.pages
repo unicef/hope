@@ -1,0 +1,12 @@
+nav:
+  - index.md
+  - setup.md
+  - contributing.md
+  - lint.md
+  - stack.md
+  - ...
+
+collapse: true
+
+toc:
+  baselevel: 1

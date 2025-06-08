@@ -5,7 +5,7 @@ repos:
       - id: black
         exclude: "migrations|snapshots"
         args: [--check,--config=pyproject.toml]        # don’t re-write files
-        language_version: python3.12   # adapt if you target a different runtime
+        language_version: python3.13   # adapt if you target a different runtime
 
   - repo: https://github.com/pycqa/flake8
     rev: 7.2.0

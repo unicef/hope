@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.12.7-slim-bookworm as base
+FROM python:3.13-slim-bookworm as base
 ENV APP_PATH=/app
 ARG UID=82
 
@@ -91,7 +91,7 @@ COPY ./src/ ./src/
 COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hct_mis_api/apps/web/static/web
 RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-dev --no-editable --frozen --extra distribution
+        --no-dev --no-editable --frozen
 
 
 ## Dist (backend only) image

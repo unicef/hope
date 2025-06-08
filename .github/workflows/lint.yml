@@ -20,7 +20,7 @@ jobs:
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
-          python-version: 3.12
+          python-version: 3.13
 
       - name: Restore cached vEnv
         id: cache-venv-restore
