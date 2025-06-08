@@ -19,16 +19,14 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
 )
-from hct_mis_api.apps.program.models import Program, BeneficiaryGroup, ProgramCycle
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, create_household_and_individuals
+from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from tests.selenium.conftest import business_area
 
 pytestmark = pytest.mark.django_db
 
