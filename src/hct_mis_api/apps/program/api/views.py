@@ -242,7 +242,7 @@ class ProgramViewSet(
         old_partner_access = old_program.partner_access
 
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data, context=self.get_serializer_context())
+        serializer = serializer_class(instance=program, data=request.data, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         partners_data = data.pop("partners", [])
@@ -269,7 +269,7 @@ class ProgramViewSet(
         old_program = copy.deepcopy(program)
 
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data, context=self.get_serializer_context())
+        serializer = serializer_class(instance=program, data=request.data, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
