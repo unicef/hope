@@ -2,6 +2,7 @@ import camelCase from 'lodash/camelCase';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { thingForSpecificGrievanceType } from '@utils/utils';
 import { removeIdPropertyFromObjects } from './helpers';
+import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 
 export const replaceLabels = (text, _beneficiaryGroup) => {
   return text
@@ -375,6 +376,214 @@ export function prepareVariables(businessArea, values) {
     grievanceTypeIssueTypeDict,
   );
   return prepareFunction(requiredVariables, values);
+}
+
+// Transform form values to REST API CreateGrievanceTicket format
+export function prepareRestVariables(
+  businessArea: string,
+  values: any,
+): CreateGrievanceTicket {
+  // Build extras based on category and issue type
+  const extras: any = {};
+  const category = parseInt(values.category, 10);
+  const issueType = values.issueType
+    ? parseInt(values.issueType, 10)
+    : undefined;
+
+  // Category-specific extras
+  if (category === parseInt(GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK, 10)) {
+    extras.category = {
+      positiveFeedbackTicketExtras: {
+        household: values.selectedHousehold?.id,
+        individual: values.selectedIndividual?.id,
+      },
+    };
+  } else if (
+    category === parseInt(GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK, 10)
+  ) {
+    extras.category = {
+      negativeFeedbackTicketExtras: {
+        household: values.selectedHousehold?.id,
+        individual: values.selectedIndividual?.id,
+      },
+    };
+  } else if (category === parseInt(GRIEVANCE_CATEGORIES.REFERRAL, 10)) {
+    extras.category = {
+      referralTicketExtras: {
+        household: values.selectedHousehold?.id,
+        individual: values.selectedIndividual?.id,
+      },
+    };
+  } else if (
+    category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10)
+  ) {
+    extras.category = {
+      grievanceComplaintTicketExtras: {
+        household: values.selectedHousehold?.id,
+        individual: values.selectedIndividual?.id,
+        paymentRecord:
+          values.selectedPaymentRecords?.map((el) => el.id) || null,
+      },
+    };
+  } else if (
+    category === parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10)
+  ) {
+    extras.category = {
+      sensitiveGrievanceTicketExtras: {
+        household: values.selectedHousehold?.id,
+        individual: values.selectedIndividual?.id,
+        paymentRecord:
+          values.selectedPaymentRecords?.map((el) => el.id) || null,
+      },
+    };
+  }
+
+  // Issue type-specific extras for DATA_CHANGE category
+  if (
+    category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10) &&
+    issueType
+  ) {
+    if (issueType === parseInt(GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL, 10)) {
+      let { flexFields } = values.individualData;
+      if (flexFields) {
+        flexFields = { ...flexFields };
+        for (const [key, value] of Object.entries(flexFields)) {
+          if (value === '') {
+            delete flexFields[key];
+          }
+        }
+      }
+
+      const newlyAddedDocumentsWithoutIds = removeIdPropertyFromObjects(
+        values.individualData.documents,
+      );
+      const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
+        values.individualData.identities,
+      );
+
+      extras.issueType = {
+        addIndividualIssueTypeExtras: {
+          household: values.selectedHousehold?.id,
+          individualData: {
+            ...values.individualData,
+            documents: newlyAddedDocumentsWithoutIds,
+            identities: newlyAddedIdentitiesWithoutIds,
+            flexFields,
+          },
+        },
+      };
+    } else if (
+      issueType === parseInt(GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL, 10)
+    ) {
+      extras.issueType = {
+        individualDeleteIssueTypeExtras: {
+          individual: values.selectedIndividual?.id,
+        },
+      };
+    } else if (
+      issueType === parseInt(GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD, 10)
+    ) {
+      extras.issueType = {
+        householdDeleteIssueTypeExtras: {
+          household: values.selectedHousehold?.id,
+        },
+      };
+    } else if (
+      issueType === parseInt(GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL, 10)
+    ) {
+      const individualData = values.individualDataUpdateFields
+        .filter((item) => item.fieldName && !item.isFlexField)
+        .reduce((prev, current) => {
+          prev[camelCase(current.fieldName)] = current.fieldValue;
+          return prev;
+        }, {});
+      const flexFields = values.individualDataUpdateFields
+        .filter((item) => item.fieldName && item.isFlexField)
+        .reduce((prev, current) => {
+          prev[camelCase(current.fieldName)] = current.fieldValue;
+          return prev;
+        }, {});
+      individualData.flexFields = flexFields;
+
+      const newlyAddedDocumentsWithoutIds = removeIdPropertyFromObjects(
+        values.individualDataUpdateFieldsDocuments,
+      );
+      const newlyAddedIdentitiesWithoutIds = removeIdPropertyFromObjects(
+        values.individualDataUpdateFieldsIdentities,
+      );
+      const newlyAddedPaymentChannelsWithoutIds = removeIdPropertyFromObjects(
+        values.individualDataUpdateFieldsPaymentChannels,
+      );
+
+      extras.issueType = {
+        individualDataUpdateIssueTypeExtras: {
+          individual: values.selectedIndividual?.id,
+          individualData: {
+            ...individualData,
+            documents: newlyAddedDocumentsWithoutIds,
+            documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+            documentsToEdit: values.individualDataUpdateDocumentsToEdit,
+            identities: newlyAddedIdentitiesWithoutIds,
+            identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
+            identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
+            paymentChannels: newlyAddedPaymentChannelsWithoutIds,
+            paymentChannelsToRemove:
+              values.individualDataUpdatePaymentChannelsToRemove,
+            paymentChannelsToEdit:
+              values.individualDataUpdatePaymentChannelsToEdit,
+          },
+        },
+      };
+    } else if (
+      issueType === parseInt(GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD, 10)
+    ) {
+      const householdData = values.householdDataUpdateFields
+        .filter((item) => item.fieldName && !item.isFlexField)
+        .reduce((prev, current) => {
+          prev[camelCase(current.fieldName)] = current.fieldValue;
+          return prev;
+        }, {});
+      const flexFields = values.householdDataUpdateFields
+        .filter((item) => item.fieldName && item.isFlexField)
+        .reduce((prev, current) => {
+          prev[current.fieldName] = current.fieldValue;
+          return prev;
+        }, {});
+
+      extras.issueType = {
+        householdDataUpdateIssueTypeExtras: {
+          household: values.selectedHousehold?.id,
+          householdData: { ...householdData, flexFields },
+        },
+      };
+    }
+  }
+
+  return {
+    description: values.description,
+    assignedTo: values.assignedTo,
+    category,
+    issueType,
+    admin: values.admin,
+    area: values.area,
+    language: values.language,
+    consent: values.consent,
+    linkedTickets: values.selectedLinkedTickets || [],
+    extras: Object.keys(extras).length > 0 ? extras : {},
+    priority:
+      values.priority === 'Not set' || values.priority === null
+        ? undefined
+        : values.priority,
+    urgency:
+      values.urgency === 'Not set' || values.urgency === null
+        ? undefined
+        : values.urgency,
+    partner: values.partner ? parseInt(values.partner, 10) : undefined,
+    program: values.program,
+    comments: values.comments,
+    linkedFeedbackId: values.linkedFeedbackId,
+    documentation: values.documentation || [],
+  };
 }
 
 export const matchGrievanceUrlByCategory = (category: number): string => {

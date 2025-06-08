@@ -10,6 +10,8 @@ import AddIndividualDataChange from '../AddIndividualDataChange';
 import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
+import { UpdateGrievanceTicketExtras } from '@restgenerated/models/UpdateGrievanceTicketExtras';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -523,4 +525,72 @@ export function prepareVariables(_businessArea, values, ticket) {
     grievanceTypeIssueTypeDict,
   );
   return prepareFunction(requiredVariables, values);
+}
+
+// REST API version for updating grievance tickets
+export function prepareRestUpdateVariables(
+  values: EditValuesTypes,
+  ticket: GrievanceTicketDetail,
+): PatchedUpdateGrievanceTicket {
+  const baseUpdate: PatchedUpdateGrievanceTicket = {
+    description: values.description,
+    assignedTo: values.assignedTo,
+    language: values.language,
+    admin: values?.admin,
+    area: values.area,
+    household: values.selectedHousehold?.id,
+    individual: values.selectedIndividual?.id,
+    priority:
+      values.priority === 'Not set' ||
+      values.priority === null ||
+      values.priority === ''
+        ? 0
+        : Number(values.priority),
+    urgency:
+      values.urgency === 'Not set' ||
+      values.urgency === null ||
+      values.urgency === ''
+        ? 0
+        : Number(values.urgency),
+    partner: values.partner ? Number(values.partner) : undefined,
+    comments: values.comments,
+    program: ticket.programs?.[0]?.id || values?.program,
+    paymentRecord: values.selectedPaymentRecords
+      ? values.selectedPaymentRecords[0]?.id
+      : undefined,
+    documentation: values.documentation || undefined,
+    documentationToUpdate: values.documentationToUpdate
+      ? values.documentationToUpdate
+          .filter((el) => el)
+          .map((doc) => ({
+            id: String(doc.id),
+            name: doc.name,
+            file: doc.file,
+          }))
+      : undefined,
+    documentationToDelete: values.documentationToDelete || undefined,
+    linkedTickets: values.selectedLinkedTickets || undefined,
+  };
+
+  // For now, keep extras minimal - can be expanded later based on requirements
+  if (values.individualData || values.householdDataUpdateFields) {
+    const extras: UpdateGrievanceTicketExtras = {};
+
+    // Simple approach for now - just pass the data as-is
+    if (values.individualData) {
+      extras.individualDataUpdateIssueTypeExtras = {
+        individualData: values.individualData,
+      };
+    }
+
+    if (values.householdDataUpdateFields) {
+      extras.householdDataUpdateIssueTypeExtras = {
+        householdData: values.householdDataUpdateFields,
+      };
+    }
+
+    baseUpdate.extras = extras;
+  }
+
+  return baseUpdate;
 }
