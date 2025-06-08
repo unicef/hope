@@ -19,7 +19,7 @@ import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTi
 import { TicketsAlreadyExist } from '@components/grievances/TicketsAlreadyExist';
 import {
   getGrievanceDetailsPath,
-  prepareVariables,
+  prepareRestVariables,
   selectedIssueType,
 } from '@components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
@@ -28,16 +28,16 @@ import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
   useAllEditPeopleFieldsQuery,
-  useCreateGrievanceMutation,
 } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, FormHelperText, Grid2 as Grid } from '@mui/material';
+import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
@@ -140,7 +140,13 @@ const CreateGrievancePage = (): ReactElement => {
       }),
   });
 
-  const [mutate, { loading }] = useCreateGrievanceMutation();
+  const { mutateAsync, isPending: loading } = useMutation({
+    mutationFn: (requestData: CreateGrievanceTicket) =>
+      RestService.restBusinessAreasGrievanceTicketsCreate({
+        businessAreaSlug: businessArea,
+        requestBody: requestData,
+      }),
+  });
 
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
@@ -271,11 +277,11 @@ const CreateGrievancePage = (): ReactElement => {
       onSubmit={async (values) => {
         if (activeStep === GrievanceSteps.Description) {
           try {
-            const { data } = await mutate(
-              prepareVariables(businessArea, values),
-            );
-            const grievanceTicket =
-              data.createGrievanceTicket.grievanceTickets[0];
+            const requestData = prepareRestVariables(businessArea, values);
+            const data = await mutateAsync(requestData);
+            // Handle the REST API response structure - data.results contains the created tickets
+            const grievanceTickets = data.results || [];
+            const grievanceTicket = grievanceTickets[0];
             let msg: string;
             let url: string;
             const paymentsNumber = values.selectedPaymentRecords.length;
@@ -293,7 +299,10 @@ const CreateGrievancePage = (): ReactElement => {
             showMessage(msg);
             navigate(url);
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            showMessage(
+              e.message ||
+                'An error occurred while creating the grievance ticket',
+            );
           }
         } else {
           setValidateData(false);

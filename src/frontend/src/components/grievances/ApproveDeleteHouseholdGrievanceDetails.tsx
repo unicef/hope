@@ -13,19 +13,18 @@ import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import {
-  GrievanceTicketDocument,
-  useApproveDeleteHouseholdDataChangeMutation,
-} from '@generated/graphql';
+import { RestService } from '@restgenerated/services/RestService';
 import { useProgramContext } from 'src/programContext';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
@@ -43,12 +42,39 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
 }: ApproveDeleteHouseholdGrievanceDetailsProps): ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
+  const queryClient = useQueryClient();
+  const { businessAreaSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const { approveStatus, reasonHousehold } = ticket.ticketDetails;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const mutation = useMutation({
+    mutationFn: ({
+      approveStatus: mutationApproveStatus,
+      reasonHhId,
+    }: {
+      approveStatus: boolean;
+      reasonHhId?: string;
+    }) => {
+      return RestService.restBusinessAreasGrievanceTicketsApproveDeleteHouseholdCreate(
+        {
+          businessAreaSlug,
+          id: ticket.id,
+          requestBody: {
+            approveStatus: mutationApproveStatus,
+            reasonHhId,
+          },
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['grievanceTicket', ticket.id],
+      });
+    },
+  });
 
   const validationSchema = Yup.object().shape({
     reasonHhId: Yup.string().when(
@@ -92,20 +118,12 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
       validationSchema={validationSchema}
       onSubmit={async (values, { resetForm }) => {
         try {
-          await mutate({
-            variables: {
-              grievanceTicketId: ticket.id,
-              approveStatus: type === 'edit' ? true : !approveStatus,
-              reasonHhId:
-                values.withdrawReason === 'duplicate' ? values.reasonHhId : '',
-            },
-            refetchQueries: () => [
-              {
-                query: GrievanceTicketDocument,
-                variables: { id: ticket.id },
-              },
-            ],
+          await mutation.mutateAsync({
+            approveStatus: type === 'edit' ? true : !approveStatus,
+            reasonHhId:
+              values.withdrawReason === 'duplicate' ? values.reasonHhId : '',
           });
+
           if (type === 'edit') {
             showMessage(t('Changes Approved'));
           }
@@ -117,8 +135,10 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
           }
           setDialogOpen(false);
           resetForm();
-        } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+        } catch (e: any) {
+          const errorMessage =
+            e?.message || e?.response?.data?.message || 'An error occurred';
+          showMessage(errorMessage);
         }
       }}
     >
