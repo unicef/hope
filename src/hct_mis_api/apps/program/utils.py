@@ -29,7 +29,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -41,13 +40,7 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
     program.pk = None
     program.status = Program.DRAFT
 
-    data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
-    if data_collecting_type_code:
-        data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
-    else:
-        data_collecting_type = program.data_collecting_type
-
-    validate_data_collecting_type(program.business_area, program.data_collecting_type, data_collecting_type)
+    data_collecting_type = program_data.pop("data_collecting_type", None) or program.data_collecting_type
 
     program_data["data_collecting_type_id"] = data_collecting_type.id
 
