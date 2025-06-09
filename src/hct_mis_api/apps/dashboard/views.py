@@ -79,8 +79,7 @@ class DashboardDataView(APIView):
         cache_identifier = GLOBAL_SLUG if is_global else business_area_slug
         data = data_cache.get_data(cache_identifier)
         if not data:
-            # Data not in cache. Return empty list.
-            # Cache should be populated asynchronously via CreateOrUpdateDashReportView or a scheduled task.
+            generate_dash_report_task.delay(cache_identifier) 
             data = []
 
         return Response(data, status=status.HTTP_200_OK)
