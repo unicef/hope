@@ -1,7 +1,6 @@
 import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
@@ -9,10 +8,11 @@ import { FiltersSection } from '@core/FiltersSection';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { ReactElement } from 'react';
+import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
 
 interface LookUpLinkedTicketsFiltersProps {
   filter;
-  choicesData: GrievancesChoiceDataQuery;
+  choicesData: GrievanceChoices;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;

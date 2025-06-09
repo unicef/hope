@@ -3,12 +3,11 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
 import ProgramCyclesTableProgramDetails from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
-import {
-  useBusinessAreaDataQuery,
-  useProgrammeChoiceDataQuery,
-} from '@generated/graphql';
+import { useProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -20,7 +19,6 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const Container = styled.div`
   && {
@@ -57,7 +55,7 @@ function ProgramDetailsPage(): ReactElement {
     isLoading: loading,
     error,
   } = useQuery<ProgramDetail>({
-    queryKey: ['businessAreaProgram', businessArea, id],
+    queryKey: ['program', businessArea, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRetrieve({
         businessAreaSlug: businessArea,
@@ -65,10 +63,15 @@ function ProgramDetailsPage(): ReactElement {
       }),
   });
 
-  const { data: businessAreaData, loading: businessAreaDataLoading } =
-    useBusinessAreaDataQuery({
-      variables: { businessAreaSlug: businessArea },
+  const { data: businessAreaData, isLoading: businessAreaDataLoading } =
+    useQuery<BusinessArea>({
+      queryKey: ['businessArea', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasRetrieve({
+          slug: businessArea,
+        }),
     });
+
   const { data: choices, loading: choicesLoading } =
     useProgrammeChoiceDataQuery();
   const permissions = usePermissions();

@@ -2,8 +2,6 @@ import { Box, Button } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
 import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import { useCashAssistUrlPrefixQuery } from '@generated/graphql';
-import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 
@@ -28,12 +26,7 @@ export function FinalizedTargetPopulationHeaderButtons({
   canDuplicate,
 }: FinalizedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const { data, loading } = useCashAssistUrlPrefixQuery({
-    fetchPolicy: 'cache-first',
-  });
 
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
   return (
     <Box display="flex" alignItems="center">
       {canDuplicate && (

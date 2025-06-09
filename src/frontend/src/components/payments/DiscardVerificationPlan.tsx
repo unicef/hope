@@ -8,33 +8,49 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useDiscardPaymentVerificationPlanMutation } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ErrorButton } from '@core/ErrorButton';
 import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function DiscardVerificationPlan({
   paymentVerificationPlanId,
+  cashOrPaymentPlanId,
 }: DiscardVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const [mutate] = useDiscardPaymentVerificationPlanMutation();
+  const { businessArea, programId: programSlug } = useBaseUrl();
+
+  const discardVerificationPlanMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsDiscardVerificationPlanCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          verificationPlanId: paymentVerificationPlanId,
+        },
+      ),
+  });
 
   const discard = async (): Promise<void> => {
     try {
-      await mutate({
-        variables: { paymentVerificationPlanId },
-      });
+      await discardVerificationPlanMutation.mutateAsync();
       setDiscardDialogOpen(false);
       showMessage(t('Verification plan has been discarded.'));
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+
+      // TODO: Implement proper React Query cache invalidation if needed
+    } catch (error) {
+      showMessage(error?.message || t('Error while submitting'));
     }
   };
   return (

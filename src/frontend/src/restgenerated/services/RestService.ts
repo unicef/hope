@@ -4,9 +4,14 @@
 /* eslint-disable */
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
+import type { BulkGrievanceTicketsAddNote } from '../models/BulkGrievanceTicketsAddNote';
+import type { BulkUpdateGrievanceTicketsAssignees } from '../models/BulkUpdateGrievanceTicketsAssignees';
+import type { BulkUpdateGrievanceTicketsPriority } from '../models/BulkUpdateGrievanceTicketsPriority';
+import type { BulkUpdateGrievanceTicketsUrgency } from '../models/BulkUpdateGrievanceTicketsUrgency';
 import type { BusinessArea } from '../models/BusinessArea';
 import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
+import type { CreateGrievanceTicket } from '../models/CreateGrievanceTicket';
 import type { DelegatePeople } from '../models/DelegatePeople';
 import type { FeedbackCreate } from '../models/FeedbackCreate';
 import type { FeedbackDetail } from '../models/FeedbackDetail';
@@ -15,7 +20,15 @@ import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FspChoices } from '../models/FspChoices';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
+import type { GrievanceCreateNote } from '../models/GrievanceCreateNote';
+import type { GrievanceDeleteHouseholdApproveStatus } from '../models/GrievanceDeleteHouseholdApproveStatus';
+import type { GrievanceHouseholdDataChangeApprove } from '../models/GrievanceHouseholdDataChangeApprove';
+import type { GrievanceIndividualDataChangeApprove } from '../models/GrievanceIndividualDataChangeApprove';
+import type { GrievanceNeedsAdjudicationApprove } from '../models/GrievanceNeedsAdjudicationApprove';
+import type { GrievanceReassignRole } from '../models/GrievanceReassignRole';
+import type { GrievanceStatusChange } from '../models/GrievanceStatusChange';
 import type { GrievanceTicketDetail } from '../models/GrievanceTicketDetail';
+import type { GrievanceUpdateApproveStatus } from '../models/GrievanceUpdateApproveStatus';
 import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { IndividualChoices } from '../models/IndividualChoices';
@@ -31,6 +44,7 @@ import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaL
 import type { PaginatedChoiceList } from '../models/PaginatedChoiceList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
+import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedHouseholdMemberList } from '../models/PaginatedHouseholdMemberList';
@@ -65,6 +79,7 @@ import type { PatchedPaymentVerificationUpdate } from '../models/PatchedPaymentV
 import type { PatchedProgramCycleUpdate } from '../models/PatchedProgramCycleUpdate';
 import type { PatchedRDI } from '../models/PatchedRDI';
 import type { PatchedTargetPopulationCreate } from '../models/PatchedTargetPopulationCreate';
+import type { PatchedUpdateGrievanceTicket } from '../models/PatchedUpdateGrievanceTicket';
 import type { PaymentDetail } from '../models/PaymentDetail';
 import type { PaymentPlan } from '../models/PaymentPlan';
 import type { PaymentPlanBulkAction } from '../models/PaymentPlanBulkAction';
@@ -103,6 +118,7 @@ import type { SurveySampleSize } from '../models/SurveySampleSize';
 import type { TargetPopulationCopy } from '../models/TargetPopulationCopy';
 import type { TargetPopulationCreate } from '../models/TargetPopulationCreate';
 import type { TargetPopulationDetail } from '../models/TargetPopulationDetail';
+import type { TicketNote } from '../models/TicketNote';
 import type { TPHouseholdList } from '../models/TPHouseholdList';
 import type { UserChoices } from '../models/UserChoices';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -1201,6 +1217,228 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedGrievanceTicketDetailList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsCreate({
+        businessAreaSlug,
+        requestBody,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        requestBody: CreateGrievanceTicket,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns GrievanceTicketDetail
      * @throws ApiError
      */
@@ -1221,6 +1459,1165 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
+        });
+    }
+    /**
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsPartialUpdate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody?: PatchedUpdateGrievanceTicket,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsApproveDeleteHouseholdCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody: GrievanceDeleteHouseholdApproveStatus,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-delete-household/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsApproveHouseholdDataChangeCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody: GrievanceHouseholdDataChangeApprove,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-household-data-change/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsApproveIndividualDataChangeCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody: GrievanceIndividualDataChangeApprove,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-individual-data-change/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsApproveNeedsAdjudicationCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody?: GrievanceNeedsAdjudicationApprove,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-needs-adjudication/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsApprovePaymentDetailsCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody: GrievanceUpdateApproveStatus,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-payment-details/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * action for approve_add_individual, approve_delete_individual, approve_system_flagging
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody: GrievanceUpdateApproveStatus,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/approve-status-update/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns TicketNote
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsCreateNoteCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody: GrievanceCreateNote,
+    }): CancelablePromise<TicketNote> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/create-note/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsReassignRoleCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody: GrievanceReassignRole,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/reassign-role/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns GrievanceTicketDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsStatusChangeCreate({
+        businessAreaSlug,
+        id,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Grievance Ticket.
+         */
+        id: string,
+        requestBody: GrievanceStatusChange,
+    }): CancelablePromise<GrievanceTicketDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/{id}/status-change/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaginatedGrievanceTicketDetailList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
+        businessAreaSlug,
+        requestBody,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        requestBody: BulkGrievanceTicketsAddNote,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/bulk-add-note/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaginatedGrievanceTicketDetailList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate({
+        businessAreaSlug,
+        requestBody,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        requestBody: BulkUpdateGrievanceTicketsAssignees,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/bulk-update-assignee/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaginatedGrievanceTicketDetailList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsBulkUpdatePriorityCreate({
+        businessAreaSlug,
+        requestBody,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        requestBody: BulkUpdateGrievanceTicketsPriority,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/bulk-update-priority/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaginatedGrievanceTicketDetailList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsBulkUpdateUrgencyCreate({
+        businessAreaSlug,
+        requestBody,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        requestBody: BulkUpdateGrievanceTicketsUrgency,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedGrievanceTicketDetailList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/bulk-update-urgency/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

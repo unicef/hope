@@ -1,4 +1,3 @@
-import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import React, { ReactElement } from 'react';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
@@ -21,12 +20,7 @@ export const PaymentPlanTableRow = ({
   paymentPlan,
   canViewDetails,
 }: PaymentPlanTableRowProps): ReactElement => {
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
-
   const paymentPlanPath = `./payment-plans/${paymentPlan.id}`;
-
-  if (!statusChoicesData) return null;
 
   return (
     <ClickableTableRow key={paymentPlan.id}>

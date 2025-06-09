@@ -316,12 +316,10 @@ class TestGrievanceUtils(TestCase):
                     "full_name": "Tester Test",
                 },
             )
-            individuals[0].unicef_id = "IND-333"
-            individuals[0].save()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
             assert (
                 str(e.value)
-                == "The selected individual IND-333 is not valid, must be one of those attached to the ticket"
+                == f"The selected individual {individuals[0].unicef_id} is not valid, must be one of those attached to the ticket"
             )
 
         ticket_details.possible_duplicates.add(individuals[0])
@@ -329,7 +327,10 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValidationError) as e:
             individuals[0].withdraw()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
-            assert str(e.value) == "The selected individual IND-333 is not valid, must be not withdrawn"
+            assert (
+                str(e.value)
+                == f"The selected individual {individuals[0].unicef_id} is not valid, must be not withdrawn"
+            )
 
             individuals[0].unwithdraw()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)

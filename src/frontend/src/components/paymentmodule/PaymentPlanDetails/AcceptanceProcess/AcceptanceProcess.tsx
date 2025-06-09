@@ -4,10 +4,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useExportPdfPpSummaryMutation } from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
@@ -16,6 +16,8 @@ import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
@@ -32,11 +34,21 @@ function AcceptanceProcess({
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId: programSlug } = useBaseUrl();
 
   const { approvalProcess } = paymentPlan;
   const [showAll, setShowAll] = useState(false);
-  const [mutate, { loading: exportPdfLoading }] =
-    useExportPdfPpSummaryMutation();
+
+  const exportPdfMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansExportPdfPaymentPlanSummaryRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programSlug,
+          id: paymentPlan.id,
+        },
+      ),
+  });
 
   const matchDataSize = (data) => (showAll ? data : [data[0]]);
 
@@ -45,15 +57,10 @@ function AcceptanceProcess({
   }
   const handleExportPdf = async (): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-        },
-      });
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-    } finally {
+      await exportPdfMutation.mutateAsync();
       showMessage(t('PDF generated. Please check your email.'));
+    } catch (e) {
+      showMessage(e.message || t('Failed to export PDF'));
     }
   };
 
@@ -71,7 +78,7 @@ function AcceptanceProcess({
           </Title>
           {canExportPdf && (
             <LoadingButton
-              loading={exportPdfLoading}
+              loading={exportPdfMutation.isPending}
               color="primary"
               variant="contained"
               onClick={handleExportPdf}

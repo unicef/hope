@@ -22,7 +22,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryF
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
 
-data_migration = import_module("hct_mis_api.apps.account.migrations.0010_migration")
+data_migration = import_module("hct_mis_api.apps.account.migrations.0011_migration")
 
 
 # TODO: remove this file after removal of BusinessAreaPartnerThrough and ProgramPartnerThrough - see the comment below

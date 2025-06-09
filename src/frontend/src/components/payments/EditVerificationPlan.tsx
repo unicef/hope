@@ -8,22 +8,22 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Field, Form, Formik } from 'formik';
-import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  ReactElement,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import {
-  useAllRapidProFlowsLazyQuery,
-  useEditPaymentVerificationPlanMutation,
-  useSampleSizeLazyQuery,
-} from '@generated/graphql';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -41,7 +41,14 @@ import { RapidProFlowsLoader } from './RapidProFlowsLoader';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { FullList } from '@restgenerated/models/FullList';
+import { RandomSampling } from '@restgenerated/models/RandomSampling';
+import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
+import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
+import { RapidPro } from '@restgenerated/models/RapidPro';
+import { Age } from '@restgenerated/models/Age';
+import { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -52,83 +59,135 @@ const TabsContainer = styled.div`
   border-bottom: 1px solid #e8e8e8;
 `;
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareVariables(
-  cashOrPaymentPlanId: string,
-  paymentVerificationPlanId: string | undefined,
-  selectedTab: number,
-  values,
-  businessArea: string,
-  shouldUseCashOrPaymentPlanId: boolean = false,
-) {
-  const getFullListArguments = (): { excludedAdminAreas: string[] } | null => {
-    return selectedTab === 0
-      ? { excludedAdminAreas: values.excludedAdminAreasFull || [] }
-      : null;
-  };
-
-  const getRapidProArguments = (): { flowId: string } | null => {
-    return values.verificationChannel === 'RAPIDPRO'
-      ? { flowId: values.rapidProFlow || '' }
-      : null;
-  };
-
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const getRandomSamplingArguments = () => {
-    if (selectedTab !== 1) return null;
-
-    const age = values.ageCheckbox
-      ? {
-          min: values.filterAgeMin || null,
-          max: values.filterAgeMax || null,
-        }
-      : null;
-
-    return {
-      confidenceInterval: values.confidenceInterval! * 0.01,
-      marginOfError: values.marginOfError! * 0.01,
-      excludedAdminAreas: values.adminCheckbox
-        ? values.excludedAdminAreasRandom || []
-        : [],
-      age,
-      sex: values.sexCheckbox ? values.filterSex || null : null,
-    };
-  };
-
-  return {
-    input: {
-      ...(shouldUseCashOrPaymentPlanId && {
-        cashOrPaymentPlanId: cashOrPaymentPlanId,
-      }),
-      ...(paymentVerificationPlanId && { paymentVerificationPlanId }),
-      sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-      fullListArguments: getFullListArguments(),
-      verificationChannel: values.verificationChannel || '',
-      rapidProArguments: getRapidProArguments(),
-      randomSamplingArguments: getRandomSamplingArguments(),
-      businessAreaSlug: businessArea,
-    },
-  };
-}
-
 export interface Props {
   paymentVerificationPlanNode: PaymentVerificationPlanDetails['paymentVerificationPlans'][number];
   cashOrPaymentPlanId: string;
+}
+
+// Helper function to prepare sample size request for REST API
+function prepareSampleSizeRequest(
+  selectedTab: number,
+  formValues: any,
+  cashOrPaymentPlanId: string,
+): MessageSampleSize {
+  const samplingType =
+    selectedTab === 0
+      ? SamplingTypeE86Enum.FULL_LIST
+      : SamplingTypeE86Enum.RANDOM;
+
+  const fullListArguments =
+    selectedTab === 0
+      ? {
+          excludedAdminAreas: formValues.excludedAdminAreasFull || [],
+        }
+      : undefined;
+
+  const randomSamplingArguments =
+    selectedTab === 1
+      ? {
+          confidenceInterval: formValues.confidenceInterval * 0.01,
+          marginOfError: formValues.marginOfError * 0.01,
+          excludedAdminAreas: formValues.adminCheckbox
+            ? formValues.excludedAdminAreasRandom || []
+            : [],
+          age: formValues.ageCheckbox
+            ? {
+                min: formValues.filterAgeMin || 0,
+                max: formValues.filterAgeMax || 999,
+              }
+            : null,
+          sex: formValues.sexCheckbox ? formValues.filterSex || '' : null,
+        }
+      : undefined;
+
+  return {
+    paymentPlan: cashOrPaymentPlanId,
+    samplingType,
+    fullListArguments,
+    randomSamplingArguments,
+  };
 }
 
 export const EditVerificationPlan = ({
   paymentVerificationPlanNode,
   cashOrPaymentPlanId,
 }: Props): ReactElement => {
-  const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId: programSlug } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
+
+  // Helper function to prepare mutation data
+  const prepareUpdateMutationData = (
+    tab: number,
+    values: any,
+  ): PatchedPaymentVerificationPlanCreate => {
+    const baseData = {
+      sampling: tab === 0 ? 'FULL_LIST' : 'RANDOM',
+      verificationChannel: values.verificationChannel,
+    };
+
+    if (tab === 0) {
+      // Full list
+      const result: PatchedPaymentVerificationPlanCreate = {
+        ...baseData,
+        fullListArguments: {
+          excludedAdminAreas: values.excludedAdminAreasFull || [],
+        } as FullList,
+      };
+
+      if (values.verificationChannel === 'RAPIDPRO') {
+        result.rapidProArguments = {
+          flowId: values.rapidProFlow,
+        } as RapidPro;
+      }
+
+      return result;
+    } else {
+      // Random sampling
+      const result: PatchedPaymentVerificationPlanCreate = {
+        ...baseData,
+        randomSamplingArguments: {
+          confidenceInterval: values.confidenceInterval * 0.01,
+          marginOfError: values.marginOfError * 0.01,
+          excludedAdminAreas: values.adminCheckbox
+            ? values.excludedAdminAreasRandom || []
+            : [],
+          age: values.ageCheckbox
+            ? ({
+                min: values.filterAgeMin || 0,
+                max: values.filterAgeMax || 999,
+              } as Age)
+            : ({ min: 0, max: 999 } as Age),
+          sex: values.sexCheckbox ? values.filterSex || '' : '',
+        } as RandomSampling,
+      };
+
+      if (values.verificationChannel === 'RAPIDPRO') {
+        result.rapidProArguments = {
+          flowId: values.rapidProFlow,
+        } as RapidPro;
+      }
+
+      return result;
+    }
+  };
+
+  const updateVerificationPlanMutation = useMutation({
+    mutationFn: (requestData: PatchedPaymentVerificationPlanCreate) =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsUpdateVerificationPlanPartialUpdate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          verificationPlanId: paymentVerificationPlanNode.id,
+          requestBody: requestData,
+        },
+      ),
+  });
   useEffect(() => {
     if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
       setSelectedTab(0);
@@ -161,13 +220,20 @@ export const EditVerificationPlan = ({
 
   const [formValues, setFormValues] = useState(initialValues);
 
-  const [loadRapidProFlows, { data: rapidProFlows }] =
-    useAllRapidProFlowsLazyQuery({
-      variables: {
+  const { data: rapidProFlowsData, refetch: refetchRapidProFlows } = useQuery({
+    queryKey: ['rapidProFlows', businessArea, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug: businessArea,
-      },
-      fetchPolicy: 'network-only',
-    });
+        programSlug: programSlug,
+      }),
+    enabled: false,
+  });
+
+  const rapidProFlows = rapidProFlowsData
+    ? { allRapidProFlows: rapidProFlowsData.results }
+    : null;
+  const loadRapidProFlows = refetchRapidProFlows;
 
   const { data: adminAreasData } = useQuery<PaginatedAreaList>({
     queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
@@ -181,42 +247,57 @@ export const EditVerificationPlan = ({
     enabled: !!businessArea,
   });
 
-  const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
-    variables: prepareVariables(
-      cashOrPaymentPlanId,
-      paymentVerificationPlanNode.id,
-      selectedTab,
-      formValues,
-      businessArea,
-      true,
-    ),
-    fetchPolicy: 'network-only',
-  });
+  // Sample size state management
+  const [sampleSizesData, setSampleSizesData] = useState<any>(null);
+
+  const loadSampleSize = useCallback(async () => {
+    if (!businessArea || !programSlug) return;
+
+    try {
+      const requestBody = prepareSampleSizeRequest(
+        selectedTab,
+        formValues,
+        cashOrPaymentPlanId,
+      );
+
+      const result =
+        await RestService.restBusinessAreasProgramsMessagesSampleSizeCreate({
+          businessAreaSlug: businessArea,
+          programSlug: programSlug,
+          requestBody,
+        });
+
+      setSampleSizesData({
+        sampleSize: {
+          sampleSize: result.sampleSize || 0,
+          paymentRecordCount: result.numberOfRecipients || 0,
+        },
+      });
+    } catch (error) {
+      console.error('Error loading sample size data:', error);
+    }
+  }, [businessArea, programSlug, selectedTab, formValues, cashOrPaymentPlanId]);
 
   useEffect(() => {
     if (open) {
       loadSampleSize();
     }
-  }, [open, loadSampleSize, loadRapidProFlows, selectedTab]);
+  }, [open, loadSampleSize, selectedTab]);
 
   const submit = async (mutationVariables): Promise<void> => {
-    const { errors } = await mutate({
-      variables: prepareVariables(
-        cashOrPaymentPlanId,
-        paymentVerificationPlanNode.id,
+    try {
+      const requestData = prepareUpdateMutationData(
         selectedTab,
         mutationVariables,
-        businessArea,
-      ),
-      refetchQueries,
-    });
-    setOpen(false);
+      );
+      await updateVerificationPlanMutation.mutateAsync(requestData);
+      setOpen(false);
+      showMessage(t('Verification plan edited.'));
 
-    if (errors) {
-      showMessage(t('Error while submitting'));
-      return;
+      // TODO: Implement proper React Query cache invalidation if needed
+    } catch (error) {
+      showMessage(error?.message || t('Error while submitting'));
     }
-    showMessage(t('Verification plan edited.'));
   };
 
   const mappedAdminAreas = adminAreasData?.results?.length
@@ -387,7 +468,7 @@ export const EditVerificationPlan = ({
                               rapidProFlows
                                 ? rapidProFlows.allRapidProFlows.map(
                                     (flow) => ({
-                                      value: flow.id,
+                                      value: flow.uuid,
                                       name: flow.name,
                                     }),
                                   )
@@ -562,7 +643,7 @@ export const EditVerificationPlan = ({
                 <DialogActions>
                   <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
                   <LoadingButton
-                    loading={loading}
+                    loading={updateVerificationPlanMutation.isPending}
                     type="submit"
                     color="primary"
                     variant="contained"
