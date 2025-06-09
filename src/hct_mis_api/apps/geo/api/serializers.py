@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -46,7 +46,7 @@ class AreaTreeSerializer(serializers.ModelSerializer):
     def get_level(obj: Area) -> int:
         return obj.area_type.area_level
 
-    def get_fields(self):
+    def get_fields(self) -> Any:
         fields = super().get_fields()
         fields["areas"] = AreaTreeSerializer(many=True)
         return fields
