@@ -1,7 +1,7 @@
+import { LogEntry } from '@restgenerated/models/LogEntry';
 import { HeadCell } from '../Table/EnhancedTableHead';
-import { LogEntryNode } from '@generated/graphql';
 
-export const headCells: HeadCell<LogEntryNode>[] = [
+export const headCells: HeadCell<LogEntry>[] = [
   {
     disablePadding: false,
     label: 'Date',
