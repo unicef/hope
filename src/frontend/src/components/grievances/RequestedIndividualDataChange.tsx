@@ -7,7 +7,9 @@ import mapKeys from 'lodash/mapKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
@@ -16,12 +18,13 @@ import {
   HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
-  useApproveIndividualDataChangeMutation,
 } from '@generated/graphql';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
+import { RestService } from '@restgenerated/services/RestService';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -46,6 +49,8 @@ export function RequestedIndividualDataChange({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
+  const queryClient = useQueryClient();
+  const { businessArea } = useBaseUrl();
   const individualData = {
     ...ticket.ticketDetails.individualData,
   };
@@ -108,7 +113,73 @@ export function RequestedIndividualDataChange({
     `You approved ${allChangesLength || 0} change${
       allChangesLength === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
-  const [mutate] = useApproveIndividualDataChangeMutation();
+
+  const { mutateAsync: mutate } = useMutation({
+    mutationFn: ({
+      individualApproveData,
+      approvedDocumentsToCreate,
+      approvedDocumentsToRemove,
+      approvedDocumentsToEdit,
+      approvedIdentitiesToCreate,
+      approvedIdentitiesToRemove,
+      approvedIdentitiesToEdit,
+      approvedPaymentChannelsToCreate,
+      approvedPaymentChannelsToRemove,
+      approvedPaymentChannelsToEdit,
+      flexFieldsApproveData,
+    }: {
+      individualApproveData: any;
+      approvedDocumentsToCreate?: number[];
+      approvedDocumentsToRemove?: number[];
+      approvedDocumentsToEdit?: number[];
+      approvedIdentitiesToCreate?: number[];
+      approvedIdentitiesToRemove?: number[];
+      approvedIdentitiesToEdit?: number[];
+      approvedPaymentChannelsToCreate?: number[];
+      approvedPaymentChannelsToRemove?: number[];
+      approvedPaymentChannelsToEdit?: number[];
+      flexFieldsApproveData?: any;
+    }) => {
+      const requestBody: GrievanceIndividualDataChangeApprove = {
+        individualApproveData,
+        approvedDocumentsToCreate,
+        approvedDocumentsToRemove,
+        approvedDocumentsToEdit,
+        approvedIdentitiesToCreate,
+        approvedIdentitiesToRemove,
+        approvedIdentitiesToEdit,
+        approvedPaymentChannelsToCreate,
+        approvedPaymentChannelsToRemove,
+        approvedPaymentChannelsToEdit,
+        flexFieldsApproveData,
+      };
+
+      return RestService.restBusinessAreasGrievanceTicketsApproveIndividualDataChangeCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: ticket.id,
+          requestBody,
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage('Changes Approved');
+      queryClient.invalidateQueries({
+        queryKey: ['GrievanceTicketDetail', ticket.id],
+      });
+    },
+    onError: (error: any) => {
+      if (error?.body?.errors) {
+        Object.values(error.body.errors)
+          .flat()
+          .forEach((msg: string) => {
+            showMessage(msg);
+          });
+      } else {
+        showMessage('An error occurred while approving changes');
+      }
+    },
+  });
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   const selectedDocumentsToEdit = [];
@@ -310,26 +381,22 @@ export function RequestedIndividualDataChange({
         );
         try {
           await mutate({
-            variables: {
-              grievanceTicketId: ticket.id,
-              individualApproveData: JSON.stringify(individualApproveData),
-              approvedDocumentsToCreate,
-              approvedDocumentsToRemove,
-              approvedDocumentsToEdit,
-              approvedIdentitiesToCreate,
-              approvedIdentitiesToRemove,
-              approvedIdentitiesToEdit,
-              approvedPaymentChannelsToCreate,
-              approvedPaymentChannelsToRemove,
-              approvedPaymentChannelsToEdit,
-              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
-            },
+            individualApproveData,
+            approvedDocumentsToCreate,
+            approvedDocumentsToRemove,
+            approvedDocumentsToEdit,
+            approvedIdentitiesToCreate,
+            approvedIdentitiesToRemove,
+            approvedIdentitiesToEdit,
+            approvedPaymentChannelsToCreate,
+            approvedPaymentChannelsToRemove,
+            approvedPaymentChannelsToEdit,
+            flexFieldsApproveData,
           });
-          showMessage('Changes Approved');
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          // Error handling is already in the mutation onError callback
         }
       }}
     >
