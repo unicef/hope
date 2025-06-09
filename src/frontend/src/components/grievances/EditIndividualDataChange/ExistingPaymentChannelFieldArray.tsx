@@ -8,7 +8,11 @@ export interface ExistingPaymentChannelFieldArrayProps {
   individual: IndividualDetail;
 }
 
-export function ExistingPaymentChannelFieldArray(): ReactElement {
+export function ExistingPaymentChannelFieldArray({
+  setFieldValue,
+  values,
+  individual,
+}: ExistingPaymentChannelFieldArrayProps): ReactElement {
   //TODO: Uncomment and implement the logic for rendering payment channels
 
   // const location = useLocation();

@@ -464,7 +464,6 @@ export const GrievancesTable = ({
                 )}
                 optionsData={optionsData}
                 setInputValue={setInputValue}
-                initialVariables={initialQueryVariables}
               />
             )}
           />
