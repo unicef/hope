@@ -424,4 +424,3 @@ class TestProgramCopy:
 
         assert "partners" in response.json()
         assert "Please assign access to your partner before saving the Program." in response.json()["partners"][0]
-
