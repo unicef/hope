@@ -25,7 +25,7 @@ class TestPartnerAccessChangeSignal(TestCase):
             partner=cls.partner_with_role_in_afg_1,
             role=role,
             business_area=cls.business_area,
-            program=ProgramFactory(business_area=cls.business_area),
+            program=None,
         )
 
         cls.partner_with_role_in_afg_2 = PartnerFactory(name="Partner with role in Afg 2")
@@ -34,8 +34,9 @@ class TestPartnerAccessChangeSignal(TestCase):
             partner=cls.partner_with_role_in_afg_2,
             role=role,
             business_area=cls.business_area,
-            program=ProgramFactory(business_area=cls.business_area),
+            program=None,
         )
+        # TODO: After proper solution is applied, the above can be removed and partner can just be allowed in business area.
 
         cls.partner_not_allowed_in_BA = PartnerFactory(name="Partner without role in Afg")
 
@@ -66,7 +67,7 @@ class TestPartnerAccessChangeSignal(TestCase):
         self.assertEqual(self.program.role_assignments.count(), 0)
         self.assertEqual(
             RoleAssignment.objects.filter(business_area=self.business_area, program=None).count(),
-            2,
+            4,
         )  # UNICEF HQ and UNICEF Partner for afghanistan
         self.assertEqual(
             RoleAssignment.objects.filter(
@@ -92,7 +93,7 @@ class TestPartnerAccessChangeSignal(TestCase):
         self.assertEqual(self.program.role_assignments.count(), 0)
         self.assertEqual(
             RoleAssignment.objects.filter(business_area=self.business_area, program=None).count(),
-            2,
+            4,
         )  # UNICEF HQ and UNICEF Partner for afghanistan
 
         self.assertEqual(self.program.admin_area_limits.count(), 0)
@@ -149,7 +150,7 @@ class TestPartnerAccessChangeSignal(TestCase):
         self.assertEqual(self.program.role_assignments.count(), 0)
         self.assertEqual(
             RoleAssignment.objects.filter(business_area=self.business_area, program=None).count(),
-            2,
+            4,
         )  # UNICEF HQ and UNICEF Partner for afghanistan
         self.assertEqual(
             RoleAssignment.objects.filter(
