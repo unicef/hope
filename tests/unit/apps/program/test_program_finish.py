@@ -1,27 +1,24 @@
-from typing import Callable, Optional
 import datetime
+from typing import Any, Callable
 
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (
-    UserFactory,
-    PartnerFactory,
-)
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.program.fixtures import ProgramFactory, ProgramCycleFactory
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 pytestmark = pytest.mark.django_db
 
 
 class TestProgramFinish:
     @pytest.fixture(autouse=True)
-    def setup(self, api_client) -> None:
+    def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="Test Partner")
         self.user = UserFactory(partner=self.partner)
@@ -67,10 +64,12 @@ class TestProgramFinish:
             assert self.program.status == Program.FINISHED
             assert response.json() == {"message": "Program Finished."}
         else:
-            assert self.program.status == Program.ACTIVE # Status should not change if permission denied
+            assert self.program.status == Program.ACTIVE  # Status should not change if permission denied
 
     def test_finish_program_already_finished(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+        )
 
         self.program.status = Program.FINISHED
         self.program.save()
@@ -83,7 +82,9 @@ class TestProgramFinish:
         assert self.program.status == Program.FINISHED
 
     def test_finish_program_invalid_status_draft(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+        )
 
         self.program.status = Program.DRAFT
         self.program.save()
@@ -96,7 +97,9 @@ class TestProgramFinish:
         assert self.program.status == Program.DRAFT
 
     def test_finish_program_without_end_date(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+        )
 
         self.program.end_date = None
         self.program.save()
@@ -109,7 +112,9 @@ class TestProgramFinish:
         assert self.program.status == Program.ACTIVE
 
     def test_finish_program_with_active_cycles(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+        )
 
         ProgramCycleFactory(program=self.program, status=ProgramCycle.ACTIVE)
 
@@ -121,7 +126,9 @@ class TestProgramFinish:
         assert self.program.status == Program.ACTIVE
 
     def test_finish_program_with_unreconciled_payment_plans(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+        )
 
         PaymentPlanFactory(program_cycle=self.program.cycles.first(), status=PaymentPlan.Status.IN_REVIEW)
 
@@ -133,7 +140,9 @@ class TestProgramFinish:
         assert self.program.status == Program.ACTIVE
 
     def test_finish_program_with_reconciled_payment_plans(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_FINISH], self.afghanistan, whole_business_area_access=True
+        )
 
         PaymentPlanFactory(program_cycle=self.program.cycles.first(), status=PaymentPlan.Status.ACCEPTED)
         PaymentPlanFactory(program_cycle=self.program.cycles.first(), status=PaymentPlan.Status.FINISHED)

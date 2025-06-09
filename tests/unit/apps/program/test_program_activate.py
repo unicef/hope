@@ -1,13 +1,10 @@
-from typing import Callable
+from typing import Any, Callable
 
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (
-    UserFactory,
-    PartnerFactory,
-)
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -18,7 +15,7 @@ pytestmark = pytest.mark.django_db
 
 class TestProgramActivate:
     @pytest.fixture(autouse=True)
-    def setup(self, api_client) -> None:
+    def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="Test Partner")
         self.user = UserFactory(partner=self.partner)
@@ -38,7 +35,7 @@ class TestProgramActivate:
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
-            ([Permissions.PROGRAMME_ACTIVATE],status.HTTP_200_OK),
+            ([Permissions.PROGRAMME_ACTIVATE], status.HTTP_200_OK),
             ([Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], status.HTTP_403_FORBIDDEN),
             ([], status.HTTP_403_FORBIDDEN),
         ],
@@ -60,7 +57,9 @@ class TestProgramActivate:
             assert self.program.status == Program.DRAFT  # Status should not change if permission denied
 
     def test_activate_program_already_active(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_ACTIVATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_ACTIVATE], self.afghanistan, whole_business_area_access=True
+        )
         self.program.status = Program.ACTIVE
         self.program.save()
 
@@ -72,7 +71,9 @@ class TestProgramActivate:
         assert self.program.status == Program.ACTIVE
 
     def test_activate_program_status_finished(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_ACTIVATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_ACTIVATE], self.afghanistan, whole_business_area_access=True
+        )
         self.program.status = Program.FINISHED
         self.program.save()
 

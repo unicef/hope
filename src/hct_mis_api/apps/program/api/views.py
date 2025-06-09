@@ -4,10 +4,7 @@ from typing import Any
 
 from django.db import transaction
 from django.db.models import Case, IntegerField, Prefetch, QuerySet, Value, When
-from hct_mis_api.apps.program.celery_tasks import (
-    copy_program_task,
-    populate_pdu_new_rounds_with_null_values_task,
-)
+
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -15,8 +12,13 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
-from rest_framework.mixins import DestroyModelMixin, ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
-    UpdateModelMixin
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -30,7 +32,6 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
 )
 from hct_mis_api.apps.activity_log.models import log_create
-
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
@@ -41,7 +42,9 @@ from hct_mis_api.apps.core.api.mixins import (
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import FlexibleAttributeForPDUService
+from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import (
+    FlexibleAttributeForPDUService,
+)
 from hct_mis_api.apps.program.api.caches import (
     BeneficiaryGroupKeyConstructor,
     ProgramCycleKeyConstructor,
@@ -50,17 +53,29 @@ from hct_mis_api.apps.program.api.caches import (
 from hct_mis_api.apps.program.api.filters import ProgramCycleFilter, ProgramFilter
 from hct_mis_api.apps.program.api.serializers import (
     BeneficiaryGroupSerializer,
+    ProgramCopySerializer,
+    ProgramCreateSerializer,
     ProgramCycleCreateSerializer,
     ProgramCycleListSerializer,
     ProgramCycleUpdateSerializer,
     ProgramDetailSerializer,
-    ProgramListSerializer, ProgramCreateSerializer, ProgramUpdateSerializer, ProgramCopySerializer,
+    ProgramListSerializer,
     ProgramUpdatePartnerAccessSerializer,
+    ProgramUpdateSerializer,
+)
+from hct_mis_api.apps.program.celery_tasks import (
+    copy_program_task,
+    populate_pdu_new_rounds_with_null_values_task,
 )
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
-from hct_mis_api.apps.program.utils import create_program_partner_access, remove_program_partner_access, \
-    copy_program_object
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import BiometricDeduplicationService
+from hct_mis_api.apps.program.utils import (
+    copy_program_object,
+    create_program_partner_access,
+    remove_program_partner_access,
+)
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -149,8 +164,10 @@ class ProgramViewSet(
         if (
             PaymentPlan.objects.filter(program_cycle__in=program.cycles.all())
             .exclude(
-                status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
-            ).exists()
+                status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+                + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
+            )
+            .exists()
         ):
             raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
 
@@ -277,7 +294,7 @@ class ProgramViewSet(
         partner_access = data.get("partner_access", None)
         pdu_fields = data.pop("pdu_fields", [])
 
-        program = copy_program_object(str(program.id), data, self.request.user)
+        program = copy_program_object(str(program.id), data, self.request.user)  # type: ignore
 
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
@@ -285,7 +302,9 @@ class ProgramViewSet(
 
         transaction.on_commit(
             lambda: copy_program_task.delay(
-                copy_from_program_id=str(old_program.id), new_program_id=str(program.id), user_id=str(self.request.user.id)
+                copy_from_program_id=str(old_program.id),
+                new_program_id=str(program.id),
+                user_id=str(self.request.user.id),
             )
         )
 
@@ -294,7 +313,10 @@ class ProgramViewSet(
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", self.request.user, program.pk, None, program)
 
-        return Response(status=status.HTTP_201_CREATED, data={"message": "Program copied successfully. New Program slug: {}".format(program.slug)})
+        return Response(
+            status=status.HTTP_201_CREATED,
+            data={"message": f"Program copied successfully. New Program slug: {program.slug}"},
+        )
 
     def perform_destroy(self, instance: Program) -> None:
         old_program = copy.deepcopy(instance)
