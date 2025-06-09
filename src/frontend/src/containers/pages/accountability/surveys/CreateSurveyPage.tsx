@@ -12,8 +12,8 @@ import { PaperContainer } from '@components/targeting/PaperContainer';
 import {
   CreateSurveyAccountabilityMutationVariables,
   SamplingChoices,
-  SurveyCategory,
 } from '@generated/graphql';
+import { SurveyCategoryEnum } from '@utils/enums';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -31,7 +31,6 @@ import {
   Typography,
 } from '@mui/material';
 import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
-import { SurveySampleSize } from '@restgenerated/models/SurveySampleSize';
 import { SurveySampleSizeSamplingTypeEnum } from '@restgenerated/models/SurveySampleSizeSamplingTypeEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -122,10 +121,10 @@ const CreateSurveyPage = (): ReactElement => {
   const categoryIndex = parts.indexOf('create') + 1;
   const categoryFromUrl = parts[categoryIndex];
   const isCategoryValid = [
-    SurveyCategory.Sms,
-    SurveyCategory.Manual,
-    SurveyCategory.RapidPro,
-  ].includes(categoryFromUrl as SurveyCategory);
+    SurveyCategoryEnum.SMS,
+    SurveyCategoryEnum.MANUAL,
+    SurveyCategoryEnum.RAPID_PRO,
+  ].includes(categoryFromUrl as SurveyCategoryEnum);
   const [category, setCategory] = useState<string | undefined>(categoryFromUrl);
   useEffect(() => {
     setCategory(categoryFromUrl);
@@ -134,7 +133,7 @@ const CreateSurveyPage = (): ReactElement => {
   // Set category to SMS if the user types random string in url
   if (!isCategoryValid) {
     navigate(
-      `/${businessArea}/accountability/surveys/create/${SurveyCategory.Sms}`,
+      `/${businessArea}/accountability/surveys/create/${SurveyCategoryEnum.SMS}`,
     );
   }
   const initialValues = {
@@ -232,7 +231,7 @@ const CreateSurveyPage = (): ReactElement => {
   }, [businessArea, programId]);
 
   useEffect(() => {
-    if (category === SurveyCategory.RapidPro) {
+    if (category === SurveyCategoryEnum.RAPID_PRO) {
       loadAvailableFlows();
     }
   }, [category, loadAvailableFlows]);
@@ -357,7 +356,8 @@ const CreateSurveyPage = (): ReactElement => {
   };
 
   const matchTitle = (values): string =>
-    category === SurveyCategory.Sms || category === SurveyCategory.Manual
+    category === SurveyCategoryEnum.SMS ||
+    category === SurveyCategoryEnum.MANUAL
       ? values.title
       : flowsData?.surveyAvailableFlows.find((el) => values.title === el.id).id;
 
@@ -405,11 +405,11 @@ const CreateSurveyPage = (): ReactElement => {
 
   const matchCategory = (surveyCategory): string => {
     switch (surveyCategory) {
-      case SurveyCategory.Sms:
+      case SurveyCategoryEnum.SMS:
         return t('SMS');
-      case SurveyCategory.RapidPro:
+      case SurveyCategoryEnum.RAPID_PRO:
         return t('Rapid Pro');
-      case SurveyCategory.Manual:
+      case SurveyCategoryEnum.MANUAL:
         return t('Manual');
       default:
         return '';
@@ -429,11 +429,11 @@ const CreateSurveyPage = (): ReactElement => {
             confirm({
               title: t('Confirmation'),
               content:
-                category === SurveyCategory.Manual
+                category === SurveyCategoryEnum.MANUAL
                   ? t('Are you sure you want to save this survey?')
                   : t('Are you sure you want to send this survey?'),
               continueText:
-                category === SurveyCategory.Manual ? t('Save') : t('Send'),
+                category === SurveyCategoryEnum.MANUAL ? t('Save') : t('Send'),
             }).then(async () => {
               try {
                 const variables = prepareMutationVariables(values);
@@ -719,7 +719,7 @@ const CreateSurveyPage = (): ReactElement => {
                     <Border />
                     <Box my={3}>
                       <Grid size={{ xs: 12 }}>
-                        {category === SurveyCategory.RapidPro ? (
+                        {category === SurveyCategoryEnum.RAPID_PRO ? (
                           <Field
                             name="title"
                             label={t('Title')}
@@ -742,7 +742,7 @@ const CreateSurveyPage = (): ReactElement => {
                         )}
                       </Grid>
                     </Box>
-                    {category === SurveyCategory.Sms && (
+                    {category === SurveyCategoryEnum.SMS && (
                       <Box my={3}>
                         <Grid size={{ xs: 12 }}>
                           <Field
@@ -808,7 +808,7 @@ const CreateSurveyPage = (): ReactElement => {
                     {t(
                       activeStep === steps.length - 1
                         ? t(
-                            category === SurveyCategory.Manual
+                            category === SurveyCategoryEnum.MANUAL
                               ? 'Save'
                               : 'Send',
                           )

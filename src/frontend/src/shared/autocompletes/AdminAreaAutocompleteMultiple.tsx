@@ -1,9 +1,9 @@
 import { ReactElement, useEffect, useState } from 'react';
-import get from 'lodash/get';
 import { Checkbox } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@hooks/useDebounce';
-import { useAllAdminAreasQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   StyledAutocomplete,
@@ -31,24 +31,27 @@ export function AdminAreaAutocompleteMultiple({
   const debouncedInputText = useDebounce(inputValue, 400);
   const [newValue, setNewValue] = useState([]);
   const { businessArea } = useBaseUrl();
-  const { data, loading } = useAllAdminAreasQuery({
-    variables: {
-      first: 100,
-      name: debouncedInputText,
-      businessArea,
-      level,
-      parentId,
-    },
+  const { data: areasData, isLoading } = useQuery({
+    queryKey: ['adminAreas', debouncedInputText, businessArea, level, parentId],
+    queryFn: () =>
+      RestService.restAreasList({
+        search: debouncedInputText,
+        areaTypeAreaLevel: level,
+        parentId: parentId || undefined,
+        limit: 100,
+      }),
   });
+
+  const loading = isLoading;
   useEffect(() => {
     setNewValue(value);
-  }, [data, value]);
+  }, [areasData, value]);
 
   useEffect(() => {
     setInputTextChange('');
   }, [value]);
 
-  const options = get(data, 'allAdminAreas.edges', []);
+  const options = areasData?.results || [];
   return (
     <StyledAutocomplete
       multiple
@@ -58,16 +61,16 @@ export function AdminAreaAutocompleteMultiple({
       onChange={onChange}
       value={newValue}
       getOptionLabel={(option: any) => {
-        if (!option.node) {
+        if (!option) {
           return '';
         }
-        return `${option.node.name}`;
+        return `${option.name}`;
       }}
       disabled={disabled}
       options={options}
       loading={loading}
       isOptionEqualToValue={(option: any, value1: any) =>
-        option.node.name === value1.node.name
+        option.name === value1.name
       }
       renderOption={(props, option: any, { selected }) => (
         <li {...props}>
@@ -77,15 +80,17 @@ export function AdminAreaAutocompleteMultiple({
             style={{ marginRight: 8 }}
             checked={selected}
           />
-          {option.node.name}
+          {option.name}
         </li>
       )}
       renderInput={(params) => (
         <StyledTextField
           {...params}
-          inputProps={{
-            ...params.inputProps,
-            value: inputValue,
+          slotProps={{
+            htmlInput: {
+              ...params.inputProps,
+              value: inputValue,
+            },
           }}
           size="small"
           placeholder={newValue.length > 0 ? null : t('Administrative Level 2')}

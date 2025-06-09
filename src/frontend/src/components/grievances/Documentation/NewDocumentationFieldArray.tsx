@@ -24,13 +24,14 @@ export function NewDocumentationFieldArray({
         render={(arrayHelpers) => (
           <>
             {values.documentation?.map((_item, index) => (
-              <DocumentationField
-                index={index}
-                key={`${index}-documentation-file`}
-                onDelete={() => arrayHelpers.remove(index)}
-                baseName="documentation"
-                setFieldValue={setFieldValue}
-              />
+              <Grid size={{ xs: 12 }} key={`${index}-documentation-file`}>
+                <DocumentationField
+                  index={index}
+                  onDelete={() => arrayHelpers.remove(index)}
+                  baseName="documentation"
+                  setFieldValue={setFieldValue}
+                />
+              </Grid>
             ))}
             <Grid size={{ xs: 12 }}>
               <Button

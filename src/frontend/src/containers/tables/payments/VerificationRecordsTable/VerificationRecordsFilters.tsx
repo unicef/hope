@@ -1,12 +1,14 @@
 import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { usePaymentVerificationChoicesQuery } from '@generated/graphql';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { ReactElement } from 'react';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { Choice } from '@restgenerated/models/Choice';
 
 interface VerificationRecordsFiltersProps {
   filter;
@@ -45,8 +47,20 @@ export function VerificationRecordsFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
-  const { data: choicesData } = usePaymentVerificationChoicesQuery();
-  if (!choicesData) {
+  const { data: verificationStatusChoices } = useQuery<Array<Choice>>({
+    queryKey: ['verificationStatusChoices'],
+    queryFn: () => RestService.restChoicesPaymentVerificationPlanStatusList(),
+  });
+
+  //TODO: replace if a REST endpoint for verification channels is available
+  // Hardcoded verification channel choices since no REST endpoint exists
+  const verificationChannelChoices = [
+    { name: 'Manual', value: 'MANUAL' },
+    { name: 'RapidPro', value: 'RAPIDPRO' },
+    { name: 'XLSX', value: 'XLSX' },
+  ];
+
+  if (!verificationStatusChoices) {
     return null;
   }
 
@@ -78,7 +92,7 @@ export function VerificationRecordsFilters({
             value={filter.status}
             fullWidth
           >
-            {choicesData.paymentVerificationStatusChoices.map((item) => (
+            {verificationStatusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
@@ -93,13 +107,11 @@ export function VerificationRecordsFilters({
             label={t('Verification Channel')}
             value={filter.verificationChannel}
           >
-            {choicesData.cashPlanVerificationVerificationChannelChoices.map(
-              (item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ),
-            )}
+            {verificationChannelChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 3 }}>

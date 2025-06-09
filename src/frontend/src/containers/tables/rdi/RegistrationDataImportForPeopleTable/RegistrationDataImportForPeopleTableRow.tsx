@@ -1,7 +1,7 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { Radio } from '@mui/material';
-import { RegistrationDataImportNode } from '@generated/graphql';
+import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import { registrationDataImportStatusToColor } from '@utils/utils';
@@ -10,8 +10,8 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
-interface PaymentRecordTableRowProps {
-  registrationDataImport: RegistrationDataImportNode;
+interface RegistrationDataImportForPeopleTableRowProps {
+  registrationDataImport: RegistrationDataImportList;
   canViewDetails: boolean;
   selectedRDI?;
   radioChangeHandler?: (id: string) => void;
@@ -22,7 +22,7 @@ export function RegistrationDataImportForPeopleTableRow({
   canViewDetails,
   selectedRDI,
   radioChangeHandler,
-}: PaymentRecordTableRowProps): ReactElement {
+}: RegistrationDataImportForPeopleTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const importDetailsForPeoplePath = `/${baseUrl}/registration-data-import/${registrationDataImport.id}`;
@@ -30,13 +30,7 @@ export function RegistrationDataImportForPeopleTableRow({
     navigate(importDetailsForPeoplePath);
   };
   const renderImportedBy = (): string => {
-    if (registrationDataImport?.importedBy) {
-      if (registrationDataImport.importedBy.firstName) {
-        return `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`;
-      }
-      return registrationDataImport.importedBy.email;
-    }
-    return '-';
+    return registrationDataImport?.importedBy || '-';
   };
   return (
     <ClickableTableRow

@@ -2,11 +2,9 @@ from typing import List
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 
 from graphql import GraphQLError
 
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketDeleteHouseholdDetails,
@@ -23,9 +21,7 @@ class HouseholdDeleteService(DataChangeService):
     def save(self) -> List[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         household_data_update_issue_type_extras = data_change_extras.get("household_delete_issue_type_extras")
-        household_encoded_id = household_data_update_issue_type_extras.get("household")
-        household_id = decode_id_string(household_encoded_id)
-        household = get_object_or_404(Household, id=household_id)
+        household = household_data_update_issue_type_extras.get("household")
         ticket_household_data_update_details = TicketDeleteHouseholdDetails(
             household=household,
             ticket=self.grievance_ticket,

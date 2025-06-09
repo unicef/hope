@@ -29,27 +29,31 @@ export const NewIdentityFieldArray = ({
             {values.individualDataUpdateFieldsIdentities?.map((item) => {
               const existingOrNewId = item.node?.id || item.id;
               return (
-                <AgencyField
-                  id={existingOrNewId}
+                <Grid
+                  size={{ xs: 12 }}
                   key={`${existingOrNewId}-${item?.country}-${item?.partner}`}
-                  onDelete={() =>
-                    removeItemById(
-                      values.individualDataUpdateFieldsIdentities,
-                      existingOrNewId,
-                      arrayHelpers,
-                    )
-                  }
-                  countryChoices={addIndividualFieldsData.countriesChoices}
-                  identityTypeChoices={
-                    addIndividualFieldsData.identityTypeChoices
-                  }
-                  baseName="individualDataUpdateFieldsIdentities"
-                  values={values}
-                />
+                >
+                  <AgencyField
+                    id={existingOrNewId}
+                    onDelete={() =>
+                      removeItemById(
+                        values.individualDataUpdateFieldsIdentities,
+                        existingOrNewId,
+                        arrayHelpers,
+                      )
+                    }
+                    countryChoices={addIndividualFieldsData.countriesChoices}
+                    identityTypeChoices={
+                      addIndividualFieldsData.identityTypeChoices
+                    }
+                    baseName="individualDataUpdateFieldsIdentities"
+                    values={values}
+                  />
+                </Grid>
               );
             })}
 
-            <Grid size={{ xs:8 }} />
+            <Grid size={{ xs: 8 }} />
             <Grid size={{ xs: 12 }}>
               <Button
                 color="primary"

@@ -1,4 +1,4 @@
-import { api, handleMutationError } from '@api/api';
+import { api, handleMutationError } from 'src/api/api';
 
 export type ProgramCycleStatus = 'Active' | 'Draft' | 'Finished';
 
