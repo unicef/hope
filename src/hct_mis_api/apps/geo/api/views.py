@@ -3,7 +3,9 @@ from typing import Any
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -18,7 +20,7 @@ from hct_mis_api.apps.core.api.mixins import (
 )
 from hct_mis_api.apps.geo.api.caches import AreaKeyConstructor
 from hct_mis_api.apps.geo.api.filters import AreaFilter
-from hct_mis_api.apps.geo.api.serializers import AreaListSerializer
+from hct_mis_api.apps.geo.api.serializers import AreaListSerializer, AreaTreeSerializer
 from hct_mis_api.apps.geo.models import Area
 
 logger = logging.getLogger(__name__)
@@ -41,3 +43,21 @@ class AreaViewSet(
     @cache_response(timeout=config.REST_API_TTL, key_func=AreaKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        responses={
+            200: AreaTreeSerializer(many=True),
+        },
+    )
+    @action(detail=False, methods=["get"], url_path="all-areas-tree")
+    def all_areas_tree(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        # get Area max level 3
+        queryset = (
+            Area.objects.filter(
+                area_type__country__business_areas__slug=self.business_area, area_type__area_level__lte=3
+            )
+            .select_related("area_type", "area_type__country")
+            .prefetch_related("area_type__country__business_areas")
+        )
+
+        return Response(AreaTreeSerializer(queryset.get_cached_trees(), many=True).data, status=200)
