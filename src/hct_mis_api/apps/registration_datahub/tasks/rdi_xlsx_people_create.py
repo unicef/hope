@@ -293,8 +293,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_collectors()
         self._create_bank_accounts_infos()
         self._create_accounts()
-        print("*" * 50)
-        print("self.colided_households_pks", self.colided_households_pks)
         self.registration_data_import.extra_hh_rdis.add(*self.colided_households_pks)
 
     @transaction.atomic()
