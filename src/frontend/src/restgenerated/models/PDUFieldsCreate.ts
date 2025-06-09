@@ -2,4 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Admin2Enum = string;
+import type { PDUData } from './PDUData';
+export type PDUFieldsCreate = {
+    label: string;
+    pduData: PDUData;
+};
+
