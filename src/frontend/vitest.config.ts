@@ -9,6 +9,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@api': resolve(__dirname, 'src/api'),
       '@components': resolve(__dirname, 'src/components'),
       '@core': resolve(__dirname, 'src/components/core'),
       '@containers': resolve(__dirname, 'src/containers'),

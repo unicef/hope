@@ -31,6 +31,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FspChoices } from '@restgenerated/models/FspChoices';
+import { fieldNameToLabel } from '@utils/utils';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -116,15 +117,20 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
-          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          : <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          :{' '}
           <span>
             {displayValueOrEmpty(field.arguments?.[0])} -{' '}
             {displayValueOrEmpty(field.arguments?.[1])}
@@ -135,7 +141,10 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          :{' '}
           {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
             <BlueText>{t('Empty')}</BlueText>
           ) : typeof field.arguments?.[0] === 'boolean' ? (
@@ -171,8 +180,10 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
 
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
-          {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          : {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
           <span>{displayValueOrEmpty(displayValue)}</span>
         </p>
       );
@@ -181,7 +192,10 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'CONTAINS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          :{' '}
           {field.__typename === 'TargetingCollectorBlockRuleFilterNode'
             ? field.arguments?.map((argument, index) => (
                 <Fragment key={index}>
@@ -211,8 +225,10 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     default:
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn}:{' '}
-          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          : <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
