@@ -69,6 +69,16 @@ class DocumentSerializer(serializers.ModelSerializer):
         )
 
 
+class DocumentPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Document
+        fields = (
+            "id",
+            "document_number",
+            "photo",
+        )
+
+
 class IndividualSmallSerializer(serializers.ModelSerializer):
     class Meta:
         model = Individual
@@ -466,3 +476,19 @@ class IndividualForTicketSerializer(serializers.ModelSerializer):
     @extend_schema_field(DocumentSerializer(many=True))
     def get_documents(self, obj: Individual) -> Dict:
         return DocumentSerializer(obj.documents(manager="all_merge_status_objects").all(), many=True).data
+
+
+class IndividualPhotoDetailSerializer(serializers.ModelSerializer):
+    documents = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Individual
+        fields = (
+            "id",
+            "photo",
+            "documents",
+        )
+
+    @extend_schema_field(DocumentPhotoSerializer(many=True))
+    def get_documents(self, obj: Individual) -> Dict:
+        return DocumentPhotoSerializer(obj.documents(manager="all_merge_status_objects").all(), many=True).data

@@ -8,7 +8,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice
+from hct_mis_api.apps.core.models import (
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.core.schema import get_fields_attr_generators, sort_by_attr
 from hct_mis_api.apps.core.utils import to_choice_object
 
@@ -61,6 +65,17 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
         return None
 
 
+class CollectorAttributeSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    type = serializers.CharField()
+    name = serializers.CharField()
+    lookup = serializers.CharField()
+    label = serializers.DictField()
+    hint = serializers.CharField()
+    required = serializers.BooleanField()
+    choices = serializers.ListField(child=serializers.CharField())
+
+
 class FieldAttributeSerializer(serializers.Serializer):
     id = serializers.CharField()
     type = serializers.CharField()
@@ -71,6 +86,13 @@ class FieldAttributeSerializer(serializers.Serializer):
     choices = CoreFieldChoiceSerializer(many=True)
     associated_with = serializers.SerializerMethodField()
     is_flex_field = serializers.SerializerMethodField()
+    pdu_data = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_pdu_data(obj: Union[Dict, FlexibleAttribute]) -> Optional[PeriodicFieldData]:
+        if isinstance(obj, FlexibleAttribute):
+            return obj.pdu_data
+        return None
 
     def get_labels(self, obj: Any) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
