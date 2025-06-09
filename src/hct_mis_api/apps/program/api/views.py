@@ -315,7 +315,7 @@ class ProgramViewSet(
 
         return Response(
             status=status.HTTP_201_CREATED,
-            data={"message": "Program copied successfully. New Program slug: {}".format(program.slug)},
+            data={"message": f"Program copied successfully. New Program slug: {program.slug}"},
         )
 
     def perform_destroy(self, instance: Program) -> None:
