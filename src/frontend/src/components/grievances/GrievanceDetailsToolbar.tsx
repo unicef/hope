@@ -236,11 +236,7 @@ export const GrievanceDetailsToolbar = ({
       : null;
 
   const changeState = async (status: number): Promise<void> => {
-    try {
-      await mutateAsync({ status });
-    } catch (e) {
-      // Error handling is done in the mutation onError callback
-    }
+    await mutateAsync({ status });
   };
 
   const getClosingConfirmationText = (): string => {
@@ -315,11 +311,7 @@ export const GrievanceDetailsToolbar = ({
           warningContent: closingWarningText,
           continueText: t('close ticket'),
         }).then(async () => {
-          try {
-            await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-          } catch (e) {
-            // Error handling is done in the mutation onError callback
-          }
+          await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
         })
       }
       data-cy="button-close-ticket"
