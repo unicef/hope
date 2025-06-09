@@ -23,18 +23,16 @@ import {
   EmptyComponent,
   dataChangeComponentDict,
   prepareInitialValues,
-  prepareVariables,
+  prepareRestUpdateVariables,
 } from '@components/grievances/utils/editGrievanceUtils';
 import { validate } from '@components/grievances/utils/validateGrievance';
 import { validationSchema } from '@components/grievances/utils/validationSchema';
 import {
-  GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
   useAllEditPeopleFieldsQuery,
-  useGrievanceTicketStatusChangeMutation,
-  useUpdateGrievanceMutation,
 } from '@generated/graphql';
+import { useMutation } from 'react-query';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -141,8 +139,22 @@ const EditGrievancePage = (): ReactElement => {
       }),
   });
 
-  const [mutate, { loading }] = useUpdateGrievanceMutation();
-  const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
+  const { mutateAsync: updateGrievanceTicket, isLoading: loading } =
+    useMutation((data: { id: string; requestBody: any }) =>
+      RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
+        businessAreaSlug,
+        id: data.id,
+        requestBody: data.requestBody,
+      }),
+    );
+  const { mutateAsync: changeTicketStatus } = useMutation(
+    (data: { id: string; requestBody: any }) =>
+      RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
+        businessAreaSlug,
+        id: data.id,
+        requestBody: data.requestBody,
+      }),
+  );
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
@@ -231,13 +243,22 @@ const EditGrievancePage = (): ReactElement => {
   )
     return <PermissionDenied />;
 
-  const changeState = (status): void => {
-    mutateStatus({
-      variables: {
-        grievanceTicketId: ticket.id,
-        status,
-      },
-    });
+  const changeState = async (status): Promise<void> => {
+    try {
+      await changeTicketStatus({
+        id: ticket.id,
+        requestBody: {
+          status,
+        },
+      });
+      showMessage(t('Ticket status updated successfully.'));
+    } catch (e) {
+      if (e?.response?.data?.message) {
+        showMessage(e.response.data.message);
+      } else {
+        showMessage(t('An error occurred while updating the ticket status.'));
+      }
+    }
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const initialValues: any = prepareInitialValues(ticket);
@@ -298,24 +319,19 @@ const EditGrievancePage = (): ReactElement => {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const { variables } = prepareVariables(
-            businessAreaSlug,
-            values,
-            ticket,
-          );
-          await mutate({
-            variables,
-            refetchQueries: () => [
-              {
-                query: GrievanceTicketDocument,
-                variables: { id: ticket.id },
-              },
-            ],
+          const requestBody = prepareRestUpdateVariables(values, ticket);
+          await updateGrievanceTicket({
+            id: ticket.id,
+            requestBody,
           });
           showMessage(t('Grievance Ticket edited.'));
           navigate(grievanceDetailsPath);
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          if (e?.response?.data?.message) {
+            showMessage(e.response.data.message);
+          } else {
+            showMessage(t('An error occurred while updating the ticket.'));
+          }
         }
         if (
           ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||

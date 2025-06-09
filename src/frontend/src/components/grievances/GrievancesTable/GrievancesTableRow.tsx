@@ -1,10 +1,9 @@
 import { Checkbox } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import {
-  AllGrievanceTicketDocument,
-  useBulkUpdateGrievanceAssigneeMutation,
-} from '@generated/graphql';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -36,7 +35,6 @@ interface GrievancesTableRowProps {
   isSelected: boolean;
   optionsData;
   setInputValue;
-  initialVariables;
 }
 
 export function GrievancesTableRow({
@@ -51,7 +49,6 @@ export function GrievancesTableRow({
   isSelected,
   optionsData,
   setInputValue,
-  initialVariables,
 }: GrievancesTableRowProps): ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
@@ -69,26 +66,41 @@ export function GrievancesTableRow({
         .name
     : '-';
 
-  const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation({
+    mutationFn: (params: BulkUpdateGrievanceTicketsAssignees) => {
+      return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
+        {
+          businessAreaSlug: businessArea,
+          requestBody: params,
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsGrievanceTickets'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasGrievanceTickets'],
+      });
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.body?.errors || error?.message || 'An error occurred';
+      showMessage(errorMessage);
+    },
+  });
 
   const onFilterChange = async (assignee, ids): Promise<void> => {
     if (assignee) {
       try {
-        await mutate({
-          variables: {
-            assignedTo: assignee.node.id,
-            businessAreaSlug: businessArea,
-            grievanceTicketIds: ids,
-          },
-          refetchQueries: () => [
-            {
-              query: AllGrievanceTicketDocument,
-              variables: { ...initialVariables },
-            },
-          ],
+        await mutateAsync({
+          assignedTo: assignee.node.id,
+          grievanceTicketIds: ids,
         });
       } catch (e) {
-        e.graphQLErrors.map((x) => showMessage(x.message));
+        // Error is handled in onError callback
       }
     }
   };
