@@ -1,31 +1,29 @@
-from typing import Callable, List, Dict, Any
-import copy
+from typing import Any, Callable
+
+from django.db.models import Q
 
 import pytest
-from django.db.models import Q
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import (
-    UserFactory,
     PartnerFactory,
-    RoleAssignmentFactory, RoleFactory,
+    RoleAssignmentFactory,
+    UserFactory,
 )
-from hct_mis_api.apps.account.models import Partner, RoleAssignment, AdminAreaLimitedTo
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.geo.models import Area
-
 
 pytestmark = pytest.mark.django_db
 
 
 class TestProgramUpdatePartnerAccess:
     @pytest.fixture(autouse=True)
-    def setup(self, api_client) -> None:
+    def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="Test Partner")
         self.user = UserFactory(partner=self.partner)
@@ -147,10 +145,14 @@ class TestProgramUpdatePartnerAccess:
         if expected_status == status.HTTP_200_OK:
             assert self.program.partner_access == Program.ALL_PARTNERS_ACCESS
             assert response.json() == {"message": "Partner access updated."}
-            assert self.program.role_assignments.count() == 3  # roles created for self.partner, self.partner1_for_assignment, self.partner2_for_assignment
-            assert set(
-                self.program.role_assignments.values_list("partner", flat=True)
-            ) == {self.partner.id, self.partner1_for_assignment.id, self.partner2_for_assignment.id}
+            assert (
+                self.program.role_assignments.count() == 3
+            )  # roles created for self.partner, self.partner1_for_assignment, self.partner2_for_assignment
+            assert set(self.program.role_assignments.values_list("partner", flat=True)) == {
+                self.partner.id,
+                self.partner1_for_assignment.id,
+                self.partner2_for_assignment.id,
+            }
         else:
             assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS  # Should not change if permission denied
 
@@ -161,28 +163,46 @@ class TestProgramUpdatePartnerAccess:
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 0
         # UNICEF HQ and UNICEF Partner for Afghanistan have Role in the whole BA
-        assert RoleAssignment.objects.filter(
-            Q(partner=self.unicef_hq) | Q(partner=self.unicef_partner_in_afghanistan),
-            business_area=self.afghanistan, program=None
-        ).count() == 2
-        assert self.unicef_hq.role_assignments.filter(program=None, business_area=self.program.business_area).first().role.name == "Role with all permissions"
-        assert self.unicef_partner_in_afghanistan.role_assignments.filter(program=None, business_area=self.program.business_area).first().role.name == "Role for UNICEF Partners"
+        assert (
+            RoleAssignment.objects.filter(
+                Q(partner=self.unicef_hq) | Q(partner=self.unicef_partner_in_afghanistan),
+                business_area=self.afghanistan,
+                program=None,
+            ).count()
+            == 2
+        )
+        assert (
+            self.unicef_hq.role_assignments.filter(program=None, business_area=self.program.business_area)
+            .first()
+            .role.name
+            == "Role with all permissions"
+        )
+        assert (
+            self.unicef_partner_in_afghanistan.role_assignments.filter(
+                program=None, business_area=self.program.business_area
+            )
+            .first()
+            .role.name
+            == "Role for UNICEF Partners"
+        )
 
         # Update partner access NONE_PARTNERS_ACCESS -> ALL_PARTNERS_ACCESS
-        payload = {"partner_access": Program.ALL_PARTNERS_ACCESS, "partners": []}
-        response = self.client.post(self.update_partner_access_url, payload)
+        payload_1 = {"partner_access": Program.ALL_PARTNERS_ACCESS, "partners": []}
+        response = self.client.post(self.update_partner_access_url, payload_1)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"message": "Partner access updated."}
         self.program.refresh_from_db()
         assert self.program.partner_access == Program.ALL_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 3
-        assert set(
-            self.program.role_assignments.values_list("partner", flat=True)
-        ) == {self.partner.id, self.partner1_for_assignment.id, self.partner2_for_assignment.id}
+        assert set(self.program.role_assignments.values_list("partner", flat=True)) == {
+            self.partner.id,
+            self.partner1_for_assignment.id,
+            self.partner2_for_assignment.id,
+        }
 
         # Update partner access ALL_PARTNERS_ACCESS -> NONE_PARTNERS_ACCESS
-        payload = {"partner_access": Program.NONE_PARTNERS_ACCESS, "partners": []}
-        response = self.client.post(self.update_partner_access_url, payload)
+        payload_2 = {"partner_access": Program.NONE_PARTNERS_ACCESS, "partners": []}
+        response = self.client.post(self.update_partner_access_url, payload_2)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"message": "Partner access updated."}
         self.program.refresh_from_db()
@@ -190,7 +210,7 @@ class TestProgramUpdatePartnerAccess:
         assert self.program.role_assignments.count() == 0
 
         # Update partner access NONE_PARTNERS_ACCESS -> SELECTED_PARTNERS_ACCESS with specific partners
-        payload = {
+        payload_3 = {
             "partner_access": Program.SELECTED_PARTNERS_ACCESS,
             "partners": [
                 {
@@ -203,26 +223,24 @@ class TestProgramUpdatePartnerAccess:
                 },
             ],
         }
-        response = self.client.post(self.update_partner_access_url, payload)
+        response = self.client.post(self.update_partner_access_url, payload_3)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"message": "Partner access updated."}
         self.program.refresh_from_db()
         assert self.program.partner_access == Program.SELECTED_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 2
-        assert set(
-            self.program.role_assignments.values_list("partner", flat=True)
-        ) == {self.partner.id,  self.partner1_for_assignment.id}
-        assert AdminAreaLimitedTo.objects.filter(program=self.program
-        ).count() == 1
-        assert AdminAreaLimitedTo.objects.filter(
-            partner=self.partner, program=self.program
-        ).count() == 1
-        assert AdminAreaLimitedTo.objects.filter(
-            partner=self.partner1_for_assignment, program=self.program
-        ).count() == 0
+        assert set(self.program.role_assignments.values_list("partner", flat=True)) == {
+            self.partner.id,
+            self.partner1_for_assignment.id,
+        }
+        assert AdminAreaLimitedTo.objects.filter(program=self.program).count() == 1
+        assert AdminAreaLimitedTo.objects.filter(partner=self.partner, program=self.program).count() == 1
+        assert (
+            AdminAreaLimitedTo.objects.filter(partner=self.partner1_for_assignment, program=self.program).count() == 0
+        )
 
         # Update partners for SELECTED_PARTNERS_ACCESS - add partner, change areas
-        payload = {
+        payload_4 = {
             "partner_access": Program.SELECTED_PARTNERS_ACCESS,
             "partners": [
                 {
@@ -239,29 +257,28 @@ class TestProgramUpdatePartnerAccess:
                 },
             ],
         }
-        response = self.client.post(self.update_partner_access_url, payload)
+        response = self.client.post(self.update_partner_access_url, payload_4)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"message": "Partner access updated."}
         self.program.refresh_from_db()
         assert self.program.partner_access == Program.SELECTED_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 3
-        assert set(
-            self.program.role_assignments.values_list("partner", flat=True)
-        ) == {self.partner.id, self.partner1_for_assignment.id, self.partner2_for_assignment.id}
-        assert AdminAreaLimitedTo.objects.filter(program=self.program
-        ).count() == 2
-        assert AdminAreaLimitedTo.objects.filter(
-            partner=self.partner, program=self.program
-        ).count() == 1
-        assert AdminAreaLimitedTo.objects.filter(
-            partner=self.partner1_for_assignment, program=self.program
-        ).count() == 1
-        assert AdminAreaLimitedTo.objects.filter(
-            partner=self.partner2_for_assignment, program=self.program
-        ).count() == 0
+        assert set(self.program.role_assignments.values_list("partner", flat=True)) == {
+            self.partner.id,
+            self.partner1_for_assignment.id,
+            self.partner2_for_assignment.id,
+        }
+        assert AdminAreaLimitedTo.objects.filter(program=self.program).count() == 2
+        assert AdminAreaLimitedTo.objects.filter(partner=self.partner, program=self.program).count() == 1
+        assert (
+            AdminAreaLimitedTo.objects.filter(partner=self.partner1_for_assignment, program=self.program).count() == 1
+        )
+        assert (
+            AdminAreaLimitedTo.objects.filter(partner=self.partner2_for_assignment, program=self.program).count() == 0
+        )
 
         # Update partners and areas for SELECTED_PARTNERS_ACCESS - remove one of partners, change areas
-        payload = {
+        payload_5 = {
             "partner_access": Program.SELECTED_PARTNERS_ACCESS,
             "partners": [
                 {
@@ -274,42 +291,43 @@ class TestProgramUpdatePartnerAccess:
                 },
             ],
         }
-        response = self.client.post(self.update_partner_access_url, payload)
+        response = self.client.post(self.update_partner_access_url, payload_5)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"message": "Partner access updated."}
         self.program.refresh_from_db()
         assert self.program.partner_access == Program.SELECTED_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 2
-        assert set(
-            self.program.role_assignments.values_list("partner", flat=True)
-        ) == {self.partner.id, self.partner1_for_assignment.id}
-        assert AdminAreaLimitedTo.objects.filter(program=self.program
-        ).count() == 2
-        assert AdminAreaLimitedTo.objects.filter(
-            partner=self.partner, program=self.program
-        ).count() == 1
-        assert AdminAreaLimitedTo.objects.filter(
-            partner=self.partner1_for_assignment, program=self.program
-        ).count() == 1
-        assert AdminAreaLimitedTo.objects.filter(
-            partner=self.partner2_for_assignment, program=self.program
-        ).count() == 0
+        assert set(self.program.role_assignments.values_list("partner", flat=True)) == {
+            self.partner.id,
+            self.partner1_for_assignment.id,
+        }
+        assert AdminAreaLimitedTo.objects.filter(program=self.program).count() == 2
+        assert AdminAreaLimitedTo.objects.filter(partner=self.partner, program=self.program).count() == 1
+        assert (
+            AdminAreaLimitedTo.objects.filter(partner=self.partner1_for_assignment, program=self.program).count() == 1
+        )
+        assert (
+            AdminAreaLimitedTo.objects.filter(partner=self.partner2_for_assignment, program=self.program).count() == 0
+        )
 
         # Update partner access SELECTED_PARTNERS_ACCESS -> ALL_PARTNERS_ACCESS
-        payload = {"partner_access": Program.ALL_PARTNERS_ACCESS, "partners": []}
-        response = self.client.post(self.update_partner_access_url, payload)
+        payload_6 = {"partner_access": Program.ALL_PARTNERS_ACCESS, "partners": []}
+        response = self.client.post(self.update_partner_access_url, payload_6)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"message": "Partner access updated."}
         self.program.refresh_from_db()
         assert self.program.partner_access == Program.ALL_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 3
-        assert set(
-            self.program.role_assignments.values_list("partner", flat=True)
-        ) == {self.partner.id, self.partner1_for_assignment.id, self.partner2_for_assignment.id}
-        assert AdminAreaLimitedTo.objects.filter(program=self.program
-        ).count() == 0
+        assert set(self.program.role_assignments.values_list("partner", flat=True)) == {
+            self.partner.id,
+            self.partner1_for_assignment.id,
+            self.partner2_for_assignment.id,
+        }
+        assert AdminAreaLimitedTo.objects.filter(program=self.program).count() == 0
 
-    def test_update_partner_access_invalid_all_partners_access_with_partners_data(self, create_user_role_with_permissions: Callable) -> None:
+    def test_update_partner_access_invalid_all_partners_access_with_partners_data(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
         )
@@ -323,19 +341,20 @@ class TestProgramUpdatePartnerAccess:
                     "partner": str(self.partner1_for_assignment.id),
                     "areas": [str(self.area2.id)],
                 },
-            ]
+            ],
         }
         response = self.client.post(self.update_partner_access_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "partners" in response.json()
         assert response.json()["partners"][0] == "You cannot specify partners for the chosen access type."
 
-
         self.program.refresh_from_db()
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 0
 
-    def test_update_partner_access_invalid_none_partners_access_with_partners_data(self, create_user_role_with_permissions: Callable) -> None:
+    def test_update_partner_access_invalid_none_partners_access_with_partners_data(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
         )
@@ -349,7 +368,7 @@ class TestProgramUpdatePartnerAccess:
                     "partner": str(self.partner1_for_assignment.id),
                     "areas": [str(self.area2.id)],
                 },
-            ]
+            ],
         }
         response = self.client.post(self.update_partner_access_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -360,7 +379,9 @@ class TestProgramUpdatePartnerAccess:
         assert self.program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 0
 
-    def test_update_partner_access_invalid_selected_partner_access_without_partner(self, create_user_role_with_permissions: Callable) -> None:
+    def test_update_partner_access_invalid_selected_partner_access_without_partner(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
         )
@@ -375,7 +396,7 @@ class TestProgramUpdatePartnerAccess:
                     "partner": str(self.partner1_for_assignment.id),
                     "areas": [str(self.area2.id)],
                 },
-            ]
+            ],
         }
         response = self.client.post(self.update_partner_access_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -416,9 +437,7 @@ class TestProgramUpdatePartnerAccess:
         self.program.refresh_from_db()
         assert self.program.partner_access == Program.ALL_PARTNERS_ACCESS
         assert self.program.role_assignments.count() == 4
-        assert set(
-            self.program.role_assignments.values_list("partner", flat=True)
-        ) == {
+        assert set(self.program.role_assignments.values_list("partner", flat=True)) == {
             self.partner.id,
             self.partner1_for_assignment.id,
             self.partner2_for_assignment.id,
