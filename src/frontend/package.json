@@ -1,12 +1,12 @@
 {
   "name": "frontend",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build-for-backend": "yarn build --outDir '../hct_mis_api/apps/web/static/web' --emptyOutDir",
+    "build-fotr-backend": "yarn build --outDir '../hct_mis_api/apps/web/static/web' --emptyOutDir",
     "build-and-watch": "yarn build-for-backend --watch",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "TZ=UTC jest --config jest.config.ts",
