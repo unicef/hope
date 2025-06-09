@@ -78,10 +78,9 @@ class DashboardDataView(APIView):
 
         cache_identifier = GLOBAL_SLUG if is_global else business_area_slug
         data = data_cache.get_data(cache_identifier)
-        if not data:
-            generate_dash_report_task.delay(cache_identifier) 
+        if data is None:
+            generate_dash_report_task.delay(cache_identifier)
             data = []
-
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -110,14 +109,11 @@ class CreateOrUpdateDashReportView(APIView):
             ):
                 has_permission = True
         else:
-            try:
-                business_area_obj = BusinessArea.objects.get(slug=business_area_slug)
-                if check_permissions(
-                    request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj
-                ):
-                    has_permission = True
-            except BusinessArea.DoesNotExist:
-                return Response({"detail": _("Business area not found.")}, status=status.HTTP_404_NOT_FOUND)
+            business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
+            if request.user.is_superuser or check_permissions(
+                request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj
+            ):
+                has_permission = True
 
         if not has_permission:
             raise PermissionDenied(_("You do not have permission to trigger DashReport generation for this scope."))
