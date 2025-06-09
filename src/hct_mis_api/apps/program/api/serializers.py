@@ -12,11 +12,17 @@ from hct_mis_api.apps.account.api.serializers import PartnerForProgramSerializer
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.api.serializers import DataCollectingTypeSerializer
-from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData, FlexibleAttribute
+from hct_mis_api.apps.core.models import (
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.periodic_data_update.api.serializers import PeriodicFieldSerializer
+from hct_mis_api.apps.periodic_data_update.api.serializers import (
+    PeriodicFieldSerializer,
+)
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
@@ -220,7 +226,6 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
             if start_date and end_date < start_date:
                 raise serializers.ValidationError({"end_date": "End date cannot be earlier than the start date."})
 
-
         validate_cycle_timeframes_overlapping(program, start_date, end_date, str(self.instance.pk))
         return data
 
@@ -318,15 +323,18 @@ class PDUDataSerializer(serializers.Serializer):
     number_of_rounds = serializers.IntegerField(min_value=1)
     rounds_names = serializers.ListField(child=serializers.CharField(max_length=100, allow_blank=True))
 
+
 class PDUFieldsCreateSerializer(serializers.Serializer):
-    label = serializers.CharField()
-    pdu_data = PDUDataSerializer(required=True)
+    label = serializers.CharField()  # type: ignore
+    pdu_data = PDUDataSerializer()
+
 
 class PDUFieldsUpdateSerializer(PDUFieldsCreateSerializer):
     id = serializers.CharField(required=False)
 
+
 class ProgramCreateSerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True)
+    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
@@ -361,7 +369,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             "status",
         )
 
-    def validate_programme_code(self, value: str) -> str:
+    def validate_programme_code(self, value: Optional[str]) -> Optional[str]:
         if value:
             value = value.upper()
             if not re.match(r"^[A-Z0-9\-]{4}$", value):
@@ -378,8 +386,11 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         data_collecting_type = value
         # validate DCT.limit_to
         business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
-        if data_collecting_type.limit_to.exists() and not data_collecting_type.limit_to.filter(slug=business_area_slug).exists():
-                raise serializers.ValidationError("This Data Collecting Type is not available for this Business Area.")
+        if (
+            data_collecting_type.limit_to.exists()
+            and not data_collecting_type.limit_to.filter(slug=business_area_slug).exists()
+        ):
+            raise serializers.ValidationError("This Data Collecting Type is not available for this Business Area.")
 
         # validate DCT
         if not data_collecting_type.active:
@@ -392,9 +403,7 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
         # validate start_date and end_date
         end_date = data.get("end_date")
         if end_date and end_date < data["start_date"]:
-            raise serializers.ValidationError(
-                {"end_date": "End date cannot be earlier than the start date."}
-            )
+            raise serializers.ValidationError({"end_date": "End date cannot be earlier than the start date."})
 
         # validate partners and partner_access
         partners = data.get("partners", [])
@@ -410,26 +419,20 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
                 {"partners": "Please assign access to your partner before saving the Program."}
             )
         if partners_ids and partner_access != Program.SELECTED_PARTNERS_ACCESS:
-            raise serializers.ValidationError(
-                {"partners": "You cannot specify partners for the chosen access type."}
-            )
+            raise serializers.ValidationError({"partners": "You cannot specify partners for the chosen access type."})
 
         # validate DCT and BG combination
         data_collecting_type = data["data_collecting_type"]
         beneficiary_group = data["beneficiary_group"]
-        if (
-            data_collecting_type.type == DataCollectingType.Type.SOCIAL
-            and beneficiary_group.master_detail
-        ) or (
-            data_collecting_type.type == DataCollectingType.Type.STANDARD
-            and not beneficiary_group.master_detail
+        if (data_collecting_type.type == DataCollectingType.Type.SOCIAL and beneficiary_group.master_detail) or (
+            data_collecting_type.type == DataCollectingType.Type.STANDARD and not beneficiary_group.master_detail
         ):
             raise serializers.ValidationError(
                 {"beneficiary_group": "Selected combination of data collecting type and beneficiary group is invalid."}
             )
         return data
 
-    def to_representation(self, obj):
+    def to_representation(self, obj: Program) -> Dict:
         """
         Override to_representation to include the partners and pdu_fields in the correct format.
         """
@@ -444,11 +447,14 @@ class ProgramCreateSerializer(serializers.ModelSerializer):
             .distinct()
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
-        representation["pdu_fields"] = PeriodicFieldSerializer(FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"), many=True).data
+        representation["pdu_fields"] = PeriodicFieldSerializer(
+            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"), many=True
+        ).data
         return representation
 
+
 class ProgramUpdateSerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True)
+    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
@@ -481,7 +487,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             "partner_access",
         )
 
-    def validate_programme_code(self, value: str) -> str:
+    def validate_programme_code(self, value: Optional[str]) -> Optional[str]:
         if value:
             value = value.upper()
             if not re.match(r"^[A-Z0-9\-]{4}$", value):
@@ -490,7 +496,11 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
                     "and character: -"
                 )
 
-            if Program.objects.filter(business_area=self.instance.business_area, programme_code=value).exclude(id=self.instance.id).exists():
+            if (
+                Program.objects.filter(business_area=self.instance.business_area, programme_code=value)
+                .exclude(id=self.instance.id)
+                .exists()
+            ):
                 raise serializers.ValidationError("Programme code is already used.")
         return value
 
@@ -498,8 +508,11 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         data_collecting_type = value
 
         # validate DCT.limit_to
-        if data_collecting_type.limit_to.exists() and not data_collecting_type.limit_to.filter(id=self.instance.business_area_id).exists():
-                raise serializers.ValidationError("This Data Collecting Type is not available for this Business Area.")
+        if (
+            data_collecting_type.limit_to.exists()
+            and not data_collecting_type.limit_to.filter(id=self.instance.business_area_id).exists()
+        ):
+            raise serializers.ValidationError("This Data Collecting Type is not available for this Business Area.")
 
         # validate DCT
         if not data_collecting_type.active:
@@ -514,13 +527,15 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Data Collecting Type can be updated only for Draft Programs.")
             else:
                 if Household.objects.filter(program=self.instance).exists():
-                    raise serializers.ValidationError("Data Collecting Type can be updated only for Program without any households.")
+                    raise serializers.ValidationError(
+                        "Data Collecting Type can be updated only for Program without any households."
+                    )
         return value
 
     def validate_beneficiary_group(self, value: BeneficiaryGroup) -> BeneficiaryGroup:
         # validate if BG can be updated
         if self.instance.beneficiary_group != value and self.instance.registration_imports.exists():
-                raise serializers.ValidationError("Beneficiary Group cannot be updated if Program has population.")
+            raise serializers.ValidationError("Beneficiary Group cannot be updated if Program has population.")
         return value
 
     def validate_version(self, value: Optional[int]) -> Optional[int]:
@@ -531,9 +546,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         end_date = data.get("end_date")
         if end_date:
             if end_date < data["start_date"]:
-                raise serializers.ValidationError(
-                    {"end_date": "End date cannot be earlier than the start date."}
-                )
+                raise serializers.ValidationError({"end_date": "End date cannot be earlier than the start date."})
 
             if self.instance.cycles.filter(end_date__gt=end_date).exists():
                 raise serializers.ValidationError(
@@ -548,19 +561,15 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         # validate DCT and BG combination
         data_collecting_type = data["data_collecting_type"]
         beneficiary_group = data["beneficiary_group"]
-        if (
-            data_collecting_type.type == DataCollectingType.Type.SOCIAL
-            and beneficiary_group.master_detail
-        ) or (
-            data_collecting_type.type == DataCollectingType.Type.STANDARD
-            and not beneficiary_group.master_detail
+        if (data_collecting_type.type == DataCollectingType.Type.SOCIAL and beneficiary_group.master_detail) or (
+            data_collecting_type.type == DataCollectingType.Type.STANDARD and not beneficiary_group.master_detail
         ):
             raise serializers.ValidationError(
                 {"beneficiary_group": "Selected combination of data collecting type and beneficiary group is invalid."}
             )
         return data
 
-    def to_representation(self, obj):
+    def to_representation(self, obj: Program) -> Dict:
         """
         Override to_representation to include the partners and pdu_fields in the correct format.
         """
@@ -575,7 +584,9 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
             .distinct()
         )
         representation["partners"] = PartnerForProgramSerializer(partners_qs, many=True).data
-        representation["pdu_fields"] = PeriodicFieldSerializer(FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"), many=True).data
+        representation["pdu_fields"] = PeriodicFieldSerializer(
+            FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU, program=obj).order_by("name"), many=True
+        ).data
         return representation
 
 
@@ -602,22 +613,20 @@ class ProgramUpdatePartnerAccessSerializer(serializers.ModelSerializer):
         partner = self.context["request"].user.partner
         partners_ids = [int(partner["partner"]) for partner in partners]
         if (
-                partner_access == Program.SELECTED_PARTNERS_ACCESS
-                and not partner.is_unicef_subpartner
-                and partner.id not in partners_ids
+            partner_access == Program.SELECTED_PARTNERS_ACCESS
+            and not partner.is_unicef_subpartner
+            and partner.id not in partners_ids
         ):
             raise serializers.ValidationError(
                 {"partners": "Please assign access to your partner before saving the Program."}
             )
         if partners_ids and partner_access != Program.SELECTED_PARTNERS_ACCESS:
-            raise serializers.ValidationError(
-                {"partners": "You cannot specify partners for the chosen access type."}
-            )
+            raise serializers.ValidationError({"partners": "You cannot specify partners for the chosen access type."})
         return data
 
 
 class ProgramCopySerializer(serializers.ModelSerializer):
-    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True)
+    programme_code = serializers.CharField(min_length=4, max_length=4, allow_null=True, required=False)
     data_collecting_type = serializers.SlugRelatedField(slug_field="code", queryset=DataCollectingType.objects.all())
     start_date = serializers.DateField()
     end_date = serializers.DateField(allow_null=True)
@@ -645,7 +654,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             "partner_access",
         )
 
-    def validate_programme_code(self, value: str) -> str:
+    def validate_programme_code(self, value: Optional[str]) -> Optional[str]:
         if value:
             value = value.upper()
             if not re.match(r"^[A-Z0-9\-]{4}$", value):
@@ -662,8 +671,11 @@ class ProgramCopySerializer(serializers.ModelSerializer):
         data_collecting_type = value
 
         # validate DCT.limit_to
-        if data_collecting_type.limit_to.exists() and not data_collecting_type.limit_to.filter(id=self.instance.business_area_id).exists():
-                raise serializers.ValidationError("This Data Collecting Type is not available for this Business Area.")
+        if (
+            data_collecting_type.limit_to.exists()
+            and not data_collecting_type.limit_to.filter(id=self.instance.business_area_id).exists()
+        ):
+            raise serializers.ValidationError("This Data Collecting Type is not available for this Business Area.")
 
         # validate DCT
         if not data_collecting_type.active:
@@ -690,12 +702,8 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             )
 
         # validate DCT and BG combination
-        if (
-            data_collecting_type.type == DataCollectingType.Type.SOCIAL
-            and beneficiary_group.master_detail
-        ) or (
-            data_collecting_type.type == DataCollectingType.Type.STANDARD
-            and not beneficiary_group.master_detail
+        if (data_collecting_type.type == DataCollectingType.Type.SOCIAL and beneficiary_group.master_detail) or (
+            data_collecting_type.type == DataCollectingType.Type.STANDARD and not beneficiary_group.master_detail
         ):
             raise serializers.ValidationError(
                 {"beneficiary_group": "Selected combination of data collecting type and beneficiary group is invalid."}
@@ -707,18 +715,17 @@ class ProgramCopySerializer(serializers.ModelSerializer):
         partner = self.context["request"].user.partner
         partners_ids = [int(partner["partner"]) for partner in partners]
         if (
-                partner_access == Program.SELECTED_PARTNERS_ACCESS
-                and not partner.is_unicef_subpartner
-                and partner.id not in partners_ids
+            partner_access == Program.SELECTED_PARTNERS_ACCESS
+            and not partner.is_unicef_subpartner
+            and partner.id not in partners_ids
         ):
             raise serializers.ValidationError(
                 {"partners": "Please assign access to your partner before saving the Program."}
             )
         if partners_ids and partner_access != Program.SELECTED_PARTNERS_ACCESS:
-            raise serializers.ValidationError(
-                {"partners": "You cannot specify partners for the chosen access type."}
-            )
+            raise serializers.ValidationError({"partners": "You cannot specify partners for the chosen access type."})
         return data
+
 
 class ProgramSmallSerializer(serializers.ModelSerializer):
     class Meta:

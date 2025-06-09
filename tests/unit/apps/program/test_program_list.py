@@ -10,10 +10,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (
-    PartnerFactory,
-    UserFactory,
-)
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import (
     DataCollectingTypeFactory,
@@ -285,6 +282,7 @@ class TestProgramList:
         _test_response_len_and_queries(2, no_queries_not_cached_no_permissions)
         # cached data with another call
         _test_response_len_and_queries(2, no_queries_cached)
+
 
 class TestProgramFilter:
     @pytest.fixture(autouse=True)
