@@ -100,10 +100,14 @@ import type { PeriodicDataUpdateUpload } from '../models/PeriodicDataUpdateUploa
 import type { PeriodicDataUpdateUploadDetail } from '../models/PeriodicDataUpdateUploadDetail';
 import type { Profile } from '../models/Profile';
 import type { ProgramAPI } from '../models/ProgramAPI';
+import type { ProgramCopy } from '../models/ProgramCopy';
+import type { ProgramCreate } from '../models/ProgramCreate';
 import type { ProgramCycleCreate } from '../models/ProgramCycleCreate';
 import type { ProgramCycleList } from '../models/ProgramCycleList';
 import type { ProgramCycleUpdate } from '../models/ProgramCycleUpdate';
 import type { ProgramDetail } from '../models/ProgramDetail';
+import type { ProgramUpdate } from '../models/ProgramUpdate';
+import type { ProgramUpdatePartnerAccess } from '../models/ProgramUpdatePartnerAccess';
 import type { PushPeople } from '../models/PushPeople';
 import type { RDI } from '../models/RDI';
 import type { RDINested } from '../models/RDINested';
@@ -3188,16 +3192,6 @@ export class RestService {
         });
     }
     /**
-     * Base validation class, inherit from this class to create custom validators.
-     * Your custom validators have to implement validation methods that starts
-     * with name "validate_" so validate can call all the validators from your
-     * custom validator.
-     *
-     * Custom validate method have to takes *args, **kwargs parameters.
-     *
-     * validate method with parameters have to be called in mutate method.
-     * If there are validation errors they will be all
-     * returned as one error message.
      * @returns PaginatedProgramListList
      * @throws ApiError
      */
@@ -3328,6 +3322,27 @@ export class RestService {
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
             },
+        });
+    }
+    /**
+     * @returns ProgramCreate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCreate({
+        businessAreaSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        requestBody: ProgramCreate,
+    }): CancelablePromise<ProgramCreate> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**
@@ -8315,16 +8330,6 @@ export class RestService {
         });
     }
     /**
-     * Base validation class, inherit from this class to create custom validators.
-     * Your custom validators have to implement validation methods that starts
-     * with name "validate_" so validate can call all the validators from your
-     * custom validator.
-     *
-     * Custom validate method have to takes *args, **kwargs parameters.
-     *
-     * validate method with parameters have to be called in mutate method.
-     * If there are validation errors they will be all
-     * returned as one error message.
      * @returns ProgramDetail
      * @throws ApiError
      */
@@ -8345,16 +8350,50 @@ export class RestService {
         });
     }
     /**
-     * Base validation class, inherit from this class to create custom validators.
-     * Your custom validators have to implement validation methods that starts
-     * with name "validate_" so validate can call all the validators from your
-     * custom validator.
-     *
-     * Custom validate method have to takes *args, **kwargs parameters.
-     *
-     * validate method with parameters have to be called in mutate method.
-     * If there are validation errors they will be all
-     * returned as one error message.
+     * @returns ProgramUpdate
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsUpdate({
+        businessAreaSlug,
+        slug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+        requestBody: ProgramUpdate,
+    }): CancelablePromise<ProgramUpdate> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPartialUpdate({
+        businessAreaSlug,
+        slug,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+        });
+    }
+    /**
      * @returns void
      * @throws ApiError
      */
@@ -8375,16 +8414,70 @@ export class RestService {
         });
     }
     /**
-     * Base validation class, inherit from this class to create custom validators.
-     * Your custom validators have to implement validation methods that starts
-     * with name "validate_" so validate can call all the validators from your
-     * custom validator.
-     *
-     * Custom validate method have to takes *args, **kwargs parameters.
-     *
-     * validate method with parameters have to be called in mutate method.
-     * If there are validation errors they will be all
-     * returned as one error message.
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsActivateCreate({
+        businessAreaSlug,
+        slug,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/activate/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+        });
+    }
+    /**
+     * @returns ProgramCopy
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsCopyCreate({
+        businessAreaSlug,
+        slug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+        requestBody: ProgramCopy,
+    }): CancelablePromise<ProgramCopy> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/copy/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsFinishCreate({
+        businessAreaSlug,
+        slug,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/finish/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+        });
+    }
+    /**
      * @returns PaginatedPaymentListList
      * @throws ApiError
      */
@@ -8521,16 +8614,30 @@ export class RestService {
         });
     }
     /**
-     * Base validation class, inherit from this class to create custom validators.
-     * Your custom validators have to implement validation methods that starts
-     * with name "validate_" so validate can call all the validators from your
-     * custom validator.
-     *
-     * Custom validate method have to takes *args, **kwargs parameters.
-     *
-     * validate method with parameters have to be called in mutate method.
-     * If there are validation errors they will be all
-     * returned as one error message.
+     * @returns ProgramUpdatePartnerAccess
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsUpdatePartnerAccessCreate({
+        businessAreaSlug,
+        slug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+        requestBody: ProgramUpdatePartnerAccess,
+    }): CancelablePromise<ProgramUpdatePartnerAccess> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/update_partner_access/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns CountResponse
      * @throws ApiError
      */
