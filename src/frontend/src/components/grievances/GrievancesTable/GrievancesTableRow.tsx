@@ -94,14 +94,10 @@ export function GrievancesTableRow({
 
   const onFilterChange = async (assignee, ids): Promise<void> => {
     if (assignee) {
-      try {
-        await mutateAsync({
-          assignedTo: assignee.node.id,
-          grievanceTicketIds: ids,
-        });
-      } catch (e) {
-        // Error is handled in onError callback
-      }
+      await mutateAsync({
+        assignedTo: assignee.node.id,
+        grievanceTicketIds: ids,
+      });
     }
   };
 
