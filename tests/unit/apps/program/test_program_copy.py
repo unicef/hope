@@ -279,6 +279,22 @@ class TestProgramCopy:
             in response.json()["programme_code"][0]
         )
 
+    def test_copy_program_with_invalid_dates(self, create_user_role_with_permissions: Callable) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
+        )
+
+        payload = {
+            **self.base_copy_payload,
+            "start_date": "2024-12-31",
+            "end_date": "2024-01-01",
+        }
+        response = self.client.post(self.copy_url, payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        assert "end_date" in response.json()
+        assert "End date cannot be earlier than the start date." in response.json()["end_date"][0]
+
     def test_copy_program_incompatible_dct(self, create_user_role_with_permissions: Callable) -> None:
         create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True

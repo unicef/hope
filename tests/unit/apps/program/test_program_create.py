@@ -86,6 +86,7 @@ class TestProgramCreate:
         self.expected_response_standard = {
             **self.valid_input_data_standard,
             "description": "",
+            "status": Program.DRAFT,
             "budget": "1000000.00",  # budget is formatted as a string
             "partners": [
                 {
