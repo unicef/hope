@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from hct_mis_api.apps.payment.models import (
     Account,
     AccountType,
@@ -80,4 +82,11 @@ def migrate_mobile_money_accounts() -> None:
                         account.save()
                         account_ids.append(account.id)
 
+    print(f"Created {len(account_ids)} accounts")
     Account.validate_uniqueness(Account.objects.filter(id__in=account_ids))
+
+
+def dry_run() -> None:
+    with transaction.atomic():
+        migrate_mobile_money_accounts()
+        raise Exception
