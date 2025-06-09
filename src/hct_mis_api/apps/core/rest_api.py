@@ -70,9 +70,9 @@ class CollectorAttributeSerializer(serializers.Serializer):
     type = serializers.CharField()
     name = serializers.CharField()
     lookup = serializers.CharField()
-    label = serializers.DictField()
+    label = serializers.DictField()  # type: ignore
     hint = serializers.CharField()
-    required = serializers.BooleanField()
+    required = serializers.BooleanField()  # type: ignore
     choices = serializers.ListField(child=serializers.CharField())
 
 

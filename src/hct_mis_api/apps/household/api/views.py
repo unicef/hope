@@ -84,6 +84,10 @@ class HouseholdViewSet(
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.PM_VIEW_DETAILS,
         ],
+        "all_flex_fields_attributes": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.RDI_VIEW_DETAILS,
+        ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = HouseholdFilter
@@ -170,14 +174,7 @@ class HouseholdViewSet(
             .prefetch_related("choices")
             .order_by("created_at")
         )
-        return Response(FieldAttributeSerializer(many=qs).data, status=status.HTTP_200_OK)
-
-
-#     all_collector_fields_attributes = graphene.List(
-#         FieldAttributeNode,
-#         flex_field=graphene.Boolean(),
-#         description="All collectors fields for Delivery Mechanism Data.",
-#     )
+        return Response(FieldAttributeSerializer(qs, many=True).data, status=status.HTTP_200_OK)
 
 
 class HouseholdGlobalViewSet(
@@ -241,6 +238,10 @@ class IndividualViewSet(
             Permissions.RDI_VIEW_DETAILS,
             Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
         ],
+        "all_flex_fields_attributes": [
+            Permissions.RDI_VIEW_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+        ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = IndividualFilter
@@ -275,7 +276,7 @@ class IndividualViewSet(
             .prefetch_related("choices")
             .order_by("created_at")
         )
-        return Response(FieldAttributeSerializer(many=qs).data, status=status.HTTP_200_OK)
+        return Response(FieldAttributeSerializer(qs, many=True).data, status=status.HTTP_200_OK)
 
 
 class IndividualGlobalViewSet(
