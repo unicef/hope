@@ -1,31 +1,37 @@
-from typing import Callable
+import copy
+from typing import Any, Callable
 
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
-import copy
 
 from hct_mis_api.apps.account.fixtures import (
-    UserFactory,
     PartnerFactory,
-    RoleAssignmentFactory, RoleFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import (
     DataCollectingTypeFactory,
-    create_afghanistan,
     FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory, create_ukraine,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+    create_ukraine,
 )
-from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute, PeriodicFieldData
+from hct_mis_api.apps.core.models import (
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import (
-    ProgramFactory,
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
+    ProgramFactory,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 pytestmark = pytest.mark.django_db
@@ -33,7 +39,7 @@ pytestmark = pytest.mark.django_db
 
 class TestProgramUpdate:
     @pytest.fixture(autouse=True)
-    def setup(self, api_client, create_user_role_with_permissions) -> None:
+    def setup(self, api_client: Any) -> None:
         self.afghanistan = create_afghanistan()
 
         self.unicef_partner = PartnerFactory(name="UNICEF")
@@ -53,11 +59,12 @@ class TestProgramUpdate:
         self.area2 = AreaFactory(parent=None, area_type=admin_type, p_code="AF02U", name="Area2")
 
         self.dct_standard = DataCollectingTypeFactory(label="Full", code="full", type=DataCollectingType.Type.STANDARD)
-        self.dct_social = DataCollectingTypeFactory(label="SW Full", code="sw_full", type=DataCollectingType.Type.SOCIAL)
+        self.dct_social = DataCollectingTypeFactory(
+            label="SW Full", code="sw_full", type=DataCollectingType.Type.SOCIAL
+        )
 
         self.bg_household = BeneficiaryGroupFactory(name="Household", master_detail=True)
-        self.bg_sw= BeneficiaryGroupFactory(name="Social Worker", master_detail=False)
-
+        self.bg_sw = BeneficiaryGroupFactory(name="Social Worker", master_detail=False)
 
         self.initial_program_data = {
             "name": "Test Program To Update",
@@ -89,7 +96,7 @@ class TestProgramUpdate:
             "api:programs:programs-detail",
             kwargs={"business_area_slug": self.afghanistan.slug, "slug": self.program.slug},
         )
-        
+
         # pdu fields
         self.pdu_data_to_be_removed = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
@@ -166,7 +173,11 @@ class TestProgramUpdate:
                 {
                     **pdu_field_data,
                     "name": pdu_field.name,
-                } for pdu_field_data, pdu_field in zip(self.base_payload_for_update_without_changes["pdu_fields"], [self.pdu_field_to_be_preserved, self.pdu_field_to_be_removed, self.pdu_field_to_be_updated])
+                }
+                for pdu_field_data, pdu_field in zip(
+                    self.base_payload_for_update_without_changes["pdu_fields"],
+                    [self.pdu_field_to_be_preserved, self.pdu_field_to_be_removed, self.pdu_field_to_be_updated],
+                )
             ],
             "partners": [
                 {
@@ -217,7 +228,6 @@ class TestProgramUpdate:
             ],
         }
 
-
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
@@ -226,7 +236,9 @@ class TestProgramUpdate:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_update_program_permissions(self, permissions: list, expected_status: int, create_user_role_with_permissions: Callable) -> None:
+    def test_update_program_permissions(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Callable
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
 
         payload = {
@@ -247,7 +259,9 @@ class TestProgramUpdate:
             }
 
     def test_update_program_with_no_changes(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = copy.deepcopy(self.base_payload_for_update_without_changes)
         response = self.client.put(self.update_url, payload)
@@ -257,12 +271,14 @@ class TestProgramUpdate:
         self.program.refresh_from_db()
         assert self.program == old_program_instance
         assert response.json() == {
-                **self.base_expected_response_without_changes,
-                "version": self.program.version,
-            }
+            **self.base_expected_response_without_changes,
+            "version": self.program.version,
+        }
 
     def test_update_programme_code(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -282,7 +298,9 @@ class TestProgramUpdate:
         }
 
     def test_update_programme_code_with_empty(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -302,27 +320,34 @@ class TestProgramUpdate:
         }
 
     def test_update_programme_code_invalid(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
-            "programme_code":" T#ST",
+            "programme_code": " T#ST",
         }
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "programme_code" in response.json()
-        assert "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -" in response.json()["programme_code"][0]
+        assert (
+            "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -"
+            in response.json()["programme_code"][0]
+        )
 
         self.program.refresh_from_db()
         assert self.program.programme_code == self.initial_program_data["programme_code"]
 
     def test_update_programme_code_existing(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
         ProgramFactory(programme_code="T3ST", business_area=self.afghanistan)
 
         payload = {
             **self.base_payload_for_update_without_changes,
-            "programme_code":" T3ST",
+            "programme_code": " T3ST",
         }
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -333,7 +358,9 @@ class TestProgramUpdate:
         assert self.program.programme_code == self.initial_program_data["programme_code"]
 
     def test_update_data_collecting_type(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
         dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
 
         payload = {
@@ -352,8 +379,12 @@ class TestProgramUpdate:
         }
 
     def test_update_data_collecting_type_invalid(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
-        dct_invalid = DataCollectingTypeFactory(label="DCT_INVALID", code="dct_invalid", type=DataCollectingType.Type.STANDARD)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
+        dct_invalid = DataCollectingTypeFactory(
+            label="DCT_INVALID", code="dct_invalid", type=DataCollectingType.Type.STANDARD
+        )
         payload = {
             **self.base_payload_for_update_without_changes,
             "data_collecting_type": dct_invalid.code,
@@ -365,7 +396,10 @@ class TestProgramUpdate:
         response_for_inactive = self.client.put(self.update_url, payload)
         assert response_for_inactive.status_code == status.HTTP_400_BAD_REQUEST
         assert "data_collecting_type" in response_for_inactive.json()
-        assert response_for_inactive.json()["data_collecting_type"][0] == "Only active Data Collecting Type can be used in Program."
+        assert (
+            response_for_inactive.json()["data_collecting_type"][0]
+            == "Only active Data Collecting Type can be used in Program."
+        )
         self.program.refresh_from_db()
         assert self.program.data_collecting_type == self.dct_standard
 
@@ -376,7 +410,10 @@ class TestProgramUpdate:
         response_for_deprecated = self.client.put(self.update_url, payload)
         assert response_for_deprecated.status_code == status.HTTP_400_BAD_REQUEST
         assert "data_collecting_type" in response_for_deprecated.json()
-        assert response_for_deprecated.json()["data_collecting_type"][0] == "Deprecated Data Collecting Type cannot be used in Program."
+        assert (
+            response_for_deprecated.json()["data_collecting_type"][0]
+            == "Deprecated Data Collecting Type cannot be used in Program."
+        )
         self.program.refresh_from_db()
         assert self.program.data_collecting_type == self.dct_standard
 
@@ -388,12 +425,17 @@ class TestProgramUpdate:
         response_for_limited = self.client.put(self.update_url, payload)
         assert response_for_limited.status_code == status.HTTP_400_BAD_REQUEST
         assert "data_collecting_type" in response_for_limited.json()
-        assert response_for_limited.json()["data_collecting_type"][0] == "This Data Collecting Type is not available for this Business Area."
+        assert (
+            response_for_limited.json()["data_collecting_type"][0]
+            == "This Data Collecting Type is not available for this Business Area."
+        )
         self.program.refresh_from_db()
         assert self.program.data_collecting_type == self.dct_standard
 
     def test_update_data_collecting_type_for_active_program(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
         dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
 
         self.program.status = Program.ACTIVE
@@ -406,12 +448,18 @@ class TestProgramUpdate:
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "data_collecting_type" in response.json()
-        assert response.json()["data_collecting_type"][0] == "Data Collecting Type can be updated only for Draft Programs."
+        assert (
+            response.json()["data_collecting_type"][0] == "Data Collecting Type can be updated only for Draft Programs."
+        )
         self.program.refresh_from_db()
         assert self.program.data_collecting_type == self.dct_standard
 
-    def test_update_data_collecting_type_for_program_with_population(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_data_collecting_type_for_program_with_population(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
         dct_2 = DataCollectingTypeFactory(label="DCT2", code="dct2", type=DataCollectingType.Type.STANDARD)
 
         create_household_and_individuals(
@@ -428,12 +476,19 @@ class TestProgramUpdate:
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "data_collecting_type" in response.json()
-        assert response.json()["data_collecting_type"][0] == "Data Collecting Type can be updated only for Program without any households."
+        assert (
+            response.json()["data_collecting_type"][0]
+            == "Data Collecting Type can be updated only for Program without any households."
+        )
         self.program.refresh_from_db()
         assert self.program.data_collecting_type == self.dct_standard
 
-    def test_update_data_collecting_type_invalid_with_beneficiary_group(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_data_collecting_type_invalid_with_beneficiary_group(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
         payload = {
             **self.base_payload_for_update_without_changes,
             "data_collecting_type": self.dct_social.code,
@@ -441,13 +496,18 @@ class TestProgramUpdate:
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "beneficiary_group" in response.json()
-        assert response.json()["beneficiary_group"][0] == "Selected combination of data collecting type and beneficiary group is invalid."
+        assert (
+            response.json()["beneficiary_group"][0]
+            == "Selected combination of data collecting type and beneficiary group is invalid."
+        )
 
         self.program.refresh_from_db()
         assert self.program.data_collecting_type == self.dct_standard
 
     def test_update_beneficiary_group(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
         bg_2 = BeneficiaryGroupFactory(name="Beneficiary Group 2", master_detail=True)
 
         payload = {
@@ -465,8 +525,12 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
-    def test_update_beneficiary_group_invalid_with_data_collecting_type(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_beneficiary_group_invalid_with_data_collecting_type(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -475,13 +539,20 @@ class TestProgramUpdate:
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "beneficiary_group" in response.json()
-        assert response.json()["beneficiary_group"][0] == "Selected combination of data collecting type and beneficiary group is invalid."
+        assert (
+            response.json()["beneficiary_group"][0]
+            == "Selected combination of data collecting type and beneficiary group is invalid."
+        )
 
         self.program.refresh_from_db()
         assert self.program.beneficiary_group == self.bg_household
 
-    def test_update_beneficiary_group_invalid_with_population(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_beneficiary_group_invalid_with_population(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
         bg_2 = BeneficiaryGroupFactory(name="Beneficiary Group 2", master_detail=True)
 
         RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
@@ -493,13 +564,17 @@ class TestProgramUpdate:
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "beneficiary_group" in response.json()
-        assert response.json()["beneficiary_group"][0] == "Beneficiary Group cannot be updated if Program has population."
+        assert (
+            response.json()["beneficiary_group"][0] == "Beneficiary Group cannot be updated if Program has population."
+        )
 
         self.program.refresh_from_db()
         assert self.program.beneficiary_group == self.bg_household
 
     def test_update_start_and_end_dates(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         program_cycle = ProgramCycle.objects.filter(program=self.program).first()
         program_cycle.start_date = "2030-06-01"
@@ -514,8 +589,8 @@ class TestProgramUpdate:
         assert response.status_code == status.HTTP_200_OK
 
         self.program.refresh_from_db()
-        assert self.program.start_date.strftime('%Y-%m-%d') == payload["start_date"]
-        assert self.program.end_date.strftime('%Y-%m-%d') == payload["end_date"]
+        assert self.program.start_date.strftime("%Y-%m-%d") == payload["start_date"]
+        assert self.program.end_date.strftime("%Y-%m-%d") == payload["end_date"]
         assert response.json() == {
             **self.base_expected_response_without_changes,
             "start_date": payload["start_date"],
@@ -523,8 +598,12 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
-    def test_update_end_date_and_start_date_invalid_end_date_before_start_date(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_end_date_and_start_date_invalid_end_date_before_start_date(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -537,11 +616,15 @@ class TestProgramUpdate:
         assert "End date cannot be earlier than the start date." in response.json()["end_date"][0]
 
         self.program.refresh_from_db()
-        assert self.program.start_date.strftime('%Y-%m-%d') == self.initial_program_data["start_date"]
-        assert self.program.end_date.strftime('%Y-%m-%d') == self.initial_program_data["end_date"]
+        assert self.program.start_date.strftime("%Y-%m-%d") == self.initial_program_data["start_date"]
+        assert self.program.end_date.strftime("%Y-%m-%d") == self.initial_program_data["end_date"]
 
-    def test_update_end_date_and_start_date_invalid_end_date_before_last_cycle(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_end_date_and_start_date_invalid_end_date_before_last_cycle(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         program_cycle = ProgramCycle.objects.filter(program=self.program).first()
         program_cycle.start_date = "2030-06-01"
@@ -551,8 +634,8 @@ class TestProgramUpdate:
 
         payload = {
             **self.base_payload_for_update_without_changes,
-            "start_date": "2030-01-01", # Start date is valid
-            "end_date": "2033-06-30", # End date is before the latest cycle's end_date
+            "start_date": "2030-01-01",  # Start date is valid
+            "end_date": "2033-06-30",  # End date is before the latest cycle's end_date
         }
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -560,11 +643,15 @@ class TestProgramUpdate:
         assert "End date must be the same as or after the latest cycle." in response.json()["end_date"][0]
 
         self.program.refresh_from_db()
-        assert self.program.start_date.strftime('%Y-%m-%d') == self.initial_program_data["start_date"]
-        assert self.program.end_date.strftime('%Y-%m-%d') == self.initial_program_data["end_date"]
+        assert self.program.start_date.strftime("%Y-%m-%d") == self.initial_program_data["start_date"]
+        assert self.program.end_date.strftime("%Y-%m-%d") == self.initial_program_data["end_date"]
 
-    def test_update_end_date_and_start_date_invalid_start_date_after_first_cycle(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_end_date_and_start_date_invalid_start_date_after_first_cycle(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         program_cycle = ProgramCycle.objects.filter(program=self.program).first()
         program_cycle.start_date = "2030-06-01"
@@ -574,8 +661,8 @@ class TestProgramUpdate:
 
         payload = {
             **self.base_payload_for_update_without_changes,
-            "start_date": "2030-07-01", # Start date is after the earliest cycle's start_date
-            "end_date": "2034-12-31", # End date is valid
+            "start_date": "2030-07-01",  # Start date is after the earliest cycle's start_date
+            "end_date": "2034-12-31",  # End date is valid
         }
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -583,11 +670,13 @@ class TestProgramUpdate:
         assert "Start date must be the same as or before the earliest cycle." in response.json()["start_date"][0]
 
         self.program.refresh_from_db()
-        assert self.program.start_date.strftime('%Y-%m-%d') == self.initial_program_data["start_date"]
-        assert self.program.end_date.strftime('%Y-%m-%d') == self.initial_program_data["end_date"]
+        assert self.program.start_date.strftime("%Y-%m-%d") == self.initial_program_data["start_date"]
+        assert self.program.end_date.strftime("%Y-%m-%d") == self.initial_program_data["end_date"]
 
     def test_update_multiple_fields(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -598,7 +687,6 @@ class TestProgramUpdate:
             "population_goal": 200,
             "cash_plus": True,
             "frequency_of_payments": Program.ONE_OFF,
-
         }
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_200_OK
@@ -626,7 +714,9 @@ class TestProgramUpdate:
         }
 
     def test_update_pdu_fields(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -657,13 +747,17 @@ class TestProgramUpdate:
         assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_200_OK
-        assert FlexibleAttribute.objects.filter(program=self.program).count() == 2 # After update, one field is removed
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 2  # After update, one field is removed
 
         self.pdu_field_to_be_updated.refresh_from_db()
         assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field Updated"
         assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.BOOL
         assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 3
-        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"]
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == [
+            "Round 1 Updated",
+            "Round 2 Updated",
+            "Round 3 Updated",
+        ]
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is True
 
@@ -696,7 +790,9 @@ class TestProgramUpdate:
         }
 
     def test_update_pdu_fields_and_add_new(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -736,13 +832,19 @@ class TestProgramUpdate:
         assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_200_OK
-        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3 # After update, one field is removed, one is updated, and one new is added
+        assert (
+            FlexibleAttribute.objects.filter(program=self.program).count() == 3
+        )  # After update, one field is removed, one is updated, and one new is added
 
         self.pdu_field_to_be_updated.refresh_from_db()
         assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field Updated"
         assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.BOOL
         assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 3
-        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"]
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == [
+            "Round 1 Updated",
+            "Round 2 Updated",
+            "Round 3 Updated",
+        ]
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is True
         new_pdu_field = FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").first()
@@ -790,7 +892,9 @@ class TestProgramUpdate:
         }
 
     def test_update_pdu_fields_invalid_data(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -827,7 +931,7 @@ class TestProgramUpdate:
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Number of rounds does not match the number of round names." in response.json()
-        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3 # No change
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # No change
 
         # Check that the fields are not updated
         self.pdu_field_to_be_updated.refresh_from_db()
@@ -839,8 +943,12 @@ class TestProgramUpdate:
         assert self.pdu_field_to_be_removed.is_removed is False
         assert FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False
 
-    def test_update_pdu_fields_invalid_data_duplicated_field_names_in_input(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_pdu_fields_invalid_data_duplicated_field_names_in_input(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         payload = {
             **self.base_payload_for_update_without_changes,
@@ -886,9 +994,12 @@ class TestProgramUpdate:
         assert self.pdu_field_to_be_removed.is_removed is False
         assert FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False
 
-
-    def test_update_pdu_fields_add_field_with_same_field_name_in_different_program(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_pdu_fields_add_field_with_same_field_name_in_different_program(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         # pdu data with NEW field with name that already exists in the database but in different program -> no fail
         program2 = ProgramFactory(name="TestProgram2", business_area=self.afghanistan)
@@ -933,13 +1044,19 @@ class TestProgramUpdate:
         assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_200_OK
-        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3 # After update, one field is removed, one is updated, and one new is added
+        assert (
+            FlexibleAttribute.objects.filter(program=self.program).count() == 3
+        )  # After update, one field is removed, one is updated, and one new is added
 
         self.pdu_field_to_be_updated.refresh_from_db()
         assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field Updated"
         assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.BOOL
         assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 3
-        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"]
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == [
+            "Round 1 Updated",
+            "Round 2 Updated",
+            "Round 3 Updated",
+        ]
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is True
         new_pdu_field = FlexibleAttribute.objects.filter(program=self.program, name="pdu_field_existing").first()
@@ -988,8 +1105,12 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
-    def test_update_pdu_fields_with_same_name_in_different_program(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+    def test_update_pdu_fields_with_same_name_in_different_program(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         # pdu data with NEW field with name that already exists in the database but in different program -> no fail
         program2 = ProgramFactory(name="TestProgram2", business_area=self.afghanistan)
@@ -1026,13 +1147,17 @@ class TestProgramUpdate:
         assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # Initial count of PDU fields
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_200_OK
-        assert FlexibleAttribute.objects.filter(program=self.program).count() == 2 # After update, one field is removed
+        assert FlexibleAttribute.objects.filter(program=self.program).count() == 2  # After update, one field is removed
 
         self.pdu_field_to_be_updated.refresh_from_db()
         assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field Existing"
         assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.BOOL
         assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 3
-        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"]
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == [
+            "Round 1 Updated",
+            "Round 2 Updated",
+            "Round 3 Updated",
+        ]
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is True
 
@@ -1066,7 +1191,9 @@ class TestProgramUpdate:
 
     def test_update_pdu_fields_when_program_has_RDI(self, create_user_role_with_permissions: Callable) -> None:
         # if program has RDI, it is not possible to remove or add PDU fields or update existing PDU fields - only possible to increase number of rounds and add names for new rounds
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
 
@@ -1079,7 +1206,12 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,  # subtype will NOT be updated
                         "number_of_rounds": 4,  # number of rounds will be increased
-                        "rounds_names": ["Round 1 To Be Updated", "Round 2 To Be Updated", "Round 3 New", "Round 4 New"],  # can only add new rounds, cannot change existing names
+                        "rounds_names": [
+                            "Round 1 To Be Updated",
+                            "Round 2 To Be Updated",
+                            "Round 3 New",
+                            "Round 4 New",
+                        ],  # can only add new rounds, cannot change existing names
                     },
                 },
                 {
@@ -1095,16 +1227,25 @@ class TestProgramUpdate:
         assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_200_OK
-        assert FlexibleAttribute.objects.filter(program=self.program).count() == 3  # no field can be removed or added for program with RDI
+        assert (
+            FlexibleAttribute.objects.filter(program=self.program).count() == 3
+        )  # no field can be removed or added for program with RDI
 
         self.pdu_field_to_be_updated.refresh_from_db()
         assert self.pdu_field_to_be_updated.label["English(EN)"] == "PDU Field To Be Updated"  # not updated
         assert self.pdu_field_to_be_updated.pdu_data.subtype == PeriodicFieldData.STRING  # not updated
         assert self.pdu_field_to_be_updated.pdu_data.number_of_rounds == 4  # updated
-        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == ["Round 1 To Be Updated", "Round 2 To Be Updated", "Round 3 New", "Round 4 New"]  # updated
+        assert self.pdu_field_to_be_updated.pdu_data.rounds_names == [
+            "Round 1 To Be Updated",
+            "Round 2 To Be Updated",
+            "Round 3 New",
+            "Round 4 New",
+        ]  # updated
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is False  # not removed
-        assert FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False  # new field not added
+        assert (
+            FlexibleAttribute.objects.filter(program=self.program, name="new_pdu_field").exists() is False
+        )  # new field not added
 
         self.program.refresh_from_db()
         assert response.json() == {
@@ -1136,7 +1277,12 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 4,
-                        "rounds_names": ["Round 1 To Be Updated", "Round 2 To Be Updated", "Round 3 New", "Round 4 New"],
+                        "rounds_names": [
+                            "Round 1 To Be Updated",
+                            "Round 2 To Be Updated",
+                            "Round 3 New",
+                            "Round 4 New",
+                        ],
                     },
                     "name": self.pdu_field_to_be_updated.name,
                 },
@@ -1144,9 +1290,13 @@ class TestProgramUpdate:
             "version": self.program.version,
         }
 
-    def test_update_pdu_fields_invalid_when_program_has_RDI_decrease_rounds(self, create_user_role_with_permissions: Callable) -> None:
+    def test_update_pdu_fields_invalid_when_program_has_RDI_decrease_rounds(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
         # round number CANNOT be decreased for Program with RDI
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
 
@@ -1179,9 +1329,13 @@ class TestProgramUpdate:
         self.pdu_field_to_be_removed.refresh_from_db()
         assert self.pdu_field_to_be_removed.is_removed is False
 
-    def test_update_pdu_fields_invalid_when_program_has_RDI_change_rounds_names(self, create_user_role_with_permissions: Callable) -> None:
+    def test_update_pdu_fields_invalid_when_program_has_RDI_change_rounds_names(
+        self, create_user_role_with_permissions: Callable
+    ) -> None:
         # names for existing rounds cannot be changed for Program with RDI
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_UPDATE], self.afghanistan, whole_business_area_access=True
+        )
 
         RegistrationDataImportFactory(program=self.program, business_area=self.afghanistan)
 
@@ -1194,7 +1348,11 @@ class TestProgramUpdate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.BOOL,  # subtype will NOT be updated
                         "number_of_rounds": 3,
-                        "rounds_names": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],  # cannot change existing names
+                        "rounds_names": [
+                            "Round 1 Updated",
+                            "Round 2 Updated",
+                            "Round 3 Updated",
+                        ],  # cannot change existing names
                     },
                 },
             ],
@@ -1202,7 +1360,9 @@ class TestProgramUpdate:
         assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
         response = self.client.put(self.update_url, payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "It is not possible to change the names of existing rounds for a Program with RDI or TP." in response.json()
+        assert (
+            "It is not possible to change the names of existing rounds for a Program with RDI or TP." in response.json()
+        )
         assert FlexibleAttribute.objects.filter(program=self.program).count() == 3
 
         # Check that the fields are not updated

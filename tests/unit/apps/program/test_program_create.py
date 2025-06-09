@@ -6,21 +6,28 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
-    UserFactory, RoleAssignmentFactory,
+    RoleAssignmentFactory,
+    UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import (
+    DataCollectingTypeFactory,
     FlexibleAttributeForPDUFactory,
-    create_afghanistan, DataCollectingTypeFactory, create_ukraine, PeriodicFieldDataFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+    create_ukraine,
 )
-from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData, FlexibleAttribute
+from hct_mis_api.apps.core.models import (
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.program.fixtures import (
-    ProgramFactory, BeneficiaryGroupFactory,
-)
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 pytestmark = pytest.mark.django_db
+
 
 class TestProgramCreate:
     @pytest.fixture(autouse=True)
@@ -35,7 +42,9 @@ class TestProgramCreate:
         self.partner2 = PartnerFactory(name="TestPartner2")
         self.unicef_partner = PartnerFactory(name="UNICEF")
         self.unicef_hq = PartnerFactory(name="UNICEF HQ", parent=self.unicef_partner)
-        self.unicef_partner_in_afghanistan = PartnerFactory(name="UNICEF Partner for afghanistan", parent=self.unicef_partner)
+        self.unicef_partner_in_afghanistan = PartnerFactory(
+            name="UNICEF Partner for afghanistan", parent=self.unicef_partner
+        )
 
         self.partner.allowed_business_areas.add(self.afghanistan)
         self.partner2.allowed_business_areas.add(self.afghanistan)
@@ -50,10 +59,12 @@ class TestProgramCreate:
         self.area2 = AreaFactory(parent=None, area_type=admin_type, p_code="AF02", name="Area2")
 
         self.dct_standard = DataCollectingTypeFactory(label="Full", code="full", type=DataCollectingType.Type.STANDARD)
-        self.dct_social = DataCollectingTypeFactory(label="SW Full", code="sw_full", type=DataCollectingType.Type.SOCIAL)
+        self.dct_social = DataCollectingTypeFactory(
+            label="SW Full", code="sw_full", type=DataCollectingType.Type.SOCIAL
+        )
 
         self.bg_household = BeneficiaryGroupFactory(name="Household", master_detail=True)
-        self.bg_sw= BeneficiaryGroupFactory(name="Social Worker", master_detail=False)
+        self.bg_sw = BeneficiaryGroupFactory(name="Social Worker", master_detail=False)
 
         self.valid_input_data_standard = {
             "name": "Test Program",
@@ -118,7 +129,9 @@ class TestProgramCreate:
             ([], status.HTTP_403_FORBIDDEN),
         ],
     )
-    def test_create_program_permissions(self, permissions: list, expected_status: int, create_user_role_with_permissions: Any) -> None:
+    def test_create_program_permissions(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
         create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
 
         response = self.client.post(self.list_url, self.valid_input_data_standard)
@@ -136,7 +149,9 @@ class TestProgramCreate:
             assert response.json() == expected_response
 
     def test_create_program_with_programme_code(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_program_code = {
             **self.valid_input_data_standard,
             "programme_code": "T3st",
@@ -154,7 +169,9 @@ class TestProgramCreate:
         assert response.json() == expected_response
 
     def test_create_program_with_programme_code_invalid(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_program_code = {
             **self.valid_input_data_standard,
             "programme_code": "T#ST",  # Invalid program code
@@ -162,11 +179,16 @@ class TestProgramCreate:
         response = self.client.post(self.list_url, input_data_with_program_code)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "programme_code" in response.json()
-        assert "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -" in response.json()["programme_code"][0]
+        assert (
+            "Programme code should be exactly 4 characters long and may only contain letters, digits and character: -"
+            in response.json()["programme_code"][0]
+        )
 
     def test_create_program_with_programme_code_existing(self, create_user_role_with_permissions: Any) -> None:
         ProgramFactory(programme_code="T3ST", business_area=self.afghanistan)
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_program_code = {
             **self.valid_input_data_standard,
             "programme_code": "T3st",
@@ -177,18 +199,25 @@ class TestProgramCreate:
         assert response.json()["programme_code"][0] == "Programme code is already used."
 
     def test_create_program_with_missing_data(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         missing_input_data = {
             **self.valid_input_data_standard,
         }
         missing_input_data.pop("name")
-        response = self.client.post(self.list_url, missing_input_data,)
+        response = self.client.post(
+            self.list_url,
+            missing_input_data,
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "name" in response.json()
         assert response.json()["name"][0] == "This field is required."
 
     def test_create_program_with_invalid_data_collecting_type(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         dct_invalid = DataCollectingTypeFactory(label="Invalid", code="invalid", type=DataCollectingType.Type.STANDARD)
         invalid_input_data = {
             **self.valid_input_data_standard,
@@ -201,7 +230,10 @@ class TestProgramCreate:
         response_for_inactive = self.client.post(self.list_url, invalid_input_data)
         assert response_for_inactive.status_code == status.HTTP_400_BAD_REQUEST
         assert "data_collecting_type" in response_for_inactive.json()
-        assert response_for_inactive.json()["data_collecting_type"][0] == "Only active Data Collecting Type can be used in Program."
+        assert (
+            response_for_inactive.json()["data_collecting_type"][0]
+            == "Only active Data Collecting Type can be used in Program."
+        )
 
         # DCT deprecated
         dct_invalid.active = True
@@ -210,7 +242,10 @@ class TestProgramCreate:
         response_for_deprecated = self.client.post(self.list_url, invalid_input_data)
         assert response_for_deprecated.status_code == status.HTTP_400_BAD_REQUEST
         assert "data_collecting_type" in response_for_deprecated.json()
-        assert response_for_deprecated.json()["data_collecting_type"][0] == "Deprecated Data Collecting Type cannot be used in Program."
+        assert (
+            response_for_deprecated.json()["data_collecting_type"][0]
+            == "Deprecated Data Collecting Type cannot be used in Program."
+        )
 
         # DCT limited to another BA
         dct_invalid.deprecated = False
@@ -220,7 +255,10 @@ class TestProgramCreate:
         response_for_limited = self.client.post(self.list_url, invalid_input_data)
         assert response_for_limited.status_code == status.HTTP_400_BAD_REQUEST
         assert "data_collecting_type" in response_for_limited.json()
-        assert response_for_limited.json()["data_collecting_type"][0] == "This Data Collecting Type is not available for this Business Area."
+        assert (
+            response_for_limited.json()["data_collecting_type"][0]
+            == "This Data Collecting Type is not available for this Business Area."
+        )
 
         # DCT valid
         dct_invalid.limit_to.add(self.afghanistan)
@@ -228,7 +266,9 @@ class TestProgramCreate:
         assert response_for_valid.status_code == status.HTTP_201_CREATED
 
     def test_create_program_with_invalid_beneficiary_group(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         invalid_input_data = {
             **self.valid_input_data_standard,
             "beneficiary_group": str(self.bg_sw.id),  # Invalid DCT and BG combination
@@ -236,10 +276,15 @@ class TestProgramCreate:
         response = self.client.post(self.list_url, invalid_input_data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "beneficiary_group" in response.json()
-        assert response.json()["beneficiary_group"][0] == "Selected combination of data collecting type and beneficiary group is invalid."
+        assert (
+            response.json()["beneficiary_group"][0]
+            == "Selected combination of data collecting type and beneficiary group is invalid."
+        )
 
     def test_create_program_with_invalid_dates(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         invalid_input_data = {
             **self.valid_input_data_standard,
             "start_date": "2033-01-01",  # Start date after end date
@@ -251,7 +296,9 @@ class TestProgramCreate:
         assert response.json()["end_date"][0] == "End date cannot be earlier than the start date."
 
     def test_create_program_without_end_date(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         invalid_input_data = {
             **self.valid_input_data_standard,
             "end_date": None,
@@ -270,7 +317,9 @@ class TestProgramCreate:
         assert response.json() == expected_response
 
     def test_create_program_with_partners_data(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_partners_data = {
             **self.valid_input_data_standard,
             "partner_access": Program.SELECTED_PARTNERS_ACCESS,
@@ -333,7 +382,9 @@ class TestProgramCreate:
         }
 
     def test_create_program_with_invalid_partners_data(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_partners_data = {
             **self.valid_input_data_standard,
             "partner_access": Program.SELECTED_PARTNERS_ACCESS,
@@ -350,8 +401,12 @@ class TestProgramCreate:
         assert "partners" in response.json()
         assert response.json()["partners"][0] == "Please assign access to your partner before saving the Program."
 
-    def test_create_program_with_invalid_partners_data_and_partner_access(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+    def test_create_program_with_invalid_partners_data_and_partner_access(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_partners_data = {
             **self.valid_input_data_standard,
             "partner_access": Program.ALL_PARTNERS_ACCESS,  # cannot specify partners_data with ALL_PARTNERS_ACCESS
@@ -373,7 +428,9 @@ class TestProgramCreate:
         assert response.json()["partners"][0] == "You cannot specify partners for the chosen access type."
 
     def test_create_program_with_pdu_fields(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_pdu_fields = {
             **self.valid_input_data_standard,
             "pdu_fields": [
@@ -383,7 +440,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 3,
                         "rounds_names": ["Round 1", "", "Round 2"],
-                    }
+                    },
                 },
                 {
                     "label": "PDU Field 2",
@@ -391,9 +448,9 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 2,
                         "rounds_names": ["", ""],
-                    }
+                    },
                 },
-            ]
+            ],
         }
         response = self.client.post(self.list_url, input_data_with_pdu_fields)
         assert response.status_code == status.HTTP_201_CREATED
@@ -420,7 +477,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 3,
                         "rounds_names": ["Round 1", "", "Round 2"],
-                    }
+                    },
                 },
                 {
                     "id": str(pdu_field_2.id),
@@ -430,7 +487,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 2,
                         "rounds_names": ["", ""],
-                    }
+                    },
                 },
             ],
             "id": str(program.id),
@@ -440,7 +497,9 @@ class TestProgramCreate:
         }
 
     def test_create_program_with_invalid_pdu_fields(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_invalid_pdu_fields = {
             **self.valid_input_data_standard,
             "pdu_fields": [
@@ -449,8 +508,12 @@ class TestProgramCreate:
                     "pdu_data": {
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 2,
-                        "rounds_names": ["Round 1", "", "Round 2"], # Number of rounds does not match rounds_names length
-                    }
+                        "rounds_names": [
+                            "Round 1",
+                            "",
+                            "Round 2",
+                        ],  # Number of rounds does not match rounds_names length
+                    },
                 },
                 {
                     "label": "PDU Field 2",
@@ -458,17 +521,21 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 2,
                         "rounds_names": ["", ""],
-                    }
+                    },
                 },
-            ]
+            ],
         }
         response = self.client.post(self.list_url, input_data_with_invalid_pdu_fields)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU).count() == 0
         assert "Number of rounds does not match the number of round names." in response.json()
 
-    def test_create_program_with_invalid_pdu_fields_duplicated_names(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+    def test_create_program_with_invalid_pdu_fields_duplicated_names(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         input_data_with_invalid_pdu_fields = {
             **self.valid_input_data_standard,
             "pdu_fields": [
@@ -478,7 +545,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 3,
                         "rounds_names": ["Round 1", "", "Round 2"],
-                    }
+                    },
                 },
                 {
                     "label": "PDU Field 1",
@@ -486,17 +553,21 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 2,
                         "rounds_names": ["", ""],
-                    }
+                    },
                 },
-            ]
+            ],
         }
         response = self.client.post(self.list_url, input_data_with_invalid_pdu_fields)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert FlexibleAttribute.objects.filter(type=FlexibleAttribute.PDU).count() == 0
         assert "Time Series Field names must be unique." in response.json()
 
-    def test_create_program_with_valid_pdu_fields_existing_field_name_in_different_program(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True)
+    def test_create_program_with_valid_pdu_fields_existing_field_name_in_different_program(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PROGRAMME_CREATE], self.afghanistan, whole_business_area_access=True
+        )
         # pdu data with field name that already exists in the database but in different program -> no fail
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DATE,
@@ -518,7 +589,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 3,
                         "rounds_names": ["Round 1", "", "Round 2"],
-                    }
+                    },
                 },
                 {
                     "label": "PDU Field 2",
@@ -526,9 +597,9 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 2,
                         "rounds_names": ["", ""],
-                    }
+                    },
                 },
-            ]
+            ],
         }
         response = self.client.post(self.list_url, input_data_with_valid_pdu_fields)
         assert response.status_code == status.HTTP_201_CREATED
@@ -555,7 +626,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.STRING,
                         "number_of_rounds": 3,
                         "rounds_names": ["Round 1", "", "Round 2"],
-                    }
+                    },
                 },
                 {
                     "id": str(pdu_field_2.id),
@@ -565,7 +636,7 @@ class TestProgramCreate:
                         "subtype": PeriodicFieldData.BOOL,
                         "number_of_rounds": 2,
                         "rounds_names": ["", ""],
-                    }
+                    },
                 },
             ],
             "id": str(program.id),

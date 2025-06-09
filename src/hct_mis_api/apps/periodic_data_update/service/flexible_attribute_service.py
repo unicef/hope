@@ -1,4 +1,5 @@
 from typing import Any, Dict
+
 from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
@@ -118,4 +119,6 @@ class FlexibleAttributeForPDUService:
         if new_number_of_rounds <= current_number_of_rounds:
             raise ValidationError("It is not possible to decrease the number of rounds for a Program with RDI or TP.")
         if current_rounds_names != new_rounds_names[:current_number_of_rounds]:
-            raise ValidationError("It is not possible to change the names of existing rounds for a Program with RDI or TP.")
+            raise ValidationError(
+                "It is not possible to change the names of existing rounds for a Program with RDI or TP."
+            )

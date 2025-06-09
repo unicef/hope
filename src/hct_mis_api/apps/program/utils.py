@@ -12,7 +12,7 @@ from hct_mis_api.apps.account.models import (
     RoleAssignment,
     User,
 )
-from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
