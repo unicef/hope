@@ -8,8 +8,13 @@ export interface ExistingPaymentChannelFieldArrayProps {
   individual: IndividualDetail;
 }
 
-export function ExistingPaymentChannelFieldArray(): ReactElement {
+export function ExistingPaymentChannelFieldArray({
+  setFieldValue,
+  values,
+  individual,
+}: ExistingPaymentChannelFieldArrayProps): ReactElement {
   //TODO: Uncomment and implement the logic for rendering payment channels
+  console.log(setFieldValue, values, individual);
 
   // const location = useLocation();
   // const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
