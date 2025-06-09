@@ -8,20 +8,20 @@ import {
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import {
-  GrievanceTicketDocument,
-  useUpdateGrievanceMutation,
-} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
+import { RestService } from '@restgenerated/services/RestService';
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketDetail;
@@ -32,36 +32,51 @@ export function VerifyPaymentGrievance({
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate, { error }] = useUpdateGrievanceMutation();
+  const queryClient = useQueryClient();
+  const { businessArea } = useBaseUrl();
+
+  const { mutateAsync: mutate } = useMutation({
+    mutationFn: (values: any) => {
+      const requestBody: PatchedUpdateGrievanceTicket = {
+        extras: {
+          ticketPaymentVerificationDetailsExtras: {
+            newReceivedAmount: values.newReceivedAmount,
+            newStatus: values.newStatus,
+          },
+        },
+      };
+
+      return RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
+        businessAreaSlug: businessArea,
+        id: ticket.id,
+        requestBody,
+      });
+    },
+    onSuccess: () => {
+      setVerifyManualDialogOpen(false);
+      showMessage(t('Payment has been verified.'));
+      queryClient.invalidateQueries({
+        queryKey: ['GrievanceTicketDetail', ticket.id],
+      });
+    },
+    onError: (error: any) => {
+      if (error?.body?.errors) {
+        Object.values(error.body.errors)
+          .flat()
+          .forEach((msg: string) => {
+            showMessage(msg);
+          });
+      } else {
+        showMessage('An error occurred while verifying payment');
+      }
+    },
+  });
 
   const submit = async (values): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          input: {
-            ticketId: ticket.id,
-            extras: {
-              ticketPaymentVerificationDetailsExtras: {
-                newReceivedAmount: values.newReceivedAmount,
-                newStatus: values.newStatus,
-              },
-            },
-          },
-        },
-        refetchQueries: () => [
-          {
-            query: GrievanceTicketDocument,
-            variables: { id: ticket.id },
-          },
-        ],
-      });
+      await mutate(values);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-      return;
-    }
-    if (!error) {
-      setVerifyManualDialogOpen(false);
-      showMessage(t('Payment has been verified.'));
+      // Error handling is already in the mutation onError callback
     }
   };
 

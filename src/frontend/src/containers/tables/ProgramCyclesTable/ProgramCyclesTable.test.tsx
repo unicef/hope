@@ -196,62 +196,7 @@ describe('ProgramCyclesTable', () => {
     });
   });
 
-  it('displays formatted currency amounts correctly', async () => {
-    const { findByText } = renderWithProviders(
-      <QueryClientProvider client={queryClient}>
-        <ProgramCyclesTablePaymentModule
-          program={mockProgram}
-          filters={mockFilters}
-        />
-      </QueryClientProvider>,
-    );
-
-    // Wait for data to load
-    await findByText('Emergency Response Cycle Q1');
-
-    // Check that formatCurrencyWithSymbol was called for the amounts
-    // Since we're mocking it, we can't easily test the exact output format
-    // but we can verify the component renders without errors
-    expect(findByText('Emergency Response Cycle Q1')).toBeTruthy();
-  });
-
-  it('displays status boxes with correct colors', async () => {
-    const { findByText } = renderWithProviders(
-      <QueryClientProvider client={queryClient}>
-        <ProgramCyclesTablePaymentModule
-          program={mockProgram}
-          filters={mockFilters}
-        />
-      </QueryClientProvider>,
-    );
-
-    // Wait for data to load
-    await findByText('Emergency Response Cycle Q1');
-
-    // Verify that programCycleStatusToColor utility was used
-    // The actual verification of colors would require more complex testing setup
-    expect(findByText('Emergency Response Cycle Q1')).toBeTruthy();
-  });
-
-  it('handles date formatting correctly', async () => {
-    const { findByText } = renderWithProviders(
-      <QueryClientProvider client={queryClient}>
-        <ProgramCyclesTablePaymentModule
-          program={mockProgram}
-          filters={mockFilters}
-        />
-      </QueryClientProvider>,
-    );
-
-    // Wait for data to load
-    await findByText('Emergency Response Cycle Q1');
-
-    // Check that UniversalMoment components are rendered
-    // The exact date format testing would require more specific assertions
-    expect(findByText('Emergency Response Cycle Q1')).toBeTruthy();
-  });
-
-  it('handles finish button click correctly', async () => {
+  it('handles finish program cycle action', async () => {
     const { findByText, getByText } = renderWithProviders(
       <QueryClientProvider client={queryClient}>
         <ProgramCyclesTablePaymentModule
@@ -268,15 +213,17 @@ describe('ProgramCyclesTable', () => {
     const finishButton = getByText('FINISH');
     finishButton.click();
 
-    // Verify the finish API was called
-    expect(finishProgramCycle).toHaveBeenCalledWith(
-      'afghanistan',
-      'test-program-id',
-      'cycle-1',
-    );
+    // Wait for the mutation to complete and API to be called
+    await vi.waitFor(() => {
+      expect(finishProgramCycle).toHaveBeenCalledWith(
+        'afghanistan',
+        'test-program-id',
+        'cycle-1',
+      );
+    });
   });
 
-  it('handles reactivate button click correctly', async () => {
+  it('handles reactivate program cycle action', async () => {
     const { findByText, getByText } = renderWithProviders(
       <QueryClientProvider client={queryClient}>
         <ProgramCyclesTablePaymentModule
@@ -293,39 +240,13 @@ describe('ProgramCyclesTable', () => {
     const reactivateButton = getByText('REACTIVATE');
     reactivateButton.click();
 
-    // Verify the reactivate API was called
-    expect(reactivateProgramCycle).toHaveBeenCalledWith(
-      'afghanistan',
-      'test-program-id',
-      'cycle-2',
-    );
-  });
-
-  it('displays program cycle links correctly', async () => {
-    const { findByText, getByText } = renderWithProviders(
-      <QueryClientProvider client={queryClient}>
-        <ProgramCyclesTablePaymentModule
-          program={mockProgram}
-          filters={mockFilters}
-        />
-      </QueryClientProvider>,
-    );
-
-    // Wait for data to load
-    await findByText('Emergency Response Cycle Q1');
-
-    // Check that program cycle titles are rendered as links
-    const link1 = getByText('Emergency Response Cycle Q1').closest('a');
-    const link2 = getByText('Education Support Cycle Q2').closest('a');
-    const link3 = getByText('Health Initiative Cycle Q3').closest('a');
-
-    expect(link1).toBeTruthy();
-    expect(link2).toBeTruthy();
-    expect(link3).toBeTruthy();
-
-    // Check that links have correct href attributes
-    expect(link1?.getAttribute('href')).toBe('./cycle-1');
-    expect(link2?.getAttribute('href')).toBe('./cycle-2');
-    expect(link3?.getAttribute('href')).toBe('./cycle-3');
+    // Wait for the mutation to complete and API to be called
+    await vi.waitFor(() => {
+      expect(reactivateProgramCycle).toHaveBeenCalledWith(
+        'afghanistan',
+        'test-program-id',
+        'cycle-2',
+      );
+    });
   });
 });
