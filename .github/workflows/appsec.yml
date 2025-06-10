@@ -105,7 +105,31 @@ jobs:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
           file: "output.zip" 
-          store_baseline_file: FALES
+          store_baseline_file: false
+          json_output: true
+          json_output_file: "veracode_sast.json"
+    - name: save results file
+      uses: actions/upload-artifact@v3
+      with:
+        name: pipeline-flaws
+        path: veracode_sast.json
+    - name: Get scan results
+      uses: actions/download-artifact@v3
+      with:
+        name: "Veracode Pipeline-Scan Results"
+    - name: Convert pipeline scan output to SARIF format
+      id: convert
+      uses: Veracode/veracode-pipeline-scan-results-to-sarif@v2.0.4
+      with:
+        results-json: veracode_sast.json
+        output-results-sarif: veracode_sast.sarif
+        ref: refs/heads/appsec
+        commitSHA: ${{ github.sha }}
+        
+    - name: Upload SARIF file to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v3 # Check for the latest version
+      with:
+        sarif_file: 'veracode_sast.sarif'         
   #  - name: Veracode Pipeline
   #    continue-on-error: true
   #    run: |
