@@ -3,8 +3,9 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useGrievanceTicketStatusChangeMutation } from '@generated/graphql';
+import { useMutation } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { RestService } from '@restgenerated/services/RestService';
 import { MiśTheme } from '../../theme';
 import {
   GRIEVANCE_CATEGORIES,
@@ -69,7 +70,7 @@ export const GrievanceDetailsToolbar = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const confirm = useConfirmation();
   const navigate = useNavigate();
   const { isActiveProgram, selectedProgram } = useProgramContext();
@@ -81,7 +82,25 @@ export const GrievanceDetailsToolbar = ({
       to: `/${baseUrl}/grievance/tickets/user-generated`,
     },
   ];
-  const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
+
+  const { mutateAsync, isPending: loading } = useMutation({
+    mutationFn: ({ status }: { status: number }) => {
+      return RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
+        businessAreaSlug: businessArea,
+        id: ticket.id,
+        requestBody: { status },
+      });
+    },
+    onError: (error: any) => {
+      if (error?.response?.data?.errors) {
+        Object.values(error.response.data.errors).forEach((errorMsg: any) => {
+          showMessage(errorMsg);
+        });
+      } else {
+        showMessage(error?.message || 'An error occurred');
+      }
+    },
+  });
 
   const isNew = ticket.status === GRIEVANCE_TICKET_STATES.NEW;
   const isAssigned = ticket.status === GRIEVANCE_TICKET_STATES.ASSIGNED;
@@ -216,16 +235,11 @@ export const GrievanceDetailsToolbar = ({
         )
       : null;
 
-  const changeState = async (status): Promise<void> => {
+  const changeState = async (status: number): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          grievanceTicketId: ticket.id,
-          status,
-        },
-      });
+      await mutateAsync({ status });
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      // Error handling is done in the mutation onError callback
     }
   };
 
@@ -304,7 +318,7 @@ export const GrievanceDetailsToolbar = ({
           try {
             await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            // Error handling is done in the mutation onError callback
           }
         })
       }

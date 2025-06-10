@@ -12,7 +12,7 @@ from hct_mis_api.apps.account.models import (
     RoleAssignment,
     User,
 )
-from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -29,7 +29,6 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
@@ -41,13 +40,7 @@ def copy_program_object(copy_from_program_id: str, program_data: dict, user: Use
     program.pk = None
     program.status = Program.DRAFT
 
-    data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
-    if data_collecting_type_code:
-        data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
-    else:
-        data_collecting_type = program.data_collecting_type
-
-    validate_data_collecting_type(program.business_area, program.data_collecting_type, data_collecting_type)
+    data_collecting_type = program_data.pop("data_collecting_type", None) or program.data_collecting_type
 
     program_data["data_collecting_type_id"] = data_collecting_type.id
 
@@ -570,6 +563,7 @@ def create_program_partner_access(
             RoleAssignment.objects.filter(
                 partner_id=partner_data["partner"],
                 business_area=program.business_area,
+                program=None,
             )
             .values_list("role_id", flat=True)
             .distinct()
@@ -581,6 +575,7 @@ def create_program_partner_access(
                 program=program,
                 role_id=role_id,
             )
+        # TODO: end of temporary solution - to remove after role assignment is implemented in UI
         if areas := partner_data.get("areas"):  # create area limits if it is not a full-area-access
             area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
                 partner_id=partner_data["partner"],
