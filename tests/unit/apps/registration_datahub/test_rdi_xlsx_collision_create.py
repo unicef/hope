@@ -13,12 +13,17 @@ from hct_mis_api.apps.core.fixtures import (
     create_pdu_flexible_attribute,
 )
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
-from hct_mis_api.apps.household.models import PendingHousehold, PendingIndividual
+from hct_mis_api.apps.household.models import (
+    Household,
+    PendingHousehold,
+    PendingIndividual,
+)
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
+from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
@@ -99,3 +104,40 @@ class TestRdiXlsxCollisions(TestCase):
             PendingHousehold.objects.get(identification_key="ab1234").extra_rdis.first().id,
             registration_data_import2.id,
         )
+
+    def test_merge(self) -> None:
+        import_data1 = ImportData.objects.create(
+            file=self.file,
+            number_of_households=3,
+            number_of_individuals=6,
+        )
+        registration_data_import1 = RegistrationDataImportFactory(
+            business_area=self.business_area, program=self.program, import_data=import_data1
+        )
+        self.RdiXlsxCreateTask().execute(
+            registration_data_import1.id, import_data1.id, self.business_area.id, self.program.id
+        )
+        import_data2 = ImportData.objects.create(
+            file=self.file,
+            number_of_households=3,
+            number_of_individuals=6,
+        )
+        registration_data_import2 = RegistrationDataImportFactory(
+            business_area=self.business_area, program=self.program, import_data=import_data2
+        )
+        self.RdiXlsxCreateTask().execute(
+            registration_data_import2.id, import_data2.id, self.business_area.id, self.program.id
+        )
+        self.assertEqual(
+            PendingHousehold.objects.get(identification_key="ab1234").extra_rdis.first().id,
+            registration_data_import2.id,
+        )
+        RdiMergeTask().execute(registration_data_import2.pk)
+        self.assertEqual(
+            Household.objects.get(identification_key="ab1234").registration_data_import.pk, registration_data_import2.pk
+        )
+        self.assertEqual(
+            Household.objects.get(identification_key="ab1234").extra_rdis.first().id,
+            registration_data_import1.id,
+        )
+        self.assertEqual(Household.objects.get(identification_key="ab1234").rdi_merge_status, Household.MERGED)

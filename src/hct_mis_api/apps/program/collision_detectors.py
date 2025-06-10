@@ -13,10 +13,10 @@ class AbstractCollisionDetector:
     def __init__(self, context: "Program"):
         self.program = context
         if not self.program.collision_detection_enabled:
-            raise ValueError("Collision detection is not enabled for this program")
+            raise ValueError("Collision detection is not enabled for this program")  # pragma: no cover
 
     def detect_collision(self, household: Household) -> Optional[str]:
-        raise NotImplementedError("Subclasses should implement this method")
+        raise NotImplementedError("Subclasses should implement this method")  # pragma: no cover
 
 
 class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
