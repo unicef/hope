@@ -2,6 +2,7 @@ import json
 from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.cache import cache
+from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
@@ -477,6 +478,7 @@ class TestIndividualDetail:
                     "seeing_disability": LOT_DIFFICULTY,
                     "hearing_disability": CANNOT_DO,
                     "disability": DISABLED,
+                    "photo": ContentFile(b"abc", name="1.png"),
                 },
                 {},
             ],
@@ -560,6 +562,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc.png"),
         )
 
         self.national_passport = DocumentFactory(
@@ -905,6 +908,33 @@ class TestIndividualDetail:
                 "status": self.grievance_ticket.status,
             }
         ]
+
+    def test_get_individual_photos(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[
+                Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+            ],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(
+            reverse(
+                "api:households:individuals-photos",
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": str(self.individual1.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+
+        assert data["id"] == str(self.individual1.id)
+        assert data["photo"] is not None
+        assert data["documents"][0]["document_number"] == "123-456-789"
+        assert data["documents"][0]["photo"] is not None
 
 
 class TestIndividualGlobalViewSet:

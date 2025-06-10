@@ -8,38 +8,6 @@ from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 
 class TestSchema(APITestCase):
-    maxDiff = None
-
-    QUERY = """
-    query AllAreasTree {
-      allAreasTree(businessArea: "ukraine") {
-        name
-        pCode
-        level
-        areas {
-          name
-          pCode
-          level
-          areas {
-            name
-            pCode
-            level
-            areas {
-              name
-              pCode
-              level
-              areas {
-                name
-                pCode
-                level
-              }
-            }
-          }
-        }
-      }
-    }
-    """
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
