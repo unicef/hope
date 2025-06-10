@@ -379,7 +379,9 @@ class PaymentFilter(FilterSet):
     )
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        queryset = queryset.select_related("financial_service_provider").annotate(
+        queryset = queryset.exclude(
+            parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+        ).select_related("financial_service_provider").annotate(
             mark=Case(
                 When(status=Payment.STATUS_DISTRIBUTION_SUCCESS, then=Value(1)),
                 When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
