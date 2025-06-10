@@ -15,9 +15,7 @@ def create_financial_institutions() -> None:
 
     # Get the distinct bank account IDs in a memory-safe way
     def yield_account_id_chunks():  # type: ignore
-        qs = Account.all_objects.order_by(
-            "individual__business_area",
-        ).values_list("id", flat=True)
+        qs = Account.all_objects.order_by("individual__business_area", "created_at").values_list("id", flat=True)
         chunk = []
         for pk in qs.iterator(chunk_size=CHUNK_SIZE):
             chunk.append(pk)
@@ -34,21 +32,24 @@ def create_financial_institutions() -> None:
     account_ids = []
     created_fi = {}
     chunk_count = 0
+
+    uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
+
     for id_chunk in yield_account_id_chunks():  # type: ignore
         chunk_count += 1
         print(f"Chunk {chunk_count}")
         for account in (
             Account.all_objects.filter(id__in=id_chunk)
             .select_related(
-                "individual__business_area__slug",
+                "individual__business_area",
                 "individual__household__country",
             )
+            .order_by("created_at")
             .iterator(chunk_size=CHUNK_SIZE)
         ):
             if account.individual.business_area.slug == "nigeria":
                 try:
                     ubabank_code = account.data.get("code")
-                    uba_fsp = FinancialServiceProvider.objects.get(name="United Bank for Africa - Nigeria")
                     mapping = FinancialInstitutionMapping.objects.get(
                         code=ubabank_code, financial_service_provider=uba_fsp
                     )
