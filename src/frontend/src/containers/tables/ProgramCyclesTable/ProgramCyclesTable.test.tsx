@@ -212,7 +212,7 @@ describe('ProgramCyclesTable', () => {
 
     // Click the FINISH button
     const finishButton = getByText('FINISH');
-    
+
     await act(async () => {
       finishButton.click();
     });
@@ -242,7 +242,7 @@ describe('ProgramCyclesTable', () => {
 
     // Click the REACTIVATE button
     const reactivateButton = getByText('REACTIVATE');
-    
+
     await act(async () => {
       reactivateButton.click();
     });
