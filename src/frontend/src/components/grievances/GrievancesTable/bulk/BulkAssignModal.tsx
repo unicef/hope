@@ -3,14 +3,15 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useBulkUpdateGrievanceAssigneeMutation } from '@generated/graphql';
 import { AssignedToDropdown } from '../AssignedToDropdown';
 import { BulkBaseModal } from './BulkBaseModal';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { User } from '@restgenerated/models/User';
 import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -22,26 +23,50 @@ export const StyledLink = styled.div`
 
 interface BulkAssignModalProps {
   selectedTickets: GrievanceTicketList[];
-  businessArea: string;
   setSelected;
 }
 
 export function BulkAssignModal({
   selectedTickets,
-  businessArea,
   setSelected,
 }: BulkAssignModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { businessAreaSlug } = useBaseUrl();
   const [value, setValue] = useState<User | null>(null);
-  const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
   const [inputValue, setInputValue] = useState('');
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation({
+    mutationFn: (params: BulkUpdateGrievanceTicketsAssignees) => {
+      return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
+        {
+          businessAreaSlug,
+          requestBody: params,
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsGrievanceTickets'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasGrievanceTickets'],
+      });
+      setSelected([]);
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.body?.errors || error?.message || 'An error occurred';
+      showMessage(errorMessage);
+    },
+  });
 
   const { data: usersData } = useQuery({
-    queryKey: ['users', businessArea, inputValue],
+    queryKey: ['users', businessAreaSlug, inputValue],
     queryFn: () =>
       RestService.restBusinessAreasUsersList({
-        businessAreaSlug: businessArea,
+        businessAreaSlug: businessAreaSlug,
         limit: 20,
         orderBy: ['first_name', 'last_name', 'email'],
         search: inputValue,
@@ -54,21 +79,10 @@ export function BulkAssignModal({
     setValue(data);
   };
   const onSave = async (): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          assignedTo: value?.id,
-          businessAreaSlug: businessArea,
-          grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
-        },
-        refetchQueries: ['AllGrievanceTicket'],
-        awaitRefetchQueries: true,
-      });
-      setSelected([]);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-      throw e;
-    }
+    await mutateAsync({
+      assignedTo: value?.id || '',
+      grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
+    });
   };
 
   return (

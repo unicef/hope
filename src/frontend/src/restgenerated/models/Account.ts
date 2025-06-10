@@ -7,7 +7,7 @@ export type Account = {
     readonly id: string;
     accountType: string;
     number?: string;
-    financialInstitution?: string;
+    financialInstitution?: number;
     data?: any;
     rdiMergeStatus?: RdiMergeStatusEnum;
     readonly createdAt: string;
