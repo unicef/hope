@@ -3,7 +3,6 @@ import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { IndividualRoleInHouseholdRole } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -50,8 +49,7 @@ export function ReassignMultipleRoleBox({
   }
   const selectedIndividualsToReassign =
     ticket.ticketDetails.selectedDuplicates?.filter(
-      (el) =>
-        el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+      (el) => el.role === 'PRIMARY' || el.role === 'HEAD',
     );
   const mappedReassignLookups = (): ReactElement => (
     <>

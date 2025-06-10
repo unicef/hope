@@ -14,17 +14,14 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import {
-  HouseholdNode,
-  IndividualNode,
-  IndividualRoleInHouseholdRole,
-} from '@generated/graphql';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -34,9 +31,9 @@ const StyledBox = styled(Paper)`
 `;
 
 export type RoleReassignData = {
-  role: IndividualRoleInHouseholdRole | string;
-  individual: IndividualNode;
-  household: HouseholdNode;
+  role: string;
+  individual: IndividualDetail;
+  household: HouseholdDetail;
 };
 
 export function RequestedIndividualDataChange({
@@ -249,14 +246,12 @@ export function RequestedIndividualDataChange({
     ticket.individual?.id === ticket.household?.headOfHousehold?.id;
 
   const primaryCollectorRolesCount =
-    ticket?.individual?.rolesInHouseholds.filter(
-      (el) => el.role === IndividualRoleInHouseholdRole.Primary,
-    ).length + (isHeadOfHousehold ? 1 : 0);
+    ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
+      .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
     ticket.ticketDetails.roleReassignData,
   )?.filter(
-    (el: RoleReassignData) =>
-      el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+    (el: RoleReassignData) => el.role === 'PRIMARY' || el.role === 'HEAD',
   ).length;
 
   let approveEnabled = false;
