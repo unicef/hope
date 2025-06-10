@@ -32,6 +32,21 @@ def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> N
     pre_save_partner_access_change.send(sender=sender, instance=instance, old_partner_access=old_partner_access)
 
 
+@receiver(pre_save, sender=Program)
+def update_slug_on_programme_code_change(sender: Any, instance: Program, **kwargs: Any) -> None:
+    """
+    Signal to regenerate the slug if the programme_code has changed.
+    """
+    if instance.pk is None:
+        return
+    try:
+        old_program = Program.objects.get(pk=instance.pk)
+    except Program.DoesNotExist:
+        return
+    if instance.programme_code != old_program.programme_code:
+        instance.slug = instance.generate_slug()
+
+
 @receiver(post_save, sender=Program)
 def handle_partner_access_change(sender: Any, instance: Program, created: bool, **kwargs: Any) -> None:
     old_partner_access = instance.old_partner_access
