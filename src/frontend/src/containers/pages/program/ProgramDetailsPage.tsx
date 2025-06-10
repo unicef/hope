@@ -3,6 +3,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
 import ProgramCyclesTableProgramDetails from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
+// TODO: Replace with REST API when available - using GraphQL temporarily
 import { useProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -72,6 +73,8 @@ function ProgramDetailsPage(): ReactElement {
         }),
     });
 
+  // TODO: Replace with REST API choices when available
+  // Currently using GraphQL temporarily until REST endpoints are implemented
   const { data: choices, loading: choicesLoading } =
     useProgrammeChoiceDataQuery();
   const permissions = usePermissions();

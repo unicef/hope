@@ -9,7 +9,7 @@ import type { PDUFieldsCreate } from './PDUFieldsCreate';
 import type { SectorEnum } from './SectorEnum';
 export type ProgramCreate = {
     readonly id: string;
-    programmeCode: string | null;
+    programmeCode?: string | null;
     /**
      * Program name
      */
