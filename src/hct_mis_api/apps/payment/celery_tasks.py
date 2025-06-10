@@ -25,9 +25,6 @@ from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
 )
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
-)
 from hct_mis_api.apps.payment.utils import generate_cache_key, get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
@@ -420,7 +417,6 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 
         PaymentPlanService(payment_plan=payment_plan).create_follow_up_payments()
         payment_plan.refresh_from_db()
-        create_payment_plan_snapshot_data(payment_plan)
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
     except Exception as e:
