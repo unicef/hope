@@ -94,6 +94,7 @@ export function EditDocumentationRow({
             >
               <Edit />
             </IconButton>
+            !isEditTicket && (
             <IconButton
               onClick={() => {
                 setFieldValue(
@@ -104,6 +105,7 @@ export function EditDocumentationRow({
             >
               <Delete />
             </IconButton>
+            )
           </Box>
         ) : (
           <Box display="flex" alignItems="center" height={48} color="red">

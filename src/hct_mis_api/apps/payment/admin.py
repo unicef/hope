@@ -29,6 +29,7 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     DeliveryMechanismConfig,
     FinancialInstitution,
+    FinancialInstitutionMapping,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspNameMapping,
@@ -40,7 +41,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
 )
-from hct_mis_api.apps.payment.models.payment import FinancialInstitutionMapping
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
@@ -497,7 +497,7 @@ class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
 
         error_message = f"Delivery Mechanism {delivery_mechanism} is not supported by Financial Service Provider {financial_service_provider}"
         # to work both in inline and standalone
-        if delivery_mechanisms := self.data.get("delivery_mechanisms"):
+        if delivery_mechanisms := self.data.getlist("delivery_mechanisms"):
             if delivery_mechanism and str(delivery_mechanism.id) not in delivery_mechanisms:
                 raise ValidationError(error_message)
         else:
@@ -702,12 +702,12 @@ class AccountTypeAdmin(HOPEModelAdminBase):
 @admin.register(FinancialInstitution)
 class FinancialInstitutionAdmin(HOPEModelAdminBase):
     list_display = (
-        "code",
-        "description",
+        "id",
+        "name",
         "type",
         "country",
     )
-    search_fields = ("code",)
+    search_fields = ("id", "name")
     list_filter = (
         ("country", AutoCompleteFilter),
         "type",
@@ -742,8 +742,8 @@ class FinancialInstitutionMappingAdmin(HOPEModelAdminBase):
     )
     search_fields = (
         "code",
-        "finanacial_institution____code",
-        "finanacial_institution__description",
+        "financial_institution__id",
+        "financial_institution__name",
         "financial_service_provider__name",
         "financial_service_provider__vision_vendor_number",
     )

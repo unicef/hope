@@ -309,7 +309,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(120):
+        with self.assertNumQueries(107):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
@@ -390,7 +390,7 @@ class TestPaymentPlanServices(APITestCase):
         p_force_failed = payments[2]
         p_manually_cancelled = payments[3]
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -440,14 +440,14 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(47):
+        with self.assertNumQueries(49):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
@@ -602,6 +602,13 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[0].split_payment_items.count(), 4)
         self.assertEqual(pp_splits[1].split_payment_items.count(), 8)
 
+        # split by no_split
+        PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.NO_SPLIT)
+        pp_splits = pp.splits.all().order_by("order")
+        self.assertEqual(pp.splits.count(), 1)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.NO_SPLIT)
+        self.assertEqual(pp_splits[0].split_payment_items.count(), 12)
+
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
@@ -744,7 +751,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(78):
+        with self.assertNumQueries(80):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)

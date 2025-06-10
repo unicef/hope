@@ -31,28 +31,32 @@ export function NewDocumentFieldArray({
             {values.individualDataUpdateFieldsDocuments?.map((item) => {
               const existingOrNewId = item.node?.id || item.id;
               return (
-                <DocumentField
-                  id={existingOrNewId}
+                <Grid
+                  size={{ xs: 12 }}
                   key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
-                  onDelete={() =>
-                    removeItemById(
-                      values.individualDataUpdateFieldsDocuments,
-                      existingOrNewId,
-                      arrayHelpers,
-                    )
-                  }
-                  countryChoices={addIndividualFieldsData.countriesChoices}
-                  documentTypeChoices={
-                    addIndividualFieldsData.documentTypeChoices
-                  }
-                  baseName="individualDataUpdateFieldsDocuments"
-                  setFieldValue={setFieldValue}
-                  values={values}
-                />
+                >
+                  <DocumentField
+                    id={existingOrNewId}
+                    onDelete={() =>
+                      removeItemById(
+                        values.individualDataUpdateFieldsDocuments,
+                        existingOrNewId,
+                        arrayHelpers,
+                      )
+                    }
+                    countryChoices={addIndividualFieldsData.countriesChoices}
+                    documentTypeChoices={
+                      addIndividualFieldsData.documentTypeChoices
+                    }
+                    baseName="individualDataUpdateFieldsDocuments"
+                    setFieldValue={setFieldValue}
+                    values={values}
+                  />
+                </Grid>
               );
             })}
 
-            <Grid size={{ xs:8 }} />
+            <Grid size={{ xs: 8 }} />
             <Grid size={{ xs: 12 }}>
               <Button
                 color="primary"
