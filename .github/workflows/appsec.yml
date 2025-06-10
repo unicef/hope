@@ -115,20 +115,17 @@ jobs:
         path: veracode_sast.json
     - name: Get scan results
       uses: actions/download-artifact@v4
-      with:
-        name: "Veracode Pipeline-Scan Results"
     - name: Convert pipeline scan output to SARIF format
       uses: Veracode/veracode-pipeline-scan-results-to-sarif@v2.0.4
       with:
-        results-json: veracode_sast.json
+        pipeline-results-json: veracode_sast.json
         output-results-sarif: veracode_sast.sarif
         ref: ${{ github.ref }}
-        commitSHA: ${{ github.sha }}
-        
+        commitSHA: ${{ github.sha }}     
     - name: Upload SARIF file to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3 # Check for the latest version
       with:
-        sarif_file: 'veracode_sast.sarif'         
+        sarif_file: 'veracode_sast.sarif'        
   #  - name: Veracode Pipeline
   #    continue-on-error: true
   #    run: |
