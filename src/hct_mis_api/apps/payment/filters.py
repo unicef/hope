@@ -379,20 +379,16 @@ class PaymentFilter(FilterSet):
     )
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        queryset = (
-            queryset.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
-            .select_related("financial_service_provider")
-            .annotate(
-                mark=Case(
-                    When(status=Payment.STATUS_DISTRIBUTION_SUCCESS, then=Value(1)),
-                    When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
-                    When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
-                    When(status=Payment.STATUS_ERROR, then=Value(4)),
-                    When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
-                    When(status=Payment.STATUS_MANUALLY_CANCELLED, then=Value(6)),
-                    When(status=Payment.STATUS_PENDING, then=Value(7)),
-                    output_field=IntegerField(),
-                )
+        queryset = queryset.select_related("financial_service_provider").annotate(
+            mark=Case(
+                When(status=Payment.STATUS_DISTRIBUTION_SUCCESS, then=Value(1)),
+                When(status=Payment.STATUS_DISTRIBUTION_PARTIAL, then=Value(2)),
+                When(status=Payment.STATUS_NOT_DISTRIBUTED, then=Value(3)),
+                When(status=Payment.STATUS_ERROR, then=Value(4)),
+                When(status=Payment.STATUS_FORCE_FAILED, then=Value(5)),
+                When(status=Payment.STATUS_MANUALLY_CANCELLED, then=Value(6)),
+                When(status=Payment.STATUS_PENDING, then=Value(7)),
+                output_field=IntegerField(),
             )
         )
         if not self.form.cleaned_data.get("order_by"):
@@ -404,4 +400,6 @@ class PaymentFilter(FilterSet):
         return qs.filter(parent__program_cycle__program_id=decode_id_string_required(value))
 
     def filter_by_household_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
-        return qs.filter(household_id=decode_id_string_required(value))
+        return qs.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(
+            household_id=decode_id_string_required(value)
+        )
