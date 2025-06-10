@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useBulkUpdateGrievanceUrgencyMutation } from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { BulkUpdateGrievanceTicketsUrgency } from '@restgenerated/models/BulkUpdateGrievanceTicketsUrgency';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -21,20 +21,43 @@ export const StyledLink = styled.div`
 
 interface BulkSetUrgencyModalProps {
   selectedTickets: GrievanceTicketList[];
-  businessArea: string;
   setSelected;
 }
 
 export function BulkSetUrgencyModal({
   selectedTickets,
-  businessArea,
   setSelected,
 }: BulkSetUrgencyModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { businessAreaSlug } = useBaseUrl();
   const [value, setValue] = useState<number>(0);
-  const [mutate] = useBulkUpdateGrievanceUrgencyMutation();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation({
+    mutationFn: (params: BulkUpdateGrievanceTicketsUrgency) => {
+      return RestService.restBusinessAreasGrievanceTicketsBulkUpdateUrgencyCreate(
+        {
+          businessAreaSlug,
+          requestBody: params,
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsGrievanceTickets'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasGrievanceTickets'],
+      });
+      setSelected([]);
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.body?.errors || error?.message || 'An error occurred';
+      showMessage(errorMessage);
+    },
+  });
   const { data: choices } = useQuery({
     queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
     queryFn: () =>
@@ -44,21 +67,10 @@ export function BulkSetUrgencyModal({
   });
   const urgencyChoices = choices.grievanceTicketUrgencyChoices;
   const onSave = async (): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          urgency: value,
-          businessAreaSlug: businessArea,
-          grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
-        },
-        refetchQueries: ['AllGrievanceTicket'],
-        awaitRefetchQueries: true,
-      });
-      setSelected([]);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-      throw e;
-    }
+    await mutateAsync({
+      urgency: value,
+      grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
+    });
   };
 
   return (

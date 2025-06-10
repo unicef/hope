@@ -3,7 +3,6 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { StatusBox } from '@components/core/StatusBox';
 import { AdminButton } from '@core/AdminButton';
-import { PaymentPlanBuildStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -112,7 +111,7 @@ export function TargetPopulationPageHeader({
       title={
         <HeaderWrapper>
           {t(`${paymentPlan.name}`)}
-          {paymentPlan.buildStatus !== PaymentPlanBuildStatus.Ok && (
+          {paymentPlan.buildStatus !== 'OK' && (
             <StatusWrapper>
               <StatusBox
                 status={paymentPlan.buildStatus}

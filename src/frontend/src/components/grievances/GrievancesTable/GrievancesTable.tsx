@@ -410,22 +410,18 @@ export const GrievancesTable = ({
             {' '}
             <BulkAssignModal
               selectedTickets={selectedTickets}
-              businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
             <BulkSetPriorityModal
               selectedTickets={selectedTickets}
-              businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
             <BulkSetUrgencyModal
               selectedTickets={selectedTickets}
-              businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
             <BulkAddNoteModal
               selectedTickets={selectedTickets}
-              businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
           </Box>
@@ -468,7 +464,6 @@ export const GrievancesTable = ({
                 )}
                 optionsData={optionsData}
                 setInputValue={setInputValue}
-                initialVariables={initialQueryVariables}
               />
             )}
           />

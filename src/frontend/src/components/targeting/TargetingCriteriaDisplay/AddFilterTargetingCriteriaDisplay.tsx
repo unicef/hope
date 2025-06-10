@@ -186,7 +186,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
   const isSocialWorkingProgram =
-    selectedProgram?.dataCollectingType?.type === 'SOCIAL';
+    (selectedProgram?.dataCollectingType?.type as string) === 'SOCIAL';
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;
