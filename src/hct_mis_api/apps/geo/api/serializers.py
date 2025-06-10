@@ -24,6 +24,29 @@ class AreaSimpleSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
+class AreaChildrenTreeSerializer(serializers.ModelSerializer):
+    level = serializers.SerializerMethodField()
+    areas = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Area
+        fields = (
+            "id",
+            "name",
+            "p_code",
+            "areas",
+            "level",
+        )
+
+    # @extend_schema_field(serializers.ListSerializer(child=AreaChildrenTreeSerializer()))
+    def get_areas(self, obj: Area) -> Dict:
+        return AreaChildrenTreeSerializer(obj.get_children(), many=True).data
+
+    @staticmethod
+    def get_level(obj: Area) -> int:
+        return obj.area_type.area_level
+
+
 class AreaTreeSerializer(serializers.ModelSerializer):
     level = serializers.SerializerMethodField()
     areas = serializers.SerializerMethodField()
@@ -38,9 +61,9 @@ class AreaTreeSerializer(serializers.ModelSerializer):
             "level",
         )
 
-    @extend_schema_field(serializers.ListSerializer(child=serializers.Serializer()))
+    @extend_schema_field(AreaChildrenTreeSerializer(many=True))
     def get_areas(self, obj: Area) -> Dict:
-        return AreaTreeSerializer(obj.get_children(), many=True, context=self.context).data
+        return AreaTreeSerializer(obj.get_children(), many=True).data
 
     @staticmethod
     def get_level(obj: Area) -> int:

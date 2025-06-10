@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import AlarmAddIcon from '@mui/icons-material/AlarmAdd';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useBulkUpdateGrievancePriorityMutation } from '@generated/graphql';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { BulkUpdateGrievanceTicketsPriority } from '@restgenerated/models/BulkUpdateGrievanceTicketsPriority';
 import { BulkBaseModal } from './BulkBaseModal';
 import { ReactElement, useState } from 'react';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -21,20 +21,18 @@ export const StyledLink = styled.div`
 
 interface BulkSetPriorityModalProps {
   selectedTickets: GrievanceTicketList[];
-  businessArea: string;
   setSelected;
 }
 
 export const BulkSetPriorityModal = ({
   selectedTickets,
-  businessArea,
   setSelected,
 }: BulkSetPriorityModalProps): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { businessAreaSlug } = useBaseUrl();
   const [value, setValue] = useState<number>(0);
-  const [mutate] = useBulkUpdateGrievancePriorityMutation();
+  const queryClient = useQueryClient();
 
   const { data: choices } = useQuery({
     queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
@@ -44,22 +42,40 @@ export const BulkSetPriorityModal = ({
       }),
   });
 
-  const priorityChoices = choices.grievanceTicketPriorityChoices;
-  const onSave = async (): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          priority: value,
-          businessAreaSlug: businessArea,
-          grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
+  const { mutateAsync } = useMutation({
+    mutationFn: (params: BulkUpdateGrievanceTicketsPriority) => {
+      return RestService.restBusinessAreasGrievanceTicketsBulkUpdatePriorityCreate(
+        {
+          businessAreaSlug,
+          requestBody: params,
         },
-        refetchQueries: ['AllGrievanceTicket'],
-        awaitRefetchQueries: true,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasProgramsGrievanceTickets'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasGrievanceTickets'],
       });
       setSelected([]);
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.body?.errors || error?.message || 'An error occurred';
+      showMessage(errorMessage);
+    },
+  });
+
+  const priorityChoices = choices?.grievanceTicketPriorityChoices;
+  const onSave = async (): Promise<void> => {
+    try {
+      await mutateAsync({
+        grievanceTicketIds: selectedTickets.map((ticket) => ticket.id),
+        priority: value,
+      });
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-      throw e;
+      // Error is handled in onError callback
     }
   };
 
@@ -78,7 +94,7 @@ export const BulkSetPriorityModal = ({
           onChange={(e) => setValue(e.target.value as number)}
           label={t('Priority')}
         >
-          {priorityChoices.map((choice) => (
+          {priorityChoices?.map((choice) => (
             <MenuItem key={choice.value} value={choice.value}>
               {choice.name}
             </MenuItem>
