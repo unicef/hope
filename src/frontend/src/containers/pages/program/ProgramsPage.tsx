@@ -1,6 +1,7 @@
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+// TODO: Replace with REST API when available - using GraphQL temporarily
 import { useProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -38,6 +39,8 @@ function ProgramsPage(): ReactElement {
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
+  // TODO: Replace with REST API choices when available
+  // Currently using GraphQL temporarily until REST endpoints are implemented
   const { data: choicesData } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
 

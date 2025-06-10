@@ -8,7 +8,7 @@ import type { PartnersData } from './PartnersData';
 import type { PDUFieldsCreate } from './PDUFieldsCreate';
 import type { SectorEnum } from './SectorEnum';
 export type ProgramCopy = {
-    programmeCode: string | null;
+    programmeCode?: string | null;
     /**
      * Program name
      */
