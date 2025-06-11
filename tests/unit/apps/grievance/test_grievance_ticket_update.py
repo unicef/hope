@@ -640,7 +640,6 @@ class TestGrievanceTicketApprove:
             status=Program.ACTIVE,
             name="program afghanistan 1",
         )
-        # program_different = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
