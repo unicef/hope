@@ -2,7 +2,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
@@ -12,7 +12,7 @@ import { ReactElement } from 'react';
 
 interface LookUpProgrammesTableRowSurveysProps {
   program: ProgramList;
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
   radioChangeHandler: (program) => void;
   selectedProgram: string;
 }
@@ -29,9 +29,7 @@ export function LookUpProgrammesTableRowSurveys({
     radioChangeHandler(program.id);
   };
 
-  const programSectorChoiceDict = choicesToDict(
-    choicesData.programSectorChoices,
-  );
+  const programSectorChoiceDict = choicesToDict(choicesData.sectorChoices);
 
   return (
     <ClickableTableRow

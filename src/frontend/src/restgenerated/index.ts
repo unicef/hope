@@ -221,6 +221,7 @@ export { PriorityEnum as PriorityEnumCamelCase } from './models/PriorityEnum';
 export type { Profile as ProfileCamelCase } from './models/Profile';
 export { ProfileStatusEnum as ProfileStatusEnumCamelCase } from './models/ProfileStatusEnum';
 export type { ProgramAPI as ProgramAPICamelCase } from './models/ProgramAPI';
+export type { ProgramChoices as ProgramChoicesCamelCase } from './models/ProgramChoices';
 export type { ProgramCopy as ProgramCopyCamelCase } from './models/ProgramCopy';
 export type { ProgramCreate as ProgramCreateCamelCase } from './models/ProgramCreate';
 export type { ProgramCycleCreate as ProgramCycleCreateCamelCase } from './models/ProgramCycleCreate';
