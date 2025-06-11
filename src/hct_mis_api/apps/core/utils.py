@@ -34,7 +34,6 @@ from django.utils import timezone
 import pytz
 from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
-from graphene.types.resolver import attr_resolver, dict_resolver
 from PIL import Image
 
 from hct_mis_api.apps.utils.exceptions import log_and_raise
@@ -929,19 +928,3 @@ class JSONBSet(Func):
     def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
         create_missing = Value("true") if create_missing else Value("false")  # type: ignore
         super().__init__(expression, path, new_value, create_missing, **extra)
-
-
-def _custom_dict_or_attr_resolver(attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any) -> Any:
-    resolver = attr_resolver
-    if isinstance(root, dict):
-        resolver = dict_resolver
-    return resolver(attname, default_value, root, info, **args)
-
-
-def sort_by_attr(options: Iterable, attrs: str) -> List:
-    def key_extractor(el: Any) -> Any:
-        for attr in attrs.split("."):
-            el = _custom_dict_or_attr_resolver(attr, None, el, None)
-        return el
-
-    return list(sorted(options, key=key_extractor))
