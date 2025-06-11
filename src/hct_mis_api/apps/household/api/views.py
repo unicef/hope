@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
 
@@ -21,6 +22,8 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.rest_api import FieldAttributeSerializer
 from hct_mis_api.apps.household.api.caches import (
     HouseholdListKeyConstructor,
     IndividualListKeyConstructor,
@@ -35,6 +38,7 @@ from hct_mis_api.apps.household.api.serializers.household import (
 from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
     IndividualListSerializer,
+    IndividualPhotoDetailSerializer,
 )
 from hct_mis_api.apps.household.filters import HouseholdFilter, IndividualFilter
 from hct_mis_api.apps.household.models import (
@@ -61,6 +65,7 @@ class HouseholdViewSet(
         "retrieve": HouseholdDetailSerializer,
         "members": HouseholdMemberSerializer,
         "payments": PaymentListSerializer,
+        "all_flex_fields_attributes": FieldAttributeSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -78,6 +83,10 @@ class HouseholdViewSet(
         "payments": [
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.PM_VIEW_DETAILS,
+        ],
+        "all_flex_fields_attributes": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            Permissions.RDI_VIEW_DETAILS,
         ],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -153,6 +162,20 @@ class HouseholdViewSet(
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        responses={
+            200: FieldAttributeSerializer(many=True),
+        },
+    )
+    @action(detail=False, methods=["get"], url_path="all-flex-fields-attributes")
+    def all_flex_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        qs = (
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+            .prefetch_related("choices")
+            .order_by("created_at")
+        )
+        return Response(FieldAttributeSerializer(qs, many=True).data, status=status.HTTP_200_OK)
+
 
 class HouseholdGlobalViewSet(
     BusinessAreaVisibilityMixin,
@@ -199,6 +222,8 @@ class IndividualViewSet(
     serializer_classes_by_action = {
         "list": IndividualListSerializer,
         "retrieve": IndividualDetailSerializer,
+        "photos": IndividualPhotoDetailSerializer,
+        "all_flex_fields_attributes": FieldAttributeSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -206,6 +231,14 @@ class IndividualViewSet(
             Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
         ],
         "retrieve": [
+            Permissions.RDI_VIEW_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+        ],
+        "photos": [
+            Permissions.RDI_VIEW_DETAILS,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+        ],
+        "all_flex_fields_attributes": [
             Permissions.RDI_VIEW_DETAILS,
             Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
         ],
@@ -224,6 +257,26 @@ class IndividualViewSet(
     @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
     def list(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return super().list(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get"])
+    def photos(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        individual = self.get_object()
+        return Response(IndividualPhotoDetailSerializer(individual).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        responses={
+            200: FieldAttributeSerializer(many=True),
+        },
+    )
+    @action(detail=False, methods=["get"], url_path="all-flex-fields-attributes")
+    def all_flex_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        qs = (
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+            .exclude(type=FlexibleAttribute.PDU)
+            .prefetch_related("choices")
+            .order_by("created_at")
+        )
+        return Response(FieldAttributeSerializer(qs, many=True).data, status=status.HTTP_200_OK)
 
 
 class IndividualGlobalViewSet(

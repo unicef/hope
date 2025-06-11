@@ -15,6 +15,7 @@ from rest_framework.reverse import reverse
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
@@ -317,6 +318,31 @@ class TestHouseholdList:
             etag_fifth_call = response.headers["etag"]
             assert etag_fifth_call == etag_fourth_call
             assert len(ctx.captured_queries) == 10
+
+    def test_household_all_flex_fields_attributes(self, create_user_role_with_permissions: Any) -> None:
+        program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
+        list_url = reverse(
+            "api:households:households-all-flex-fields-attributes",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": program.slug},
+        )
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
+            business_area=self.afghanistan,
+            program=program,
+        )
+        FlexibleAttribute.objects.create(
+            name="Flexible Attribute for HH",
+            type=FlexibleAttribute.STRING,
+            label={"English(EN)": "Test Flex", "Test": ""},
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            program=program,
+        )
+
+        response = self.api_client.get(list_url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 1
+        assert response.json()[0]["name"] == "Flexible Attribute for HH"
 
 
 class TestHouseholdDetail:
