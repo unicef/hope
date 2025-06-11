@@ -1,5 +1,7 @@
 from typing import Dict, List, Union
 
+from django.db.models import Q
+
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -55,6 +57,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
     golden_record_possible_duplicates_count_and_percentage = serializers.SerializerMethodField(
         method_name="resolve_golden_record_possible_duplicates_count_and_percentage"
     )
+    total_households_count_with_valid_phone_no = serializers.SerializerMethodField()
 
     class Meta:
         model = RegistrationDataImport
@@ -80,6 +83,7 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             "golden_record_duplicates_count_and_percentage",
             "golden_record_possible_duplicates_count_and_percentage",
             "golden_record_unique_count_and_percentage",
+            "total_households_count_with_valid_phone_no",
             "admin_url",
         )
 
@@ -133,6 +137,16 @@ class RegistrationDataImportDetailSerializer(serializers.ModelSerializer, AdminU
             biometric_unique = obj.number_of_individuals - obj.dedup_engine_golden_record_duplicates
             result.append(get_count_and_percentage(biometric_unique, obj.number_of_individuals))
         return result
+
+    def get_total_households_count_with_valid_phone_no(self, obj: RegistrationDataImport) -> int:
+        count = (
+            obj.households.filter(
+                Q(head_of_household__phone_no_valid=True) | Q(head_of_household__phone_no_alternative_valid=True)
+            )
+            .distinct()
+            .count()
+        )
+        return count
 
 
 class RefuseRdiSerializer(serializers.Serializer):
