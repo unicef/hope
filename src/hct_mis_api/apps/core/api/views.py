@@ -29,7 +29,6 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.rest_api import CollectorAttributeSerializer
-from hct_mis_api.apps.core.schema import sort_by_attr
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.payment.models import (
     AccountType,
@@ -85,10 +84,7 @@ class BusinessAreaViewSet(
             for account_type in account_types
             for field in account_type.unique_fields
         ]
-        result_list = sort_by_attr(
-            (attr for attr in definitions),
-            "label.English(EN)",
-        )
+        result_list = sorted(definitions, key=lambda attr: attr["label"]["English(EN)"])  # type: ignore
         return Response(CollectorAttributeSerializer(result_list, many=True).data, status=200)
 
 
