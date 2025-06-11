@@ -1,11 +1,13 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
-import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
+import { useQuery } from '@tanstack/react-query';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -96,8 +98,11 @@ const AddFilterTargetingCriteriaDisplay = ({
   const { data: allCoreFieldsAttributesData, loading } =
     useCachedIndividualFieldsQuery(businessArea, programId);
   const { data: allCollectorFieldsAttributesData } =
-    useAllCollectorFieldsAttributesQuery({
-      fetchPolicy: 'cache-first',
+    useQuery<PaginatedCollectorAttributeList>({
+      queryKey: ['collectorFieldsAttributes'],
+      queryFn: () =>
+        RestService.restBusinessAreasAllCollectorFieldsAttributesList({}),
+      staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
     });
 
   const [isOpen, setOpen] = useState(false);
@@ -120,13 +125,10 @@ const AddFilterTargetingCriteriaDisplay = ({
   useEffect(() => {
     if (loading) return;
     const allCollectorDataChoicesDictTmp =
-      allCollectorFieldsAttributesData?.allCollectorFieldsAttributes?.reduce(
-        (acc, item) => {
-          acc[item.name] = item.choices;
-          return acc;
-        },
-        {},
-      );
+      allCollectorFieldsAttributesData?.results?.reduce((acc, item) => {
+        acc[item.name] = item.choices;
+        return acc;
+      }, {});
     setAllCollectorDataChoicesDict(allCollectorDataChoicesDictTmp);
   }, [allCollectorFieldsAttributesData, loading]);
 
@@ -186,7 +188,7 @@ const AddFilterTargetingCriteriaDisplay = ({
   let householdFiltersAvailable =
     selectedProgram?.dataCollectingType?.householdFiltersAvailable;
   const isSocialWorkingProgram =
-    (selectedProgram?.dataCollectingType?.type as string) === 'SOCIAL';
+    selectedProgram?.dataCollectingType?.type === 'SOCIAL';
   // Allow use filters on non-migrated programs
   if (individualFiltersAvailable === undefined) {
     individualFiltersAvailable = true;
