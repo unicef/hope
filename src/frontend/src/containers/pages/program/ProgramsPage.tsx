@@ -1,10 +1,12 @@
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useProgrammeChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Button } from '@mui/material';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +40,13 @@ function ProgramsPage(): ReactElement {
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: choicesData } = useProgrammeChoiceDataQuery();
+  const { data: choicesData } = useQuery<ProgramChoices>({
+    queryKey: ['programChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
   const { t } = useTranslation();
 
   if (!permissions || !choicesData) return null;

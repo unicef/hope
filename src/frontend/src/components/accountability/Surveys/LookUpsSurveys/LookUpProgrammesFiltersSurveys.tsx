@@ -11,12 +11,11 @@ import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 interface LookUpProgrammesFiltersSurveysProps {
   filter;
-  //TODO: replace with the correct REST API
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -75,7 +74,7 @@ function LookUpProgrammesFiltersSurveys({
             value={filter.status}
             data-cy="filters-status"
           >
-            {choicesData.programStatusChoices.map((item) => (
+            {choicesData.statusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
@@ -116,7 +115,7 @@ function LookUpProgrammesFiltersSurveys({
             value={filter.sector}
             multiple
           >
-            {choicesData.programSectorChoices.map((item) => (
+            {choicesData.sectorChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>

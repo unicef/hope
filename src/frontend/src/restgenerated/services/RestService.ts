@@ -104,6 +104,7 @@ import type { PeriodicDataUpdateUpload } from '../models/PeriodicDataUpdateUploa
 import type { PeriodicDataUpdateUploadDetail } from '../models/PeriodicDataUpdateUploadDetail';
 import type { Profile } from '../models/Profile';
 import type { ProgramAPI } from '../models/ProgramAPI';
+import type { ProgramChoices } from '../models/ProgramChoices';
 import type { ProgramCopy } from '../models/ProgramCopy';
 import type { ProgramCreate } from '../models/ProgramCreate';
 import type { ProgramCycleCreate } from '../models/ProgramCycleCreate';
@@ -9180,6 +9181,23 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/users/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
+    public static restBusinessAreasUsersPartnerForGrievanceChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/users/partner-for-grievance-choices/',
             path: {
                 'business_area_slug': businessAreaSlug,
             },

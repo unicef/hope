@@ -7,7 +7,8 @@ import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
-import { useAllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
+import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
+import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -63,8 +64,14 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         }),
     });
 
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
-    useAllIndividualsFlexFieldsAttributesQuery();
+  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } =
+    useQuery<AllIndividualsFlexFieldsAttributesQuery>({
+      queryKey: ['fieldsAttributes'],
+      queryFn: async () => {
+        const data = await FieldsAttributesService.fieldsAttributesRetrieve();
+        return { allIndividualsFlexFieldsAttributes: data };
+      },
+    });
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({

@@ -23,6 +23,7 @@ import { FormikAdminAreaAutocompleteMultiple } from '@shared/Formik/FormikAdminA
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { REPORT_TYPES } from '@utils/constants';
+// TODO: Replace with REST API when available
 import {
   useCreateReportMutation,
   useReportChoiceDataQuery,
@@ -84,8 +85,11 @@ const NewReportForm = (): ReactElement => {
           ),
         ),
     });
+  // TODO: Replace with REST API query when available
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
+
+  // TODO: Replace with REST API mutation when available
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
@@ -151,6 +155,7 @@ const NewReportForm = (): ReactElement => {
     return variables || basicVariables;
   };
 
+  // TODO: Replace with REST API call when available
   const submitFormHandler = async (values): Promise<void> => {
     const response = await mutate({
       variables: {

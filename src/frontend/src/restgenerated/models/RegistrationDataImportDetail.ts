@@ -28,6 +28,7 @@ export type RegistrationDataImportDetail = {
     readonly goldenRecordDuplicatesCountAndPercentage: Array<Record<string, number>>;
     readonly goldenRecordPossibleDuplicatesCountAndPercentage: Array<Record<string, number>>;
     readonly goldenRecordUniqueCountAndPercentage: Array<Record<string, number>>;
+    readonly totalHouseholdsCountWithValidPhoneNo: number;
     readonly adminUrl: string;
 };
 

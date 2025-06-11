@@ -3,7 +3,9 @@ import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useProgrammeChoiceDataQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { SurveyTabsValues } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import LookUpProgrammesFiltersSurveys from './LookUpProgrammesFiltersSurveys';
@@ -72,8 +74,14 @@ export function LookUpSelectionSurveys({
 
   const { t } = useTranslation();
 
-  const { data: choicesData, loading: choicesLoading } =
-    useProgrammeChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<ProgramChoices>({
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const handleChange = (type: number, value: string): void => {
     setValues({
