@@ -78,6 +78,7 @@ const router = sentryCreateBrowserRouter([
     Component: Root,
     future: {
       v7_fetcherPersist: true,
+      v7_relativeSplatPath: true,
     },
   },
 ]);

@@ -14,13 +14,10 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import {
-  useAllFinancialServiceProviderXlsxTemplatesQuery,
-  useExportXlsxPpListPerFspMutation,
-} from '../../../../../__generated__/graphql';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { PaymentPlanExportAuthCode } from '@restgenerated/models/PaymentPlanExportAuthCode';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -42,7 +39,18 @@ export function AcceptedPaymentPlanHeaderButtons({
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
-  const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery();
+
+  // TODO: Replace with proper REST API call when available
+  // Temporary mock data structure to match GraphQL response
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['fspXlsxTemplates'],
+    queryFn: () =>
+      Promise.resolve({
+        allFinancialServiceProviderXlsxTemplates: {
+          edges: [], // Empty array for now - will be populated when REST endpoint is available
+        },
+      }),
+  });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
     {
@@ -65,8 +73,32 @@ export function AcceptedPaymentPlanHeaderButtons({
     },
   );
 
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPpListPerFspMutation();
+  // Replace GraphQL mutation with REST API call
+  const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
+    mutationFn: async (variables: { fspXlsxTemplateId?: string }) => {
+      const requestBody: PaymentPlanExportAuthCode = {
+        fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
+      };
+      return RestService.restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+          requestBody,
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage(t('Exporting XLSX started'));
+    },
+    onError: (error: any) => {
+      showMessage(
+        error?.body?.errors ||
+          error?.message ||
+          'An error occurred while exporting',
+      );
+    },
+  });
 
   const {
     mutateAsync: sendToPaymentGateway,
@@ -117,29 +149,26 @@ export function AcceptedPaymentPlanHeaderButtons({
   const handleExportAPI = async () => {
     try {
       await mutateExport({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-          fspXlsxTemplateId: selectedTemplate,
-        },
+        fspXlsxTemplateId: selectedTemplate,
       });
-      showMessage(t('Exporting XLSX started'));
       handleClose();
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+    } catch (e: any) {
+      showMessage(
+        e?.body?.errors || e?.message || 'An error occurred while exporting',
+      );
     }
   };
 
   const handleExport = async () => {
     try {
       await mutateExport({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-        },
+        fspXlsxTemplateId: '',
       });
-      showMessage(t('Exporting XLSX started'));
       handleClose();
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+    } catch (e: any) {
+      showMessage(
+        e?.body?.errors || e?.message || 'An error occurred while exporting',
+      );
     }
   };
 

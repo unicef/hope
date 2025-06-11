@@ -121,6 +121,34 @@ function findFieldMappings(openApiSchema, enumName, endpoint) {
               requiredField: 'status',
               allowedSchemas: ['paymentverification'],
             },
+            'grievance-ticket-category': {
+              requiredField: 'category',
+              allowedSchemas: ['grievanceticket'],
+            },
+            'grievance-ticket-status': {
+              requiredField: 'status',
+              allowedSchemas: ['grievanceticket'],
+            },
+            'grievance-ticket-priority': {
+              requiredField: 'priority',
+              allowedSchemas: ['grievanceticket'],
+            },
+            'grievance-ticket-urgency': {
+              requiredField: 'urgency',
+              allowedSchemas: ['grievanceticket'],
+            },
+            'grievance-ticket-issue-type': {
+              requiredField: 'issue_type',
+              allowedSchemas: ['grievanceticket'],
+            },
+            'payment-record-delivery-type': {
+              requiredField: 'delivery_type',
+              allowedSchemas: ['paymentrecord', 'payment'],
+            },
+            'feedback-issue-type': {
+              requiredField: 'issue_type',
+              allowedSchemas: ['feedback'],
+            },
           };
 
           // Check if this endpoint has specific rules
@@ -135,44 +163,31 @@ function findFieldMappings(openApiSchema, enumName, endpoint) {
                 fields.push(`${schemaName}.${fieldName}`);
               }
             }
-            // Skip pattern matching for rule-based endpoints
+            // Skip all other pattern matching for rule-based endpoints
             continue;
           }
 
-          // Generic pattern matching for endpoints without specific rules
-          let fieldMatched = false;
-          for (const pattern of patterns) {
-            const patternLower = pattern.toLowerCase();
-
-            // Exact match first (highest priority)
-            if (fieldLower === patternLower) {
+          // For endpoints without specific rules, be more restrictive
+          // Only match if the endpoint is very generic (single word) or if we have exact matches
+          if (endpointParts.length === 1) {
+            // Single word endpoints like 'currencies' - allow exact matches only
+            if (
+              fieldLower === endpoint.toLowerCase() ||
+              fieldLower === _.camelCase(endpoint)
+            ) {
               fields.push(`${schemaName}.${fieldName}`);
-              fieldMatched = true;
-              break;
             }
+          } else {
+            // Multi-part endpoints - require exact compound matches, not just the last part
+            const exactSnakeCase = endpoint.replace(/-/g, '_');
+            const exactCamelCase = _.camelCase(endpoint);
 
-            // Partial matches for compound patterns
-            if (pattern.includes('_') || pattern.includes('-')) {
-              // For compound patterns, check if field contains all parts
-              const patternParts = pattern.toLowerCase().split(/[_-]/);
-              const fieldParts = fieldName.toLowerCase().split(/[_-]/);
-
-              if (patternParts.every((part) => fieldParts.includes(part))) {
-                fields.push(`${schemaName}.${fieldName}`);
-                fieldMatched = true;
-                break;
-              }
+            if (
+              fieldLower === exactSnakeCase ||
+              fieldLower === exactCamelCase
+            ) {
+              fields.push(`${schemaName}.${fieldName}`);
             }
-          }
-
-          // Fallback: if last concept matches field name (for simple cases like 'status', 'type')
-          if (
-            !fieldMatched &&
-            patterns.includes(lastConcept) &&
-            fieldLower === lastConcept
-          ) {
-            // Only add if we don't have a more specific match already
-            fields.push(`${schemaName}.${fieldName}`);
           }
         }
       }

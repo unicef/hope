@@ -15,6 +15,7 @@ const customRender = (
       <BrowserRouter
         future={{
           v7_startTransition: true,
+          v7_relativeSplatPath: true,
         }}
       >
         <Formik initialValues={{}} onSubmit={noop}>

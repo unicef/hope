@@ -1,37 +1,38 @@
-import { Box, Fade } from '@mui/material';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  AllProgramsForChoicesDocument,
-  ProgramPartnerAccess,
-  useAllAreasTreeQuery,
-  useCreateProgramMutation,
-  usePduSubtypeChoicesDataQuery,
-  useUserPartnerChoicesQuery,
-} from '@generated/graphql';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
+import { BaseSection } from '@components/core/BaseSection';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useNavigate } from 'react-router-dom';
-import { BaseSection } from '@components/core/BaseSection';
 import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
 import {
   handleNext,
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
-import { useProgramContext } from 'src/programContext';
-import { omit } from 'lodash';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import {
+  ProgramPartnerAccess,
+  useAllAreasTreeQuery,
+  useUserPartnerChoicesQuery,
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Fade } from '@mui/material';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
+import { RestService } from '@restgenerated/services/RestService';
+import type { DefaultError } from '@tanstack/query-core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { mapPartnerChoicesWithoutUnicef } from '@utils/utils';
+import { Formik } from 'formik';
+import { omit } from 'lodash';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import { hasPermissionInModule } from '../../../config/permissions';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -49,13 +50,36 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
-  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
-    usePduSubtypeChoicesDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<ProgramChoices>({
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
-  const [mutate, { loading: loadingCreate }] = useCreateProgramMutation({
-    refetchQueries: () => [
-      { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
-    ],
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: createProgram, isPending: loadingCreate } = useMutation<
+    ProgramCreate,
+    DefaultError,
+    ProgramCreate
+  >({
+    mutationFn: (programData: ProgramCreate) => {
+      return RestService.restBusinessAreasProgramsCreate({
+        businessAreaSlug: businessArea,
+        requestBody: programData,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['programs', businessArea],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['programChoices', businessArea],
+      });
+    },
   });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -72,7 +96,6 @@ export const CreateProgramPage = (): ReactElement => {
         ? values.partners.map(({ id, areas, areaAccess }) => ({
             partner: id,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
-            areaAccess,
           }))
         : [];
 
@@ -143,29 +166,42 @@ export const CreateProgramPage = (): ReactElement => {
         : null;
 
     try {
-      const response = await mutate({
-        variables: {
-          programData: {
-            ...requestValues,
-            budget: budgetToFixed,
-            populationGoal: populationGoalParsed,
-            businessAreaSlug: businessArea,
-            partners: partnersToSet,
-            pduFields: pduFieldsToSend,
-          },
-        },
-        refetchQueries: () => [
-          {
-            query: AllProgramsForChoicesDocument,
-            variables: { businessArea, first: 100 },
-          },
-        ],
-      });
+      const programData: ProgramCreate = {
+        id: '', // Will be set by server
+        slug: '', // Will be set by server
+        version: 0, // Will be set by server
+        status: '', // Will be set by server
+        name: requestValues.name,
+        programmeCode: requestValues.programmeCode || null,
+        sector: requestValues.sector,
+        description: requestValues.description || '',
+        budget: budgetToFixed.toString(),
+        administrativeAreasOfImplementation:
+          requestValues.administrativeAreasOfImplementation || '',
+        populationGoal: populationGoalParsed,
+        cashPlus: requestValues.cashPlus,
+        frequencyOfPayments: requestValues.frequencyOfPayments,
+        dataCollectingType: requestValues.dataCollectingTypeCode,
+        beneficiaryGroup: requestValues.beneficiaryGroup || '',
+        startDate: requestValues.startDate,
+        endDate: requestValues.endDate,
+        pduFields: pduFieldsToSend || [],
+        partners: partnersToSet,
+        partnerAccess: values.partnerAccess,
+      };
+
+      const response = await createProgram(programData);
 
       showMessage('Programme created.');
-      navigate(`/${baseUrl}/details/${response.data.createProgram.program.id}`);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      navigate(`/${baseUrl}/details/${response.id}`);
+    } catch (error: any) {
+      if (error?.body?.detail) {
+        showMessage(error.body.detail);
+      } else if (error?.message) {
+        showMessage(error.message);
+      } else {
+        showMessage('An error occurred while creating the programme.');
+      }
     }
   };
 
@@ -208,11 +244,10 @@ export const CreateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  if (treeLoading || userPartnerChoicesLoading || pdusubtypeChoicesLoading)
+  if (treeLoading || userPartnerChoicesLoading || choicesLoading)
     return <LoadingComponent />;
 
-  if (!treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
-    return null;
+  if (!treeData || !userPartnerChoicesData || !choicesData) return null;
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
@@ -334,7 +369,7 @@ export const CreateProgramPage = (): ReactElement => {
                         handleNext={handleNextStep}
                         step={step}
                         setStep={setStep}
-                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        pdusubtypeChoicesData={choicesData.pduSubtypeChoices}
                         errors={errors}
                         setFieldValue={setFieldValue}
                       />

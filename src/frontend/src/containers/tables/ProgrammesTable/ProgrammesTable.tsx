@@ -1,7 +1,7 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { createApiParams } from '@utils/apiUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { CountResponse } from '@restgenerated/models/CountResponse';
@@ -17,7 +17,7 @@ import { ProgramList } from '@restgenerated/models/ProgramList';
 interface ProgrammesTableProps {
   businessArea: string;
   filter;
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
 }
 
 function ProgrammesTable({

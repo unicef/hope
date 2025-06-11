@@ -11,7 +11,7 @@ import { BigValueContainer } from '@components/rdi/details/RegistrationDetails/R
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
-import { useAllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
+import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
@@ -25,6 +25,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 
@@ -75,8 +76,14 @@ const PeopleDetailsPage = (): ReactElement => {
         }),
     });
 
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
-    useAllIndividualsFlexFieldsAttributesQuery();
+  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } =
+    useQuery<AllIndividualsFlexFieldsAttributesQuery>({
+      queryKey: ['fieldsAttributes'],
+      queryFn: async () => {
+        const data = await FieldsAttributesService.fieldsAttributesRetrieve();
+        return { allIndividualsFlexFieldsAttributes: data };
+      },
+    });
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({

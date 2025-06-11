@@ -12,9 +12,6 @@ import {
 import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
-  usePduSubtypeChoicesDataQuery,
-  useUpdateProgramMutation,
-  useUpdateProgramPartnersMutation,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -30,7 +27,6 @@ import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { hasPermissionInModule } from '../../../config/permissions';
 import {
   editPartnersValidationSchema,
@@ -38,9 +34,13 @@ import {
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
 import { omit } from 'lodash';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { ProgramUpdate } from '@restgenerated/models/ProgramUpdate';
+import { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdatePartnerAccess';
+import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -69,50 +69,69 @@ const EditProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
-  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
-    usePduSubtypeChoicesDataQuery();
-
-  const [updateProgramDetails, { loading: loadingUpdate }] =
-    useUpdateProgramMutation({
-      refetchQueries: [
-        {
-          query: ALL_LOG_ENTRIES_QUERY,
-          variables: {
-            objectId: decodeIdString(id),
-            count: 5,
-            businessArea,
-          },
-        },
-      ],
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<ProgramChoices>({
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
     });
 
-  const [updateProgramPartners] = useUpdateProgramPartnersMutation({
-    refetchQueries: [
-      {
-        query: ALL_LOG_ENTRIES_QUERY,
-        variables: {
-          objectId: decodeIdString(id),
-          count: 5,
-          businessArea,
-        },
-      },
-    ],
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: updateProgramDetails } = useMutation({
+    mutationFn: (programData: ProgramUpdate) => {
+      return RestService.restBusinessAreasProgramsUpdate({
+        businessAreaSlug: businessArea,
+        slug: id,
+        requestBody: programData,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreaProgram', businessArea, id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreaPrograms', businessArea],
+      });
+    },
+  });
+
+  const {
+    mutateAsync: updateProgramPartners,
+    isPending: loadingPartnersUpdate,
+  } = useMutation({
+    mutationFn: (partnerData: ProgramUpdatePartnerAccess) => {
+      return RestService.restBusinessAreasProgramsUpdatePartnerAccessCreate({
+        businessAreaSlug: businessArea,
+        slug: id,
+        requestBody: partnerData,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreaProgram', businessArea, id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['businessAreaPrograms', businessArea],
+      });
+      // Invalidate activity logs cache
+      await queryClient.invalidateQueries({
+        queryKey: ['activityLogs', businessArea, decodeIdString(id)],
+      });
+    },
   });
 
   if (
     loadingProgram ||
     treeLoading ||
     userPartnerChoicesLoading ||
-    pdusubtypeChoicesLoading
+    choicesLoading
   )
     return <LoadingComponent />;
 
-  if (
-    !program ||
-    !treeData ||
-    !userPartnerChoicesData ||
-    !pdusubtypeChoicesData
-  )
+  if (!program || !treeData || !userPartnerChoicesData || !choicesData)
     return null;
 
   const {
@@ -144,7 +163,7 @@ const EditProgramPage = (): ReactElement => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
-      : 0;
+      : '0.00';
     const populationGoalValue = parseInt(values.population_goal, 10) ?? 0;
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
@@ -189,22 +208,36 @@ const EditProgramPage = (): ReactElement => {
       const pduFieldsToSendWithoutTypename = pduFieldsToSend.map((pduField) =>
         omit(pduField, ['__typename']),
       );
-      const response = await updateProgramDetails({
-        variables: {
-          programData: {
-            id,
-            ...requestValuesDetails,
-            budget: budgetToFixed,
-            populationGoal: populationGoalParsed,
-            pduFields: pduFieldsToSendWithoutTypename,
-          },
-          version,
-        },
-      });
+
+      const programData: ProgramUpdate = {
+        programmeCode: requestValuesDetails.programmeCode,
+        name: requestValuesDetails.name,
+        slug: '', // readonly field, will be ignored by API
+        sector: requestValuesDetails.sector,
+        description: requestValuesDetails.description,
+        budget: budgetToFixed,
+        administrativeAreasOfImplementation:
+          requestValuesDetails.administrativeAreasOfImplementation,
+        populationGoal: populationGoalParsed,
+        cashPlus: requestValuesDetails.cashPlus,
+        frequencyOfPayments: requestValuesDetails.frequencyOfPayments,
+        dataCollectingType: requestValuesDetails.dataCollectingTypeCode,
+        beneficiaryGroup: requestValuesDetails.beneficiaryGroup,
+        startDate: requestValuesDetails.startDate,
+        endDate: requestValuesDetails.endDate,
+        pduFields: pduFieldsToSendWithoutTypename,
+        version,
+        status: '', // readonly field, will be ignored by API
+        partnerAccess: '', // readonly field, will be ignored by API
+      };
+
+      const response = await updateProgramDetails(programData);
       showMessage(t('Programme edited.'));
-      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      navigate(`/${baseUrl}/details/${response.slug}`);
+    } catch (e: any) {
+      const errorMessage =
+        e?.message || 'An error occurred while updating the program';
+      showMessage(errorMessage);
     }
   };
 
@@ -214,27 +247,23 @@ const EditProgramPage = (): ReactElement => {
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
             partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
-            areaAccess,
           }))
         : [];
 
     try {
-      const response = await updateProgramPartners({
-        variables: {
-          programData: {
-            id,
-            partners: partnersToSet,
-            partnerAccess: values.partnerAccess,
-          },
-          version,
-        },
-      });
+      const partnerData: ProgramUpdatePartnerAccess = {
+        partners: partnersToSet,
+        partnerAccess: values.partnerAccess as PartnerAccessEnum,
+        version,
+      };
+
+      await updateProgramPartners(partnerData);
       showMessage(t('Programme Partners updated.'));
-      navigate(
-        `/${baseUrl}/details/${response.data.updateProgramPartners.program.id}`,
-      );
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      navigate(`/${baseUrl}/details/${id}`);
+    } catch (e: any) {
+      const errorMessage =
+        e?.message || 'An error occurred while updating partners';
+      showMessage(errorMessage);
     }
   };
 
@@ -397,7 +426,9 @@ const EditProgramPage = (): ReactElement => {
                             values={values}
                             step={step}
                             setStep={setStep}
-                            pdusubtypeChoicesData={pdusubtypeChoicesData}
+                            pdusubtypeChoicesData={
+                              choicesData?.pduSubtypeChoices
+                            }
                             programHasRdi={programHasRdi}
                             programHasTp={programHasTp}
                             programId={id}
@@ -440,7 +471,7 @@ const EditProgramPage = (): ReactElement => {
                       submitForm={submitForm}
                       setFieldValue={setFieldValue}
                       programId={id}
-                      loading={loadingUpdate}
+                      loading={loadingPartnersUpdate}
                     />
                   </div>
                 </Fade>

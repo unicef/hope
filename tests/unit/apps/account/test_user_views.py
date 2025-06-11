@@ -18,7 +18,7 @@ from hct_mis_api.apps.account.fixtures import (
     RoleFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Role
+from hct_mis_api.apps.account.models import INACTIVE, USER_STATUS_CHOICES, Partner, Role
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
@@ -30,6 +30,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -869,3 +870,169 @@ class TestUserChoices:
                 for partner in [self.partner, self.unicef_hq, self.unicef_partner_in_afghanistan]
             ],
         }
+
+
+class TestPartnerForGrievanceChoices:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any, create_partner_role_with_permissions: Any) -> None:
+        self.partner_for_grievance_choices_url = "api:accounts:users-partner-for-grievance-choices"
+        self.afghanistan = create_afghanistan()
+
+        self.program = ProgramFactory(name="Test Program", status=Program.DRAFT, business_area=self.afghanistan)
+
+        self.program_for_household = ProgramFactory(
+            name="Test Program for Household", status=Program.DRAFT, business_area=self.afghanistan
+        )
+        self.household, individuals = create_household_and_individuals(
+            household_data={
+                "business_area": self.afghanistan,
+                "program_id": self.program_for_household.pk,
+            },
+            individuals_data=[
+                {
+                    "business_area": self.afghanistan,
+                    "program_id": self.program_for_household.pk,
+                },
+            ],
+        )
+        self.individual = individuals[0]
+
+        # UNICEF partner
+        partner_unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+        self.unicef_hq, _ = Partner.objects.get_or_create(name="UNICEF HQ", parent=partner_unicef)
+        self.user = UserFactory(partner=self.unicef_hq, username="unicef_user")
+        self.api_client = api_client(self.user)
+        self.unicef_partner_for_afghanistan, _ = Partner.objects.get_or_create(
+            name="UNICEF Partner for afghanistan", parent=partner_unicef
+        )
+
+        # partner with access to Test Program - should be returned if Program is passed or if neither program nor household/individual is passed
+        # (because it has access to ANY program in this BA)
+        self.partner_with_access_to_test_program = PartnerFactory(name="Partner with access to Test Program")
+        create_partner_role_with_permissions(
+            self.partner_with_access_to_test_program, [], self.afghanistan, self.program
+        )
+
+        # partner with access to Test Program for Household - should be returned if Program is not passed and household/individual is passed
+        # or if neither program nor household/individual is passed
+        # (because it has access to ANY program in this BA)
+        self.partner_with_access_to_test_program_for_hh = PartnerFactory(
+            name="Partner with access to Test Program for Household"
+        )
+        create_partner_role_with_permissions(
+            self.partner_with_access_to_test_program_for_hh, [], self.afghanistan, self.program_for_household
+        )
+
+        # partner with access to all programs - should be returned if neither program nor household/individual is passed
+        # or if any program is passed or if household/individual is passed
+        # (because it has access to all programs in this BA)
+        self.partner_with_access_to_all_programs = PartnerFactory(name="Partner with access to All Programs")
+        create_partner_role_with_permissions(
+            self.partner_with_access_to_all_programs, [], self.afghanistan, whole_business_area_access=True
+        )
+
+        # partner without access to any program in this BA - should not be returned in any case
+        self.unicef_without_program_access = PartnerFactory(name="Partner Without Program Access")
+
+    def test_get_partner_for_grievance_choices_for_program(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(self.partner_for_grievance_choices_url, kwargs={"business_area_slug": self.afghanistan.slug}),
+            {"program": self.program.slug},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == [
+            {
+                "name": self.partner_with_access_to_all_programs.name,
+                "value": self.partner_with_access_to_all_programs.id,
+            },
+            {
+                "name": self.partner_with_access_to_test_program.name,
+                "value": self.partner_with_access_to_test_program.id,
+            },
+            {"name": self.unicef_hq.name, "value": self.unicef_hq.id},
+            {"name": self.unicef_partner_for_afghanistan.name, "value": self.unicef_partner_for_afghanistan.id},
+        ]
+
+    def test_get_partner_for_grievance_choices_for_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(self.partner_for_grievance_choices_url, kwargs={"business_area_slug": self.afghanistan.slug}),
+            {"household": self.household.pk},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == [
+            {
+                "name": self.partner_with_access_to_all_programs.name,
+                "value": self.partner_with_access_to_all_programs.id,
+            },
+            {
+                "name": self.partner_with_access_to_test_program_for_hh.name,
+                "value": self.partner_with_access_to_test_program_for_hh.id,
+            },
+            {"name": self.unicef_hq.name, "value": self.unicef_hq.id},
+            {"name": self.unicef_partner_for_afghanistan.name, "value": self.unicef_partner_for_afghanistan.id},
+        ]
+
+    def test_get_partner_for_grievance_choices_for_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(self.partner_for_grievance_choices_url, kwargs={"business_area_slug": self.afghanistan.slug}),
+            {"individual": self.individual.pk},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == [
+            {
+                "name": self.partner_with_access_to_all_programs.name,
+                "value": self.partner_with_access_to_all_programs.id,
+            },
+            {
+                "name": self.partner_with_access_to_test_program_for_hh.name,
+                "value": self.partner_with_access_to_test_program_for_hh.id,
+            },
+            {"name": self.unicef_hq.name, "value": self.unicef_hq.id},
+            {"name": self.unicef_partner_for_afghanistan.name, "value": self.unicef_partner_for_afghanistan.id},
+        ]
+
+    def test_get_partner_for_grievance_choices_without_params(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(self.partner_for_grievance_choices_url, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == [
+            {
+                "name": self.partner_with_access_to_all_programs.name,
+                "value": self.partner_with_access_to_all_programs.id,
+            },
+            {
+                "name": self.partner_with_access_to_test_program.name,
+                "value": self.partner_with_access_to_test_program.id,
+            },
+            {
+                "name": self.partner_with_access_to_test_program_for_hh.name,
+                "value": self.partner_with_access_to_test_program_for_hh.id,
+            },
+            {"name": self.unicef_hq.name, "value": self.unicef_hq.id},
+            {"name": self.unicef_partner_for_afghanistan.name, "value": self.unicef_partner_for_afghanistan.id},
+        ]

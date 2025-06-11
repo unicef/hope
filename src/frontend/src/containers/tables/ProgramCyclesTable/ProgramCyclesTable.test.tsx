@@ -11,6 +11,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderWithProviders } from 'src/testUtils/testUtils';
+import { act } from '@testing-library/react';
 import ProgramCyclesTablePaymentModule from './ProgramCyclesTable';
 import { RestService } from '@restgenerated/services/RestService';
 import {
@@ -211,7 +212,10 @@ describe('ProgramCyclesTable', () => {
 
     // Click the FINISH button
     const finishButton = getByText('FINISH');
-    finishButton.click();
+
+    await act(async () => {
+      finishButton.click();
+    });
 
     // Wait for the mutation to complete and API to be called
     await vi.waitFor(() => {
@@ -238,7 +242,10 @@ describe('ProgramCyclesTable', () => {
 
     // Click the REACTIVATE button
     const reactivateButton = getByText('REACTIVATE');
-    reactivateButton.click();
+
+    await act(async () => {
+      reactivateButton.click();
+    });
 
     // Wait for the mutation to complete and API to be called
     await vi.waitFor(() => {

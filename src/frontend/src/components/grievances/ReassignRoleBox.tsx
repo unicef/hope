@@ -124,7 +124,6 @@ export const ReassignRoleBox = ({
         reassignData[el.id]?.individual !== uniqueIndividual.id ? (
           <ReassignRoleUnique
             individualRole={{ role: el.role, id: el.id }}
-            ticket={ticket}
             household={el.household}
             individual={uniqueIndividual}
           />

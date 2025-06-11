@@ -5,7 +5,8 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationIndividualAdditionalRegistrationInformation } from '@components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation/RegistrationIndividualAdditionalRegistrationInformation';
 import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
-import { useAllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
+import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
+import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
@@ -36,9 +37,15 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
 
   const {
     data: flexFieldsData,
-    loading: flexFieldsDataLoading,
+    isLoading: flexFieldsDataLoading,
     error,
-  } = useAllIndividualsFlexFieldsAttributesQuery();
+  } = useQuery<AllIndividualsFlexFieldsAttributesQuery>({
+    queryKey: ['fieldsAttributes'],
+    queryFn: async () => {
+      const data = await FieldsAttributesService.fieldsAttributesRetrieve();
+      return { allIndividualsFlexFieldsAttributes: data };
+    },
+  });
   const { data: individual, isLoading: loadingIndividual } =
     useQuery<IndividualDetail>({
       queryKey: ['businessAreaProgramIndividual', businessArea, programId, id],

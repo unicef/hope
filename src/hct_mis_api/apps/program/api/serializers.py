@@ -1,7 +1,7 @@
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
-from django.db.models import Q, Value
+from django.db.models import F, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 
@@ -17,7 +17,10 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    to_choice_object,
+)
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.periodic_data_update.api.serializers import (
@@ -686,6 +689,58 @@ class ProgramCopySerializer(serializers.ModelSerializer):
         partner = self.context["request"].user.partner
         validate_partners_data(partners, partner_access, partner)
         return data
+
+
+class ProgramChoicesSerializer(serializers.Serializer):
+    status_choices = serializers.SerializerMethodField()
+    frequency_of_payments_choices = serializers.SerializerMethodField()
+    sector_choices = serializers.SerializerMethodField()
+    scope_choices = serializers.SerializerMethodField()
+    data_collecting_type_choices = serializers.SerializerMethodField()
+    partner_access_choices = serializers.SerializerMethodField()
+    pdu_subtype_choices = serializers.SerializerMethodField()
+    program_cycle_status_choices = serializers.SerializerMethodField()
+
+    def get_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(Program.STATUS_CHOICE)
+
+    def get_frequency_of_payments_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(Program.FREQUENCY_OF_PAYMENTS_CHOICE)
+
+    def get_sector_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(Program.SECTOR_CHOICE)
+
+    def get_scope_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(Program.SCOPE_CHOICE)
+
+    def get_data_collecting_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        request = self.context.get("request", {})
+        return list(
+            DataCollectingType.objects.filter(
+                Q(
+                    Q(
+                        limit_to__slug=request.parser_context["kwargs"]["business_area_slug"],
+                    )
+                    | Q(limit_to__isnull=True)
+                ),
+                active=True,
+                deprecated=False,
+            )
+            .exclude(code__iexact="unknown")
+            .annotate(name=F("label"))
+            .annotate(value=F("code"))
+            .values("name", "value", "description", "type")
+            .order_by("name")
+        )
+
+    def get_partner_access_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(Program.PARTNER_ACCESS_CHOICE)
+
+    def get_pdu_subtype_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(PeriodicFieldData.TYPE_CHOICES)
+
+    def get_program_cycle_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(ProgramCycle.STATUS_CHOICE)
 
 
 class ProgramSmallSerializer(serializers.ModelSerializer):
