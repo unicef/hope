@@ -1,5 +1,5 @@
 import json
-from typing import Callable
+from typing import Any, Callable
 
 from django.core.cache import cache
 from django.db import connection
@@ -15,7 +15,14 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.core.fixtures import create_ukraine
+from hct_mis_api.apps.geo.fixtures import (
+    AreaFactory,
+    AreaTypeFactory,
+    CountryFactory,
+    generate_area_types,
+)
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 pytestmark = pytest.mark.django_db()
 
@@ -344,3 +351,52 @@ class TestAreaViews:
             etag_call_with_filter = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
             assert etag_call_with_filter != etag_call_after_update_second_call
+
+    def test_areas_tree(
+        self, api_client: Callable, afghanistan: BusinessAreaFactory, create_user_role_with_permissions: Any
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        # call_command("init-geo-fixtures")
+        business_area = create_ukraine()
+        country, _ = Country.objects.get_or_create(name="Ukraine")
+        business_area.countries.add(country)
+        generate_area_types()
+
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GEO_VIEW_LIST],
+            business_area,
+        )
+
+        p_code_prefix = country.iso_code2
+        area_type_level_1 = AreaType.objects.get(country=country, area_level=1)
+        area_type_level_2 = area_type_level_1.get_children().first()
+        area_type_level_3 = area_type_level_2.get_children().first()
+        area_type_level_4 = area_type_level_3.get_children().first()
+        area_type_level_5 = area_type_level_4.get_children().first()
+        # 1 level
+        area_l_1 = AreaFactory(area_type=area_type_level_1, p_code=f"{p_code_prefix}11", name="City1")
+        area_l_2 = AreaFactory(
+            area_type=area_type_level_2, p_code=f"{p_code_prefix}1122", parent=area_l_1, name="City2"
+        )
+        area_l_3 = AreaFactory(
+            area_type=area_type_level_3, p_code=f"{p_code_prefix}112233", parent=area_l_2, name="City3"
+        )
+        area_l_4 = AreaFactory(
+            area_type=area_type_level_4, p_code=f"{p_code_prefix}11223344", parent=area_l_3, name="City4"
+        )
+        AreaFactory(area_type=area_type_level_5, p_code=f"{p_code_prefix}1122334455", parent=area_l_4, name="City5")
+
+        Area.objects.rebuild()
+        AreaType.objects.rebuild()
+        Country.objects.rebuild()
+
+        # check api
+        response = self.client.get(reverse("api:geo:areas-all-areas-tree", kwargs={"business_area_slug": "ukraine"}))
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.json()
+        assert len(response_results) == 1
+        assert response_results[0]["name"] == "City1"
+        assert response_results[0]["areas"][0]["name"] == "City2"
+        assert response_results[0]["areas"][0]["areas"][0]["name"] == "City3"
+        assert len(response_results[0]["areas"][0]["areas"][0]["areas"]) == 0

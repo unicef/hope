@@ -26,9 +26,12 @@ from hct_mis_api.apps.core.api.serializers import (
     ChoiceSerializer,
 )
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.rest_api import CollectorAttributeSerializer
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.payment.models import (
+    AccountType,
     DeliveryMechanism,
     PaymentPlan,
     PaymentVerificationPlan,
@@ -58,6 +61,31 @@ class BusinessAreaViewSet(
     @cache_response(timeout=config.REST_API_TTL, key_func=BusinessAreaKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        responses={
+            200: CollectorAttributeSerializer(many=True),
+        },
+    )
+    @action(detail=False, methods=["get"], url_path="all-collector-fields-attributes")
+    def all_collector_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        account_types = AccountType.objects.all()
+        definitions = [
+            {
+                "id": f"{account_type.key}__{field}",
+                "type": TYPE_STRING,
+                "name": f"{account_type.key}__{field}",
+                "lookup": f"{account_type.key}__{field}",
+                "label": {"English(EN)": f"{account_type.key.title()} {field.title()}"},
+                "hint": "",
+                "required": False,
+                "choices": [],
+            }
+            for account_type in account_types
+            for field in account_type.unique_fields
+        ]
+        result_list = sorted(definitions, key=lambda attr: attr["label"]["English(EN)"])  # type: ignore
+        return Response(CollectorAttributeSerializer(result_list, many=True).data, status=200)
 
 
 class ChoicesViewSet(ViewSet):
