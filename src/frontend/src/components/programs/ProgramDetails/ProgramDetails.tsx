@@ -5,8 +5,8 @@ import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid, Typography } from '@mui/material';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import {
   choicesToDict,
@@ -40,7 +40,7 @@ const StyledBox = styled(Box)`
 
 interface ProgramDetailsProps {
   program: ProgramDetail;
-  choices: ProgrammeChoiceDataQuery;
+  choices: ProgramChoices;
 }
 
 export const ProgramDetails = ({
@@ -48,11 +48,11 @@ export const ProgramDetails = ({
   choices,
 }: ProgramDetailsProps): ReactElement => {
   const { t } = useTranslation();
-  const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
+  const { frequencyOfPaymentsChoices, sectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
-    programFrequencyOfPaymentsChoices,
+    frequencyOfPaymentsChoices,
   );
-  const programSectorChoicesDict = choicesToDict(programSectorChoices);
+  const programSectorChoicesDict = choicesToDict(sectorChoices);
   const renderAdminAreasCount = (
     partner: ProgramDetail['partners'][0],
   ): ReactElement => {

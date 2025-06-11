@@ -3,7 +3,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import {
@@ -17,7 +17,7 @@ import { ProgramList } from '@restgenerated/models/ProgramList';
 
 interface ProgrammesTableRowProps {
   program: ProgramList;
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
 }
 
 function ProgrammesTableRow({
@@ -31,9 +31,7 @@ function ProgrammesTableRow({
     navigate(programDetailsPath);
   };
 
-  const programSectorChoiceDict = choicesToDict(
-    choicesData?.programSectorChoices,
-  );
+  const programSectorChoiceDict = choicesToDict(choicesData?.sectorChoices);
 
   return (
     <>

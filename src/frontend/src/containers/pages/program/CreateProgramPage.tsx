@@ -1,38 +1,38 @@
-import { Box, Fade } from '@mui/material';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  ProgramPartnerAccess,
-  useAllAreasTreeQuery,
-  usePduSubtypeChoicesDataQuery,
-  useUserPartnerChoicesQuery,
-} from '@generated/graphql';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
-import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
-import type { DefaultError } from '@tanstack/query-core';
+import { BaseSection } from '@components/core/BaseSection';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useNavigate } from 'react-router-dom';
-import { BaseSection } from '@components/core/BaseSection';
 import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
 import {
   handleNext,
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
-import { useProgramContext } from 'src/programContext';
-import { omit } from 'lodash';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import {
+  ProgramPartnerAccess,
+  useAllAreasTreeQuery,
+  useUserPartnerChoicesQuery,
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Fade } from '@mui/material';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
+import { RestService } from '@restgenerated/services/RestService';
+import type { DefaultError } from '@tanstack/query-core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { mapPartnerChoicesWithoutUnicef } from '@utils/utils';
+import { Formik } from 'formik';
+import { omit } from 'lodash';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import { hasPermissionInModule } from '../../../config/permissions';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -50,8 +50,14 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
-  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
-    usePduSubtypeChoicesDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<ProgramChoices>({
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const queryClient = useQueryClient();
 
@@ -238,11 +244,10 @@ export const CreateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  if (treeLoading || userPartnerChoicesLoading || pdusubtypeChoicesLoading)
+  if (treeLoading || userPartnerChoicesLoading || choicesLoading)
     return <LoadingComponent />;
 
-  if (!treeData || !userPartnerChoicesData || !pdusubtypeChoicesData)
-    return null;
+  if (!treeData || !userPartnerChoicesData || !choicesData) return null;
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
@@ -364,7 +369,7 @@ export const CreateProgramPage = (): ReactElement => {
                         handleNext={handleNextStep}
                         step={step}
                         setStep={setStep}
-                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        pdusubtypeChoicesData={choicesData.pduSubtypeChoices}
                         errors={errors}
                         setFieldValue={setFieldValue}
                       />

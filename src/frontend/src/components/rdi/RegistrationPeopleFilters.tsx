@@ -2,7 +2,9 @@ import { Grid2 as Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useRegistrationChoicesQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AssigneeAutocompleteRestFilter } from '@shared/autocompletes/AssigneeAutocompleteRestFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
@@ -50,7 +52,22 @@ const RegistrationPeopleFilters = ({
   };
 
   const { t } = useTranslation();
-  const { data: registrationChoicesData } = useRegistrationChoicesQuery();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+
+  const { data: registrationChoicesData } = useQuery({
+    queryKey: [
+      RestService
+        .restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList.name,
+      businessAreaSlug,
+      programSlug,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsRegistrationDataImportsStatusChoicesList(
+        { businessAreaSlug, programSlug },
+      );
+    },
+  });
+
   if (!registrationChoicesData) {
     return null;
   }
@@ -89,13 +106,11 @@ const RegistrationPeopleFilters = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             data-cy="filter-status"
           >
-            {registrationChoicesData.registrationDataStatusChoices.map(
-              (item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ),
-            )}
+            {registrationChoicesData.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid size={{ xs: 3 }}>

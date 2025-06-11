@@ -4,7 +4,6 @@ import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { usePartnerForGrievanceChoicesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   Box,
@@ -14,6 +13,8 @@ import {
   Typography,
 } from '@mui/material';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
@@ -69,15 +70,15 @@ function Description({
   permissions,
 }: DescriptionProps): ReactElement {
   const { t } = useTranslation();
-  const { isAllPrograms } = useBaseUrl();
+  const { isAllPrograms, businessArea } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
 
-  const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({
-    variables: {
-      householdId: values.selectedHousehold?.id,
-      individualId: values.selectedIndividual?.id,
-    },
-    fetchPolicy: 'network-only',
+  const { data: partnerChoicesData } = useQuery({
+    queryKey: ['partnerForGrievanceChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasUsersPartnerForGrievanceChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
   });
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -196,7 +197,7 @@ function Description({
                 fullWidth
                 variant="outlined"
                 label={t('Partner*')}
-                choices={partnerChoicesData?.partnerForGrievanceChoices || []}
+                choices={partnerChoicesData || []}
                 component={FormikSelectField}
               />
             </Grid>
