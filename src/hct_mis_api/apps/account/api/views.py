@@ -20,7 +20,7 @@ from hct_mis_api.apps.account.api.serializers import (
     UserSerializer,
 )
 from hct_mis_api.apps.account.filters import UsersFilter
-from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     Permissions,
@@ -32,6 +32,10 @@ from hct_mis_api.apps.core.api.mixins import (
     PermissionActionMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -46,6 +50,7 @@ class UserViewSet(
     permissions_by_action = {
         "list": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
         "choices": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
+        "partner_for_grievance_choices": [Permissions.USER_MANAGEMENT_VIEW_LIST, *ALL_GRIEVANCES_CREATE_MODIFY],
     }
     queryset = User.objects.all()
 
@@ -88,3 +93,29 @@ class UserViewSet(
     @action(detail=False, methods=["get"])
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return Response(data=self.get_serializer(instance={}).data)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="partner-for-grievance-choices",
+        url_name="partner-for-grievance-choices",
+    )
+    def partner_for_grievance_choices(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
+        business_area_slug = self.kwargs.get("business_area_slug")
+        business_area = BusinessArea.objects.get(slug=business_area_slug)
+
+        program_slug = request.query_params.get("program")
+        household_id = request.query_params.get("household")
+        individual_id = request.query_params.get("individual")
+
+        if program_slug:
+            program = Program.objects.get(business_area=business_area, slug=program_slug)
+        elif household_id:
+            program = Household.objects.get(id=household_id).program
+        elif individual_id:
+            program = Individual.objects.get(id=individual_id).program
+        else:
+            program = None
+
+        choices_data = Partner.get_partners_for_program_as_choices(business_area.id, program.id if program else None)
+        return Response(to_choice_object(choices_data))
