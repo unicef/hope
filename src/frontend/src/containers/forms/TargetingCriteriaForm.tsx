@@ -1,6 +1,5 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
-import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
@@ -52,6 +51,7 @@ import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndi
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
 import { FspChoices } from '@restgenerated/models/FspChoices';
 
 const ButtonBox = styled.div`
@@ -224,8 +224,11 @@ export const TargetingCriteriaForm = ({
     programId,
   );
   const { data: allCollectorFieldsAttributesData } =
-    useAllCollectorFieldsAttributesQuery({
-      fetchPolicy: 'cache-first',
+    useQuery<PaginatedCollectorAttributeList>({
+      queryKey: ['collectorFieldsAttributes'],
+      queryFn: () =>
+        RestService.restBusinessAreasAllCollectorFieldsAttributesList({}),
+      staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
     });
   const { data: availableFspsForDeliveryMechanismData } = useQuery<
     FspChoices[]
@@ -289,13 +292,10 @@ export const TargetingCriteriaForm = ({
     setAllDataChoicesDict(allDataChoicesDictTmp);
 
     const allCollectorFieldsChoicesDictTmp =
-      allCollectorFieldsAttributesData?.allCollectorFieldsAttributes?.reduce(
-        (acc, item) => {
-          acc[item.name] = item.choices;
-          return acc;
-        },
-        {},
-      );
+      allCollectorFieldsAttributesData?.results?.reduce((acc, item) => {
+        acc[item.name] = item.choices;
+        return acc;
+      }, {});
     setAllCollectorFieldsChoicesDict(allCollectorFieldsChoicesDictTmp);
   }, [data, loading, allCollectorFieldsAttributesData]);
 

@@ -2,7 +2,6 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { partnerAccessChoices } from '@components/programs/constants';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { DividerLine } from '@core/DividerLine';
-import { AllAreasTreeQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Grid2 as Grid } from '@mui/material';
@@ -12,10 +11,11 @@ import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 
 interface PartnersStepProps {
   values;
-  allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
+  allAreasTreeData: AreaTree[];
   partnerChoices;
   step: number;
   setStep: (step: number) => void;
