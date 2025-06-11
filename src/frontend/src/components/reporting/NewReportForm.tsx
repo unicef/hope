@@ -88,8 +88,8 @@ const NewReportForm = (): ReactElement => {
   // TODO: Replace with REST API query when available
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
-  
-  // TODO: Replace with REST API mutation when available  
+
+  // TODO: Replace with REST API mutation when available
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;

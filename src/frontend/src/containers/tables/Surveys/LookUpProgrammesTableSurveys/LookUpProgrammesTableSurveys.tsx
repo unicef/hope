@@ -1,6 +1,6 @@
 import { ReactElement, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { ProgrammeChoiceDataQuery } from '@generated/graphql';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from './LookUpProgrammesHeadCellsSurveys';
@@ -23,7 +23,7 @@ const NoTableStyling = styled.div`
 interface LookUpProgrammesTableSurveysProps {
   businessArea: string;
   filter;
-  choicesData: ProgrammeChoiceDataQuery;
+  choicesData: ProgramChoices;
   selectedProgram;
   handleChange: (value) => void;
   setFieldValue;

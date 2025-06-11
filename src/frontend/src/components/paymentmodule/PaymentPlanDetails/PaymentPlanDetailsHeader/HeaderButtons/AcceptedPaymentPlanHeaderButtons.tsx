@@ -39,16 +39,17 @@ export function AcceptedPaymentPlanHeaderButtons({
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
-  
+
   // TODO: Replace with proper REST API call when available
   // Temporary mock data structure to match GraphQL response
   const { data, isLoading: loading } = useQuery({
     queryKey: ['fspXlsxTemplates'],
-    queryFn: () => Promise.resolve({
-      allFinancialServiceProviderXlsxTemplates: {
-        edges: [] // Empty array for now - will be populated when REST endpoint is available
-      }
-    }),
+    queryFn: () =>
+      Promise.resolve({
+        allFinancialServiceProviderXlsxTemplates: {
+          edges: [], // Empty array for now - will be populated when REST endpoint is available
+        },
+      }),
   });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
@@ -78,18 +79,24 @@ export function AcceptedPaymentPlanHeaderButtons({
       const requestBody: PaymentPlanExportAuthCode = {
         fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
       };
-      return RestService.restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-        id: paymentPlan.id,
-        requestBody,
-      });
+      return RestService.restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+          requestBody,
+        },
+      );
     },
     onSuccess: () => {
       showMessage(t('Exporting XLSX started'));
     },
     onError: (error: any) => {
-      showMessage(error?.body?.errors || error?.message || 'An error occurred while exporting');
+      showMessage(
+        error?.body?.errors ||
+          error?.message ||
+          'An error occurred while exporting',
+      );
     },
   });
 
@@ -146,7 +153,9 @@ export function AcceptedPaymentPlanHeaderButtons({
       });
       handleClose();
     } catch (e: any) {
-      showMessage(e?.body?.errors || e?.message || 'An error occurred while exporting');
+      showMessage(
+        e?.body?.errors || e?.message || 'An error occurred while exporting',
+      );
     }
   };
 
@@ -157,7 +166,9 @@ export function AcceptedPaymentPlanHeaderButtons({
       });
       handleClose();
     } catch (e: any) {
-      showMessage(e?.body?.errors || e?.message || 'An error occurred while exporting');
+      showMessage(
+        e?.body?.errors || e?.message || 'An error occurred while exporting',
+      );
     }
   };
 

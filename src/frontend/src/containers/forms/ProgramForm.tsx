@@ -3,10 +3,6 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, useFormikContext } from 'formik';
 import { ReactElement, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  useDataCollectionTypeChoiceDataQuery,
-  useProgrammeChoiceDataQuery,
-} from '@generated/graphql';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
@@ -14,8 +10,10 @@ import { useQuery } from '@tanstack/react-query';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useLocation } from 'react-router-dom';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
 
 interface ProgramFormPropTypes {
@@ -29,11 +27,16 @@ const ProgramForm = ({
 }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { businessArea } = useBaseUrl();
   const isEditProgram = location.pathname.includes('edit');
 
-  const { data } = useProgrammeChoiceDataQuery();
-  const { data: dataCollectionTypeChoicesData } =
-    useDataCollectionTypeChoiceDataQuery();
+  const { data } = useQuery<ProgramChoices>({
+    queryKey: ['programChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const { data: beneficiaryGroupsData } =
     useQuery<PaginatedBeneficiaryGroupList>({
@@ -44,9 +47,7 @@ const ProgramForm = ({
   const { setFieldValue } = useFormikContext();
 
   const filteredDataCollectionTypeChoicesData =
-    dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
-      (el) => el.name !== '',
-    );
+    data?.dataCollectingTypeChoices.filter((el) => el.name !== '');
 
   const mappedBeneficiaryGroupsData = useMemo(() => {
     function getTypeByDataCollectingTypeCode(
@@ -108,8 +109,7 @@ const ProgramForm = ({
     setFieldValue,
   ]);
 
-  if (!data || !dataCollectionTypeChoicesData || !beneficiaryGroupsData)
-    return null;
+  if (!data || !beneficiaryGroupsData) return null;
 
   return (
     <Form>
@@ -171,7 +171,7 @@ const ProgramForm = ({
             fullWidth
             required
             variant="outlined"
-            choices={data.programSectorChoices}
+            choices={data.sectorChoices}
             component={FormikSelectField}
             data-cy="input-sector"
           />
@@ -289,7 +289,7 @@ const ProgramForm = ({
           <Field
             name="frequencyOfPayments"
             label={t('Frequency of Payment')}
-            choices={data.programFrequencyOfPaymentsChoices}
+            choices={data.frequencyOfPaymentsChoices}
             component={FormikRadioGroup}
             data-cy="input-frequency-of-payment"
             alignItems="center"
