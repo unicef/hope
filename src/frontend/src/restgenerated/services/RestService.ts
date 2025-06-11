@@ -9045,6 +9045,23 @@ export class RestService {
         });
     }
     /**
+     * @returns ProgramChoices
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsChoicesRetrieve({
+        businessAreaSlug,
+    }: {
+        businessAreaSlug: string,
+    }): CancelablePromise<ProgramChoices> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/choices/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+        });
+    }
+    /**
      * @returns CountResponse
      * @throws ApiError
      */

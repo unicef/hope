@@ -447,6 +447,14 @@ export type Household = {
      */
     flexRegistrationsRecordId?: number | null;
     /**
+     * Key used to identify Collisions in the system
+     */
+    identificationKey?: string | null;
+    /**
+     * Flag used to identify if the household is in collision state
+     */
+    collisionFlag?: boolean;
+    /**
      * Collection of household representations
      */
     householdCollection?: number | null;
@@ -484,5 +492,9 @@ export type Household = {
      * Through model will contain the role (ROLE_CHOICE) they are connected with on.
      */
     readonly representatives: Array<string>;
+    /**
+     * This relation is filed when collision of Household happens.
+     */
+    extraRdis?: Array<string>;
 };
 
