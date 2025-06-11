@@ -11,17 +11,15 @@ import {
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
-import {
-  ProgramPartnerAccess,
-  useAllAreasTreeQuery,
-  useUserPartnerChoicesQuery,
-} from '@generated/graphql';
+import { ProgramPartnerAccess } from '@generated/graphql';
+import { UserChoices } from '@restgenerated/models/UserChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
+import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
 import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -44,11 +42,22 @@ export const CreateProgramPage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
-    variables: { businessArea },
-  });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
-    useUserPartnerChoicesQuery();
+  const { data: treeData, isLoading: treeLoading } =
+    useQuery<PaginatedAreaTreeList>({
+      queryKey: ['allAreasTree', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+          businessAreaSlug: businessArea,
+        }),
+    });
+  const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
+    useQuery<UserChoices>({
+      queryKey: ['userChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasUsersChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
@@ -249,8 +258,8 @@ export const CreateProgramPage = (): ReactElement => {
 
   if (!treeData || !userPartnerChoicesData || !choicesData) return null;
 
-  const { allAreasTree } = treeData;
-  const { userPartnerChoices } = userPartnerChoicesData;
+  const allAreasTree = treeData?.results || [];
+  const { partnerChoices: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

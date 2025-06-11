@@ -3,11 +3,9 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import {
-  ProgramPartnerAccess,
-  useAllAreasTreeQuery,
-  useUserPartnerChoicesQuery,
-} from '@generated/graphql';
+import { ProgramPartnerAccess } from '@generated/graphql';
+import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
+import { UserChoices } from '@restgenerated/models/UserChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -64,9 +62,14 @@ const DuplicateProgramPage = (): ReactElement => {
     },
   });
 
-  const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
-    variables: { businessArea },
-  });
+  const { data: treeData, isLoading: treeLoading } =
+    useQuery<PaginatedAreaTreeList>({
+      queryKey: ['allAreasTree', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGeoAreasAllAreasTreeList({
+          businessAreaSlug: businessArea,
+        }),
+    });
   const { data: program, isLoading: loadingProgram } = useQuery<ProgramDetail>({
     queryKey: ['businessAreaProgram', businessArea, id],
     queryFn: () =>
@@ -76,8 +79,14 @@ const DuplicateProgramPage = (): ReactElement => {
       }),
   });
 
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
-    useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
+    useQuery<UserChoices>({
+      queryKey: ['userChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasUsersChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
@@ -274,8 +283,8 @@ const DuplicateProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  const { allAreasTree } = treeData;
-  const { userPartnerChoices } = userPartnerChoicesData;
+  const allAreasTree = treeData?.results || [];
+  const { partnerChoices: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

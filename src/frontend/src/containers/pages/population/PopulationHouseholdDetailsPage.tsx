@@ -14,7 +14,8 @@ import PaymentsHouseholdTable from '@containers/tables/payments/PaymentsHousehol
 import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
 import { AdminButton } from '@core/AdminButton';
-import { useAllHouseholdsFlexFieldsAttributesQuery } from '@generated/graphql';
+import { AllHouseholdsFlexFieldsAttributesQuery } from '@generated/graphql';
+import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 import { usePermissions } from '@hooks/usePermissions';
@@ -79,8 +80,14 @@ const PopulationHouseholdDetailsPage = (): ReactElement => {
     {},
   );
 
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
-    useAllHouseholdsFlexFieldsAttributesQuery();
+  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } =
+    useQuery<AllHouseholdsFlexFieldsAttributesQuery>({
+      queryKey: ['householdsFieldsAttributes'],
+      queryFn: async () => {
+        const data = await FieldsAttributesService.fieldsAttributesRetrieve();
+        return { allHouseholdsFlexFieldsAttributes: data };
+      },
+    });
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
