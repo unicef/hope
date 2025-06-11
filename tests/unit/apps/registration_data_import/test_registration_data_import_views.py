@@ -16,6 +16,7 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -63,6 +64,14 @@ class TestRegistrationDataImportViews:
             kwargs={
                 "business_area_slug": self.afghanistan.slug,
                 "program_slug": self.program1.slug,
+            },
+        )
+        self.url_detail = reverse(
+            "api:registration-data:registration-data-imports-detail",
+            kwargs={
+                "business_area_slug": self.afghanistan.slug,
+                "program_slug": self.program1.slug,
+                "pk": self.rdi1.id,
             },
         )
 
@@ -278,3 +287,38 @@ class TestRegistrationDataImportViews:
             assert len(ctx.captured_queries) == 4
 
             assert etag_call_after_update_second_call == etag_call_after_update
+
+    def test_get_registration_data_import_detail(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.RDI_VIEW_DETAILS],
+            self.afghanistan,
+            self.program1,
+        )
+        create_household_and_individuals(
+            household_data={
+                "program": self.program1,
+                "business_area": self.afghanistan,
+                "registration_data_import": self.rdi1,
+            },
+            individuals_data=[{"phone_no_valid": True}],
+        )
+        response = self.client.get(self.url_detail)
+        assert response.status_code == status.HTTP_200_OK
+
+        response_json = response.json()
+        assert response_json["id"] == str(self.rdi1.id)
+        assert response_json["name"] == self.rdi1.name
+        assert response_json["status"] == self.rdi1.status
+        assert response_json["imported_by"] == self.rdi1.imported_by.get_full_name()
+        assert response_json["data_source"] == self.rdi1.get_data_source_display()
+        assert response_json["created_at"] == "2022-01-01T00:00:00Z"
+        assert response_json["erased"] is False
+        assert response_json["import_date"] == "2022-01-01T00:00:00Z"
+        assert response_json["total_households_count_with_valid_phone_no"] == 1
