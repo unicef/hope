@@ -33,17 +33,21 @@ import type { HouseholdChoices } from '../models/HouseholdChoices';
 import type { HouseholdDetail } from '../models/HouseholdDetail';
 import type { IndividualChoices } from '../models/IndividualChoices';
 import type { IndividualDetail } from '../models/IndividualDetail';
+import type { IndividualPhotoDetail } from '../models/IndividualPhotoDetail';
 import type { MessageCreate } from '../models/MessageCreate';
 import type { MessageDetail } from '../models/MessageDetail';
 import type { MessageSampleSize } from '../models/MessageSampleSize';
 import type { PaginatedAreaList } from '../models/PaginatedAreaList';
 import type { PaginatedAreaListList } from '../models/PaginatedAreaListList';
+import type { PaginatedAreaTreeList } from '../models/PaginatedAreaTreeList';
 import type { PaginatedAreaTypeList } from '../models/PaginatedAreaTypeList';
 import type { PaginatedBeneficiaryGroupList } from '../models/PaginatedBeneficiaryGroupList';
 import type { PaginatedBusinessAreaList } from '../models/PaginatedBusinessAreaList';
 import type { PaginatedChoiceList } from '../models/PaginatedChoiceList';
+import type { PaginatedCollectorAttributeList } from '../models/PaginatedCollectorAttributeList';
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
+import type { PaginatedFieldAttributeList } from '../models/PaginatedFieldAttributeList';
 import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
@@ -990,6 +994,52 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/geo/areas/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'level': level,
+                'limit': limit,
+                'name': name,
+                'offset': offset,
+                'ordering': ordering,
+                'updated_at': updatedAt,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedAreaTreeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGeoAreasAllAreasTreeList({
+        businessAreaSlug,
+        level,
+        limit,
+        name,
+        offset,
+        ordering,
+        updatedAt,
+    }: {
+        businessAreaSlug: string,
+        level?: number,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        name?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        updatedAt?: string,
+    }): CancelablePromise<PaginatedAreaTreeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/geo/areas/all-areas-tree/',
             path: {
                 'business_area_slug': businessAreaSlug,
             },
@@ -4679,6 +4729,177 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList({
+        businessAreaSlug,
+        programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        residenceStatus,
+        search,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/all-flex-fields-attributes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'residence_status': residenceStatus,
+                'search': search,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
      * @returns CountResponse
      * @throws ApiError
      */
@@ -4880,6 +5101,191 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
                 'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns IndividualPhotoDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsPhotosRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Individual.
+         */
+        id: string,
+        programSlug: string,
+    }): CancelablePromise<IndividualPhotoDetail> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/{id}/photos/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsIndividualsAllFlexFieldsAttributesList({
+        businessAreaSlug,
+        programSlug,
+        admin1,
+        admin2,
+        ageMax,
+        ageMin,
+        documentNumber,
+        documentType,
+        duplicatesOnly,
+        excludedId,
+        flags,
+        fullName,
+        householdAdminArea,
+        householdId,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        search,
+        sex,
+        status,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        admin1?: string,
+        admin2?: string,
+        ageMax?: string,
+        ageMin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        duplicatesOnly?: boolean,
+        excludedId?: any,
+        /**
+         * * `DUPLICATE` - Duplicate
+         * * `NEEDS_ADJUDICATION` - Needs adjudication
+         * * `SANCTION_LIST_CONFIRMED_MATCH` - Sanction list match
+         * * `SANCTION_LIST_POSSIBLE_MATCH` - Sanction list possible match
+         */
+        flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
+        fullName?: string,
+        householdAdminArea?: string,
+        householdId?: string,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `household__unicef_id` - Household  unicef id
+         * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `birth_date` - Birth date
+         * * `-birth_date` - Birth date (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `relationship` - Relationship
+         * * `-relationship` - Relationship (descending)
+         * * `household__admin_area__name` - Household  admin area  name
+         * * `-household__admin_area__name` - Household  admin area  name (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        search?: any,
+        /**
+         * Beneficiary gender
+         *
+         * * `MALE` - Male
+         * * `FEMALE` - Female
+         * * `OTHER` - Other
+         * * `NOT_COLLECTED` - Not collected
+         * * `NOT_ANSWERED` - Not answered
+         */
+        sex?: Array<'FEMALE' | 'MALE' | 'NOT_ANSWERED' | 'NOT_COLLECTED' | 'OTHER'>,
+        /**
+         * * `ACTIVE` - Active
+         * * `DUPLICATE` - Duplicate
+         * * `WITHDRAWN` - Withdrawn
+         */
+        status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/individuals/all-flex-fields-attributes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'age_max': ageMax,
+                'age_min': ageMin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'duplicates_only': duplicatesOnly,
+                'excluded_id': excludedId,
+                'flags': flags,
+                'full_name': fullName,
+                'household__admin_area': householdAdminArea,
+                'household__id': householdId,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'search': search,
+                'sex': sex,
+                'status': status,
+                'withdrawn': withdrawn,
             },
         });
     }
@@ -8639,23 +9045,6 @@ export class RestService {
         });
     }
     /**
-     * @returns ProgramChoices
-     * @throws ApiError
-     */
-    public static restBusinessAreasProgramsChoicesRetrieve({
-        businessAreaSlug,
-    }: {
-        businessAreaSlug: string,
-    }): CancelablePromise<ProgramChoices> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/business-areas/{business_area_slug}/programs/choices/',
-            path: {
-                'business_area_slug': businessAreaSlug,
-            },
-        });
-    }
-    /**
      * @returns CountResponse
      * @throws ApiError
      */
@@ -8850,6 +9239,38 @@ export class RestService {
             url: '/api/rest/business-areas/{slug}/',
             path: {
                 'slug': slug,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedCollectorAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasAllCollectorFieldsAttributesList({
+        limit,
+        offset,
+        ordering,
+    }: {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedCollectorAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/all-collector-fields-attributes/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
             },
         });
     }

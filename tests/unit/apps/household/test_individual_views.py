@@ -2,6 +2,7 @@ import json
 from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.cache import cache
+from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
@@ -20,7 +21,7 @@ from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     create_ukraine,
 )
-from hct_mis_api.apps.core.models import PeriodicFieldData
+from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
@@ -408,6 +409,31 @@ class TestIndividualList:
         assert ind["deduplication_golden_record_results"][0]["proximity_to_score"] == 14.0
         assert ind["deduplication_golden_record_results"][0]["location"] is None
 
+    def test_individual_all_flex_fields_attributes(self, create_user_role_with_permissions: Any) -> None:
+        program = ProgramFactory(business_area=self.afghanistan, status=Program.DRAFT)
+        list_url = reverse(
+            "api:households:individuals-all-flex-fields-attributes",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": program.slug},
+        )
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS],
+            business_area=self.afghanistan,
+            program=program,
+        )
+        FlexibleAttribute.objects.create(
+            name="Flexible Attribute for INDIVIDUAL",
+            type=FlexibleAttribute.STRING,
+            label={"English(EN)": "Test Flex", "Test": ""},
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            program=program,
+        )
+
+        response = self.api_client.get(list_url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 1
+        assert response.json()[0]["name"] == "Flexible Attribute for INDIVIDUAL"
+
 
 class TestIndividualDetail:
     @pytest.fixture(autouse=True)
@@ -452,6 +478,7 @@ class TestIndividualDetail:
                     "seeing_disability": LOT_DIFFICULTY,
                     "hearing_disability": CANNOT_DO,
                     "disability": DISABLED,
+                    "photo": ContentFile(b"abc", name="1.png"),
                 },
                 {},
             ],
@@ -535,6 +562,7 @@ class TestIndividualDetail:
             individual=self.individual1,
             program=self.program,
             country=self.country,
+            photo=ContentFile(b"abc", name="doc.png"),
         )
 
         self.national_passport = DocumentFactory(
@@ -880,6 +908,33 @@ class TestIndividualDetail:
                 "status": self.grievance_ticket.status,
             }
         ]
+
+    def test_get_individual_photos(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[
+                Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+            ],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        response = self.api_client.get(
+            reverse(
+                "api:households:individuals-photos",
+                kwargs={
+                    "business_area_slug": self.afghanistan.slug,
+                    "program_slug": self.program.slug,
+                    "pk": str(self.individual1.id),
+                },
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+
+        assert data["id"] == str(self.individual1.id)
+        assert data["photo"] is not None
+        assert data["documents"][0]["document_number"] == "123-456-789"
+        assert data["documents"][0]["photo"] is not None
 
 
 class TestIndividualGlobalViewSet:
