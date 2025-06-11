@@ -2,10 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { FeedbackIssueTypeEnum } from './FeedbackIssueTypeEnum';
 export type CollectorAttribute = {
     id: string;
-    type: FeedbackIssueTypeEnum;
+    type: string;
     name: string;
     lookup: string;
     label: Record<string, any>;

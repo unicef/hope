@@ -3,10 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CoreFieldChoice } from './CoreFieldChoice';
-import type { FeedbackIssueTypeEnum } from './FeedbackIssueTypeEnum';
 export type FieldAttribute = {
     id: string;
-    type: FeedbackIssueTypeEnum;
+    type: string;
     name: string;
     readonly labels: Array<Record<string, any>>;
     readonly labelEn: string | null;
