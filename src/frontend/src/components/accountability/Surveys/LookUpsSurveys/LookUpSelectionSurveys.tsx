@@ -74,7 +74,6 @@ export function LookUpSelectionSurveys({
 
   const { t } = useTranslation();
 
-  // Replace GraphQL query with REST API call
   const { data: choicesData, isLoading: choicesLoading } =
     useQuery<ProgramChoices>({
       queryKey: ['programChoices', businessArea],

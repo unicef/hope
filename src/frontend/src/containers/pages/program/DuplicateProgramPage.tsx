@@ -6,7 +6,6 @@ import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
 import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
-  usePduSubtypeChoicesDataQuery,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -37,6 +36,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramCopy } from '@restgenerated/models/ProgramCopy';
 import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -79,8 +79,14 @@ const DuplicateProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
-  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
-    usePduSubtypeChoicesDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<ProgramChoices>({
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const handleSubmit = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
@@ -199,15 +205,10 @@ const DuplicateProgramPage = (): ReactElement => {
     loadingProgram ||
     treeLoading ||
     userPartnerChoicesLoading ||
-    pdusubtypeChoicesLoading
+    choicesLoading
   )
     return <LoadingComponent />;
-  if (
-    !program ||
-    !treeData ||
-    !userPartnerChoicesData ||
-    !pdusubtypeChoicesData
-  )
+  if (!program || !treeData || !userPartnerChoicesData || !choicesData)
     return null;
 
   const {
@@ -389,7 +390,7 @@ const DuplicateProgramPage = (): ReactElement => {
                         handleNext={handleNextStep}
                         step={step}
                         setStep={setStep}
-                        pdusubtypeChoicesData={pdusubtypeChoicesData}
+                        pdusubtypeChoicesData={choicesData.pduSubtypeChoices}
                         errors={errors}
                         programId={id}
                         setFieldValue={setFieldValue}

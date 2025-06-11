@@ -12,7 +12,6 @@ import {
 import {
   ProgramPartnerAccess,
   useAllAreasTreeQuery,
-  usePduSubtypeChoicesDataQuery,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -41,6 +40,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramUpdate } from '@restgenerated/models/ProgramUpdate';
 import { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdatePartnerAccess';
 import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -69,8 +69,14 @@ const EditProgramPage = (): ReactElement => {
   const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
     useUserPartnerChoicesQuery();
 
-  const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
-    usePduSubtypeChoicesDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } =
+    useQuery<ProgramChoices>({
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const queryClient = useQueryClient();
 
@@ -121,16 +127,11 @@ const EditProgramPage = (): ReactElement => {
     loadingProgram ||
     treeLoading ||
     userPartnerChoicesLoading ||
-    pdusubtypeChoicesLoading
+    choicesLoading
   )
     return <LoadingComponent />;
 
-  if (
-    !program ||
-    !treeData ||
-    !userPartnerChoicesData ||
-    !pdusubtypeChoicesData
-  )
+  if (!program || !treeData || !userPartnerChoicesData || !choicesData)
     return null;
 
   const {
@@ -425,7 +426,9 @@ const EditProgramPage = (): ReactElement => {
                             values={values}
                             step={step}
                             setStep={setStep}
-                            pdusubtypeChoicesData={pdusubtypeChoicesData}
+                            pdusubtypeChoicesData={
+                              choicesData?.pduSubtypeChoices
+                            }
                             programHasRdi={programHasRdi}
                             programHasTp={programHasTp}
                             programId={id}
