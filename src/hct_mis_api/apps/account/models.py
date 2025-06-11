@@ -94,7 +94,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         role_assignments = RoleAssignment.objects.filter(business_area_id=business_area_id)
         if program_id:
             role_assignments = role_assignments.filter(Q(program_id=program_id) | Q(program=None))
-        partners = cls.objects.filter(role_assignments__in=role_assignments).distinct()
+        partners = cls.objects.filter(role_assignments__in=role_assignments).order_by("name").distinct()
 
         return [(partner.id, partner.name) for partner in partners]
 
