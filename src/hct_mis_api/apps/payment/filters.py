@@ -105,7 +105,7 @@ class PaymentVerificationPlanFilter(FilterSet):
         model = PaymentVerificationPlan
 
     def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentVerificationPlan]":
-        return qs.filter(Q(payment_plan__program_id=value) | Q(cash_plan__program_id=value))
+        return qs.filter(payment_plan__program_cycle__program_id=value)
 
 
 class PaymentVerificationSummaryFilter(FilterSet):
@@ -394,4 +394,6 @@ class PaymentFilter(FilterSet):
         return qs.filter(parent__program_cycle__program_id=value)
 
     def filter_by_household_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
-        return qs.filter(household_id=value)
+        return qs.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(
+            household_id=value
+        )
