@@ -394,6 +394,4 @@ class PaymentFilter(FilterSet):
         return qs.filter(parent__program_cycle__program_id=value)
 
     def filter_by_household_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
-        return qs.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(
-            household_id=value
-        )
+        return qs.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(household_id=value)
