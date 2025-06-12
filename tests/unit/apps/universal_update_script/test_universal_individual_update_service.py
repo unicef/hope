@@ -197,6 +197,12 @@ class TestUniversalIndividualUpdateService:
         :param program:
         :return:
         """
+        # create one more DeliveryMechanismConfig with empty account_type
+        DeliveryMechanismConfig.objects.get_or_create(
+            fsp=FinancialServiceProviderFactory(),
+            delivery_mechanism=DeliveryMechanism.objects.create(name="Test", code="test", account_type=None),
+            required_fields=["phone_number"],
+        )
         # save old values
         given_name_old = individual.given_name
         sex_old = individual.sex
@@ -219,6 +225,7 @@ class TestUniversalIndividualUpdateService:
         universal_update.save()
         universal_update.document_types.add(DocumentType.objects.first())
         universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
+        DeliveryMechanism.objects.create(name="Cash", code="cash")
         service = UniversalIndividualUpdateService(universal_update)
         template_file = service.generate_xlsx_template()
 

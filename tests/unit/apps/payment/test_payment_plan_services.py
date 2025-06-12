@@ -865,8 +865,19 @@ class TestPaymentPlanServices(APITestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle,
             created_by=self.user,
-            status=PaymentPlan.Status.DRAFT,
+            status=PaymentPlan.Status.TP_LOCKED,
         )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).draft()
+        self.assertEqual(
+            str(e.exception),
+            "Can only promote to Payment Plan if DM/FSP is chosen.",
+        )
+
+        payment_plan.status = PaymentPlan.Status.DRAFT
+        payment_plan.financial_service_provider = self.fsp
+        payment_plan.save()
+
         with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).draft()
         self.assertEqual(
