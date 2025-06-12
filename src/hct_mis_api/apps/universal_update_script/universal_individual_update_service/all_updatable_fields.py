@@ -175,15 +175,17 @@ def get_document_fields() -> list[Any]:
     return [(f"{x}_no_i_c", f"{x}_country_i_c") for x in DocumentType.objects.values_list("key", flat=True)]
 
 
-def get_wallet_fields() -> dict[Any, Any]:
+def get_account_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
     for dm_config in DeliveryMechanismConfig.objects.all():
         if not dm_config.delivery_mechanism.account_type:
             continue
         account_type = dm_config.delivery_mechanism.account_type.key
-        wallet_fields = []
+        wallet_fields = set()
         for field in dm_config.required_fields:
-            wallet_fields.append((f"account__{account_type}__{field}", field))
+            wallet_fields.add((f"account__{account_type}__{field}", field))
+        wallet_fields.add((f"account__{account_type}__*", None))
+        wallet_fields.add((f"account__{account_type}__number", "number"))
         if len(wallet_fields) > 0:
             deliver_mechanism_data_fields[account_type] = tuple(wallet_fields)
     return deliver_mechanism_data_fields
