@@ -35,9 +35,9 @@ export function PaymentChannelField({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <>
-      <Grid size={{ xs:11 }} />
+      <Grid size={{ xs: 11 }} />
       {!isEdited ? (
-        <Grid size={{ xs:1 }}>
+        <Grid size={{ xs: 1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>
@@ -62,7 +62,7 @@ export function PaymentChannelField({
           variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
@@ -85,7 +85,7 @@ export function PaymentChannelField({
           variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
