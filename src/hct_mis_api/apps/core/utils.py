@@ -25,6 +25,7 @@ from typing import (
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Func, Q, Value
 from django.http import Http404
@@ -35,6 +36,7 @@ import pytz
 from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
 from PIL import Image
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
@@ -928,3 +930,19 @@ class JSONBSet(Func):
     def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
         create_missing = Value("true") if create_missing else Value("false")  # type: ignore
         super().__init__(expression, path, new_value, create_missing, **extra)
+
+
+def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> List:
+    from hct_mis_api.apps.core.kobo.api import KoboAPI
+    from hct_mis_api.apps.core.kobo.common import reduce_assets_list
+
+    try:
+        assets = KoboAPI(business_area_slug).get_all_projects_data()
+    except ObjectDoesNotExist as e:
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
+        raise ValidationError("Provided business area does not exist.") from e
+    except AttributeError as error:
+        logger.warning(error)
+        raise ValidationError(str(error)) from error
+
+    return reduce_assets_list(assets, only_deployed=only_deployed)

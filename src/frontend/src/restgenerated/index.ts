@@ -88,6 +88,7 @@ export { FrequencyOfPaymentsEnum as FrequencyOfPaymentsEnumCamelCase } from './m
 export type { FspChoice as FspChoiceCamelCase } from './models/FspChoice';
 export type { FspChoices as FspChoicesCamelCase } from './models/FspChoices';
 export type { FullList as FullListCamelCase } from './models/FullList';
+export type { GetKoboAssetList as GetKoboAssetListCamelCase } from './models/GetKoboAssetList';
 export type { GrievanceChoices as GrievanceChoicesCamelCase } from './models/GrievanceChoices';
 export type { GrievanceComplaintTicketExtras as GrievanceComplaintTicketExtrasCamelCase } from './models/GrievanceComplaintTicketExtras';
 export type { GrievanceCreateNote as GrievanceCreateNoteCamelCase } from './models/GrievanceCreateNote';
@@ -127,6 +128,7 @@ export type { IndividualSimple as IndividualSimpleCamelCase } from './models/Ind
 export type { IndividualUpdateData as IndividualUpdateDataCamelCase } from './models/IndividualUpdateData';
 export { IssueTypeEnum as IssueTypeEnumCamelCase } from './models/IssueTypeEnum';
 export type { IssueTypeExtras as IssueTypeExtrasCamelCase } from './models/IssueTypeExtras';
+export type { KoboAssetObject as KoboAssetObjectCamelCase } from './models/KoboAssetObject';
 export type { LogEntry as LogEntryCamelCase } from './models/LogEntry';
 export { MaritalStatusEnum as MaritalStatusEnumCamelCase } from './models/MaritalStatusEnum';
 export { MemoryDisabilityEnum as MemoryDisabilityEnumCamelCase } from './models/MemoryDisabilityEnum';
@@ -155,6 +157,7 @@ export type { PaginatedGrievanceTicketListList as PaginatedGrievanceTicketListLi
 export type { PaginatedHouseholdListList as PaginatedHouseholdListListCamelCase } from './models/PaginatedHouseholdListList';
 export type { PaginatedHouseholdMemberList as PaginatedHouseholdMemberListCamelCase } from './models/PaginatedHouseholdMemberList';
 export type { PaginatedIndividualListList as PaginatedIndividualListListCamelCase } from './models/PaginatedIndividualListList';
+export type { PaginatedKoboAssetObjectList as PaginatedKoboAssetObjectListCamelCase } from './models/PaginatedKoboAssetObjectList';
 export type { PaginatedLogEntryList as PaginatedLogEntryListCamelCase } from './models/PaginatedLogEntryList';
 export type { PaginatedMessageListList as PaginatedMessageListListCamelCase } from './models/PaginatedMessageListList';
 export type { PaginatedOrganizationList as PaginatedOrganizationListCamelCase } from './models/PaginatedOrganizationList';
