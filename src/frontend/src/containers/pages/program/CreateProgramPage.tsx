@@ -202,7 +202,7 @@ export const CreateProgramPage = (): ReactElement => {
       const response = await createProgram(programData);
 
       showMessage('Programme created.');
-      navigate(`/${baseUrl}/details/${response.id}`);
+      navigate(`/${baseUrl}/details/${response.slug}`);
     } catch (error: any) {
       if (error?.body?.detail) {
         showMessage(error.body.detail);
