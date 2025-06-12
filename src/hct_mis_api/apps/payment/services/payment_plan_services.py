@@ -197,7 +197,7 @@ class PaymentPlanService:
 
     def draft(self) -> PaymentPlan:
         if not self.payment_plan.financial_service_provider:
-            raise GraphQLError("Can only promote to Payment Plan if DM/FSP is chosen.")
+            raise ValidationError("Can only promote to Payment Plan if DM/FSP is chosen.")
         self.payment_plan.status_draft()
         self.payment_plan.save(update_fields=("status_date", "status"))
         return self.payment_plan
