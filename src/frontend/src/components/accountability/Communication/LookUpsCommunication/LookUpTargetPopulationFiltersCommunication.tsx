@@ -2,7 +2,6 @@ import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PaymentPlanStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
   paymentPlanStatusMapping,
@@ -13,6 +12,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { ReactElement } from 'react';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 
 interface LookUpTargetPopulationFiltersCommunicationProps {
   filter;
@@ -52,8 +52,8 @@ export function LookUpTargetPopulationFiltersCommunication({
   };
 
   const preparedStatusChoices = isAccountability
-    ? Object.values(PaymentPlanStatus).filter((key) => key !== 'OPEN')
-    : Object.values(PaymentPlanStatus);
+    ? Object.values(PaymentPlanStatusEnum).filter((key) => key !== 'OPEN')
+    : Object.values(PaymentPlanStatusEnum);
 
   return (
     <FiltersSection

@@ -3,11 +3,9 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  GrievanceTicketQuery,
-  useGrievanceTicketStatusChangeMutation,
-} from '@generated/graphql';
+import { useMutation } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { RestService } from '@restgenerated/services/RestService';
 import { MiśTheme } from '../../theme';
 import {
   GRIEVANCE_CATEGORIES,
@@ -24,6 +22,7 @@ import { useProgramContext } from '../../programContext';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const Separator = styled.div`
   width: 1px;
@@ -60,7 +59,7 @@ export const GrievanceDetailsToolbar = ({
   canClose,
   canAssign,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canEdit: boolean;
   canSetInProgress: boolean;
   canSetOnHold: boolean;
@@ -71,7 +70,7 @@ export const GrievanceDetailsToolbar = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const confirm = useConfirmation();
   const navigate = useNavigate();
   const { isActiveProgram, selectedProgram } = useProgramContext();
@@ -83,7 +82,25 @@ export const GrievanceDetailsToolbar = ({
       to: `/${baseUrl}/grievance/tickets/user-generated`,
     },
   ];
-  const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
+
+  const { mutateAsync, isPending: loading } = useMutation({
+    mutationFn: ({ status }: { status: number }) => {
+      return RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
+        businessAreaSlug: businessArea,
+        id: ticket.id,
+        requestBody: { status },
+      });
+    },
+    onError: (error: any) => {
+      if (error?.response?.data?.errors) {
+        Object.values(error.response.data.errors).forEach((errorMsg: any) => {
+          showMessage(errorMsg);
+        });
+      } else {
+        showMessage(error?.message || 'An error occurred');
+      }
+    },
+  });
 
   const isNew = ticket.status === GRIEVANCE_TICKET_STATES.NEW;
   const isAssigned = ticket.status === GRIEVANCE_TICKET_STATES.ASSIGNED;
@@ -100,16 +117,14 @@ export const GrievanceDetailsToolbar = ({
 
   const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
     (): string => {
-      const householdData =
-        ticket.householdDataUpdateTicketDetails?.householdData || {};
-      const individualData =
-        ticket.individualDataUpdateTicketDetails?.individualData || {};
+      const householdData = ticket.ticketDetails?.householdData || {};
+      const individualData = ticket.ticketDetails?.individualData || {};
 
       const allData = {
         ...householdData,
         ...individualData,
-        ...householdData?.flex_fields,
-        ...individualData?.flex_fields,
+        ...householdData?.flexFields,
+        ...individualData?.flexFields,
       };
       const filterData = (data: any) => {
         const excludedKeys = [
@@ -174,14 +189,11 @@ export const GrievanceDetailsToolbar = ({
       ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
 
     const notApprovedDeleteIndividualChanges =
-      isDeleteIndividualIssue &&
-      ticket.deleteIndividualTicketDetails?.approveStatus === false;
+      isDeleteIndividualIssue && ticket.ticketDetails?.approveStatus === false;
     const notApprovedAddIndividualChanges =
-      isAddIndividualIssue &&
-      ticket.addIndividualTicketDetails?.approveStatus === false;
+      isAddIndividualIssue && ticket.ticketDetails?.approveStatus === false;
     const notApprovedSystemFlaggingChanges =
-      isSystemFlaggingCategory &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+      isSystemFlaggingCategory && ticket.ticketDetails?.approveStatus === false;
 
     let confirmationMessage = '';
     if (notApprovedDeleteIndividualChanges) {
@@ -217,22 +229,17 @@ export const GrievanceDetailsToolbar = ({
   );
 
   const closingWarningText =
-    ticket?.businessArea.postponeDeduplication === true
+    ticket?.postponeDeduplication === true
       ? t(
           'This ticket will be closed without running the deduplication process.',
         )
       : null;
 
-  const changeState = async (status): Promise<void> => {
+  const changeState = async (status: number): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          grievanceTicketId: ticket.id,
-          status,
-        },
-      });
+      await mutateAsync({ status });
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      // Error handling is done in the mutation onError callback
     }
   };
 
@@ -244,8 +251,7 @@ export const GrievanceDetailsToolbar = ({
 
     let additionalContent = '';
     const notApprovedSystemFlaggingChanges =
-      isSystemFlaggingCategory &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+      isSystemFlaggingCategory && ticket.ticketDetails?.approveStatus === false;
 
     if (notApprovedSystemFlaggingChanges) {
       additionalContent = t(
@@ -273,14 +279,12 @@ export const GrievanceDetailsToolbar = ({
 
   const isDeduplicationCategory =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
-  const hasDuplicatedDocument =
-    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument;
+  const hasDuplicatedDocument = ticket?.ticketDetails?.hasDuplicatedDocument;
   const isMultipleDuplicatesVersion =
-    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
-  const selectedIndividual =
-    ticket?.needsAdjudicationTicketDetails?.selectedIndividual;
+    ticket?.ticketDetails?.isMultipleDuplicatesVersion;
+  const selectedIndividual = ticket?.ticketDetails?.selectedIndividual;
   const selectedIndividualsLength =
-    ticket?.needsAdjudicationTicketDetails?.selectedDuplicates.length;
+    ticket?.ticketDetails?.selectedDuplicates.length;
 
   const shouldShowButtonDialog =
     isDeduplicationCategory &&
@@ -314,7 +318,7 @@ export const GrievanceDetailsToolbar = ({
           try {
             await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            // Error handling is done in the mutation onError callback
           }
         })
       }

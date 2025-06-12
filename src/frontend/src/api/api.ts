@@ -9,10 +9,22 @@ export const api = {
     const params = new URLSearchParams();
 
     Object.entries(data).forEach(([key, value]) => {
+      if (typeof key !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(key)) {
+        throw new Error('Invalid parameter key');
+      }
+
       if (Array.isArray(value)) {
-        value.forEach((v) => params.append(key, v.toString()));
+        value.forEach((v) => {
+          if (typeof v !== 'string' && typeof v !== 'number') {
+            throw new Error('Invalid parameter value');
+          }
+          params.append(key, encodeURIComponent(v.toString()));
+        });
       } else {
-        params.append(key, value.toString());
+        if (typeof value !== 'string' && typeof value !== 'number') {
+          throw new Error('Invalid parameter value');
+        }
+        params.append(key, encodeURIComponent(value.toString()));
       }
     });
 
@@ -140,4 +152,35 @@ export const api = {
     }
     return;
   },
+};
+
+export type Params = Record<string, any>;
+
+export const handleApiResponse = async (apiCall) => {
+  try {
+    const response = await apiCall;
+    return response;
+  } catch (error: any) {
+    console.error('API call failed:', error.message || error);
+    throw new Error(`API call failed: ${error.message || 'Unknown error'}`);
+  }
+};
+
+export const handleMutationError = (error: any, action: string): never => {
+  const errorMessage = error?.message || 'An unknown error occurred';
+  throw new Error(`Failed to ${action}: ${errorMessage}`);
+};
+
+export const postRequest = async (
+  url: string,
+  body: any,
+  errorMessage: string,
+) => {
+  try {
+    const response = await api.post(url, body);
+    return response.data;
+  } catch (error) {
+    handleMutationError(error, errorMessage);
+    throw error;
+  }
 };

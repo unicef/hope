@@ -1,4 +1,10 @@
-import { Box, Button, DialogContent, DialogTitle, Grid2 as Grid } from '@mui/material';
+import {
+  Box,
+  Button,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,19 +14,21 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import {
-  PaymentVerificationStatus,
-  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation,
-} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
+import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
 
 export interface Props {
   paymentVerificationId: string;
   status: string;
   enabled: boolean;
   receivedAmount: number;
+  cashOrPaymentPlanId: string;
+  verificationPlanId: string;
 }
 
 export function VerifyManual({
@@ -28,32 +36,38 @@ export function VerifyManual({
   status,
   enabled,
   receivedAmount,
+  cashOrPaymentPlanId,
+  verificationPlanId,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate, { error }] =
-    useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
+  const { businessArea, programId: programSlug } = useBaseUrl();
+
+  const updateVerificationMutation = useMutation({
+    mutationFn: (data: PatchedPaymentVerificationUpdate) =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsVerificationsPartialUpdate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          paymentVerificationPk: verificationPlanId,
+          requestBody: data,
+        },
+      ),
+  });
 
   const submit = async (values): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          paymentVerificationId,
-          received: values.status === 'RECEIVED',
-          receivedAmount:
-            values.status === 'RECEIVED'
-              ? parseFloat(values.receivedAmount).toFixed(2)
-              : 0,
-        },
+      await updateVerificationMutation.mutateAsync({
+        received: values.status === 'RECEIVED',
+        receivedAmount:
+          values.status === 'RECEIVED' ? parseFloat(values.receivedAmount) : 0,
       });
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-      return;
-    }
-    if (!error) {
       setVerifyManualDialogOpen(false);
       showMessage(t('Payment has been verified.'));
+    } catch (e) {
+      showMessage(e.message || t('Failed to verify payment'));
     }
   };
 
@@ -76,9 +90,7 @@ export function VerifyManual({
               data-cy="button-ed-plan"
               disabled={!enabled}
             >
-              {status === PaymentVerificationStatus.Pending
-                ? t('Verify')
-                : t('Edit')}
+              {status === 'PENDING' ? t('Verify') : t('Edit')}
             </Button>
           </Box>
           <Dialog
@@ -114,7 +126,7 @@ export function VerifyManual({
                       component={FormikRadioGroup}
                     />
                   </Grid>
-                  <Grid size={{ xs:6 }}>
+                  <Grid size={{ xs: 6 }}>
                     {values.status === 'RECEIVED' && (
                       <Field
                         name="receivedAmount"

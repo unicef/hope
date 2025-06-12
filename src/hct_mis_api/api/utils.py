@@ -1,7 +1,5 @@
-from base64 import b64encode
 from typing import Any, Dict, List, Union
 
-from rest_framework import serializers
 from rest_framework.authentication import SessionAuthentication
 
 
@@ -36,17 +34,3 @@ def humanize_errors(errors: Dict) -> Dict:
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request: Any) -> None:
         return
-
-
-class EncodedIdSerializerMixin(serializers.ModelSerializer):
-    id = serializers.SerializerMethodField()
-
-    class Meta:
-        abstract = True
-
-    def encode_id_base64_api(self, id_string: str, model_name: str) -> str:
-        return b64encode(f"{model_name}:{str(id_string)}".encode()).decode()
-
-    def get_id(self, obj: Any) -> str:
-        model_name = self.Meta.model.__name__
-        return self.encode_id_base64_api(obj.id, model_name)

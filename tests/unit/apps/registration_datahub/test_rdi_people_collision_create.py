@@ -3,6 +3,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
+from django.core.management import call_command
 from django.test import TestCase
 
 import pytest
@@ -13,6 +14,7 @@ from hct_mis_api.apps.core.fixtures import (
     create_pdu_flexible_attribute,
 )
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
+from hct_mis_api.apps.geo.fixtures import generate_small_areas_for_afghanistan_only
 from hct_mis_api.apps.household.models import PendingHousehold, PendingIndividual
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -26,17 +28,18 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 @pytest.mark.elasticsearch
 class TestRdiXlsxPeopleCollisions(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("loadcountries")
+        call_command("loadcountrycodes")
         PartnerFactory(name="UNHCR")
         content = Path(
             f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test_collision.xlsx"
         ).read_bytes()
         cls.file = File(BytesIO(content), name="rdi_people_test_collision.xlsx")
         cls.business_area = create_afghanistan()
+        generate_small_areas_for_afghanistan_only()
 
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
             RdiXlsxPeopleCreateTask,

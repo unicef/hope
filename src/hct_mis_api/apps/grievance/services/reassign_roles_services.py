@@ -7,7 +7,6 @@ from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
@@ -54,10 +53,10 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
     )
     for _key, role_data in role_reassign_data.items():
         role_name = role_data.get("role")
-        new_individual = get_object_or_404(Individual, id=decode_id_string(role_data.get("new_individual")))
+        new_individual = get_object_or_404(Individual, id=role_data.get("new_individual"))
         old_individual_to_log = Individual.objects.get(id=new_individual.id)
-        household = get_object_or_404(Household, id=decode_id_string(role_data.get("household")))
-        individual_which_loses_role = get_object_or_404(Individual, id=decode_id_string(role_data.get("individual")))
+        household = get_object_or_404(Household, id=role_data.get("household"))
+        individual_which_loses_role = get_object_or_404(Individual, id=role_data.get("individual"))
 
         if new_individual.program != individual_which_loses_role.program:
             raise ValidationError("Cannot reassign role to individual from different program")
@@ -189,8 +188,8 @@ def reassign_roles_on_disable_individual_service(
     roles_to_delete = []
     for role_data in role_reassign_data.values():
         role_name = role_data.get("role")
-        new_individual = get_object_or_404(Individual, id=decode_id_string(role_data.get(individual_key)))
-        household = get_object_or_404(Household, id=decode_id_string(role_data.get("household")))
+        new_individual = get_object_or_404(Individual, id=role_data.get(individual_key))
+        household = get_object_or_404(Household, id=role_data.get("household"))
         old_individual = Individual.objects.get(id=new_individual.id)
 
         if role_name == HEAD:
@@ -263,8 +262,8 @@ def reassign_roles_on_update_service(
     roles_to_delete = []
     for role_data in role_reassign_data.values():
         role_name = role_data.get("role")
-        new_individual = get_object_or_404(Individual, id=decode_id_string(role_data.get("individual")))
-        household = get_object_or_404(Household, id=decode_id_string(role_data.get("household")))
+        new_individual = get_object_or_404(Individual, id=role_data.get("individual"))
+        household = get_object_or_404(Household, id=role_data.get("household"))
         old_individual = Individual.objects.get(id=new_individual.id)
 
         if role_name == HEAD:

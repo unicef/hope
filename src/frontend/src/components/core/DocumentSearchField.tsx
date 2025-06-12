@@ -1,14 +1,13 @@
-import { Grid2 as Grid, MenuItem } from '@mui/material';
-import { SelectFilter } from '@core/SelectFilter';
 import { SearchTextField } from '@core/SearchTextField';
-import { ChoiceObject } from '@generated/graphql';
+import { SelectFilter } from '@core/SelectFilter';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 interface DocumentSearchFieldProps {
   onChange: (key: string, value: string) => void;
   type: string;
   number: string;
-  choices: ChoiceObject[];
+  choices: Record<string, any>[];
 }
 
 export const DocumentSearchField = ({
@@ -20,7 +19,7 @@ export const DocumentSearchField = ({
   const { t } = useTranslation();
 
   return (
-    <Grid container  size={{ xs: 6 }} spacing={0}>
+    <Grid container size={{ xs: 6 }} spacing={0}>
       <Grid size={{ xs: 4 }}>
         <SelectFilter
           onChange={(e) => onChange('documentType', e.target.value)}
@@ -38,7 +37,7 @@ export const DocumentSearchField = ({
           ))}
         </SelectFilter>
       </Grid>
-      <Grid size={{ xs:8 }}>
+      <Grid size={{ xs: 8 }}>
         <SearchTextField
           value={number}
           label={t('Document Number')}

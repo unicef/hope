@@ -1,7 +1,4 @@
-import { Grid2 as Grid, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { choicesToDict, renderUserName } from '@utils/utils';
-import { SurveyQuery, SurveysChoiceDataQuery } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
@@ -9,12 +6,17 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Grid2 as Grid, Typography } from '@mui/material';
+import { PaginatedSurveyCategoryChoiceList } from '@restgenerated/models/PaginatedSurveyCategoryChoiceList';
+import { Survey } from '@restgenerated/models/Survey';
+import { choicesToDict, renderUserName } from '@utils/utils';
 import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 
 interface SurveyDetailsProps {
-  survey: SurveyQuery['survey'];
-  choicesData: SurveysChoiceDataQuery;
+  survey: Survey;
+  choicesData: PaginatedSurveyCategoryChoiceList;
 }
 
 function SurveyDetails({
@@ -22,9 +24,12 @@ function SurveyDetails({
   choicesData,
 }: SurveyDetailsProps): ReactElement {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
-  const { category, title, createdBy, createdAt, program, body } = survey;
-  const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
+  const { baseUrl, programId } = useBaseUrl();
+  const {
+    selectedProgram: { name: programName },
+  } = useProgramContext();
+  const { category, title, createdBy, createdAt, body } = survey;
+  const categoryDict = choicesToDict(choicesData.results);
 
   return (
     <ContainerColumnWithBorder>
@@ -55,11 +60,12 @@ function SurveyDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Target Population')}>
+              {/* //TODO: is it correct id for the link below? */}
               {survey?.paymentPlan ? (
                 <BlackLink
-                  to={`/${baseUrl}/target-population/${survey?.paymentPlan.id}`}
+                  to={`/${baseUrl}/target-population/${survey?.paymentPlan}`}
                 >
-                  {survey?.paymentPlan.name}
+                  {survey?.paymentPlan}
                 </BlackLink>
               ) : (
                 '-'
@@ -68,13 +74,9 @@ function SurveyDetails({
           </Grid>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Programme')}>
-              {program ? (
-                <BlackLink to={`/${baseUrl}/programmes/${program.id}`}>
-                  {program.name}
-                </BlackLink>
-              ) : (
-                '-'
-              )}
+              <BlackLink to={`/${baseUrl}/programmes/${programId}`}>
+                {programName}
+              </BlackLink>
             </LabelizedField>
           </Grid>
           {body && (

@@ -7,8 +7,9 @@ import pytest
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 
+pytestmark = pytest.mark.django_db()
 
-@pytest.mark.django_db
+
 class TestAutocompleteWidget:
     def test_get_url_without_business_area(self) -> None:
         widget = AutocompleteWidget(model=Program, admin_site="admin")

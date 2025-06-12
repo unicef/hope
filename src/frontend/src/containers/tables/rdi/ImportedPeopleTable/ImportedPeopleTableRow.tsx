@@ -13,9 +13,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
 import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 interface ImportedIndividualsTableRowProps {
-  individual;
+  individual: IndividualList;
   choices: HouseholdChoiceDataQuery;
   rdi;
 }
@@ -102,8 +103,8 @@ export function ImportedPeopleTableRow({
         individual.deduplicationBatchResults?.length ? (
           <DedupeBiographicalBiometricResults
             status={renderDeduplicationStatus(
-              individual.deduplicationBatchStatus,
-              individual.biometricDeduplicationBatchStatus,
+              individual.deduplicationBatchStatus as any,
+              individual.biometricDeduplicationBatchStatus as any,
               deduplicationBatchDict,
             )}
             results={individual.deduplicationBatchResults}
@@ -113,19 +114,19 @@ export function ImportedPeopleTableRow({
           />
         ) : (
           renderDeduplicationStatus(
-            individual.deduplicationBatchStatus,
-            individual.biometricDeduplicationBatchStatus,
+            individual.deduplicationBatchStatus as any,
+            individual.biometricDeduplicationBatchStatus as any,
             deduplicationBatchDict,
           )
         )}
       </TableCell>
       <TableCell align="left">
         {individual.biometricDeduplicationGoldenRecordResults?.length ||
-        individual.deduplicationGoldenRecordsResults?.length ? (
+        individual.deduplicationGoldenRecordResults?.length ? (
           <DedupeBiographicalBiometricResults
             status={renderDeduplicationStatus(
-              individual.deduplicationGoldenRecordStatus,
-              individual.biometricDeduplicationGoldenRecordStatus,
+              individual.deduplicationGoldenRecordStatus as any,
+              individual.biometricDeduplicationGoldenRecordStatus as any,
               deduplicationGoldenDict,
             )}
             results={individual.deduplicationGoldenRecordResults}
@@ -136,8 +137,8 @@ export function ImportedPeopleTableRow({
           />
         ) : (
           renderDeduplicationStatus(
-            individual.deduplicationGoldenRecordResults,
-            individual.biometricDeduplicationGoldenRecordResults,
+            individual.deduplicationGoldenRecordResults as any,
+            individual.biometricDeduplicationGoldenRecordResults as any,
             deduplicationGoldenDict,
           )
         )}

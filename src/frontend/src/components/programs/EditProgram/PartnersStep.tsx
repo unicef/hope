@@ -4,7 +4,8 @@ import { Field, FieldArray } from 'formik';
 import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { AllAreasTreeQuery, ProgramPartnerAccess } from '@generated/graphql';
+import { ProgramPartnerAccess } from '@generated/graphql';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -15,7 +16,7 @@ import { LoadingButton } from '@components/core/LoadingButton';
 
 interface PartnersStepProps {
   values;
-  allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
+  allAreasTreeData: AreaTree[];
   partnerChoices;
   submitForm: () => void;
   setFieldValue;

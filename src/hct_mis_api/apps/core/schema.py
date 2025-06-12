@@ -394,8 +394,6 @@ class Query(graphene.ObjectType):
         LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
     )
     data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
-    data_collection_type_choices = graphene.List(DataCollectingTypeChoiceObject)
-    pdu_subtype_choices = graphene.List(PDUSubtypeChoiceObject)
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
@@ -491,32 +489,6 @@ class Query(graphene.ObjectType):
 
     def resolve_all_languages(self, info: Any, code: str, **kwargs: Any) -> List[Language]:
         return Languages.filter_by_code(code)
-
-    def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        data_collecting_types = (
-            DataCollectingType.objects.filter(
-                Q(Q(limit_to__slug=info.context.headers.get("Business-Area").lower()) | Q(limit_to__isnull=True)),
-                active=True,
-                deprecated=False,
-            )
-            .exclude(code__iexact="unknown")
-            .only("code", "label", "description", "type")
-            .values("code", "label", "description", "type")
-        )
-        result = []
-        for data_collection_type in data_collecting_types:
-            result.append(
-                {
-                    "name": data_collection_type["label"],
-                    "value": data_collection_type["code"],
-                    "description": data_collection_type["description"],
-                    "type": data_collection_type["type"],
-                }
-            )
-        return result
-
-    def resolve_pdu_subtype_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return [{"value": choice[0], "display_name": choice[1]} for choice in PeriodicFieldData.TYPE_CHOICES]
 
 
 class PeriodicFieldNode(DjangoObjectType):

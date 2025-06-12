@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestCreateCommunicationMessage::test_create_accountability_communication_message_by_households_0_FULL_LIST 1'] = {
@@ -22,7 +21,6 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                 },
                 'paymentPlan': None,
                 'randomSamplingArguments': '{"excluded_admin_areas": []}',
-                'registrationDataImport': None,
                 'sampleSize': 14,
                 'title': 'Test message'
             }
@@ -45,7 +43,6 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                 },
                 'paymentPlan': None,
                 'randomSamplingArguments': None,
-                'registrationDataImport': None,
                 'sampleSize': 1,
                 'title': 'Test message'
             }
@@ -70,7 +67,6 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                     'name': 'Test Message Payment Plan'
                 },
                 'randomSamplingArguments': '{"excluded_admin_areas": []}',
-                'registrationDataImport': None,
                 'sampleSize': 14,
                 'title': 'Test message'
             }
@@ -95,7 +91,6 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                     'name': 'Test Message Payment Plan'
                 },
                 'randomSamplingArguments': None,
-                'registrationDataImport': None,
                 'sampleSize': 1,
                 'title': 'Test message'
             }

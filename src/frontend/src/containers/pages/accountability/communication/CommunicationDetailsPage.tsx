@@ -8,7 +8,9 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { useAccountabilityCommunicationMessageQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { MessageDetail } from '@restgenerated/models/MessageDetail';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import RecipientsTable from '../../../tables/Communication/RecipientsTable/RecipientsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -21,20 +23,30 @@ import CommunicationDetails from '@components/accountability/Communication/Commu
 function CommunicationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl } = useBaseUrl();
-  const { data, loading, error } = useAccountabilityCommunicationMessageQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
+  const { businessArea, baseUrl } = useBaseUrl();
+
+  const {
+    data: message,
+    isLoading,
+    error,
+  } = useQuery<MessageDetail>({
+    queryKey: ['accountabilityCommunicationMessage', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsMessagesRetrieve({
+        businessAreaSlug: businessArea,
+        id: id,
+        programSlug: 'TODO',
+      }),
+    enabled: !!id && !!businessArea,
   });
+
   const permissions = usePermissions();
 
-  if (loading) return <LoadingComponent />;
+  if (isLoading) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null) return null;
-
-  const message = data.accountabilityCommunicationMessage;
+  if (!message || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

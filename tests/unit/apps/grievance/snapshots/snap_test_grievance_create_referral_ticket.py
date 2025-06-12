@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateReferralTicketQuery::test_create_referral_ticket_with_household_and_individual_extras_0_with_permission 1'] = {

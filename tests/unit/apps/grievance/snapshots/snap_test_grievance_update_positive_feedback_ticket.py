@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestGrievanceUpdatePositiveFeedbackTicketQuery::test_update_positive_feedback_ticket_not_supported_0_with_permission 1'] = {

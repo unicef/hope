@@ -5,9 +5,7 @@ from django.shortcuts import get_object_or_404
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.accountability.services.sampling import Sampling
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
 
 
@@ -24,12 +22,11 @@ class SurveyCrudServices:
         )
 
         if payment_plan := input_data.get("payment_plan"):
-            obj = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan))
-            households = Household.objects.filter(payment__parent=obj)
-            survey.payment_plan = obj
-            survey.program = obj.program_cycle.program
+            households = Household.objects.filter(payment__parent=payment_plan)
+            survey.payment_plan = payment_plan
+            survey.program = payment_plan.program_cycle.program
         elif program := input_data.get("program"):
-            obj = get_object_or_404(Program, id=decode_id_string(program))
+            obj = get_object_or_404(Program, id=program)
             households = obj.households_with_payments_in_program
             survey.program = obj
         else:

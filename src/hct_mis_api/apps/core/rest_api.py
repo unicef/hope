@@ -7,8 +7,14 @@ from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.models import (
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.core.schema import get_fields_attr_generators, sort_by_attr
+from hct_mis_api.apps.core.utils import to_choice_object
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -59,6 +65,17 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
         return None
 
 
+class CollectorAttributeSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    type = serializers.CharField()
+    name = serializers.CharField()
+    lookup = serializers.CharField()
+    label = serializers.DictField()  # type: ignore
+    hint = serializers.CharField()
+    required = serializers.BooleanField()  # type: ignore
+    choices = serializers.ListField(child=serializers.CharField())
+
+
 class FieldAttributeSerializer(serializers.Serializer):
     id = serializers.CharField()
     type = serializers.CharField()
@@ -69,6 +86,13 @@ class FieldAttributeSerializer(serializers.Serializer):
     choices = CoreFieldChoiceSerializer(many=True)
     associated_with = serializers.SerializerMethodField()
     is_flex_field = serializers.SerializerMethodField()
+    pdu_data = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_pdu_data(obj: Union[Dict, FlexibleAttribute]) -> Optional[PeriodicFieldData]:
+        if isinstance(obj, FlexibleAttribute):
+            return obj.pdu_data
+        return None
 
     def get_labels(self, obj: Any) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
@@ -95,6 +119,7 @@ class FieldAttributeSerializer(serializers.Serializer):
 
 @api_view()
 def all_fields_attributes(request: "Request") -> "Response":
+    """Returns the list of FieldAttribute."""
     business_area_slug = request.data.get("business_area_slug")
 
     records = cache.get(business_area_slug)
@@ -107,3 +132,9 @@ def all_fields_attributes(request: "Request") -> "Response":
 
     cache.set(business_area_slug, data)
     return Response(data)
+
+
+@api_view()
+def get_currency_choices(request: "Request") -> "Response":
+    """Returns the list of currency choices."""
+    return Response(to_choice_object(CURRENCY_CHOICES))

@@ -11,24 +11,22 @@ import {
 import { GetApp } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
-import {
-  Action,
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanQuery,
-  useAllFinancialServiceProviderXlsxTemplatesQuery,
-  useExportXlsxPpListPerFspMutation,
-} from '../../../../../__generated__/graphql';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { PaymentPlanExportAuthCode } from '@restgenerated/models/PaymentPlanExportAuthCode';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
@@ -40,27 +38,96 @@ export function AcceptedPaymentPlanHeaderButtons({
   const [open, setOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
-  const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery();
-  const { mutatePaymentPlanAction: sendXlsxPassword, loading: loadingSend } =
-    usePaymentPlanAction(Action.SendXlsxPassword, paymentPlan.id, () =>
-      showMessage(t('Password has been sent.')),
-    );
+  const { businessArea, programId } = useBaseUrl();
 
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPpListPerFspMutation();
+  // TODO: Replace with proper REST API call when available
+  // Temporary mock data structure to match GraphQL response
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['fspXlsxTemplates'],
+    queryFn: () =>
+      Promise.resolve({
+        allFinancialServiceProviderXlsxTemplates: {
+          edges: [], // Empty array for now - will be populated when REST endpoint is available
+        },
+      }),
+  });
+
+  const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
+    {
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansSendXlsxPasswordRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: paymentPlan.id,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(t('Password has been sent.'));
+      },
+      onError: (error) => {
+        showMessage(
+          error.message || t('An error occurred while sending the password'),
+        );
+      },
+    },
+  );
+
+  // Replace GraphQL mutation with REST API call
+  const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
+    mutationFn: async (variables: { fspXlsxTemplateId?: string }) => {
+      const requestBody: PaymentPlanExportAuthCode = {
+        fspXlsxTemplateId: variables.fspXlsxTemplateId || '',
+      };
+      return RestService.restBusinessAreasProgramsPaymentPlansGenerateXlsxWithAuthCodeCreate(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+          requestBody,
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage(t('Exporting XLSX started'));
+    },
+    onError: (error: any) => {
+      showMessage(
+        error?.body?.errors ||
+          error?.message ||
+          'An error occurred while exporting',
+      );
+    },
+  });
 
   const {
-    mutatePaymentPlanAction: sendToPaymentGateway,
-    loading: LoadingSendToPaymentGateway,
-  } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () =>
-    showMessage(t('Sending to Payment Gateway started')),
-  );
+    mutateAsync: sendToPaymentGateway,
+    isPending: LoadingSendToPaymentGateway,
+  } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansSendToPaymentGatewayRetrieve(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          id: paymentPlan.id,
+        },
+      ),
+    onSuccess: () => {
+      showMessage(t('Sending to Payment Gateway started'));
+    },
+    onError: (error) => {
+      showMessage(
+        error.message ||
+          t('An error occurred while sending to payment gateway'),
+      );
+    },
+  });
 
   const shouldDisableExportXlsx =
     loadingExport ||
     !paymentPlan.canExportXlsx ||
     paymentPlan.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting;
+      PaymentPlanBackgroundActionStatusEnum.XLSX_EXPORTING;
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
@@ -82,29 +149,26 @@ export function AcceptedPaymentPlanHeaderButtons({
   const handleExportAPI = async () => {
     try {
       await mutateExport({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-          fspXlsxTemplateId: selectedTemplate,
-        },
+        fspXlsxTemplateId: selectedTemplate,
       });
-      showMessage(t('Exporting XLSX started'));
       handleClose();
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+    } catch (e: any) {
+      showMessage(
+        e?.body?.errors || e?.message || 'An error occurred while exporting',
+      );
     }
   };
 
   const handleExport = async () => {
     try {
       await mutateExport({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-        },
+        fspXlsxTemplateId: '',
       });
-      showMessage(t('Exporting XLSX started'));
       handleClose();
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+    } catch (e: any) {
+      showMessage(
+        e?.body?.errors || e?.message || 'An error occurred while exporting',
+      );
     }
   };
 

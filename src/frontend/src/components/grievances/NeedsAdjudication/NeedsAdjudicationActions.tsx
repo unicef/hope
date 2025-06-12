@@ -9,14 +9,12 @@ import { useProgramContext } from 'src/programContext';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { BiometricsResults } from './BiometricsResults';
-import {
-  GrievanceTicketQuery,
-  useApproveNeedsAdjudicationMutation,
-  GrievanceTicketDocument,
-} from '@generated/graphql';
+import { useMutation } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 interface NeedsAdjudicationActionsProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   isEditable: boolean;
   canApprove: boolean;
   isTicketForApproval: boolean;
@@ -35,23 +33,33 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   setSelectedIndividualIds,
 }) => {
   const { showMessage } = useSnackbar();
-  const [approve] = useApproveNeedsAdjudicationMutation({
-    refetchQueries: () => [
-      {
-        query: GrievanceTicketDocument,
-        variables: { id: ticket.id },
-      },
-    ],
-  });
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const navigate = useNavigate();
   const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
-  const { dedupEngineSimilarityPair } =
-    ticket.needsAdjudicationTicketDetails.extraData;
+  const { dedupEngineSimilarityPair } = ticket.ticketDetails.extraData;
+
+  const { mutateAsync: approve, isPending: isApproving } = useMutation({
+    mutationFn: async (body: Record<string, any>) => {
+      return RestService.restBusinessAreasGrievanceTicketsApproveNeedsAdjudicationCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: ticket.id,
+          requestBody: body,
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage(t('Action successful'));
+      setSelectedIndividualIds([]);
+    },
+    onError: (error: any) => {
+      showMessage(error?.body?.errors || error?.message || 'An error occurred');
+    },
+  });
 
   return (
     <Box
@@ -97,7 +105,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
         {isEditable && canApprove && (
           <>
             <Button
-              disabled={actionsDisabled}
+              disabled={actionsDisabled || isApproving}
               data-cy="button-mark-distinct"
               onClick={() =>
                 confirm({
@@ -106,14 +114,12 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
                 }).then(async () => {
                   try {
                     await approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        distinctIndividualIds: selectedIndividualIds,
-                      },
+                      distinctIndividualIds: selectedIndividualIds,
                     });
-                    setSelectedIndividualIds([]);
-                  } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                  } catch (e: any) {
+                    showMessage(
+                      e?.body?.errors || e?.message || 'An error occurred',
+                    );
                   }
                   setIsEditMode(false);
                 })
@@ -124,7 +130,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
               {t('Mark as Distinct')}
             </Button>
             <Button
-              disabled={actionsDisabled}
+              disabled={actionsDisabled || isApproving}
               data-cy="button-mark-duplicate"
               onClick={() =>
                 confirm({
@@ -134,14 +140,12 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
                 }).then(async () => {
                   try {
                     await approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        duplicateIndividualIds: selectedIndividualIds,
-                      },
+                      duplicateIndividualIds: selectedIndividualIds,
                     });
-                    setSelectedIndividualIds([]);
-                  } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                  } catch (e: any) {
+                    showMessage(
+                      e?.body?.errors || e?.message || 'An error occurred',
+                    );
                   }
                   setIsEditMode(false);
                 })
@@ -158,7 +162,7 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
         variant="outlined"
         color="error"
         data-cy="button-clear"
-        disabled={actionsDisabled}
+        disabled={actionsDisabled || isApproving}
         onClick={() =>
           confirm({
             content: t(
@@ -166,15 +170,9 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
             ),
           }).then(async () => {
             try {
-              await approve({
-                variables: {
-                  grievanceTicketId: ticket.id,
-                  clearIndividualIds: selectedIndividualIds,
-                },
-              });
-              setSelectedIndividualIds([]);
-            } catch (e) {
-              e.graphQLErrors.map((x) => showMessage(x.message));
+              await approve({ clearIndividualIds: selectedIndividualIds });
+            } catch (e: any) {
+              showMessage(e?.body?.errors || e?.message || 'An error occurred');
             }
             setIsEditMode(false);
           })

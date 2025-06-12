@@ -2,11 +2,10 @@ from typing import List
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
+from hct_mis_api.apps.core.utils import to_snake_case
 from hct_mis_api.apps.grievance.celery_tasks import (
     deduplicate_and_check_against_sanctions_list_task,
 )
@@ -53,9 +52,7 @@ class AddIndividualService(DataChangeService):
     def save(self) -> List[GrievanceTicket]:
         data_change_extras = self.extras.get("issue_type")
         add_individual_issue_type_extras = data_change_extras.get("add_individual_issue_type_extras")
-        household_encoded_id = add_individual_issue_type_extras.get("household")
-        household_id = decode_id_string(household_encoded_id)
-        household = get_object_or_404(Household, id=household_id)
+        household = add_individual_issue_type_extras.get("household")
         individual_data = add_individual_issue_type_extras.get("individual_data", {})
         documents = individual_data.pop("documents", [])
         to_phone_number_str(individual_data, "phone_no")

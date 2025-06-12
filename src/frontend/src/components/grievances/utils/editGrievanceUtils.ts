@@ -1,5 +1,5 @@
 import camelCase from 'lodash/camelCase';
-import { GrievanceTicketQuery, PaymentNode } from '@generated/graphql';
+import { PaymentNode } from '@generated/graphql';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   camelizeArrayObjects,
@@ -9,6 +9,9 @@ import { ReactElement } from 'react';
 import AddIndividualDataChange from '../AddIndividualDataChange';
 import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
+import { UpdateGrievanceTicketExtras } from '@restgenerated/models/UpdateGrievanceTicketExtras';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -41,15 +44,15 @@ interface EditValuesTypes {
 
 function prepareInitialValueAddIndividual(
   initialValuesArg: EditValuesTypes,
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const individualData = {
-    ...ticket.addIndividualTicketDetails.individualData,
+    ...ticket.ticketDetails.individualData,
   };
-  const flexFields = individualData.flex_fields;
-  delete individualData.flex_fields;
+  const flexFields = individualData.flexFields;
+  delete individualData.flexFields;
   initialValues.individualData = Object.entries(individualData).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       // eslint-disable-next-line no-param-reassign,prefer-destructuring
@@ -135,15 +138,15 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
 
 function prepareInitialValueEditHousehold(
   initialValuesArg,
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const householdData = {
-    ...ticket.householdDataUpdateTicketDetails.householdData,
+    ...ticket.ticketDetails.householdData,
   };
-  const flexFields = householdData.flex_fields;
-  delete householdData.flex_fields;
+  const flexFields = householdData.flexFields;
+  delete householdData.flexFields;
   const householdDataArray = Object.entries(householdData).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],
@@ -172,7 +175,7 @@ const prepareInitialValueDict = {
 };
 
 export function prepareInitialValues(
-  ticket: GrievanceTicketQuery['grievanceTicket'],
+  ticket: GrievanceTicketDetail,
 ): EditValuesTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
@@ -192,7 +195,12 @@ export function prepareInitialValues(
     issueType: ticket.issueType || '',
     paymentRecord: ticket?.paymentRecord?.id || null,
     selectedPaymentRecords: ticket?.paymentRecord?.id
-      ? [ticket.paymentRecord]
+      ? [
+          ticket.paymentRecord as Pick<
+            PaymentNode,
+            'id' | 'deliveredQuantity' | 'entitlementQuantity'
+          >,
+        ]
       : [],
     selectedLinkedTickets: ticket.linkedTickets.map(
       (linkedTicket) => linkedTicket.id,
@@ -542,4 +550,72 @@ export function prepareVariables(_businessArea, values, ticket) {
     grievanceTypeIssueTypeDict,
   );
   return prepareFunction(requiredVariables, values);
+}
+
+// REST API version for updating grievance tickets
+export function prepareRestUpdateVariables(
+  values: EditValuesTypes,
+  ticket: GrievanceTicketDetail,
+): PatchedUpdateGrievanceTicket {
+  const baseUpdate: PatchedUpdateGrievanceTicket = {
+    description: values.description,
+    assignedTo: values.assignedTo,
+    language: values.language,
+    admin: values?.admin,
+    area: values.area,
+    household: values.selectedHousehold?.id,
+    individual: values.selectedIndividual?.id,
+    priority:
+      values.priority === 'Not set' ||
+      values.priority === null ||
+      values.priority === ''
+        ? 0
+        : Number(values.priority),
+    urgency:
+      values.urgency === 'Not set' ||
+      values.urgency === null ||
+      values.urgency === ''
+        ? 0
+        : Number(values.urgency),
+    partner: values.partner ? Number(values.partner) : undefined,
+    comments: values.comments,
+    program: ticket.programs?.[0]?.id || values?.program,
+    paymentRecord: values.selectedPaymentRecords
+      ? values.selectedPaymentRecords[0]?.id
+      : undefined,
+    documentation: values.documentation || undefined,
+    documentationToUpdate: values.documentationToUpdate
+      ? values.documentationToUpdate
+          .filter((el) => el)
+          .map((doc) => ({
+            id: String(doc.id),
+            name: doc.name,
+            file: doc.file,
+          }))
+      : undefined,
+    documentationToDelete: values.documentationToDelete || undefined,
+    linkedTickets: values.selectedLinkedTickets || undefined,
+  };
+
+  // For now, keep extras minimal - can be expanded later based on requirements
+  if (values.individualData || values.householdDataUpdateFields) {
+    const extras: UpdateGrievanceTicketExtras = {};
+
+    // Simple approach for now - just pass the data as-is
+    if (values.individualData) {
+      extras.individualDataUpdateIssueTypeExtras = {
+        individualData: values.individualData,
+      };
+    }
+
+    if (values.householdDataUpdateFields) {
+      extras.householdDataUpdateIssueTypeExtras = {
+        householdData: values.householdDataUpdateFields,
+      };
+    }
+
+    baseUpdate.extras = extras;
+  }
+
+  return baseUpdate;
 }

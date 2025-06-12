@@ -5,11 +5,10 @@ import { FieldArray } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllIndividualsQuery,
-  useAllAddIndividualFieldsQuery,
-  useIndividualLazyQuery,
-} from '@generated/graphql';
+import { useAllAddIndividualFieldsQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
@@ -21,6 +20,7 @@ import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldA
 import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -41,25 +41,30 @@ function EditIndividualDataChange({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
-    values.selectedIndividual;
+  const individual: IndividualList = values.selectedIndividual;
   const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } =
     useAllAddIndividualFieldsQuery({ fetchPolicy: 'network-only' });
 
-  const [
-    getIndividual,
-    { data: fullIndividual, loading: fullIndividualLoading },
-  ] = useIndividualLazyQuery({ variables: { id: individual?.id } });
-
-  useEffect(() => {
-    if (individual) {
-      getIndividual();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.selectedIndividual]);
+  const { data: fullIndividual, isLoading: fullIndividualLoading } = useQuery({
+    queryKey: ['individual', businessAreaSlug, programSlug, individual?.id],
+    queryFn: () => {
+      if (!individual?.id) return null;
+      return RestService.restBusinessAreasProgramsIndividualsRetrieve({
+        businessAreaSlug,
+        programSlug,
+        id: individual.id,
+      });
+    },
+    enabled:
+      !!individual?.id &&
+      !!businessAreaSlug &&
+      !!programSlug &&
+      programSlug !== 'all',
+  });
 
   useEffect(() => {
     if (
@@ -108,7 +113,7 @@ function EditIndividualDataChange({
                       <EditIndividualDataChangeFieldRow
                         itemValue={item}
                         index={index}
-                        individual={fullIndividual.individual}
+                        individual={fullIndividual}
                         fields={
                           addIndividualFieldsData.allAddIndividualsFieldsAttributes
                         }
@@ -149,7 +154,7 @@ function EditIndividualDataChange({
           <ExistingDocumentFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
+            individual={fullIndividual}
             addIndividualFieldsData={addIndividualFieldsData}
           />
           {!isEditTicket && (
@@ -169,7 +174,7 @@ function EditIndividualDataChange({
           <ExistingIdentityFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
+            individual={fullIndividual}
             addIndividualFieldsData={addIndividualFieldsData}
           />
           {!isEditTicket && (
@@ -188,7 +193,7 @@ function EditIndividualDataChange({
           <ExistingPaymentChannelFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
+            individual={fullIndividual}
           />
           {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
         </Box>

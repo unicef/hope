@@ -1,21 +1,21 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  AllPaymentsForTableQueryVariables,
-  HouseholdNode,
-  PaymentNode,
-  useAllPaymentsForTableQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '../../UniversalTable';
-import { PaymentsHouseholdTableRow } from './PaymentsHouseholdTableRow';
-import { adjustHeadCells } from '@utils/utils';
-import { useProgramContext } from 'src/programContext';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { headCells } from './PaymentsHouseholdTableHeadCells';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { PaymentList } from '@restgenerated/models/PaymentList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { adjustHeadCells } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import { headCells } from './PaymentsHouseholdTableHeadCells';
+import { PaymentsHouseholdTableRow } from './PaymentsHouseholdTableRow';
 
 interface PaymentsHouseholdTableProps {
-  household?: HouseholdNode;
+  household?: HouseholdDetail;
   openInNewTab?: boolean;
   businessArea: string;
   canViewPaymentRecordDetails: boolean;
@@ -28,11 +28,39 @@ function PaymentsHouseholdTable({
 }: PaymentsHouseholdTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const initialVariables = {
-    householdId: household?.id,
-    businessArea,
-    program: programId,
+  const initialQueryVariables = {
+    id: household?.id,
+    businessAreaSlug: businessArea,
+    programSlug: programId,
   };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      queryVariables,
+      household?.id,
+      businessArea,
+      programId,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsHouseholdsPaymentsList(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: household?.id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
+  });
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -51,13 +79,15 @@ function PaymentsHouseholdTable({
   );
 
   return (
-    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
+    <UniversalRestTable
       title={t('Payments')}
       headCells={adjustedHeadCells}
-      query={useAllPaymentsForTableQuery}
-      queriedObjectName="allPayments"
-      initialVariables={initialVariables}
-      renderRow={(row) => (
+      data={paymentsData}
+      error={error}
+      isLoading={isLoading}
+      queryVariables={queryVariables}
+      setQueryVariables={setQueryVariables}
+      renderRow={(row: PaymentList) => (
         <PaymentsHouseholdTableRow
           key={row.id}
           payment={row}

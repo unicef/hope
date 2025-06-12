@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestHouseholdPermissionsQuery::test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access_for_program 1'] = {

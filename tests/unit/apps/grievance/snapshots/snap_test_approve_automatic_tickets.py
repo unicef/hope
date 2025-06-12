@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_0_with_permission 1'] = {
@@ -54,7 +53,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
                     'line': 5
                 }
             ],
-            'message': 'Only one option for duplicate or distinct or clear individuals is available',
+            'message': "[ErrorDetail(string='Only one option for duplicate or distinct or clear individuals is available', code='invalid')]",
             'path': [
                 'approveNeedsAdjudication'
             ]

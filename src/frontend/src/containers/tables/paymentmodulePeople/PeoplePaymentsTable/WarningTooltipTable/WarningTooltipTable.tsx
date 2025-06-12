@@ -20,15 +20,23 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { paymentPlanStatusToColor } from '@utils/utils';
-import {
-  AllPaymentsForTableQuery,
-  PaymentConflictDataNode,
-  PaymentPlanQuery,
-} from '@generated/graphql';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaymentList } from '@restgenerated/models/PaymentList';
+
+// Interface to replace PaymentConflictDataNode
+interface PaymentConflictData {
+  paymentPlanId?: string;
+  paymentPlanUnicefId?: string;
+  paymentPlanStartDate?: string;
+  paymentPlanEndDate?: string;
+  paymentPlanStatus?: string;
+  paymentId?: string;
+  paymentUnicefId?: string;
+}
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -43,8 +51,8 @@ const GreyBox = styled(Box)`
 `;
 
 interface WarningTooltipTableProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
-  payment: AllPaymentsForTableQuery['allPayments']['edges'][number]['node'];
+  paymentPlan: PaymentPlanDetail;
+  payment: PaymentList;
   setDialogOpen: (dialogOpen: boolean) => void;
   baseUrl: string;
   canViewDetails: boolean;
@@ -70,7 +78,7 @@ export function WarningTooltipTable({
       paymentPlanSoftConflictedData,
     } = payment;
 
-    const renderRow = (row: PaymentConflictDataNode): ReactElement => (
+    const renderRow = (row: PaymentConflictData): ReactElement => (
       <ClickableTableRow hover>
         <TableCell align="left">
           {canViewDetails ? (
@@ -126,12 +134,12 @@ export function WarningTooltipTable({
         </Box>
         <GreyBox p={3}>
           <Grid container>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('Start Date')}>
                 <UniversalMoment>{paymentPlan.startDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid size={{ xs:6 }}>
+            <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('End Date')}>
                 <UniversalMoment>{paymentPlan.endDate}</UniversalMoment>
               </LabelizedField>
@@ -140,7 +148,7 @@ export function WarningTooltipTable({
         </GreyBox>
         <Box mt={10} mb={10} display="flex">
           {`${beneficiaryGroup?.groupLabel} ID`}{' '}
-          <Bold>{payment.household?.unicefId}</Bold>{' '}
+          <Bold>{payment.householdUnicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>
         <StyledTable>

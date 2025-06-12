@@ -115,9 +115,6 @@ export type Individual = {
     blockchain_name?: string;
     wallet_address?: string;
     origin_unicef_id?: string | null;
-    is_migration_handled?: boolean;
-    migrated_at?: string | null;
-    mis_unicef_id?: string | null;
     individual_collection?: number | null;
     program?: string | null;
     /**

@@ -5,11 +5,9 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { Title } from '@core/Title';
-import {
-  AllPaymentPlansForTableQueryVariables,
-  PaymentPlanStatus,
-  usePaymentPlanStatusChoicesQueryQuery,
-} from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { MenuItem, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Box } from '@mui/system';
@@ -18,17 +16,6 @@ import moment from 'moment';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
->;
 
 interface PaymentPlansFilterProps {
   filter;
@@ -68,15 +55,18 @@ export const PaymentPlansFilters = ({
     clearFilter();
   };
 
-  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
+  const { data: statusChoicesData } = useQuery({
+    queryKey: ['choicesPaymentPlanStatusList'],
+    queryFn: () => RestService.restChoicesPaymentPlanStatusList(),
+  });
 
   if (!statusChoicesData) {
     return null;
   }
 
   const preparedStatusChoices =
-    [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
-      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    [...(statusChoicesData || [])]?.filter((el) =>
+      allowedStatusChoices.includes(el.value as PaymentPlanStatusEnum),
     ) || [];
 
   return (

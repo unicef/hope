@@ -1,21 +1,18 @@
-import { Radio } from '@mui/material';
-import TableCell from '@mui/material/TableCell';
-import { AllProgramsQuery, ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  choicesToDict,
-  formatCurrency,
-  programStatusToColor,
-} from '@utils/utils';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { ProgramList } from '@restgenerated/models/ProgramList';
+import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
 
 interface LookUpProgrammesTableRowSurveysProps {
-  program: AllProgramsQuery['allPrograms']['edges'][number]['node'];
-  choicesData: ProgrammeChoiceDataQuery;
+  program: ProgramList;
+  choicesData: ProgramChoices;
   radioChangeHandler: (program) => void;
   selectedProgram: string;
 }
@@ -32,9 +29,7 @@ export function LookUpProgrammesTableRowSurveys({
     radioChangeHandler(program.id);
   };
 
-  const programSectorChoiceDict = choicesToDict(
-    choicesData.programSectorChoices,
-  );
+  const programSectorChoiceDict = choicesToDict(choicesData.sectorChoices);
 
   return (
     <ClickableTableRow
@@ -72,10 +67,11 @@ export function LookUpProgrammesTableRowSurveys({
       <TableCell align="left">
         {programSectorChoiceDict[program.sector]}
       </TableCell>
-      <TableCell align="right">
+      {/* //TODO: fix */}
+      {/* <TableCell align="right">
         {program.totalNumberOfHouseholdsWithTpInProgram}
       </TableCell>
-      <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
+      <TableCell align="right">{formatCurrency(program.budget)}</TableCell> */}
     </ClickableTableRow>
   );
 }
