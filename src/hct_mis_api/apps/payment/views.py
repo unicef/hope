@@ -86,7 +86,7 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
         PaymentPlan.Status.IN_REVIEW,
         PaymentPlan.Status.ACCEPTED,
         PaymentPlan.Status.FINISHED,
-    ):
+    ):  # pragma: no cover
         raise GraphQLError("Export PDF is possible only for Payment Plan within status IN_REVIEW/ACCEPTED/FINISHED.")
 
     if payment_plan.export_pdf_file_summary and payment_plan.export_pdf_file_summary.file:
