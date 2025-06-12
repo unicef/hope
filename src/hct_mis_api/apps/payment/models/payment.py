@@ -1891,6 +1891,7 @@ class FinancialInstitution(TimeStampedModel):
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=30, choices=FinancialInstitutionType.choices)
     country = models.ForeignKey(Country, on_delete=models.PROTECT, blank=True, null=True)
+    swift_code = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self) -> str:
         return f"{self.id} {self.name}: {self.type}"  # pragma: no cover
