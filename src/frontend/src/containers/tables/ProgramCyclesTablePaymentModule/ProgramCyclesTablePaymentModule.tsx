@@ -33,7 +33,7 @@ export const ProgramCyclesTablePaymentModule = ({
   adjustedHeadCells,
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
@@ -45,6 +45,9 @@ export const ProgramCyclesTablePaymentModule = ({
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+    // Don't fetch data when viewing "all programs"
+  const shouldFetchData = Boolean(!isAllPrograms && program?.id);
 
   const { data, refetch, error, isLoading } =
     useQuery<PaginatedProgramCycleListList>({
@@ -58,6 +61,7 @@ export const ProgramCyclesTablePaymentModule = ({
           ),
         );
       },
+      enabled: shouldFetchData,
     });
 
   const { data: dataProgramCyclesCount } = useQuery<CountResponse>({
@@ -83,6 +87,7 @@ export const ProgramCyclesTablePaymentModule = ({
           queryKey: ['programCycles', businessArea, program.id],
         });
       },
+      mutationKey: ['finishProgramCycle', businessArea, program.id],
     });
 
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
@@ -95,6 +100,7 @@ export const ProgramCyclesTablePaymentModule = ({
           queryKey: ['programCycles', businessArea, program.id],
         });
       },
+      mutationKey: ['reactivateProgramCycle', businessArea, program.id],
     });
 
   useEffect(() => {
