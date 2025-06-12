@@ -1,20 +1,20 @@
-import { Grid2 as Grid, Tooltip } from '@mui/material';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Field, Form, useFormikContext } from 'formik';
-import { ReactElement, useMemo, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Grid2 as Grid, Tooltip } from '@mui/material';
+import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
-import { useQuery } from '@tanstack/react-query';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
-import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { Field, Form, useFormikContext } from 'formik';
+import { ReactElement, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
 
 interface ProgramFormPropTypes {
   values;
@@ -45,6 +45,13 @@ const ProgramForm = ({
     });
 
   const { setFieldValue } = useFormikContext();
+
+  const stableSetFieldValue = useCallback(
+    (field: string, value: any, shouldValidate?: boolean) => {
+      setFieldValue(field, value, shouldValidate);
+    },
+    [setFieldValue],
+  );
 
   const filteredDataCollectionTypeChoicesData =
     data?.dataCollectingTypeChoices.filter((el) => el.name !== '');
@@ -90,24 +97,6 @@ const ProgramForm = ({
   ]);
 
   const isCopyProgramPage = location.pathname.includes('duplicate');
-
-  useEffect(() => {
-    const isFieldDisabled =
-      !values.dataCollectingTypeCode || programHasRdi || isCopyProgramPage;
-
-    if (isFieldDisabled) {
-      const nonEmptyValue =
-        mappedBeneficiaryGroupsData[0]?.value || 'disabled-value';
-
-      setFieldValue('beneficiaryGroup', nonEmptyValue, false);
-    }
-  }, [
-    values.dataCollectingTypeCode,
-    programHasRdi,
-    isCopyProgramPage,
-    mappedBeneficiaryGroupsData,
-    setFieldValue,
-  ]);
 
   if (!data || !beneficiaryGroupsData) return null;
 
