@@ -197,6 +197,12 @@ class TestUniversalIndividualUpdateService:
         :param program:
         :return:
         """
+        # create one more DeliveryMechanismConfig with empty account_type
+        DeliveryMechanismConfig.objects.get_or_create(
+            fsp=FinancialServiceProviderFactory(),
+            delivery_mechanism=DeliveryMechanism.objects.create(name="Test", code="test", account_type=None),
+            required_fields=["phone_number"],
+        )
         # save old values
         given_name_old = individual.given_name
         sex_old = individual.sex
