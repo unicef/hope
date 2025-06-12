@@ -174,6 +174,12 @@ const AddFilterTargetingCriteriaDisplay = ({
     setOpen(true);
   };
 
+  //function to add an "Or" filter - should NOT show payment channel validation since it's already set in first criteria
+  const handleAddOrFilter = (): void => {
+    setIndex(null); // Set to null so payment channel validation doesn't appear for additional criteria
+    setOpen(true);
+  };
+
   // const  collectorFiltersAvailable =
   //   selectedProgram?.dataCollectingType?.collectorFiltersAvailable;
 
@@ -207,7 +213,7 @@ const AddFilterTargetingCriteriaDisplay = ({
                 <Button
                   variant="outlined"
                   color="primary"
-                  onClick={() => setOpen(true)}
+                  onClick={handleAddOrFilter}
                   data-cy="button-target-population-add-criteria"
                 >
                   {t('Add')} &apos;Or&apos; {t('Filter')}
