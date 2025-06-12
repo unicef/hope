@@ -138,22 +138,24 @@ const EditGrievancePage = (): ReactElement => {
       }),
   });
 
-  const { mutateAsync: updateGrievanceTicket, isLoading: loading } =
-    useMutation((data: { id: string; requestBody: any }) =>
-      RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
-        businessAreaSlug,
-        id: data.id,
-        requestBody: data.requestBody,
-      }),
-    );
-  const { mutateAsync: changeTicketStatus } = useMutation(
-    (data: { id: string; requestBody: any }) =>
+  const { mutateAsync: updateGrievanceTicket, isPending: loading } =
+    useMutation({
+      mutationFn: (data: { id: string; requestBody: any }) =>
+        RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
+          businessAreaSlug,
+          id: data.id,
+          requestBody: data.requestBody,
+        }),
+    });
+
+  const { mutateAsync: changeTicketStatus } = useMutation({
+    mutationFn: (data: { id: string; requestBody: any }) =>
       RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
         businessAreaSlug,
         id: data.id,
         requestBody: data.requestBody,
       }),
-  );
+  });
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
