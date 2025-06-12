@@ -869,10 +869,7 @@ class TestPaymentPlanServices(APITestCase):
         )
         with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).draft()
-        self.assertEqual(
-            str(e.exception),
-            "Can only promote to Payment Plan if DM/FSP is chosen.",
-        )
+        assert "Can only promote to Payment Plan if DM/FSP is chosen." in str(e.exception)
 
         payment_plan.status = PaymentPlan.Status.DRAFT
         payment_plan.financial_service_provider = self.fsp
