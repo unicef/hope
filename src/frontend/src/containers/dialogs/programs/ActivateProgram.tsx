@@ -1,10 +1,11 @@
 import { LoadingButton } from '@components/core/LoadingButton';
-import { useUpdateProgramMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -25,34 +26,30 @@ export const ActivateProgram = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
 
-  const [mutate, { loading }] = useUpdateProgramMutation();
+  const { mutateAsync: activateProgram, isPending: loading } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsActivateCreate({
+        businessAreaSlug: businessArea,
+        slug: program.id,
+      }),
+  });
 
-  const activateProgram = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.ACTIVE,
-        },
-        //TODO: add
-        version: null,
-        // version: program.version,
-      },
-    });
+  const handleActivateProgram = async (): Promise<void> => {
+    try {
+      const response = await activateProgram();
 
-    if (!response.errors && response.data.updateProgram) {
       setSelectedProgram({
         ...selectedProgram,
         status: ProgramStatus.ACTIVE,
       });
 
       showMessage(t('Programme activated.'));
-      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
+      navigate(`/${baseUrl}/details/${response.id}`);
       setOpen(false);
-    } else {
+    } catch (error) {
       showMessage(t('Programme activate action failed.'));
     }
   };
@@ -94,7 +91,7 @@ export const ActivateProgram = ({
               type="submit"
               color="primary"
               variant="contained"
-              onClick={activateProgram}
+              onClick={handleActivateProgram}
               data-cy="button-activate-program-modal"
             >
               {t('ACTIVATE')}
