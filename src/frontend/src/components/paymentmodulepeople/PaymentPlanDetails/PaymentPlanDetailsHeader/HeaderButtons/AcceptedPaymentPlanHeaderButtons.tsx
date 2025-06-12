@@ -14,10 +14,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import {
-  useAllFinancialServiceProviderXlsxTemplatesQuery,
-  useExportXlsxPpListPerFspMutation,
-} from '../../../../../__generated__/graphql';
+import { useAllFinancialServiceProviderXlsxTemplatesQuery } from '../../../../../__generated__/graphql';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
@@ -65,8 +62,25 @@ export function AcceptedPaymentPlanHeaderButtons({
     },
   );
 
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPpListPerFspMutation();
+  const { mutateAsync: exportReconciliationXlsx, isPending: loadingExport } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsPaymentPlansReconciliationExportXlsxRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            id: paymentPlan.id,
+          },
+        ),
+      onSuccess: () => {
+        showMessage(t('Exporting XLSX started'));
+      },
+      onError: (error) => {
+        showMessage(
+          error.message || t('An error occurred while exporting XLSX'),
+        );
+      },
+    });
 
   const {
     mutateAsync: sendToPaymentGateway,
@@ -116,30 +130,19 @@ export function AcceptedPaymentPlanHeaderButtons({
 
   const handleExportAPI = async () => {
     try {
-      await mutateExport({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-          fspXlsxTemplateId: selectedTemplate,
-        },
-      });
-      showMessage(t('Exporting XLSX started'));
+      await exportReconciliationXlsx();
       handleClose();
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      // Error handling is managed by the mutation's onError callback
     }
   };
 
   const handleExport = async () => {
     try {
-      await mutateExport({
-        variables: {
-          paymentPlanId: paymentPlan.id,
-        },
-      });
-      showMessage(t('Exporting XLSX started'));
+      await exportReconciliationXlsx();
       handleClose();
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      // Error handling is managed by the mutation's onError callback
     }
   };
 

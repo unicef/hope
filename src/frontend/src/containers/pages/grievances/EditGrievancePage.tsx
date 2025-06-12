@@ -32,7 +32,6 @@ import {
   useAllEditHouseholdFieldsQuery,
   useAllEditPeopleFieldsQuery,
 } from '@generated/graphql';
-import { useMutation } from 'react-query';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -49,7 +48,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
@@ -139,22 +138,24 @@ const EditGrievancePage = (): ReactElement => {
       }),
   });
 
-  const { mutateAsync: updateGrievanceTicket, isLoading: loading } =
-    useMutation((data: { id: string; requestBody: any }) =>
-      RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
-        businessAreaSlug,
-        id: data.id,
-        requestBody: data.requestBody,
-      }),
-    );
-  const { mutateAsync: changeTicketStatus } = useMutation(
-    (data: { id: string; requestBody: any }) =>
+  const { mutateAsync: updateGrievanceTicket, isPending: loading } =
+    useMutation({
+      mutationFn: (data: { id: string; requestBody: any }) =>
+        RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
+          businessAreaSlug,
+          id: data.id,
+          requestBody: data.requestBody,
+        }),
+    });
+
+  const { mutateAsync: changeTicketStatus } = useMutation({
+    mutationFn: (data: { id: string; requestBody: any }) =>
       RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
         businessAreaSlug,
         id: data.id,
         requestBody: data.requestBody,
       }),
-  );
+  });
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
