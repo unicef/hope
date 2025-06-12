@@ -62,7 +62,7 @@ export function PaymentChannelField({
           variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
@@ -85,7 +85,7 @@ export function PaymentChannelField({
           variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>

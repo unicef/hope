@@ -178,6 +178,8 @@ def get_document_fields() -> list[Any]:
 def get_wallet_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
     for dm_config in DeliveryMechanismConfig.objects.all():
+        if not dm_config.delivery_mechanism.account_type:
+            continue
         account_type = dm_config.delivery_mechanism.account_type.key
         wallet_fields = []
         for field in dm_config.required_fields:

@@ -328,9 +328,10 @@ export const TargetingCriteriaForm = ({
     return bag.resetForm();
   };
 
-  const validationSchema = openPaymentChannelCollapse
-    ? requiredSchema
-    : optionalSchema;
+  const validationSchema =
+    criteriaIndex === 0 && openPaymentChannelCollapse
+      ? requiredSchema
+      : optionalSchema;
 
   if (loading || !open || !availableFspsForDeliveryMechanismData) return null;
 
@@ -679,7 +680,9 @@ export const TargetingCriteriaForm = ({
                       </Button>
                       <Button
                         onClick={
-                          !values.deliveryMechanism && !values.fsp
+                          criteriaIndex === 0 &&
+                          !values.deliveryMechanism &&
+                          !values.fsp
                             ? () =>
                                 confirm({
                                   title: t('Warning'),
