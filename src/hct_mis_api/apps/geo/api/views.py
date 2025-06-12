@@ -32,7 +32,7 @@ class AreaViewSet(
     mixins.ListModelMixin,
     BaseViewSet,
 ):
-    queryset = Area.objects.all()
+    queryset = Area.objects.all().order_by("area_type__area_level", "name")
     business_area_model_field = "area_type__country__business_areas"
     serializer_class = AreaListSerializer
     PERMISSIONS = [Permissions.GEO_VIEW_LIST]
