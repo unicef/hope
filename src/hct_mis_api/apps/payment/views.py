@@ -83,9 +83,9 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     if payment_plan.status not in (
-            PaymentPlan.Status.IN_REVIEW,
-            PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.FINISHED
+        PaymentPlan.Status.IN_REVIEW,
+        PaymentPlan.Status.ACCEPTED,
+        PaymentPlan.Status.FINISHED,
     ):
         raise GraphQLError("Export PDF is possible only for Payment Plan within status IN_REVIEW/ACCEPTED/FINISHED.")
 
