@@ -8870,6 +8870,26 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug,
+        slug,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/deduplication_flags/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsFinishCreate({
         businessAreaSlug,
         slug,
