@@ -38,3 +38,19 @@ class DataCollectingTypeSerializer(serializers.ModelSerializer):
 class ChoiceSerializer(serializers.Serializer):
     name = serializers.CharField()
     value = serializers.CharField()
+
+
+class GetKoboAssetListSerializer(serializers.Serializer):
+    only_deployed = serializers.BooleanField(default=False)
+
+
+class KoboAssetObjectSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    sector = serializers.CharField()
+    country = serializers.CharField()
+    asset_type = serializers.CharField()
+    date_modified = serializers.DateTimeField()
+    deployment_active = serializers.BooleanField()
+    has_deployment = serializers.BooleanField()
+    xls_link = serializers.CharField()
