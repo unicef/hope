@@ -25,7 +25,7 @@ export const DefaultRoute = (): ReactElement | null => {
       if (meData.businessAreas.length < 1) {
         navigate('/access-denied');
       } else {
-        navigate(`/${meData.businessAreas.edges[0].slug}/programs/all/list`);
+        navigate(`/${meData.businessAreas[0].slug}/programs/all/list`);
       }
     }
   }, [meData, navigate]);
