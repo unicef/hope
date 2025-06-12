@@ -25,15 +25,11 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import (
-    FILTERABLE_TYPES,
-    Scope,
-)
+from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
-    BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     FlexibleAttributeChoice,

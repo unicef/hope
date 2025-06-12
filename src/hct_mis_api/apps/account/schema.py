@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 import graphene
 
+
 class Query(graphene.ObjectType):
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
 
