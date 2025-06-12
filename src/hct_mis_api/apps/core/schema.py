@@ -18,18 +18,15 @@ from django.db.models import Q
 
 import graphene
 from constance import config
-from flags.state import flag_state
 from graphene import Boolean, Connection, ConnectionField, DateTime, Int, String, relay
 from graphene.types.resolver import attr_resolver, dict_or_attr_resolver, dict_resolver
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import (
     FILTERABLE_TYPES,
-    TYPE_STRING,
     Scope,
 )
 from hct_mis_api.apps.core.kobo.api import KoboAPI
@@ -60,35 +57,6 @@ class ChoiceObject(graphene.ObjectType):
 class ChoiceObjectInt(graphene.ObjectType):
     name = String()
     value = Int()
-
-
-class DataCollectingTypeChoiceObject(graphene.ObjectType):
-    name = String()
-    value = String()
-    description = String()
-    type = String()
-
-
-class PDUSubtypeChoiceObject(graphene.ObjectType):
-    value = String()
-    display_name = String()
-
-
-class BusinessAreaNode(DjangoObjectType):
-    is_accountability_applicable = graphene.Boolean()
-
-    def resolve_is_accountability_applicable(self, info: Any) -> bool:
-        return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), self.is_accountability_applicable])
-
-    @classmethod
-    def get_queryset(cls, queryset: "QuerySet", info: Any) -> "QuerySet":
-        return queryset.filter(is_split=False)
-
-    class Meta:
-        model = BusinessArea
-        filter_fields = ["id", "slug"]
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class FlexibleAttributeChoiceNode(DjangoObjectType):
@@ -349,29 +317,12 @@ class DataCollectingTypeNode(DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
-    business_area = graphene.Field(
-        BusinessAreaNode,
-        business_area_slug=graphene.String(required=True, description="The business area slug"),
-        description="Single business area",
-    )
-    all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
     all_fields_attributes = graphene.List(
         FieldAttributeNode,
         flex_field=graphene.Boolean(),
         business_area_slug=graphene.String(required=False, description="The business area slug"),
         program_id=graphene.String(required=False, description="program id"),
         description="All field datatype meta.",
-    )
-    all_collector_fields_attributes = graphene.List(
-        FieldAttributeNode,
-        flex_field=graphene.Boolean(),
-        description="All collectors fields for Delivery Mechanism Data.",
-    )
-    all_pdu_fields = graphene.List(
-        FieldAttributeNode,
-        business_area_slug=graphene.String(required=True, description="The business area slug"),
-        program_id=graphene.String(required=True, description="program id"),
-        description="All pdu fields.",
     )
     all_groups_with_fields = graphene.List(
         GroupAttributeNode,
@@ -393,20 +344,9 @@ class Query(graphene.ObjectType):
     all_languages = ConnectionField(
         LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
     )
-    data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
-
-    def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
-        return BusinessArea.objects.get(slug=business_area_slug)
 
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX
-
-    def resolve_all_pdu_fields(parent, info: Any, business_area_slug: str, program_id: str) -> Dict:
-        return FlexibleAttribute.objects.filter(
-            program__business_area__slug=business_area_slug,
-            program_id=decode_id_string(program_id),
-            type=FlexibleAttribute.PDU,
-        )
 
     def resolve_all_fields_attributes(
         parent,
@@ -449,32 +389,6 @@ class Query(graphene.ObjectType):
             "label.English(EN)",
         )
 
-    def resolve_all_collector_fields_attributes(
-        parent,
-        info: Any,
-    ) -> List[Any]:
-        from hct_mis_api.apps.payment.models.payment import AccountType
-
-        account_types = AccountType.objects.all()
-        definitions = [
-            {
-                "id": f"{account_type.key}__{field}",
-                "type": TYPE_STRING,
-                "name": f"{account_type.key}__{field}",
-                "lookup": f"{account_type.key}__{field}",
-                "label": {"English(EN)": f"{account_type.key.title()} {field.title()}"},
-                "hint": "",
-                "required": False,
-                "choices": [],
-            }
-            for account_type in account_types
-            for field in account_type.unique_fields
-        ]
-        return sort_by_attr(
-            (attr for attr in definitions),
-            "label.English(EN)",
-        )
-
     def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Dict:
         return resolve_asset(business_area_slug=business_area_slug, uid=uid)
 
@@ -489,10 +403,3 @@ class Query(graphene.ObjectType):
 
     def resolve_all_languages(self, info: Any, code: str, **kwargs: Any) -> List[Language]:
         return Languages.filter_by_code(code)
-
-
-class PeriodicFieldNode(DjangoObjectType):
-    class Meta:
-        model = FlexibleAttribute
-        fields = ["name", "label", "pdu_data"]
-        interfaces = (relay.Node,)
