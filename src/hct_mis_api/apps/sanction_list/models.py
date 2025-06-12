@@ -2,7 +2,11 @@ from typing import Any, Dict, Tuple
 
 from django.db import models
 
+from strategy_field.fields import StrategyField
+
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+
+from .strategies import registry
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):
@@ -33,6 +37,19 @@ class ActiveIndividualsManager(models.Manager):
         return self.get_queryset().hard_delete()
 
 
+class SanctionList(TimeStampedUUIDModel):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    config = models.JSONField(default=dict)
+    strategy = StrategyField(registry=registry, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class SanctionListIndividual(TimeStampedUUIDModel):
     first_name = models.CharField(max_length=85)
     second_name = models.CharField(max_length=85, blank=True, default="")
@@ -55,11 +72,14 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     country_of_birth = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
 
+    sanction_list = models.ForeignKey(SanctionList, on_delete=models.CASCADE)
     objects = ActiveIndividualsManager()
     all_objects = ActiveIndividualsManager(active_only=False)
 
     class Meta:
         ordering = ["-listed_on"]
+        verbose_name = "Individual"
+        verbose_name_plural = "Individuals"
 
 
 class SanctionListIndividualDocument(TimeStampedUUIDModel):

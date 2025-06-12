@@ -1,8 +1,11 @@
+from typing import Any
+
 from django.conf import settings
 from django.test import TestCase
 
 import pytest
 from constance.test import override_config
+from strategy_field.utils import fqn
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -19,6 +22,8 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.sanction_list.models import SanctionList
+from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
 )
@@ -26,6 +31,13 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+
+
+@pytest.fixture()
+def sanction_list(db: Any) -> "SanctionList":
+    from test_utils.factories.sanction_list import SanctionListFactory
+
+    return SanctionListFactory(strategy=fqn(UNSanctionList))
 
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
@@ -39,9 +51,11 @@ class TestSanctionListPreMerge(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        from test_utils.factories.sanction_list import SanctionListFactory
+
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
-        task = LoadSanctionListXMLTask(full_sanction_list_path)
-        task.execute()
+        task = LoadSanctionListXMLTask(SanctionListFactory())
+        task.load_from_file(full_sanction_list_path)
 
         cls.business_area = BusinessArea.objects.create(
             code="0060",
@@ -57,7 +71,10 @@ class TestSanctionListPreMerge(TestCase):
             business_area=cls.business_area, program=cls.program
         )
         cls.household, cls.individuals = create_household_and_individuals(
-            household_data={"registration_data_import": cls.registration_data_import, "program": cls.program},
+            household_data={
+                "registration_data_import": cls.registration_data_import,
+                "program": cls.program,
+            },
             individuals_data=[
                 {
                     # DUPLICATE
@@ -125,9 +142,16 @@ class TestSanctionListPreMerge(TestCase):
         ind = Individual.objects.get(full_name="Abdul Afghanistan")
         country = geo_models.Country.objects.get(iso_code3="AFG")
         doc_type = DocumentTypeFactory(
-            label="National ID", key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
+            label="National ID",
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
         )
-        DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country, program=ind.program)
+        DocumentFactory(
+            document_number="55130",
+            individual=ind,
+            type=doc_type,
+            country=country,
+            program=ind.program,
+        )
         rebuild_search_index()
 
     def test_execute(self) -> None:
@@ -150,7 +174,10 @@ class TestSanctionListPreMerge(TestCase):
 
     def test_create_system_flag_tickets(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
-        self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 0)
+        self.assertEqual(
+            GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(),
+            0,
+        )
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
             self.assertEqual(grievance_ticket.programs.count(), 0)
             self.assertEqual(grievance_ticket.programs.first(), self.program)
