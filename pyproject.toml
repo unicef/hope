@@ -57,7 +57,8 @@ exclude = [
     "snapshots",
     "__pypackages__",
     "build",
-    "uv-cache"
+    "uv-cache",
+    "manage.py"
 ]
 
 strict = true
