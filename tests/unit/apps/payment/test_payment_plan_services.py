@@ -867,7 +867,7 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.TP_LOCKED,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(ValidationError) as e:
             PaymentPlanService(payment_plan).draft()
         self.assertEqual(
             str(e.exception),
