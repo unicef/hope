@@ -7,7 +7,7 @@ from django.db.models import Model
 
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.apps.payment.models import DeliveryMechanismConfig
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
@@ -177,13 +177,8 @@ def get_document_fields() -> list[Any]:
 
 def get_account_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
-    for dm_config in DeliveryMechanismConfig.objects.all():
-        if not dm_config.delivery_mechanism.account_type:
-            continue
-        account_type = dm_config.delivery_mechanism.account_type.key
+    for account_type in AccountType.objects.all():
         wallet_fields = set()
-        for field in dm_config.required_fields:
-            wallet_fields.add((f"account__{account_type}__{field}", field))
         wallet_fields.add((f"account__{account_type}__*", None))
         wallet_fields.add((f"account__{account_type}__number", "number"))
         wallet_fields.add((f"account__{account_type}__financial_institution_pk", "financial_institution"))
