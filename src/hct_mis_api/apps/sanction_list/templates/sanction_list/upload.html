@@ -1,0 +1,12 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    <p>Upload new Sanction List version for {{ obj.name }}</p>
+    <p>{{ obj.description }}</p>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table>
+            {{ form }}
+        </table>
+        <input type="submit" name="upload" value="Upload">
+    </form>
+{% endblock %}
