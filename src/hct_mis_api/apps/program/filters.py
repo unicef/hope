@@ -1,12 +1,11 @@
-from typing import Any, Dict
+from typing import Any
 
-from django.db.models import Count, DecimalField, Q, QuerySet
+from django.db.models import DecimalField, Q, QuerySet
 from django.db.models.aggregates import Sum
 from django.db.models.functions import Coalesce, Lower
 
 from _decimal import Decimal
 from django_filters import (
-    BooleanFilter,
     CharFilter,
     DateFilter,
     FilterSet,
@@ -14,12 +13,7 @@ from django_filters import (
     NumberFilter,
 )
 
-from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.utils import (
-    CustomOrderingFilter,
-    get_program_id_from_headers,
-)
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
