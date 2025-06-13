@@ -9846,6 +9846,18 @@ export class RestService {
      * @returns Choice
      * @throws ApiError
      */
+    public static restChoicesLanguagesList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/languages/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
     public static restChoicesPaymentPlanBackgroundActionStatusList(): CancelablePromise<Array<Choice>> {
         return __request(OpenAPI, {
             method: 'GET',
