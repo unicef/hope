@@ -640,7 +640,6 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             "cash_plus",
             "frequency_of_payments",
             "data_collecting_type",
-            "beneficiary_group",
             "start_date",
             "end_date",
             "pdu_fields",
@@ -665,7 +664,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
 
         # validate DCT against original program
         data_collecting_type = data["data_collecting_type"]
-        beneficiary_group = data["beneficiary_group"]
+        beneficiary_group = original_program.beneficiary_group
         if not original_program.data_collecting_type:
             raise serializers.ValidationError(
                 {"data_collecting_type": "The original Program must have a Data Collecting Type."}
