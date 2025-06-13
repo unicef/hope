@@ -11,12 +11,12 @@ from django.shortcuts import get_object_or_404
 from admin_extra_buttons.buttons import Button
 from admin_extra_buttons.decorators import button
 
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.universal_update_script.celery_tasks import (
     generate_universal_individual_update_template,
     run_universal_individual_update,
 )
 from hct_mis_api.apps.universal_update_script.models import (
-    DeliveryMechanism,
     DocumentType,
     UniversalUpdate,
 )
@@ -72,7 +72,7 @@ class UniversalUpdateAdminForm(forms.ModelForm):
         fields = "__all__"
         widgets = {
             "document_types": FilteredSelectMultiple("Document Types", is_stacked=False),
-            "delivery_mechanisms": FilteredSelectMultiple("Delivery Mechanisms", is_stacked=False),
+            "account_types": FilteredSelectMultiple("Account Types", is_stacked=False),
         }
 
     def __init__(self, *args: list[Any], **kwargs: dict[Any, Any]) -> None:
@@ -86,7 +86,7 @@ class UniversalUpdateAdminForm(forms.ModelForm):
         )
         self.fields["household_fields"].widget.choices = list(self.get_dynamic_household_fields_choices())
         self.fields["document_types"].queryset = self.get_dynamic_document_types_queryset()
-        self.fields["delivery_mechanisms"].queryset = self.get_dynamic_delivery_mechanisms_queryset()
+        self.fields["account_types"].queryset = self.get_dynamic_account_types_queryset()
 
     def get_dynamic_individual_fields_choices(self) -> Iterator[Tuple[str, str]]:
         for field_data in individual_fields.values():
@@ -107,8 +107,8 @@ class UniversalUpdateAdminForm(forms.ModelForm):
     def get_dynamic_document_types_queryset(self) -> QuerySet[DocumentType]:
         return DocumentType.objects.all()
 
-    def get_dynamic_delivery_mechanisms_queryset(self) -> QuerySet[DeliveryMechanism]:
-        return DeliveryMechanism.objects.all()
+    def get_dynamic_account_types_queryset(self) -> QuerySet[AccountType]:
+        return AccountType.objects.all()
 
 
 @admin.register(UniversalUpdate)
@@ -116,7 +116,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
     form = UniversalUpdateAdminForm
     filter_horizontal = (
         "document_types",
-        "delivery_mechanisms",
+        "account_types",
     )
     autocomplete_fields = ("program",)
     list_display = ("id", "program", "update_file", "created_at", "updated_at")
@@ -151,7 +151,7 @@ class UniversalUpdateAdmin(HOPEModelAdminBase):
                     "household_flex_fields_fields",
                     "household_fields",
                     "document_types",
-                    "delivery_mechanisms",
+                    "account_types",
                 ),
             },
         ),
