@@ -53,7 +53,7 @@ export function DocumentField({
           label={t('Type')}
           component={FormikSelectField}
           choices={documentTypeChoices}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
@@ -65,7 +65,7 @@ export function DocumentField({
           label={t('Country')}
           component={FormikSelectField}
           choices={countryChoices}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
@@ -76,7 +76,7 @@ export function DocumentField({
           variant="outlined"
           label={t('Document Number')}
           component={FormikTextField}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
