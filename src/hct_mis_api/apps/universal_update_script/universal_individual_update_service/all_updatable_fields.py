@@ -1,7 +1,7 @@
 """
 This is static by design, it could be made dynamic by fetching the fields from the model itself.
 """
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from django.db.models import Model
 
@@ -178,7 +178,7 @@ def get_document_fields() -> list[Any]:
 def get_account_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
     for account_type in AccountType.objects.all():
-        wallet_fields = set()
+        wallet_fields: set[tuple[str, Optional[str]]] = set()
         wallet_fields.add((f"account__{account_type}__*", None))
         wallet_fields.add((f"account__{account_type}__number", "number"))
         wallet_fields.add((f"account__{account_type}__financial_institution_pk", "financial_institution"))
