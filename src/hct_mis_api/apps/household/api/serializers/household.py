@@ -106,6 +106,19 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
         return ROLE_NO_ROLE
 
 
+class RecipientSerializer(serializers.ModelSerializer):
+    head_of_household = HeadOfHouseholdSerializer()
+
+    class Meta:
+        model = Household
+        fields = (
+            "id",
+            "unicef_id",
+            "size",
+            "head_of_household",
+        )
+
+
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
     admin1 = serializers.CharField(source="admin1.name", default="")
