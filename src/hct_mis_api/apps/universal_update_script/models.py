@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.db import models
 
 from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.apps.payment.models import DeliveryMechanism, AccountType
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import CeleryEnabledModel, TimeStampedModel
 

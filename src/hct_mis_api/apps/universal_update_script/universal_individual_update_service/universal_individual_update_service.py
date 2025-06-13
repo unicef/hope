@@ -23,10 +23,10 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 )
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
+    get_account_fields,
     get_document_fields,
     get_household_flex_fields,
     get_individual_flex_fields,
-    get_account_fields,
     household_fields,
     individual_fields,
 )
@@ -163,6 +163,42 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - Multiple documents with document type {document_type} found")
         return errors
 
+    def validate_accounts(
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+    ) -> List[str]:
+        errors = []
+        for account_type, account_columns_mapping in self.account_data_fields.items():
+            columns_from_header = self.get_all_account_columns(
+                account_type, headers, [x for x, y in account_columns_mapping]
+            )  # this gets columns starting with account__{account_type}__ and not in the mapping
+            all_account_fields = []
+            all_account_fields.extend(account_columns_mapping)
+            all_account_fields.extend(columns_from_header)
+            updating_anything = False
+            had_financial_institution = False
+            for column_name, field_name in all_account_fields:
+                if column_name == f"account__{account_type}__*":
+                    continue
+                if column_name not in headers:
+                    errors.append(
+                        f"Row: {row_index} - Column {column_name} not found in headers for account type {account_type}"
+                    )
+                    continue
+                value = row[headers.index(column_name)]
+                if not (value is None or value == ""):
+                    updating_anything = True
+                    if field_name == "financial_institution":
+                        if not value.isdigit():
+                            errors.append(
+                                f"Row: {row_index} - Financial institution ID must be a number for field {column_name}"
+                            )
+                        had_financial_institution = True
+            if updating_anything and not had_financial_institution:
+                errors.append(
+                    f"Row: {row_index} - Financial institution ID must be provided for account type {account_type} if any other field is updated"
+                )
+        return errors
+
     def validate(self, sheet: Worksheet, headers: List[str]) -> List[str]:
         errors = []
         row_index = 1
@@ -192,6 +228,7 @@ class UniversalIndividualUpdateService:
             errors.extend(self.validate_individual_flex_fields(row, headers, individual, row_index))
             errors.extend(self.validate_household_flex_fields(row, headers, individual, row_index))
             errors.extend(self.validate_documents(row, headers, individual, row_index))
+            errors.extend(self.validate_accounts(row, headers, individual, row_index))
         return errors
 
     def handle_household_update(self, row: Tuple[Any, ...], headers: List[str], household: Any) -> None:
@@ -262,24 +299,25 @@ class UniversalIndividualUpdateService:
                 )
         return documents_to_update, documents_to_create
 
-    def get_all_account_columns(self, account_type: str, headers: List[str], columns_to_ignore: List[str]) -> List[Tuple[str,str]]:
+    def get_all_account_columns(
+        self, account_type: str, headers: List[str], columns_to_ignore: List[str]
+    ) -> List[Tuple[str, str]]:
         prefix = f"account__{account_type}__"
         prefix_len = len(prefix)
-        return [(x, x[prefix_len:] )for x in headers if x.startswith(prefix) and x not in columns_to_ignore]
+        return [(x, x[prefix_len:]) for x in headers if x.startswith(prefix) and x not in columns_to_ignore]
 
-    def handle_deliver_mechanism_data_update(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual
-    ) -> None:
+    def handle_account_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
         individual_accounts = individual.accounts.all()
         for account_type, account_columns_mapping in self.account_data_fields.items():
             account_type_instance = self.delivery_mechanisms_account_types.get(account_type)
+
             single_data_object = next(
                 (d for d in individual_accounts if str(d.account_type.key) == str(account_type)),
                 None,
             )
             columns_from_header = self.get_all_account_columns(
                 account_type, headers, [x for x, y in account_columns_mapping]
-            ) # this gets columns starting with account__{account_type}__ and not in the mapping
+            )  # this gets columns starting with account__{account_type}__ and not in the mapping
             all_account_fields = []
             all_account_fields.extend(account_columns_mapping)
             all_account_fields.extend(columns_from_header)
@@ -296,8 +334,11 @@ class UniversalIndividualUpdateService:
                             account_type=account_type_instance,
                             rdi_merge_status=Account.MERGED,
                         )
-                    if field_name == number:
+                    if field_name == "number":
                         single_data_object.number = value
+                    if field_name == "financial_institution":
+                        single_data_object.financial_institution_id = value
+                        continue
                     single_data_object.data[field_name] = value
             if single_data_object:
                 single_data_object.save()
@@ -338,7 +379,7 @@ class UniversalIndividualUpdateService:
             documents_to_update_part, documents_to_create_part = self.handle_documents_update(row, headers, individual)
             documents_to_update.extend(documents_to_update_part)
             documents_to_create.extend(documents_to_create_part)
-            self.handle_deliver_mechanism_data_update(row, headers, individual)
+            self.handle_account_update(row, headers, individual)
             households_to_update.append(household)
             individuals_to_update.append(individual)
             if len(individuals_to_update) == self.batch_size:

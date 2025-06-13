@@ -186,6 +186,7 @@ def get_account_fields() -> dict[Any, Any]:
             wallet_fields.add((f"account__{account_type}__{field}", field))
         wallet_fields.add((f"account__{account_type}__*", None))
         wallet_fields.add((f"account__{account_type}__number", "number"))
+        wallet_fields.add((f"account__{account_type}__financial_institution_pk", "financial_institution"))
         if len(wallet_fields) > 0:
             deliver_mechanism_data_fields[account_type] = tuple(wallet_fields)
     return deliver_mechanism_data_fields
