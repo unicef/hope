@@ -14,6 +14,10 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.accountability.fixtures import (
+    CommunicationMessageFactory,
+    SurveyFactory,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
@@ -343,6 +347,65 @@ class TestHouseholdList:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.json()) == 1
         assert response.json()[0]["name"] == "Flexible Attribute for HH"
+
+    def test_household_all_accountability_communication_message_recipients(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        # upd HH
+        self.household1.head_of_household.phone_no_valid = True
+        self.household2.head_of_household.phone_no_alternative_valid = True
+        self.household1.save()
+        self.household2.save()
+
+        list_url = reverse(
+            "api:households:households-all-accountability-communication-message-recipients",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(list_url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 2
+
+        # add filter by Survey ID
+        survey = SurveyFactory(created_by=self.user)
+        survey.recipients.set([self.household1])
+
+        response = self.api_client.get(list_url, {"survey": str(survey.pk)})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 1
+        assert response.json()["results"][0]["id"] == str(self.household1.pk)
+
+    def test_household_recipients(self, create_user_role_with_permissions: Any) -> None:
+        list_url = reverse(
+            "api:households:households-recipients",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        msg_obj = CommunicationMessageFactory(business_area=self.afghanistan)
+        msg_obj.households.set([self.household1, self.household2])
+
+        response = self.api_client.get(list_url, {"message_id": str(msg_obj.pk)})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 2
+
+        # filter by 'recipient_id'
+        response = self.api_client.get(
+            list_url, {"message_id": str(msg_obj.pk), "recipient_id": str(self.household1.head_of_household.pk)}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 1
+        assert response.json()["results"][0]["id"] == str(self.household1.pk)
 
 
 class TestHouseholdDetail:
