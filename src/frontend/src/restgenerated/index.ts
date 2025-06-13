@@ -11,10 +11,10 @@ export type { AccountabilityRandomSamplingArguments as AccountabilityRandomSampl
 export { ActionEnum as ActionEnumCamelCase } from './models/ActionEnum';
 export type { AddIndividualData as AddIndividualDataCamelCase } from './models/AddIndividualData';
 export type { AddIndividualIssueTypeExtras as AddIndividualIssueTypeExtrasCamelCase } from './models/AddIndividualIssueTypeExtras';
-export { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
-export { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
-export { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
-export { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
+export type { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
+export type { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
+export type { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
+export type { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
 export type { Age as AgeCamelCase } from './models/Age';
 export type { ApplyEngineFormula as ApplyEngineFormulaCamelCase } from './models/ApplyEngineFormula';
 export type { ApprovalProcess as ApprovalProcessCamelCase } from './models/ApprovalProcess';
@@ -172,6 +172,7 @@ export type { PaginatedProgramCycleListList as PaginatedProgramCycleListListCame
 export type { PaginatedProgramGlobalList as PaginatedProgramGlobalListCamelCase } from './models/PaginatedProgramGlobalList';
 export type { PaginatedProgramListList as PaginatedProgramListListCamelCase } from './models/PaginatedProgramListList';
 export type { PaginatedProjectList as PaginatedProjectListCamelCase } from './models/PaginatedProjectList';
+export type { PaginatedRecipientList as PaginatedRecipientListCamelCase } from './models/PaginatedRecipientList';
 export type { PaginatedRegistrationDataImportListList as PaginatedRegistrationDataImportListListCamelCase } from './models/PaginatedRegistrationDataImportListList';
 export type { PaginatedRegistrationList as PaginatedRegistrationListCamelCase } from './models/PaginatedRegistrationList';
 export type { PaginatedRuleList as PaginatedRuleListCamelCase } from './models/PaginatedRuleList';
@@ -206,7 +207,6 @@ export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
-export { PaymentRecordDeliveryTypeEnum as PaymentRecordDeliveryTypeEnumCamelCase } from './models/PaymentRecordDeliveryTypeEnum';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';
@@ -255,6 +255,7 @@ export type { RapidPro as RapidProCamelCase } from './models/RapidPro';
 export type { RDI as RDICamelCase } from './models/RDI';
 export { RdiMergeStatusEnum as RdiMergeStatusEnumCamelCase } from './models/RdiMergeStatusEnum';
 export type { RDINested as RDINestedCamelCase } from './models/RDINested';
+export type { Recipient as RecipientCamelCase } from './models/Recipient';
 export type { ReferralTicketExtras as ReferralTicketExtrasCamelCase } from './models/ReferralTicketExtras';
 export type { RefuseRdi as RefuseRdiCamelCase } from './models/RefuseRdi';
 export type { Registration as RegistrationCamelCase } from './models/Registration';
