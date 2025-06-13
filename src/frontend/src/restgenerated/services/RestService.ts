@@ -19,6 +19,7 @@ import type { FeedbackMessage } from '../models/FeedbackMessage';
 import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FspChoices } from '../models/FspChoices';
+import type { GetKoboAssetList } from '../models/GetKoboAssetList';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
 import type { GrievanceCreateNote } from '../models/GrievanceCreateNote';
 import type { GrievanceDeleteHouseholdApproveStatus } from '../models/GrievanceDeleteHouseholdApproveStatus';
@@ -53,6 +54,7 @@ import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrieva
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedHouseholdMemberList } from '../models/PaginatedHouseholdMemberList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
+import type { PaginatedKoboAssetObjectList } from '../models/PaginatedKoboAssetObjectList';
 import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
@@ -67,6 +69,7 @@ import type { PaginatedProgramCycleListList } from '../models/PaginatedProgramCy
 import type { PaginatedProgramGlobalList } from '../models/PaginatedProgramGlobalList';
 import type { PaginatedProgramListList } from '../models/PaginatedProgramListList';
 import type { PaginatedProjectList } from '../models/PaginatedProjectList';
+import type { PaginatedRecipientList } from '../models/PaginatedRecipientList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
 import type { PaginatedRuleList } from '../models/PaginatedRuleList';
@@ -2729,19 +2732,25 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        messageId,
         offset,
         orderBy,
         ordering,
+        phoneNo,
         program,
         rdiId,
         rdiMergeStatus,
+        recipientId,
         residenceStatus,
         search,
+        sex,
         sizeGte,
         sizeLte,
         sizeRange,
         sizeMax,
         sizeMin,
+        survey,
+        unicefId,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -2762,6 +2771,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        messageId?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -2803,6 +2813,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phoneNo?: string,
         program?: string,
         rdiId?: string,
         /**
@@ -2810,6 +2821,7 @@ export class RestService {
          * * `MERGED` - Merged
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
         /**
          * Household residence status
          *
@@ -2823,6 +2835,7 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
+        sex?: string,
         sizeGte?: number,
         sizeLte?: number,
         /**
@@ -2837,6 +2850,8 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -2860,19 +2875,25 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'message_id': messageId,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone_no': phoneNo,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
                 'residence_status': residenceStatus,
                 'search': search,
+                'sex': sex,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
                 'withdrawn': withdrawn,
             },
         });
@@ -4309,19 +4330,25 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        messageId,
         offset,
         orderBy,
         ordering,
+        phoneNo,
         program,
         rdiId,
         rdiMergeStatus,
+        recipientId,
         residenceStatus,
         search,
+        sex,
         sizeGte,
         sizeLte,
         sizeRange,
         sizeMax,
         sizeMin,
+        survey,
+        unicefId,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4343,6 +4370,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        messageId?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4384,6 +4412,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phoneNo?: string,
         program?: string,
         rdiId?: string,
         /**
@@ -4391,6 +4420,7 @@ export class RestService {
          * * `MERGED` - Merged
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
         /**
          * Household residence status
          *
@@ -4404,6 +4434,7 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
+        sex?: string,
         sizeGte?: number,
         sizeLte?: number,
         /**
@@ -4418,6 +4449,8 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -4442,19 +4475,25 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'message_id': messageId,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone_no': phoneNo,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
                 'residence_status': residenceStatus,
                 'search': search,
+                'sex': sex,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
                 'withdrawn': withdrawn,
             },
         });
@@ -4547,19 +4586,25 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        messageId,
         offset,
         orderBy,
         ordering,
+        phoneNo,
         program,
         rdiId,
         rdiMergeStatus,
+        recipientId,
         residenceStatus,
         search,
+        sex,
         sizeGte,
         sizeLte,
         sizeRange,
         sizeMax,
         sizeMin,
+        survey,
+        unicefId,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4585,6 +4630,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        messageId?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4626,6 +4672,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phoneNo?: string,
         program?: string,
         rdiId?: string,
         /**
@@ -4633,6 +4680,7 @@ export class RestService {
          * * `MERGED` - Merged
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
         /**
          * Household residence status
          *
@@ -4646,6 +4694,7 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
+        sex?: string,
         sizeGte?: number,
         sizeLte?: number,
         /**
@@ -4660,6 +4709,8 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
@@ -4685,19 +4736,25 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'message_id': messageId,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone_no': phoneNo,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
                 'residence_status': residenceStatus,
                 'search': search,
+                'sex': sex,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
                 'withdrawn': withdrawn,
             },
         });
@@ -4729,10 +4786,10 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedFieldAttributeList
+     * @returns PaginatedRecipientList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList({
+    public static restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList({
         businessAreaSlug,
         programSlug,
         address,
@@ -4749,19 +4806,25 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        messageId,
         offset,
         orderBy,
         ordering,
+        phoneNo,
         program,
         rdiId,
         rdiMergeStatus,
+        recipientId,
         residenceStatus,
         search,
+        sex,
         sizeGte,
         sizeLte,
         sizeRange,
         sizeMax,
         sizeMin,
+        survey,
+        unicefId,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4783,6 +4846,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        messageId?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4824,6 +4888,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phoneNo?: string,
         program?: string,
         rdiId?: string,
         /**
@@ -4831,6 +4896,7 @@ export class RestService {
          * * `MERGED` - Merged
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
         /**
          * Household residence status
          *
@@ -4844,6 +4910,7 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
+        sex?: string,
         sizeGte?: number,
         sizeLte?: number,
         /**
@@ -4858,6 +4925,197 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedRecipientList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/all-accountability-communication-message-recipients/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'message_id': messageId,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'phone_no': phoneNo,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
+                'residence_status': residenceStatus,
+                'search': search,
+                'sex': sex,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList({
+        businessAreaSlug,
+        programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        messageId,
+        offset,
+        orderBy,
+        ordering,
+        phoneNo,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        recipientId,
+        residenceStatus,
+        search,
+        sex,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        survey,
+        unicefId,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        messageId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        phoneNo?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sex?: string,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedFieldAttributeList> {
         return __request(OpenAPI, {
@@ -4882,19 +5140,25 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'message_id': messageId,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone_no': phoneNo,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
                 'residence_status': residenceStatus,
                 'search': search,
+                'sex': sex,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
                 'withdrawn': withdrawn,
             },
         });
@@ -4916,6 +5180,195 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedRecipientList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsRecipientsList({
+        businessAreaSlug,
+        programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        messageId,
+        offset,
+        orderBy,
+        ordering,
+        phoneNo,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        recipientId,
+        residenceStatus,
+        search,
+        sex,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        survey,
+        unicefId,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        messageId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        phoneNo?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sex?: string,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedRecipientList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/recipients/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'message_id': messageId,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'phone_no': phoneNo,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
+                'residence_status': residenceStatus,
+                'search': search,
+                'sex': sex,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
+                'withdrawn': withdrawn,
             },
         });
     }
@@ -8868,6 +9321,26 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug,
+        slug,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/deduplication_flags/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsFinishCreate({
         businessAreaSlug,
         slug,
@@ -9260,6 +9733,48 @@ export class RestService {
         });
     }
     /**
+     * All Kobo projects/assets.
+     * @returns PaginatedKoboAssetObjectList
+     * @throws ApiError
+     */
+    public static restBusinessAreasAllKoboProjectsCreate({
+        slug,
+        limit,
+        offset,
+        ordering,
+        requestBody,
+    }: {
+        slug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        requestBody?: GetKoboAssetList,
+    }): CancelablePromise<PaginatedKoboAssetObjectList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{slug}/all-kobo-projects/',
+            path: {
+                'slug': slug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns PaginatedCollectorAttributeList
      * @throws ApiError
      */
@@ -9323,6 +9838,18 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/feedback-issue-type/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesLanguagesList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/languages/',
         });
     }
     /**

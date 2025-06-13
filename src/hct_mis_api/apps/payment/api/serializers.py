@@ -625,8 +625,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     funds_commitments = serializers.SerializerMethodField()
     available_funds_commitments = serializers.SerializerMethodField()
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
-    # payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
-    # payment_verification_plans_count = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -682,9 +680,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "eligible_payments_count",
             "funds_commitments",
             "available_funds_commitments",
-            # "payment_verification_summary",
             "payment_verification_plans",
-            # "payment_verification_plans_count",
             "admin_url",
         )
 

@@ -1,5 +1,6 @@
 import json
 from typing import Any
+from unittest.mock import patch
 
 from django.core.cache import cache
 from django.db import connection
@@ -179,7 +180,7 @@ class TestBusinessAreaDetail:
         api_client: Any,
         create_user_role_with_permissions: Any,
     ) -> None:
-        self.afghanistan = BusinessAreaFactory(slug="afghanistan")
+        self.afghanistan = BusinessAreaFactory(name="Afghanistan", slug="afghanistan", kobo_token="123")
         self.detail_url_name = "api:core:business-areas-detail"
         self.user = UserFactory()
         self.client = api_client(self.user)
@@ -207,6 +208,41 @@ class TestBusinessAreaDetail:
         assert response_data["parent"] == self.afghanistan.parent
         assert response_data["is_split"] == self.afghanistan.is_split
         assert response_data["active"] == self.afghanistan.active
+
+    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.get_all_projects_data")
+    def test_get_kobo_asset_list(self, mock_get_all_projects_data: Any, mock_kobo_init: Any) -> None:
+        mock_kobo_init.return_value = None
+        mock_get_all_projects_data.return_value = [
+            {
+                "name": "Registration 2025",
+                "uid": "123",
+                "has_deployment": True,
+                "asset_type": "Type",
+                "deployment__active": True,
+                "downloads": [{"format": "xls", "url": "xlsx_url"}],
+                "settings": {"sector": {"label": "Sector 123"}, "country": {"label": "Country Test"}},
+                "date_modified": "2022-02-22",
+            },
+            {
+                "name": "Campain 123",
+                "uid": "222",
+                "has_deployment": True,
+                "asset_type": "Type",
+                "deployment__active": True,
+                "downloads": [{"format": "xls", "url": "xlsx_url"}],
+                "settings": {"sector": {"label": "Sector 123"}, "country": {"label": "Country Test"}},
+                "date_modified": "2022-02-22",
+            },
+        ]
+
+        response = self.client.post(
+            reverse("api:core:business-areas-all-kobo-projects", kwargs={"slug": self.afghanistan.slug}),
+            {"only_deployed": True},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 2
 
 
 class TestBusinessAreaFilter:

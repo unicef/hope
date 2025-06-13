@@ -65,7 +65,7 @@ RUN --mount=type=cache,target=/root/.uv-cache \
     uv sync --cache-dir=/root/.uv-cache \
         --python=/usr/local/bin/python \
         --python-preference=system \
-        --no-editable --frozen --extra distribution --no-install-package hope
+        --no-editable --frozen --no-install-package hope
 COPY ./tests ./tests
 COPY ./src/data $APP_PATH/data
 COPY ./manage.py ./manage.py

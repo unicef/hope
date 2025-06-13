@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
@@ -34,6 +34,7 @@ from hct_mis_api.apps.household.api.serializers.household import (
     HouseholdListSerializer,
     HouseholdMemberSerializer,
     IndividualChoicesSerializer,
+    RecipientSerializer,
 )
 from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualDetailSerializer,
@@ -47,7 +48,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.api.serializers import PaymentListSerializer
-from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.program.models import Program
 
 
@@ -66,6 +67,8 @@ class HouseholdViewSet(
         "members": HouseholdMemberSerializer,
         "payments": PaymentListSerializer,
         "all_flex_fields_attributes": FieldAttributeSerializer,
+        "all_accountability_communication_message_recipients": RecipientSerializer,
+        "recipients": RecipientSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -88,6 +91,12 @@ class HouseholdViewSet(
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
             Permissions.RDI_VIEW_DETAILS,
         ],
+        "all_accountability_communication_message_recipients": [
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS,
+            Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR,
+        ],
+        "recipients": [Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
     }
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = HouseholdFilter
@@ -152,7 +161,9 @@ class HouseholdViewSet(
     @action(detail=True, methods=["get"])
     def payments(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         hh = self.get_object()
-        payments = Payment.objects.filter(household=hh)
+        payments = Payment.objects.filter(
+            Q(household=hh) & ~Q(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        )
 
         page = self.paginate_queryset(payments)
         if page is not None:
@@ -175,6 +186,35 @@ class HouseholdViewSet(
             .order_by("created_at")
         )
         return Response(FieldAttributeSerializer(qs, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(responses={200: RecipientSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="all-accountability-communication-message-recipients")
+    def all_accountability_communication_message_recipients(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        recipients = self.filter_queryset(
+            self.get_queryset().exclude(
+                head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
+            )
+        )
+
+        page = self.paginate_queryset(recipients)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(recipients, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(responses={200: RecipientSerializer(many=True)})
+    @action(detail=False, methods=["get"])
+    def recipients(self, request: Any, *args: Any, **kwargs: Any) -> Any:
+        recipients = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(recipients)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(recipients, many=True)
+        return Response(serializer.data)
 
 
 class HouseholdGlobalViewSet(

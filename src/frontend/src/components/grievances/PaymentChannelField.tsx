@@ -9,7 +9,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
 import { ReactElement } from 'react';
 
-export interface PaymentChannelProps {
+export interface PaymentChannelFieldProps {
   id: string;
   baseName: string;
   onDelete;
@@ -25,7 +25,7 @@ export function PaymentChannelField({
   isEdited,
   paymentChannel,
   values,
-}: PaymentChannelProps): ReactElement {
+}: PaymentChannelFieldProps): ReactElement {
   const { t } = useTranslation();
   const paymentChannelFieldName = `${baseName}.${getIndexForId(
     values[baseName],

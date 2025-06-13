@@ -58,10 +58,10 @@ class MessageRecipientsMapFilter(FilterSet):
         return super().filter_queryset(queryset)
 
     def filter_message_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(messages__id=decode_id_string(value))
+        return queryset.filter(messages__id=value)
 
     def filter_recipient_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(head_of_household_id=decode_id_string(value))
+        return queryset.filter(head_of_household_id=value)
 
     class Meta:
         model = Household
@@ -200,4 +200,4 @@ class RecipientFilter(FilterSet):
     )
 
     def filter_survey(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(surveys__id=decode_id_string(value))
+        return queryset.filter(surveys__id=value)

@@ -1,10 +1,11 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUpdateProgramMutation } from '@generated/graphql';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
@@ -23,32 +24,31 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
 
-  const [mutate, { loading }] = useUpdateProgramMutation();
-  const finishProgram = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.FINISHED,
-        },
-        //TODO: add
-        version: null,
-        // version: program.version,
-      },
+  const { mutateAsync: finishProgramMutation, isPending: loading } =
+    useMutation({
+      mutationFn: () =>
+        RestService.restBusinessAreasProgramsFinishCreate({
+          businessAreaSlug: businessArea,
+          slug: program.id,
+        }),
     });
-    if (!response.errors && response.data.updateProgram) {
+
+  const finishProgram = async (): Promise<void> => {
+    try {
+      await finishProgramMutation();
+
       setSelectedProgram({
         ...selectedProgram,
         status: ProgramStatus.FINISHED,
       });
 
       showMessage(t('Programme finished.'));
-      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
+      navigate(`/${baseUrl}/details/${program.slug}`);
       setOpen(false);
-    } else {
+    } catch (error) {
       showMessage(t('Programme finish action failed.'));
     }
   };

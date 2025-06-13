@@ -1,9 +1,8 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDebounce } from '@hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import {
   createHandleApplyFilterChange,
@@ -33,44 +32,24 @@ export function LanguageAutocompleteRestFilter({
   dataCy?: string;
 }): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
 
-  // TODO: Replace with dedicated language endpoint when available
-  // This is a temporary placeholder using the users endpoint
-  const [queryVariables, setQueryVariables] = useState({
-    limit: 20,
-    businessAreaSlug: businessArea,
-    search: debouncedInputText || undefined,
-  });
-
   const {
     data: languageData,
     isLoading,
     refetch,
   } = useQuery({
-    // TODO: Replace with appropriate language endpoint query key and function
-    queryKey: ['temporaryLanguagesList', queryVariables, businessArea],
-    queryFn: () => RestService.restBusinessAreasUsersList(queryVariables),
+    queryKey: ['languagesList'],
+    queryFn: () => RestService.restChoicesLanguagesList(),
   });
 
-  // Update query variables when search text changes
-  useEffect(() => {
-    setQueryVariables((prev) => ({
-      ...prev,
-      search: debouncedInputText || undefined,
-    }));
-  }, [debouncedInputText]);
-
   const loadData = useCallback(() => {
-    if (businessArea) {
-      refetch();
-    }
-  }, [businessArea, refetch]);
+    refetch();
+  }, [refetch]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -82,13 +61,16 @@ export function LanguageAutocompleteRestFilter({
     setAppliedFilter,
   );
 
-  // TODO: Replace with proper language data mapping when endpoint is available
-  // This is a mock structure to simulate language data from the users endpoint
-  const languages = languageData?.results || [];
-  const options = languages.map((user) => ({
-    id: user.id,
-    code: user.id, // Using ID as code temporarily
-    name: user.firstName || user.email || 'Unknown Language',
+  // Map languages data to options format and filter based on input
+  const languages = languageData || [];
+  const filteredLanguages = languages.filter((lang) =>
+    lang.name.toLowerCase().includes(debouncedInputText.toLowerCase()),
+  );
+
+  const options = filteredLanguages.map((lang) => ({
+    id: lang.value,
+    code: lang.value,
+    name: lang.name,
   }));
 
   const handleOptionSelected = (option: any, selectedValue: any) => {

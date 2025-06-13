@@ -227,7 +227,6 @@ export const CreateVerificationPlan = ({
           requestBody,
         });
 
-      // Adapt the response to match the expected GraphQL structure
       setSampleSizesData({
         sampleSize: {
           sampleSize: result.sampleSize || 0,
@@ -252,8 +251,6 @@ export const CreateVerificationPlan = ({
 
       setOpen(false);
       showMessage(t('New verification plan created.'));
-
-      // TODO: Implement proper React Query cache invalidation if needed
     } catch (error) {
       showMessage(error?.message || t('Error while submitting'));
     }

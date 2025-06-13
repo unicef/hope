@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR30` - Bradmouth
- * * `AF52` - East Danny
- * * `AF62` - Harriston
- * * `HR51` - Lake Jessicashire
- * * `UA46` - North Kristinport
- * * `UA32` - Port Carlville
- * * `UA44` - Port Joseton
- * * `HR29` - Port Kathrynberg
- * * `AF14` - South Trevorberg
+ * * `AF13` - Cantuchester
+ * * `HR21` - East Lindaburgh
+ * * `AF95` - Jonesbury
+ * * `UA15` - Lake Tony
+ * * `AF27` - Matthewhaven
+ * * `UA21` - North Matthewbury
+ * * `HR81` - North Natasha
+ * * `HR15` - Port Cynthia
+ * * `UA66` - Wilsonland
  */
 export enum Admin1Enum {
-    HR30 = 'HR30',
-    AF52 = 'AF52',
-    AF62 = 'AF62',
-    HR51 = 'HR51',
-    UA46 = 'UA46',
-    UA32 = 'UA32',
-    UA44 = 'UA44',
-    HR29 = 'HR29',
-    AF14 = 'AF14',
+    AF13 = 'AF13',
+    HR21 = 'HR21',
+    AF95 = 'AF95',
+    UA15 = 'UA15',
+    AF27 = 'AF27',
+    UA21 = 'UA21',
+    HR81 = 'HR81',
+    HR15 = 'HR15',
+    UA66 = 'UA66',
 }
