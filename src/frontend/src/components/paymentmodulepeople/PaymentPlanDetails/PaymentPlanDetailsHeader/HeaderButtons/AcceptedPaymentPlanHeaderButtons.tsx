@@ -24,6 +24,7 @@ import {
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
@@ -40,7 +41,8 @@ export function AcceptedPaymentPlanHeaderButtons({
   const [open, setOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
-  const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery();
+  const { businessArea } = useBaseUrl();
+  const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery({ variables: { businessArea } });
   const { mutatePaymentPlanAction: sendXlsxPassword, loading: loadingSend } =
     usePaymentPlanAction(Action.SendXlsxPassword, paymentPlan.id, () =>
       showMessage(t('Password has been sent.')),

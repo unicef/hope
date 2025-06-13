@@ -5,6 +5,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
@@ -28,6 +29,7 @@ query AllFinancialServiceProviderXlsxTemplates(
     $name: String
     $createdBy: ID
     $orderBy: String
+    $businessArea: String!
 ) {
 allFinancialServiceProviderXlsxTemplates(
         offset: $offset
@@ -38,6 +40,7 @@ allFinancialServiceProviderXlsxTemplates(
         name: $name
         createdBy: $createdBy
         orderBy: $orderBy
+        businessArea: $businessArea
     ) {
  edges {
         node {
@@ -142,13 +145,23 @@ class TestFSPRelatedSchema(APITestCase):
         cls.fsp_xlsx_template_1 = FinancialServiceProviderXlsxTemplateFactory(
             name="FSP_template_1", columns=["column_1", "column_2"]
         )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=cls.fsp_1, delivery_mechanism=cls.dm_cash, xlsx_template=cls.fsp_xlsx_template_1
+        )
         cls.fsp_xlsx_template_2 = FinancialServiceProviderXlsxTemplateFactory(
             name="FSP_template_2", columns=["column_3", "column_4"]
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=cls.fsp_2,
+            delivery_mechanism=cls.dm_voucher,
+            xlsx_template=cls.fsp_xlsx_template_2,
         )
 
     def test_query_all_financial_service_provider_xlsx_templates(self) -> None:
         self.snapshot_graphql_request(
-            request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATES, context={"user": self.user}
+            request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDER_XLSX_TEMPLATES,
+            context={"user": self.user},
+            variables={"businessArea": self.business_area.slug},
         )
 
     def test_query_all_financial_service_providers(self) -> None:
