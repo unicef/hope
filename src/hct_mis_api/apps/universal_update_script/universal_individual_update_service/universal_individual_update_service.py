@@ -81,7 +81,7 @@ class UniversalIndividualUpdateService:
         self.account_data_fields = {
             account_type: data
             for account_type, data in get_account_fields().items()
-            if account_type in universal_update.account_types.values_list("key", flat=True)
+            if account_type.key in universal_update.account_types.values_list("key", flat=True)
         }
         self.ignore_empty_values = ignore_empty_values
         self.deduplicate_es = deduplicate_es
@@ -179,16 +179,11 @@ class UniversalIndividualUpdateService:
             for column_name, field_name in all_account_fields:
                 if column_name == f"account__{account_type}__*":
                     continue
-                if column_name not in headers:
-                    errors.append(
-                        f"Row: {row_index} - Column {column_name} not found in headers for account type {account_type}"
-                    )
-                    continue
                 value = row[headers.index(column_name)]
                 if not (value is None or value == ""):
                     updating_anything = True
                     if field_name == "financial_institution":
-                        if not value.isdigit():
+                        if not isinstance(value, int):
                             errors.append(
                                 f"Row: {row_index} - Financial institution ID must be a number for field {column_name}"
                             )
@@ -456,12 +451,14 @@ class UniversalIndividualUpdateService:
                 row.append(None)
         all_wallets = individual.accounts.all()
         for account_type, data_fields in self.account_data_fields.items():
-            wallet = [x for x in all_wallets if x.account_type.key == account_type]
+            wallet = [x for x in all_wallets if x.account_type.key == account_type.key]
             if len(wallet) > 1:
                 raise ValueError("Multiple wallets found")
             if len(wallet) == 1:
                 for _, field_name in data_fields:
                     value = wallet[0].data.get(field_name)
+                    if field_name == "financial_institution":
+                        value = wallet[0].financial_institution_id
                     row.append(self.get_excel_value(value))
             else:
                 for _ in data_fields:
