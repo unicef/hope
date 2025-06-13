@@ -284,7 +284,7 @@ const EditProgramPage = (): ReactElement => {
     endDate: endDate,
     sector,
     dataCollectingTypeCode: dataCollectingType.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup.id),
+    beneficiaryGroup: beneficiaryGroup.id,
     description,
     budget,
     administrativeAreasOfImplementation: administrativeAreasOfImplementation,
