@@ -108,7 +108,7 @@ dev = [
     "selenium==4.29.0",
     "webdriver-manager==4.0.2",
     "requests-mock<2.0.0,>=1.9.3",
-    "responses<1.0,>=0.22",
+    "responses>=0.22,<1.0",
     "snapshottest<2.0.0,>=1.0.0a0",
     "types-freezegun<2.0.0,>=1.1.10",
     "types-requests==2.31.0.6",

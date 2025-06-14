@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 import dateutil.parser
+from elasticsearch.exceptions import NotFoundError
 
 from hct_mis_api.apps.core.countries import SanctionListCountries as Countries
 from hct_mis_api.apps.geo.models import Country
@@ -318,18 +319,20 @@ class LoadSanctionListXMLTask:
         all_fields = SanctionListIndividual._meta.get_fields(include_parents=False)
         return [field.name for field in all_fields if field.name not in excluded_fields and field.concrete is True]
 
-    @staticmethod
     def _get_individual_from_db_or_file(
+        self,
         individual: "SanctionListIndividual",
     ) -> "SanctionListIndividual":
         try:
-            return SanctionListIndividual.all_objects.get(reference_number=individual.reference_number)
+            return SanctionListIndividual.all_objects.filter(sanction_list=self.sanction_list).get(
+                reference_number=individual.reference_number
+            )
         except ObjectDoesNotExist:
             return individual
 
     @cached_property
     def _get_all_individuals_from_db(self) -> QuerySet:
-        return SanctionListIndividual.all_objects.defer("documents")
+        return SanctionListIndividual.all_objects.filter(sanction_list=self.sanction_list).defer("documents")
 
     def _get_existing_individuals(self, individuals_reference_numbers: set[str]) -> QuerySet:
         return self._get_all_individuals_from_db.filter(reference_number__in=individuals_reference_numbers)
@@ -479,7 +482,9 @@ class LoadSanctionListXMLTask:
                 1000,
             )
         individuals_ids_to_delete = self._get_individuals_to_deactivate(individuals_from_file)
-        SanctionListIndividual.objects.filter(id__in=individuals_ids_to_delete).delete()
+        SanctionListIndividual.objects.filter(
+            sanction_list=self.sanction_list, id__in=individuals_ids_to_delete
+        ).delete()
 
         # SanctionListIndividualDocument
         if documents_from_file:
@@ -496,18 +501,18 @@ class LoadSanctionListXMLTask:
                     individuals_to_check_against_sanction_list.append(doc_obj.individual)
 
         # SanctionListIndividualCountries
-        SanctionListIndividualCountries.objects.all().delete()
+        SanctionListIndividualCountries.objects.filter(individual__sanction_list=self.sanction_list).delete()
         if countries_from_file:
             SanctionListIndividualCountries.objects.bulk_create(countries_from_file)
 
         # SanctionListIndividualNationalities
 
-        SanctionListIndividualNationalities.objects.all().delete()
+        SanctionListIndividualNationalities.objects.filter(individual__sanction_list=self.sanction_list).delete()
         if nationalities_from_file:
             SanctionListIndividualNationalities.objects.bulk_create(nationalities_from_file)
 
         # SanctionListIndividualAliasName
-        SanctionListIndividualAliasName.objects.all().delete()
+        SanctionListIndividualAliasName.objects.filter(individual__sanction_list=self.sanction_list).delete()
         if aliases_from_file:
             SanctionListIndividualAliasName.objects.bulk_create(aliases_from_file)
 
@@ -528,7 +533,10 @@ class LoadSanctionListXMLTask:
         individuals_to_check_against_sanction_list.extend(individuals_to_update)
 
         if individuals_to_check_against_sanction_list:
-            CheckAgainstSanctionListPreMergeTask.execute(individuals_to_check_against_sanction_list)
+            try:
+                CheckAgainstSanctionListPreMergeTask.execute(individuals_to_check_against_sanction_list)
+            except NotFoundError:
+                pass
 
 
 class UNSanctionList(BaseSanctionList):
