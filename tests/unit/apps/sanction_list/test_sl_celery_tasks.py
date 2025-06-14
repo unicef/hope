@@ -2,17 +2,13 @@ from typing import TYPE_CHECKING, Any
 
 import responses
 
-from hct_mis_api.apps.sanction_list.celery_tasks import (
-    sync_sanction_list_task,
-)
+from hct_mis_api.apps.sanction_list.celery_tasks import sync_sanction_list_task
+from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 if TYPE_CHECKING:
     from responses import RequestsMock
 
-    from hct_mis_api.apps.sanction_list.models import (
-        SanctionList,
-        SanctionListIndividual,
-    )
+    from hct_mis_api.apps.sanction_list.models import SanctionList
 
 
 def test_sync_sanction_list_task(
