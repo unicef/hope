@@ -207,7 +207,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         household_one.save()
         cls.household_one = household_one
 
+        from test_utils.factories.sanction_list import SanctionListFactory
+
         sanction_list_individual_data = {
+            "sanction_list": SanctionListFactory(),
             "data_id": 112138,
             "version_num": 1,
             "first_name": "DAWOOD",

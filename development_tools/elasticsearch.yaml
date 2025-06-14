@@ -1,0 +1,3 @@
+cluster.routing.allocation.disk.threshold_enabled: true
+cluster.routing.allocation.disk.watermark.low: 93%
+cluster.routing.allocation.disk.watermark.high: 95%

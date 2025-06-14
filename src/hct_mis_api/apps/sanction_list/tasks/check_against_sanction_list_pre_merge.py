@@ -60,7 +60,15 @@ class CheckAgainstSanctionListPreMergeTask:
         ]
 
         queries: List = [
-            {"match": {"full_name": {"query": individual.full_name, "boost": 4, "operator": "and"}}},
+            {
+                "match": {
+                    "full_name": {
+                        "query": individual.full_name,
+                        "boost": 4,
+                        "operator": "and",
+                    }
+                }
+            },
         ]
         queries.extend(document_queries)
         queries.extend(birth_dates_queries)
@@ -142,7 +150,8 @@ class CheckAgainstSanctionListPreMergeTask:
                                 tickets_to_create.append(ticket)
                                 tickets_programs.append(
                                     GrievanceTicketProgramThrough(
-                                        grievanceticket=ticket, program_id=marked_individual.program_id
+                                        grievanceticket=ticket,
+                                        program_id=marked_individual.program_id,
                                     )
                                 )
                                 ticket_details_to_create.append(ticket_details)
