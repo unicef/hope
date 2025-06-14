@@ -1,0 +1,25 @@
+{% extends "sanction_list/layout.html" %}{% load feature_flags i18n %}
+{% block page-top %}
+    <div class="title-top">
+        <h2>Select File to Import to Check Against Sanctions List</h2>
+    </div>
+{% endblock page-top %}
+
+{% block content %}
+    <div class="flex items-center justify-center">
+        <div class="text-xl pt-20">Upload file</div>
+    </div>
+    <div class="flex items-center justify-center">
+        <div class="w-1/4 pt-10 text-center">
+            <form method="post"  enctype="multipart/form-data" id="upload-form">
+                {% csrf_token %}
+                <table>
+                    {{ form.as_table }}
+                </table>
+                <input type="submit" value="Upload">
+            </form>
+        </div>
+    </div>
+
+
+{% endblock %}
