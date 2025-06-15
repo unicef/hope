@@ -1,3 +1,5 @@
+from typing import Dict
+
 from django.contrib import admin, messages
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
@@ -139,4 +141,8 @@ class SanctionListIndividualDateOfBirthAdmin(HOPEModelAdminBase):
 
 @admin.register(UploadedXLSXFile)
 class UploadedXLSXFileAdmin(HOPEModelAdminBase):
-    pass
+    list_display = ("id", "file", "associated_email")
+    filter_horizontal = ("selected_lists",)
+
+    def get_actions(self, request: HttpRequest) -> Dict:
+        return super().get_actions(request)

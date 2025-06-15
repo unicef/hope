@@ -1,21 +1,25 @@
 from tempfile import NamedTemporaryFile
 
 from django import forms
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
 from django.views.generic.edit import CreateView
 
-from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
+from hct_mis_api.apps.sanction_list.models import SanctionList, UploadedXLSXFile
 from hct_mis_api.apps.sanction_list.template_generator import get_template_file
 
 
 class UploadForm(forms.ModelForm):
     file = forms.FileField(required=True, widget=forms.ClearableFileInput)
+    selected_lists = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple, queryset=SanctionList.objects.all()
+    )
 
     class Meta:
         model = UploadedXLSXFile
-        fields = ["file"]
+        fields = ["selected_lists", "file"]
 
 
 class UploadFileView(LoginRequiredMixin, CreateView):
@@ -28,6 +32,7 @@ class UploadFileView(LoginRequiredMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.associated_email = self.request.user.email
         self.object.save()
+        messages.add_message(self.request, messages.SUCCESS, "File Uploaded")
         return super().form_valid(form)
 
 
