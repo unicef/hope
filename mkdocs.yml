@@ -1,0 +1,136 @@
+copyright: Copyright &copy; 2020-2024 UNICEF
+dev_addr: 127.0.0.1:8001
+docs_dir: docs
+edit_uri: 'blob/main/docs/'
+repo_url: https://github.com/unicef/hope
+site_author: HOPE Team
+site_description: "Documentation"
+site_dir: ./~build/docs
+site_name: "Documentation"
+site_url: https://unicef.github.io/hope/
+strict: true
+extra_css:
+  - _theme/css/style.css
+extra_javascript:
+  - _theme/js/js.cookie.js
+  - _theme/js/address.js
+exclude_docs: |
+  _docs/*
+  _hooks/*
+  _includes/*
+  _scripts/*
+  ~*
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.snippets:
+      base_path: 'docs'
+      check_paths: true
+      url_download: true
+
+
+extra:
+  consent:
+    title: Cookie consent
+    description: >- 
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+
+theme:
+  name: "material"
+  custom_dir: docs/_theme/overrides
+  logo: _theme/img/logo.png
+  favicon: _theme/img/favicon.ico
+  color_mode: auto
+  user_color_mode_toggle: true
+  highlightjs: true
+  hljs_languages:
+    - yaml
+    - django
+  extra:
+    version:
+      provider: mike
+      alias: true
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: light blue
+      media: "(prefers-color-scheme: light)"
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: light blue
+      media: "(prefers-color-scheme: dark)"
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  features:
+    - content.action.edit
+    - content.code.copy
+    - navigation.indexes
+    - navigation.tabs
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+
+plugins:
+  - autorefs
+  - awesome-pages:
+      filename: .pages
+      collapse_single_pages: true
+      strict: false
+      order: asc
+      sort_type: natural
+      order_by: title
+  - ezglossary:
+      templates: docs/_theme/glossary
+      inline_refs: none
+      list_definitions: true
+      list_references: true
+#      tooltip: heading
+#  - ezlinks
+  - gitsnippet
+  - link-marker
+  - macros
+  #  - mkdocstrings
+  - include-markdown:
+      encoding: ascii
+      preserve_includer_indent: false
+      dedent: false
+      trailing_newlines: true
+      comments: false
+      rewrite_relative_urls: true
+      heading_offset: 0
+      recursive: true
+  - privacy
+  - search
+  - social:
+      cards_dir: assets/images/social
+      cards_layout_options:
+        font_family: Noto Sans SC
+  - tags:
+      tags_file: tags.md
+  - panzoom:
+      full_screen: true
+
+hooks:
+  - docs/_hooks/hooks.py
+
+validation:
+  omitted_files: warn
+  absolute_links: warn  # Or 'relative_to_docs' - new in MkDocs 1.6
+  unrecognized_links: warn
+  anchors: warn  # New in MkDocs 1.6

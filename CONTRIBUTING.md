@@ -36,12 +36,12 @@ Every pull requests should contain tests to coverage the functionality.
 Get started
 -----------
 
-1. Install [pdm](https://github.com/pdm-project/pdm#installation)
-2. $`pdm venv create`
-3. Register the created venv for the project with `pdm use` 
-4. Activate your venv (eg. $`$(pdm venv activate)`).
+1. Install [uv](https://docs.astral.sh/)
+2. $`uv create venv --python 3.13`
+3. You may want to use direnv and configure your .envrc
+4. Activate your venv (eg. $`$( source .venv/bin/activate)`).
 5. Check your environment
-   eg. $`python --version` -> see that it uses Python 3.12.*
+   eg. $`python --version` -> see that it uses Python 3.13.*
    eg. $`which python` -> see that it matches you python executable in the venv you have created: $```echo `pwd`/.venv/bin/python```
 6. Install the package: $`pdm install`
 7. Add `export PYTHONPATH="$PYTHONPATH:./src"`
