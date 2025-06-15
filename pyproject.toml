@@ -133,15 +133,12 @@ dev = [
     "tox-uv>=1.25.0",
 ]
 
-[tool.pdm]
-distribution = true
-
 [project]
 name = "hope"
 version = "3.2.3"
-description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
+description = "HOPE Humanitarian Opertaion Platform & Ecosystem"
 authors = [
-    { name = "Tivix" },
+    { name = "UNICEF" },
 ]
 dependencies = [
     "setuptools==71.1.0",
