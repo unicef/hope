@@ -46,11 +46,8 @@ class EUParser:
 
     def __iter__(self) -> "Generator[Entry, None, None]":
         namespace = {"ns": "http://eu.europa.ec/fpi/fsd/export"}
-
-        # export = self.root.find("./ns:export", namespace)
-        # dt = self.root.get("generationDate")
         num = self.root.get("globalFileId", "")
-        for i, entity in enumerate(self.root.findall("ns:sanctionEntity", namespace), 1):
+        for _i, entity in enumerate(self.root.findall("ns:sanctionEntity", namespace), 1):
             subjectType = entity.findall("ns:subjectType", namespace)[0]
             if subjectType.get("classificationCode") != "P":
                 continue
@@ -99,7 +96,7 @@ class EUParser:
                     }
                 )
             yield {
-                "id": i,
+                "id": _i,
                 "aliases": aliases,
                 "birthdays": birthdays,
                 "citizenships": citizenships,
@@ -121,8 +118,8 @@ class EUSanctionList(BaseSanctionList):
 
     def parse(self, root: ET.Element) -> int:
         parser = EUParser(root)
-        i = 0
-        for i, entry in enumerate(parser):
+        _i = 0
+        for _i, entry in enumerate(parser):
             ind_data = entry["aliases"][0]
             ref_number = ind_data.pop("reference_number")
             ind, __ = self.context.entries.update_or_create(reference_number=ref_number, defaults=ind_data)
@@ -142,7 +139,7 @@ class EUSanctionList(BaseSanctionList):
                     ind.nationalities.get_or_create(nationality=country)
                 except Country.DoesNotExist:
                     logger.error(f"Unknown country: '{nationality['iso_code2']}'")
-        return i
+        return _i
 
     def refresh(self) -> None:
         self.load_from_url()
