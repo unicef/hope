@@ -312,22 +312,9 @@ class DataCollectingTypeNode(DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
-    all_fields_attributes = graphene.List(
-        FieldAttributeNode,
-        flex_field=graphene.Boolean(),
-        business_area_slug=graphene.String(required=False, description="The business area slug"),
-        program_id=graphene.String(required=False, description="program id"),
-        description="All field datatype meta.",
-    )
     all_groups_with_fields = graphene.List(
         GroupAttributeNode,
         description="Get all groups that contains flex fields",
-    )
-    kobo_project = graphene.Field(
-        KoboAssetObject,
-        uid=graphene.String(required=True),
-        business_area_slug=graphene.String(required=True),
-        description="Single Kobo project/asset.",
     )
     all_kobo_projects = ConnectionField(
         KoboAssetObjectConnection,
@@ -340,55 +327,8 @@ class Query(graphene.ObjectType):
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX
 
-    def resolve_all_fields_attributes(
-        parent,
-        info: Any,
-        flex_field: Optional[bool] = None,
-        business_area_slug: Optional[str] = None,
-        program_id: Optional[str] = None,
-    ) -> List[Any]:
-        def is_a_killer_filter(field: Any) -> bool:
-            if isinstance(field, FlexibleAttribute):
-                name = field.name
-                associated_with = field.get_associated_with_display()
-            else:
-                name = field["name"]
-                associated_with = field["associated_with"]
-
-            return name in {
-                "Household": ["address", "deviceid"],
-                "Individual": [
-                    "full_name",
-                    "family_name",
-                    "given_name",
-                    "middle_name",
-                    "phone_no",
-                    "phone_no_alternative",
-                    "electoral_card_no",
-                    "drivers_license_no",
-                    "national_passport",
-                    "national_id_no",
-                ],
-            }.get(associated_with, [])
-
-        program_id = decode_id_string(info.context.headers.get("Program"))
-        return sort_by_attr(
-            (
-                attr
-                for attr in get_fields_attr_generators(flex_field, business_area_slug, program_id)
-                if not is_a_killer_filter(attr)
-            ),
-            "label.English(EN)",
-        )
-
     def resolve_kobo_project(self, info: Any, uid: str, business_area_slug: str, **kwargs: Any) -> Dict:
         return resolve_asset(business_area_slug=business_area_slug, uid=uid)
-
-    def resolve_all_kobo_projects(self, info: Any, business_area_slug: str, *args: Any, **kwargs: Any) -> List:
-        return resolve_assets_list(
-            business_area_slug=business_area_slug,
-            only_deployed=kwargs.get("only_deployed", False),
-        )
 
     def resolve_all_groups_with_fields(self, info: Any, **kwargs: Any) -> "QuerySet[FlexibleAttributeGroup]":
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)
