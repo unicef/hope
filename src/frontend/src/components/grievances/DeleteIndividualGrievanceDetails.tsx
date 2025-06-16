@@ -8,9 +8,11 @@ import {
   HouseholdNode,
   IndividualNode,
   IndividualRoleInHouseholdRole,
-  useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -68,12 +70,23 @@ export function DeleteIndividualGrievanceDetails({
     return false;
   };
 
-  const { data, loading } = useAllAddIndividualFieldsQuery();
+  const { businessArea } = useBaseUrl();
+
+  const { data: addIndividualFieldsData, isLoading } = useQuery({
+    queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
+  });
+
   const [mutate] = useApproveDeleteIndividualDataChangeMutation();
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
+  if (isLoading) return <LoadingComponent />;
+  if (!addIndividualFieldsData) return null;
   const documents = ticket.individual?.documents;
-  const fieldsDict = data.allAddIndividualsFieldsAttributes?.reduce(
+  const fieldsDict = addIndividualFieldsData.results?.reduce(
     (previousValue, currentValue) => ({
       ...previousValue,
       [currentValue?.name]: currentValue,

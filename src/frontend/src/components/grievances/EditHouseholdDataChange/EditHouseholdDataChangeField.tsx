@@ -7,11 +7,7 @@ import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-  useAllAdminAreasLazyQuery,
-} from '@generated/graphql';
+import { useAllAdminAreasLazyQuery } from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
@@ -20,9 +16,16 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
 export interface EditHouseholdDataChangeFieldProps {
-  field:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    labelEn?: string;
+    required?: boolean;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   name: string;
 }
 export const EditHouseholdDataChangeField = ({

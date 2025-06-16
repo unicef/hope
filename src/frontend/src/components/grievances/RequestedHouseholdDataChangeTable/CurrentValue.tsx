@@ -1,14 +1,15 @@
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
 }
 

@@ -6,18 +6,12 @@ import camelCase from 'lodash/camelCase';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export interface EditHouseholdDataChangeFieldRowProps {
-  fields:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes']
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'];
+  fields: any[];
   household: HouseholdDetail;
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
