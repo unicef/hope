@@ -581,3 +581,47 @@ class TestGrievanceTicketGlobalList:
         result_ids = [result["id"] for result in response_results]
         for i in expected_tickets:
             assert str(self.grievance_tickets[i].id) in result_ids
+
+    def test_all_edit_household_fields_attributes(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_CREATE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        url = "api:grievance-tickets:grievance-tickets-global-all-edit-household-fields-attributes"
+        response = self.api_client.get(reverse(url, kwargs={"business_area_slug": self.afghanistan.slug}))
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 39
+
+    def test_all_edit_people_fields_attributes(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_CREATE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-all-edit-people-fields-attributes",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 42
+
+    def test_all_add_individuals_fields_attributes(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.GRIEVANCES_CREATE],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.get(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-all-add-individuals-fields-attributes",
+                kwargs={"business_area_slug": self.afghanistan.slug},
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 30
