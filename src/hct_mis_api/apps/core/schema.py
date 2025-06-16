@@ -28,7 +28,6 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
-from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
     DataCollectingType,
     FlexibleAttribute,
@@ -337,9 +336,6 @@ class Query(graphene.ObjectType):
         description="All Kobo projects/assets.",
     )
     cash_assist_url_prefix = graphene.String()
-    all_languages = ConnectionField(
-        LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
-    )
 
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX
@@ -396,6 +392,3 @@ class Query(graphene.ObjectType):
 
     def resolve_all_groups_with_fields(self, info: Any, **kwargs: Any) -> "QuerySet[FlexibleAttributeGroup]":
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)
-
-    def resolve_all_languages(self, info: Any, code: str, **kwargs: Any) -> List[Language]:
-        return Languages.filter_by_code(code)
