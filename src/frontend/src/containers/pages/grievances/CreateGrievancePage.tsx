@@ -24,11 +24,6 @@ import {
 } from '@components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
-import {
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -164,29 +159,55 @@ const CreateGrievancePage = (): ReactElement => {
 
   const {
     data: allAddIndividualFieldsData,
-    loading: allAddIndividualFieldsDataLoading,
-  } = useAllAddIndividualFieldsQuery();
+    isLoading: allAddIndividualFieldsDataLoading,
+  } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
+  });
 
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, isLoading: householdFieldsLoading } =
+    useQuery({
+      queryKey: ['householdFieldsAttributes', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+          },
+        ),
+    });
 
-  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery();
+  const {
+    data: allEditPeopleFieldsData,
+    isLoading: allEditPeopleFieldsLoading,
+  } = useQuery({
+    queryKey: ['editPeopleFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
+  });
 
   const individualFieldsDict = useArrayToDict(
-    allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
+    allAddIndividualFieldsData?.results,
     'name',
     '*',
   );
 
   const householdFieldsDict = useArrayToDict(
-    householdFieldsData?.allEditHouseholdFieldsAttributes,
+    householdFieldsData?.results,
     'name',
     '*',
   );
 
   const peopleFieldsDict = useArrayToDict(
-    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    allEditPeopleFieldsData?.results,
     'name',
     '*',
   );
@@ -215,8 +236,8 @@ const CreateGrievancePage = (): ReactElement => {
 
   if (
     !choicesData ||
-    !allAddIndividualFieldsData ||
-    !householdFieldsData ||
+    !allAddIndividualFieldsData?.results ||
+    !householdFieldsData?.results ||
     !householdFieldsDict ||
     !individualFieldsDict ||
     !programsData ||
@@ -325,7 +346,7 @@ const CreateGrievancePage = (): ReactElement => {
       validate={(values) =>
         validateUsingSteps(
           values,
-          allAddIndividualFieldsData,
+          allAddIndividualFieldsData?.results || null,
           individualFieldsDictForValidation,
           householdFieldsDict,
           activeStep,

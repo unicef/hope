@@ -27,8 +27,6 @@ import {
 } from '@components/grievances/utils/editGrievanceUtils';
 import { validate } from '@components/grievances/utils/validateGrievance';
 import { validationSchema } from '@components/grievances/utils/validationSchema';
-import {} from // Keeping these until we migrate the other queries
-'@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -367,7 +365,7 @@ const EditGrievancePage = (): ReactElement => {
       validate={(values) =>
         validate(
           values,
-          allAddIndividualFieldsData,
+          allAddIndividualFieldsData?.results || null,
           individualFieldsDictForValidation,
           householdFieldsDict,
           beneficiaryGroup,
