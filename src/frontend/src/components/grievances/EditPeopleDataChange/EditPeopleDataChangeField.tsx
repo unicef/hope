@@ -7,7 +7,6 @@ import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useAllAdminAreasLazyQuery } from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
 import { ReactElement } from 'react';
@@ -67,11 +66,11 @@ export const EditPeopleDataChangeField = ({
       if (field.name === 'admin_area_title') {
         fieldProps = {
           component: FormikAsyncAutocomplete,
-          query: useAllAdminAreasLazyQuery,
+          restEndpoint: 'adminAreas',
           fetchData: (data) =>
-            data?.allAdminAreas?.edges?.map(({ node }) => ({
-              labelEn: `${node.name} - ${node.pCode}`,
-              value: node.pCode,
+            data?.results?.map((area) => ({
+              labelEn: `${area.name} - ${area.pCode}`,
+              value: area.pCode,
             })),
           variables: {
             businessArea,

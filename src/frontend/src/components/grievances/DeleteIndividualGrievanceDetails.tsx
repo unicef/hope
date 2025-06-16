@@ -5,8 +5,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
-  HouseholdNode,
-  IndividualNode,
   IndividualRoleInHouseholdRole,
   useApproveDeleteIndividualDataChangeMutation,
 } from '@generated/graphql';
@@ -22,11 +20,13 @@ import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { Individual } from '@restgenerated/models/Individual';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export type RoleReassignData = {
   role: IndividualRoleInHouseholdRole | string;
-  individual: IndividualNode;
-  household: HouseholdNode;
+  individual: Individual;
+  household: HouseholdDetail;
 };
 
 export function DeleteIndividualGrievanceDetails({
