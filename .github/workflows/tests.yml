@@ -98,7 +98,7 @@ jobs:
 
 
       - name: Run Test suite
-        run: uv run tox -e unit -- -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hct_mis_api
+        run: uv run tox -e unit -- tests/unit -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hct_mis_api
 
       - name: Test Report
         uses: dorny/test-reporter@v2
