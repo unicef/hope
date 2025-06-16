@@ -27,11 +27,8 @@ import {
 } from '@components/grievances/utils/editGrievanceUtils';
 import { validate } from '@components/grievances/utils/validateGrievance';
 import { validationSchema } from '@components/grievances/utils/validationSchema';
-import {
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllEditPeopleFieldsQuery,
-} from '@generated/graphql';
+import {} from // Keeping these until we migrate the other queries
+'@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -158,12 +155,38 @@ const EditGrievancePage = (): ReactElement => {
   });
   const {
     data: allAddIndividualFieldsData,
-    loading: allAddIndividualFieldsDataLoading,
-  } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
-  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery();
+    isLoading: allAddIndividualFieldsDataLoading,
+  } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
+  const { data: householdFieldsData, isLoading: householdFieldsLoading } =
+    useQuery({
+      queryKey: ['householdFieldsAttributes', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+          {
+            businessAreaSlug,
+          },
+        ),
+    });
+  const {
+    data: allEditPeopleFieldsData,
+    isLoading: allEditPeopleFieldsLoading,
+  } = useQuery({
+    queryKey: ['editPeopleFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
 
   const { data: programsData, isLoading: programsDataLoading } =
     useQuery<PaginatedProgramListList>({
@@ -179,18 +202,18 @@ const EditGrievancePage = (): ReactElement => {
         ),
     });
   const individualFieldsDict = useArrayToDict(
-    allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
+    allAddIndividualFieldsData?.results,
     'name',
     '*',
   );
   const householdFieldsDict = useArrayToDict(
-    householdFieldsData?.allEditHouseholdFieldsAttributes,
+    householdFieldsData?.results,
     'name',
     '*',
   );
 
   const peopleFieldsDict = useArrayToDict(
-    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    allEditPeopleFieldsData?.results,
     'name',
     '*',
   );

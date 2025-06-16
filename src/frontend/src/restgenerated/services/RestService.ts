@@ -1791,6 +1791,660 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList({
+        businessAreaSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/all-add-individuals-fields-attributes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList({
+        businessAreaSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/all-edit-household-fields-attributes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList({
+        businessAreaSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        id,
+        idStartswith,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        id?: string,
+        idStartswith?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/all-edit-people-fields-attributes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'id': id,
+                'id__startswith': idStartswith,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+        });
+    }
+    /**
      * @returns PaginatedGrievanceTicketDetailList
      * @throws ApiError
      */
