@@ -59,9 +59,7 @@ export function LanguageAutocompleteRestFilter({
     setFilter,
     appliedFilter,
     setAppliedFilter,
-  );
-
-  // Map languages data to options format and filter based on input
+  ); // Map languages data to options format and filter based on input
   const languages = languageData || [];
   const filteredLanguages = languages.filter((lang) =>
     lang.name.toLowerCase().includes(debouncedInputText.toLowerCase()),
