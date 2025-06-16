@@ -22,8 +22,8 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.rest_api import FieldAttributeSerializer
 from hct_mis_api.apps.household.api.caches import (
     HouseholdListKeyConstructor,
     IndividualListKeyConstructor,
