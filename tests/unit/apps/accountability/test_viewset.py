@@ -1410,6 +1410,7 @@ class TestSurveyViewSet:
             assert "has_valid_sample_file" in srv
             assert "sample_file_path" in srv
             assert "created_at" in srv
+            assert "number_of_recipients" in srv
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
