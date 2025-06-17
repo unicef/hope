@@ -25,7 +25,6 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
 
@@ -76,14 +75,13 @@ const PeopleDetailsPage = (): ReactElement => {
         }),
     });
 
-  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } =
-    useQuery<AllIndividualsFlexFieldsAttributesQuery>({
-      queryKey: ['fieldsAttributes'],
-      queryFn: async () => {
-        const data = await FieldsAttributesService.fieldsAttributesRetrieve();
-        return { allIndividualsFlexFieldsAttributes: data };
-      },
-    });
+  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
+    queryKey: ['fieldsAttributes'],
+    queryFn: async () => {
+      const data = await FieldsAttributesService.fieldsAttributesRetrieve();
+      return { allIndividualsFlexFieldsAttributes: data };
+    },
+  });
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({

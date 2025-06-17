@@ -6,12 +6,12 @@ import { RegistrationDataImportCreateDialog } from '@components/rdi/create/Regis
 import RegistrationPeopleFilters from '@components/rdi/RegistrationPeopleFilters';
 import { RegistrationDataImportForPeopleTable } from '@containers/tables/rdi/RegistrationDataImportForPeopleTable';
 import { ButtonTooltip } from '@core/ButtonTooltip';
-import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,10 +32,17 @@ function PeopleRegistrationDataImportPage(): ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programId, businessAreaSlug, programSlug } =
+    useBaseUrl();
   const { showMessage } = useSnackbar();
-  const { data: deduplicationFlags, loading } = useDeduplicationFlagsQuery({
-    fetchPolicy: 'cache-and-network',
+
+  const { data: deduplicationFlags, isLoading: loading } = useQuery({
+    queryKey: ['deduplicationFlags', businessAreaSlug, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug,
+        slug: programSlug,
+      }),
   });
 
   const [filter, setFilter] = useState(

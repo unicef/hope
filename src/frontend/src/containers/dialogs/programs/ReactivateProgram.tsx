@@ -7,10 +7,11 @@ import {
 } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUpdateProgramMutation } from '@generated/graphql';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useMutation } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
@@ -30,34 +31,35 @@ export function ReactivateProgram({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessAreaSlug } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
 
-  const [mutate, { loading }] = useUpdateProgramMutation();
-  const reactivateProgram = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.ACTIVE,
-        },
-        //TODO: add
-        version: null,
-        // version: program.version,
-      },
-    });
-    if (!response.errors && response.data.updateProgram) {
+  const { mutate, isPending: loading } = useMutation({
+    mutationFn: async (programData: any) =>
+      RestService.restBusinessAreasProgramsUpdate({
+        businessAreaSlug,
+        slug: program.id,
+        requestBody: programData,
+      }),
+    onSuccess: () => {
       setSelectedProgram({
         ...selectedProgram,
         status: ProgramStatus.ACTIVE,
       });
-
       showMessage(t('Programme reactivated.'));
-      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
+      navigate(`/${baseUrl}/details/${program.id}`);
       setOpen(false);
-    } else {
+    },
+    onError: () => {
       showMessage(t('Programme reactivate action failed.'));
-    }
+    },
+  });
+
+  const reactivateProgram = (): void => {
+    mutate({
+      ...program,
+      status: ProgramStatus.ACTIVE,
+    });
   };
   return (
     <span>

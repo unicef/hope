@@ -49,6 +49,7 @@ import type { PaginatedCollectorAttributeList } from '../models/PaginatedCollect
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedFieldAttributeList } from '../models/PaginatedFieldAttributeList';
+import type { PaginatedFieldAttributeSimpleList } from '../models/PaginatedFieldAttributeSimpleList';
 import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
@@ -10461,6 +10462,38 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedFieldAttributeSimpleList
+     * @throws ApiError
+     */
+    public static restBusinessAreasAllFieldsAttributesList({
+        limit,
+        offset,
+        ordering,
+    }: {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedFieldAttributeSimpleList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/all-fields-attributes/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
      * @returns CountResponse
      * @throws ApiError
      */
@@ -10574,17 +10607,6 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/constance/',
-        });
-    }
-    /**
-     * Returns the list of currency choices.
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restCurrencyRetrieve(): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/currency/',
         });
     }
     /**

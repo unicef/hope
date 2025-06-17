@@ -13,7 +13,7 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
@@ -25,27 +25,39 @@ function AddIndividualGrievanceDetails({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { businessAreaSlug } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryKey: ['addIndividualFieldsAttributes', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
         {
-          businessAreaSlug,
+          businessAreaSlug: businessArea,
         },
       ),
   });
 
-  // TODO: Find the correct REST API endpoint for approving add individual data changes
   const { mutate } = useMutation({
-    mutationFn: async (params: {
+    mutationFn: ({
+      grievanceTicketId,
+      approveStatus,
+    }: {
       grievanceTicketId: string;
       approveStatus: boolean;
-    }) => {
-      // Placeholder - needs to be implemented with correct endpoint
-      console.log('Approve add individual mutation:', params);
-      return Promise.resolve();
+    }) =>
+      RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
+        businessAreaSlug: businessArea,
+        id: grievanceTicketId,
+        requestBody: {
+          approveStatus,
+        },
+      }),
+    onSuccess: () => {
+      // Invalidate and refetch the grievance ticket details
+      queryClient.invalidateQueries({
+        queryKey: ['grievanceTicket', ticket.id],
+      });
     },
   });
   const { selectedProgram } = useProgramContext();
@@ -177,7 +189,7 @@ function AddIndividualGrievanceDetails({
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                    showMessage(t('An error occurred'));
                   }
                 })
               }

@@ -28,22 +28,18 @@ export const RerunDedupe = ({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const { mutateAsync: mutate, isPending: loading } =
-    useActionMutation(
-      registration.id,
-      RestService.restBusinessAreasProgramsRegistrationDataImportsDeduplicateCreate,
-      [
-        RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve
-          .name,
-      ],
-    );
+  const { mutateAsync: mutate, isPending: loading } = useActionMutation(
+    registration.id,
+    RestService.restBusinessAreasProgramsRegistrationDataImportsDeduplicateCreate,
+    [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
+  );
   const rerunDedupe = async (): Promise<void> => {
     try {
       await mutate();
       showMessage('Rerunning Deduplication started');
       setOpen(false);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e.message);
     }
   };
   return (

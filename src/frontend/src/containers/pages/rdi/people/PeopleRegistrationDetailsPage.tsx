@@ -5,12 +5,11 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationIndividualAdditionalRegistrationInformation } from '@components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation/RegistrationIndividualAdditionalRegistrationInformation';
 import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
-import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
-import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -39,7 +38,7 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
     data: flexFieldsData,
     isLoading: flexFieldsDataLoading,
     error,
-  } = useQuery<AllIndividualsFlexFieldsAttributesQuery>({
+  } = useQuery({
     queryKey: ['fieldsAttributes'],
     queryFn: async () => {
       const data = await FieldsAttributesService.fieldsAttributesRetrieve();
@@ -58,10 +57,10 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
     });
 
   const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
       queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });
