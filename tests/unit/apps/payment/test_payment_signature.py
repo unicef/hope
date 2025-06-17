@@ -5,8 +5,8 @@ from unittest import mock
 from django.conf import settings
 from django.utils import timezone
 
-from freezegun import freeze_time
 from pytz import utc
+from time_machine import travel
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -112,7 +112,7 @@ class TestPaymentSignature(APITestCase):
         payment.refresh_from_db()
         self.assertEqual(payment.signature_hash, self.calculate_hash_manually(payment))
 
-    @freeze_time("2020-10-10")
+    @travel("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_signature_after_prepare_payment_plan(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(

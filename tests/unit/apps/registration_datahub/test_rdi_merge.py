@@ -9,8 +9,8 @@ from django.forms import model_to_dict
 from django.test import TestCase
 
 import pytest
-from freezegun import freeze_time
 from parameterized import parameterized
+from time_machine import travel
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
@@ -212,7 +212,7 @@ class TestRdiMergeTask(TestCase):
 
         cls.individuals = [PendingIndividualFactory(**individual) for individual in individuals_to_create]
 
-    @freeze_time("2022-01-01")
+    @travel("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
         hh = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -324,7 +324,7 @@ class TestRdiMergeTask(TestCase):
         }
         self.assertEqual(household_data, expected)
 
-    @freeze_time("2022-01-01")
+    @travel("2022-01-01")
     @patch(
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
@@ -355,7 +355,7 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.assert_called_once()
         sanction_execute_mock.reset_mock()
 
-    @freeze_time("2022-01-01")
+    @travel("2022-01-01")
     @patch(
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
@@ -387,7 +387,7 @@ class TestRdiMergeTask(TestCase):
             RdiMergeTask().execute(self.rdi.pk)
         sanction_execute_mock.assert_not_called()
 
-    @freeze_time("2022-01-01")
+    @travel("2022-01-01")
     @patch(
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
     )
