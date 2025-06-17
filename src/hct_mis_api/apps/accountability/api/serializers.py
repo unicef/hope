@@ -257,6 +257,7 @@ class SurveySerializer(serializers.ModelSerializer):
             "sample_file_path",
             "has_valid_sample_file",
             "rapid_pro_url",
+            "number_of_recipients",
             "created_at",
             "created_by",
         )
