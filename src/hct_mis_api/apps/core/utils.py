@@ -2,6 +2,7 @@ import functools
 import io
 import itertools
 import json
+import logging
 import string
 from collections import OrderedDict
 from collections.abc import MutableMapping
@@ -38,10 +39,6 @@ from graphene.types.resolver import attr_resolver, dict_resolver
 from PIL import Image
 from rest_framework.exceptions import ValidationError
 
-from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
@@ -971,6 +968,16 @@ def sort_by_attr(options: Iterable, attrs: str) -> List:
 def get_fields_attr_generators(
     flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
 ) -> Generator:
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
+    from hct_mis_api.apps.core.field_attributes.fields_types import (
+        FILTERABLE_TYPES,
+        Scope,
+    )
+    from hct_mis_api.apps.core.models import FlexibleAttribute
+    from hct_mis_api.apps.program.models import Program
+
     if flex_field is not False:
         yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
             "created_at"
