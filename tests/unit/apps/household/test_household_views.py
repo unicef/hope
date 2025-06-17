@@ -40,6 +40,8 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -457,6 +459,24 @@ class TestHouseholdDetail:
         self.grievance_ticket = GrievanceTicketFactory(household_unicef_id=self.household.unicef_id)
         GrievanceTicketFactory()  # not linked ticket
 
+        # delivered quantities
+        PaymentFactory(
+            parent=PaymentPlanFactory(program_cycle=self.program.cycles.first()),
+            currency="AFG",
+            delivered_quantity_usd=50,
+            delivered_quantity=100,
+            household=self.household,
+            status=Payment.STATUS_SUCCESS,
+        )
+
+        PaymentFactory(
+            parent=PaymentPlanFactory(program_cycle=self.program.cycles.first()),
+            currency="AFG",
+            delivered_quantity_usd=33,
+            delivered_quantity=133,
+            household=self.household,
+        )
+
     @pytest.mark.parametrize(
         "permissions",
         [
@@ -562,6 +582,16 @@ class TestHouseholdDetail:
         assert data["size"] == self.household.size
         assert data["residence_status"] == self.household.residence_status
         assert data["program_registration_id"] == self.household.program_registration_id
+        assert data["delivered_quantities"] == [
+            {
+                "currency": "USD",
+                "total_delivered_quantity": "83.00",
+            },
+            {
+                "currency": "AFG",
+                "total_delivered_quantity": "233.00",
+            },
+        ]
         assert data["linked_grievances"] == [
             {
                 "id": str(self.grievance_ticket.id),

@@ -34,7 +34,15 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
+    delivered_quantity_service,
+)
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
+
+
+class DeliveredQuantitySerializer(serializers.Serializer):
+    currency = serializers.CharField()
+    total_delivered_quantity = serializers.DecimalField(max_digits=64, decimal_places=2)
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):
@@ -137,6 +145,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     admin_area_title = serializers.SerializerMethodField()
     active_individuals_count = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
+    delivered_quantities = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
@@ -205,6 +214,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "size",
             "residence_status",
             "program_registration_id",
+            "delivered_quantities",
         )
 
     def get_has_duplicates(self, obj: Household) -> bool:
@@ -232,6 +242,9 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
         if obj.enumerator_rec_id:
             return f"{obj.unicef_id} (Enumerator ID {obj.enumerator_rec_id})"
         return obj.unicef_id
+
+    def get_delivered_quantities(self, obj: Household) -> List:
+        return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 
 
 class HouseholdForTicketSerializer(serializers.ModelSerializer):
