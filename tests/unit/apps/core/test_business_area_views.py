@@ -16,7 +16,8 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
+from hct_mis_api.apps.core.utils import get_fields_attr_generators
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 pytestmark = pytest.mark.django_db
@@ -209,41 +210,6 @@ class TestBusinessAreaDetail:
         assert response_data["is_split"] == self.afghanistan.is_split
         assert response_data["active"] == self.afghanistan.active
 
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
-    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.get_all_projects_data")
-    def test_get_kobo_asset_list(self, mock_get_all_projects_data: Any, mock_kobo_init: Any) -> None:
-        mock_kobo_init.return_value = None
-        mock_get_all_projects_data.return_value = [
-            {
-                "name": "Registration 2025",
-                "uid": "123",
-                "has_deployment": True,
-                "asset_type": "Type",
-                "deployment__active": True,
-                "downloads": [{"format": "xls", "url": "xlsx_url"}],
-                "settings": {"sector": {"label": "Sector 123"}, "country": {"label": "Country Test"}},
-                "date_modified": "2022-02-22",
-            },
-            {
-                "name": "Campain 123",
-                "uid": "222",
-                "has_deployment": True,
-                "asset_type": "Type",
-                "deployment__active": True,
-                "downloads": [{"format": "xls", "url": "xlsx_url"}],
-                "settings": {"sector": {"label": "Sector 123"}, "country": {"label": "Country Test"}},
-                "date_modified": "2022-02-22",
-            },
-        ]
-
-        response = self.client.post(
-            reverse("api:core:business-areas-all-kobo-projects", kwargs={"slug": self.afghanistan.slug}),
-            {"only_deployed": True},
-            format="json",
-        )
-        assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 2
-
 
 class TestBusinessAreaFilter:
     @pytest.fixture(autouse=True)
@@ -326,3 +292,114 @@ class TestBusinessAreaFilter:
         assert str(self.syria.id) not in business_area_ids
         assert str(self.croatia.id) not in business_area_ids
         assert str(self.sudan.id) not in business_area_ids
+
+
+class TestKoboAssetList:
+    @pytest.fixture(autouse=True)
+    def setup(
+        self,
+        api_client: Any,
+        create_user_role_with_permissions: Any,
+    ) -> None:
+        self.afghanistan = BusinessAreaFactory(name="Afghanistan", slug="afghanistan", kobo_token="123")
+        self.detail_url_name = "api:core:business-areas-detail"
+        self.user = UserFactory()
+        self.client = api_client(self.user)
+
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+
+    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.__init__")
+    @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.get_all_projects_data")
+    def test_get_kobo_asset_list(self, mock_get_all_projects_data: Any, mock_kobo_init: Any) -> None:
+        mock_kobo_init.return_value = None
+        mock_get_all_projects_data.return_value = [
+            {
+                "name": "Registration 2025",
+                "uid": "123",
+                "has_deployment": True,
+                "asset_type": "Type",
+                "deployment__active": True,
+                "downloads": [{"format": "xls", "url": "xlsx_url"}],
+                "settings": {"sector": {"label": "Sector 123"}, "country": {"label": "Country Test"}},
+                "date_modified": "2022-02-22",
+            },
+            {
+                "name": "Campain 123",
+                "uid": "222",
+                "has_deployment": True,
+                "asset_type": "Type",
+                "deployment__active": True,
+                "downloads": [{"format": "xls", "url": "xlsx_url"}],
+                "settings": {"sector": {"label": "Sector 123"}, "country": {"label": "Country Test"}},
+                "date_modified": "2022-02-22",
+            },
+        ]
+
+        response = self.client.post(
+            reverse("api:core:business-areas-all-kobo-projects", kwargs={"slug": self.afghanistan.slug}),
+            {"only_deployed": True},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 2
+
+
+class TestAllFieldsAttributes:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.user = UserFactory()
+        self.client = api_client(self.user)
+        self.all_fields_attributes_url = reverse("api:core:business-areas-all-fields-attributes")
+
+        FlexibleAttribute.objects.create(
+            type=FlexibleAttribute.STRING,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "Flex Field 1"},
+            name="flex_field_1",
+        )
+        FlexibleAttribute.objects.create(
+            type=FlexibleAttribute.INTEGER,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "Muac"},
+            name="muac",
+        )
+
+    def test_all_fields_attributes(self) -> None:
+        response = self.client.get(self.all_fields_attributes_url)
+        assert response.status_code == status.HTTP_200_OK
+
+        response_data = response.data
+        expected_response_flex_fields = [
+            {
+                "id": str(attr.id),
+                "type": attr.type,
+                "name": attr.name,
+                "label_en": attr.label.get("English(EN)", None) if getattr(attr, "label", None) else None,
+                "associated_with": "Household" if attr.associated_with == 0 else "Individual",
+                "is_flex_field": True,
+            }
+            for attr in get_fields_attr_generators(flex_field=True)
+        ]
+        expected_response_core_fields = [
+            {
+                "id": attr_dict["id"],
+                "type": attr_dict["type"],
+                "name": attr_dict["name"],
+                "label_en": attr_dict.get("label", {}).get("English(EN)", None) if attr_dict.get("label") else None,
+                "associated_with": attr_dict.get("associated_with"),
+                "is_flex_field": False,
+            }
+            for attr_dict in get_fields_attr_generators(flex_field=False)
+        ]
+        sorted_response_data = sorted(response_data, key=lambda x: str(x.get("id")))
+        sorted_expected_attributes = sorted(
+            expected_response_flex_fields + expected_response_core_fields, key=lambda x: str(x.get("id"))
+        )
+
+        assert len(response_data) == len(sorted_expected_attributes)
+        assert sorted_response_data == sorted_expected_attributes

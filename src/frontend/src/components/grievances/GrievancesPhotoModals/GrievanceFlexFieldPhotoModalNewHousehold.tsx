@@ -1,8 +1,4 @@
 import { Box } from '@mui/material';
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -12,9 +8,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 
 export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {
-  flexField:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
+  flexField: {
+    name?: string;
+    [key: string]: any;
+  };
   householdId: string;
 }
 

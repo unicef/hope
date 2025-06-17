@@ -24,6 +24,8 @@ from hct_mis_api.apps.core.api.mixins import BaseViewSet, CountActionMixin
 from hct_mis_api.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
+    CollectorAttributeSerializer,
+    FieldAttributeSimpleSerializer,
     GetKoboAssetListSerializer,
     KoboAssetObjectSerializer,
 )
@@ -31,8 +33,11 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.rest_api import CollectorAttributeSerializer
-from hct_mis_api.apps.core.utils import resolve_assets_list, to_choice_object
+from hct_mis_api.apps.core.utils import (
+    get_fields_attr_generators,
+    resolve_assets_list,
+    to_choice_object,
+)
 from hct_mis_api.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
@@ -89,6 +94,16 @@ class BusinessAreaViewSet(
         ]
         result_list = sorted(definitions, key=lambda attr: attr["label"]["English(EN)"])  # type: ignore
         return Response(CollectorAttributeSerializer(result_list, many=True).data, status=200)
+
+    @extend_schema(
+        responses={
+            200: FieldAttributeSimpleSerializer(many=True),
+        },
+    )
+    @action(detail=False, methods=["get"], url_path="all-fields-attributes")
+    def all_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        result_list = get_fields_attr_generators()
+        return Response(FieldAttributeSimpleSerializer(result_list, many=True).data, status=200)
 
     @extend_schema(
         request=GetKoboAssetListSerializer,

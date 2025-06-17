@@ -2,14 +2,11 @@ import { Box } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
-import {
-  AllAddIndividualFieldsQuery,
-  useGrievanceTicketFlexFieldsQuery,
-} from '@generated/graphql';
+import { useGrievanceTicketFlexFieldsQuery } from '@generated/graphql';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalEditableProps {
-  flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  flexField: any;
   isCurrent?: boolean;
   isIndividual?: boolean;
   field;

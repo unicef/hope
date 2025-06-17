@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -9,7 +8,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 
 export interface GrievanceFlexFieldPhotoModalNewIndividualProps {
-  flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  flexField: {
+    name?: string;
+    [key: string]: any;
+  };
   individualId: string;
 }
 

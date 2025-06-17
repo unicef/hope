@@ -6,10 +6,10 @@ import Edit from '@mui/icons-material/Edit';
 import { Fragment, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaymentChannelField } from '../PaymentChannelField';
 import { removeItemById } from '../utils/helpers';
+import { a } from 'vitest/dist/chunks/suite.d.FvehnV49';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -22,7 +22,8 @@ const DisabledDiv = styled.div<DisabledDivProps>`
 export interface EditPaymentChannelRowProps {
   setFieldValue;
   values;
-  paymentChannel: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['paymentChannels'][number];
+  // TODO: Change type to PaymentChannel when available
+  paymentChannel: any;
   arrayHelpers;
   id: string;
 }
@@ -90,7 +91,7 @@ export function EditPaymentChannelRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs:2 }}>
+      <Grid size={{ xs: 2 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Account holder name')}
@@ -98,7 +99,7 @@ export function EditPaymentChannelRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs:2 }}>
+      <Grid size={{ xs: 2 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Bank branch name')}
@@ -106,7 +107,7 @@ export function EditPaymentChannelRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid size={{ xs:1 }}>
+      <Grid size={{ xs: 1 }}>
         {!removed ? (
           <Box display="flex" align-items="center">
             <IconButton

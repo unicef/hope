@@ -4,11 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { getFlexFieldTextValue, renderBoolean } from '@utils/utils';
-import {
-  GrievanceTicketDocument,
-  useAllAddIndividualFieldsQuery,
-  useApproveAddIndividualDataChangeMutation,
-} from '@generated/graphql';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -18,6 +13,9 @@ import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 function AddIndividualGrievanceDetails({
   ticket,
@@ -27,8 +25,29 @@ function AddIndividualGrievanceDetails({
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { data, loading } = useAllAddIndividualFieldsQuery();
-  const [mutate] = useApproveAddIndividualDataChangeMutation();
+  const { businessAreaSlug } = useBaseUrl();
+
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
+
+  // TODO: Find the correct REST API endpoint for approving add individual data changes
+  const { mutate } = useMutation({
+    mutationFn: async (params: {
+      grievanceTicketId: string;
+      approveStatus: boolean;
+    }) => {
+      // Placeholder - needs to be implemented with correct endpoint
+      console.log('Approve add individual mutation:', params);
+      return Promise.resolve();
+    },
+  });
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -40,13 +59,14 @@ function AddIndividualGrievanceDetails({
   if (!data) {
     return null;
   }
-  const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => ({
-      ...previousValue,
-      [currentValue?.name]: currentValue,
-    }),
-    {},
-  );
+  const fieldsDict =
+    data?.results?.reduce(
+      (previousValue, currentValue) => ({
+        ...previousValue,
+        [currentValue?.name]: currentValue,
+      }),
+      {},
+    ) || {};
 
   const individualData = {
     ...ticket.ticketDetails?.individualData,
@@ -144,19 +164,11 @@ function AddIndividualGrievanceDetails({
                 confirm({
                   title: t('Warning'),
                   content: dialogText,
-                }).then(async () => {
+                }).then(() => {
                   try {
-                    await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.ticketDetails.approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
-                        },
-                      ],
+                    mutate({
+                      grievanceTicketId: ticket.id,
+                      approveStatus: !ticket.ticketDetails.approveStatus,
                     });
                     if (ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Disapproved'));

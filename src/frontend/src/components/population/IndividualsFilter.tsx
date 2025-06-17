@@ -3,11 +3,7 @@ import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  DataCollectingTypeType,
-  IndividualChoiceDataQuery,
-  ProgramNode,
-} from '@generated/graphql';
+import { DataCollectingTypeType } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { generateTableOrderOptionsMember } from '@utils/constants';
@@ -20,11 +16,13 @@ import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
 import { DocumentSearchField } from '@core/DocumentSearchField';
 import { ReactElement } from 'react';
+import { ProgramList } from '@restgenerated/models/ProgramList';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 interface IndividualsFilterProps {
   filter;
-  programs?: ProgramNode[];
-  choicesData: IndividualChoiceDataQuery;
+  programs?: ProgramList[];
+  choicesData: IndividualChoices;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, List
 
 from django.db.models import F, Func, OuterRef, Q, QuerySet, Subquery, Sum
 from django.db.models.functions import Coalesce
@@ -18,8 +18,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import FieldAttributeNode
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
@@ -31,7 +30,6 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     NEEDS_ADJUDICATION,
-    BankAccountInfo,
     Household,
     Individual,
 )
@@ -83,16 +81,6 @@ class ExtendedHouseHoldConnection(graphene.Connection):
 class DeliveredQuantityNode(graphene.ObjectType):
     total_delivered_quantity = graphene.Decimal()
     currency = graphene.String()
-
-
-class BankAccountInfoNode(DjangoObjectType):
-    type = graphene.String(required=False)
-
-    class Meta:
-        model = BankAccountInfo
-        exclude = ("debit_card_number",)
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -218,19 +206,6 @@ class Query(graphene.ObjectType):
         program=graphene.String(required=False),
         administrative_area=graphene.String(required=False),
     )
-
-    all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
-    all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
-
-    def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-        ).prefetch_related("choices").order_by("created_at")
-
-    def resolve_all_individuals_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user
