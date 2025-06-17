@@ -196,6 +196,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "male_age_group_12_17_disabled_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
+            "other_sex_group_count",
             "start",
             "deviceid",
             "fchild_hoh",

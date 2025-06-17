@@ -553,6 +553,7 @@ class TestHouseholdDetail:
         assert data["male_age_group_12_17_disabled_count"] == self.household.male_age_group_12_17_disabled_count
         assert data["male_age_group_18_59_disabled_count"] == self.household.male_age_group_18_59_disabled_count
         assert data["male_age_group_60_disabled_count"] == self.household.male_age_group_60_disabled_count
+        assert data["other_sex_group_count"] == self.household.other_sex_group_count
         assert data["start"] == f"{self.household.start:%Y-%m-%dT%H:%M:%SZ}"
         assert data["deviceid"] == self.household.deviceid
         assert data["fchild_hoh"] == self.household.fchild_hoh
