@@ -33,8 +33,11 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.schema import get_fields_attr_generators
-from hct_mis_api.apps.core.utils import resolve_assets_list, to_choice_object
+from hct_mis_api.apps.core.utils import (
+    get_fields_attr_generators,
+    resolve_assets_list,
+    to_choice_object,
+)
 from hct_mis_api.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
