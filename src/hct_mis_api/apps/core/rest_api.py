@@ -2,6 +2,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from django.core.cache import cache
+from drf_spectacular.utils import extend_schema_field
 
 from rest_framework import serializers
 from rest_framework.decorators import api_view
@@ -76,6 +77,11 @@ class CollectorAttributeSerializer(serializers.Serializer):
     choices = serializers.ListField(child=serializers.CharField())
 
 
+class LabelSerializer(serializers.Serializer):
+    language = serializers.CharField()
+    label = serializers.CharField()
+
+
 class FieldAttributeSerializer(serializers.Serializer):
     id = serializers.CharField()
     type = serializers.CharField()
@@ -94,6 +100,7 @@ class FieldAttributeSerializer(serializers.Serializer):
             return obj.pdu_data
         return None
 
+    @extend_schema_field(LabelSerializer(many=True))
     def get_labels(self, obj: Any) -> list[dict[str, Any]]:
         return resolve_label(_custom_dict_or_attr_resolver("label", None, obj))
 
