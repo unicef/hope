@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.sidebar {
+  width: 280px;
+  background-color: #ffffff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  height: 100vh;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logo/Header */
+.sidebar-header {
+  background-color: #00AEEF;
+  color: white;
+  padding: 22px 20px;
+  font-size: 26px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* Section containers */
+.nav-section {
+  padding: 16px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.nav-title {
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+  padding: 0 20px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation items */
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #2d2d2d;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background-color: #f1faff;
+  color: #007ab8;
+}
+
+.nav-item i {
+  margin-right: 14px;
+  font-size: 17px;
+  color: #666;
+  min-width: 20px;
+}
+
+/* Active menu item with dropdown arrow */
+.nav-item.active {
+  background-color: #e6f6fc;
+  color: #007ab8;
+  font-weight: 600;
+}
+
+.nav-item.active i {
+  color: #007ab8;
+}
+
+.nav-item.active::after {
+  content: '▼';
+  margin-left: auto;
+  font-size: 11px;
+  color: #007ab8;
+}
+
+/* Footer with version */
+.sidebar-footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 14px 0;
+  font-size: 13px;
+  color: #aaa;
+  font-weight: 400;
+}
