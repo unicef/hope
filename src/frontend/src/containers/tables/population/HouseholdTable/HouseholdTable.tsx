@@ -7,7 +7,6 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { createApiParams } from '@utils/apiUtils';
 import { TableCell } from '@mui/material';
@@ -67,7 +66,7 @@ export const HouseholdTable = ({
       residenceStatus: filter.residenceStatus,
       withdrawn: matchWithdrawnValue(),
       ordering: filter.orderBy,
-      rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
+      rdiMergeStatus: 'MERGED',
     };
   }, [
     businessArea,

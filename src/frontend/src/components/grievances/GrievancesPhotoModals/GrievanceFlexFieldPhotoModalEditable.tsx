@@ -2,7 +2,9 @@ import { Box } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
-import { useGrievanceTicketFlexFieldsQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalEditableProps {
@@ -22,9 +24,16 @@ export function GrievanceFlexFieldPhotoModalEditable({
 }: GrievanceFlexFieldPhotoModalEditableProps): ReactElement {
   const [isEdited, setEdit] = useState(false);
   const { id } = useParams();
-  const { data } = useGrievanceTicketFlexFieldsQuery({
-    variables: { id },
-    fetchPolicy: 'network-only',
+  const { businessArea } = useBaseUrl();
+
+  const { data } = useQuery({
+    queryKey: ['grievanceTicket', id, businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug: businessArea,
+        id,
+      }),
+    enabled: !!id,
   });
 
   if (!data) {
@@ -32,9 +41,9 @@ export function GrievanceFlexFieldPhotoModalEditable({
   }
 
   const flexFields = isIndividual
-    ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
+    ? data.ticketDetails?.individualDataUpdateTicketDetails?.individualData
         ?.flexFields
-    : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
+    : data.ticketDetails?.householdDataUpdateTicketDetails?.householdData
         ?.flexFields;
 
   const picUrl: string = isCurrent

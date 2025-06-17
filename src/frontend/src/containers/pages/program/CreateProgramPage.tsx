@@ -11,7 +11,6 @@ import {
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
-import { ProgramPartnerAccess } from '@generated/graphql';
 import { UserChoices } from '@restgenerated/models/UserChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -101,7 +100,7 @@ export const CreateProgramPage = (): ReactElement => {
       ? populationGoalValue
       : 0;
     const partnersToSet =
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS'
         ? values.partners.map(({ id, areas, areaAccess }) => ({
             partner: id,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
@@ -230,7 +229,7 @@ export const CreateProgramPage = (): ReactElement => {
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
-    partnerAccess: ProgramPartnerAccess.AllPartnersAccess,
+    partnerAccess: 'ALL_PARTNERS_ACCESS',
     pduFields: [],
   };
 

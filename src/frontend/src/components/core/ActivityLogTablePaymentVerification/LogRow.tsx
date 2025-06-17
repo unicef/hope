@@ -4,9 +4,9 @@ import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
-import { PaymentVerificationLogEntryNode } from '@generated/graphql';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
+import { LogEntry } from '@restgenerated/models/LogEntry';
 
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
@@ -28,7 +28,7 @@ const StyledIconButton = styled(IconButton)<{ expanded: boolean }>`
 `;
 
 interface LogRowProps {
-  logEntry: PaymentVerificationLogEntryNode;
+  logEntry: LogEntry;
 }
 
 export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
@@ -43,13 +43,9 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight}>
-          {logEntry.user
-            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : null}
+          {logEntry.user ? `${logEntry.user}` : null}
         </Cell>
-        <Cell weight={headCells[2].weight}>
-          {logEntry.contentObject?.unicefId}
-        </Cell>
+        <Cell weight={headCells[2].weight}>{logEntry.objectId}</Cell>
         <Cell weight={headCells[3].weight}>{changes[keys[0]].from}</Cell>
         <Cell weight={headCells[4].weight}>{changes[keys[0]].to}</Cell>
         <ButtonPlaceHolder />
@@ -63,13 +59,9 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight}>
-          {logEntry.user
-            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : null}
+          {logEntry.user ? `${logEntry.user}` : null}
         </Cell>
-        <Cell weight={headCells[2].weight}>
-          {logEntry.contentObject?.unicefId}
-        </Cell>
+        <Cell weight={headCells[2].weight}>{logEntry.objectId}</Cell>
         <Cell weight={headCells[3].weight}>Multiple</Cell>
         <Cell weight={headCells[4].weight} />
         <Cell weight={headCells[5].weight} />
@@ -85,7 +77,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
 
       <CollapseContainer in={expanded}>
         {keys.map((key) => (
-          <Row key={logEntry.id}>
+          <Row key={logEntry.objectId}>
             <Cell weight={headCells[0].weight} />
             <Cell weight={headCells[1].weight} />
             <Cell weight={headCells[2].weight} />

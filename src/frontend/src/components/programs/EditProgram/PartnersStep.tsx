@@ -4,7 +4,6 @@ import { Field, FieldArray } from 'formik';
 import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ProgramPartnerAccess } from '@generated/graphql';
 import { AreaTree } from '@restgenerated/models/AreaTree';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@core/ButtonTooltip';
@@ -13,6 +12,7 @@ import { DividerLine } from '@core/DividerLine';
 import { partnerAccessChoices } from '@components/programs/constants';
 import { ProgramPartnerCard } from '../CreateProgram/ProgramPartnerCard';
 import { LoadingButton } from '@components/core/LoadingButton';
+import { ProgramPartnerAccess } from '@generated/graphql';
 
 interface PartnersStepProps {
   values;
@@ -38,7 +38,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
 
   useEffect(() => {
     if (
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess &&
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS' &&
       values.partners.length === 0
     ) {
       setFieldValue('partners', [
@@ -50,7 +50,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
     }
 
     if (
-      values.partnerAccess !== ProgramPartnerAccess.SelectedPartnersAccess &&
+      values.partnerAccess !== 'SELECTED_PARTNERS_ACCESS' &&
       values.partners.length > 0
     ) {
       setFieldValue('partners', []);

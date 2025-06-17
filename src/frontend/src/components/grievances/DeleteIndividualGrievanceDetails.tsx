@@ -3,14 +3,9 @@ import snakeCase from 'lodash/snakeCase';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import {
-  GrievanceTicketDocument,
-  IndividualRoleInHouseholdRole,
-  useApproveDeleteIndividualDataChangeMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -24,7 +19,7 @@ import { Individual } from '@restgenerated/models/Individual';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export type RoleReassignData = {
-  role: IndividualRoleInHouseholdRole | string;
+  role: string;
   individual: Individual;
   household: HouseholdDetail;
 };
@@ -47,14 +42,12 @@ export function DeleteIndividualGrievanceDetails({
     ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
   const isOneIndividual = ticket?.household?.activeIndividualsCount === 1;
   const primaryCollectorRolesCount =
-    ticket?.individual?.rolesInHouseholds.filter(
-      (el) => el.role === IndividualRoleInHouseholdRole.Primary,
-    ).length + (isHeadOfHousehold ? 1 : 0);
+    ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
+      .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
     ticket.ticketDetails.roleReassignData,
   )?.filter(
-    (el: RoleReassignData) =>
-      el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+    (el: RoleReassignData) => el.role === 'PRIMARY' || el.role === 'HEAD',
   ).length;
 
   const approveEnabled = (): boolean => {
@@ -71,6 +64,7 @@ export function DeleteIndividualGrievanceDetails({
   };
 
   const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { data: addIndividualFieldsData, isLoading } = useQuery({
     queryKey: ['allAddIndividualsFieldsAttributes', businessArea],
@@ -82,7 +76,28 @@ export function DeleteIndividualGrievanceDetails({
       ),
   });
 
-  const [mutate] = useApproveDeleteIndividualDataChangeMutation();
+  const mutation = useMutation({
+    mutationFn: ({
+      grievanceTicketId,
+      approveStatus,
+    }: {
+      grievanceTicketId: string;
+      approveStatus: boolean;
+    }) =>
+      RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
+        businessAreaSlug: businessArea,
+        id: grievanceTicketId,
+        requestBody: {
+          approveStatus,
+        },
+      }),
+    onSuccess: () => {
+      // Invalidate and refetch the grievance ticket details
+      queryClient.invalidateQueries({
+        queryKey: ['grievanceTicket', ticket.id],
+      });
+    },
+  });
   if (isLoading) return <LoadingComponent />;
   if (!addIndividualFieldsData) return null;
   const documents = ticket.individual?.documents;
@@ -193,17 +208,9 @@ export function DeleteIndividualGrievanceDetails({
                   content: dialogText,
                 }).then(async () => {
                   try {
-                    await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.ticketDetails?.approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
-                        },
-                      ],
+                    await mutation.mutateAsync({
+                      grievanceTicketId: ticket.id,
+                      approveStatus: !ticket.ticketDetails?.approveStatus,
                     });
                     if (ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Disapproved'));
@@ -212,7 +219,9 @@ export function DeleteIndividualGrievanceDetails({
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                    showMessage(
+                      t('An error occurred while updating the status'),
+                    );
                   }
                 })
               }

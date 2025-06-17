@@ -12,15 +12,15 @@ import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { RegistrationDetailedFragment } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
 import { useActionMutation } from '@hooks/useActionMutation';
+import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 
 interface MergeRegistrationDataImportDialogProps {
-  registration: RegistrationDetailedFragment;
+  registration: RegistrationDataImportDetail;
 }
 
 function MergeRegistrationDataImportDialog({

@@ -11,7 +11,6 @@ import {
   handleNext,
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
-import { ProgramPartnerAccess } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -103,7 +102,7 @@ const DuplicateProgramPage = (): ReactElement => {
       ? budgetValue.toFixed(2)
       : 0;
     const partnersToSet =
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS'
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
             partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
@@ -234,7 +233,7 @@ const DuplicateProgramPage = (): ReactElement => {
     cashPlus = false,
     frequencyOfPayments = 'REGULAR',
     partners,
-    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
+    partnerAccess = 'ALL_PARTNERS_ACCESS',
   } = program;
 
   const initialValues = {

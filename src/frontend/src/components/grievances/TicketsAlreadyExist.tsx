@@ -2,7 +2,8 @@ import { Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useExistingGrievanceTicketsQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { decodeIdString } from '@utils/utils';
 import { ContentLink } from '@core/ContentLink';
@@ -30,32 +31,45 @@ const WarnIcon = styled(WarningIcon)`
 `;
 
 export function TicketsAlreadyExist({ values }): ReactElement {
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessAreaSlug } = useBaseUrl();
   const { t } = useTranslation();
-  const { data, loading } = useExistingGrievanceTicketsQuery({
-    variables: {
-      businessArea,
-      category: values.category,
-      issueType: values.issueType,
-      household: decodeIdString(values.selectedHousehold?.id),
-      individual: decodeIdString(values.selectedIndividual?.id),
-      paymentRecord: values.selectedPaymentRecords,
-    },
+
+  const { data, isPending: loading } = useQuery({
+    queryKey: [
+      'existingGrievanceTickets',
+      businessAreaSlug,
+      values.category,
+      values.issueType,
+      values.selectedHousehold?.id,
+      values.selectedIndividual?.id,
+      values.selectedPaymentRecords,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsList({
+        businessAreaSlug,
+        category: values.category,
+        issueType: values.issueType,
+        household: decodeIdString(values.selectedHousehold?.id),
+        //TODO: pass these when available
+        //individual: decodeIdString(values.selectedIndividual?.id),
+        // paymentRecord: values.selectedPaymentRecords,
+      }),
+    enabled: !!(businessAreaSlug && values.category),
   });
+
   if (loading) return <LoadingComponent />;
   if (!data) return null;
-  const { edges } = data.existingGrievanceTickets;
-  const mappedTickets = edges?.map((edge) => {
+
+  const results = data.results || [];
+  const mappedTickets = results?.map((ticket) => {
     const grievanceDetailsPath = getGrievanceDetailsPath(
-      edge.node.id,
-      edge.node.category,
+      ticket.id,
+      ticket.category,
       baseUrl,
     );
     return (
-      <Box key={edge.node.id} mb={1}>
-        <ContentLink href={grievanceDetailsPath}>
-          {edge.node.unicefId}
-        </ContentLink>
+      <Box key={ticket.id} mb={1}>
+        <ContentLink href={grievanceDetailsPath}>{ticket.unicefId}</ContentLink>
       </Box>
     );
   });
@@ -63,13 +77,13 @@ export function TicketsAlreadyExist({ values }): ReactElement {
     !!values.category &&
     (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
 
-  return edges.length && shouldShowBox ? (
-    <Grid size={{ xs:6 }}>
+  return results.length && shouldShowBox ? (
+    <Grid size={{ xs: 6 }}>
       <StyledBox>
         <OrangeTitle>
           <Typography variant="h6">
             <WarnIcon />
-            {edges.length === 1
+            {results.length === 1
               ? t('Ticket already exists')
               : t('Tickets already exist')}
           </Typography>

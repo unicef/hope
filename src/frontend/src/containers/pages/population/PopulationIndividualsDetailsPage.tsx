@@ -7,8 +7,6 @@ import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
-import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
-import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -64,14 +62,20 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         }),
     });
 
-  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } =
-    useQuery<AllIndividualsFlexFieldsAttributesQuery>({
-      queryKey: ['fieldsAttributes'],
-      queryFn: async () => {
-        const data = await FieldsAttributesService.fieldsAttributesRetrieve();
-        return { allIndividualsFlexFieldsAttributes: data };
-      },
-    });
+  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
+    queryKey: ['fieldsAttributes', businessArea, programId],
+    queryFn: async () => {
+      const data =
+        await RestService.restBusinessAreasProgramsIndividualsAllFlexFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+          },
+        );
+      // Transform REST response to match GraphQL structure for compatibility
+      return { allIndividualsFlexFieldsAttributes: data.results };
+    },
+  });
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({

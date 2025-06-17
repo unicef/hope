@@ -3,7 +3,6 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { DataCollectingTypeType } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
@@ -66,8 +65,7 @@ export function PeopleFilter({
 
   // Show admin area filter only for social programs
   const showAdminAreaFilter =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Social;
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() === 'SOCIAL';
 
   const individualTableOrderOptions =
     generateTableOrderOptionsMember(beneficiaryGroup) || [];

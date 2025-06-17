@@ -3,7 +3,6 @@ import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { DataCollectingTypeType } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { generateTableOrderOptionsMember } from '@utils/constants';
@@ -67,8 +66,7 @@ export function IndividualsFilter({
 
   // Show admin area filter only for social programs
   const showAdminAreaFilter =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Social;
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() === 'SOCIAL';
 
   const individualTableOrderOptions =
     generateTableOrderOptionsMember(beneficiaryGroup);

@@ -19,7 +19,7 @@ export function PaymentPlanTargeting({
   loading,
   disabled,
 }: {
-  allTargetPopulations: TargetPopulationList;
+  allTargetPopulations: TargetPopulationList[];
   loading: boolean;
   disabled?: boolean;
 }): ReactElement {

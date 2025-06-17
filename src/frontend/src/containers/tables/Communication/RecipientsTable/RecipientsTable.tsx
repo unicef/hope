@@ -1,16 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
-import {
-  AllAccountabilityCommunicationMessageRecipientsQueryVariables,
-  CommunicationMessageRecipientMapNode,
-  useAllAccountabilityCommunicationMessageRecipientsQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '../../UniversalTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { RestService } from '@restgenerated/services/RestService';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface RecipientsTableProps {
@@ -25,10 +22,14 @@ function RecipientsTable({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables =
-    {
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+
+  const initialVariables = useMemo(
+    () => ({
       messageId: id,
-    };
+    }),
+    [id],
+  );
 
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
@@ -45,16 +46,15 @@ function RecipientsTable({
 
   return (
     <TableWrapper>
-      <UniversalTable<
-        CommunicationMessageRecipientMapNode,
-        AllAccountabilityCommunicationMessageRecipientsQueryVariables
-      >
+      <UniversalRestQueryTable
         title={t('Recipients')}
         headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllAccountabilityCommunicationMessageRecipientsQuery}
-        queriedObjectName="allAccountabilityCommunicationMessageRecipients"
-        initialVariables={initialVariables}
+        query={
+          RestService.restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList
+        }
+        queryVariables={{ businessAreaSlug, programSlug, ...initialVariables }}
+        setQueryVariables={() => {}}
         renderRow={(row) => (
           <RecipientsTableRow
             key={row.id}
