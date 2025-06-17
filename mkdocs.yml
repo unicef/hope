@@ -121,8 +121,6 @@ plugins:
       cards_dir: assets/images/social
       cards_layout_options:
         font_family: Noto Sans SC
-  - tags:
-      tags_file: tags.md
   - panzoom:
       full_screen: true
 
