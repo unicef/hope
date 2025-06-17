@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# from hct_mis_api.apps.account.models import UserRole
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import generate_dash_report_task
@@ -93,7 +93,7 @@ class CreateOrUpdateDashReportView(APIView):
         if is_global:
             if (
                 request.user.is_superuser
-                or UserRole.objects.filter(
+                or RoleAssignment.objects.filter(
                     user=request.user,
                     role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
                     business_area__active=True,
