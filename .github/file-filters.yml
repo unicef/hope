@@ -40,6 +40,5 @@ lint:
 
 docs:
   - added|modified: './docs/**/*'
-  - modified: './src/hope_payment_gateway/config/__init__.py'
   - modified: './github/workflows/docs.yml'
   - modified: './github/file-filters.yml'
