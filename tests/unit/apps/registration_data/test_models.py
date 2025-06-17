@@ -3,7 +3,7 @@ import datetime
 from django.core.management import call_command
 from django.test import TestCase
 
-from freezegun import freeze_time
+from time_machine import travel
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -77,7 +77,7 @@ class TestRegistrationDataModels(TestCase):
     def test_imported_household_str(self) -> None:
         self.assertEqual(str(self.imported_household), self.imported_household.unicef_id)
 
-    @freeze_time("2024-05-27")
+    @travel("2024-05-27")
     def test_imported_individual_age(self) -> None:
         self.assertEqual(self.imported_individual_3.age, 33)
 

@@ -9,8 +9,8 @@ from django.http import FileResponse
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
-import freezegun
 import pytest
+import time_machine
 from flaky import flaky
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -31,9 +31,10 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 pytestmark = pytest.mark.django_db
 
 
-@freezegun.freeze_time("2022-01-01")
 class TestPeriodicDataUpdateTemplateViews:
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
+        self._travel = time_machine.travel("2022-01-01")
+        self._travel.start()
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -114,6 +115,9 @@ class TestPeriodicDataUpdateTemplateViews:
                 "pk": self.pdu_template_program2.id,
             },
         )
+
+    def tearDown(self) -> None:
+        self._travel.stop()
 
     @pytest.mark.parametrize(
         "permissions, partner_permissions, access_to_program, expected_status",

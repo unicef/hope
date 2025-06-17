@@ -8,9 +8,9 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 import pytest
-from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
+from time_machine import travel
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -287,7 +287,7 @@ class TestGrievanceTicketList:
         for grievance_ticket in self.grievance_tickets[:-1]:
             grievance_ticket.linked_tickets.add(self.grievance_tickets[-1])
 
-    @freeze_time("2024-08-25 12:00:00")
+    @travel("2024-08-25 12:00:00")
     def test_grievance_ticket_list_with_all_permissions(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             user=self.user,

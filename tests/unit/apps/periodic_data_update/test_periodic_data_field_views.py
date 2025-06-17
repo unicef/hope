@@ -5,8 +5,8 @@ from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
-import freezegun
 import pytest
+import time_machine
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -26,9 +26,10 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 pytestmark = pytest.mark.django_db()
 
 
-@freezegun.freeze_time("2022-01-01")
 class TestPeriodicFieldViews:
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
+        self._travel = time_machine.travel("2022-01-01")
+        self._travel.start()
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -56,6 +57,9 @@ class TestPeriodicFieldViews:
                 "program_slug": self.program1.slug,
             },
         )
+
+    def tearDown(self) -> None:
+        self._travel.stop()
 
     def test_list_periodic_fields(
         self,

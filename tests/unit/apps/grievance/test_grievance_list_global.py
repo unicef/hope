@@ -4,9 +4,9 @@ from typing import Any, Callable
 from django.utils import timezone
 
 import pytest
-from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
+from time_machine import travel
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -24,10 +24,11 @@ from hct_mis_api.apps.program.models import Program
 pytestmark = pytest.mark.django_db()
 
 
-@freeze_time("2024-08-25 12:00:00")
 class TestGrievanceTicketGlobalList:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
+        self._travel = travel("2024-08-25 12:00:00")
+        self._travel.start()
         self.global_url_name = "api:grievance:grievance-tickets-global-list"
         self.global_count_url = "api:grievance:grievance-tickets-global-count"
         self.afghanistan = create_afghanistan()
@@ -290,6 +291,9 @@ class TestGrievanceTicketGlobalList:
 
         for grievance_ticket in self.grievance_tickets[:-1]:
             grievance_ticket.linked_tickets.add(self.grievance_tickets[-1])
+
+    def tearDown(self) -> None:
+        self._travel.stop()
 
     def test_grievance_ticket_global_list_with_all_permissions(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(

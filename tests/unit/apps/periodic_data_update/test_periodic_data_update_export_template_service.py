@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 import openpyxl
-from freezegun import freeze_time
+from time_machine import travel
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
@@ -253,7 +253,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first(), female)
 
-    @freeze_time("2024-07-12")
+    @travel("2024-07-12")
     def test_get_individuals_queryset_age_filter(self) -> None:
         individual32yo = self.individuals[0]
         individual29yo = self.individuals[1]

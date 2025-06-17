@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.test import TestCase
 
-from freezegun import freeze_time
+from time_machine import travel
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -41,7 +41,7 @@ class TestBuildSnapshot(TestCase):
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
         cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
 
-        with freeze_time("2020-10-10"):
+        with travel("2020-10-10"):
             program = RealProgramFactory()
             program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(

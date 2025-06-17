@@ -11,9 +11,9 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from constance.test import override_config
-from freezegun import freeze_time
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+from time_machine import travel
 
 from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
@@ -32,7 +32,7 @@ class TestSanctionList(TestCase):
     @patch("hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list.load_workbook")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
-    @freeze_time("2024-01-10 01:01:01")
+    @travel("2024-01-10 01:01:01")
     def test_sanction_list_email(self, mocked_load_workbook: Any, mocked_requests_post: Any) -> None:
         class MockLoadWorkbook:
             class MockSheet:
