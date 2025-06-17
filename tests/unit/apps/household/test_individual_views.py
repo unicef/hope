@@ -729,6 +729,7 @@ class TestIndividualDetail:
             "data_source": self.registration_data_import.data_source,
         }
         assert data["import_id"] == self.individual1.unicef_id
+        assert data["admin_url"] == self.individual1.admin_url
         assert data["preferred_language"] == self.individual1.preferred_language
         assert data["roles_in_households"] == [
             {

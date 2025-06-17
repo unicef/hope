@@ -9,6 +9,7 @@ from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
     resolve_flex_fields_choices_to_string,
@@ -339,7 +340,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
-class IndividualDetailSerializer(serializers.ModelSerializer):
+class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
     role = serializers.SerializerMethodField()
     registration_data_import = RegistrationDataImportSerializer()
@@ -373,6 +374,7 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             "relationship",
             "registration_data_import",
             "import_id",
+            "admin_url",
             "preferred_language",
             "roles_in_households",
             "observed_disability",
