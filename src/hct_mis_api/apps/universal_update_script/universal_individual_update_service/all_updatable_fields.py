@@ -177,7 +177,8 @@ def get_document_fields() -> list[Any]:
 
 def get_account_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
-    for account_type in AccountType.objects.all():
+    for account_type_instance in AccountType.objects.all():
+        account_type = account_type_instance.key
         wallet_fields: set[tuple[str, Optional[str]]] = set()
         wallet_fields.add((f"account__{account_type}__*", None))
         wallet_fields.add((f"account__{account_type}__number", "number"))

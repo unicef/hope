@@ -81,7 +81,7 @@ class UniversalIndividualUpdateService:
         self.account_data_fields = {
             account_type: data
             for account_type, data in get_account_fields().items()
-            if account_type.key in universal_update.account_types.values_list("key", flat=True)
+            if account_type in universal_update.account_types.values_list("key", flat=True)
         }
         self.ignore_empty_values = ignore_empty_values
         self.deduplicate_es = deduplicate_es
@@ -451,7 +451,7 @@ class UniversalIndividualUpdateService:
                 row.append(None)
         all_wallets = individual.accounts.all()
         for account_type, data_fields in self.account_data_fields.items():
-            wallet = [x for x in all_wallets if x.account_type.key == account_type.key]
+            wallet = [x for x in all_wallets if x.account_type.key == account_type]
             if len(wallet) > 1:
                 raise ValueError("Multiple wallets found")
             if len(wallet) == 1:
