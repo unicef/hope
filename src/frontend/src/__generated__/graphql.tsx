@@ -5378,6 +5378,7 @@ export type QueryAllFieldsAttributesArgs = {
 export type QueryAllFinancialServiceProviderXlsxTemplatesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  businessArea: Scalars['String']['input'];
   createdBy?: InputMaybe<Scalars['ID']['input']>;
   financialServiceProviders?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -9158,7 +9159,9 @@ export type RelatedGrievanceTicketsQueryVariables = Exact<{
 
 export type RelatedGrievanceTicketsQuery = { __typename?: 'Query', grievanceTicket?: { __typename?: 'GrievanceTicketNode', relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, status: number, category: number, issueType?: number | null, unicefId?: string | null } | null> | null } | null };
 
-export type AllFinancialServiceProviderXlsxTemplatesQueryVariables = Exact<{ [key: string]: never; }>;
+export type AllFinancialServiceProviderXlsxTemplatesQueryVariables = Exact<{
+  businessArea: Scalars['String']['input'];
+}>;
 
 
 export type AllFinancialServiceProviderXlsxTemplatesQuery = { __typename?: 'Query', allFinancialServiceProviderXlsxTemplates?: { __typename?: 'FinancialServiceProviderXlsxTemplateNodeConnection', edges: Array<{ __typename?: 'FinancialServiceProviderXlsxTemplateNodeEdge', node?: { __typename?: 'FinancialServiceProviderXlsxTemplateNode', id: string, name: string } | null } | null> } | null };
@@ -16611,8 +16614,8 @@ export type RelatedGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useRe
 export type RelatedGrievanceTicketsSuspenseQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsSuspenseQuery>;
 export type RelatedGrievanceTicketsQueryResult = Apollo.QueryResult<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>;
 export const AllFinancialServiceProviderXlsxTemplatesDocument = gql`
-    query AllFinancialServiceProviderXlsxTemplates {
-  allFinancialServiceProviderXlsxTemplates {
+    query AllFinancialServiceProviderXlsxTemplates($businessArea: String!) {
+  allFinancialServiceProviderXlsxTemplates(businessArea: $businessArea) {
     edges {
       node {
         id
@@ -16635,10 +16638,11 @@ export const AllFinancialServiceProviderXlsxTemplatesDocument = gql`
  * @example
  * const { data, loading, error } = useAllFinancialServiceProviderXlsxTemplatesQuery({
  *   variables: {
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
-export function useAllFinancialServiceProviderXlsxTemplatesQuery(baseOptions?: Apollo.QueryHookOptions<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>) {
+export function useAllFinancialServiceProviderXlsxTemplatesQuery(baseOptions: Apollo.QueryHookOptions<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables> & ({ variables: AllFinancialServiceProviderXlsxTemplatesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>(AllFinancialServiceProviderXlsxTemplatesDocument, options);
       }
@@ -24728,7 +24732,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allEditPeopleFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
   allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, Partial<QueryAllFeedbacksArgs>>;
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, Partial<QueryAllFieldsAttributesArgs>>;
-  allFinancialServiceProviderXlsxTemplates?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProviderXlsxTemplatesArgs>>;
+  allFinancialServiceProviderXlsxTemplates?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllFinancialServiceProviderXlsxTemplatesArgs, 'businessArea'>>;
   allFinancialServiceProviders?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProvidersArgs>>;
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>;
   allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>;
