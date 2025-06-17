@@ -96,7 +96,6 @@ dev = [
     "flake8-absolute-import<2.0.0.0,>=1.0.0.1",
     "flake8-bugbear<23.0.0,>=22.9.23",
     "flake8-formatter-junit-xml<1.0.0,>=0.0.6",
-    "freezegun",
     "graphene-stubs<1.0,>=0.15",
     "ipdb<1.0.0,>=0.13.9",
     "isort<6.0.0,>=5.10.1",
@@ -270,6 +269,7 @@ dependencies = [
     "msoffcrypto-tool>=5.4.2",
     "pyzipper>=0.3.6",
     "drf-nested-routers>=0.94.0",
+    "freezegun",
 ]
 requires-python = "==3.13.*"
 readme = "README.md"
