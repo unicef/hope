@@ -360,7 +360,7 @@ class TestFeedbackViewSet:
             format="json",
         )
         assert response.status_code == expected_status
-        assert "In order to proceed this action, program status must not be finished" in response.json()
+        assert "It is not possible to create Feedback for a Finished Program." in response.json()
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -756,7 +756,7 @@ class TestFeedbackViewSet:
             format="json",
         )
         assert response.status_code == expected_status
-        assert "In order to proceed this action, program status must not be finished" in response.json()
+        assert "It is not possible to create Feedback for a Finished Program." in response.json()
 
     def test_list_feedback_issue_type(self) -> None:
         response_data = self.client.get(reverse("api:choices-feedback-issue-type")).data
