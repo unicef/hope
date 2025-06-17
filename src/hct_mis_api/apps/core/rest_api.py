@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
-from hct_mis_api.apps.core.schema import get_fields_attr_generators, sort_by_attr
+from hct_mis_api.apps.core.utils import get_fields_attr_generators, sort_by_attr
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
