@@ -4,7 +4,6 @@ import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAllEditHouseholdFieldsQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
@@ -63,11 +62,19 @@ function EditHouseholdDataChange({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery({ fetchPolicy: 'network-only' });
 
-  const householdFieldsDict =
-    householdFieldsData?.allEditHouseholdFieldsAttributes;
+  const { data: householdFieldsData, isLoading: householdFieldsLoading } =
+    useQuery({
+      queryKey: ['householdFieldsAttributes', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+          },
+        ),
+    });
+
+  const householdFieldsDict = householdFieldsData?.results;
 
   if (!household) {
     return (

@@ -1,14 +1,25 @@
 import { Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import {
-  AllAddIndividualFieldsQuery,
-  useGrievanceTicketFlexFieldsQuery,
-} from '@generated/graphql';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
+import { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';ox } from '@mui/material';
+import { useParams } from 'react-router-dom';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
+import { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';rt { Box } from '@mui/material';
+import { useParams } from 'react-router-dom';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 
 export interface GrievanceFlexFieldPhotoModalProps {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: {
+    name?: string;
+    [key: string]: any;
+  };
   isCurrent?: boolean;
   isIndividual?: boolean;
 }

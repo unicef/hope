@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
 import { ReactElement } from 'react';
@@ -14,7 +13,8 @@ export interface PaymentChannelFieldProps {
   baseName: string;
   onDelete;
   isEdited?: boolean;
-  paymentChannel?: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['paymentChannels'][number];
+  //TODO: Change type to PaymentChannel when available
+  paymentChannel?: any;
   values;
 }
 

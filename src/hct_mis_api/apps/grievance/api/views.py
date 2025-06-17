@@ -36,10 +36,10 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.rest_api import FieldAttributeSerializer
 from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hct_mis_api.apps.grievance.api.mixins import (
