@@ -2,9 +2,9 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { PaymentPlanNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import {
   formatCurrencyWithSymbol,
   paymentVerificationStatusToColor,
@@ -13,7 +13,7 @@ import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface PaymentVerificationTableRowProps {
-  plan: PaymentPlanNode;
+  plan: PaymentPlanDetail;
   canViewDetails: boolean;
 }
 

@@ -61,11 +61,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   const { businessArea, programSlug } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
 
-  const {
-    data,
-    isLoading: loading,
-    error,
-  } = useQuery<RegistrationDataImportDetail>({
+  const { data, isLoading: loading, error } = useQuery<RegistrationDataImportDetail>({
     queryKey: ['registrationDataImport', businessArea, programSlug, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve({
@@ -103,6 +99,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
 
   const [selectedTab, setSelectedTab] = useState(0);
 
+  const status = data?.status;
   const isMerged = RegistrationDataImportStatusEnum.MERGED === data?.status;
 
   if (loading || choicesLoading) return <LoadingComponent />;

@@ -18,7 +18,6 @@ import { Delete, Edit } from '@mui/icons-material';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
-import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { ReactElement, useEffect, useState } from 'react';
@@ -262,7 +261,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
 };
 
 interface CriteriaProps {
-  rules: [TargetingCriteriaRuleObjectType];
+  rules: [any];
   individualsFiltersBlocks;
   collectorsFiltersBlocks;
   removeFunction?;

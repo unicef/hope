@@ -72,7 +72,6 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
             programSlug: programId,
           },
         );
-      // Transform REST response to match GraphQL structure for compatibility
       return { allIndividualsFlexFieldsAttributes: data.results };
     },
   });
