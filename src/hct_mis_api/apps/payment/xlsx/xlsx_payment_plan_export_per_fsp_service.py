@@ -245,7 +245,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 filename += f"-chunk{i + 1}"
             wb, ws_fsp = self.open_workbook(filename)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
-            payment_ids = list(split.split_payment_items.all().order_by("unicef_id").values_list("id", flat=True))
+            payment_ids = list(split.split_payment_items.eligible().order_by("unicef_id").values_list("id", flat=True))
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
             self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
