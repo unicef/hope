@@ -4,6 +4,7 @@
     {{ business_area_slug }} {% translate "Dashboard" %}
 {% endblock %}
 {% block content %}
+    <div id="dashboard-loading-status" class="text-center p-4 mb-4 text-gray-700 bg-yellow-100 border border-yellow-300 rounded" style="display: none;"></div>
     <!-- Top Row: Disbursed and Planned Amounts -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div class="bg-white p-4 rounded shadow flex flex-col justify-center items-center">
@@ -77,6 +78,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         const currentYear = new Date().getFullYear();
         let isChartsInitialized = false;
+        const loadingStatusDiv = document.getElementById("dashboard-loading-status");
 
         function fetchDataForCountry() {
             dc.config.defaultColors(d3.schemePaired);
@@ -89,12 +91,18 @@
             };
 
             function showSpinner(chartId) {
-                document.getElementById(chartId).innerHTML =
-                    `<div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-blue-500 border-t-transparent"></div>`;
+                const chartElement = document.getElementById(chartId);
+                if (chartElement) {
+                    chartElement.innerHTML =
+                        `<div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-blue-500 border-t-transparent"></div>`;
+                }
             }
 
             function hideSpinner(chartId) {
-                document.getElementById(chartId).innerHTML = "";
+                 const chartElement = document.getElementById(chartId);
+                if (chartElement) {
+                    chartElement.innerHTML = "";
+                }
             }
 
             const url = "{{household_data_url}}";
@@ -105,7 +113,10 @@
                 "Transaction Successful",
             ];
 
-            function createDashboard() {
+            const maxRetries = 12; 
+            const retryDelay = 5000;
+
+            function initializeChartsAndMetrics(data) { 
                 [
                     "payments-by-fsp",
                     "payments-by-delivery",
@@ -115,23 +126,7 @@
                     "payments-by-month",
                 ].forEach(showSpinner);
 
-                d3.json(url).then((data) => {
-                    if (!data || data.length === 0) {
-                        console.warn("No data available. Displaying 0 for all metrics.");
-                        [
-                            "payments-by-fsp",
-                            "payments-by-delivery",
-                            "payments-by-sector",
-                            "volume-by-program",
-                            "payments-by-admin1",
-                            "payments-by-month",
-                        ].forEach(hideSpinner);
-                        const ndx = crossfilter([]);
-                        updateTopMetrics(ndx);
-                        return;
-                    }
-
-                    const processedPayments = data.map((item) => ({
+                const processedPayments = (data || []).map((item) => ({
                         currency: item.currency || "USD",
                         delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0,
                         delivered_quantity: Number.parseFloat(item.total_delivered_quantity) || 0.0,
@@ -596,9 +591,43 @@
                     hideSpinner("payments-by-month");
                     dc.renderAll();
                     isChartsInitialized = true;
+            } 
+
+            function attemptFetch(retryCount = 0) {
+                d3.json(url).then((fetchedData) => {
+                    if (!fetchedData || fetchedData.length === 0) {
+                        if (retryCount < maxRetries) {
+                            const attemptMessage = `Dashboard data is being prepared. Automatically refreshing in ${retryDelay / 1000} seconds... (Attempt ${retryCount + 1} of ${maxRetries})`;
+                            if (loadingStatusDiv) {
+                                loadingStatusDiv.textContent = attemptMessage;
+                                loadingStatusDiv.style.display = 'block';
+                            }
+                            setTimeout(() => attemptFetch(retryCount + 1), retryDelay);
+                        } else {
+                            const errorMessage = "Could not load dashboard data after several attempts. Displaying empty dashboard. You can try refreshing the page later.";
+                            if (loadingStatusDiv) {
+                                loadingStatusDiv.textContent = errorMessage;
+                                loadingStatusDiv.style.display = 'block';
+                            }
+                            initializeChartsAndMetrics([]);
+                        }
+                    } else {
+                        if (loadingStatusDiv) {
+                            loadingStatusDiv.style.display = 'none'; 
+                        }
+                        initializeChartsAndMetrics(fetchedData);
+                    }
+                }).catch(error => {
+                    const errorMessage = "An error occurred while fetching data. Please try refreshing the page. If the problem persists, contact support.";
+                     if (loadingStatusDiv) {
+                        loadingStatusDiv.textContent = errorMessage;
+                        loadingStatusDiv.style.display = 'block';
+                    }
+                    initializeChartsAndMetrics([]); 
                 });
             }
-            createDashboard();
+
+            attemptFetch();
         }
         fetchDataForCountry();
 

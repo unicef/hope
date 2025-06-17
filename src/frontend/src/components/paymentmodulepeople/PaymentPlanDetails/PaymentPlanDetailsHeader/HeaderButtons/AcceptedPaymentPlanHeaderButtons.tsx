@@ -42,7 +42,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
-  const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery();
+  const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery({ variables: { businessArea } });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
     {

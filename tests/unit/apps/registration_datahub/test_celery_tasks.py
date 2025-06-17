@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+from django.utils.functional import classproperty
 
 import pytest
 
@@ -849,8 +850,7 @@ class TestAutomatingRDICreationTask(TestCase):
         self, mock_validate_data_collection_type: Any
     ) -> None:
         class ServiceWithoutCeleryTask(BaseRegistrationService, ABC):
-            @classmethod
-            @property
+            @classproperty
             @abstractmethod
             def PROCESS_FLEX_RECORDS_TASK(cls) -> str:
                 raise NotImplementedError

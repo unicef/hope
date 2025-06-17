@@ -124,6 +124,8 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
 
 
 class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
+    business_area = CharFilter(method="business_area_filter", required=True)
+
     class Meta:
         fields = (
             "financial_service_providers",
@@ -138,6 +140,9 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
             ("created_by__first_name", "created_by"),
         )
     )
+
+    def business_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(financial_service_providers__allowed_business_areas__slug=value)
 
 
 class FinancialServiceProviderFilter(FilterSet):
