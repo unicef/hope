@@ -62,10 +62,15 @@ function AcceptanceProcess({
     }
   };
 
-  const canExportPdf =
-    hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Accepted ||
-      paymentPlan.status === PaymentPlanStatus.Finished);
+  const exportPdfAllowedStatuses = [
+  PaymentPlanStatus.InReview,
+  PaymentPlanStatus.Accepted,
+  PaymentPlanStatus.Finished,
+];
+
+const canExportPdf =
+  hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
+  exportPdfAllowedStatuses.includes(paymentPlan.status);
 
   return (
     <Box m={5}>

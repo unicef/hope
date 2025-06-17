@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.db import models
 
 from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.models import CeleryEnabledModel, TimeStampedModel
 
@@ -35,8 +35,8 @@ class UniversalUpdate(
     document_types = models.ManyToManyField(
         DocumentType, blank=True, help_text="Selected Document Types of which Documents can be updated"
     )
-    delivery_mechanisms = models.ManyToManyField(
-        DeliveryMechanism, blank=True, help_text="Selected Delivery Mechanisms of which Wallets data can be updated"
+    account_types = models.ManyToManyField(
+        AccountType, blank=True, help_text="Selected Account Types of which Wallets data can be updated"
     )
     template_file = models.FileField(
         blank=True,
