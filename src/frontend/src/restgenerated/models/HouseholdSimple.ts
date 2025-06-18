@@ -60,5 +60,6 @@ export type HouseholdSimple = {
      */
     village?: string;
     readonly geopoint: string | null;
+    readonly importId: string;
 };
 
