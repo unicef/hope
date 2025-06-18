@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import {
   choicesToDict,
   formatAge,
+  getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
@@ -98,8 +99,8 @@ export const IndividualBioData = ({
   const mappedRoles = (
     <Grid size={{ xs: 3 }}>
       <LabelizedField label={`Linked ${beneficiaryGroup?.groupLabelPlural}`}>
-        {individual?.householdsAndRoles?.length
-          ? individual?.householdsAndRoles?.map((item) => (
+        {individual?.rolesInHouseholds?.length
+          ? individual?.rolesInHouseholds?.map((item) => (
               <Box key={item.id}>
                 {item.household.unicefId} -{roleChoicesDict[item.role]}
               </Box>
@@ -323,19 +324,17 @@ export const IndividualBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          {/* //TODO: */}
-          {/* <LabelizedField label={t('Phone Number')}>
+          <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual?.phoneNo, individual?.phoneNoValid)}
-          </LabelizedField> */}
+          </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          {/* //TODO: */}
-          {/* <LabelizedField label={t('Alternative Phone Number')}>
+          <LabelizedField label={t('Alternative Phone Number')}>
             {getPhoneNoLabel(
               individual?.phoneNoAlternative,
               individual?.phoneNoAlternativeValid,
             )}
-          </LabelizedField> */}
+          </LabelizedField>
         </Grid>
         <Grid size={{ xs: 12 }}>
           <BorderBox />

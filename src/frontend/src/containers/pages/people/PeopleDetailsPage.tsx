@@ -286,7 +286,7 @@ const PeopleDetailsPage = (): ReactElement => {
               <Grid container spacing={6}>
                 <Grid size={{ xs: 3 }}>
                   <LabelizedField label={t('Start time')}>
-                    <UniversalMoment>{household?.startTime}</UniversalMoment>
+                    <UniversalMoment>{household?.start}</UniversalMoment>
                   </LabelizedField>
                 </Grid>
                 <Grid size={{ xs: 3 }}>
