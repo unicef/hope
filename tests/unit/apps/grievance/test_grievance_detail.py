@@ -1281,13 +1281,25 @@ class TestGrievanceTicketDetail:
                 "household": {
                     "id": str(individual.household.id),
                     "unicef_id": individual.household.unicef_id,
-                    "admin2": {
-                        "id": str(individual.household.admin2.id),
-                        "name": individual.household.admin2.name,
-                    },
+                    "admin1": individual.household.admin1.name,
+                    "admin2": individual.household.admin2.name,
+                    "admin3": "",
+                    "admin4": "",
+                    "first_registration_date": "2025-01-19T22:45:26Z",
+                    "last_registration_date": "2025-04-08T02:47:04Z",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": individual.household.residence_status,
+                    "country_origin": individual.household.country_origin.name,
+                    "country": individual.household.country.name,
+                    "address": individual.household.address,
+                    "village": individual.household.village,
+                    "geopoint": None,
+                    "import_id": individual.household.unicef_id,
                 },
-                "relationship": individual.relationship,
-                "role": (expected_role.get_role_display() if expected_role else "-"),
                 "roles_in_households": [
                     {
                         "id": str(role.id),
@@ -1303,6 +1315,8 @@ class TestGrievanceTicketDetail:
                     }
                     for role in individual.households_and_roles(manager="all_merge_status_objects").all()
                 ],
+                "relationship": individual.relationship,
+                "role": (expected_role.get_role_display() if expected_role else "-"),
                 "documents": [
                     {
                         "id": str(document.id),

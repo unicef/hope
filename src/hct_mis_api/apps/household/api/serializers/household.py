@@ -87,10 +87,12 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
 
 
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
-    admin1 = AreaSimpleSerializer()
-    admin2 = AreaSimpleSerializer()
-    admin3 = AreaSimpleSerializer()
-    admin4 = AreaSimpleSerializer()
+    admin1 = serializers.CharField(source="admin1.name", default="")
+    admin2 = serializers.CharField(source="admin2.name", default="")
+    admin3 = serializers.CharField(source="admin3.name", default="")
+    admin4 = serializers.CharField(source="admin4.name", default="")
+    country = serializers.CharField(source="country.name", default="")
+    country_origin = serializers.CharField(source="country_origin.name", default="")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     delivered_quantities = serializers.SerializerMethodField()

@@ -2,16 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { AreaSimple } from './AreaSimple';
 import type { DeliveredQuantity } from './DeliveredQuantity';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdSimple = {
     readonly id: string;
     unicefId?: string | null;
-    admin1: AreaSimple;
-    admin2: AreaSimple;
-    admin3: AreaSimple;
-    admin4: AreaSimple;
+    admin1?: string;
+    admin2?: string;
+    admin3?: string;
+    admin4?: string;
     /**
      * Household first registration date [sys]
      */
@@ -43,14 +42,8 @@ export type HouseholdSimple = {
      * * `RETURNEE` - Displaced  |   Returnee
      */
     residenceStatus?: ResidenceStatusEnum;
-    /**
-     * Household country origin
-     */
-    countryOrigin?: string | null;
-    /**
-     * Household country
-     */
-    country?: string | null;
+    countryOrigin?: string;
+    country?: string;
     /**
      * Household address
      */
