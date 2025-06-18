@@ -604,7 +604,6 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": "transfer",
                         "account_type": "bank",
                     },
-                    "extra_data": {},
                 }
             ],
             validate_response=True,
@@ -667,7 +666,6 @@ class TestPaymentGatewayService(APITestCase):
                             "financial_institution": str(fi.id),
                         },
                     },
-                    "extra_data": {},
                 }
             ],
             validate_response=True,
@@ -743,7 +741,6 @@ class TestPaymentGatewayService(APITestCase):
             "remote_id": str(self.payments[0].id),
             "record_code": self.payments[0].unicef_id,
             "payload": expected_payload,
-            "extra_data": {},
         }
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         actual_args, actual_kwargs = post_mock.call_args
@@ -862,7 +859,6 @@ class TestPaymentGatewayService(APITestCase):
             "fsp": "123",
             "system": "123",
             "payload": "123",
-            "extra": "123",
         }, 200
 
         response_data = PaymentGatewayAPI().create_payment_instruction({})

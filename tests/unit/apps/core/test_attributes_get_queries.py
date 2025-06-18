@@ -1,4 +1,5 @@
 import datetime as dt
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -10,6 +11,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_range_query,
     country_origin_query,
     country_query,
+    extra_rdis_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_documents_issuer_query,
@@ -328,4 +330,10 @@ class TestAttributesGetQueries(APITestCase):
         country_code = "AUS"
         result = get_other_issuer_query(None, [country_code])
         expected = Q(documents__type__type="OTHER", documents__type__country__iso_code3=country_code)
+        self.assertEqual(result, expected)
+
+    def test_get_extra_rdis_query(self) -> None:
+        rdis_uuids = [uuid.uuid4(), uuid.uuid4()]
+        result = extra_rdis_query("CONTAINS", rdis_uuids)
+        expected = Q(extra_rdis__in=rdis_uuids)
         self.assertEqual(result, expected)

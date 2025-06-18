@@ -78,6 +78,8 @@ class RdiBaseCreateTask:
         imported_delivery_mechanism_data = []
         for _, data in self.accounts.items():
             individual = data.pop("individual")
+            if individual._state.adding:  # if individual is not actually created because it is a colided one
+                continue
             for account_type, values in data.items():
                 imported_delivery_mechanism_data.append(
                     PendingAccount(
