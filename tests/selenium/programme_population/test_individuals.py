@@ -111,12 +111,12 @@ class TestSmokeIndividuals:
         assert "Head of household (self)" in pageIndividualsDetails.getLabelRelationshipToHoh().text
         assert "-" in pageIndividualsDetails.getLabelPreferredLanguage().text
         assert "HH-00-0000.1380 -Primary collector" in pageIndividualsDetails.getLabelLinkedHouseholds().text
-        assert "None" in pageIndividualsDetails.getLabelObservedDisabilities().text
-        assert "None" in pageIndividualsDetails.getLabelSeeingDisabilitySeverity().text
-        assert "None" in pageIndividualsDetails.getLabelHearingDisabilitySeverity().text
-        assert "None" in pageIndividualsDetails.getLabelPhysicalDisabilitySeverity().text
-        assert "None" in pageIndividualsDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text
-        assert "None" in pageIndividualsDetails.getLabelCommunicatingDisabilitySeverity().text
+        assert "" in pageIndividualsDetails.getLabelObservedDisabilities().text
+        assert "" in pageIndividualsDetails.getLabelSeeingDisabilitySeverity().text
+        assert "" in pageIndividualsDetails.getLabelHearingDisabilitySeverity().text
+        assert "" in pageIndividualsDetails.getLabelPhysicalDisabilitySeverity().text
+        assert "" in pageIndividualsDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text
+        assert "" in pageIndividualsDetails.getLabelCommunicatingDisabilitySeverity().text
         assert "Not Disabled" in pageIndividualsDetails.getLabelDisability().text
         assert "fake111test@email.com" in pageIndividualsDetails.getLabelEmail().text
         assert "Invalid Phone Number" in pageIndividualsDetails.getLabelPhoneNumber().text

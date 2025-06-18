@@ -69,7 +69,6 @@ HOST = "HOST"
 NON_HOST = "NON_HOST"
 RETURNEE = "RETURNEE"
 RESIDENCE_STATUS_CHOICE = (
-    (BLANK, _("None")),
     (IDP, _("Displaced  |  Internally Displaced People")),
     (REFUGEE, _("Displaced  |  Refugee / Asylum Seeker")),
     (OTHERS_OF_CONCERN, _("Displaced  |  Others of Concern")),
@@ -98,7 +97,6 @@ WIDOWED = "WIDOWED"
 DIVORCED = "DIVORCED"
 SEPARATED = "SEPARATED"
 MARITAL_STATUS_CHOICE = (
-    (BLANK, _("None")),
     (DIVORCED, _("Divorced")),
     (MARRIED, _("Married")),
     (SEPARATED, _("Separated")),
@@ -106,7 +104,6 @@ MARITAL_STATUS_CHOICE = (
     (WIDOWED, _("Widowed")),
 )
 
-NONE = "NONE"
 SEEING = "SEEING"
 HEARING = "HEARING"
 WALKING = "WALKING"
@@ -114,7 +111,6 @@ MEMORY = "MEMORY"
 SELF_CARE = "SELF_CARE"
 COMMUNICATING = "COMMUNICATING"
 OBSERVED_DISABILITY_CHOICE = (
-    (NONE, _("None")),
     (SEEING, _("Difficulty seeing (even if wearing glasses)")),
     (HEARING, _("Difficulty hearing (even if using a hearing aid)")),
     (WALKING, _("Difficulty walking or climbing steps")),
@@ -265,7 +261,6 @@ SOME_DIFFICULTY = "SOME_DIFFICULTY"
 LOT_DIFFICULTY = "LOT_DIFFICULTY"
 CANNOT_DO = "CANNOT_DO"
 SEVERITY_OF_DISABILITY_CHOICES = (
-    (BLANK, _("None")),
     (LOT_DIFFICULTY, "A lot of difficulty"),
     (CANNOT_DO, "Cannot do at all"),
     (SOME_DIFFICULTY, "Some difficulty"),
@@ -273,7 +268,6 @@ SEVERITY_OF_DISABILITY_CHOICES = (
 UNICEF = "UNICEF"
 PARTNER = "PARTNER"
 ORG_ENUMERATOR_CHOICES = (
-    (BLANK, _("None")),
     (PARTNER, "Partner"),
     (UNICEF, "UNICEF"),
 )
@@ -281,7 +275,6 @@ HUMANITARIAN_PARTNER = "HUMANITARIAN_PARTNER"
 PRIVATE_PARTNER = "PRIVATE_PARTNER"
 GOVERNMENT_PARTNER = "GOVERNMENT_PARTNER"
 DATA_SHARING_CHOICES = (
-    (BLANK, _("None")),
     (GOVERNMENT_PARTNER, "Government partners"),
     (HUMANITARIAN_PARTNER, "Humanitarian partners"),
     (PRIVATE_PARTNER, "Private partners"),
@@ -290,7 +283,6 @@ DATA_SHARING_CHOICES = (
 HH_REGISTRATION = "HH_REGISTRATION"
 COMMUNITY = "COMMUNITY"
 REGISTRATION_METHOD_CHOICES = (
-    (BLANK, _("None")),
     (COMMUNITY, "Community-level Registration"),
     (HH_REGISTRATION, "Household Registration"),
 )
@@ -519,12 +511,8 @@ class Household(
         validators=[validate_image_file_extension], blank=True, help_text="Household consent sign image"
     )
     consent = models.BooleanField(null=True, help_text="Household consent")
-    consent_sharing = MultiSelectField(
-        choices=DATA_SHARING_CHOICES, default=BLANK, help_text="Household consent sharing"
-    )
-    residence_status = models.CharField(
-        max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True, help_text="Household residence status"
-    )
+    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, help_text="Household consent sharing", null=True)
+    residence_status = models.CharField(max_length=254, null=True, blank=True, help_text="Household residence status")
 
     address = CICharField(max_length=1024, blank=True, help_text="Household address")
     zip_code = models.CharField(max_length=12, blank=True, null=True, help_text="Household zip code")
@@ -635,7 +623,8 @@ class Household(
     registration_method = models.CharField(
         max_length=250,
         choices=REGISTRATION_METHOD_CHOICES,
-        default=BLANK,
+        null=True,
+        blank=True,
         help_text="Household registration method [sys]",
     )
     family_id = models.CharField(
@@ -690,7 +679,11 @@ class Household(
         max_length=250, blank=True, default=BLANK, help_text="Household name enumerator [sys]"
     )
     org_enumerator = models.CharField(
-        max_length=250, choices=ORG_ENUMERATOR_CHOICES, default=BLANK, help_text="Household org enumerator [sys]"
+        max_length=250,
+        choices=ORG_ENUMERATOR_CHOICES,
+        null=True,
+        blank=True,
+        help_text="Household org enumerator [sys]",
     )
     org_name_enumerator = models.CharField(
         max_length=250, blank=True, default=BLANK, help_text="Household org name enumerator [sys]"
@@ -1147,7 +1140,8 @@ class Individual(
     marital_status = models.CharField(
         max_length=255,
         choices=MARITAL_STATUS_CHOICE,
-        default=BLANK,
+        null=True,
+        blank=True,
         db_index=True,
         help_text="Beneficiary marital status",
     )
@@ -1177,28 +1171,28 @@ class Individual(
         max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
     )
     observed_disability = MultiSelectField(
-        choices=OBSERVED_DISABILITY_CHOICE, default=NONE, help_text="Observed disability status"
+        choices=OBSERVED_DISABILITY_CHOICE, blank=True, null=True, help_text="Observed disability status"
     )
     disability_certificate_picture = models.ImageField(
         blank=True, null=True, help_text="Disability certificate picture"
     )
     seeing_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Seeing disability"
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, null=True, blank=True, help_text="Seeing disability"
     )
     hearing_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Hearing disability"
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, null=True, blank=True, help_text="Hearing disability"
     )
     physical_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Physical disability"
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, null=True, blank=True, help_text="Physical disability"
     )
     memory_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Memory disability"
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, null=True, blank=True, help_text="Memory disability"
     )
     selfcare_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Selfcare disability"
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, null=True, blank=True, help_text="Selfcare disability"
     )
     comms_disability = models.CharField(
-        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Comms disability"
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, null=True, blank=True, help_text="Comms disability"
     )
 
     who_answers_phone = models.CharField(max_length=150, blank=True, help_text="Who answers phone number")

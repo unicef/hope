@@ -35,12 +35,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.models import (
-    NONE,
-    WORK_STATUS_CHOICE,
-    Household,
-    Individual,
-)
+from hct_mis_api.apps.household.models import WORK_STATUS_CHOICE, Household, Individual
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
     Payment,
@@ -83,7 +78,7 @@ class GenerateReportContentHelpers:
             individual.estimated_birth_date,
             individual.sex,
             individual.marital_status,
-            len(individual.observed_disability) >= 1 and NONE not in individual.observed_disability,
+            len(individual.observed_disability) >= 1,
             individual.observed_disability,
             individual.comms_disability,
             individual.hearing_disability,
@@ -396,7 +391,7 @@ class GenerateReportContentHelpers:
             individual.estimated_birth_date,
             individual.sex,
             individual.marital_status,
-            len(individual.observed_disability) >= 1 and NONE not in individual.observed_disability,
+            len(individual.observed_disability) >= 1,
             individual.observed_disability,
             individual.comms_disability,
             individual.hearing_disability,
