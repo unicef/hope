@@ -87,7 +87,10 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
 
 
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
+    admin1 = AreaSimpleSerializer()
     admin2 = AreaSimpleSerializer()
+    admin3 = AreaSimpleSerializer()
+    admin4 = AreaSimpleSerializer()
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     delivered_quantities = serializers.SerializerMethodField()
@@ -97,13 +100,17 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "unicef_id",
+            "admin1",
             "admin2",
+            "admin2",
+            "admin3",
             "first_registration_date",
             "last_registration_date",
             "total_cash_received",
             "total_cash_received_usd",
             "delivered_quantities",
             "start",
+            "zip_code",
         )
 
     @extend_schema_field(DeliveredQuantitySerializer(many=True))
