@@ -14,9 +14,12 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     resolve_flex_fields_choices_to_string,
 )
-from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.api.serializers.household import (
+    HouseholdSimpleSerializer,
+    LinkedGrievanceTicketSerializer,
+)
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
@@ -27,7 +30,6 @@ from hct_mis_api.apps.household.models import (
     BankAccountInfo,
     Document,
     DocumentType,
-    Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
@@ -132,18 +134,6 @@ class AccountSerializer(serializers.ModelSerializer):
         return dict(sorted(obj.data.items()))
 
 
-class HouseholdSimpleSerializer(serializers.ModelSerializer):
-    admin2 = AreaSimpleSerializer()
-
-    class Meta:
-        model = Household
-        fields = (
-            "id",
-            "unicef_id",
-            "admin2",
-        )
-
-
 class IndividualSimpleSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
     roles_in_households = serializers.SerializerMethodField()
@@ -187,16 +177,6 @@ class IndividualRoleInHouseholdSerializer(serializers.ModelSerializer):
             "id",
             "household",
             "role",
-        )
-
-
-class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GrievanceTicket
-        fields = (
-            "id",
-            "category",
-            "status",
         )
 
 
@@ -401,6 +381,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "status",
             "flex_fields",
             "linked_grievances",
+            "photo",
         )
 
     def get_role(self, obj: Individual) -> str:

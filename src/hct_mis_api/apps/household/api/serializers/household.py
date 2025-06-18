@@ -9,10 +9,6 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.api.serializers.individual import (
-    HouseholdSimpleSerializer,
-    LinkedGrievanceTicketSerializer,
-)
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
@@ -89,6 +85,30 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
         )
 
 
+class HouseholdSimpleSerializer(serializers.ModelSerializer):
+    admin2 = AreaSimpleSerializer()
+    total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
+    total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
+    delivered_quantities = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Household
+        fields = (
+            "id",
+            "unicef_id",
+            "admin2",
+            "first_registration_date",
+            "last_registration_date",
+            "total_cash_received",
+            "total_cash_received_usd",
+            "delivered_quantities",
+            "start",
+        )
+
+    def get_delivered_quantities(self, obj: Household) -> Dict:
+        return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
+
+
 class HouseholdMemberSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
     household = HouseholdSimpleSerializer()
@@ -124,6 +144,16 @@ class RecipientSerializer(serializers.ModelSerializer):
             "unicef_id",
             "size",
             "head_of_household",
+        )
+
+
+class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrievanceTicket
+        fields = (
+            "id",
+            "category",
+            "status",
         )
 
 
