@@ -320,6 +320,10 @@ export type HouseholdDetail = {
      */
     maleAgeGroup60DisabledCount?: number | null;
     /**
+     * Household other sex group count
+     */
+    otherSexGroupCount?: number | null;
+    /**
      * Data collection start date
      */
     start?: string | null;
@@ -359,5 +363,6 @@ export type HouseholdDetail = {
      * Beneficiary Program Registration id [sys]
      */
     programRegistrationId?: string | null;
+    readonly deliveredQuantities: Record<string, any>;
 };
 
