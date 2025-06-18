@@ -112,7 +112,7 @@ export function DeleteIndividualGrievanceDetails({
   const excludedFields = [
     'household',
     'documents',
-    'householdsAndRoles',
+    'rolesInHouseholds',
     'identities',
     'headingHousehold',
     'flexFields',

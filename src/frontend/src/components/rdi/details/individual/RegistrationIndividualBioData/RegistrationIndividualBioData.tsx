@@ -1,12 +1,16 @@
+import { ContentLink } from '@components/core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { ObservedDisabilityEnum } from '@restgenerated/models/ObservedDisabilityEnum';
 import {
   choicesToDict,
   formatAge,
+  getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
@@ -15,7 +19,6 @@ import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
-import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 const Overview = styled(Paper)<{ theme?: Theme }>`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -37,6 +40,7 @@ export function RegistrationIndividualBioData({
 }: RegistrationIndividualBioDataProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
+  const { baseUrl } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const relationshipChoicesDict = choicesToDict(
@@ -148,8 +152,7 @@ export function RegistrationIndividualBioData({
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
-            {/* //TODO: REST */}
-            {/* {individual?.household?.id ? (
+            {individual?.household?.id ? (
               <ContentLink
                 href={`/${baseUrl}/registration-data-import/household/${individual?.household?.id}`}
               >
@@ -157,7 +160,7 @@ export function RegistrationIndividualBioData({
               </ContentLink>
             ) : (
               '-'
-            )} */}
+            )}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -237,18 +240,16 @@ export function RegistrationIndividualBioData({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          {/* //TODO: */}
-          {/* <LabelizedField label={t('Phone Number')}>
+          <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual.phoneNo, individual.phoneNoValid)}
-          </LabelizedField> */}
+          </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Alternate Phone Number')}>
-            {/* //TODO: */}
-            {/* {getPhoneNoLabel(
+            {getPhoneNoLabel(
               individual.phoneNoAlternative,
               individual.phoneNoAlternativeValid,
-            )} */}
+            )}
           </LabelizedField>
         </Grid>
       </Grid>
