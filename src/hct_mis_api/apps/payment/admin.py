@@ -288,6 +288,8 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     raw_id_fields = (
         "business_area",
+        "financial_service_provider",
+        "delivery_mechanism",
         "targeting_criteria",
         "created_by",
         "program_cycle",
@@ -331,6 +333,13 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 action=self.sync_with_payment_gateway,
                 message="Do you confirm to Sync with Payment Gateway?",
             )
+
+    @button(permission="payment.view_paymentplan")
+    def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
+        obj = PaymentPlan.objects.get(pk=pk)
+        url = reverse("admin:payment_deliverymechanismconfig_changelist")
+        flt = f"delivery_mechanism__exact={obj.delivery_mechanism.id}&fsp__exact={obj.financial_service_provider.id}"
+        return HttpResponseRedirect(f"{url}?{flt}")
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
