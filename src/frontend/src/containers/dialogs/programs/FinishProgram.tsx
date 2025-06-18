@@ -32,7 +32,7 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
       mutationFn: () =>
         RestService.restBusinessAreasProgramsFinishCreate({
           businessAreaSlug: businessArea,
-          slug: program.id,
+          slug: program.slug,
         }),
     });
 

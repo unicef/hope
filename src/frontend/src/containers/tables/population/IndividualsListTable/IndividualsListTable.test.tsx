@@ -41,11 +41,18 @@ describe('IndividualsListTable', () => {
         biometricDeduplicationGoldenRecordResults: [],
         household: {
           id: 'household-1',
+          geopoint: 'POINT(85.324 27.7172)',
           unicefId: 'HH-001',
-          admin2: {
-            id: 'admin2-1',
-            name: 'District 1',
-          },
+          admin1: { id: 'admin1-1', name: 'Province 1' },
+          admin2: { id: 'admin2-1', name: 'District 1' },
+          admin3: { id: 'admin3-1', name: '' },
+          admin4: { id: 'admin4-1', name: '' },
+          firstRegistrationDate: '2023-01-15T10:30:00Z',
+          lastRegistrationDate: '2023-01-15T10:30:00Z',
+          totalCashReceived: '1000.00',
+          totalCashReceivedUsd: '1000.00',
+          deliveredQuantities: [],
+          importId: 'import-1',
         },
         program: {
           id: 'test-program',
@@ -68,6 +75,16 @@ describe('IndividualsListTable', () => {
       { value: 'RESIDENT', label: 'Resident' },
       { value: 'REFUGEE', label: 'Refugee' },
     ],
+    sexChoices: [],
+    flagChoices: [],
+    statusChoices: [],
+    relationshipChoices: [],
+    roleChoices: [],
+    maritalStatusChoices: [],
+    identityTypeChoices: [],
+    observedDisabilityChoices: [],
+    severityOfDisabilityChoices: [],
+    workStatusChoices: [],
   };
 
   const defaultFilter = {

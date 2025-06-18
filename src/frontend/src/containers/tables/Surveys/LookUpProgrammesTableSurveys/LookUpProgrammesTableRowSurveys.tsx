@@ -7,7 +7,11 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import { ProgramList } from '@restgenerated/models/ProgramList';
-import { choicesToDict, programStatusToColor } from '@utils/utils';
+import {
+  choicesToDict,
+  formatCurrency,
+  programStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
 
 interface LookUpProgrammesTableRowSurveysProps {
@@ -67,11 +71,12 @@ export function LookUpProgrammesTableRowSurveys({
       <TableCell align="left">
         {programSectorChoiceDict[program.sector]}
       </TableCell>
-      {/* //TODO: fix */}
-      {/* <TableCell align="right">
-        {program.totalNumberOfHouseholdsWithTpInProgram}
+      <TableCell align="right">
+        {program.numberOfHouseholdsWithTpInProgram}
       </TableCell>
-      <TableCell align="right">{formatCurrency(program.budget)}</TableCell> */}
+      <TableCell align="right">
+        {formatCurrency(Number(program.budget))}
+      </TableCell>
     </ClickableTableRow>
   );
 }

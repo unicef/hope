@@ -13,7 +13,6 @@ export interface PaymentChannelFieldProps {
   baseName: string;
   onDelete;
   isEdited?: boolean;
-  //TODO: Change type to PaymentChannel when available
   paymentChannel?: any;
   values;
 }

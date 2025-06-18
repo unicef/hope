@@ -8,7 +8,6 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
@@ -22,32 +21,29 @@ interface ActivateProgramProps {
 export const ActivateProgram = ({
   program,
 }: ActivateProgramProps): ReactElement => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
 
   const { mutateAsync: activateProgram, isPending: loading } = useMutation({
     mutationFn: () =>
       RestService.restBusinessAreasProgramsActivateCreate({
         businessAreaSlug: businessArea,
-        slug: program.id,
+        slug: program.slug,
       }),
   });
 
   const handleActivateProgram = async (): Promise<void> => {
     try {
-      const response = await activateProgram();
-
+      await activateProgram();
       setSelectedProgram({
         ...selectedProgram,
         status: ProgramStatus.ACTIVE,
       });
 
       showMessage(t('Programme activated.'));
-      navigate(`/${baseUrl}/details/${response.id}`);
       setOpen(false);
     } catch (error) {
       showMessage(t('Programme activate action failed.'));

@@ -9,7 +9,6 @@ import styled from 'styled-components';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaymentChannelField } from '../PaymentChannelField';
 import { removeItemById } from '../utils/helpers';
-import { a } from 'vitest/dist/chunks/suite.d.FvehnV49';
 
 interface DisabledDivProps {
   disabled: boolean;
@@ -22,7 +21,6 @@ const DisabledDiv = styled.div<DisabledDivProps>`
 export interface EditPaymentChannelRowProps {
   setFieldValue;
   values;
-  // TODO: Change type to PaymentChannel when available
   paymentChannel: any;
   arrayHelpers;
   id: string;

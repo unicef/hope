@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 
 const Container = styled.div`
   padding: 20px;
@@ -92,10 +93,9 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
         title={`${t('Individual ID')}: ${individual.importId}`}
         breadCrumbs={breadCrumbsItems}
       >
-        {/* //TODO: add individual photo */}
-        {/* {individual.photo ? (
+        {individual.photo ? (
           <IndividualPhotoModal individual={individual} />
-        ) : null} */}
+        ) : null}
       </PageHeader>
       <Container>
         <RegistrationIndividualBioData

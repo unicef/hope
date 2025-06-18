@@ -50,9 +50,10 @@ export function TicketsAlreadyExist({ values }): ReactElement {
         category: values.category,
         issueType: values.issueType,
         household: decodeIdString(values.selectedHousehold?.id),
-        //TODO: pass these when available
-        //individual: decodeIdString(values.selectedIndividual?.id),
-        // paymentRecord: values.selectedPaymentRecords,
+        individualId: decodeIdString(values.selectedIndividual?.id),
+        paymentRecordIds: Array.isArray(values.selectedPaymentRecords)
+          ? values.selectedPaymentRecords.map((r) => r.id).join(',')
+          : values.selectedPaymentRecords,
       }),
     enabled: !!(businessAreaSlug && values.category),
   });
