@@ -111,6 +111,12 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
             "delivered_quantities",
             "start",
             "zip_code",
+            "residence_status",
+            "country_origin",
+            "country",
+            "address",
+            "village",
+            "geopoint",
         )
 
     @extend_schema_field(DeliveredQuantitySerializer(many=True))
