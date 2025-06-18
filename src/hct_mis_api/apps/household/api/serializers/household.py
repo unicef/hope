@@ -44,7 +44,7 @@ class DeliveredQuantitySerializer(serializers.Serializer):
 
 class HouseholdListSerializer(serializers.ModelSerializer):
     head_of_household = serializers.CharField(source="head_of_household.full_name")
-    admin1 = serializers.CharField(source="admin1.name", default="")
+    admin1 = AreaSimpleSerializer()
     admin2 = AreaSimpleSerializer()
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
@@ -87,10 +87,10 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
 
 
 class HouseholdSimpleSerializer(serializers.ModelSerializer):
-    admin1 = serializers.CharField(source="admin1.name", default="")
-    admin2 = serializers.CharField(source="admin2.name", default="")
-    admin3 = serializers.CharField(source="admin3.name", default="")
-    admin4 = serializers.CharField(source="admin4.name", default="")
+    admin1 = AreaSimpleSerializer()
+    admin2 = AreaSimpleSerializer()
+    admin3 = AreaSimpleSerializer()
+    admin4 = AreaSimpleSerializer()
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
@@ -185,10 +185,10 @@ class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
 
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
-    admin1 = serializers.CharField(source="admin1.name", default="")
-    admin2 = serializers.CharField(source="admin2.name", default="")
-    admin3 = serializers.CharField(source="admin3.name", default="")
-    admin4 = serializers.CharField(source="admin4.name", default="")
+    admin1 = AreaSimpleSerializer()
+    admin2 = AreaSimpleSerializer()
+    admin3 = AreaSimpleSerializer()
+    admin4 = AreaSimpleSerializer()
     program = serializers.CharField(source="program.name")
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
@@ -304,8 +304,8 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
 
 
 class HouseholdForTicketSerializer(serializers.ModelSerializer):
-    admin1 = serializers.CharField(source="admin1.name", default="")
-    admin2 = serializers.CharField(source="admin2.name", default="")
+    admin1 = AreaSimpleSerializer()
+    admin2 = AreaSimpleSerializer()
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
     head_of_household = HeadOfHouseholdSerializer()

@@ -10,7 +10,7 @@ export type HouseholdList = {
     readonly id: string;
     unicefId: string | null;
     headOfHousehold: string;
-    admin1?: string;
+    admin1: AreaSimple;
     admin2: AreaSimple;
     program: ProgramSmall;
     readonly status: string;
