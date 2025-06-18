@@ -7,8 +7,8 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
+import freezegun
 import pytest
-import time_machine
 from constance.test import override_config
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -1531,7 +1531,7 @@ class TestIndividualFilter:
             individual1_data={"birth_date": "2004-10-10"},
             individual2_data={"birth_date": "1999-10-10"},
         )
-        with time_machine.travel("2019-11-10"):
+        with freezegun.freeze_time("2019-11-10"):
             response_min = self.api_client.get(self.list_url, {"age_min": 8})
             assert response_min.status_code == status.HTTP_200_OK
             response_data_min = response_min.json()["results"]

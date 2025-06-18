@@ -6,8 +6,8 @@ from django.db.models import QuerySet
 from django.test import TestCase
 from django.utils import timezone
 
+from freezegun import freeze_time
 from pytz import utc
-from time_machine import travel
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import (
@@ -148,7 +148,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         except ValidationError:
             self.assertTrue(True)
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     def test_rule_filter_age_equal(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(comparison_method="EQUALS", field_name="age", arguments=[50])
         query = rule_filter.get_query()
@@ -156,7 +156,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(self.household_50_yo.pk, queryset[0].household.pk)
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     def test_rule_filter_age_not_equal(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(
             comparison_method="NOT_EQUALS", field_name="age", arguments=[50]
@@ -166,7 +166,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_49(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(comparison_method="RANGE", field_name="age", arguments=[1, 49])
         query = rule_filter.get_query()
@@ -174,7 +174,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_50(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(comparison_method="RANGE", field_name="age", arguments=[1, 50])
         query = rule_filter.get_query()
@@ -182,7 +182,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 4)
         self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     def test_rule_filter_age_gt_40(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(
             comparison_method="GREATER_THAN", field_name="age", arguments=[40]
@@ -192,7 +192,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 1)
         self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     def test_rule_filter_age_lt_40(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(
             comparison_method="LESS_THAN", field_name="age", arguments=[40]
@@ -202,7 +202,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
 
-    @travel("2020-09-28")
+    @freeze_time("2020-09-28")
     def test_rule_filter_age_lt_49_should_contains_person_born_in_proper_year_before_birthday(self) -> None:
         rule_filter = TargetingIndividualBlockRuleFilter(
             comparison_method="LESS_THAN", field_name="age", arguments=[49]
@@ -212,7 +212,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 4)
         self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
 
-    @travel("2020-09-29")
+    @freeze_time("2020-09-29")
     def test_rule_filter_age_lt_49_shouldn_t_contains_person_born_in_proper_year_after_and_during_birthday(
         self,
     ) -> None:

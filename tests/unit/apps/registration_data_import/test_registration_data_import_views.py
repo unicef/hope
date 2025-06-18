@@ -5,8 +5,8 @@ from django.core.cache import cache
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
+import freezegun
 import pytest
-import time_machine
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -24,10 +24,9 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 pytestmark = pytest.mark.django_db
 
 
+@freezegun.freeze_time("2022-01-01")
 class TestRegistrationDataImportViews:
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
-        self._travel = time_machine.travel("2022-01-01")
-        self._travel.start()
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
         self.client = api_client(self.user)
@@ -75,9 +74,6 @@ class TestRegistrationDataImportViews:
                 "pk": self.rdi1.id,
             },
         )
-
-    def tearDown(self) -> None:
-        self._travel.stop()
 
     @pytest.mark.parametrize(
         "user_permissions, partner_permissions, is_permission_in_correct_program, expected_status",
