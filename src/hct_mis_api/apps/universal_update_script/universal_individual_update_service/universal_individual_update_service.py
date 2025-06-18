@@ -23,10 +23,10 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 )
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.all_updatable_fields import (
+    get_account_fields,
     get_document_fields,
     get_household_flex_fields,
     get_individual_flex_fields,
-    get_wallet_fields,
     household_fields,
     individual_fields,
 )
@@ -78,10 +78,10 @@ class UniversalIndividualUpdateService:
             key = self.document_types[document_no_column_name].key
             if key in universal_update.document_types.values_list("key", flat=True):
                 self.document_fields.append((document_no_column_name, f"{key}_country_i_c"))
-        self.deliver_mechanism_data_fields = {
+        self.account_data_fields = {
             account_type: data
-            for account_type, data in get_wallet_fields().items()
-            if account_type in universal_update.delivery_mechanisms.values_list("account_type__key", flat=True)
+            for account_type, data in get_account_fields().items()
+            if account_type in universal_update.account_types.values_list("key", flat=True)
         }
         self.ignore_empty_values = ignore_empty_values
         self.deduplicate_es = deduplicate_es
@@ -157,6 +157,37 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - Multiple documents with document type {document_type} found")
         return errors
 
+    def validate_accounts(
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
+    ) -> List[str]:
+        errors = []
+        for account_type, account_columns_mapping in self.account_data_fields.items():
+            columns_from_header = self.get_all_account_columns(
+                account_type, headers, [x for x, y in account_columns_mapping]
+            )  # this gets columns starting with account__{account_type}__ and not in the mapping
+            all_account_fields = []
+            all_account_fields.extend(account_columns_mapping)
+            all_account_fields.extend(columns_from_header)
+            updating_anything = False
+            had_financial_institution = False
+            for column_name, field_name in all_account_fields:
+                if column_name == f"account__{account_type}__*":
+                    continue
+                value = row[headers.index(column_name)]
+                if not (value is None or value == ""):
+                    updating_anything = True
+                    if field_name == "financial_institution":
+                        if not isinstance(value, int):
+                            errors.append(
+                                f"Row: {row_index} - Financial institution ID must be a number for field {column_name}"
+                            )
+                        had_financial_institution = True
+            if updating_anything and not had_financial_institution:
+                errors.append(
+                    f"Row: {row_index} - Financial institution ID must be provided for account type {account_type} if any other field is updated"
+                )
+        return errors
+
     def validate(self, sheet: Worksheet, headers: List[str]) -> List[str]:
         errors = []
         row_index = 1
@@ -186,6 +217,7 @@ class UniversalIndividualUpdateService:
             errors.extend(self.validate_individual_flex_fields(row, headers, row_index))
             errors.extend(self.validate_household_flex_fields(row, headers, row_index))
             errors.extend(self.validate_documents(row, headers, individual, row_index))
+            errors.extend(self.validate_accounts(row, headers, individual, row_index))
         return errors
 
     def handle_household_update(self, row: Tuple[Any, ...], headers: List[str], household: Any) -> None:
@@ -256,18 +288,31 @@ class UniversalIndividualUpdateService:
                 )
         return documents_to_update, documents_to_create
 
-    def handle_deliver_mechanism_data_update(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual
-    ) -> None:
+    def get_all_account_columns(
+        self, account_type: str, headers: List[str], columns_to_ignore: List[str]
+    ) -> List[Tuple[str, str]]:
+        prefix = f"account__{account_type}__"
+        prefix_len = len(prefix)
+        return [(x, x[prefix_len:]) for x in headers if x.startswith(prefix) and x not in columns_to_ignore]
+
+    def handle_account_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
         individual_accounts = individual.accounts.all()
-        for account_type, delivery_mechanism_columns_mapping in self.deliver_mechanism_data_fields.items():
+        for account_type, account_columns_mapping in self.account_data_fields.items():
             account_type_instance = self.delivery_mechanisms_account_types.get(account_type)
+
             single_data_object = next(
                 (d for d in individual_accounts if str(d.account_type.key) == str(account_type)),
                 None,
             )
-
-            for column_name, field_name in delivery_mechanism_columns_mapping:
+            columns_from_header = self.get_all_account_columns(
+                account_type, headers, [x for x, y in account_columns_mapping]
+            )  # this gets columns starting with account__{account_type}__ and not in the mapping
+            all_account_fields = []
+            all_account_fields.extend(account_columns_mapping)
+            all_account_fields.extend(columns_from_header)
+            for column_name, field_name in all_account_fields:
+                if column_name == f"account__{account_type}__*":
+                    continue
                 if column_name in headers:
                     value = row[headers.index(column_name)]
                     if self.ignore_empty_values and (value is None or value == ""):
@@ -278,6 +323,11 @@ class UniversalIndividualUpdateService:
                             account_type=account_type_instance,
                             rdi_merge_status=Account.MERGED,
                         )
+                    if field_name == "number":
+                        single_data_object.number = value
+                    if field_name == "financial_institution":
+                        single_data_object.financial_institution_id = value
+                        continue
                     single_data_object.data[field_name] = value
             if single_data_object:
                 single_data_object.save()
@@ -318,7 +368,7 @@ class UniversalIndividualUpdateService:
             documents_to_update_part, documents_to_create_part = self.handle_documents_update(row, headers, individual)
             documents_to_update.extend(documents_to_update_part)
             documents_to_create.extend(documents_to_create_part)
-            self.handle_deliver_mechanism_data_update(row, headers, individual)
+            self.handle_account_update(row, headers, individual)
             households_to_update.append(household)
             individuals_to_update.append(individual)
             if len(individuals_to_update) == self.batch_size:
@@ -394,13 +444,15 @@ class UniversalIndividualUpdateService:
                 row.append(None)
                 row.append(None)
         all_wallets = individual.accounts.all()
-        for account_type, data_fields in self.deliver_mechanism_data_fields.items():
+        for account_type, data_fields in self.account_data_fields.items():
             wallet = [x for x in all_wallets if x.account_type.key == account_type]
             if len(wallet) > 1:
                 raise ValueError("Multiple wallets found")
             if len(wallet) == 1:
                 for _, field_name in data_fields:
                     value = wallet[0].data.get(field_name)
+                    if field_name == "financial_institution":
+                        value = wallet[0].financial_institution_id
                     row.append(self.get_excel_value(value))
             else:
                 for _ in data_fields:
@@ -424,7 +476,7 @@ class UniversalIndividualUpdateService:
 
         for col_pair in self.document_fields:
             columns.extend(col_pair)
-        for lists in self.deliver_mechanism_data_fields.values():
+        for lists in self.account_data_fields.values():
             for pair in lists:
                 columns.append(pair[0])
         wb = openpyxl.Workbook()

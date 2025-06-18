@@ -47,6 +47,7 @@ export function AcceptedPaymentPlanHeaderButtons({
     queryFn: () =>
       Promise.resolve({
         allFinancialServiceProviderXlsxTemplates: {
+          // ({ variables: { businessArea } }) filter by BA
           edges: [], // Empty array for now - will be populated when REST endpoint is available
         },
       }),
