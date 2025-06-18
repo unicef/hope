@@ -1,4 +1,4 @@
-import { Grid2 as Grid, Theme, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Theme, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useProgramContext } from '../../../programContext';
@@ -281,8 +281,7 @@ export function HouseholdDetails({
         <Grid container>
           <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Cash received')}>
-              {/* //TODO: */}
-              {/* {household?.deliveredQuantities?.length ? (
+              {household?.deliveredQuantities?.length ? (
                 <Box mb={2}>
                   <Grid container>
                     <Grid size={{ xs: 6 }}>
@@ -308,7 +307,7 @@ export function HouseholdDetails({
                 </Box>
               ) : (
                 <>-</>
-              )} */}
+              )}
             </LabelizedField>
           </Grid>
           <Grid size={{ xs: 3 }}>

@@ -18,6 +18,7 @@ describe('HouseholdMembersTable', () => {
   // Mock household data
   const mockHousehold = {
     id: 'household-1',
+    deliveredQuantities: [1, 2],
     unicefId: 'HH-001',
     headOfHousehold: {
       id: 'head-1',
@@ -114,10 +115,17 @@ describe('HouseholdMembersTable', () => {
         household: {
           id: 'household-1',
           unicefId: 'HH-001',
-          admin2: {
-            id: 'admin2-1',
-            name: 'District 1',
-          },
+          admin1: { id: 'admin1-1', name: 'Province 1' },
+          admin2: { id: 'admin2-1', name: 'District 1' },
+          admin3: { id: 'admin3-1', name: '' },
+          admin4: { id: 'admin4-1', name: '' },
+          firstRegistrationDate: '2023-01-15T10:30:00Z',
+          lastRegistrationDate: '2023-01-15T10:30:00Z',
+          totalCashReceived: '1000.00',
+          totalCashReceivedUsd: '1000.00',
+          deliveredQuantities: [],
+          geopoint: null,
+          importId: 'import-1',
         },
       },
       {
@@ -132,10 +140,17 @@ describe('HouseholdMembersTable', () => {
         household: {
           id: 'household-1',
           unicefId: 'HH-001',
-          admin2: {
-            id: 'admin2-1',
-            name: 'District 1',
-          },
+          admin1: { id: 'admin1-1', name: 'Province 1' },
+          admin2: { id: 'admin2-1', name: 'District 1' },
+          admin3: { id: 'admin3-1', name: '' },
+          admin4: { id: 'admin4-1', name: '' },
+          firstRegistrationDate: '2023-01-15T10:30:00Z',
+          lastRegistrationDate: '2023-01-15T10:30:00Z',
+          totalCashReceived: '1000.00',
+          totalCashReceivedUsd: '1000.00',
+          deliveredQuantities: [],
+          geopoint: null,
+          importId: 'import-1',
         },
       },
       {
@@ -150,10 +165,17 @@ describe('HouseholdMembersTable', () => {
         household: {
           id: 'household-1',
           unicefId: 'HH-001',
-          admin2: {
-            id: 'admin2-1',
-            name: 'District 1',
-          },
+          admin1: { id: 'admin1-1', name: 'Province 1' },
+          admin2: { id: 'admin2-1', name: 'District 1' },
+          admin3: { id: 'admin3-1', name: '' },
+          admin4: { id: 'admin4-1', name: '' },
+          firstRegistrationDate: '2023-01-15T10:30:00Z',
+          lastRegistrationDate: '2023-01-15T10:30:00Z',
+          totalCashReceived: '1000.00',
+          totalCashReceivedUsd: '1000.00',
+          deliveredQuantities: [],
+          geopoint: null,
+          importId: 'import-1',
         },
       },
     ],
