@@ -68,7 +68,8 @@ export function AcceptanceProcess({
   const canExportPdf =
     hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
     (paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
-      paymentPlan.status === PaymentPlanStatusEnum.FINISHED);
+      paymentPlan.status === PaymentPlanStatusEnum.FINISHED ||
+    paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW);
 
   return (
     <Box m={5}>

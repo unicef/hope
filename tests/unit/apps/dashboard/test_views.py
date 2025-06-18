@@ -126,7 +126,7 @@ def test_create_or_update_dash_report_business_area_not_found(mock_task_delay: M
 
     response = client.post(url)
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.data["detail"] == "Business area not found."
+    assert str(response.data["detail"]) == "No BusinessArea matches the given query."
     mock_task_delay.assert_not_called()
 
 
@@ -236,37 +236,17 @@ def test_dashboard_data_view_global_slug_cache_miss(
     client.force_authenticate(user=user)
 
     cache.delete(DashboardGlobalDataCache.get_cache_key("global"))
-
-    mock_global_data = [
-        {
-            "year": 2023,
-            "country": "Global Summary",
-            "payments": 10,
-            "total_delivered_quantity_usd": "1000.00",
-            "households": 1,
-            "individuals": 1,
-            "children_counts": 0,
-            "pwd_counts": 0,
-            "sector": "Cash",
-            "status": "OK",
-            "delivery_types": "Mobile",
-            "reconciled": 0,
-            "finished_payment_plans": 0,
-            "total_payment_plans": 0,
-            "region": "Global Region",
-        }
-    ]
-
-    with patch.object(
-        DashboardGlobalDataCache, "refresh_data", autospec=True, return_value=mock_global_data
-    ) as mock_refresh:
+    with patch.object(DashboardGlobalDataCache, "get_data", return_value=None) as mock_get_data, patch(
+        "hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay"
+    ) as mock_task_delay:
         response = client.get(global_url)
-        mock_refresh.assert_called_once_with("global")
+
+        mock_get_data.assert_called_once_with("global")
+        mock_task_delay.assert_called_once_with("global")
 
     assert response.status_code == status.HTTP_200_OK
     assert response["Content-Type"] == "application/json"
-    assert len(response.data) > 0, "Mocked data was not returned or was empty"
-    assert response.data == mock_global_data, "Response data does not match mocked data"
+    assert response.data == []
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])

@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# from hct_mis_api.apps.account.models import UserRole
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import generate_dash_report_task
@@ -70,9 +70,9 @@ class DashboardDataView(APIView):
 
         cache_identifier = GLOBAL_SLUG if is_global else business_area_slug
         data = data_cache.get_data(cache_identifier)
-        if not data:
-            data = data_cache.refresh_data(cache_identifier)
-
+        if data is None:
+            generate_dash_report_task.delay(cache_identifier)
+            data = []
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -86,27 +86,42 @@ class CreateOrUpdateDashReportView(APIView):
 
     @sentry_tags
     def post(self, request: Any, business_area_slug: str) -> Response:
-        if not request.user.is_superuser and not check_permissions(
-            request.user,
-            [Permissions.DASHBOARD_VIEW_COUNTRY],
-            business_area=BusinessArea.objects.get(slug=business_area_slug),
-        ):
-            raise PermissionDenied(
-                "Only superusers or users with the correct permissions can create or update DashReports."
-            )
+        is_global = business_area_slug.lower() == GLOBAL_SLUG
+        has_permission = False
+        business_area_obj = None
+
+        if is_global:
+            if (
+                request.user.is_superuser
+                or RoleAssignment.objects.filter(
+                    user=request.user,
+                    role__permissions__contains=[Permissions.DASHBOARD_VIEW_COUNTRY.value],
+                    business_area__active=True,
+                ).exists()
+            ):
+                has_permission = True
+        else:
+            business_area_obj = get_object_or_404(BusinessArea, slug=business_area_slug)
+            if request.user.is_superuser or check_permissions(
+                request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area_obj
+            ):
+                has_permission = True
+
+        if not has_permission:
+            raise PermissionDenied(_("You do not have permission to trigger DashReport generation for this scope."))
 
         try:
-            business_area = BusinessArea.objects.get(slug=business_area_slug)
-            generate_dash_report_task.delay(business_area.slug)
-            cache_key = f"dashboard_report_{business_area_slug}"
-            cache.delete(cache_key)
+            task_identifier = GLOBAL_SLUG if is_global else business_area_slug
+
+            data_cache_class: Type[DashboardCacheBase] = DashboardGlobalDataCache if is_global else DashboardDataCache
+            data_cache_key_to_clear = data_cache_class.get_cache_key(task_identifier)
+            cache.delete(data_cache_key_to_clear)
+
+            generate_dash_report_task.delay(task_identifier)
 
             return Response(
                 {"detail": _("DashReport generation task has been triggered.")}, status=status.HTTP_202_ACCEPTED
             )
-
-        except BusinessArea.DoesNotExist:
-            return Response({"detail": "Business area not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
