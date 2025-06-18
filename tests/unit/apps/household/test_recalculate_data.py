@@ -291,7 +291,7 @@ class TestRecalculateData(TestCase):
         self.assertEqual(household.pregnant_count, 2)
 
     @patch("hct_mis_api.apps.household.celery_tasks.recalculate_population_fields_task.delay")
-    @freeze_time("2021-07-30")
+    @freeze_time("2021-07-29")
     def test_interval_recalculate_population_fields_task(
         self, recalculate_population_fields_task_mock: MagicMock
     ) -> None:
