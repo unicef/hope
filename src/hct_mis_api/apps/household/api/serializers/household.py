@@ -243,7 +243,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             return f"{obj.unicef_id} (Enumerator ID {obj.enumerator_rec_id})"
         return obj.unicef_id
 
-    def get_delivered_quantities(self, obj: Household) -> List:
+    def get_delivered_quantities(self, obj: Household) -> Dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 
 
