@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -105,6 +106,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
             "start",
         )
 
+    @extend_schema_field(DeliveredQuantitySerializer(many=True))
     def get_delivered_quantities(self, obj: Household) -> Dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
 

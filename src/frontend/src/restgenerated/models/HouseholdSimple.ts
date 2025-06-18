@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AreaSimple } from './AreaSimple';
+import type { DeliveredQuantity } from './DeliveredQuantity';
 export type HouseholdSimple = {
     readonly id: string;
     unicefId?: string | null;
@@ -17,7 +18,7 @@ export type HouseholdSimple = {
     lastRegistrationDate: string;
     totalCashReceived: string;
     totalCashReceivedUsd: string;
-    readonly deliveredQuantities: Record<string, any>;
+    readonly deliveredQuantities: Array<DeliveredQuantity>;
     /**
      * Data collection start date
      */
