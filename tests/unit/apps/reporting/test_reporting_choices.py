@@ -1,8 +1,8 @@
 from django.core.cache import cache
 from django.utils import timezone
 
+from freezegun import freeze_time
 from pytz import utc
-from time_machine import travel
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -56,7 +56,7 @@ class TestProgramChoices(APITestCase):
             context={"user": self.user},
         )
 
-    @travel("2023-10-10")
+    @freeze_time("2023-10-10")
     def test_dashboard_years_choices_no_objects(self) -> None:
         cache.clear()
         Payment.objects.all().delete()
@@ -70,7 +70,7 @@ class TestProgramChoices(APITestCase):
             variables={"businessArea": "afghanistan"},
         )
 
-    @travel("2023-10-10")
+    @freeze_time("2023-10-10")
     def test_dashboard_years_choices(self) -> None:
         cache.clear()
         create_afghanistan()

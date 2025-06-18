@@ -4,7 +4,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
-from time_machine import travel
+from freezegun import freeze_time
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -146,7 +146,7 @@ class TestSriLankaRegistrationService(TestCase):
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
 
-    @travel("2023-12-12")
+    @freeze_time("2023-12-12")
     def test_import_data_to_datahub(self) -> None:
         service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")

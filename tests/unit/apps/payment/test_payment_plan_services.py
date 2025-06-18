@@ -11,8 +11,8 @@ from django.utils import timezone
 from aniso8601 import parse_date
 from django_fsm import TransitionNotAllowed
 from flaky import flaky
+from freezegun import freeze_time
 from pytz import utc
-from time_machine import travel
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -149,7 +149,7 @@ class TestPaymentPlanServices(APITestCase):
         program_cycle.refresh_from_db()
         self.assertEqual(program_cycle.status, ProgramCycle.ACTIVE)
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -246,7 +246,7 @@ class TestPaymentPlanServices(APITestCase):
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(
@@ -319,7 +319,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_individuals_count, 6)
         self.assertEqual(pp.payment_items.count(), 2)
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
@@ -348,7 +348,7 @@ class TestPaymentPlanServices(APITestCase):
         ):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
 
-    @travel("2023-10-10")
+    @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         tc = TargetingCriteriaFactory()
@@ -495,7 +495,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(payment_plan.dispersion_end_date, dispersion_end_date)
 
     @flaky(max_runs=5, min_passes=1)
-    @travel("2023-10-10")
+    @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")
     def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
@@ -610,7 +610,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.NO_SPLIT)
         self.assertEqual(pp_splits[0].split_payment_items.count(), 12)
 
-    @travel("2023-10-10")
+    @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pg_fsp = FinancialServiceProviderFactory(
@@ -648,7 +648,7 @@ class TestPaymentPlanServices(APITestCase):
             pps.send_to_payment_gateway()
             assert mock_send_to_payment_gateway_task.call_count == 1
 
-    @travel("2020-10-10")
+    @freeze_time("2020-10-10")
     def test_create_with_program_cycle_validation_error(self) -> None:
         program = ProgramFactory(
             status=Program.ACTIVE,
@@ -703,7 +703,7 @@ class TestPaymentPlanServices(APITestCase):
         # open PP will update cycle' status into Active
         assert cycle.status == ProgramCycle.DRAFT
 
-    @travel("2022-12-12")
+    @freeze_time("2022-12-12")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_full_rebuild(self, get_exchange_rate_mock: Any) -> None:
         program = ProgramFactory(

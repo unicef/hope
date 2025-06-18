@@ -6,9 +6,9 @@ from django.utils import timezone
 import pytest
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
-from time_machine import travel
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -60,11 +60,10 @@ from hct_mis_api.apps.sanction_list.models import (
 pytestmark = pytest.mark.django_db()
 
 
+@freeze_time("2024-08-25 12:00:00")
 class TestGrievanceTicketDetail:
     @pytest.fixture(autouse=True)
     def setup(self, api_client: Any) -> None:
-        self._travel = travel("2024-08-25 12:00:00")
-        self._travel.start()
         self.detail_url_name = "api:grievance:grievance-tickets-global-detail"
 
         self.afghanistan = create_afghanistan()
@@ -164,9 +163,6 @@ class TestGrievanceTicketDetail:
         )
         self.existing_ticket.created_at = timezone.make_aware(datetime(year=2021, month=8, day=23))
         self.existing_ticket.save()
-
-    def tearDown(self) -> None:
-        self._travel.stop()
 
     def test_grievance_detail_with_all_permissions(self, create_user_role_with_permissions: Any) -> None:
         grievance_ticket = GrievanceTicketFactory(
