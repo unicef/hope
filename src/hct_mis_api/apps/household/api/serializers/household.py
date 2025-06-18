@@ -94,6 +94,7 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
     delivered_quantities = serializers.SerializerMethodField()
+    import_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
@@ -117,11 +118,19 @@ class HouseholdSimpleSerializer(serializers.ModelSerializer):
             "address",
             "village",
             "geopoint",
+            "import_id",
         )
 
     @extend_schema_field(DeliveredQuantitySerializer(many=True))
     def get_delivered_quantities(self, obj: Household) -> Dict:
         return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
+
+    def get_import_id(self, obj: Household) -> str:
+        if obj.detail_id:
+            return f"{obj.unicef_id} (Detail id {obj.detail_id})"
+        if obj.enumerator_rec_id:
+            return f"{obj.unicef_id} (Enumerator ID {obj.enumerator_rec_id})"
+        return obj.unicef_id
 
 
 class HouseholdMemberSerializer(serializers.ModelSerializer):
