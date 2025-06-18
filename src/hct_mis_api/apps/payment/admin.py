@@ -334,7 +334,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
                 message="Do you confirm to Sync with Payment Gateway?",
             )
 
-    @button(permission="payment.view_paymentverification")
+    @button(permission="payment.view_paymentplan")
     def related_configs(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
         obj = PaymentPlan.objects.get(pk=pk)
         url = reverse("admin:payment_deliverymechanismconfig_changelist")
