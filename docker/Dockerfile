@@ -21,6 +21,7 @@ RUN apt-get update \
     libpangocairo-1.0-0 \
     shared-mime-info \
     wkhtmltopdf \
+    screen \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && addgroup --system --gid "${UID}" hope \
