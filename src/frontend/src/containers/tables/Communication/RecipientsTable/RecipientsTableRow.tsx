@@ -64,7 +64,7 @@ export const RecipientsTableRow = ({
       </TableCell>
       <AnonTableCell>{headOfHousehold.fullName}</AnonTableCell>
       <TableCell align="left">{household.size}</TableCell>
-      <TableCell align="left">{household.admin2 || '-'}</TableCell>
+      <TableCell align="left">{household.admin2?.name || '-'}</TableCell>
       <TableCell align="left">
         {residenceStatusChoiceDict[household.residenceStatus]}
       </TableCell>
