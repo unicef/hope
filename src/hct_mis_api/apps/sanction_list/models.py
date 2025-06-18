@@ -4,7 +4,7 @@ from django.db import models
 
 from strategy_field.fields import StrategyField
 
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import TimeStampedModel, TimeStampedUUIDModel
 
 from .strategies import registry
 from .strategies._base import BaseSanctionList
@@ -38,9 +38,8 @@ class ActiveIndividualsManager(models.Manager):
         return self.get_queryset().hard_delete()
 
 
-class SanctionList(TimeStampedUUIDModel):
+class SanctionList(TimeStampedModel):
     strategy: "BaseSanctionList"
-    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     config = models.JSONField(default=dict, blank=True)
     strategy = StrategyField(registry=registry, unique=True)

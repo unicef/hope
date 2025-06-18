@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from typing import Any, List
+from typing import Any
 
 from django.db.models import Q
 from django.utils import timezone
@@ -17,21 +17,26 @@ logger = logging.getLogger(__name__)
 @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def deduplicate_and_check_against_sanctions_list_task(
-    self: Any, should_populate_index: bool, individuals_ids: List[str]
+def deduplicate_and_check_against_sanctions_list_task_single_individual(
+    self: Any,
+    should_populate_index: bool,
+    individual_id: str,
 ) -> None:
+    """
+    This task is used in Grievance Tickets which changes/ adds an individual.
+    """
     try:
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             DeduplicateAndCheckAgainstSanctionsListTask,
         )
         from hct_mis_api.apps.household.models import Individual
 
-        individual = Individual.objects.filter(id__in=individuals_ids[:1]).first()
+        individual = Individual.objects.get(id=individual_id)
         if individual:
             business_area_name = individual.business_area.name
             set_sentry_business_area_tag(business_area_name)
 
-        DeduplicateAndCheckAgainstSanctionsListTask().execute(should_populate_index, individuals_ids)
+        DeduplicateAndCheckAgainstSanctionsListTask().execute(should_populate_index, individual)
     except Exception as e:
         logger.warning(e)
         raise self.retry(exc=e)

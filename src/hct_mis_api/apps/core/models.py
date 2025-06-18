@@ -132,7 +132,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         default=5,
         help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
-    screen_beneficiary = models.BooleanField(default=False, help_text="Enable screen beneficiary against sanction list")
     deduplication_ignore_withdraw = models.BooleanField(default=False)
     biometric_deduplication_threshold = models.FloatField(
         default=0.0,

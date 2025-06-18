@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
                 ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('id', models.AutoField(primary_key=True, serialize=False)),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
                 ('config', models.JSONField(blank=True, default=dict)),
                 ('strategy', strategy_field.fields.StrategyField(unique=True)),

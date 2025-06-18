@@ -27,9 +27,10 @@ from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividualNationalities,
 )
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
-    CheckAgainstSanctionListPreMergeTask,
+    check_against_sanction_list_pre_merge,
 )
 
+from ...program.models import Program
 from ._base import BaseSanctionList
 
 
@@ -431,13 +432,6 @@ class LoadSanctionListXMLTask:
         raise DeprecationWarning()
 
     def parse(self, root: ET.Element) -> None:
-        # if self.file_path is not None:
-        #     tree = ET.parse(self.file_path)
-        # else:
-        #     url = urlopen(self.SANCTION_LIST_XML_URL)
-        #     tree = ET.parse(url)
-        # root = tree.getroot()
-
         individuals_from_file = set()
         documents_from_file = set()
         nationalities_from_file = set()
@@ -467,9 +461,6 @@ class LoadSanctionListXMLTask:
             aliases_from_file.update(individual_data_dict["alias_names"])
             dob_from_file.update(individual_data_dict["birth_dates"])
 
-        # SanctionListIndividual
-        individuals_to_check_against_sanction_list = []
-
         individuals_to_create = self._get_individuals_to_create(individuals_from_file)
         SanctionListIndividual.all_objects.bulk_create(individuals_to_create)
 
@@ -489,7 +480,7 @@ class LoadSanctionListXMLTask:
         # SanctionListIndividualDocument
         if documents_from_file:
             for single_doc in documents_from_file:
-                doc_obj, created = SanctionListIndividualDocument.objects.get_or_create(
+                SanctionListIndividualDocument.objects.get_or_create(
                     individual=single_doc.individual,
                     document_number=single_doc.document_number,
                     type_of_document=single_doc.type_of_document,
@@ -497,8 +488,6 @@ class LoadSanctionListXMLTask:
                     issuing_country=single_doc.issuing_country,
                     note=single_doc.note,
                 )
-                if created is True:
-                    individuals_to_check_against_sanction_list.append(doc_obj.individual)
 
         # SanctionListIndividualCountries
         SanctionListIndividualCountries.objects.filter(individual__sanction_list=self.sanction_list).delete()
@@ -519,24 +508,19 @@ class LoadSanctionListXMLTask:
         # SanctionListIndividualDateOfBirth
         if dob_from_file:
             for single_dob in dob_from_file:
-                (
-                    dob_obj,
-                    created,
-                ) = SanctionListIndividualDateOfBirth.objects.get_or_create(
+                SanctionListIndividualDateOfBirth.objects.get_or_create(
                     individual=single_dob.individual,
                     date=single_dob.date,
                 )
-                if created is True:
-                    individuals_to_check_against_sanction_list.append(dob_obj.individual)
 
-        individuals_to_check_against_sanction_list.extend(individuals_to_create)
-        individuals_to_check_against_sanction_list.extend(individuals_to_update)
-
-        if individuals_to_check_against_sanction_list:
-            try:
-                CheckAgainstSanctionListPreMergeTask.execute(individuals_to_check_against_sanction_list)
-            except NotFoundError:
-                pass
+        try:
+            programs = Program.objects.filter(
+                sanction_lists__strategy=self.__class__.__qualname__
+            )  # get programs which use sanction list which is using this strategy
+            for program in programs:
+                check_against_sanction_list_pre_merge(program_id=program.id)
+        except NotFoundError:
+            pass
 
 
 class UNSanctionList(BaseSanctionList):

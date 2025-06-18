@@ -5,8 +5,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import requests
+from elasticsearch import NotFoundError
 
 from ...geo.models import Country
+from ...program.models import Program
+from ..tasks.check_against_sanction_list_pre_merge import (
+    check_against_sanction_list_pre_merge,
+)
 from ._base import BaseSanctionList
 
 if TYPE_CHECKING:
@@ -139,6 +144,15 @@ class EUSanctionList(BaseSanctionList):
                     ind.nationalities.get_or_create(nationality=country)
                 except Country.DoesNotExist:
                     logger.error(f"Unknown country: '{nationality['iso_code2']}'")
+
+        try:
+            programs = Program.objects.filter(
+                sanction_lists__strategy=self.__class__.__qualname__
+            )  # get programs which use sanction list which is using this strategy
+            for program in programs:
+                check_against_sanction_list_pre_merge(program_id=program.id)
+        except NotFoundError:
+            pass
         return _i
 
     def refresh(self) -> None:
