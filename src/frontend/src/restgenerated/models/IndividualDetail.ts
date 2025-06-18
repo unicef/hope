@@ -106,6 +106,7 @@ export type IndividualDetail = {
     relationship?: RelationshipEnum;
     registrationDataImport: RegistrationDataImport;
     readonly importId: string;
+    readonly adminUrl: string;
     /**
      * Preferred language
      *
@@ -241,5 +242,9 @@ export type IndividualDetail = {
     readonly status: string;
     readonly flexFields: Record<string, any>;
     readonly linkedGrievances: Record<string, any>;
+    /**
+     * Photo
+     */
+    photo?: string;
 };
 
