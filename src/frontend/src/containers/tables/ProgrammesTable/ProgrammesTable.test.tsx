@@ -23,6 +23,7 @@ describe('ProgrammesTable', () => {
       {
         id: 'program-1',
         programmeCode: 'PROG001',
+        numberOfHouseholdsWithTpInProgram: 1000,
         slug: 'test-program',
         name: 'Emergency Cash Transfer Program',
         startDate: '2023-01-01',
@@ -57,6 +58,7 @@ describe('ProgrammesTable', () => {
       {
         id: 'program-2',
         programmeCode: 'PROG002',
+        numberOfHouseholdsWithTpInProgram: 1000,
         slug: 'education-program',
         name: 'Education Support Initiative',
         startDate: '2023-06-01',

@@ -98,14 +98,13 @@ export const IndividualBioData = ({
   const mappedRoles = (
     <Grid size={{ xs: 3 }}>
       <LabelizedField label={`Linked ${beneficiaryGroup?.groupLabelPlural}`}>
-        {/* //TODO: */}
-        {/* {individual?.householdsAndRoles?.length
+        {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
               <Box key={item.id}>
                 {item.household.unicefId} -{roleChoicesDict[item.role]}
               </Box>
             ))
-          : '-'} */}
+          : '-'}
       </LabelizedField>
     </Grid>
   );

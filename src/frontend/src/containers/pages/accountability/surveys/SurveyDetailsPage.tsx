@@ -11,7 +11,6 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { SurveyCategoryEnum } from '@utils/enums';
-import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -22,6 +21,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import SurveyDetails from '@components/accountability/Surveys/SurveyDetails';
 import { Survey } from '@restgenerated/models/Survey';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import RecipientsTable from '@containers/tables/Communication/RecipientsTable/RecipientsTable';
 
 function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
