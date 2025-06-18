@@ -604,6 +604,7 @@ class TestPaymentGatewayService(APITestCase):
                         "delivery_mechanism": "transfer",
                         "account_type": "bank",
                     },
+                    "extra_data": self.payments[0].household_snapshot.snapshot_data,
                 }
             ],
             validate_response=True,
@@ -666,6 +667,7 @@ class TestPaymentGatewayService(APITestCase):
                             "financial_institution": str(fi.id),
                         },
                     },
+                    "extra_data": self.payments[0].household_snapshot.snapshot_data,
                 }
             ],
             validate_response=True,
@@ -725,6 +727,8 @@ class TestPaymentGatewayService(APITestCase):
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payments[0].parent)
         self.payments[0].refresh_from_db()
+        self.payments[0].collector.refresh_from_db()
+        self.payments[0].household_snapshot.refresh_from_db()
 
         expected_payload = {
             "amount": str(self.payments[0].entitlement_quantity),
@@ -741,6 +745,7 @@ class TestPaymentGatewayService(APITestCase):
             "remote_id": str(self.payments[0].id),
             "record_code": self.payments[0].unicef_id,
             "payload": expected_payload,
+            "extra_data": self.payments[0].household_snapshot.snapshot_data,
         }
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         actual_args, actual_kwargs = post_mock.call_args
@@ -768,6 +773,10 @@ class TestPaymentGatewayService(APITestCase):
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payments[0].parent)
         self.payments[0].refresh_from_db()
+        self.payments[0].collector.refresh_from_db()
+        self.payments[0].household_snapshot.refresh_from_db()
+        for account in self.payments[0].collector.accounts.all():
+            account.refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         expected_payload["account"]["code"] = "456"
