@@ -1,5 +1,5 @@
 import pytest
-from time_machine import travel
+from freezegun import freeze_time
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
@@ -83,7 +83,7 @@ class TestSmokeIndividuals:
         assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
         assert len(add_household.active_individuals) == len(pageIndividuals.getIndividualTableRow())
 
-    @travel("2024-08-26")
+    @freeze_time("2024-08-26")
     def test_smoke_page_individuals_details(
         self,
         create_programs: None,

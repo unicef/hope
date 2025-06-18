@@ -268,7 +268,7 @@ dependencies = [
     "django-fernet-fields>=0.6",
     "msoffcrypto-tool>=5.4.2",
     "pyzipper>=0.3.6",
-    "time-machine>=2.16.0",
+    "freezegun>=1.5.2",
 ]
 requires-python = "==3.13.*"
 readme = "README.md"
