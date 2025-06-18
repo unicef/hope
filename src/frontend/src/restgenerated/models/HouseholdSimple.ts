@@ -7,7 +7,10 @@ import type { DeliveredQuantity } from './DeliveredQuantity';
 export type HouseholdSimple = {
     readonly id: string;
     unicefId?: string | null;
+    admin1: AreaSimple;
     admin2: AreaSimple;
+    admin3: AreaSimple;
+    admin4: AreaSimple;
     /**
      * Household first registration date [sys]
      */
@@ -23,5 +26,9 @@ export type HouseholdSimple = {
      * Data collection start date
      */
     start?: string | null;
+    /**
+     * Household zip code
+     */
+    zipCode?: string | null;
 };
 
