@@ -19,6 +19,7 @@ export type Survey = {
     readonly sampleFilePath: string | null;
     readonly hasValidSampleFile: boolean;
     readonly rapidProUrl: string | null;
+    numberOfRecipients?: number;
     readonly createdAt: string;
     readonly createdBy: string;
 };

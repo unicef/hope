@@ -106,6 +106,7 @@ export type IndividualDetail = {
     relationship?: RelationshipEnum;
     registrationDataImport: RegistrationDataImport;
     readonly importId: string;
+    readonly adminUrl: string;
     /**
      * Preferred language
      *

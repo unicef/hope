@@ -7,6 +7,7 @@ import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import {
   choicesToDict,
   formatAge,
+  getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
 } from '@utils/utils';
@@ -150,46 +151,37 @@ export const PeopleBioData = ({
       <>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Residence Status')}>
-            {/* //TODO: */}
-            {/* {residenceChoicesDict[household?.residenceStatus]} */}
-            {}
+            {household?.residenceStatus}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Country')}>
-            {/* //TODO: */}
-            {/* {household?.country} */}
+            {household?.country}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Country of Origin')}>
-            {/* //TODO: */}
-            {/* {household.countryOrigin} */}
+            {household.countryOrigin}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Address')}>
-            {/* //TODO: */}
-            {/* {household.address} */}
+            {household.address}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Vilage')}>
-            {/* //TODO: */}
-            {/* {household.village} */}
+            {household.village}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Zip Code')}>
-            {/* //TODO: */}
-            {/* {household.zipCode} */}
+            {household.zipCode}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 1')}>
-            {/* //TODO: */}
-
-            {/* {household?.admin1} */}
+            {household?.admin1?.name}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -198,22 +190,18 @@ export const PeopleBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          {/* //TODO: */}
-          {/* <LabelizedField label={t('Administrative Level 3')}>
+          <LabelizedField label={t('Administrative Level 3')}>
             {household?.admin3}
-          </LabelizedField> */}
+          </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 4')}>
-            {/* //TODO: */}
-            {/* {household?.admin4} */}
+            {household?.admin4}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 6 }}>
           <LabelizedField label={t('Geolocation')}>
-            {/* //TODO: */}
-
-            {/* {household?.geopoint} */}
+            {household?.geopoint}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
@@ -361,18 +349,16 @@ export const PeopleBioData = ({
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
-          {/* //TODO: */}
-          {/* <LabelizedField label={t('Phone Number')}>
+          <LabelizedField label={t('Phone Number')}>
             {getPhoneNoLabel(individual?.phoneNo, individual?.phoneNoValid)}
-          </LabelizedField> */}
+          </LabelizedField>
         </Grid>
         <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Alternative Phone Number')}>
-            {/* //TODO: */}
-            {/* {getPhoneNoLabel(
+            {getPhoneNoLabel(
               individual?.phoneNoAlternative,
               individual?.phoneNoAlternativeValid,
-            )} */}
+            )}
           </LabelizedField>
         </Grid>
         <Grid size={{ xs: 12 }}>

@@ -7,7 +7,10 @@ import { PeopleBioData } from '@components/people/PeopleBioData/PeopleBioData';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
-import { BigValueContainer } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
+import {
+  BigValue,
+  BigValueContainer,
+} from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
 import PaymentsPeopleTable from '@containers/tables/payments/PaymentsPeopleTable/PaymentsPeopleTable';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -18,7 +21,10 @@ import { Box, Grid2 as Grid, Paper, Theme, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { isPermissionDeniedError } from '@utils/utils';
+import {
+  formatCurrencyWithSymbol,
+  isPermissionDeniedError,
+} from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -27,6 +33,10 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import { IndividualFlags } from '@components/population/IndividualFlags';
+import { AdminButton } from '@components/core/AdminButton';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -146,15 +156,15 @@ const PeopleDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            {/*<IndividualFlags individual={individual} />  TODO REST Refactor*/}
-            {/* <AdminButton adminUrl={individual?.adminUrl} /> */}
+            <IndividualFlags individual={individual} />
+            <AdminButton adminUrl={individual?.adminUrl} />
           </>
         }
       >
         <Box mr={2}>
-          {/* {individual?.photo ? (
+          {individual?.photo ? (
             <IndividualPhotoModal individual={individual} />
-          ) : null} */}
+          ) : null}
         </Box>
       </PageHeader>
 
@@ -184,8 +194,7 @@ const PeopleDetailsPage = (): ReactElement => {
           <Grid container>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Cash received')}>
-                {/* //TODO: refactor REST */}
-                {/* {household?.deliveredQuantities?.length ? (
+                {household?.deliveredQuantities?.length ? (
                   <Box mb={2}>
                     <Grid container>
                       <Grid size={{ xs: 6 }}>
@@ -211,18 +220,18 @@ const PeopleDetailsPage = (): ReactElement => {
                   </Box>
                 ) : (
                   <>-</>
-                )} */}
+                )}
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <BigValueContainer>
                 <LabelizedField label={t('Total Cash Received')}>
-                  {/* <BigValue>
+                  <BigValue>
                     {formatCurrencyWithSymbol(
                       household?.totalCashReceivedUsd,
                       'USD',
                     )}
-                  </BigValue> */}
+                  </BigValue>
                 </LabelizedField>
               </BigValueContainer>
             </Grid>
@@ -247,64 +256,47 @@ const PeopleDetailsPage = (): ReactElement => {
           <Grid container spacing={6}>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Source')}>
-                {/* //TODO: */}
-                {/* <div>{household?.registrationDataImport?.dataSource}</div> */}
+                <div>{individual?.registrationDataImport?.dataSource}</div>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Import name')}>
-                {/* //TODO: */}
-                {/* <div>{household?.registrationDataImport?.name}</div> */}
+                <div>{individual?.registrationDataImport?.name}</div>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Registration Date')}>
                 <div>
-                  {/* //TODO: */}
-                  {/* <UniversalMoment> */}
-                  {/* {household?.lastRegistrationDate} */}
-                  {/* </UniversalMoment> */}
+                  <UniversalMoment>
+                    {household?.lastRegistrationDate}
+                  </UniversalMoment>
                 </div>
               </LabelizedField>
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('User name')}>
-                {/* //TODO: */}
-
-                {/* {household?.registrationDataImport?.importedBy?.email} */}
+                {individual?.registrationDataImport?.importedBy?.email}
               </LabelizedField>
             </Grid>
           </Grid>
-          {/* //TODO: */}
-          {/* {household?.registrationDataImport?.dataSource === 'XLS' ? null : ( */}
-          <>
-            <hr />
-            <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
-            <Grid container spacing={6}>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('Start time')}>
-                  {/* //TODO: */}
-
-                  {/* <UniversalMoment>{household?.startTime}</UniversalMoment> */}
-                </LabelizedField>
+          {individual?.registrationDataImport?.dataSource === 'XLS' ? null : (
+            <>
+              <hr />
+              <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
+              <Grid container spacing={6}>
+                <Grid size={{ xs: 3 }}>
+                  <LabelizedField label={t('Start time')}>
+                    <UniversalMoment>{household?.startTime}</UniversalMoment>
+                  </LabelizedField>
+                </Grid>
+                <Grid size={{ xs: 3 }}>
+                  <LabelizedField label={t('End time')}>
+                    {household?.firstRegistrationDate}
+                  </LabelizedField>
+                </Grid>
               </Grid>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('End time')}>
-                  {/* <UniversalMoment> */}
-                  {/* //TODO: */}
-                  {/* {household?.firstRegistrationDate} */}
-                  {/* </UniversalMoment> */}
-                </LabelizedField>
-              </Grid>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField label={t('Device ID')}>
-                  {/* //TODO: Figure it out. deviceId removed from the model? */}
-                  {/* {household?.deviceid} */} -
-                </LabelizedField>
-              </Grid>
-            </Grid>
-          </>
-          {/* )} */}
+            </>
+          )}
         </Overview>
       </Container>
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (

@@ -11,13 +11,13 @@ import { useProgramContext } from 'src/programContext';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 interface IndividualsListTableProps {
   filter;
   businessArea: string;
   canViewDetails: boolean;
-  choicesData: HouseholdChoices;
+  choicesData: IndividualChoices;
 }
 
 export function IndividualsListTable({

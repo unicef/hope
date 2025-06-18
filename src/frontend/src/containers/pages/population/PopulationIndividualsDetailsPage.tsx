@@ -23,6 +23,9 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import { AdminButton } from '@components/core/AdminButton';
+import { IndividualFlags } from '@components/population/IndividualFlags';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 
 const Container = styled.div`
   padding: 20px;
@@ -150,17 +153,15 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            {/*<IndividualFlags individual={individual} />  TODO REST refactor*/}
-            {/* //TODO: Rest refactor */}
-            {/* <AdminButton adminUrl={individual?.adminUrl} /> */}
+            <IndividualFlags individual={individual} />
+            <AdminButton adminUrl={individual?.adminUrl} />
           </>
         }
       >
         <Box mr={2}>
-          {/* //TODO: Rest refactor */}
-          {/* {individual?.photo ? (
+          {individual?.photo ? (
             <IndividualPhotoModal individual={individual} />
-          ) : null} */}
+          ) : null}
         </Box>
       </PageHeader>
       <Container>
