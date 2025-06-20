@@ -2,9 +2,7 @@ import graphene
 from graphene_django.debug import DjangoDebug
 
 import hct_mis_api.apps.account.schema
-import hct_mis_api.apps.accountability.mutations
 import hct_mis_api.apps.accountability.schema
-import hct_mis_api.apps.activity_log.schema
 
 # DO NOT DELETE THIS IMPORT
 import hct_mis_api.apps.core.converters
