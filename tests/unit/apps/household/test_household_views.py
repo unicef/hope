@@ -509,10 +509,22 @@ class TestHouseholdDetail:
             "id": str(self.individuals[0].id),
             "full_name": self.individuals[0].full_name,
         }
-        assert data["admin1"] == self.household.admin1.name
-        assert data["admin2"] == self.household.admin2.name
-        assert data["admin3"] == self.household.admin3.name
-        assert data["admin4"] == self.household.admin4.name
+        assert data["admin1"] == {
+            "id": str(self.household.admin1.id),
+            "name": self.household.admin1.name,
+        }
+        assert data["admin2"] == {
+            "id": str(self.household.admin2.id),
+            "name": self.household.admin2.name,
+        }
+        assert data["admin3"] == {
+            "id": str(self.household.admin3.id),
+            "name": self.household.admin3.name,
+        }
+        assert data["admin4"] == {
+            "id": str(self.household.admin4.id),
+            "name": self.household.admin4.name,
+        }
         assert data["program"] == self.household.program.name
         assert data["country"] == self.household.country.name
         assert data["country_origin"] == self.household.country_origin.name
@@ -777,6 +789,7 @@ class TestHouseholdMembers:
         assert str(self.individual1_2.id) in response_ids
         assert str(self.individual2_1.id) in response_ids
         assert str(self.individual2_2.id) not in response_ids
+        breakpoint()
         assert response_results == [
             {
                 "id": str(self.individual1_1.id),
@@ -790,7 +803,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": f"{self.household1.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household1.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household1.address,
+                    "village": self.household1.village,
+                    "geopoint": None,
+                    "import_id": self.household1.unicef_id,
                 },
             },
             {
@@ -805,7 +835,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": f"{self.household1.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household1.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household1.address,
+                    "village": self.household1.village,
+                    "geopoint": None,
+                    "import_id": self.household1.unicef_id,
                 },
             },
             {
@@ -820,7 +867,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household2.id),
                     "unicef_id": self.household2.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": f"{self.household2.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household2.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household2.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household2.address,
+                    "village": self.household2.village,
+                    "geopoint": None,
+                    "import_id": self.household2.unicef_id,
                 },
             },
         ]
@@ -941,7 +1005,10 @@ class TestHouseholdGlobalViewSet:
             assert household_result_first["id"] == str(household.id)
             assert household_result_first["unicef_id"] == household.unicef_id
             assert household_result_first["head_of_household"] == household.head_of_household.full_name
-            assert household_result_first["admin1"] == household.admin1.name
+            assert household_result_first["admin1"] == {
+                "id": str(household.admin1.id),
+                "name": household.admin1.name,
+            }
             assert household_result_first["admin2"] == {
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
