@@ -133,7 +133,7 @@ class TestHouseholdList:
             assert household_result["id"] == str(household.id)
             assert household_result["unicef_id"] == household.unicef_id
             assert household_result["head_of_household"] == household.head_of_household.full_name
-            assert household_result["admin1"] == household.admin1.name
+            assert household_result["admin1"] == {"id": str(household.admin1.id), "name": household.admin1.name}
             assert household_result["admin2"] == {
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
@@ -509,10 +509,10 @@ class TestHouseholdDetail:
             "id": str(self.individuals[0].id),
             "full_name": self.individuals[0].full_name,
         }
-        assert data["admin1"] == self.household.admin1.name
-        assert data["admin2"] == self.household.admin2.name
-        assert data["admin3"] == self.household.admin3.name
-        assert data["admin4"] == self.household.admin4.name
+        assert data["admin1"] == {"id": str(self.household.admin1.id), "name": self.household.admin1.name}
+        assert data["admin2"] == {"id": str(self.household.admin2.id), "name": self.household.admin2.name}
+        assert data["admin3"] == {"id": str(self.household.admin3.id), "name": self.household.admin3.name}
+        assert data["admin4"] == {"id": str(self.household.admin4.id), "name": self.household.admin4.name}
         assert data["program"] == self.household.program.name
         assert data["country"] == self.household.country.name
         assert data["country_origin"] == self.household.country_origin.name
@@ -790,7 +790,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": "2025-05-13T00:48:47Z",
+                    "last_registration_date": "2025-05-21T04:55:29Z",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household1.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household1.address,
+                    "village": self.household1.village,
+                    "geopoint": None,
+                    "import_id": self.household1.unicef_id,
                 },
             },
             {
@@ -805,7 +822,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": "2025-05-13T00:48:47Z",
+                    "last_registration_date": "2025-05-21T04:55:29Z",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household1.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household1.address,
+                    "village": self.household1.village,
+                    "geopoint": None,
+                    "import_id": self.household1.unicef_id,
                 },
             },
             {
@@ -820,7 +854,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household2.id),
                     "unicef_id": self.household2.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": "2025-04-10T14:41:43Z",
+                    "last_registration_date": "2025-04-11T15:13:10Z",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household2.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household2.address,
+                    "village": self.household2.village,
+                    "geopoint": None,
+                    "import_id": self.household2.unicef_id,
                 },
             },
         ]
@@ -941,7 +992,7 @@ class TestHouseholdGlobalViewSet:
             assert household_result_first["id"] == str(household.id)
             assert household_result_first["unicef_id"] == household.unicef_id
             assert household_result_first["head_of_household"] == household.head_of_household.full_name
-            assert household_result_first["admin1"] == household.admin1.name
+            assert household_result_first["admin1"] == {"id": str(household.admin1.id), "name": household.admin1.name}
             assert household_result_first["admin2"] == {
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
