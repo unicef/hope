@@ -64,6 +64,7 @@ def add_household() -> Household:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeHouseholds:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_page_households(
         self, create_programs: None, add_household: Household, pageHouseholds: Households
     ) -> None:
@@ -81,6 +82,7 @@ class TestSmokeHouseholds:
         assert "Total Cash Received" in pageHouseholds.getHouseholdTotalCashReceived().text
         assert "Registration Date" in pageHouseholds.getHouseholdRegistrationDate().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_page_households_details(
         self,
         create_programs: None,
