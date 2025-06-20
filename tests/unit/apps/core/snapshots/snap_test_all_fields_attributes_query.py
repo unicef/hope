@@ -7146,16 +7146,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CANNOT_DO'
                     },
                     {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
-                    },
-                    {
                         'labelEn': 'Some difficulty',
                         'labels': [
                             {
@@ -7526,16 +7516,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'SELF_CARE'
-                    },
-                    {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NONE'
                     }
                 ],
                 'hint': '',
@@ -23031,16 +23011,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CANNOT_DO'
                     },
                     {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
-                    },
-                    {
                         'labelEn': 'Some difficulty',
                         'labels': [
                             {
@@ -23086,16 +23056,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'CANNOT_DO'
-                    },
-                    {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
                     },
                     {
                         'labelEn': 'Some difficulty',
@@ -23145,16 +23105,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CANNOT_DO'
                     },
                     {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
-                    },
-                    {
                         'labelEn': 'Some difficulty',
                         'labels': [
                             {
@@ -23202,16 +23152,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'CANNOT_DO'
                     },
                     {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
-                    },
-                    {
                         'labelEn': 'Some difficulty',
                         'labels': [
                             {
@@ -23257,16 +23197,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'CANNOT_DO'
-                    },
-                    {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
                     },
                     {
                         'labelEn': 'Some difficulty',
@@ -45415,16 +45345,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'MARRIED'
                     },
                     {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
-                    },
-                    {
                         'labelEn': 'Separated',
                         'labels': [
                             {
@@ -45709,16 +45629,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'HH_REGISTRATION'
-                    },
-                    {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
                     }
                 ],
                 'hint': '',
@@ -46455,16 +46365,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
-                    {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
-                    },
                     {
                         'labelEn': 'Partner',
                         'labels': [
@@ -47571,16 +47471,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'NON_HOST'
-                    },
-                    {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
                     }
                 ],
                 'hint': '',
@@ -53646,16 +53536,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'HUMANITARIAN_PARTNER'
-                    },
-                    {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
                     },
                     {
                         'labelEn': 'Private partners',

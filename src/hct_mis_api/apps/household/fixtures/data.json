@@ -71,7 +71,7 @@
     "withdrawn_date": null,
     "consent_sign": "D4-2022-08-10_140204.3283380000.jpg",
     "consent": true,
-    "consent_sharing": "HUMANITARIAN_PARTNER,PRIVATE_PARTNER,GOVERNMENT_PARTNER,UNICEF,",
+    "consent_sharing": "HUMANITARIAN_PARTNER,PRIVATE_PARTNER,GOVERNMENT_PARTNER,UNICEF",
     "residence_status": "REFUGEE",
     "country_origin": "69e8682a-c974-4591-8a7e-36bb0cd7eb47",
     "country": "2fc6c5cf-edab-49a2-b275-38b14ac50866",

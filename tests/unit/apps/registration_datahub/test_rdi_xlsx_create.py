@@ -542,8 +542,8 @@ class TestRdiXlsxCreateTask(TestCase):
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
         individual = PendingIndividual.objects.get(detail_id=3)
-        self.assertEqual(individual.seeing_disability, "")
-        self.assertEqual(individual.hearing_disability, "")
+        self.assertIsNone(individual.seeing_disability)
+        self.assertIsNone(individual.hearing_disability)
 
     def test_create_receiver_poi_document(self) -> None:
         task = self.RdiXlsxCreateTask()

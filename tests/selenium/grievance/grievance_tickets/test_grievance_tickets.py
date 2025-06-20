@@ -703,7 +703,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectIndividualdataSeeingdisability().click()
         pageGrievanceNewTicket.select_listbox_element("Some difficulty")
         pageGrievanceNewTicket.getSelectIndividualdataPhysicaldisability().click()
-        pageGrievanceNewTicket.select_listbox_element("None")
+        pageGrievanceNewTicket.select_listbox_element("Cannot do at all")
         pageGrievanceNewTicket.getInputIndividualdataEmail().send_keys("kridoteria@bukare.cz")
         pageGrievanceNewTicket.getSelectIndividualdataDisability().click()
         pageGrievanceNewTicket.select_listbox_element("disabled")
