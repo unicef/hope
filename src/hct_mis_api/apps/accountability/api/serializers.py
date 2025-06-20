@@ -196,8 +196,8 @@ class MessageCreateSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
     body = serializers.CharField(required=True)
     sampling_type = serializers.ChoiceField(required=True, choices=Message.SamplingChoices)
-    full_list_arguments = FullListSerializer()
-    random_sampling_arguments = RandomSamplingSerializer(allow_null=True)
+    full_list_arguments = FullListSerializer(required=False, allow_null=True)
+    random_sampling_arguments = RandomSamplingSerializer(required=False, allow_null=True)
     payment_plan = serializers.PrimaryKeyRelatedField(queryset=PaymentPlan.objects.all(), required=False)
     registration_data_import = serializers.PrimaryKeyRelatedField(
         queryset=RegistrationDataImport.objects.all(), required=False
@@ -230,8 +230,10 @@ class SurveySerializer(serializers.ModelSerializer):
     payment_plan = serializers.SlugRelatedField(
         slug_field="id", required=False, queryset=PaymentPlan.objects.all(), write_only=True
     )
-    full_list_arguments = AccountabilityFullListArgumentsSerializer(write_only=True)
-    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(write_only=True, allow_null=True)
+    full_list_arguments = AccountabilityFullListArgumentsSerializer(write_only=True, required=False, allow_null=True)
+    random_sampling_arguments = AccountabilityRandomSamplingArgumentsSerializer(
+        write_only=True, required=False, allow_null=True
+    )
 
     sample_file_path = serializers.SerializerMethodField()
     has_valid_sample_file = serializers.SerializerMethodField()
@@ -255,6 +257,7 @@ class SurveySerializer(serializers.ModelSerializer):
             "sample_file_path",
             "has_valid_sample_file",
             "rapid_pro_url",
+            "number_of_recipients",
             "created_at",
             "created_by",
         )

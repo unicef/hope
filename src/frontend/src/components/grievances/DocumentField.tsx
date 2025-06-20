@@ -5,7 +5,6 @@ import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { GrievanceDocumentPhotoModalEditable } from './GrievancesPhotoModals/GrievanceDocumentPhotoModalEditable';
 import { getIndexForId } from './utils/helpers';
 import { ReactElement } from 'react';
@@ -15,8 +14,8 @@ export interface DocumentFieldProps {
   baseName: string;
   baseNameArray?;
   onDelete;
-  countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
-  documentTypeChoices: AllAddIndividualFieldsQuery['documentTypeChoices'];
+  countryChoices: any[];
+  documentTypeChoices: any[];
   isEdited?: boolean;
   setFieldValue?;
   photoSrc?: string;

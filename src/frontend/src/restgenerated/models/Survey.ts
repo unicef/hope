@@ -14,11 +14,12 @@ export type Survey = {
     flow?: string;
     flowId?: string | null;
     paymentPlan?: string;
-    fullListArguments: AccountabilityFullListArguments;
-    randomSamplingArguments: AccountabilityRandomSamplingArguments | null;
+    fullListArguments?: AccountabilityFullListArguments | null;
+    randomSamplingArguments?: AccountabilityRandomSamplingArguments | null;
     readonly sampleFilePath: string | null;
     readonly hasValidSampleFile: boolean;
     readonly rapidProUrl: string | null;
+    numberOfRecipients?: number;
     readonly createdAt: string;
     readonly createdBy: string;
 };

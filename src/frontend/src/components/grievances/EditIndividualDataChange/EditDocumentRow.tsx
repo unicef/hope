@@ -6,10 +6,6 @@ import Edit from '@mui/icons-material/Edit';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllAddIndividualFieldsQuery,
-  AllIndividualsQuery,
-} from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
@@ -26,9 +22,9 @@ const DisabledDiv = styled.div<DisabledDivProps>`
 export interface EditDocumentRowProps {
   setFieldValue;
   values;
-  document: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['documents']['edges'][number];
+  document: any;
   arrayHelpers;
-  addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  addIndividualFieldsData: any;
   id: string;
 }
 

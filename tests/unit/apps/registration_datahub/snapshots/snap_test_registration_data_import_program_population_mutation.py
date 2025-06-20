@@ -102,7 +102,7 @@ snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registrati
                     'line': 5
                 }
             ],
-            'message': "['In order to proceed this action, program status must not be finished.']",
+            'message': "['In order to perform this action, program status must not be finished.']",
             'path': [
                 'registrationProgramPopulationImport'
             ]

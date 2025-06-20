@@ -14,6 +14,10 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.accountability.fixtures import (
+    CommunicationMessageFactory,
+    SurveyFactory,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
@@ -36,6 +40,8 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Household,
 )
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -127,7 +133,7 @@ class TestHouseholdList:
             assert household_result["id"] == str(household.id)
             assert household_result["unicef_id"] == household.unicef_id
             assert household_result["head_of_household"] == household.head_of_household.full_name
-            assert household_result["admin1"] == household.admin1.name
+            assert household_result["admin1"] == {"id": str(household.admin1.id), "name": household.admin1.name}
             assert household_result["admin2"] == {
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
@@ -344,6 +350,65 @@ class TestHouseholdList:
         assert len(response.json()) == 1
         assert response.json()[0]["name"] == "Flexible Attribute for HH"
 
+    def test_household_all_accountability_communication_message_recipients(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        # upd HH
+        self.household1.head_of_household.phone_no_valid = True
+        self.household2.head_of_household.phone_no_alternative_valid = True
+        self.household1.save()
+        self.household2.save()
+
+        list_url = reverse(
+            "api:households:households-all-accountability-communication-message-recipients",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+
+        response = self.api_client.get(list_url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 2
+
+        # add filter by Survey ID
+        survey = SurveyFactory(created_by=self.user)
+        survey.recipients.set([self.household1])
+
+        response = self.api_client.get(list_url, {"survey": str(survey.pk)})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 1
+        assert response.json()["results"][0]["id"] == str(self.household1.pk)
+
+    def test_household_recipients(self, create_user_role_with_permissions: Any) -> None:
+        list_url = reverse(
+            "api:households:households-recipients",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS],
+            business_area=self.afghanistan,
+            program=self.program,
+        )
+        msg_obj = CommunicationMessageFactory(business_area=self.afghanistan)
+        msg_obj.households.set([self.household1, self.household2])
+
+        response = self.api_client.get(list_url, {"message_id": str(msg_obj.pk)})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 2
+
+        # filter by 'recipient_id'
+        response = self.api_client.get(
+            list_url, {"message_id": str(msg_obj.pk), "recipient_id": str(self.household1.head_of_household.pk)}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 1
+        assert response.json()["results"][0]["id"] == str(self.household1.pk)
+
 
 class TestHouseholdDetail:
     @pytest.fixture(autouse=True)
@@ -394,6 +459,24 @@ class TestHouseholdDetail:
         self.grievance_ticket = GrievanceTicketFactory(household_unicef_id=self.household.unicef_id)
         GrievanceTicketFactory()  # not linked ticket
 
+        # delivered quantities
+        PaymentFactory(
+            parent=PaymentPlanFactory(program_cycle=self.program.cycles.first()),
+            currency="AFG",
+            delivered_quantity_usd=50,
+            delivered_quantity=100,
+            household=self.household,
+            status=Payment.STATUS_SUCCESS,
+        )
+
+        PaymentFactory(
+            parent=PaymentPlanFactory(program_cycle=self.program.cycles.first()),
+            currency="AFG",
+            delivered_quantity_usd=33,
+            delivered_quantity=133,
+            household=self.household,
+        )
+
     @pytest.mark.parametrize(
         "permissions",
         [
@@ -426,10 +509,10 @@ class TestHouseholdDetail:
             "id": str(self.individuals[0].id),
             "full_name": self.individuals[0].full_name,
         }
-        assert data["admin1"] == self.household.admin1.name
-        assert data["admin2"] == self.household.admin2.name
-        assert data["admin3"] == self.household.admin3.name
-        assert data["admin4"] == self.household.admin4.name
+        assert data["admin1"] == {"id": str(self.household.admin1.id), "name": self.household.admin1.name}
+        assert data["admin2"] == {"id": str(self.household.admin2.id), "name": self.household.admin2.name}
+        assert data["admin3"] == {"id": str(self.household.admin3.id), "name": self.household.admin3.name}
+        assert data["admin4"] == {"id": str(self.household.admin4.id), "name": self.household.admin4.name}
         assert data["program"] == self.household.program.name
         assert data["country"] == self.household.country.name
         assert data["country_origin"] == self.household.country_origin.name
@@ -490,6 +573,7 @@ class TestHouseholdDetail:
         assert data["male_age_group_12_17_disabled_count"] == self.household.male_age_group_12_17_disabled_count
         assert data["male_age_group_18_59_disabled_count"] == self.household.male_age_group_18_59_disabled_count
         assert data["male_age_group_60_disabled_count"] == self.household.male_age_group_60_disabled_count
+        assert data["other_sex_group_count"] == self.household.other_sex_group_count
         assert data["start"] == f"{self.household.start:%Y-%m-%dT%H:%M:%SZ}"
         assert data["deviceid"] == self.household.deviceid
         assert data["fchild_hoh"] == self.household.fchild_hoh
@@ -498,6 +582,16 @@ class TestHouseholdDetail:
         assert data["size"] == self.household.size
         assert data["residence_status"] == self.household.residence_status
         assert data["program_registration_id"] == self.household.program_registration_id
+        assert data["delivered_quantities"] == [
+            {
+                "currency": "USD",
+                "total_delivered_quantity": "83.00",
+            },
+            {
+                "currency": "AFG",
+                "total_delivered_quantity": "233.00",
+            },
+        ]
         assert data["linked_grievances"] == [
             {
                 "id": str(self.grievance_ticket.id),
@@ -696,7 +790,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": "2025-05-13T00:48:47Z",
+                    "last_registration_date": "2025-05-21T04:55:29Z",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household1.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household1.address,
+                    "village": self.household1.village,
+                    "geopoint": None,
+                    "import_id": self.household1.unicef_id,
                 },
             },
             {
@@ -711,7 +822,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household1.id),
                     "unicef_id": self.household1.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": f"{self.household1.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household1.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household1.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household1.address,
+                    "village": self.household1.village,
+                    "geopoint": None,
+                    "import_id": self.household1.unicef_id,
                 },
             },
             {
@@ -726,7 +854,24 @@ class TestHouseholdMembers:
                 "household": {
                     "id": str(self.household2.id),
                     "unicef_id": self.household2.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": f"{self.household2.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household2.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household2.residence_status,
+                    "country_origin": "",
+                    "country": "",
+                    "address": self.household2.address,
+                    "village": self.household2.village,
+                    "geopoint": None,
+                    "import_id": self.household2.unicef_id,
                 },
             },
         ]
@@ -847,7 +992,10 @@ class TestHouseholdGlobalViewSet:
             assert household_result_first["id"] == str(household.id)
             assert household_result_first["unicef_id"] == household.unicef_id
             assert household_result_first["head_of_household"] == household.head_of_household.full_name
-            assert household_result_first["admin1"] == household.admin1.name
+            assert household_result_first["admin1"] == {
+                "id": str(household.admin1.id),
+                "name": household.admin1.name,
+            }
             assert household_result_first["admin2"] == {
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,

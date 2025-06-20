@@ -1,5 +1,4 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { HouseholdRdiMergeStatus } from '@generated/graphql';
 import { RestService } from '@restgenerated/services/RestService';
 import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
@@ -20,9 +19,7 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
       rdiId: rdi.id,
       businessAreaSlug: businessArea,
       programSlug: programId,
-      rdiMergeStatus: isMerged
-        ? HouseholdRdiMergeStatus.Merged
-        : HouseholdRdiMergeStatus.Pending,
+      rdiMergeStatus: isMerged ? 'MERGED' : 'PENDING',
     }),
     [rdi.id, businessArea, programId, isMerged],
   );

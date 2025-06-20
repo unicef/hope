@@ -1,7 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useExistingGrievanceTicketsQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { decodeIdString } from '@utils/utils';
@@ -18,38 +19,41 @@ import { useProgramContext } from 'src/programContext';
 
 export function OtherRelatedTicketsCreate({ values }): ReactElement {
   const { t } = useTranslation();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessAreaSlug } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [show, setShow] = useState(false);
 
-  const { data, loading } = useExistingGrievanceTicketsQuery({
-    variables: {
-      businessArea,
-      household:
-        // TODO Janek to jeszcze kiedyś wymyśli
-        decodeIdString(values?.selectedHousehold?.id) ||
-        '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
-      // adding some random ID to get 0 results if there is no household id.
-    },
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      'grievanceTickets',
+      businessAreaSlug,
+      values?.selectedHousehold?.id,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsList({
+        businessAreaSlug,
+        household:
+          decodeIdString(values?.selectedHousehold?.id) ||
+          '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
+      }),
+    enabled: !!businessAreaSlug,
   });
-  if (loading) return <LoadingComponent />;
+  if (isLoading) return <LoadingComponent />;
   if (!data) return null;
 
-  const existingTickets = data.existingGrievanceTickets.edges;
+  const existingTickets = data.results || [];
   const renderIds = (tickets): ReactElement =>
     tickets.length ? (
-      tickets.map((edge) => {
+      tickets.map((el) => {
         const grievanceDetailsPath = getGrievanceDetailsPath(
-          edge.node.id,
-          edge.node.category,
+          el.id,
+          el.category,
           baseUrl,
         );
         return (
-          <Box key={edge.node.id} mb={1}>
-            <ContentLink href={grievanceDetailsPath}>
-              {edge.node.unicefId}
-            </ContentLink>
+          <Box key={el.id} mb={1}>
+            <ContentLink href={grievanceDetailsPath}>{el.unicefId}</ContentLink>
           </Box>
         );
       })
@@ -59,12 +63,12 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
 
   const openExistingTickets = existingTickets.length
     ? existingTickets.filter(
-        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+        (el) => el.status !== GRIEVANCE_TICKET_STATES.CLOSED,
       )
     : [];
   const closedExistingTickets = existingTickets.length
     ? existingTickets.filter(
-        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+        (el) => el.status === GRIEVANCE_TICKET_STATES.CLOSED,
       )
     : [];
 

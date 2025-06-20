@@ -1,7 +1,6 @@
 import logging
 from typing import Any, List
 
-from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
 
 from django_filters import (
@@ -9,8 +8,6 @@ from django_filters import (
     CharFilter,
     ChoiceFilter,
     FilterSet,
-    ModelChoiceFilter,
-    ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
     OrderingFilter,
     UUIDFilter,
@@ -21,8 +18,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
-from hct_mis_api.apps.household.models import HEAD, Household, Individual
-from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.household.models import HEAD, Individual
 from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
@@ -110,6 +106,9 @@ class GrievanceTicketFilter(FilterSet):
     is_active_program = BooleanFilter(method="filter_is_active_program")
     is_cross_area = BooleanFilter(method="filter_is_cross_area")
     admin1 = CharFilter(field_name="admin2__parent_id")
+    household_id = CharFilter(method="filter_by_household")
+    individual_id = CharFilter(method="filter_by_individual")
+    payment_record_ids = filters.BaseInFilter(method="filter_by_payment_record")
 
     class Meta:
         fields = {
@@ -258,78 +257,25 @@ class GrievanceTicketFilter(FilterSet):
         else:
             return qs
 
+    def _get_ticket_filters(self, lookup: str, value: str) -> Q:
+        query = Q()
+        for ticket_type, lookup_objs in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+            if real_lookup := lookup_objs.get(lookup):
+                query |= Q(**{f"{ticket_type}__{real_lookup}": value})
+        return query
 
-class ExistingGrievanceTicketFilter(FilterSet):
-    business_area = CharFilter(field_name="business_area__slug", required=True)
-    category = ChoiceFilter(field_name="category", choices=GrievanceTicket.CATEGORY_CHOICES)
-    issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
-    household = ModelChoiceFilter(queryset=Household.objects.all())
-    individual = ModelChoiceFilter(queryset=Individual.objects.all())
-    payment_record = ModelMultipleChoiceFilter(queryset=Payment.objects.all())
-    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
+    def filter_by_individual(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        individual_q = self._get_ticket_filters("individual", value)
+        return qs.filter(individual_q)
 
-    class Meta:
-        fields = ("id",)
-        model = GrievanceTicket
+    def filter_by_household(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        household_q = self._get_ticket_filters("household", value)
+        return qs.filter(household_q)
 
-    order_by = OrderingFilter(fields=("id",))
-
-    def prepare_ticket_filters(self, lookup: str, obj: GrievanceTicket) -> Q:  # pragma: no cover
-        types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
-        q_obj = Q()
-        for ticket_type, lookup_objs in types_and_lookups.items():
-            real_lookup = lookup_objs.get(lookup)
-            if (
-                ticket_type in ("complaint_ticket_details", "sensitive_ticket_details")
-                and real_lookup == "payment_record"
-            ):
-                q_obj |= Q(**{f"{ticket_type}__payment_id": str(obj.id)})
-            elif real_lookup:
-                q_obj |= Q(**{f"{ticket_type}__{real_lookup}": obj})
-        return q_obj
-
-    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        cleaned_data = self.form.cleaned_data
-
-        payment_record_objects = cleaned_data.pop("payment_record", None)
-        household_object = cleaned_data.pop("household", None)
-        individual_object = cleaned_data.pop("individual", None)
-        # if any of these filters were passed in as wrong ids we need to return an empty queryset instead of completely ignore that filter value
-        # as expected in OtherRelatedTickets.tsx component when passing random household id
-        if (household_object is None and self.form.data.get("household")) or (
-            payment_record_objects is None
-            and self.form.data.get("payment_record")
-            or (individual_object is None and self.form.data.get("individual"))
-        ):
-            return queryset.none()
-        if household_object is None:
-            queryset.model.objects.none()
-        for name, value in cleaned_data.items():
-            queryset = self.filters[name].filter(queryset, value)
-            assert isinstance(
-                queryset, models.QuerySet
-            ), "Expected '{}.{}' to return a QuerySet, but got a {} instead.".format(
-                type(self).__name__,
-                name,
-                type(queryset).__name__,
-            )
-
-        if payment_record_objects:
-            q_obj = Q()
-            for payment_record in payment_record_objects:
-                q_obj |= self.prepare_ticket_filters("payment_record", payment_record)
-            queryset = queryset.filter(q_obj)
-        if household_object:
-            q_obj = self.prepare_ticket_filters("household", household_object)
-            queryset = queryset.filter(q_obj)
-        if individual_object:
-            q_obj = self.prepare_ticket_filters("individual", individual_object)
-            queryset = queryset.filter(q_obj)
-
-        return queryset
-
-    def permissions_filter(self, qs: QuerySet, name: str, values: List[str]) -> QuerySet:
-        return GrievanceTicketFilter.permissions_filter(self, qs, name, values)
+    def filter_by_payment_record(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
+        return qs.filter(
+            Q(complaint_ticket_details__payment_id__in=value) | Q(sensitive_ticket_details__payment_id__in=value)
+        )
 
 
 class TicketNoteFilter(FilterSet):

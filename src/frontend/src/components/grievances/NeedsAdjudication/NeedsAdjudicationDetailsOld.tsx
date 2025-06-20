@@ -11,11 +11,9 @@ import {
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import {
-  GrievanceTicketDocument,
-  useApproveNeedsAdjudicationMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { BlackLink } from '@core/BlackLink';
 import { useConfirmation } from '@core/ConfirmationDialog';
@@ -42,15 +40,32 @@ export const NeedsAdjudicationDetailsOld = ({
   const { isActiveProgram } = useProgramContext();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
 
-  const [approve] = useApproveNeedsAdjudicationMutation({
-    refetchQueries: () => [
-      {
-        query: GrievanceTicketDocument,
-        variables: { id: ticket.id },
-      },
-    ],
+  const mutation = useMutation({
+    mutationFn: ({
+      grievanceTicketId,
+      approveStatus,
+    }: {
+      grievanceTicketId: string;
+      approveStatus: boolean;
+    }) =>
+      RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
+        businessAreaSlug: businessArea,
+        id: grievanceTicketId,
+        requestBody: {
+          approveStatus,
+        },
+      }),
+    onSuccess: () => {
+      // Invalidate and refetch the grievance ticket details
+      queryClient.invalidateQueries({
+        queryKey: ['grievanceTicket', ticket.id],
+      });
+    },
   });
+
   const details = ticket.ticketDetails;
   const [selectedDuplicate, setSelectedDuplicate] = useState(
     details?.selectedIndividual?.id,
@@ -144,11 +159,9 @@ export const NeedsAdjudicationDetailsOld = ({
                   confirm({
                     content: confirmationText,
                   }).then(() => {
-                    approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        selectedIndividualId: selectedDuplicate,
-                      },
+                    mutation.mutateAsync({
+                      grievanceTicketId: ticket.id,
+                      approveStatus: true, // Marking as approved/duplicate
                     });
                     setIsEditMode(false);
                   })

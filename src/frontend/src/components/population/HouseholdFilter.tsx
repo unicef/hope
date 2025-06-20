@@ -3,13 +3,13 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { ProgramNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
 import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { ProgramList } from '@restgenerated/models/ProgramList';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { generateTableOrderOptionsGroup } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
@@ -20,7 +20,7 @@ import { useProgramContext } from 'src/programContext';
 
 interface HouseholdFiltersProps {
   filter;
-  programs?: ProgramNode[];
+  programs?: ProgramList[];
   choicesData: HouseholdChoices;
   setFilter: (filter) => void;
   initialFilter;

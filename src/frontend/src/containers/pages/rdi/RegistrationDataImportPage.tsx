@@ -4,12 +4,11 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
 import { ButtonTooltip } from '@core/ButtonTooltip';
-import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +16,7 @@ import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
 import RegistrationFilters from '@components/rdi/RegistrationFilters';
+import { RestService } from '@restgenerated/services/RestService';
 
 const initialFilter = {
   search: '',
@@ -34,8 +34,13 @@ function RegistrationDataImportPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const { data: deduplicationFlags, loading } = useDeduplicationFlagsQuery({
-    fetchPolicy: 'cache-and-network',
+  const { data: deduplicationFlags, isLoading: loading } = useQuery({
+    queryKey: ['deduplicationFlags', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: programId,
+      }),
   });
 
   const [filter, setFilter] = useState(

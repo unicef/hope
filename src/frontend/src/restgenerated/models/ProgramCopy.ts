@@ -53,10 +53,6 @@ export type ProgramCopy = {
      */
     frequencyOfPayments: FrequencyOfPaymentsEnum;
     dataCollectingType: string;
-    /**
-     * Program beneficiary group
-     */
-    beneficiaryGroup: string;
     startDate: string;
     endDate: string | null;
     pduFields: Array<PDUFieldsCreate>;

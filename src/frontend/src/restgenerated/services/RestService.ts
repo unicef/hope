@@ -19,6 +19,7 @@ import type { FeedbackMessage } from '../models/FeedbackMessage';
 import type { FeedbackMessageCreate } from '../models/FeedbackMessageCreate';
 import type { FeedbackUpdate } from '../models/FeedbackUpdate';
 import type { FspChoices } from '../models/FspChoices';
+import type { GetKoboAssetList } from '../models/GetKoboAssetList';
 import type { GrievanceChoices } from '../models/GrievanceChoices';
 import type { GrievanceCreateNote } from '../models/GrievanceCreateNote';
 import type { GrievanceDeleteHouseholdApproveStatus } from '../models/GrievanceDeleteHouseholdApproveStatus';
@@ -48,11 +49,13 @@ import type { PaginatedCollectorAttributeList } from '../models/PaginatedCollect
 import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedFieldAttributeList } from '../models/PaginatedFieldAttributeList';
+import type { PaginatedFieldAttributeSimpleList } from '../models/PaginatedFieldAttributeSimpleList';
 import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
 import type { PaginatedHouseholdListList } from '../models/PaginatedHouseholdListList';
 import type { PaginatedHouseholdMemberList } from '../models/PaginatedHouseholdMemberList';
 import type { PaginatedIndividualListList } from '../models/PaginatedIndividualListList';
+import type { PaginatedKoboAssetObjectList } from '../models/PaginatedKoboAssetObjectList';
 import type { PaginatedLogEntryList } from '../models/PaginatedLogEntryList';
 import type { PaginatedMessageListList } from '../models/PaginatedMessageListList';
 import type { PaginatedOrganizationList } from '../models/PaginatedOrganizationList';
@@ -67,6 +70,7 @@ import type { PaginatedProgramCycleListList } from '../models/PaginatedProgramCy
 import type { PaginatedProgramGlobalList } from '../models/PaginatedProgramGlobalList';
 import type { PaginatedProgramListList } from '../models/PaginatedProgramListList';
 import type { PaginatedProjectList } from '../models/PaginatedProjectList';
+import type { PaginatedRecipientList } from '../models/PaginatedRecipientList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
 import type { PaginatedRuleList } from '../models/PaginatedRuleList';
@@ -1075,8 +1079,10 @@ export class RestService {
         grievanceStatus,
         grievanceType,
         household,
+        householdId,
         id,
         idStartswith,
+        individualId,
         isActiveProgram,
         isCrossArea,
         issueType,
@@ -1084,6 +1090,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        paymentRecordIds,
         preferredLanguage,
         priority,
         program,
@@ -1122,8 +1129,10 @@ export class RestService {
         grievanceStatus?: string,
         grievanceType?: string,
         household?: string,
+        householdId?: string,
         id?: string,
         idStartswith?: string,
+        individualId?: string,
         isActiveProgram?: boolean,
         isCrossArea?: boolean,
         /**
@@ -1197,6 +1206,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
         preferredLanguage?: string,
         /**
          * * `0` - Not set
@@ -1250,8 +1263,10 @@ export class RestService {
                 'grievance_status': grievanceStatus,
                 'grievance_type': grievanceType,
                 'household': household,
+                'household_id': householdId,
                 'id': id,
                 'id__startswith': idStartswith,
+                'individual_id': individualId,
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
@@ -1259,6 +1274,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
                 'preferred_language': preferredLanguage,
                 'priority': priority,
                 'program': program,
@@ -1294,8 +1310,10 @@ export class RestService {
         grievanceStatus,
         grievanceType,
         household,
+        householdId,
         id,
         idStartswith,
+        individualId,
         isActiveProgram,
         isCrossArea,
         issueType,
@@ -1303,6 +1321,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        paymentRecordIds,
         preferredLanguage,
         priority,
         program,
@@ -1342,8 +1361,10 @@ export class RestService {
         grievanceStatus?: string,
         grievanceType?: string,
         household?: string,
+        householdId?: string,
         id?: string,
         idStartswith?: string,
+        individualId?: string,
         isActiveProgram?: boolean,
         isCrossArea?: boolean,
         /**
@@ -1417,6 +1438,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
         preferredLanguage?: string,
         /**
          * * `0` - Not set
@@ -1470,8 +1495,10 @@ export class RestService {
                 'grievance_status': grievanceStatus,
                 'grievance_type': grievanceType,
                 'household': household,
+                'household_id': householdId,
                 'id': id,
                 'id__startswith': idStartswith,
+                'individual_id': individualId,
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
@@ -1479,6 +1506,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
                 'preferred_language': preferredLanguage,
                 'priority': priority,
                 'program': program,
@@ -1788,12 +1816,11 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedGrievanceTicketDetailList
+     * @returns PaginatedFieldAttributeList
      * @throws ApiError
      */
-    public static restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
+    public static restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList({
         businessAreaSlug,
-        requestBody,
         admin1,
         admin2,
         area,
@@ -1810,8 +1837,10 @@ export class RestService {
         grievanceStatus,
         grievanceType,
         household,
+        householdId,
         id,
         idStartswith,
+        individualId,
         isActiveProgram,
         isCrossArea,
         issueType,
@@ -1819,6 +1848,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        paymentRecordIds,
         preferredLanguage,
         priority,
         program,
@@ -1830,7 +1860,6 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
-        requestBody: BulkGrievanceTicketsAddNote,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -1858,8 +1887,10 @@ export class RestService {
         grievanceStatus?: string,
         grievanceType?: string,
         household?: string,
+        householdId?: string,
         id?: string,
         idStartswith?: string,
+        individualId?: string,
         isActiveProgram?: boolean,
         isCrossArea?: boolean,
         /**
@@ -1933,6 +1964,702 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/all-add-individuals-fields-attributes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'household_id': householdId,
+                'id': id,
+                'id__startswith': idStartswith,
+                'individual_id': individualId,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList({
+        businessAreaSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        householdId,
+        id,
+        idStartswith,
+        individualId,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        paymentRecordIds,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        householdId?: string,
+        id?: string,
+        idStartswith?: string,
+        individualId?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/all-edit-household-fields-attributes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'household_id': householdId,
+                'id': id,
+                'id__startswith': idStartswith,
+                'individual_id': individualId,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList({
+        businessAreaSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        householdId,
+        id,
+        idStartswith,
+        individualId,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        paymentRecordIds,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        householdId?: string,
+        id?: string,
+        idStartswith?: string,
+        individualId?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
+    }): CancelablePromise<PaginatedFieldAttributeList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/all-edit-people-fields-attributes/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'household_id': householdId,
+                'id': id,
+                'id__startswith': idStartswith,
+                'individual_id': individualId,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedGrievanceTicketDetailList
+     * @throws ApiError
+     */
+    public static restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
+        businessAreaSlug,
+        requestBody,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        householdId,
+        id,
+        idStartswith,
+        individualId,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        paymentRecordIds,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
+    }: {
+        businessAreaSlug: string,
+        requestBody: BulkGrievanceTicketsAddNote,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        householdId?: string,
+        id?: string,
+        idStartswith?: string,
+        individualId?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
         preferredLanguage?: string,
         /**
          * * `0` - Not set
@@ -1986,8 +2713,10 @@ export class RestService {
                 'grievance_status': grievanceStatus,
                 'grievance_type': grievanceType,
                 'household': household,
+                'household_id': householdId,
                 'id': id,
                 'id__startswith': idStartswith,
+                'individual_id': individualId,
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
@@ -1995,6 +2724,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
                 'preferred_language': preferredLanguage,
                 'priority': priority,
                 'program': program,
@@ -2032,8 +2762,10 @@ export class RestService {
         grievanceStatus,
         grievanceType,
         household,
+        householdId,
         id,
         idStartswith,
+        individualId,
         isActiveProgram,
         isCrossArea,
         issueType,
@@ -2041,6 +2773,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        paymentRecordIds,
         preferredLanguage,
         priority,
         program,
@@ -2080,8 +2813,10 @@ export class RestService {
         grievanceStatus?: string,
         grievanceType?: string,
         household?: string,
+        householdId?: string,
         id?: string,
         idStartswith?: string,
+        individualId?: string,
         isActiveProgram?: boolean,
         isCrossArea?: boolean,
         /**
@@ -2155,6 +2890,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
         preferredLanguage?: string,
         /**
          * * `0` - Not set
@@ -2208,8 +2947,10 @@ export class RestService {
                 'grievance_status': grievanceStatus,
                 'grievance_type': grievanceType,
                 'household': household,
+                'household_id': householdId,
                 'id': id,
                 'id__startswith': idStartswith,
+                'individual_id': individualId,
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
@@ -2217,6 +2958,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
                 'preferred_language': preferredLanguage,
                 'priority': priority,
                 'program': program,
@@ -2254,8 +2996,10 @@ export class RestService {
         grievanceStatus,
         grievanceType,
         household,
+        householdId,
         id,
         idStartswith,
+        individualId,
         isActiveProgram,
         isCrossArea,
         issueType,
@@ -2263,6 +3007,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        paymentRecordIds,
         preferredLanguage,
         priority,
         program,
@@ -2302,8 +3047,10 @@ export class RestService {
         grievanceStatus?: string,
         grievanceType?: string,
         household?: string,
+        householdId?: string,
         id?: string,
         idStartswith?: string,
+        individualId?: string,
         isActiveProgram?: boolean,
         isCrossArea?: boolean,
         /**
@@ -2377,6 +3124,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
         preferredLanguage?: string,
         /**
          * * `0` - Not set
@@ -2430,8 +3181,10 @@ export class RestService {
                 'grievance_status': grievanceStatus,
                 'grievance_type': grievanceType,
                 'household': household,
+                'household_id': householdId,
                 'id': id,
                 'id__startswith': idStartswith,
+                'individual_id': individualId,
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
@@ -2439,6 +3192,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
                 'preferred_language': preferredLanguage,
                 'priority': priority,
                 'program': program,
@@ -2476,8 +3230,10 @@ export class RestService {
         grievanceStatus,
         grievanceType,
         household,
+        householdId,
         id,
         idStartswith,
+        individualId,
         isActiveProgram,
         isCrossArea,
         issueType,
@@ -2485,6 +3241,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        paymentRecordIds,
         preferredLanguage,
         priority,
         program,
@@ -2524,8 +3281,10 @@ export class RestService {
         grievanceStatus?: string,
         grievanceType?: string,
         household?: string,
+        householdId?: string,
         id?: string,
         idStartswith?: string,
+        individualId?: string,
         isActiveProgram?: boolean,
         isCrossArea?: boolean,
         /**
@@ -2599,6 +3358,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
         preferredLanguage?: string,
         /**
          * * `0` - Not set
@@ -2652,8 +3415,10 @@ export class RestService {
                 'grievance_status': grievanceStatus,
                 'grievance_type': grievanceType,
                 'household': household,
+                'household_id': householdId,
                 'id': id,
                 'id__startswith': idStartswith,
+                'individual_id': individualId,
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
@@ -2661,6 +3426,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
                 'preferred_language': preferredLanguage,
                 'priority': priority,
                 'program': program,
@@ -2729,19 +3495,25 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        messageId,
         offset,
         orderBy,
         ordering,
+        phoneNo,
         program,
         rdiId,
         rdiMergeStatus,
+        recipientId,
         residenceStatus,
         search,
+        sex,
         sizeGte,
         sizeLte,
         sizeRange,
         sizeMax,
         sizeMin,
+        survey,
+        unicefId,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -2762,6 +3534,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        messageId?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -2803,6 +3576,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phoneNo?: string,
         program?: string,
         rdiId?: string,
         /**
@@ -2810,6 +3584,7 @@ export class RestService {
          * * `MERGED` - Merged
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
         /**
          * Household residence status
          *
@@ -2823,6 +3598,7 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
+        sex?: string,
         sizeGte?: number,
         sizeLte?: number,
         /**
@@ -2837,6 +3613,8 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -2860,19 +3638,25 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'message_id': messageId,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone_no': phoneNo,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
                 'residence_status': residenceStatus,
                 'search': search,
+                'sex': sex,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
                 'withdrawn': withdrawn,
             },
         });
@@ -4070,8 +4854,10 @@ export class RestService {
         grievanceStatus,
         grievanceType,
         household,
+        householdId,
         id,
         idStartswith,
+        individualId,
         isActiveProgram,
         isCrossArea,
         issueType,
@@ -4079,6 +4865,7 @@ export class RestService {
         offset,
         orderBy,
         ordering,
+        paymentRecordIds,
         preferredLanguage,
         priority,
         program,
@@ -4118,8 +4905,10 @@ export class RestService {
         grievanceStatus?: string,
         grievanceType?: string,
         household?: string,
+        householdId?: string,
         id?: string,
         idStartswith?: string,
+        individualId?: string,
         isActiveProgram?: boolean,
         isCrossArea?: boolean,
         /**
@@ -4193,6 +4982,10 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
         preferredLanguage?: string,
         /**
          * * `0` - Not set
@@ -4247,8 +5040,10 @@ export class RestService {
                 'grievance_status': grievanceStatus,
                 'grievance_type': grievanceType,
                 'household': household,
+                'household_id': householdId,
                 'id': id,
                 'id__startswith': idStartswith,
+                'individual_id': individualId,
                 'is_active_program': isActiveProgram,
                 'is_cross_area': isCrossArea,
                 'issue_type': issueType,
@@ -4256,6 +5051,7 @@ export class RestService {
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
                 'preferred_language': preferredLanguage,
                 'priority': priority,
                 'program': program,
@@ -4309,19 +5105,25 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        messageId,
         offset,
         orderBy,
         ordering,
+        phoneNo,
         program,
         rdiId,
         rdiMergeStatus,
+        recipientId,
         residenceStatus,
         search,
+        sex,
         sizeGte,
         sizeLte,
         sizeRange,
         sizeMax,
         sizeMin,
+        survey,
+        unicefId,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4343,6 +5145,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        messageId?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4384,6 +5187,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phoneNo?: string,
         program?: string,
         rdiId?: string,
         /**
@@ -4391,6 +5195,7 @@ export class RestService {
          * * `MERGED` - Merged
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
         /**
          * Household residence status
          *
@@ -4404,6 +5209,7 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
+        sex?: string,
         sizeGte?: number,
         sizeLte?: number,
         /**
@@ -4418,6 +5224,8 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -4442,19 +5250,25 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'message_id': messageId,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone_no': phoneNo,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
                 'residence_status': residenceStatus,
                 'search': search,
+                'sex': sex,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
                 'withdrawn': withdrawn,
             },
         });
@@ -4547,19 +5361,25 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        messageId,
         offset,
         orderBy,
         ordering,
+        phoneNo,
         program,
         rdiId,
         rdiMergeStatus,
+        recipientId,
         residenceStatus,
         search,
+        sex,
         sizeGte,
         sizeLte,
         sizeRange,
         sizeMax,
         sizeMin,
+        survey,
+        unicefId,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4585,6 +5405,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        messageId?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4626,6 +5447,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phoneNo?: string,
         program?: string,
         rdiId?: string,
         /**
@@ -4633,6 +5455,7 @@ export class RestService {
          * * `MERGED` - Merged
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
         /**
          * Household residence status
          *
@@ -4646,6 +5469,7 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
+        sex?: string,
         sizeGte?: number,
         sizeLte?: number,
         /**
@@ -4660,6 +5484,8 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
@@ -4685,19 +5511,25 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'message_id': messageId,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone_no': phoneNo,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
                 'residence_status': residenceStatus,
                 'search': search,
+                'sex': sex,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
                 'withdrawn': withdrawn,
             },
         });
@@ -4729,10 +5561,10 @@ export class RestService {
         });
     }
     /**
-     * @returns PaginatedFieldAttributeList
+     * @returns PaginatedRecipientList
      * @throws ApiError
      */
-    public static restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList({
+    public static restBusinessAreasProgramsHouseholdsAllAccountabilityCommunicationMessageRecipientsList({
         businessAreaSlug,
         programSlug,
         address,
@@ -4749,19 +5581,25 @@ export class RestService {
         lastRegistrationDateAfter,
         lastRegistrationDateBefore,
         limit,
+        messageId,
         offset,
         orderBy,
         ordering,
+        phoneNo,
         program,
         rdiId,
         rdiMergeStatus,
+        recipientId,
         residenceStatus,
         search,
+        sex,
         sizeGte,
         sizeLte,
         sizeRange,
         sizeMax,
         sizeMin,
+        survey,
+        unicefId,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4783,6 +5621,7 @@ export class RestService {
          * Number of results to return per page.
          */
         limit?: number,
+        messageId?: string,
         /**
          * The initial index from which to return the results.
          */
@@ -4824,6 +5663,7 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
+        phoneNo?: string,
         program?: string,
         rdiId?: string,
         /**
@@ -4831,6 +5671,7 @@ export class RestService {
          * * `MERGED` - Merged
          */
         rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
         /**
          * Household residence status
          *
@@ -4844,6 +5685,7 @@ export class RestService {
          */
         residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
         search?: any,
+        sex?: string,
         sizeGte?: number,
         sizeLte?: number,
         /**
@@ -4858,6 +5700,197 @@ export class RestService {
          * Household size
          */
         sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedRecipientList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/all-accountability-communication-message-recipients/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'message_id': messageId,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'phone_no': phoneNo,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
+                'residence_status': residenceStatus,
+                'search': search,
+                'sex': sex,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
+                'withdrawn': withdrawn,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedFieldAttributeList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsAllFlexFieldsAttributesList({
+        businessAreaSlug,
+        programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        messageId,
+        offset,
+        orderBy,
+        ordering,
+        phoneNo,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        recipientId,
+        residenceStatus,
+        search,
+        sex,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        survey,
+        unicefId,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        messageId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        phoneNo?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sex?: string,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedFieldAttributeList> {
         return __request(OpenAPI, {
@@ -4882,19 +5915,25 @@ export class RestService {
                 'last_registration_date_after': lastRegistrationDateAfter,
                 'last_registration_date_before': lastRegistrationDateBefore,
                 'limit': limit,
+                'message_id': messageId,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
+                'phone_no': phoneNo,
                 'program': program,
                 'rdi_id': rdiId,
                 'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
                 'residence_status': residenceStatus,
                 'search': search,
+                'sex': sex,
                 'size__gte': sizeGte,
                 'size__lte': sizeLte,
                 'size__range': sizeRange,
                 'size_max': sizeMax,
                 'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
                 'withdrawn': withdrawn,
             },
         });
@@ -4916,6 +5955,195 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedRecipientList
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsHouseholdsRecipientsList({
+        businessAreaSlug,
+        programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        limit,
+        messageId,
+        offset,
+        orderBy,
+        ordering,
+        phoneNo,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        recipientId,
+        residenceStatus,
+        search,
+        sex,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        survey,
+        unicefId,
+        withdrawn,
+    }: {
+        businessAreaSlug: string,
+        programSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        messageId?: string,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        phoneNo?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sex?: string,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
+        withdrawn?: boolean,
+    }): CancelablePromise<PaginatedRecipientList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/households/recipients/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'limit': limit,
+                'message_id': messageId,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'phone_no': phoneNo,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
+                'residence_status': residenceStatus,
+                'search': search,
+                'sex': sex,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
+                'withdrawn': withdrawn,
             },
         });
     }
@@ -8868,6 +10096,26 @@ export class RestService {
      * @returns any No response body
      * @throws ApiError
      */
+    public static restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug,
+        slug,
+    }: {
+        businessAreaSlug: string,
+        slug: string,
+    }): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{slug}/deduplication_flags/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'slug': slug,
+            },
+        });
+    }
+    /**
+     * @returns any No response body
+     * @throws ApiError
+     */
     public static restBusinessAreasProgramsFinishCreate({
         businessAreaSlug,
         slug,
@@ -9260,6 +10508,48 @@ export class RestService {
         });
     }
     /**
+     * All Kobo projects/assets.
+     * @returns PaginatedKoboAssetObjectList
+     * @throws ApiError
+     */
+    public static restBusinessAreasAllKoboProjectsCreate({
+        slug,
+        limit,
+        offset,
+        ordering,
+        requestBody,
+    }: {
+        slug: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        requestBody?: GetKoboAssetList,
+    }): CancelablePromise<PaginatedKoboAssetObjectList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{slug}/all-kobo-projects/',
+            path: {
+                'slug': slug,
+            },
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
      * @returns PaginatedCollectorAttributeList
      * @throws ApiError
      */
@@ -9284,6 +10574,38 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/all-collector-fields-attributes/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+            },
+        });
+    }
+    /**
+     * @returns PaginatedFieldAttributeSimpleList
+     * @throws ApiError
+     */
+    public static restBusinessAreasAllFieldsAttributesList({
+        limit,
+        offset,
+        ordering,
+    }: {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<PaginatedFieldAttributeSimpleList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/all-fields-attributes/',
             query: {
                 'limit': limit,
                 'offset': offset,
@@ -9323,6 +10645,18 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/feedback-issue-type/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesLanguagesList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/languages/',
         });
     }
     /**
@@ -9393,17 +10727,6 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/constance/',
-        });
-    }
-    /**
-     * Returns the list of currency choices.
-     * @returns any No response body
-     * @throws ApiError
-     */
-    public static restCurrencyRetrieve(): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/currency/',
         });
     }
     /**

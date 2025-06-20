@@ -3,14 +3,11 @@ import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividua
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
-import {
-  AllIndividualsQuery,
-  useAllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FieldArray } from 'formik';
@@ -40,10 +37,39 @@ function EditPeopleDataChange({
   const location = useLocation();
   const { businessArea, programId } = useBaseUrl();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
-    values.selectedIndividual;
-  const { data: editPeopleFieldsData, loading: editPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery({ fetchPolicy: 'network-only' });
+  const individual: IndividualList = values.selectedIndividual;
+  const { data: editPeopleFieldsData, isLoading: editPeopleFieldsLoading } =
+    useQuery({
+      queryKey: ['allEditPeopleFieldsAttributes', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsAllEditPeopleFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+          },
+        ),
+    });
+
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['grievanceTicketsChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
+
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery({
+      queryKey: ['individualsChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
+  const { data: countriesData, isLoading: countriesLoading } = useQuery({
+    queryKey: ['countriesList'],
+    queryFn: () => RestService.restLookupsCountryList({}),
+  });
 
   const { data: fullIndividual, isLoading: fullIndividualLoading } =
     useQuery<IndividualDetail>({
@@ -79,11 +105,21 @@ function EditPeopleDataChange({
   if (
     editPeopleFieldsLoading ||
     fullIndividualLoading ||
-    editPeopleFieldsLoading ||
-    !fullIndividual
+    choicesLoading ||
+    individualChoicesLoading ||
+    countriesLoading ||
+    !fullIndividual ||
+    !editPeopleFieldsData
   ) {
     return <LoadingComponent />;
   }
+
+  const combinedData = {
+    results: editPeopleFieldsData?.results || [],
+    countriesChoices: countriesData?.results || [],
+    documentTypeChoices: choicesData?.documentTypeChoices || [],
+    identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
+  };
   const notAvailableItems = (values.individualDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
@@ -106,7 +142,7 @@ function EditPeopleDataChange({
                     itemValue={item}
                     index={index}
                     individual={fullIndividual}
-                    fields={editPeopleFieldsData.allEditPeopleFieldsAttributes}
+                    fields={combinedData.results}
                     notAvailableFields={notAvailableItems}
                     onDelete={() => arrayHelpers.remove(index)}
                     values={values}
@@ -143,12 +179,12 @@ function EditPeopleDataChange({
             values={values}
             setFieldValue={setFieldValue}
             individual={fullIndividual}
-            addIndividualFieldsData={editPeopleFieldsData}
+            addIndividualFieldsData={combinedData}
           />
           {!isEditTicket && (
             <NewDocumentFieldArray
               values={values}
-              addIndividualFieldsData={editPeopleFieldsData}
+              addIndividualFieldsData={combinedData}
               setFieldValue={setFieldValue}
             />
           )}

@@ -48,8 +48,6 @@ export function DeleteVerificationPlan({
 
       setDeleteDialogOpen(false);
       showMessage(t('Verification plan has been deleted.'));
-
-      // TODO: Implement proper React Query cache invalidation if needed
     } catch (error) {
       showMessage(error?.message || t('Error while submitting'));
     }

@@ -1,3 +1,4 @@
+import { LabelizedField } from '@components/core/LabelizedField';
 import { Title } from '@components/core/Title';
 import {
   Box,
@@ -141,17 +142,17 @@ export function HouseholdCompositionTable({
       </Table>
       <Box display="flex" mt={2}>
         {/* TODO: Add the following fields */}
-        <Box mr={2}>
-          {/* <LabelizedField
+        {/* <Box mr={2}>
+          <LabelizedField
             label={t('Unknown')}
-            value={household?.count}
-          /> */}
-        </Box>
+            value={household?.unknownSexGroupCount}
+          />
+        </Box> */}
         <Box>
-          {/* <LabelizedField
+          <LabelizedField
             label={t('Other')}
             value={household?.otherSexGroupCount}
-          /> */}
+          />
         </Box>
       </Box>
     </OverviewPaper>

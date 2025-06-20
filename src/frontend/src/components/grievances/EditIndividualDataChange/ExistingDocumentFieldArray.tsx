@@ -1,4 +1,3 @@
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldArray } from 'formik';
@@ -10,7 +9,7 @@ export interface ExistingDocumentFieldArrayProps {
   setFieldValue;
   values;
   individual: IndividualDetail;
-  addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  addIndividualFieldsData: any;
 }
 
 export function ExistingDocumentFieldArray({
@@ -21,13 +20,13 @@ export function ExistingDocumentFieldArray({
 }: ExistingDocumentFieldArrayProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  return individual?.documents?.edges?.length > 0 ? (
+  return individual?.documents?.length > 0 ? (
     <Grid container spacing={3}>
       <FieldArray
         name="individualDataUpdateDocumentsToEdit"
         render={(arrayHelpers) => (
           <>
-            {individual.documents.edges.map((item) => (
+            {individual.documents.map((item) => (
               <Grid size={{ xs: 12 }} key={item.node.id}>
                 <EditDocumentRow
                   setFieldValue={setFieldValue}

@@ -2,43 +2,42 @@ import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
-import { DetailsStep } from '@components/programs/EditProgram/DetailsStep';
-import { PartnersStep } from '@components/programs/EditProgram/PartnersStep';
-import { ProgramFieldSeriesStep } from '@components/programs/EditProgram/ProgramFieldSeriesStep';
-import {
-  handleNext,
-  ProgramStepper,
-} from '@components/programs/CreateProgram/ProgramStepper';
-import { ProgramPartnerAccess } from '@generated/graphql';
-import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
-import { UserChoices } from '@restgenerated/models/UserChoices';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Fade } from '@mui/material';
-import {
-  decodeIdString,
-  mapPartnerChoicesWithoutUnicef,
-  isPartnerVisible,
-} from '@utils/utils';
-import { Formik } from 'formik';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { hasPermissionInModule } from '../../../config/permissions';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import {
   editPartnersValidationSchema,
   editProgramDetailsValidationSchema,
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
-import { omit } from 'lodash';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
+import {
+  handleNext,
+  ProgramStepper,
+} from '@components/programs/CreateProgram/ProgramStepper';
+import { DetailsStep } from '@components/programs/EditProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/EditProgram/PartnersStep';
+import { ProgramFieldSeriesStep } from '@components/programs/EditProgram/ProgramFieldSeriesStep';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Fade } from '@mui/material';
+import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
+import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramUpdate } from '@restgenerated/models/ProgramUpdate';
 import { ProgramUpdatePartnerAccess } from '@restgenerated/models/ProgramUpdatePartnerAccess';
-import { PartnerAccessEnum } from '@restgenerated/models/PartnerAccessEnum';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import { UserChoices } from '@restgenerated/models/UserChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  decodeIdString,
+  isPartnerVisible,
+  mapPartnerChoicesWithoutUnicef,
+} from '@utils/utils';
+import { Formik } from 'formik';
+import { omit } from 'lodash';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { hasPermissionInModule } from '../../../config/permissions';
 
 const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -159,7 +158,7 @@ const EditProgramPage = (): ReactElement => {
     frequencyOfPayments = 'REGULAR',
     version,
     partners,
-    partnerAccess = ProgramPartnerAccess.AllPartnersAccess,
+    partnerAccess = 'ALL_PARTNERS_ACCESS',
     registrationImportsTotalCount,
     pduFields,
     targetPopulationsCount,
@@ -252,7 +251,7 @@ const EditProgramPage = (): ReactElement => {
 
   const handleSubmitPartners = async (values): Promise<void> => {
     const partnersToSet =
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+      values.partnerAccess === '"SELECTED_PARTNERS_ACCESS"'
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
             partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
@@ -284,7 +283,7 @@ const EditProgramPage = (): ReactElement => {
     endDate: endDate,
     sector,
     dataCollectingTypeCode: dataCollectingType.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup.id),
+    beneficiaryGroup: beneficiaryGroup.id,
     description,
     budget,
     administrativeAreasOfImplementation: administrativeAreasOfImplementation,

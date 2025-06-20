@@ -142,7 +142,7 @@ class GrievanceTicketDetailSerializer(AdminUrlSerializerMixin, GrievanceTicketLi
     documentation = serializers.SerializerMethodField()
     ticket_notes = TicketNoteSerializer(many=True)
     ticket_details = serializers.SerializerMethodField()
-    household = HouseholdForTicketSerializer(source="ticket_details.household", allow_null=True)  # type: ignore
+    household = HouseholdForTicketSerializer(source="ticket_details.household", allow_null=True)
 
     class Meta(GrievanceTicketListSerializer.Meta):
         fields = GrievanceTicketListSerializer.Meta.fields + (  # type: ignore

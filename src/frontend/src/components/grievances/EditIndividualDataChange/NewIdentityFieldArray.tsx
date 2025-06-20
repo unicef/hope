@@ -3,13 +3,12 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '../utils/helpers';
 import { ReactElement } from 'react';
 
 export interface NewIdentityFieldArrayProps {
-  addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  addIndividualFieldsData: any;
   values;
 }
 

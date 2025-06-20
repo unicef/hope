@@ -11,7 +11,6 @@ import {
   registrationDataImportDeduplicationEngineStatusToColor,
   registrationDataImportStatusToColor,
 } from '@utils/utils';
-import { RegistrationDataImportStatus } from '@generated/graphql';
 import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';
@@ -192,7 +191,7 @@ function RegistrationDetails({
                   value={registration?.importedBy}
                 />
               </Grid>
-              {registration.status === RegistrationDataImportStatus.Refused &&
+              {registration.status === 'REFUSED' &&
               registration.refuseReason ? (
                 <Grid size={{ xs: 6 }}>
                   <LabelizedField

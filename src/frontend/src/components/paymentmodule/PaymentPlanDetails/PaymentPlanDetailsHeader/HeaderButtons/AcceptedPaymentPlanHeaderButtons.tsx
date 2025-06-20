@@ -74,7 +74,6 @@ export function AcceptedPaymentPlanHeaderButtons({
     },
   );
 
-  // Replace GraphQL mutation with REST API call
   const { mutateAsync: mutateExport, isPending: loadingExport } = useMutation({
     mutationFn: async (variables: { fspXlsxTemplateId?: string }) => {
       const requestBody: PaymentPlanExportAuthCode = {

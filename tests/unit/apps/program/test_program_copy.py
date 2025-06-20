@@ -52,12 +52,6 @@ class TestProgramCopy:
         self.dct_original.compatible_types.add(self.dct_compatible)
 
         self.bg_original = BeneficiaryGroupFactory(name="Original BG", master_detail=True)
-        self.bg_compatible_with_dct_compatible = BeneficiaryGroupFactory(
-            name="Compatible BG for Comp DCT", master_detail=True
-        )
-        self.bg_incompatible_with_dct_compatible = BeneficiaryGroupFactory(
-            name="Incompatible BG for Comp DCT", master_detail=False
-        )
 
         self.program_to_copy = ProgramFactory(
             business_area=self.afghanistan,
@@ -135,7 +129,6 @@ class TestProgramCopy:
             "cash_plus": True,
             "frequency_of_payments": Program.ONE_OFF,
             "data_collecting_type": self.dct_compatible.code,
-            "beneficiary_group": str(self.bg_compatible_with_dct_compatible.id),
             "partner_access": Program.NONE_PARTNERS_ACCESS,
             "partners": [],
             "pdu_fields": [
@@ -190,7 +183,7 @@ class TestProgramCopy:
         assert new_program.cash_plus is True
         assert new_program.frequency_of_payments == Program.ONE_OFF
         assert new_program.data_collecting_type.code == self.dct_compatible.code
-        assert str(new_program.beneficiary_group.id) == str(self.bg_compatible_with_dct_compatible.id)
+        assert str(new_program.beneficiary_group.id) == str(self.bg_original.id)
         assert new_program.partner_access == Program.NONE_PARTNERS_ACCESS
         assert new_program.status == Program.DRAFT  # New program should be in DRAFT status
 
@@ -303,7 +296,6 @@ class TestProgramCopy:
         payload = {
             **self.base_copy_payload,
             "data_collecting_type": self.dct_incompatible.code,
-            "beneficiary_group": str(self.bg_incompatible_with_dct_compatible.id),
         }
 
         response = self.client.post(self.copy_url, payload)
@@ -357,27 +349,6 @@ class TestProgramCopy:
         assert (
             response_for_limited.json()["data_collecting_type"][0]
             == "This Data Collecting Type is not available for this Business Area."
-        )
-
-    def test_copy_program_invalid_dct_bg_combination(self, create_user_role_with_permissions: Callable) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.PROGRAMME_DUPLICATE], self.afghanistan, whole_business_area_access=True
-        )
-
-        payload = {
-            **self.base_copy_payload,
-            "data_collecting_type": self.dct_compatible.code,
-            "beneficiary_group": str(
-                self.bg_incompatible_with_dct_compatible.id
-            ),  # BG for Social (master_detail=False)
-        }
-        response = self.client.post(self.copy_url, payload)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-        assert "beneficiary_group" in response.json()
-        assert (
-            "Selected combination of data collecting type and beneficiary group is invalid."
-            in response.json()["beneficiary_group"][0]
         )
 
     def test_copy_program_all_partners_access(self, create_user_role_with_permissions: Callable) -> None:

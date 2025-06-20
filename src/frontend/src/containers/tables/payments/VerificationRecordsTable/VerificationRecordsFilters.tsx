@@ -52,8 +52,6 @@ export function VerificationRecordsFilters({
     queryFn: () => RestService.restChoicesPaymentVerificationPlanStatusList(),
   });
 
-  //TODO: replace if a REST endpoint for verification channels is available
-  // Hardcoded verification channel choices since no REST endpoint exists
   const verificationChannelChoices = [
     { name: 'Manual', value: 'MANUAL' },
     { name: 'RapidPro', value: 'RAPIDPRO' },

@@ -53,7 +53,7 @@ export const DeleteProgram = ({
       mutationFn: () =>
         RestService.restBusinessAreasProgramsDestroy({
           businessAreaSlug: businessArea,
-          slug: program.id,
+          slug: program.slug,
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({

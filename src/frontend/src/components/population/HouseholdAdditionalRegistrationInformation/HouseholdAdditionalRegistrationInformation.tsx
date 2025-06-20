@@ -4,7 +4,6 @@ import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import { AllHouseholdsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { HouseholdFlexFieldPhotoModal } from '../HouseholdFlexFieldPhotoModal';
@@ -22,7 +21,7 @@ const Overview = styled(Paper)<{ theme?: Theme }>`
 
 interface HouseholdAdditionalRegistrationInformationProps {
   household: HouseholdDetail;
-  flexFieldsData: AllHouseholdsFlexFieldsAttributesQuery;
+  flexFieldsData: any;
 }
 
 export const HouseholdAdditionalRegistrationInformation = ({

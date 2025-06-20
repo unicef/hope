@@ -4,7 +4,6 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { useGrievanceTicketAreaScopeQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AccountBalance } from '@mui/icons-material';
@@ -50,7 +49,6 @@ export const GrievancesFilters = ({
   const { isAllPrograms } = useBaseUrl();
   const navigate = useNavigate();
   const location = useLocation();
-  const { data: areaScopeData } = useGrievanceTicketAreaScopeQuery();
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -363,26 +361,22 @@ export const GrievancesFilters = ({
             </SelectFilter>
           </Grid>
         )}
-        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated &&
-          areaScopeData?.crossAreaFilterAvailable && (
-            <Grid size={{ xs: 2 }}>
-              <SelectFilter
-                onChange={(e) =>
-                  handleFilterChange('areaScope', e.target.value)
-                }
-                label={t('Ticket Type')}
-                value={filter.areaScope}
-                fullWidth
-                disableClearable
-                data-cy="filters-area-scope"
-              >
-                <MenuItem value="cross-area">
-                  {t('Cross-Area Tickets')}
-                </MenuItem>
-                <MenuItem value="all">{t('All Tickets')}</MenuItem>
-              </SelectFilter>
-            </Grid>
-          )}
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated && (
+          //TODO: should it be hidden? areaScopeData?.crossAreaFilterAvailable
+          <Grid size={{ xs: 2 }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('areaScope', e.target.value)}
+              label={t('Ticket Type')}
+              value={filter.areaScope}
+              fullWidth
+              disableClearable
+              data-cy="filters-area-scope"
+            >
+              <MenuItem value="cross-area">{t('Cross-Area Tickets')}</MenuItem>
+              <MenuItem value="all">{t('All Tickets')}</MenuItem>
+            </SelectFilter>
+          </Grid>
+        )}
         <Grid size={{ xs: 3 }}>
           <AdminAreaAutocomplete
             level={1}

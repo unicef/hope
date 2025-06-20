@@ -8,7 +8,6 @@ import { Tab, Tabs } from '@core/Tabs';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box, Fade, Tooltip } from '@mui/material';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -31,15 +30,6 @@ export const HouseholdMembersPage = (): ReactElement => {
     location.state?.isNewTemplateJustCreated || false;
 
   const permissions = usePermissions();
-
-  const { data: householdChoicesData, isLoading: householdChoicesLoading } =
-    useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
-          businessAreaSlug: businessArea,
-        }),
-    });
 
   const { data: individualChoicesData, isLoading: individualChoicesLoading } =
     useQuery<IndividualChoices>({
@@ -86,11 +76,9 @@ export const HouseholdMembersPage = (): ReactElement => {
     permissions,
   );
 
-  if (householdChoicesLoading || individualChoicesLoading)
-    return <LoadingComponent />;
+  if (individualChoicesLoading) return <LoadingComponent />;
 
-  if (!individualChoicesData || !householdChoicesData || permissions === null)
-    return null;
+  if (!individualChoicesData || permissions === null) return null;
 
   if (!canViewHouseholdMembersPage) return <PermissionDenied />;
 
@@ -164,7 +152,7 @@ export const HouseholdMembersPage = (): ReactElement => {
                 <IndividualsListTable
                   filter={appliedFilter}
                   businessArea={businessArea}
-                  choicesData={householdChoicesData}
+                  choicesData={individualChoicesData}
                   canViewDetails={hasPermissions(
                     PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
                     permissions,

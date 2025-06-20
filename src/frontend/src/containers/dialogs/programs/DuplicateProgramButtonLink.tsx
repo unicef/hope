@@ -17,7 +17,7 @@ export function DuplicateProgramButtonLink({
   return (
     <IconButton
       component={Link}
-      to={`/${baseUrl}/duplicate/${program.id}`}
+      to={`/${baseUrl}/duplicate/${program.slug}`}
       data-cy="button-copy-program"
     >
       <FileCopy />

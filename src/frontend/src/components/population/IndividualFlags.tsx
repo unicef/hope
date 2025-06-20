@@ -4,9 +4,10 @@ import { FlagTooltip } from '@core/FlagTooltip';
 import { WarningTooltip } from '@core/WarningTooltip';
 import { FC, ReactElement } from 'react';
 import { IndividualList } from '@restgenerated/models/IndividualList';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 interface IndividualFlagsProps {
-  individual: IndividualList;
+  individual: IndividualList | IndividualDetail;
 }
 
 export const IndividualFlags: FC<IndividualFlagsProps> = ({ individual }) => {

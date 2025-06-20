@@ -32,7 +32,6 @@ interface PaymentPlansFiltersProps {
 }
 
 export const allowedStatusChoices = [
-  //TODO: add pp status choices
   PaymentPlanStatusEnum.ACCEPTED,
   PaymentPlanStatusEnum.DRAFT,
   PaymentPlanStatusEnum.FINISHED,

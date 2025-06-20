@@ -1,19 +1,21 @@
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useArrayToDict } from '@hooks/useArrayToDict';
-import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { useAllEditHouseholdFieldsQuery } from '@generated/graphql';
-import { LoadingComponent } from '@core/LoadingComponent';
-import { householdDataRow } from './householdDataRow';
 import { handleSelected } from '../utils/helpers';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { householdDataRow } from './householdDataRow';
 
 interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketDetail;
@@ -33,7 +35,23 @@ function RequestedHouseholdDataChangeTable({
   values,
 }: RequestedHouseholdDataChangeTableProps): ReactElement {
   const { t } = useTranslation();
-  const { data, loading } = useAllEditHouseholdFieldsQuery();
+  const { businessAreaSlug } = useBaseUrl();
+
+  const { data: householdFieldsData, isLoading: loading } = useQuery({
+    queryKey: ['householdFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
+
+  const { data: countriesData, isLoading: countriesLoading } = useQuery({
+    queryKey: ['countriesList'],
+    queryFn: () => RestService.restLookupsCountryList({}),
+  });
+
   const selectedBioData = values.selected;
   const { selectedFlexFields } = values;
   const householdData = {
@@ -43,13 +61,14 @@ function RequestedHouseholdDataChangeTable({
   delete householdData.flexFields;
   const entries = Object.entries(householdData);
   const entriesFlexFields = Object.entries(flexFields);
-  const fieldsDict = useArrayToDict(
-    data?.allEditHouseholdFieldsAttributes,
+  const fieldsDict = useArrayToDict(householdFieldsData?.results, 'name', '*');
+  const countriesDict = useArrayToDict(
+    countriesData?.results,
+    'isoCode2',
     'name',
-    '*',
   );
-  const countriesDict = useArrayToDict(data?.countriesChoices, 'value', 'name');
-  if (loading || !fieldsDict || !countriesDict) {
+
+  if (loading || countriesLoading || !fieldsDict) {
     return <LoadingComponent />;
   }
 

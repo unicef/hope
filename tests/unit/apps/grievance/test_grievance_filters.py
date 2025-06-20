@@ -121,6 +121,7 @@ class TestGrievanceTicketFilters:
         )
         self.household2, self.individuals2 = create_household_and_individuals(
             household_data={
+                "id": "7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe1",
                 "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2_2,
@@ -131,6 +132,7 @@ class TestGrievanceTicketFilters:
             },
             individuals_data=[
                 {
+                    "id": "b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6",
                     "preferred_language": "en",
                 },
                 {
@@ -434,6 +436,7 @@ class TestGrievanceTicketFilters:
         )
         self.financial_service_provider2 = FinancialServiceProviderFactory(name="Value")
         payment2 = PaymentFactory(
+            id="f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6",
             parent=payment_plan,
             household=self.household2,
             currency="PLN",
@@ -459,6 +462,7 @@ class TestGrievanceTicketFilters:
             ticket=self.grievance_tickets[4],
             household=self.household2,
             individual=self.individuals2[0],
+            payment=payment2,
         )
         self.individual_data_update_ticket = TicketIndividualDataUpdateDetails.objects.create(
             ticket=self.grievance_tickets[5],
@@ -669,6 +673,66 @@ class TestGrievanceTicketFilters:
     ) -> None:
         self._test_filter(
             "household",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe1", 1, 3),
+            ("7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe2", 0, 0),
+        ],
+    )
+    def test_filter_by_household_id(
+        self,
+        filter_value: bool,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "household_id",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6", 1, 3),
+            ("b1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e8", 0, 0),
+        ],
+    )
+    def test_filter_by_individual_id(
+        self,
+        filter_value: bool,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "individual_id",
+            filter_value,
+            expected_count_for_program,
+            expected_count_for_global,
+        )
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count_for_program, expected_count_for_global",
+        [
+            ("f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e6,f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e0", 1, 1),
+            ("f1c2d3e4-f5a6-7b8c-9d0e-f1a2b3c4d5e0", 0, 0),
+        ],
+    )
+    def test_filter_by_payment_record_ids(
+        self,
+        filter_value: bool,
+        expected_count_for_program: int,
+        expected_count_for_global: int,
+    ) -> None:
+        self._test_filter(
+            "payment_record_ids",
             filter_value,
             expected_count_for_program,
             expected_count_for_global,

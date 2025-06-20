@@ -2,10 +2,6 @@ import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { BlackLink } from '@core/BlackLink';
-import {
-  DeduplicationEngineSimilarityPairIndividualNode,
-  DeduplicationResultNode,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   Button,
@@ -45,8 +41,8 @@ const StyledTable = styled(Table)`
 interface DedupeBiographicalBiometricResultsProps {
   individual: IndividualList;
   status: string;
-  results: Array<DeduplicationResultNode>;
-  biometricResults: Array<DeduplicationEngineSimilarityPairIndividualNode>;
+  results: Array<any>;
+  biometricResults: Array<any>;
   isInBatch?: boolean;
 }
 

@@ -8,11 +8,9 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
-import {
-  CreateAccountabilityCommunicationMessageMutationVariables,
-  SamplingChoices,
-  useCreateAccountabilityCommunicationMessageMutation,
-} from '@generated/graphql';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { MessageCreate } from '@restgenerated/models/MessageCreate';
+import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -31,14 +29,12 @@ import {
 } from '@mui/material';
 import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
 import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
-import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useQuery } from '@tanstack/react-query';
 import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
 import { getPercentage } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
@@ -78,7 +74,7 @@ const initialValues = {
   sexCheckbox: false,
   title: '',
   body: '',
-  samplingType: SamplingChoices.FullList,
+  samplingType: SamplingTypeE86Enum.FULL_LIST,
 };
 
 function prepareSampleSizeRequest(
@@ -123,11 +119,17 @@ function prepareSampleSizeRequest(
 
 const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
-  const [mutate, { loading }] =
-    useCreateAccountabilityCommunicationMessageMutation();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: (data: MessageCreate) =>
+      RestService.restBusinessAreasProgramsMessagesCreate({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        requestBody: data,
+      }),
+  });
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();
-  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
 
@@ -321,38 +323,34 @@ const CreateCommunicationPage = (): ReactElement => {
     }
   };
 
-  const prepareMutationVariables = (
-    values,
-  ): CreateAccountabilityCommunicationMessageMutationVariables => ({
-    input: {
-      households: values.households,
-      paymentPlan: values.targetPopulation,
-      registrationDataImport: values.registrationDataImport,
-      samplingType:
-        selectedSampleSizeType === 0
-          ? SamplingChoices.FullList
-          : SamplingChoices.Random,
-      fullListArguments:
-        selectedSampleSizeType === 0
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasFull,
-            }
-          : null,
-      randomSamplingArguments:
-        selectedSampleSizeType === 1
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasRandom,
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
-          : null,
-      title: values.title,
-      body: values.body,
-    },
+  const prepareMutationVariables = (values): MessageCreate => ({
+    title: values.title,
+    body: values.body,
+    households: values.households,
+    paymentPlan: values.targetPopulation,
+    registrationDataImport: values.registrationDataImport,
+    samplingType:
+      selectedSampleSizeType === 0
+        ? SamplingTypeE86Enum.FULL_LIST
+        : SamplingTypeE86Enum.RANDOM,
+    fullListArguments:
+      selectedSampleSizeType === 0
+        ? {
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
+        : null,
+    randomSamplingArguments:
+      selectedSampleSizeType === 1
+        ? {
+            excludedAdminAreas: values.excludedAdminAreasRandom || [],
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            age: values.ageCheckbox
+              ? { min: values.filterAgeMin, max: values.filterAgeMax }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
+        : null,
   });
 
   const dataChangeErrors = (errors): ReactElement[] =>
@@ -376,15 +374,13 @@ const CreateCommunicationPage = (): ReactElement => {
             content: t('Are you sure you want to send this message?'),
           }).then(async () => {
             try {
-              const response = await mutate({
-                variables: prepareMutationVariables(values),
-              });
+              const response = await mutate(prepareMutationVariables(values));
               showMessage(t('Communication Ticket created.'));
               navigate(
-                `/${baseUrl}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
+                `/${baseUrl}/accountability/communication/${response.id}`,
               );
             } catch (e) {
-              e.graphQLErrors.map((x) => showMessage(x.message));
+              showMessage(e.message || t('An error occurred'));
             }
           });
         } else {

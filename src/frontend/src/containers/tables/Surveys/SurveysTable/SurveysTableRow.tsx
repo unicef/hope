@@ -41,10 +41,7 @@ export function SurveysTableRow({
       </TableCell>
       <TableCell align="left">{survey.title}</TableCell>
       <TableCell align="left">{categoryDict[survey.category]}</TableCell>
-      <TableCell align="left">
-        {/* //TODO: */}
-        {/* REST API doesn't include numberOfRecipients field */}
-      </TableCell>
+      <TableCell align="left">{survey.numberOfRecipients || 'N/A'}</TableCell>
       <TableCell align="left">{survey.createdBy}</TableCell>
       <TableCell align="left">
         <UniversalMoment>{survey.createdAt}</UniversalMoment>

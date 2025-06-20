@@ -2,6 +2,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { IndividualFlags } from '@components/population/IndividualFlags';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import { IndividualList } from '@restgenerated/models/IndividualList';
@@ -38,7 +39,7 @@ export const PeopleListTableRow = ({
       data-cy="individual-table-row"
     >
       <TableCell align="left">
-        {/*<IndividualFlags individual={individual} /> TODO REST refactor*/}
+        <IndividualFlags individual={individual} />
       </TableCell>
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>

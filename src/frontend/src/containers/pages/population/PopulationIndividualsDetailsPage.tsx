@@ -7,8 +7,6 @@ import { IndividualAccounts } from '@components/population/IndividualAccounts';
 import { IndividualAdditionalRegistrationInformation } from '@components/population/IndividualAdditionalRegistrationInformation/IndividualAdditionalRegistrationInformation';
 import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
-import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
-import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
@@ -25,6 +23,9 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import { AdminButton } from '@components/core/AdminButton';
+import { IndividualFlags } from '@components/population/IndividualFlags';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 
 const Container = styled.div`
   padding: 20px;
@@ -64,14 +65,19 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         }),
     });
 
-  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } =
-    useQuery<AllIndividualsFlexFieldsAttributesQuery>({
-      queryKey: ['fieldsAttributes'],
-      queryFn: async () => {
-        const data = await FieldsAttributesService.fieldsAttributesRetrieve();
-        return { allIndividualsFlexFieldsAttributes: data };
-      },
-    });
+  const { data: flexFieldsData, isLoading: flexFieldsDataLoading } = useQuery({
+    queryKey: ['fieldsAttributes', businessArea, programId],
+    queryFn: async () => {
+      const data =
+        await RestService.restBusinessAreasProgramsIndividualsAllFlexFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+          },
+        );
+      return { allIndividualsFlexFieldsAttributes: data.results };
+    },
+  });
 
   const { data: grievancesChoices, isLoading: grievancesChoicesLoading } =
     useQuery({
@@ -147,17 +153,15 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
         }
         flags={
           <>
-            {/*<IndividualFlags individual={individual} />  TODO REST refactor*/}
-            {/* //TODO: Rest refactor */}
-            {/* <AdminButton adminUrl={individual?.adminUrl} /> */}
+            <IndividualFlags individual={individual} />
+            <AdminButton adminUrl={individual?.adminUrl} />
           </>
         }
       >
         <Box mr={2}>
-          {/* //TODO: Rest refactor */}
-          {/* {individual?.photo ? (
+          {individual?.photo ? (
             <IndividualPhotoModal individual={individual} />
-          ) : null} */}
+          ) : null}
         </Box>
       </PageHeader>
       <Container>

@@ -25,6 +25,7 @@ from typing import (
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Func, Q, Value
 from django.http import Http404
@@ -34,7 +35,9 @@ from django.utils import timezone
 import pytz
 from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
+from graphene.types.resolver import attr_resolver, dict_resolver
 from PIL import Image
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
@@ -928,3 +931,63 @@ class JSONBSet(Func):
     def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
         create_missing = Value("true") if create_missing else Value("false")  # type: ignore
         super().__init__(expression, path, new_value, create_missing, **extra)
+
+
+def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> List:
+    from hct_mis_api.apps.core.kobo.api import KoboAPI
+    from hct_mis_api.apps.core.kobo.common import reduce_assets_list
+
+    try:
+        assets = KoboAPI(business_area_slug).get_all_projects_data()
+    except ObjectDoesNotExist as e:
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
+        raise ValidationError("Provided business area does not exist.") from e
+    except AttributeError as error:
+        logger.warning(error)
+        raise ValidationError(str(error)) from error
+
+    return reduce_assets_list(assets, only_deployed=only_deployed)
+
+
+def _custom_dict_or_attr_resolver(attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any) -> Any:
+    resolver = attr_resolver
+    if isinstance(root, dict):
+        resolver = dict_resolver
+    return resolver(attname, default_value, root, info, **args)
+
+
+def sort_by_attr(options: Iterable, attrs: str) -> List:
+    def key_extractor(el: Any) -> Any:
+        for attr in attrs.split("."):
+            el = _custom_dict_or_attr_resolver(attr, None, el, None)
+        return el
+
+    return list(sorted(options, key=key_extractor))
+
+
+def get_fields_attr_generators(
+    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
+) -> Generator:
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
+    from hct_mis_api.apps.core.field_attributes.fields_types import (
+        FILTERABLE_TYPES,
+        Scope,
+    )
+    from hct_mis_api.apps.core.models import FlexibleAttribute
+    from hct_mis_api.apps.program.models import Program
+
+    if flex_field is not False:
+        yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
+            "created_at"
+        )
+    if flex_field is not True:
+        if program_id and Program.objects.get(id=program_id).is_social_worker_program:
+            yield from FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING]).filtered_by_types(
+                FILTERABLE_TYPES
+            ).apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
+        else:
+            yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
+                business_area_slug=business_area_slug, program_id=program_id
+            )

@@ -1,18 +1,17 @@
-import { Box, Button, Grid2 as Grid } from '@mui/material';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { partnerAccessChoices } from '@components/programs/constants';
+import { ButtonTooltip } from '@core/ButtonTooltip';
+import { DividerLine } from '@core/DividerLine';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
+import { Box, Button, Grid2 as Grid } from '@mui/material';
+import { AreaTree } from '@restgenerated/models/AreaTree';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Field, FieldArray } from 'formik';
 import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ProgramPartnerAccess } from '@generated/graphql';
-import { AreaTree } from '@restgenerated/models/AreaTree';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ButtonTooltip } from '@core/ButtonTooltip';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { DividerLine } from '@core/DividerLine';
-import { partnerAccessChoices } from '@components/programs/constants';
 import { ProgramPartnerCard } from '../CreateProgram/ProgramPartnerCard';
-import { LoadingButton } from '@components/core/LoadingButton';
 
 interface PartnersStepProps {
   values;
@@ -38,7 +37,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
 
   useEffect(() => {
     if (
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess &&
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS' &&
       values.partners.length === 0
     ) {
       setFieldValue('partners', [
@@ -50,7 +49,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
     }
 
     if (
-      values.partnerAccess !== ProgramPartnerAccess.SelectedPartnersAccess &&
+      values.partnerAccess !== 'SELECTED_PARTNERS_ACCESS' &&
       values.partners.length > 0
     ) {
       setFieldValue('partners', []);
@@ -109,8 +108,7 @@ export const PartnersStep: FC<PartnersStepProps> = ({
                   />
                 ))}
                 <Box display="flex">
-                  {values.partnerAccess ===
-                    ProgramPartnerAccess.SelectedPartnersAccess && (
+                  {values.partnerAccess === 'SELECTED_PARTNERS_ACCESS' && (
                     <ButtonTooltip
                       disabled={addPartnerDisabled}
                       data-cy="button-add-partner"

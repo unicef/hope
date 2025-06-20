@@ -84,6 +84,8 @@ class HouseholdFilter(FilterSet):
     document_number = CharFilter(method="document_number_filter")
     head_of_household__full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr="startswith")
     head_of_household__phone_no_valid = BooleanFilter(method="phone_no_valid_filter")
+    sex = CharFilter(field_name="head_of_household__sex")
+    phone_no = CharFilter(field_name="head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"])
     last_registration_date = filters.DateFromToRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
@@ -93,10 +95,14 @@ class HouseholdFilter(FilterSet):
     admin1 = CharFilter(method="admin_field_filter", field_name="admin1")
     admin2 = CharFilter(method="admin_field_filter", field_name="admin2")
     address = CharFilter(field_name="address", lookup_expr="icontains")
+    survey = CharFilter(method="filter_survey")
+    message_id = CharFilter(method="filter_message_id")
+    recipient_id = CharFilter(method="filter_recipient_id")
 
     class Meta:
         model = Household
         fields = {
+            "unicef_id": ["exact"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
             "admin1": ["exact"],
@@ -275,6 +281,15 @@ class HouseholdFilter(FilterSet):
 
     def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
         return qs.filter(**{field_name: value})
+
+    def filter_survey(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
+        return queryset.filter(surveys__id=value)
+
+    def filter_message_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
+        return queryset.filter(messages__id=value)
+
+    def filter_recipient_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
+        return queryset.filter(head_of_household_id=value)
 
 
 class IndividualFilter(FilterSet):

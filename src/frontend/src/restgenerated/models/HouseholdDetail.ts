@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AreaSimple } from './AreaSimple';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { HeadOfHousehold } from './HeadOfHousehold';
 import type { RegistrationDataImport } from './RegistrationDataImport';
@@ -10,10 +11,10 @@ export type HouseholdDetail = {
     readonly id: string;
     unicefId: string | null;
     headOfHousehold: HeadOfHousehold;
-    admin1?: string;
-    admin2?: string;
-    admin3?: string;
-    admin4?: string;
+    admin1: AreaSimple;
+    admin2: AreaSimple;
+    admin3: AreaSimple;
+    admin4: AreaSimple;
     program: string;
     country?: string;
     countryOrigin?: string;
@@ -320,6 +321,10 @@ export type HouseholdDetail = {
      */
     maleAgeGroup60DisabledCount?: number | null;
     /**
+     * Household other sex group count
+     */
+    otherSexGroupCount?: number | null;
+    /**
      * Data collection start date
      */
     start?: string | null;
@@ -359,5 +364,6 @@ export type HouseholdDetail = {
      * Beneficiary Program Registration id [sys]
      */
     programRegistrationId?: string | null;
+    readonly deliveredQuantities: Record<string, any>;
 };
 
