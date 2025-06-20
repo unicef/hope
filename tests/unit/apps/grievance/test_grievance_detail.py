@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List, Optional
 
 from django.utils import timezone
 
@@ -755,10 +755,35 @@ class TestGrievanceTicketDetail:
             "household": {
                 "id": str(golden_records_individual.household.id),
                 "unicef_id": golden_records_individual.household.unicef_id,
+                "admin1": {
+                    "id": str(golden_records_individual.household.admin1.id),
+                    "name": golden_records_individual.household.admin1.name,
+                },
                 "admin2": {
                     "id": str(golden_records_individual.household.admin2.id),
                     "name": golden_records_individual.household.admin2.name,
                 },
+                "admin3": None,
+                "admin4": None,
+                "country": golden_records_individual.household.country.name,
+                "country_origin": golden_records_individual.household.country_origin.name,
+                "address": golden_records_individual.household.address,
+                "village": golden_records_individual.household.village,
+                "geopoint": golden_records_individual.household.geopoint,
+                "first_registration_date": f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "last_registration_date": f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "total_cash_received": golden_records_individual.household.total_cash_received,
+                "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
+                "delivered_quantities": [
+                    {
+                        "currency": "USD",
+                        "total_delivered_quantity": "0.00",
+                    }
+                ],
+                "start": f"{golden_records_individual.household.start:%Y-%m-%dT%H:%M:%SZ}",
+                "zip_code": golden_records_individual.household.zip_code,
+                "residence_status": golden_records_individual.household.residence_status,
+                "import_id": golden_records_individual.household.unicef_id,
             },
             "deduplication_golden_record_results": [
                 {
@@ -828,6 +853,8 @@ class TestGrievanceTicketDetail:
         payment = PaymentFactory(
             parent=payment_plan,
             household=self.household1,
+            delivered_quantity_usd=50,
+            delivered_quantity=100,
             currency="PLN",
         )
         payment_verification = PaymentVerificationFactory(
@@ -865,7 +892,14 @@ class TestGrievanceTicketDetail:
         assert response.status_code == status.HTTP_200_OK
         data = response.data
 
-        self._assert_base_grievance_data(data, grievance_ticket)
+        self._assert_base_grievance_data(
+            data,
+            grievance_ticket,
+            delivered_quantities=[
+                {"currency": "USD", "total_delivered_quantity": "50.00"},
+                {"currency": "PLN", "total_delivered_quantity": "100.00"},
+            ],
+        )
 
         assert data["payment_record"] == {
             "id": str(payment.id),
@@ -1018,10 +1052,35 @@ class TestGrievanceTicketDetail:
             "household": {
                 "id": str(golden_records_individual.household.id),
                 "unicef_id": golden_records_individual.household.unicef_id,
+                "admin1": {
+                    "id": str(golden_records_individual.household.admin1.id),
+                    "name": golden_records_individual.household.admin1.name,
+                },
                 "admin2": {
                     "id": str(golden_records_individual.household.admin2.id),
                     "name": golden_records_individual.household.admin2.name,
                 },
+                "admin3": None,
+                "admin4": None,
+                "country": golden_records_individual.household.country.name,
+                "country_origin": golden_records_individual.household.country_origin.name,
+                "address": golden_records_individual.household.address,
+                "village": golden_records_individual.household.village,
+                "geopoint": golden_records_individual.household.geopoint,
+                "first_registration_date": f"{golden_records_individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "last_registration_date": f"{golden_records_individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "total_cash_received": golden_records_individual.household.total_cash_received,
+                "total_cash_received_usd": golden_records_individual.household.total_cash_received_usd,
+                "delivered_quantities": [
+                    {
+                        "currency": "USD",
+                        "total_delivered_quantity": "0.00",
+                    }
+                ],
+                "start": f"{golden_records_individual.household.start:%Y-%m-%dT%H:%M:%SZ}",
+                "zip_code": golden_records_individual.household.zip_code,
+                "residence_status": golden_records_individual.household.residence_status,
+                "import_id": golden_records_individual.household.unicef_id,
             },
             "deduplication_golden_record_results": [
                 {
@@ -1065,10 +1124,35 @@ class TestGrievanceTicketDetail:
             "household": {
                 "id": str(self.individuals2[0].household.id),
                 "unicef_id": self.individuals2[0].household.unicef_id,
+                "admin1": {
+                    "id": str(self.individuals2[0].household.admin1.id),
+                    "name": self.individuals2[0].household.admin1.name,
+                },
                 "admin2": {
                     "id": str(self.individuals2[0].household.admin2.id),
                     "name": self.individuals2[0].household.admin2.name,
                 },
+                "admin3": None,
+                "admin4": None,
+                "country": self.individuals2[0].household.country.name,
+                "country_origin": self.individuals2[0].household.country_origin.name,
+                "address": self.individuals2[0].household.address,
+                "village": self.individuals2[0].household.village,
+                "geopoint": self.individuals2[0].household.geopoint,
+                "first_registration_date": f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "last_registration_date": f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "total_cash_received": self.individuals2[0].household.total_cash_received,
+                "total_cash_received_usd": self.individuals2[0].household.total_cash_received_usd,
+                "delivered_quantities": [
+                    {
+                        "currency": "USD",
+                        "total_delivered_quantity": "0.00",
+                    }
+                ],
+                "start": f"{self.individuals2[0].household.start:%Y-%m-%dT%H:%M:%SZ}",
+                "zip_code": self.individuals2[0].household.zip_code,
+                "residence_status": self.individuals2[0].household.residence_status,
+                "import_id": self.individuals2[0].household.unicef_id,
             },
             "deduplication_golden_record_results": [],
             "documents": [],
@@ -1085,10 +1169,35 @@ class TestGrievanceTicketDetail:
                 "household": {
                     "id": str(self.individuals2[0].household.id),
                     "unicef_id": self.individuals2[0].household.unicef_id,
+                    "admin1": {
+                        "id": str(self.individuals2[0].household.admin1.id),
+                        "name": self.individuals2[0].household.admin1.name,
+                    },
                     "admin2": {
                         "id": str(self.individuals2[0].household.admin2.id),
                         "name": self.individuals2[0].household.admin2.name,
                     },
+                    "admin3": None,
+                    "admin4": None,
+                    "country": self.individuals2[0].household.country.name,
+                    "country_origin": self.individuals2[0].household.country_origin.name,
+                    "address": self.individuals2[0].household.address,
+                    "village": self.individuals2[0].household.village,
+                    "geopoint": self.individuals2[0].household.geopoint,
+                    "first_registration_date": f"{self.individuals2[0].household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.individuals2[0].household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": self.individuals2[0].household.total_cash_received,
+                    "total_cash_received_usd": self.individuals2[0].household.total_cash_received_usd,
+                    "delivered_quantities": [
+                        {
+                            "currency": "USD",
+                            "total_delivered_quantity": "0.00",
+                        }
+                    ],
+                    "start": f"{self.individuals2[0].household.start:%Y-%m-%dT%H:%M:%SZ}",
+                    "zip_code": self.individuals2[0].household.zip_code,
+                    "residence_status": self.individuals2[0].household.residence_status,
+                    "import_id": self.individuals2[0].household.unicef_id,
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
@@ -1106,10 +1215,35 @@ class TestGrievanceTicketDetail:
                 "household": {
                     "id": str(duplicate.household.id),
                     "unicef_id": duplicate.household.unicef_id,
+                    "admin1": {
+                        "id": str(duplicate.household.admin1.id),
+                        "name": duplicate.household.admin1.name,
+                    },
                     "admin2": {
                         "id": str(duplicate.household.admin2.id),
                         "name": duplicate.household.admin2.name,
                     },
+                    "admin3": None,
+                    "admin4": None,
+                    "country": duplicate.household.country.name,
+                    "country_origin": duplicate.household.country_origin.name,
+                    "address": duplicate.household.address,
+                    "village": duplicate.household.village,
+                    "geopoint": duplicate.household.geopoint,
+                    "first_registration_date": f"{duplicate.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{duplicate.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": duplicate.household.total_cash_received,
+                    "total_cash_received_usd": duplicate.household.total_cash_received_usd,
+                    "delivered_quantities": [
+                        {
+                            "currency": "USD",
+                            "total_delivered_quantity": "0.00",
+                        }
+                    ],
+                    "start": f"{duplicate.household.start:%Y-%m-%dT%H:%M:%SZ}",
+                    "zip_code": duplicate.household.zip_code,
+                    "residence_status": duplicate.household.residence_status,
+                    "import_id": duplicate.household.unicef_id,
                 },
                 "deduplication_golden_record_results": [],
                 "documents": [],
@@ -1197,7 +1331,9 @@ class TestGrievanceTicketDetail:
 
         grievance_ticket.linked_tickets.add(self.linked_ticket)
 
-    def _assert_base_grievance_data(self, data: Dict, grievance_ticket: GrievanceTicket) -> None:
+    def _assert_base_grievance_data(
+        self, data: Dict, grievance_ticket: GrievanceTicket, delivered_quantities: Optional[List] = None
+    ) -> None:
         assert data["id"] == str(grievance_ticket.id)
         assert data["unicef_id"] == grievance_ticket.unicef_id
         assert data["status"] == grievance_ticket.status
@@ -1315,10 +1451,8 @@ class TestGrievanceTicketDetail:
                     "last_registration_date": "2025-04-08T02:47:04Z",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
-                    "delivered_quantities": [
-                        {"currency": "USD", "total_delivered_quantity": "366.00"},
-                        {"currency": "PLN", "total_delivered_quantity": "2243.00"},
-                    ],
+                    "delivered_quantities": delivered_quantities
+                    or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
                     "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "zip_code": None,
                     "residence_status": individual.household.residence_status,
@@ -1336,10 +1470,31 @@ class TestGrievanceTicketDetail:
                         "household": {
                             "id": str(role.household.id),
                             "unicef_id": role.household.unicef_id,
+                            "admin1": {
+                                "id": str(role.household.admin1.id),
+                                "name": role.household.admin1.name,
+                            },
                             "admin2": {
                                 "id": str(role.household.admin2.id),
                                 "name": role.household.admin2.name,
                             },
+                            "admin3": None,
+                            "admin4": None,
+                            "country": role.household.country.name,
+                            "country_origin": role.household.country_origin.name,
+                            "address": role.household.address,
+                            "village": role.household.village,
+                            "geopoint": role.household.geopoint,
+                            "first_registration_date": f"{role.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                            "last_registration_date": f"{role.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                            "total_cash_received": role.household.total_cash_received,
+                            "total_cash_received_usd": role.household.total_cash_received_usd,
+                            "delivered_quantities": delivered_quantities
+                            or [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                            "start": f"{role.household.start:%Y-%m-%dT%H:%M:%SZ}",
+                            "zip_code": role.household.zip_code,
+                            "residence_status": role.household.residence_status,
+                            "import_id": role.household.unicef_id,
                         },
                     }
                     for role in individual.households_and_roles(manager="all_merge_status_objects").all()
