@@ -1495,7 +1495,6 @@ class TestIndividualFilter:
 
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(individual2.id)
-        return response_data
 
     @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
     def test_search_by_bank_account_number(self) -> None:
