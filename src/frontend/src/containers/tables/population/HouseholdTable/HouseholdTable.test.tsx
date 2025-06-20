@@ -24,7 +24,10 @@ describe('HouseholdTable', () => {
         id: 'household-1',
         unicefId: 'HH-001',
         headOfHousehold: 'John Doe',
-        admin1: 'Province 1',
+        admin1: {
+          id: 'admin2-1',
+          name: 'District 1',
+        },
         admin2: {
           id: 'admin2-1',
           name: 'District 1',
