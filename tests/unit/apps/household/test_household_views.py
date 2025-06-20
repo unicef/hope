@@ -826,8 +826,8 @@ class TestHouseholdMembers:
                     "admin2": None,
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": "2025-05-13T00:48:47Z",
-                    "last_registration_date": "2025-05-21T04:55:29Z",
+                    "first_registration_date": f"{self.household1.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
@@ -858,8 +858,8 @@ class TestHouseholdMembers:
                     "admin2": None,
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": "2025-04-10T14:41:43Z",
-                    "last_registration_date": "2025-04-11T15:13:10Z",
+                    "first_registration_date": f"{self.household2.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household2.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
@@ -992,7 +992,10 @@ class TestHouseholdGlobalViewSet:
             assert household_result_first["id"] == str(household.id)
             assert household_result_first["unicef_id"] == household.unicef_id
             assert household_result_first["head_of_household"] == household.head_of_household.full_name
-            assert household_result_first["admin1"] == {"id": str(household.admin1.id), "name": household.admin1.name}
+            assert household_result_first["admin1"] == {
+                "id": str(household.admin1.id),
+                "name": household.admin1.name,
+            }
             assert household_result_first["admin2"] == {
                 "id": str(household.admin2.id),
                 "name": household.admin2.name,
