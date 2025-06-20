@@ -100,7 +100,7 @@ export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
               {t('Select Files to Upload')}
               <GreyText>
                 {t(
-                  'The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be \\u2264 10MB.',
+                  'The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.',
                 )}
               </GreyText>
             </Box>

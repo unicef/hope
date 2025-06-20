@@ -1,17 +1,23 @@
 import { useTranslation } from 'react-i18next';
 import { Field } from 'formik';
-import { useBusinessAreaDataQuery } from '@generated/graphql';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 export function ScreenBeneficiaryField(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasRetrieve({
+        slug: businessArea,
+      }),
   });
-  if (!businessAreaData?.businessArea?.screenBeneficiary) {
+  if (!businessAreaData?.screenBeneficiary) {
     return null;
   }
   return (

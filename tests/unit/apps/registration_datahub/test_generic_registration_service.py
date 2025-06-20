@@ -2,7 +2,7 @@ import datetime
 import json
 from typing import Union
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -11,6 +11,7 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     ROLE_ALTERNATE,
@@ -35,10 +36,10 @@ from hct_mis_api.contrib.aurora.services.generic_registration_service import (
 
 class TestGenericRegistrationService(TestCase):
     databases = {"default"}
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(cls) -> None:
+        call_command("init-geo-fixtures")
         DocumentType.objects.create(key="tax_id", label="Tax ID")
         DocumentType.objects.create(key="disability_certificate", label="Disability Certificate")
         cls.business_area = BusinessAreaFactory(slug="generic-slug")
@@ -49,6 +50,9 @@ class TestGenericRegistrationService(TestCase):
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
+        admin1 = AreaFactory(p_code="UA07", name="Name1")
+        admin2 = AreaFactory(p_code="UA0702", name="Name2", parent=admin1)
+        AreaFactory(p_code="UA0114007", name="Name3", parent=admin2)
 
         mapping = {
             "defaults": {"business_area": "ukraine", "country": "UA"},

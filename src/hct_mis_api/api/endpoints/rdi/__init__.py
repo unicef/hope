@@ -1,9 +1,7 @@
-from hct_mis_api.api.endpoints.rdi.base import (  # noqa: F401
-    CompleteRDIView,
-    CreateRDIView,
-    PushLaxToRDIView,
-    PushToRDIView,
-)
+from hct_mis_api.api.endpoints.rdi.base import CompleteRDIView  # noqa: F401
+from hct_mis_api.api.endpoints.rdi.base import CreateRDIView  # noqa: F401
+from hct_mis_api.api.endpoints.rdi.base import PushLaxToRDIView  # noqa: F401
+from hct_mis_api.api.endpoints.rdi.base import PushToRDIView  # noqa: F401
 from hct_mis_api.api.endpoints.rdi.delegate_people import (  # noqa: F401
     DelegatePeopleRDIView,
 )

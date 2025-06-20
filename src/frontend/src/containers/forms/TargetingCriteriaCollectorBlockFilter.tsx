@@ -1,4 +1,4 @@
-import { AllCollectorFieldsAttributesQuery } from '@generated/graphql';
+import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
 import { FieldChooser } from '@components/targeting/FieldChooser';
 import SubField from '@components/targeting/SubField';
 import { ReactElement } from 'react';
@@ -15,7 +15,7 @@ function TargetingCriteriaCollectorBlockFilter({
 }: {
   blockIndex: number;
   index: number;
-  data: AllCollectorFieldsAttributesQuery;
+  data: PaginatedCollectorAttributeList;
   each;
   choicesDict;
   onChange: (e, object) => void;
@@ -25,7 +25,7 @@ function TargetingCriteriaCollectorBlockFilter({
     <div>
       <FieldChooser
         index={index}
-        choices={data.allCollectorFieldsAttributes}
+        choices={data.results}
         fieldName={each.fieldName}
         onChange={onChange}
         onDelete={onDelete}

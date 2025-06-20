@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, handleApiResponse, handleMutationError } from './api';
 import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
 export const fetchRegistrationDataImports = async (
@@ -6,19 +6,25 @@ export const fetchRegistrationDataImports = async (
   programId: string,
   params = {},
 ): Promise<RegistrationDataImportList> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/registration-data/registration-data-imports/`,
-    params,
+  return handleApiResponse(
+    api.get(
+      `${businessAreaSlug}/programs/${programId}/registration-data/registration-data-imports/`,
+      params,
+    ),
   );
-  return response;
 };
 
 export const runDeduplicationDataImports = async (
   businessAreaSlug: string,
   programId: string,
 ): Promise<any> => {
-  return api.post(
-    `${businessAreaSlug}/programs/${programId}/registration-data/registration-data-imports/run-deduplication/`,
-    {},
-  );
+  try {
+    const response = await api.post(
+      `${businessAreaSlug}/programs/${programId}/registration-data/registration-data-imports/run-deduplication/`,
+      {},
+    );
+    return response.data;
+  } catch (error) {
+    handleMutationError(error, 'run deduplication data imports');
+  }
 };

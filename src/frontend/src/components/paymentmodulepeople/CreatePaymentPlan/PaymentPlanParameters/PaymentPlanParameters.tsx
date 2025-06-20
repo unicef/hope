@@ -1,15 +1,18 @@
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
-import { useTargetPopulationLazyQuery } from '@generated/graphql';
 import { Grid2 as Grid, Typography } from '@mui/material';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { tomorrow } from '@utils/utils';
 import { Field } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { CalendarTodayRounded } from '@mui/icons-material';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentPlanParametersProps {
   values;
@@ -21,18 +24,29 @@ export const PaymentPlanParameters = ({
   paymentPlan,
 }: PaymentPlanParametersProps): ReactElement => {
   const { t } = useTranslation();
-  const [loadTargetPopulation, { data, loading }] =
-    useTargetPopulationLazyQuery();
+  const { businessArea, programId } = useBaseUrl();
 
-  useEffect(() => {
-    if (values.targetingId) {
-      loadTargetPopulation({
-        variables: {
-          id: values.targetingId,
-        },
-      });
-    }
-  }, [values.targetingId, loadTargetPopulation]);
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['targetPopulation', values.targetingId, businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: values.targetingId,
+      }),
+    enabled: !!values.targetingId && !!businessArea && !!programId,
+  });
+
+  const { data: programData, isLoading: loadingProgram } =
+    useQuery<ProgramDetail>({
+      queryKey: ['program', businessArea, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsRetrieve({
+          businessAreaSlug: businessArea,
+          slug: programId,
+        }),
+      enabled: !!businessArea && !!programId,
+    });
 
   return (
     <PaperContainer>
@@ -47,9 +61,14 @@ export const PaymentPlanParameters = ({
               label={t('Start Date')}
               component={FormikDateField}
               required
-              minDate={data?.paymentPlan?.program?.startDate}
-              maxDate={values.endDate || data?.paymentPlan?.program?.endDate}
-              disabled={!data || loading || Boolean(paymentPlan?.isFollowUp)}
+              minDate={programData?.startDate}
+              maxDate={values.endDate || programData?.endDate}
+              disabled={
+                !data ||
+                loading ||
+                loadingProgram ||
+                Boolean(paymentPlan?.isFollowUp)
+              }
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
               dataCy="input-start-date"
@@ -65,7 +84,7 @@ export const PaymentPlanParameters = ({
               component={FormikDateField}
               required
               minDate={values.startDate}
-              maxDate={data?.paymentPlan?.program?.endDate}
+              maxDate={programData?.endDate}
               disabled={!values.startDate || Boolean(paymentPlan?.isFollowUp)}
               initialFocusedDate={values.startDate}
               fullWidth
@@ -90,7 +109,7 @@ export const PaymentPlanParameters = ({
               label={t('Dispersion Start Date')}
               component={FormikDateField}
               required
-              disabled={!data || loading}
+              disabled={!data || loading || loadingProgram}
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
               dataCy="input-dispersion-start-date"

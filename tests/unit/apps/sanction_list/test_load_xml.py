@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -14,7 +15,10 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 @pytest.mark.elasticsearch
 class TestLoadXML(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        call_command("init-geo-fixtures")
 
     def test_execute(self) -> None:
         main_test_files_path = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"

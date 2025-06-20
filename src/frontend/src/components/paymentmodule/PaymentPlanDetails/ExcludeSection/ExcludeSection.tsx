@@ -12,10 +12,9 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanDocument,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
   useExcludeHouseholdsPpMutation,
 } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -27,10 +26,11 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 function ExcludeSection({
@@ -64,7 +64,8 @@ function ExcludeSection({
     permissions,
   );
   const hasOpenOrLockedStatus =
-    status === PaymentPlanStatus.Locked || status === PaymentPlanStatus.Open;
+    status === PaymentPlanStatusEnum.LOCKED ||
+    status === PaymentPlanStatusEnum.OPEN;
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {

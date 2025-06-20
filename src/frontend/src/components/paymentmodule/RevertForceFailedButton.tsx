@@ -1,17 +1,22 @@
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Field, Form, Formik } from 'formik';
-import * as Yup from 'yup';
-import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import { RevertMarkPaymentAsFailed } from '@restgenerated/models/RevertMarkPaymentAsFailed';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
-import { useRevertMarkPayAsFailedMutation } from '@generated/graphql';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useMutation } from '@tanstack/react-query';
+import { Field, Form, Formik } from 'formik';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import * as Yup from 'yup';
 
 export interface RevertForceFailedButtonProps {
   paymentId: string;
@@ -23,9 +28,43 @@ export function RevertForceFailedButton({
 }: RevertForceFailedButtonProps): ReactElement {
   const { t } = useTranslation();
   const [isOpenModal, setOpenModal] = useState(false);
+  const { businessArea, programId } = useBaseUrl();
+  const { paymentPlanId } = useParams();
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useRevertMarkPayAsFailedMutation();
-
+  const {
+    mutateAsync: revertMarkAsFailed,
+    isPending: loadingRevertMarkAsFailed,
+  } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      paymentPlanId: ppId,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      paymentPlanId: string;
+      programSlug: string;
+      requestBody: RevertMarkPaymentAsFailed;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansPaymentsRevertMarkAsFailedCreate(
+        {
+          businessAreaSlug,
+          paymentId: id,
+          paymentPlanId: ppId,
+          programSlug,
+          requestBody,
+        },
+      ),
+    onSuccess: () => {
+      showMessage(t('Force failed has been reverted.'));
+    },
+    onError: (error) => {
+      showMessage(t('Failed to mark the payment as failed.'));
+      console.error(error);
+    },
+  });
   const validationSchema = Yup.object().shape({
     deliveredQuantity: Yup.number()
       .min(0)
@@ -33,21 +72,20 @@ export function RevertForceFailedButton({
     deliveryDate: Yup.date().required(t('Delivery date is required')),
   });
 
-  const submit = async (values, { resetForm }): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          paymentId,
-          deliveredQuantity: values.deliveredQuantity,
-          deliveryDate: values.deliveryDate,
-        },
-      });
-      setOpenModal(false);
-      showMessage(t('Force failed has been reverted.'));
-      resetForm();
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-    }
+  const submit = (formValues: {
+    deliveredQuantity: number;
+    deliveryDate: string;
+  }): void => {
+    revertMarkAsFailed({
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      paymentPlanId,
+      id: paymentId,
+      requestBody: {
+        deliveredQuantity: formValues.deliveredQuantity,
+        deliveryDate: formValues.deliveryDate,
+      },
+    });
   };
 
   return (
@@ -69,7 +107,7 @@ export function RevertForceFailedButton({
           deliveryDate: '',
         }}
         validationSchema={validationSchema}
-        onSubmit={submit}
+        onSubmit={(formValues) => submit(formValues)}
       >
         {({ submitForm, resetForm }) => (
           <Dialog
@@ -113,16 +151,16 @@ export function RevertForceFailedButton({
                 >
                   {t('CANCEL')}
                 </Button>
-                <Button
+                <LoadingButton
                   type="submit"
                   color="primary"
                   variant="contained"
                   onClick={submitForm}
                   data-cy="button-submit"
-                  disabled={loading}
+                  loading={loadingRevertMarkAsFailed}
                 >
                   {t('Revert mark as failed')}
-                </Button>
+                </LoadingButton>
               </DialogActions>
             </DialogFooter>
           </Dialog>

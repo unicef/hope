@@ -1,6 +1,6 @@
-from hct_mis_api.config.settings import DEBUG, INSTALLED_APPS, MIDDLEWARE
+from hct_mis_api.config.settings import DEBUG, INSTALLED_APPS, IS_TEST, MIDDLEWARE
 
-if DEBUG:
+if DEBUG and not IS_TEST:
     from constance import config
 
     INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]

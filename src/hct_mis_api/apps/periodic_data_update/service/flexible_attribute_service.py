@@ -1,9 +1,8 @@
 from typing import Any, Dict
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.periodic_data_update.signals import (
     increment_periodic_field_version_cache,
@@ -20,7 +19,7 @@ class FlexibleAttributeForPDUService:
     @staticmethod
     def _validate_pdu_data(pdu_data: Dict) -> None:
         if pdu_data["number_of_rounds"] != len(pdu_data["rounds_names"]):
-            raise GraphQLError("Number of rounds does not match the number of round names")
+            raise ValidationError("Number of rounds does not match the number of round names.")
 
     def create_pdu_flex_attribute(self, pdu_field: dict) -> FlexibleAttribute:
         pdu_data = pdu_field.pop("pdu_data")
@@ -66,8 +65,7 @@ class FlexibleAttributeForPDUService:
         self._validate_pdu_names_in_batch()
         flexible_attribute_ids_to_preserve = []
         for pdu_field in self.pdu_fields:
-            if flexible_attribute_id_encoded := pdu_field.pop("id", None):
-                flexible_attribute_id = decode_id_string(flexible_attribute_id_encoded)
+            if flexible_attribute_id := pdu_field.pop("id", None):
                 self.update_pdu_flex_attribute(pdu_field, flexible_attribute_id)
                 flexible_attribute_ids_to_preserve.append(flexible_attribute_id)
             else:
@@ -86,8 +84,7 @@ class FlexibleAttributeForPDUService:
 
     def increase_pdu_rounds_for_program_with_rdi(self) -> None:
         for pdu_field in self.pdu_fields:
-            if flexible_attribute_id_encoded := pdu_field.pop("id", None):
-                flexible_attribute_id = decode_id_string(flexible_attribute_id_encoded)
+            if flexible_attribute_id := pdu_field.pop("id", None):
                 flexible_attribute_object = FlexibleAttribute.objects.get(id=flexible_attribute_id)
                 pdu_data_object = flexible_attribute_object.pdu_data
 
@@ -106,7 +103,7 @@ class FlexibleAttributeForPDUService:
     def _validate_pdu_names_in_batch(self) -> None:
         pdu_names = [pdu_field["name"] for pdu_field in self.pdu_fields]
         if len(pdu_names) != len(set(pdu_names)):
-            raise GraphQLError("Time Series Field names must be unique.")
+            raise ValidationError("Time Series Field names must be unique.")
 
     def _populate_names_and_labels(self) -> None:
         for pdu_field in self.pdu_fields:
@@ -120,6 +117,8 @@ class FlexibleAttributeForPDUService:
         new_number_of_rounds = pdu_data["number_of_rounds"]
         new_rounds_names = pdu_data["rounds_names"]
         if new_number_of_rounds <= current_number_of_rounds:
-            raise GraphQLError("It is not possible to decrease the number of rounds for a Program with RDI or TP")
+            raise ValidationError("It is not possible to decrease the number of rounds for a Program with RDI or TP.")
         if current_rounds_names != new_rounds_names[:current_number_of_rounds]:
-            raise GraphQLError("It is not possible to change the names of existing rounds for a Program with RDI or TP")
+            raise ValidationError(
+                "It is not possible to change the names of existing rounds for a Program with RDI or TP."
+            )

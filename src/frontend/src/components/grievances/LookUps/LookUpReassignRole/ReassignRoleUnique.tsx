@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  GrievanceTicketDocument,
-  useReassignRoleGrievanceMutation,
-} from '@generated/graphql';
 import { Button } from '@mui/material';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRole';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const ReassignRoleButton = styled(Button)`
   padding: 25px;
@@ -28,44 +28,64 @@ const ReassignRoleButton = styled(Button)`
 
 export function ReassignRoleUnique({
   individualRole,
-  ticket,
   household,
   individual,
+}: {
+  individualRole: any;
+  household: any;
+  individual: any;
 }): ReactElement {
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { id } = useParams(); // This is the grievanceTicketId
   const { showMessage } = useSnackbar();
-  const [mutate] = useReassignRoleGrievanceMutation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: reassignRoleMutation, isPending: isReassigningRole } =
+    useMutation({
+      mutationFn: (requestBody: GrievanceReassignRole) =>
+        RestService.restBusinessAreasGrievanceTicketsReassignRoleCreate({
+          businessAreaSlug: businessArea,
+          id: id,
+          requestBody,
+        }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasGrievanceTicketsRetrieve', businessArea, id],
+        });
+        showMessage(t('Role Reassigned'));
+      },
+      onError: (error: any) => {
+        const errorMessage =
+          error?.body?.errors?.[0]?.message ||
+          error?.body?.errors ||
+          error?.message ||
+          'An error occurred while reassigning role.';
+        showMessage(errorMessage);
+      },
+    });
 
   return (
     <Formik
-      initialValues={{
-        grievanceTicketId: ticket.id,
-        selectedHousehold: household,
-        selectedIndividual: individual,
-        role: individualRole.role,
-      }}
-      onSubmit={async (values) => {
+      initialValues={
+        {
+          // selectedHousehold: household, // Not needed if passed directly in onSubmit
+          // selectedIndividual: individual, // Not needed if passed directly in onSubmit
+          // role: individualRole.role, // Not needed if passed directly in onSubmit
+        }
+      }
+      onSubmit={async () => {
+        const requestBody: GrievanceReassignRole = {
+          householdId: household.id, // Directly use prop
+          individualId: individual.id, // Directly use prop
+          role: individualRole.role, // Directly use prop
+        };
         try {
-          await mutate({
-            variables: {
-              grievanceTicketId: id,
-              householdId: values.selectedHousehold.id,
-              individualId: values.selectedIndividual.id,
-              role: values.role,
-            },
-            refetchQueries: () => [
-              {
-                query: GrievanceTicketDocument,
-                variables: { id: ticket.id },
-              },
-            ],
-          });
-          showMessage('Role Reassigned');
+          await reassignRoleMutation(requestBody);
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          console.error('Reassign role failed:', e);
         }
       }}
     >
@@ -76,8 +96,11 @@ export function ReassignRoleUnique({
           onClick={submitForm}
           data-cy="button-submit"
           variant="contained"
+          disabled={isReassigningRole}
         >
-          {t(`Reassign To Unique ${beneficiaryGroup?.memberLabel}`)}
+          {isReassigningRole
+            ? t('Reassigning...')
+            : t(`Reassign To Unique ${beneficiaryGroup?.memberLabel}`)}
         </ReassignRoleButton>
       )}
     </Formik>

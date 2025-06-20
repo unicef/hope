@@ -11,13 +11,13 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
   PaymentPlanDocument,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
   useImportXlsxPpListMutation,
 } from '@generated/graphql';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { DropzoneField } from '@core/DropzoneField';
 import { useProgramContext } from '../../../../programContext';
 import { LoadingButton } from '@core/LoadingButton';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -25,7 +25,7 @@ const Error = styled.div`
 `;
 
 interface ImportXlsxPaymentPlanPaymentListProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
 }
 
@@ -78,7 +78,7 @@ export function ImportXlsxPaymentPlanPaymentList({
   );
 
   const shouldDisableUpload =
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan.status !== PaymentPlanStatusEnum.LOCKED ||
     !canUploadFile ||
     !isActiveProgram;
 

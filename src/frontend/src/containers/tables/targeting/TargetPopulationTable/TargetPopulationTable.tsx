@@ -1,18 +1,18 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  AllTargetPopulationsQueryVariables,
-  PaymentPlanNode,
-  useAllTargetPopulationsQuery,
-} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
+import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
-import { UniversalTable } from '../../UniversalTable';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { createApiParams } from '@utils/apiUtils';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
-import { useProgramContext } from 'src/programContext';
 
 interface TargetPopulationProps {
   filter;
@@ -44,18 +44,61 @@ export function TargetPopulationTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables: AllTargetPopulationsQueryVariables = {
-    name: filter.name,
-    totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
-    totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
-    status: filter.status,
-    businessArea,
-    program: programId,
-    createdAtRange: JSON.stringify({
-      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+  const initialQueryVariables = useMemo(
+    () => ({
+      name: filter.name,
+      totalHouseholdsCountMin: filter.totalHouseholdsCountMin || null,
+      totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
+      status: filter.status,
+      createdAtRange: JSON.stringify({
+        min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+        max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+      }),
+      businessAreaSlug: businessArea,
+      programSlug: programId,
     }),
-  };
+    [
+      filter.name,
+      filter.totalHouseholdsCountMin,
+      filter.totalHouseholdsCountMax,
+      filter.status,
+      filter.createdAtRangeMin,
+      filter.createdAtRangeMax,
+      businessArea,
+      programId,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const {
+    data: targetPopulationsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedTargetPopulationListList>({
+    queryKey: [
+      'businessAreasProgramsTargetPopulationsList',
+      businessArea,
+      programId,
+      queryVariables,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsTargetPopulationsList(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
+  });
+
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
@@ -73,18 +116,20 @@ export function TargetPopulationTable({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<PaymentPlanNode, AllTargetPopulationsQueryVariables>
+      <UniversalRestTable
         title={noTitle ? null : t('Target Populations')}
         headCells={
           enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1)
         }
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllTargetPopulationsQuery}
-        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        data={targetPopulationsData}
+        isLoading={isLoading}
+        error={error}
+        renderRow={(row: TargetPopulationList) => (
           <TargetPopulationTableRow
             radioChangeHandler={enableRadioButton && handleRadioChange}
             selectedTargetPopulation={selectedTargetPopulation}

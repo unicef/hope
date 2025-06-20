@@ -1,4 +1,10 @@
-import { Box, Checkbox, Collapse, Grid2 as Grid, IconButton } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  Collapse,
+  Grid2 as Grid,
+  IconButton,
+} from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -7,7 +13,7 @@ import { Field } from 'formik';
 import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllAreasTreeQuery, UserPartnerChoicesQuery } from '@generated/graphql';
+import { UserPartnerChoicesQuery } from '@generated/graphql';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
@@ -15,13 +21,14 @@ import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { AreaTreeNode } from './AreaTreeNode';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { GreyText } from '@core/GreyText';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 
 interface ProgramPartnerCardProps {
   values;
   partner;
   index: number;
   arrayHelpers;
-  allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
+  allAreasTreeData: AreaTree[];
   partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
   setFieldValue;
   canDeleteProgramPartner: boolean;
@@ -185,9 +192,16 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
         <Box style={{ maxHeight: '30vh', overflow: 'auto', width: '50%' }}>
           <SimpleTreeView
             multiSelect
-            slots={{ expandIcon: ChevronRightIcon, collapseIcon: ExpandMoreIcon }}
-            defaultExpandedItems={(values.partners[index]?.areas || []).map(String)}
-            defaultSelectedItems={(values.partners[index]?.areas || []).map(String)}
+            slots={{
+              expandIcon: ChevronRightIcon,
+              collapseIcon: ExpandMoreIcon,
+            }}
+            defaultExpandedItems={(values.partners[index]?.areas || []).map(
+              String,
+            )}
+            defaultSelectedItems={(values.partners[index]?.areas || []).map(
+              String,
+            )}
           >
             {allAreasTree.length > 0 && allAreasTree.map(renderNode)}
           </SimpleTreeView>
@@ -211,7 +225,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
   return (
     <Grid container direction="column">
       <Box display="flex" justifyContent="space-between">
-        <Grid size={{ xs:6 }}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name={`partners[${index}].id`}
             label={t('Partner')}
@@ -233,7 +247,7 @@ export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
       <Box mt={2}>
         <BiggestText>{t('Area Access')}</BiggestText>
       </Box>
-      <Grid size={{ xs:6 }}>
+      <Grid size={{ xs: 6 }}>
         <Field
           name={`partners[${index}].areaAccess`}
           required={values.partners[index]?.id !== ''}

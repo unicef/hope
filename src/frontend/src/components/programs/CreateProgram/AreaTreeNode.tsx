@@ -1,4 +1,4 @@
-import { AllAreasTreeQuery } from '@generated/graphql';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 
 export class AreaTreeNode {
   id: string;
@@ -92,7 +92,7 @@ export class AreaTreeNode {
   }
 
   static buildTree(
-    areas: AllAreasTreeQuery['allAreasTree'],
+    areas: AreaTree[],
     selectedIds: string[] = [],
   ): AreaTreeNode[] {
     const createNode = (

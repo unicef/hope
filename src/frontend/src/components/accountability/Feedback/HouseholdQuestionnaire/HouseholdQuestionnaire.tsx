@@ -7,6 +7,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { useQuery } from '@tanstack/react-query';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -15,11 +19,33 @@ interface HouseholdQuestionnaireProps {
 function HouseholdQuestionnaire({
   values,
 }: HouseholdQuestionnaireProps): ReactElement {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
-  const selectedHouseholdData = values.selectedHousehold;
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const householdId = values.selectedHousehold?.id;
+
+  const {
+    data: household,
+    isLoading,
+    error,
+  } = useQuery<HouseholdDetail>({
+    queryKey: ['household', businessArea, householdId, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug: businessArea,
+        id: householdId,
+        programSlug: programId,
+      }),
+    enabled: !!householdId,
+  });
+
+  const selectedHouseholdData = household || values.selectedHousehold;
+
+  if (isLoading) return <LoadingComponent />;
+  if (error) return <div>Error loading household data</div>;
+  if (!selectedHouseholdData) return null;
 
   return (
     <Grid container spacing={6}>

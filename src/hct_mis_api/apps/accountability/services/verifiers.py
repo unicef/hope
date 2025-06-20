@@ -1,7 +1,7 @@
 import logging
 from typing import Dict
 
-from graphql import GraphQLError
+from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.accountability.models import Message
 
@@ -33,12 +33,10 @@ class MessageArgumentVerifier:
         last_1 = fields.pop()
         if not any(inputs):
             err_msg = f"Must provide any one of {', '.join(fields)} or {last_1}"
-            logger.warning(err_msg)
-            raise GraphQLError(err_msg)
+            raise ValidationError(err_msg)
         if len([value for value in inputs if value]) > 1:
             err_msg = f"Must provide only one of {', '.join(fields)} or {last_1}"
-            logger.warning(err_msg)
-            raise GraphQLError(err_msg)
+            raise ValidationError(err_msg)
 
         options = self.ARGUMENTS.get("sampling_type")
         for key, value in options.items():
@@ -47,10 +45,8 @@ class MessageArgumentVerifier:
             for required in value.get("required"):
                 if self.input_data.get(required) is None:
                     err_msg = f"Must provide {required} for {key}"
-                    logger.warning(err_msg)
-                    raise GraphQLError(err_msg)
+                    raise ValidationError(err_msg)
             for not_allowed in value.get("not_allowed"):
                 if self.input_data.get(not_allowed) is not None:
                     err_msg = f"Must not provide {not_allowed} for {key}"
-                    logger.warning(err_msg)
-                    raise GraphQLError(err_msg)
+                    raise ValidationError(err_msg)

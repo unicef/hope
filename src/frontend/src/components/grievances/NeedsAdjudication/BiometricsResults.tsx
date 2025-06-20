@@ -3,8 +3,8 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useGrievanceTicketLazyQuery } from '@generated/graphql';
 import { usePermissions } from '@hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import PersonIcon from '@mui/icons-material/Person';
 import {
   Box,
@@ -17,6 +17,8 @@ import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
+import { RestService } from 'src/restgenerated';
+import { useMutation } from '@tanstack/react-query';
 
 export interface Individual {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
@@ -30,7 +32,7 @@ export interface BiometricsResultsProps {
   similarityScore: string;
   individual1?: Individual;
   individual2?: Individual;
-  statusCode?: string
+  statusCode?: string;
 }
 
 const Placeholder: FC = () => (
@@ -63,12 +65,17 @@ export const BiometricsResults = ({
   );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { businessAreaSlug } = useBaseUrl();
 
-  const [loadData] = useGrievanceTicketLazyQuery({
-    variables: {
-      id: ticketId,
+  const { mutateAsync: loadData } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsRetrieve({
+        businessAreaSlug,
+        id: ticketId,
+      }),
+    onError: (error) => {
+      console.error('Failed to load grievance ticket data:', error);
     },
-    fetchPolicy: 'cache-and-network',
   });
 
   return (
@@ -102,52 +109,74 @@ export const BiometricsResults = ({
         <DialogContent data-cy="dialog-content">
           <DialogContainer>
             <Box display="flex" justifyContent="space-between" p={5}>
-                {individual1?.unicefId && (
-                   <Box display="flex" flexDirection="column">
-                     {individual1?.photo ? (
-                  <img
-                    src={individual1?.photo}
-                    alt="Image 1"
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '300px',
-                      objectFit: 'cover',
-                    }}
-                    data-cy="image1"
-                  />
-                ) : (
-                  <Placeholder />
-                )}
-                <Typography variant="subtitle2">
-                  {beneficiaryGroup?.memberLabel} {individual1?.unicefId}:{' '}
-                  {individual1?.fullName}
-                </Typography>
-              </Box>
-                )}
-
-              {individual2?.unicefId && (
-                              <Box display="flex" flexDirection="column">
-                {individual2?.photo ? (
-                  <img
-                    src={individual2?.photo}
-                    alt="Image 2"
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '300px',
-                      objectFit: 'cover',
-                    }}
-                    data-cy="image2"
-                  />
-                ) : (
-                  <Placeholder />
-                )}
-                <Typography variant="subtitle2">
-                  {beneficiaryGroup?.memberLabel} {individual2?.unicefId}:{' '}
-                  {individual2?.fullName}
-                </Typography>
-              </Box>
+              {individual1?.unicefId && (
+                <Box display="flex" flexDirection="column">
+                  {individual1?.photo ? (
+                    <img
+                      src={individual1?.photo}
+                      alt="Image 1"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '300px',
+                        objectFit: 'cover',
+                      }}
+                      data-cy="image1"
+                    />
+                  ) : (
+                    <Placeholder />
+                  )}
+                  <Typography variant="subtitle2">
+                    {beneficiaryGroup?.memberLabel} {individual1?.unicefId}:{' '}
+                    {individual1?.fullName}
+                  </Typography>
+                </Box>
               )}
 
+              {individual2?.unicefId && (
+                <Box display="flex" flexDirection="column">
+                  {individual2?.photo ? (
+                    <img
+                      src={individual2?.photo}
+                      alt="Image 2"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '300px',
+                        objectFit: 'cover',
+                      }}
+                      data-cy="image2"
+                    />
+                  ) : (
+                    <Placeholder />
+                  )}
+                  <Typography variant="subtitle2">
+                    {beneficiaryGroup?.memberLabel} {individual2?.unicefId}:{' '}
+                    {individual2?.fullName}
+                  </Typography>
+                </Box>
+              )}
+
+              {individual2?.unicefId && (
+                <Box display="flex" flexDirection="column">
+                  {individual2?.photo ? (
+                    <img
+                      src={individual2?.photo}
+                      alt="Image 2"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '300px',
+                        objectFit: 'cover',
+                      }}
+                      data-cy="image2"
+                    />
+                  ) : (
+                    <Placeholder />
+                  )}
+                  <Typography variant="subtitle2">
+                    {beneficiaryGroup?.memberLabel} {individual2?.unicefId}:{' '}
+                    {individual2?.fullName}
+                  </Typography>
+                </Box>
+              )}
             </Box>
             <Box p={5} data-cy="results-info">
               <div>
@@ -155,7 +184,11 @@ export const BiometricsResults = ({
                   {t('Algorithm similarity score:')} {similarityScore}
                 </strong>
               </div>
-              {Number(similarityScore) > 0 ? (<div>{t('Face images matching suggests: Duplicates')}</div>) : (statusCode)}
+              {Number(similarityScore) > 0 ? (
+                <div>{t('Face images matching suggests: Duplicates')}</div>
+              ) : (
+                statusCode
+              )}
             </Box>
           </DialogContainer>
         </DialogContent>

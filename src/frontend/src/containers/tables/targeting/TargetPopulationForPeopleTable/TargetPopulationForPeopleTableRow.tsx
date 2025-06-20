@@ -1,20 +1,20 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
-import { Radio } from '@mui/material';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { PaginatedTargetPopulationListList } from '@restgenerated/models/PaginatedTargetPopulationListList';
 import {
   paymentPlanStatusToColor,
   targetPopulationStatusDisplayMap,
 } from '@utils/utils';
-import { PaymentPlanNode } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface TargetPopulationTableRowProps {
-  targetPopulation: PaymentPlanNode;
+  targetPopulation: PaginatedTargetPopulationListList['results'][number];
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;
@@ -82,10 +82,7 @@ export function TargetPopulationForPeopleTableRow({
       <TableCell align="left">
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
-      <TableCell align="left">
-        {targetPopulation.createdBy?.firstName}{' '}
-        {targetPopulation.createdBy?.lastName}
-      </TableCell>
+      <TableCell align="left">{targetPopulation.createdBy}</TableCell>
     </ClickableTableRow>
   );
 }

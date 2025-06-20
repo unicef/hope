@@ -5,37 +5,14 @@ import {
   useContext,
   useState,
 } from 'react';
-import { DataCollectingTypeType, ProgramStatus } from './__generated__/graphql';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
 
-export interface ProgramInterface {
-  id: string;
-  name: string;
-  status: ProgramStatus;
-  dataCollectingType: {
-    id: string;
-    householdFiltersAvailable: boolean;
-    individualFiltersAvailable: boolean;
-    label: string;
-    code: string;
-    type: string;
-  };
-  pduFields: { id: string }[];
-  beneficiaryGroup: {
-    id: string;
-    name: string;
-    groupLabel: string;
-    groupLabelPlural: string;
-    memberLabel: string;
-    memberLabelPlural: string;
-    masterDetail: boolean;
-  };
-}
-
-export type ProgramContextType = ProgramInterface | null;
+export type ProgramContextType = Partial<ProgramDetail> | null;
 
 type ProgramContent = {
-  selectedProgram: ProgramContextType;
-  setSelectedProgram: (program: ProgramContextType) => void;
+  selectedProgram: Partial<ProgramDetail>;
+  setSelectedProgram: (program: Partial<ProgramDetail>) => void;
   isActiveProgram: boolean;
   isSocialDctType: boolean;
   isStandardDctType: boolean;
@@ -51,13 +28,11 @@ export function ProgramProvider({
 }): ReactElement {
   const [selectedProgram, setSelectedProgram] =
     useState<ProgramContextType>(null);
-  let isActiveProgram = selectedProgram?.status === ProgramStatus.Active;
+  let isActiveProgram = selectedProgram?.status === Status791Enum.ACTIVE;
   const isSocialDctType =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Social;
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() === 'SOCIAL';
   const isStandardDctType =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Standard;
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() === 'STANDARD';
 
   const programHasPdu =
     selectedProgram?.pduFields && selectedProgram.pduFields.length > 0;

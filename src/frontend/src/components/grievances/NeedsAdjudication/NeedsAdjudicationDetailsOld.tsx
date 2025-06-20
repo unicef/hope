@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -27,12 +26,13 @@ import {
   ApproveBox,
   StyledTable,
 } from '../GrievancesApproveSection/ApproveSectionStyles';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 export const NeedsAdjudicationDetailsOld = ({
   ticket,
   canApprove,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApprove: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
@@ -51,7 +51,7 @@ export const NeedsAdjudicationDetailsOld = ({
       },
     ],
   });
-  const details = ticket.needsAdjudicationTicketDetails;
+  const details = ticket.ticketDetails;
   const [selectedDuplicate, setSelectedDuplicate] = useState(
     details?.selectedIndividual?.id,
   );

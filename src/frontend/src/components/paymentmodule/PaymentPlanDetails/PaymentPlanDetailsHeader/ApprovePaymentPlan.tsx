@@ -1,3 +1,11 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,24 +14,19 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import * as Yup from 'yup';
+import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
+import { useMutation } from '@tanstack/react-query';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { LoadingButton } from '@core/LoadingButton';
-import { GreyText } from '@core/GreyText';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import * as Yup from 'yup';
 import { useProgramContext } from '../../../../programContext';
 
 export interface ApprovePaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function ApprovePaymentPlan({
@@ -31,17 +34,34 @@ export function ApprovePaymentPlan({
 }: ApprovePaymentPlanProps): ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
 
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
 
-  const { mutatePaymentPlanAction: approve, loading: loadingApprove } =
-    usePaymentPlanAction(
-      Action.Approve,
-      paymentPlan.id,
-      () => showMessage(t('Payment Plan has been approved.')),
-      () => setApproveDialogOpen(false),
-    );
+  const { mutateAsync: approve, isPending: loadingApprove } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: AcceptanceProcess;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansApproveCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }),
+    onSuccess: () => {
+      showMessage(t('Payment Plan has been approved.'));
+      setApproveDialogOpen(false);
+    },
+  });
   const initialValues = {
     comment: '',
   };
@@ -52,10 +72,12 @@ export function ApprovePaymentPlan({
 
   const shouldShowLastApproverMessage = (): boolean => {
     const approvalNumberRequired =
-      paymentPlan.approvalProcess?.edges[0]?.node.approvalNumberRequired;
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
+        ?.approvalNumberRequired;
 
     const approvalsCount =
-      paymentPlan.approvalProcess?.edges[0]?.node.actions?.approval?.length;
+      paymentPlan.approvalProcess?.[paymentPlan.approvalProcess.length - 1]
+        .actions?.approval?.length;
 
     return approvalNumberRequired - 1 === approvalsCount;
   };
@@ -64,7 +86,14 @@ export function ApprovePaymentPlan({
     <Formik
       initialValues={initialValues}
       onSubmit={(values, { resetForm }) => {
-        approve(values.comment);
+        approve({
+          businessAreaSlug: businessArea,
+          id: paymentPlan.id,
+          programSlug: programId,
+          requestBody: {
+            comment: values.comment,
+          },
+        });
         resetForm({});
       }}
       validationSchema={validationSchema}
