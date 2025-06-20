@@ -23,7 +23,6 @@ class Query(
     hct_mis_api.apps.steficon.schema.Query,
     hct_mis_api.apps.grievance.schema_dashboard.Query,
     hct_mis_api.apps.sanction_list.schema.Query,
-    hct_mis_api.apps.activity_log.schema.Query,
     hct_mis_api.apps.accountability.schema.Query,
     graphene.ObjectType,
 ):
