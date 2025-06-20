@@ -335,10 +335,35 @@ class TestGrievanceTicketList:
                 {
                     "id": str(household.id),
                     "unicef_id": household.unicef_id,
+                    "admin1": {
+                        "id": str(household.admin1.id),
+                        "name": household.admin1.name,
+                    },
                     "admin2": {
                         "id": str(household.admin2.id),
                         "name": household.admin2.name,
                     },
+                    "admin3": None,
+                    "admin4": None,
+                    "country": household.country.name,
+                    "country_origin": household.country_origin.name,
+                    "address": household.address,
+                    "village": household.village,
+                    "geopoint": household.geopoint,
+                    "first_registration_date": f"{household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": household.total_cash_received,
+                    "total_cash_received_usd": household.total_cash_received_usd,
+                    "delivered_quantities": [
+                        {
+                            "currency": "USD",
+                            "total_delivered_quantity": "0.00",
+                        }
+                    ],
+                    "start": f"{household.start:%Y-%m-%dT%H:%M:%SZ}",
+                    "zip_code": household.zip_code,
+                    "residence_status": household.residence_status,
+                    "import_id": household.unicef_id,
                 }
                 if household
                 else None
@@ -563,7 +588,7 @@ class TestGrievanceTicketList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 9
-            assert len(ctx.captured_queries) == 53
+            assert len(ctx.captured_queries) == 58
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -585,7 +610,7 @@ class TestGrievanceTicketList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 5 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 48
+            assert len(ctx.captured_queries) == 53
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -596,7 +621,7 @@ class TestGrievanceTicketList:
             assert len(response.json()["results"]) == 6
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 42
+            assert len(ctx.captured_queries) == 47
 
         ticket.delete()
         with CaptureQueriesContext(connection) as ctx:
