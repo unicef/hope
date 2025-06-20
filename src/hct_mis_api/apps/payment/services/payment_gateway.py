@@ -102,13 +102,17 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     record_code = serializers.CharField(source="unicef_id")
     payload = serializers.SerializerMethodField()
+    extra_data = serializers.SerializerMethodField()
 
-    def get_payload(self, obj: Payment) -> Dict:
+    def get_extra_data(self, obj: Payment) -> Dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
             raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Not found snapshot for Payment {obj.unicef_id}")
 
-        snapshot_data = snapshot.snapshot_data
+        return snapshot.snapshot_data
+
+    def get_payload(self, obj: Payment) -> Dict:
+        snapshot_data = self.get_extra_data(obj)
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
         account_data = collector_data.get("account_data", {})
 
@@ -117,6 +121,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "destination_currency": obj.currency,
             "delivery_mechanism": obj.delivery_type.code,
             "account_type": obj.delivery_type.account_type and obj.delivery_type.account_type.key,
+            "collector_id": collector_data.get("unicef_id", ""),
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
@@ -175,6 +180,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "remote_id",
             "record_code",
             "payload",
+            "extra_data",
         ]
 
 
