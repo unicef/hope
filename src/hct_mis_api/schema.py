@@ -31,7 +31,6 @@ class Query(
 
 class Mutations(
     hct_mis_api.apps.sanction_list.mutations.Mutations,
-    hct_mis_api.apps.accountability.mutations.Mutations,
     graphene.ObjectType,
 ):
     pass
