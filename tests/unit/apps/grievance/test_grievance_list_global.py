@@ -341,10 +341,30 @@ class TestGrievanceTicketGlobalList:
                 {
                     "id": str(household.id),
                     "unicef_id": household.unicef_id,
+                    "admin1": {
+                        "id": str(household.admin1.id),
+                        "name": household.admin1.name,
+                    },
                     "admin2": {
                         "id": str(household.admin2.id),
                         "name": household.admin2.name,
                     },
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": f"{household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": household.residence_status,
+                    "country_origin": household.country_origin.name,
+                    "country": household.country.name,
+                    "address": household.address,
+                    "village": household.village,
+                    "geopoint": None,
+                    "import_id": household.unicef_id,
                 }
                 if household
                 else None

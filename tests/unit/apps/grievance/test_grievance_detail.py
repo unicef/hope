@@ -1447,8 +1447,8 @@ class TestGrievanceTicketDetail:
                     },
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": "2025-01-19T22:45:26Z",
-                    "last_registration_date": "2025-04-08T02:47:04Z",
+                    "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": delivered_quantities
