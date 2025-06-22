@@ -291,7 +291,22 @@ class IndividualViewSet(
         if self.program.status == Program.DRAFT:
             return Individual.objects.none()
 
-        return super().get_queryset().select_related("household", "household__admin2", "program").order_by("created_at")
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "household",
+                "household__admin1",
+                "household__admin2",
+                "household__admin3",
+                "household__admin4",
+                "household__country",
+                "household__country_origin",
+                "household__head_of_household",
+                "program",
+            )
+            .order_by("created_at")
+        )
 
     @etag_decorator(IndividualListKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=IndividualListKeyConstructor())
