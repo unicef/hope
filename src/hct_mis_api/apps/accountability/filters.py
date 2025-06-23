@@ -3,30 +3,18 @@ import re
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import (
-    BooleanFilter,
-    CharFilter,
-    ChoiceFilter,
-    FilterSet,
-    UUIDFilter,
-)
+from django_filters import BooleanFilter, CharFilter, ChoiceFilter, FilterSet
 from django_filters import rest_framework as filters
 
-from hct_mis_api.apps.accountability.models import (
-    Feedback,
-    FeedbackMessage,
-    Message,
-    Survey,
-)
+from hct_mis_api.apps.accountability.models import Feedback, Message, Survey
 from hct_mis_api.apps.core.filters import BusinessAreaSlugFilter, DateTimeRangeFilter
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
-from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 
 
 class MessagesFilter(FilterSet):
     program = CharFilter(method="filter_program")
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
     title = CharFilter(field_name="title", lookup_expr="icontains")
     body = CharFilter(field_name="body", lookup_expr="icontains")
     sampling_type = ChoiceFilter(field_name="sampling_type", choices=Message.SamplingChoices.choices)
@@ -82,7 +70,7 @@ class FeedbackFilter(FilterSet):
 
 class SurveyFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
     search = CharFilter(method="filter_search")
     created_by = CharFilter(method="filter_created_by")
 
