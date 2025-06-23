@@ -3,7 +3,14 @@ import re
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
+from django_filters import (
+    BooleanFilter,
+    CharFilter,
+    ChoiceFilter,
+    FilterSet,
+    UUIDFilter,
+)
+from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.accountability.models import (
     Feedback,
@@ -12,11 +19,7 @@ from hct_mis_api.apps.accountability.models import (
     Survey,
 )
 from hct_mis_api.apps.core.filters import BusinessAreaSlugFilter, DateTimeRangeFilter
-from hct_mis_api.apps.core.utils import (
-    CustomOrderingFilter,
-    decode_id_string,
-    decode_id_string_required,
-)
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 
@@ -83,33 +86,21 @@ class MessageRecipientsMapFilter(FilterSet):
 
 
 class FeedbackFilter(FilterSet):
-    business_area = BusinessAreaSlugFilter()
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")
-    feedback_id = CharFilter(method="filter_feedback_id")
-    is_active_program = CharFilter(method="filter_is_active_program")
-    program = CharFilter(method="filter_by_program")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
         return queryset.filter(created_by__pk=value)
 
-    def filter_feedback_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
-        return queryset.filter(unicef_id=value)
-
-    def filter_is_active_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         filter_q = Q(program__isnull=True)
-        if value in ["true", "True"]:
+        if value is True:
             filter_q |= Q(program__status=Program.ACTIVE)
-            return qs.filter(filter_q)
-        elif value in ["false", "False"]:
-            filter_q |= Q(program__status=Program.FINISHED)
-            return qs.filter(filter_q)
         else:
-            return qs
-
-    def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> QuerySet[Feedback]:
-        return qs.filter(program_id=decode_id_string_required(value))
+            filter_q |= Q(program__status=Program.FINISHED)
+        return qs.filter(filter_q)
 
     class Meta:
         model = Feedback
