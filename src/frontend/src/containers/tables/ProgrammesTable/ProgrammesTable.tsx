@@ -88,11 +88,11 @@ function ProgrammesTable({
   });
 
   const { data: dataProgramsCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasProgramsCount', businessArea],
+    queryKey: ['businessAreasProgramsCount', businessArea, queryVariables],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsCountRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+      RestService.restBusinessAreasProgramsCountRetrieve(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      ),
   });
 
   return (

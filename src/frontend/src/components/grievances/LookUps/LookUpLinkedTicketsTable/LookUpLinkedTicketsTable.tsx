@@ -113,15 +113,17 @@ export function LookUpLinkedTicketsTable({
     queryFn: () => {
       if (programId) {
         return RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
-          {
-            businessAreaSlug: businessArea,
-            programSlug: programId,
-          },
+          createApiParams(
+            { businessAreaSlug: businessArea, programSlug: programId },
+            queryVariables,
+          ),
         );
       } else {
-        return RestService.restBusinessAreasGrievanceTicketsCountRetrieve({
-          businessAreaSlug: businessArea,
-        });
+        return RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
+          createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
+            withPagination: false,
+          }),
+        );
       }
     },
     enabled: !choicesLoading && !!choicesData,

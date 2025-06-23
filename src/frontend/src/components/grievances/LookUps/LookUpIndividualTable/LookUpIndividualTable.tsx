@@ -154,12 +154,16 @@ export function LookUpIndividualTable({
       'businessAreasProgramsIndividualsCountRetrieve',
       businessArea,
       programId,
+      queryVariables,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsIndividualsCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: false },
+        ),
+      ),
     enabled: !!businessArea && !!programId && !isAllPrograms,
   });
 
@@ -182,11 +186,15 @@ export function LookUpIndividualTable({
 
   // All Programs Count
   const { data: allProgramsIndividualsCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasIndividualsCountRetrieve', businessArea],
+    queryKey: [
+      'businessAreasIndividualsCountRetrieve',
+      businessArea,
+      queryVariables,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasIndividualsCountRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+      RestService.restBusinessAreasIndividualsCountRetrieve(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      ),
     enabled: !!businessArea && isAllPrograms,
   });
 

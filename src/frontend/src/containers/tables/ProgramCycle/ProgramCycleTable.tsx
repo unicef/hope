@@ -20,6 +20,7 @@ import { Status791Enum } from '@restgenerated/models/Status791Enum';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { CountResponse } from '@restgenerated/models/CountResponse';
 import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
 
 interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramDetail;
@@ -58,13 +59,16 @@ export const ProgramCyclesTableProgramDetails = ({
     queryKey: [
       'businessAreasProgramsCyclesCountRetrieve',
       businessArea,
-      program.id,
+      programId,
+      queryVariables,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsCyclesCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: program.id,
-      }),
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
   });
 
   const canViewDetails = programId !== 'all';
