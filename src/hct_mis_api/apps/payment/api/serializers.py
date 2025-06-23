@@ -51,6 +51,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
+    FinancialServiceProviderXlsxTemplate,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
@@ -1388,3 +1389,12 @@ class DeliveryMechanismChoiceSerializer(serializers.Serializer):
 class FspChoicesSerializer(serializers.Serializer):
     delivery_mechanism = DeliveryMechanismChoiceSerializer()
     fsps = FspChoiceSerializer(many=True)
+
+
+class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FinancialServiceProviderXlsxTemplate
+        fields = (
+            "id",
+            "name",
+        )

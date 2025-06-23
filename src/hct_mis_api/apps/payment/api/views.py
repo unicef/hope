@@ -50,6 +50,7 @@ from hct_mis_api.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
     FspChoicesSerializer,
+    FSPXlsxTemplateSerializer,
     PaymentDetailSerializer,
     PaymentListSerializer,
     PaymentPlanBulkActionSerializer,
@@ -87,6 +88,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
+    FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -583,6 +585,7 @@ class PaymentPlanViewSet(
         "generate_xlsx_with_auth_code": PaymentPlanExportAuthCodeSerializer,
         "split": SplitPaymentPlanSerializer,
         "reconciliation_import_xlsx": PaymentPlanImportFileSerializer,
+        "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -606,6 +609,7 @@ class PaymentPlanViewSet(
         "split": [Permissions.PM_SPLIT],
         "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
+        "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -1175,6 +1179,14 @@ class PaymentPlanViewSet(
         return Response(
             data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
         )
+
+    @extend_schema(responses={200: FSPXlsxTemplateSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="fsp-xlsx-template-list")
+    def fsp_xlsx_template_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        qs = FinancialServiceProviderXlsxTemplate.objects.filter(
+            financial_service_providers__allowed_business_areas__slug=self.business_area_slug
+        )
+        return Response(data=FSPXlsxTemplateSerializer(qs, many=True).data, status=status.HTTP_200_OK)
 
 
 class TargetPopulationViewSet(
