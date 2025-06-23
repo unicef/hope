@@ -130,10 +130,3 @@ class BusinessAreaSlugFilter(Filter):
         if business_area_slug:
             return qs.filter(business_area_id=ba.id)
         return qs
-
-
-class GlobalProgramFilterMixin(FilterSet):
-    @property
-    def qs(self) -> QuerySet:
-        program_id = self.request.headers.get("Program")
-        return super().qs.filter(program_id=decode_id_string(program_id))

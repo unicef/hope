@@ -903,7 +903,7 @@ class TestFeedbackViewSet:
         assert response_count.status_code == status.HTTP_200_OK
         assert response_count.json()["count"] == expected_count
 
-    def test_filter_by_created_at_range(self, create_user_role_with_permissions: Any) -> None:
+    def test_filter_by_created_at(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,
             [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
