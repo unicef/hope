@@ -74,6 +74,7 @@ import type { PaginatedRecipientList } from '../models/PaginatedRecipientList';
 import type { PaginatedRegistrationDataImportListList } from '../models/PaginatedRegistrationDataImportListList';
 import type { PaginatedRegistrationList } from '../models/PaginatedRegistrationList';
 import type { PaginatedRuleList } from '../models/PaginatedRuleList';
+import type { PaginatedSanctionListIndividualList } from '../models/PaginatedSanctionListIndividualList';
 import type { PaginatedSurveyCategoryChoiceList } from '../models/PaginatedSurveyCategoryChoiceList';
 import type { PaginatedSurveyList } from '../models/PaginatedSurveyList';
 import type { PaginatedSurveyRapidProFlowList } from '../models/PaginatedSurveyRapidProFlowList';
@@ -125,6 +126,7 @@ import type { RegistrationDataImportCreate } from '../models/RegistrationDataImp
 import type { RegistrationDataImportDetail } from '../models/RegistrationDataImportDetail';
 import type { RevertMarkPaymentAsFailed } from '../models/RevertMarkPaymentAsFailed';
 import type { SampleSize } from '../models/SampleSize';
+import type { SanctionListIndividual } from '../models/SanctionListIndividual';
 import type { SplitPaymentPlan } from '../models/SplitPaymentPlan';
 import type { Survey } from '../models/Survey';
 import type { SurveySampleSize } from '../models/SurveySampleSize';
@@ -11002,6 +11004,101 @@ export class RestService {
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
             },
+        });
+    }
+    /**
+     * @returns PaginatedSanctionListIndividualList
+     * @throws ApiError
+     */
+    public static restSanctionListList({
+        fullName,
+        fullNameStartswith,
+        id,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        referenceNumber,
+        search,
+    }: {
+        fullName?: string,
+        fullNameStartswith?: string,
+        id?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `reference_number` - Reference number
+         * * `-reference_number` - Reference number (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `listed_on` - Listed on
+         * * `-listed_on` - Listed on (descending)
+         */
+        orderBy?: Array<'-full_name' | '-id' | '-listed_on' | '-reference_number' | 'full_name' | 'id' | 'listed_on' | 'reference_number'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        referenceNumber?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedSanctionListIndividualList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/sanction-list/',
+            query: {
+                'full_name': fullName,
+                'full_name__startswith': fullNameStartswith,
+                'id': id,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'reference_number': referenceNumber,
+                'search': search,
+            },
+        });
+    }
+    /**
+     * @returns SanctionListIndividual
+     * @throws ApiError
+     */
+    public static restSanctionListRetrieve({
+        id,
+    }: {
+        /**
+         * A UUID string identifying this sanction list individual.
+         */
+        id: string,
+    }): CancelablePromise<SanctionListIndividual> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/sanction-list/{id}/',
+            path: {
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restSanctionListCountRetrieve(): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/sanction-list/count/',
         });
     }
     /**
