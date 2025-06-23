@@ -1,9 +1,11 @@
+import datetime
 from typing import Any, List
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlencode
 
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils import timezone
 
 import pytest
 from rest_framework import status
@@ -46,6 +48,7 @@ class TestFeedbackViewSet:
         self.individual_1 = IndividualFactory(household_id=self.hh_1.id)
         self.area_1 = AreaFactory(name="AREA_name")
         self.area_2 = AreaFactory(name="Wroclaw")
+        self.user_creator = UserFactory(first_name="Creator", last_name="User", partner=self.partner)
 
         self.feedback_1 = FeedbackFactory(
             program=self.program_active,
@@ -72,7 +75,11 @@ class TestFeedbackViewSet:
             admin2=self.area_1,
         )
         self.program_2 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
-        self.feedback_3 = FeedbackFactory(program=self.program_2)
+        self.feedback_3 = FeedbackFactory(
+            program=self.program_2,
+            issue_type="NEGATIVE_FEEDBACK",
+            created_by=self.user_creator,
+        )
 
         # per BA
         self.url_list = reverse(
@@ -594,7 +601,7 @@ class TestFeedbackViewSet:
     def test_feedback_get_count_per_program(
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
-        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
         response = self.client.get(self.url_count_per_program)
 
         assert response.status_code == expected_status
@@ -872,6 +879,94 @@ class TestFeedbackViewSet:
             assert feedback_message["created_by"] == "Test User"
             assert "id" in feedback_message
             assert "created_at" in feedback_message
+
+    @pytest.mark.parametrize(
+        "filter_value, expected_count",
+        [
+            ("POSITIVE_FEEDBACK", 1),
+            ("NEGATIVE_FEEDBACK", 2),
+        ],
+    )
+    def test_filter_feedback_by_issue_type(
+        self, filter_value: str, expected_count: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"issue_type": filter_value})
+        response_count = self.client.get(self.url_count, {"issue_type": filter_value})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == expected_count
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == expected_count
+
+    def test_filter_by_created_at_range(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        self.feedback_1.created_at = timezone.make_aware(datetime.datetime(year=2020, month=3, day=12))
+        self.feedback_1.save()
+        self.feedback_2.created_at = timezone.make_aware(datetime.datetime(year=2023, month=1, day=31))
+        self.feedback_2.save()
+        self.feedback_3.created_at = timezone.make_aware(datetime.datetime(year=2023, month=2, day=1))
+        self.feedback_3.save()
+        response = self.client.get(
+            self.url_list,
+            {
+                "created_at_after": "2023-01-30",
+                "created_at_before": "2023-03-01",
+            },
+        )
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 2
+        results_ids = [feedback["id"] for feedback in results]
+        assert str(self.feedback_1.id) not in results_ids
+        assert str(self.feedback_2.id) in results_ids
+        assert str(self.feedback_3.id) in results_ids
+
+        # check count
+        response_count = self.client.get(
+            self.url_count,
+            {
+                "created_at_after": "2023-01-30",
+                "created_at_before": "2023-03-01",
+            },
+        )
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 2
+
+    def test_filter_by_created_by(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"created_by": str(self.user_creator.id)})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.feedback_3.id)
+
+    def filter_by_is_active_program(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"is_active_program": True})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.feedback_1.id)
 
 
 class TestMessageViewSet:
