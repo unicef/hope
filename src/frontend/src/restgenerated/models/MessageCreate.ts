@@ -9,8 +9,8 @@ export type MessageCreate = {
     title: string;
     body: string;
     samplingType: SamplingTypeE86Enum;
-    fullListArguments: FullList;
-    randomSamplingArguments: RandomSampling | null;
+    fullListArguments?: FullList | null;
+    randomSamplingArguments?: RandomSampling | null;
     paymentPlan?: string;
     registrationDataImport?: string;
     households?: Array<string>;

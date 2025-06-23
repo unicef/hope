@@ -1,4 +1,3 @@
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { Box, Grid2 as Grid } from '@mui/material';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 import { FieldArray } from 'formik';
@@ -10,7 +9,7 @@ export interface ExistingIdentityFieldArrayProps {
   setFieldValue;
   values;
   individual: IndividualDetail;
-  addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  addIndividualFieldsData: any;
 }
 
 export function ExistingIdentityFieldArray({

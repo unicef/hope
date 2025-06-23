@@ -224,10 +224,30 @@ class TestIndividualList:
             assert individual_result["household"] == {
                 "id": str(individual.household.id),
                 "unicef_id": individual.household.unicef_id,
+                "admin1": {
+                    "id": str(individual.household.admin1.id),
+                    "name": individual.household.admin1.name,
+                },
                 "admin2": {
                     "id": str(individual.household.admin2.id),
                     "name": individual.household.admin2.name,
                 },
+                "admin3": None,
+                "admin4": None,
+                "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "total_cash_received": None,
+                "total_cash_received_usd": None,
+                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "zip_code": None,
+                "residence_status": individual.household.residence_status,
+                "country_origin": individual.household.country_origin.name,
+                "country": individual.household.country.name,
+                "address": individual.household.address,
+                "village": individual.household.village,
+                "geopoint": None,
+                "import_id": individual.household.unicef_id,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),
@@ -318,7 +338,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 22
+            assert len(ctx.captured_queries) == 30
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -337,7 +357,7 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 25
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -347,7 +367,7 @@ class TestIndividualList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 17
+            assert len(ctx.captured_queries) == 25
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -357,7 +377,7 @@ class TestIndividualList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 3
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 16
+            assert len(ctx.captured_queries) == 22
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -705,10 +725,36 @@ class TestIndividualDetail:
         assert data["household"] == {
             "id": str(self.individual1.household.id),
             "unicef_id": self.individual1.household.unicef_id,
+            "admin1": {
+                "id": str(self.individual1.household.admin1.id),
+                "name": self.individual1.household.admin1.name,
+            },
             "admin2": {
                 "id": str(self.individual1.household.admin2.id),
                 "name": self.individual1.household.admin2.name,
             },
+            "admin3": {
+                "id": str(self.individual1.household.admin3.id),
+                "name": self.individual1.household.admin3.name,
+            },
+            "admin4": {
+                "id": str(self.individual1.household.admin4.id),
+                "name": self.individual1.household.admin4.name,
+            },
+            "first_registration_date": f"{self.individual1.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+            "last_registration_date": f"{self.individual1.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+            "total_cash_received": None,
+            "total_cash_received_usd": None,
+            "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+            "start": self.individual1.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "zip_code": None,
+            "residence_status": self.individual1.household.residence_status,
+            "country_origin": self.individual1.household.country_origin.name,
+            "country": self.individual1.household.country.name,
+            "address": self.individual1.household.address,
+            "village": self.individual1.household.village,
+            "geopoint": None,
+            "import_id": self.individual1.household.unicef_id,
         }
         assert data["role"] == ROLE_PRIMARY
         assert data["relationship"] == self.individual1.relationship
@@ -729,6 +775,7 @@ class TestIndividualDetail:
             "data_source": self.registration_data_import.data_source,
         }
         assert data["import_id"] == self.individual1.unicef_id
+        assert data["admin_url"] == self.individual1.admin_url
         assert data["preferred_language"] == self.individual1.preferred_language
         assert data["roles_in_households"] == [
             {
@@ -736,10 +783,36 @@ class TestIndividualDetail:
                 "household": {
                     "id": str(self.household.id),
                     "unicef_id": self.household.unicef_id,
+                    "admin1": {
+                        "id": str(self.household.admin1.id),
+                        "name": self.household.admin1.name,
+                    },
                     "admin2": {
                         "id": str(self.household.admin2.id),
                         "name": self.household.admin2.name,
                     },
+                    "admin3": {
+                        "id": str(self.household.admin3.id),
+                        "name": self.household.admin3.name,
+                    },
+                    "admin4": {
+                        "id": str(self.household.admin4.id),
+                        "name": self.household.admin4.name,
+                    },
+                    "first_registration_date": f"{self.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household.residence_status,
+                    "country_origin": self.household.country_origin.name,
+                    "country": self.household.country.name,
+                    "address": self.household.address,
+                    "village": self.household.village,
+                    "geopoint": None,
+                    "import_id": self.household.unicef_id,
                 },
                 "role": ROLE_PRIMARY,
             },
@@ -748,7 +821,24 @@ class TestIndividualDetail:
                 "household": {
                     "id": str(self.household2.id),
                     "unicef_id": self.household2.unicef_id,
+                    "admin1": None,
                     "admin2": None,
+                    "admin3": None,
+                    "admin4": None,
+                    "first_registration_date": f"{self.household2.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household2.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "total_cash_received": None,
+                    "total_cash_received_usd": None,
+                    "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                    "start": self.household2.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "zip_code": None,
+                    "residence_status": self.household2.residence_status,
+                    "country_origin": self.household2.country_origin.name,
+                    "country": self.household2.country.name,
+                    "address": self.household2.address,
+                    "village": self.household2.village,
+                    "geopoint": None,
+                    "import_id": self.household2.unicef_id,
                 },
                 "role": ROLE_ALTERNATE,
             },
@@ -1089,10 +1179,36 @@ class TestIndividualGlobalViewSet:
             assert individual_result["household"] == {
                 "id": str(individual.household.id),
                 "unicef_id": individual.household.unicef_id,
+                "admin1": {
+                    "id": str(individual.household.admin1.id),
+                    "name": individual.household.admin1.name,
+                },
                 "admin2": {
                     "id": str(individual.household.admin2.id),
                     "name": individual.household.admin2.name,
                 },
+                "admin3": {
+                    "id": str(individual.household.admin3.id),
+                    "name": individual.household.admin3.name,
+                },
+                "admin4": {
+                    "id": str(individual.household.admin4.id),
+                    "name": individual.household.admin4.name,
+                },
+                "first_registration_date": f"{individual.household.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "last_registration_date": f"{individual.household.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                "total_cash_received": None,
+                "total_cash_received_usd": None,
+                "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
+                "start": individual.household.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "zip_code": None,
+                "residence_status": individual.household.residence_status,
+                "country_origin": individual.household.country_origin.name,
+                "country": individual.household.country.name,
+                "address": individual.household.address,
+                "village": individual.household.village,
+                "geopoint": None,
+                "import_id": individual.household.unicef_id,
             }
             assert individual_result["program"] == {
                 "id": str(individual.program.id),

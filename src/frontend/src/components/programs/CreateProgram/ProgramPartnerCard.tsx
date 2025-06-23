@@ -13,7 +13,6 @@ import { Field } from 'formik';
 import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { UserPartnerChoicesQuery } from '@generated/graphql';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
@@ -29,7 +28,7 @@ interface ProgramPartnerCardProps {
   index: number;
   arrayHelpers;
   allAreasTreeData: AreaTree[];
-  partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
+  partnerChoices: any;
   setFieldValue;
   canDeleteProgramPartner: boolean;
 }

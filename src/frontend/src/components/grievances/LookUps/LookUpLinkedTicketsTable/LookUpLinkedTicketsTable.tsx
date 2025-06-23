@@ -47,7 +47,7 @@ export function LookUpLinkedTicketsTable({
       fsp: filter.fsp || undefined,
       createdAtAfter: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       createdAtBefore: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
-      admin2: filter?.admin2?.node?.id,
+      admin2: filter?.admin2?.id,
     };
   }, [
     businessArea,
@@ -58,7 +58,7 @@ export function LookUpLinkedTicketsTable({
     filter.fsp,
     filter.createdAtRangeMin,
     filter.createdAtRangeMax,
-    filter?.admin2?.node?.id,
+    filter?.admin2?.id,
     choicesData?.documentTypeChoices,
   ]);
 

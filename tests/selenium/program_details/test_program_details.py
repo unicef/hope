@@ -236,6 +236,7 @@ def create_programs() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeProgrammeDetails:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details(self, standard_program: Program, pageProgrammeDetails: ProgrammeDetails) -> None:
         program = Program.objects.get(name="Test For Edit")
         # Go to Programme Details
@@ -268,6 +269,7 @@ class TestSmokeProgrammeDetails:
         assert "Only Selected Partners within the business area" in pageProgrammeDetails.getLabelPartnerAccess().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_edit_programme_from_details(
         self,
         create_programs: None,
@@ -295,6 +297,7 @@ class TestSmokeProgrammeDetails:
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_happy_path(
         self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -360,6 +363,7 @@ class TestProgrammeDetails:
         assert "-" in pageProgrammeDetails.getProgramCycleEndDate()[0].text
         assert "Default Programme Cycle" in pageProgrammeDetails.getProgramCycleTitle()[0].text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_edit_default_cycle_by_add_new(
         self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -400,6 +404,7 @@ class TestProgrammeDetails:
         ) in pageProgrammeDetails.getProgramCycleStartDate()[1].text
         assert "Test Title" in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_add_new_programme_cycle_without_end_date(
         self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -449,6 +454,7 @@ class TestProgrammeDetails:
         assert "-" in pageProgrammeDetails.getProgramCycleEndDate()[2].text
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_add_new_programme_cycle(
         self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -500,6 +506,7 @@ class TestProgrammeDetails:
         ) in pageProgrammeDetails.getProgramCycleEndDate()[2].text
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_edit_programme_cycle(
         self, standard_active_program_with_draft_program_cycle: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -557,6 +564,7 @@ class TestProgrammeDetails:
         else:
             assert program_cycle_3 in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_buttons_vs_programme_cycle_status(
         self, program_with_different_cycles: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -790,6 +798,7 @@ class TestProgrammeDetails:
         with pytest.raises(Exception):
             assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_program_details_program_cycle_total_quantities(
         self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:

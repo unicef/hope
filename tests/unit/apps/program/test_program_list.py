@@ -243,8 +243,8 @@ class TestProgramList:
         assert response_data[3]["id"] == str(program_finished.id)
 
     def test_program_list_caching(self, create_user_role_with_permissions: Any) -> None:
-        no_queries_not_cached_no_permissions = 11
-        no_queries_not_cached_with_permissions = 7
+        no_queries_not_cached_no_permissions = 12
+        no_queries_not_cached_with_permissions = 8
         no_queries_cached = 5
 
         program_afghanistan2 = ProgramFactory(business_area=self.afghanistan)
@@ -279,7 +279,7 @@ class TestProgramList:
         create_user_role_with_permissions(
             self.user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.afghanistan, program_afghanistan2
         )
-        _test_response_len_and_queries(2, no_queries_not_cached_no_permissions)
+        _test_response_len_and_queries(2, no_queries_not_cached_no_permissions + 1)
         # cached data with another call
         _test_response_len_and_queries(2, no_queries_cached)
 
@@ -475,27 +475,37 @@ class TestProgramFilter:
             )
             _create_hhs_for_pp(program, payment_plan, no_hhs)
 
-        program1 = ProgramFactory(business_area=self.afghanistan)
+        program1 = ProgramFactory(
+            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2020, 1, 1)
+        )
         _create_pp_and_hhs_for_program_cycle(program1, program1.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 5)
 
         # program with payments in 2 payment plans, one with excluded status, hh_count=7 but 3 excluded
-        program2 = ProgramFactory(business_area=self.afghanistan)
+        program2 = ProgramFactory(
+            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2021, 1, 1)
+        )
         _create_pp_and_hhs_for_program_cycle(program2, program2.cycles.first(), PaymentPlan.Status.TP_OPEN, 3)
         _create_pp_and_hhs_for_program_cycle(program2, program2.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 4)
 
         # program with payments in 2 payment plans, hh_count=7
-        program3 = ProgramFactory(business_area=self.afghanistan)
+        program3 = ProgramFactory(
+            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2022, 1, 1)
+        )
         _create_pp_and_hhs_for_program_cycle(program3, program3.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 3)
         _create_pp_and_hhs_for_program_cycle(program3, program3.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 4)
 
         # program with payments in 2 program cycles with payment plans in correct status, hh_count=6
-        program4 = ProgramFactory(business_area=self.afghanistan)
+        program4 = ProgramFactory(
+            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2023, 1, 1)
+        )
         _create_pp_and_hhs_for_program_cycle(program4, program4.cycles.first(), PaymentPlan.Status.TP_PROCESSING, 3)
         program_cycle_program4 = ProgramCycleFactory(program=program4)
         _create_pp_and_hhs_for_program_cycle(program4, program_cycle_program4, PaymentPlan.Status.TP_PROCESSING, 3)
 
         # program with repeated household in 2 payments, hh_count=5 but 1 repetition
-        program5 = ProgramFactory(business_area=self.afghanistan)
+        program5 = ProgramFactory(
+            business_area=self.afghanistan, status=Program.ACTIVE, start_date=datetime.datetime(2024, 1, 1)
+        )
         payment_plan_1 = PaymentPlanFactory(
             program_cycle=program5.cycles.first(),
             status=PaymentPlan.Status.TP_PROCESSING,
@@ -552,3 +562,16 @@ class TestProgramFilter:
         assert len(response_data_min_max) == 1
         program_ids_min_max = [program["id"] for program in response_data_min_max]
         assert str(program1.id) in program_ids_min_max
+
+        # test number_of_households_with_tp_in_program_min value on a list
+        response_list = self.client.get(
+            self.list_url,
+        )
+        assert response_min_max.status_code == status.HTTP_200_OK
+        response_list_data = response_list.json()["results"]
+        assert len(response_list_data) == 5
+        assert response_list_data[0]["number_of_households_with_tp_in_program"] == 5
+        assert response_list_data[1]["number_of_households_with_tp_in_program"] == 4
+        assert response_list_data[2]["number_of_households_with_tp_in_program"] == 7
+        assert response_list_data[3]["number_of_households_with_tp_in_program"] == 6
+        assert response_list_data[4]["number_of_households_with_tp_in_program"] == 4

@@ -9,10 +9,6 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaperContainer } from '@components/targeting/PaperContainer';
-import {
-  CreateSurveyAccountabilityMutationVariables,
-  SamplingChoices,
-} from '@generated/graphql';
 import { SurveyCategoryEnum } from '@utils/enums';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -152,7 +148,7 @@ const CreateSurveyPage = (): ReactElement => {
     ageCheckbox: false,
     sexCheckbox: false,
     title: '',
-    samplingType: SamplingChoices.FullList,
+    samplingType: 'FULL_LIST',
   };
 
   const [activeStep, setActiveStep] = useState(SurveySteps.LookUp);
@@ -361,19 +357,14 @@ const CreateSurveyPage = (): ReactElement => {
       ? values.title
       : flowsData?.surveyAvailableFlows.find((el) => values.title === el.id).id;
 
-  const prepareMutationVariables = (
-    values,
-  ): CreateSurveyAccountabilityMutationVariables => ({
+  const prepareMutationVariables = (values) => ({
     input: {
       title: matchTitle(values),
       body: values.body,
       category: values.category,
       paymentPlan: values.targetPopulation,
       program: values.program,
-      samplingType:
-        selectedSampleSizeType === 0
-          ? SamplingChoices.FullList
-          : SamplingChoices.Random,
+      samplingType: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
         selectedSampleSizeType === 0
           ? {

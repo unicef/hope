@@ -148,7 +148,7 @@ class FeedbackViewSet(
             program = Program.objects.get(id=program_id)
 
         if program and program.status == Program.FINISHED:
-            raise ValidationError("In order to proceed this action, program status must not be finished")
+            raise ValidationError("It is not possible to create Feedback for a Finished Program.")
 
         # additional check for global scope - check if user has permission in the target program
         if not program_slug and program:
@@ -188,7 +188,7 @@ class FeedbackViewSet(
         program = feedback.program
 
         if program and program.status == Program.FINISHED:
-            raise ValidationError("In order to proceed this action, program status must not be finished")
+            raise ValidationError("It is not possible to create Feedback for a Finished Program.")
 
         # additional check for global scope - check if user has permission in the target program
         if program:

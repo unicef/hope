@@ -9,13 +9,17 @@ from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
     resolve_flex_fields_choices_to_string,
 )
-from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.api.serializers.household import (
+    HouseholdSimpleSerializer,
+    LinkedGrievanceTicketSerializer,
+)
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
@@ -26,7 +30,6 @@ from hct_mis_api.apps.household.models import (
     BankAccountInfo,
     Document,
     DocumentType,
-    Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
@@ -131,18 +134,6 @@ class AccountSerializer(serializers.ModelSerializer):
         return dict(sorted(obj.data.items()))
 
 
-class HouseholdSimpleSerializer(serializers.ModelSerializer):
-    admin2 = AreaSimpleSerializer()
-
-    class Meta:
-        model = Household
-        fields = (
-            "id",
-            "unicef_id",
-            "admin2",
-        )
-
-
 class IndividualSimpleSerializer(serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
     roles_in_households = serializers.SerializerMethodField()
@@ -186,16 +177,6 @@ class IndividualRoleInHouseholdSerializer(serializers.ModelSerializer):
             "id",
             "household",
             "role",
-        )
-
-
-class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GrievanceTicket
-        fields = (
-            "id",
-            "category",
-            "status",
         )
 
 
@@ -339,7 +320,7 @@ class IndividualListSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
-class IndividualDetailSerializer(serializers.ModelSerializer):
+class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     household = HouseholdSimpleSerializer()
     role = serializers.SerializerMethodField()
     registration_data_import = RegistrationDataImportSerializer()
@@ -373,6 +354,7 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             "relationship",
             "registration_data_import",
             "import_id",
+            "admin_url",
             "preferred_language",
             "roles_in_households",
             "observed_disability",
@@ -399,6 +381,7 @@ class IndividualDetailSerializer(serializers.ModelSerializer):
             "status",
             "flex_fields",
             "linked_grievances",
+            "photo",
         )
 
     def get_role(self, obj: Individual) -> str:

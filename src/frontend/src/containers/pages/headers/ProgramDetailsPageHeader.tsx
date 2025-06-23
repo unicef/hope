@@ -73,13 +73,7 @@ export function ProgramDetailsPageHeader({
     <PageHeader
       title={program.name}
       breadCrumbs={breadCrumbsItems}
-      flags={
-        <AdminButton
-          adminUrl={'example'}
-          //TODO: add
-          // adminUrl={program.adminUrl}
-        />
-      }
+      flags={<AdminButton adminUrl={program.adminUrl} />}
     >
       {buttons}
     </PageHeader>

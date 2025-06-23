@@ -1,7 +1,6 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAllBusinessAreasQuery } from '@generated/graphql';
 import { AppBar } from '@components/core/AppBar';
 import { Drawer } from '@components/core/Drawer/Drawer';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -9,6 +8,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { styled as MuiStyled } from '@mui/system';
 import { theme } from 'src/theme';
 import { FC, useState } from 'react';
+import { RestService } from '@restgenerated/index';
+import { useQuery } from '@tanstack/react-query';
 
 const Root = styled.div`
   display: flex;
@@ -30,7 +31,7 @@ const AppBarSpacer = MuiStyled('div')(() => ({
 
 export const BaseHomeRouter: FC = () => {
   const [open, setOpen] = useState(true);
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programSlug } = useBaseUrl();
   const location = useLocation();
   const navigate = useNavigate();
   const handleDrawerOpen = (): void => {
@@ -39,20 +40,26 @@ export const BaseHomeRouter: FC = () => {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
-  const { data: businessAreaData, loading: businessAreaLoading } =
-    useAllBusinessAreasQuery({
-      variables: {
-        slug: businessArea,
-      },
-      fetchPolicy: 'cache-first',
-    });
+
+  const { data: businessAreaData, isLoading: businessAreaLoading } = useQuery({
+    queryKey: ['businessAreasProfile', businessArea, programSlug],
+    queryFn: () => {
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug: businessArea,
+        program: programSlug === 'all' ? undefined : programSlug,
+      });
+    },
+    staleTime: 15 * 60 * 1000, // Data is considered fresh for 15 minutes (business areas don't change often)
+    gcTime: 60 * 60 * 1000, // Keep unused data in cache for 1 hour
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+  });
 
   if (!businessAreaData || businessAreaLoading) {
     return <LoadingComponent />;
   }
 
-  const allBusinessAreasSlugs = businessAreaData.allBusinessAreas.edges.map(
-    (el) => el.node.slug,
+  const allBusinessAreasSlugs = businessAreaData.businessAreas.map(
+    (el) => el.slug,
   );
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
 

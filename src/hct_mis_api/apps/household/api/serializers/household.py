@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
@@ -9,10 +10,6 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.api.serializers import AreaSimpleSerializer
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.api.serializers.individual import (
-    HouseholdSimpleSerializer,
-    LinkedGrievanceTicketSerializer,
-)
 from hct_mis_api.apps.household.api.serializers.registration_data_import import (
     RegistrationDataImportSerializer,
 )
@@ -34,12 +31,20 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
+    delivered_quantity_service,
+)
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
+
+
+class DeliveredQuantitySerializer(serializers.Serializer):
+    currency = serializers.CharField()
+    total_delivered_quantity = serializers.DecimalField(max_digits=64, decimal_places=2)
 
 
 class HouseholdListSerializer(serializers.ModelSerializer):
     head_of_household = serializers.CharField(source="head_of_household.full_name")
-    admin1 = serializers.CharField(source="admin1.name", default="")
+    admin1 = AreaSimpleSerializer()
     admin2 = AreaSimpleSerializer()
     total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
     total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
@@ -81,6 +86,55 @@ class HeadOfHouseholdSerializer(serializers.ModelSerializer):
         )
 
 
+class HouseholdSimpleSerializer(serializers.ModelSerializer):
+    admin1 = AreaSimpleSerializer()
+    admin2 = AreaSimpleSerializer()
+    admin3 = AreaSimpleSerializer()
+    admin4 = AreaSimpleSerializer()
+    country = serializers.CharField(source="country.name", default="")
+    country_origin = serializers.CharField(source="country_origin.name", default="")
+    total_cash_received = serializers.DecimalField(max_digits=64, decimal_places=2)
+    total_cash_received_usd = serializers.DecimalField(max_digits=64, decimal_places=2)
+    delivered_quantities = serializers.SerializerMethodField()
+    import_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Household
+        fields = (
+            "id",
+            "unicef_id",
+            "admin1",
+            "admin2",
+            "admin3",
+            "admin4",
+            "first_registration_date",
+            "last_registration_date",
+            "total_cash_received",
+            "total_cash_received_usd",
+            "delivered_quantities",
+            "start",
+            "zip_code",
+            "residence_status",
+            "country_origin",
+            "country",
+            "address",
+            "village",
+            "geopoint",
+            "import_id",
+        )
+
+    @extend_schema_field(DeliveredQuantitySerializer(many=True))
+    def get_delivered_quantities(self, obj: Household) -> Dict:
+        return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
+
+    def get_import_id(self, obj: Household) -> str:
+        if obj.detail_id:
+            return f"{obj.unicef_id} (Detail id {obj.detail_id})"
+        if obj.enumerator_rec_id:
+            return f"{obj.unicef_id} (Enumerator ID {obj.enumerator_rec_id})"
+        return obj.unicef_id
+
+
 class HouseholdMemberSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
     household = HouseholdSimpleSerializer()
@@ -106,12 +160,35 @@ class HouseholdMemberSerializer(serializers.ModelSerializer):
         return ROLE_NO_ROLE
 
 
+class RecipientSerializer(serializers.ModelSerializer):
+    head_of_household = HeadOfHouseholdSerializer()
+
+    class Meta:
+        model = Household
+        fields = (
+            "id",
+            "unicef_id",
+            "size",
+            "head_of_household",
+        )
+
+
+class LinkedGrievanceTicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GrievanceTicket
+        fields = (
+            "id",
+            "category",
+            "status",
+        )
+
+
 class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer):
     head_of_household = HeadOfHouseholdSerializer()
-    admin1 = serializers.CharField(source="admin1.name", default="")
-    admin2 = serializers.CharField(source="admin2.name", default="")
-    admin3 = serializers.CharField(source="admin3.name", default="")
-    admin4 = serializers.CharField(source="admin4.name", default="")
+    admin1 = AreaSimpleSerializer()
+    admin2 = AreaSimpleSerializer()
+    admin3 = AreaSimpleSerializer()
+    admin4 = AreaSimpleSerializer()
     program = serializers.CharField(source="program.name")
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
@@ -124,6 +201,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
     admin_area_title = serializers.SerializerMethodField()
     active_individuals_count = serializers.SerializerMethodField()
     import_id = serializers.SerializerMethodField()
+    delivered_quantities = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
@@ -183,6 +261,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "male_age_group_12_17_disabled_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
+            "other_sex_group_count",
             "start",
             "deviceid",
             "fchild_hoh",
@@ -191,6 +270,7 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "size",
             "residence_status",
             "program_registration_id",
+            "delivered_quantities",
         )
 
     def get_has_duplicates(self, obj: Household) -> bool:
@@ -219,10 +299,13 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             return f"{obj.unicef_id} (Enumerator ID {obj.enumerator_rec_id})"
         return obj.unicef_id
 
+    def get_delivered_quantities(self, obj: Household) -> Dict:
+        return DeliveredQuantitySerializer(delivered_quantity_service(obj), many=True).data
+
 
 class HouseholdForTicketSerializer(serializers.ModelSerializer):
-    admin1 = serializers.CharField(source="admin1.name", default="")
-    admin2 = serializers.CharField(source="admin2.name", default="")
+    admin1 = AreaSimpleSerializer()
+    admin2 = AreaSimpleSerializer()
     country = serializers.CharField(source="country.name", default="")
     country_origin = serializers.CharField(source="country_origin.name", default="")
     head_of_household = HeadOfHouseholdSerializer()

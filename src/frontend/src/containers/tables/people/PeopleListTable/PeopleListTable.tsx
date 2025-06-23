@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { IndividualRdiMergeStatus } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { dateToIsoString } from '@utils/utils';
@@ -44,7 +43,7 @@ export const PeopleListTable = ({
         min: dateToIsoString(filter.lastRegistrationDateMin, 'startOfDay'),
         max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
       }),
-      rdiMergeStatus: IndividualRdiMergeStatus.Merged,
+      rdiMergeStatus: 'MERGED',
     }),
     [
       filter.ageMin,

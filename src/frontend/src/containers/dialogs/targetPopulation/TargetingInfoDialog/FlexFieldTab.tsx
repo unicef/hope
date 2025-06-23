@@ -3,19 +3,23 @@ import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
-import { useAllFieldsAttributesQuery } from '@generated/graphql';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 
 export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
-  const { data } = useAllFieldsAttributesQuery();
+  const { data } = useQuery({
+    queryKey: ['allFieldsAttributes'],
+    queryFn: () => RestService.restBusinessAreasAllFieldsAttributesList({}),
+  });
   const [searchValue, setSearchValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState('All');
   const [selectedFieldType, setSelectedFieldType] = useState('All');
   useEffect(() => {
-    if (data && !selectOptions.length) {
-      const options = data.allFieldsAttributes.map((el) => el.associatedWith);
+    if (data?.results && !selectOptions.length) {
+      const options = data.results.map((el) => el.associatedWith);
       const filteredOptions = options.filter(
         (item, index) => options.indexOf(item) === index,
       );
@@ -85,7 +89,7 @@ export function FlexFieldTab(): ReactElement {
         selectedOption={selectedOption}
         searchValue={searchValue}
         selectedFieldType={selectedFieldType}
-        fields={data.allFieldsAttributes}
+        fields={data.results}
       />
     </Box>
   );

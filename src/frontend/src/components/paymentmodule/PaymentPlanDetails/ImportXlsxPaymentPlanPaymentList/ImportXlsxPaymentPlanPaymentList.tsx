@@ -1,23 +1,20 @@
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@mui/icons-material';
-import get from 'lodash/get';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  ImportXlsxPpListMutation,
-  PaymentPlanDocument,
-  useImportXlsxPpListMutation,
-} from '@generated/graphql';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanImportFile } from '@restgenerated/models/PaymentPlanImportFile';
+import { RestService } from '@restgenerated/services/RestService';
 import { DropzoneField } from '@core/DropzoneField';
 import { useProgramContext } from '../../../../programContext';
 import { LoadingButton } from '@core/LoadingButton';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -38,36 +35,60 @@ export function ImportXlsxPaymentPlanPaymentList({
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
-  const [mutate, { data: uploadData, loading: fileLoading, error }] =
-    useImportXlsxPpListMutation();
-
-  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] =
-    get(uploadData, 'importXlsxPaymentPlanPaymentList.errors');
+  const {
+    mutateAsync: mutate,
+    isPending: fileLoading,
+    error,
+  } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: PaymentPlanImportFile;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansReconciliationImportXlsxCreate(
+        {
+          businessAreaSlug,
+          id,
+          programSlug,
+          requestBody,
+        },
+      ),
+    onSuccess: () => {
+      setOpenImport(false);
+      showMessage(t('Your import was successful!'));
+      // Invalidate payment plan queries to refetch updated data
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', paymentPlan.id],
+      });
+    },
+    onError: (e) => {
+      showMessage(e.message || 'An error occurred during import');
+    },
+  });
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       try {
-        const { data, errors } = await mutate({
-          variables: {
-            paymentPlanId: paymentPlan.id,
+        await mutate({
+          businessAreaSlug: businessArea,
+          id: paymentPlan.id,
+          programSlug: programId,
+          requestBody: {
+            // @ts-ignore - File object is expected here despite the string type in the model
             file: fileToImport,
           },
-          refetchQueries: () => [
-            {
-              query: PaymentPlanDocument,
-              variables: {
-                id: paymentPlan.id,
-              },
-            },
-          ],
         });
-        if (!errors && !data?.importXlsxPaymentPlanPaymentList.errors?.length) {
-          setOpenImport(false);
-          showMessage(t('Your import was successful!'));
-        }
       } catch (e) {
-        e.graphQLErrors.map((x) => showMessage(x.message));
+        // Error is already handled by onError in mutation
       }
     }
   };
@@ -123,16 +144,10 @@ export function ImportXlsxPaymentPlanPaymentList({
                 setFileToImport(file);
               }}
             />
-            {fileToImport &&
-            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
+            {fileToImport && error ? (
               <Error data-cy="error-list">
                 <p>Errors</p>
-                {error
-                  ? error.graphQLErrors.map((x) => (
-                      <p key={x.message}>{x.message}</p>
-                    ))
-                  : null}
-                <ImportErrors errors={xlsxErrors} />
+                <p>{error.message}</p>
               </Error>
             ) : null}
           </>

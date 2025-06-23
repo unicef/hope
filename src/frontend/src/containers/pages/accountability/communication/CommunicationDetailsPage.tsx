@@ -23,19 +23,24 @@ import CommunicationDetails from '@components/accountability/Communication/Commu
 function CommunicationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programSlug } = useBaseUrl();
 
   const {
     data: message,
     isLoading,
     error,
   } = useQuery<MessageDetail>({
-    queryKey: ['accountabilityCommunicationMessage', businessArea, id],
+    queryKey: [
+      'accountabilityCommunicationMessage',
+      businessArea,
+      id,
+      programSlug,
+    ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsMessagesRetrieve({
         businessAreaSlug: businessArea,
         id: id,
-        programSlug: 'TODO',
+        programSlug,
       }),
     enabled: !!id && !!businessArea,
   });
