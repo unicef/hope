@@ -1,5 +1,4 @@
 import camelCase from 'lodash/camelCase';
-import { PaymentNode } from '@generated/graphql';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   camelizeArrayObjects,
@@ -12,6 +11,7 @@ import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividual
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { UpdateGrievanceTicketExtras } from '@restgenerated/models/UpdateGrievanceTicketExtras';
+import { PaymentDetail } from '@restgenerated/models/PaymentDetail';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -27,7 +27,7 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: Pick<
-    PaymentNode,
+    PaymentDetail,
     'id' | 'deliveredQuantity' | 'entitlementQuantity'
   >[];
   paymentRecord?: string;
@@ -197,7 +197,7 @@ export function prepareInitialValues(
     selectedPaymentRecords: ticket?.paymentRecord?.id
       ? [
           ticket.paymentRecord as Pick<
-            PaymentNode,
+            PaymentDetail,
             'id' | 'deliveredQuantity' | 'entitlementQuantity'
           >,
         ]

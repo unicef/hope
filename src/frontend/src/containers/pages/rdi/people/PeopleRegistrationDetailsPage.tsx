@@ -5,12 +5,11 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationIndividualAdditionalRegistrationInformation } from '@components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation/RegistrationIndividualAdditionalRegistrationInformation';
 import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
-import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
-import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { FieldsAttributesService } from '@restgenerated/services/FieldsAttributesService';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
@@ -19,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 
 const Container = styled.div`
   padding: 20px;
@@ -39,7 +39,7 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
     data: flexFieldsData,
     isLoading: flexFieldsDataLoading,
     error,
-  } = useQuery<AllIndividualsFlexFieldsAttributesQuery>({
+  } = useQuery({
     queryKey: ['fieldsAttributes'],
     queryFn: async () => {
       const data = await FieldsAttributesService.fieldsAttributesRetrieve();
@@ -58,10 +58,10 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
     });
 
   const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
       queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });
@@ -93,10 +93,9 @@ const PeopleRegistrationDetailsPage = (): ReactElement => {
         title={`${t('Individual ID')}: ${individual.importId}`}
         breadCrumbs={breadCrumbsItems}
       >
-        {/* //TODO: add individual photo */}
-        {/* {individual.photo ? (
+        {individual.photo ? (
           <IndividualPhotoModal individual={individual} />
-        ) : null} */}
+        ) : null}
       </PageHeader>
       <Container>
         <RegistrationIndividualBioData

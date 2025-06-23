@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Table, TableBody, TableCell, TableRow } from '@mui/material';
 import { EnhancedTableHead } from '@components/core/Table/EnhancedTableHead';
 import { getComparator, stableSort } from '@utils/utils';
-import { AllFieldsAttributesQuery } from '@generated/graphql';
 import { headCells } from './HeadCells';
 
 const StyledCell = styled(TableCell)`
@@ -27,7 +26,7 @@ export function FlexFieldsTable({
     setOrderBy(property);
   };
 
-  const filterTable = (): AllFieldsAttributesQuery['allFieldsAttributes'] => {
+  const filterTable = () => {
     const filters = {
       labelEn: searchValue,
       associatedWith: selectedOption === 'All' ? '' : selectedOption,
@@ -54,8 +53,7 @@ export function FlexFieldsTable({
       return true;
     });
   };
-  type orderedType = () => AllFieldsAttributesQuery['allFieldsAttributes'];
-  const orderResults: orderedType = () =>
+  const orderResults = () =>
     stableSort(filterTable(), getComparator(order, orderBy));
 
   return (

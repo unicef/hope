@@ -51,6 +51,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
+    FinancialServiceProviderXlsxTemplate,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
@@ -625,8 +626,6 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     funds_commitments = serializers.SerializerMethodField()
     available_funds_commitments = serializers.SerializerMethodField()
     payment_verification_plans = PaymentVerificationPlanSerializer(many=True, read_only=True)
-    # payment_verification_summary = PaymentVerificationSummarySerializer(read_only=True)
-    # payment_verification_plans_count = serializers.SerializerMethodField()
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -682,9 +681,7 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
             "eligible_payments_count",
             "funds_commitments",
             "available_funds_commitments",
-            # "payment_verification_summary",
             "payment_verification_plans",
-            # "payment_verification_plans_count",
             "admin_url",
         )
 
@@ -1392,3 +1389,12 @@ class DeliveryMechanismChoiceSerializer(serializers.Serializer):
 class FspChoicesSerializer(serializers.Serializer):
     delivery_mechanism = DeliveryMechanismChoiceSerializer()
     fsps = FspChoiceSerializer(many=True)
+
+
+class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FinancialServiceProviderXlsxTemplate
+        fields = (
+            "id",
+            "name",
+        )

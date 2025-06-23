@@ -39,3 +39,8 @@ class SanctionListIndividualSerializer(serializers.ModelSerializer):
             "documents",
             "dates_of_birth",
         )
+
+
+class SanctionListIndividualListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SanctionListIndividual

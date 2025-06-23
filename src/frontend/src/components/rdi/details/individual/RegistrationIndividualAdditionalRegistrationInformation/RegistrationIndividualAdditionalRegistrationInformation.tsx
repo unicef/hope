@@ -1,6 +1,5 @@
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
-import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { Theme, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
@@ -20,7 +19,7 @@ const Overview = styled(Paper)<{ theme?: Theme }>`
 
 interface RegistrationIndividualAdditionalRegistrationInformationProps {
   individual: IndividualDetail;
-  flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
+  flexFieldsData: any;
 }
 
 export const RegistrationIndividualAdditionalRegistrationInformation = ({

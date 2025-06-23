@@ -4,7 +4,6 @@ import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import { AllIndividualsFlexFieldsAttributesQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { IndividualFlexFieldPhotoModal } from '../IndividualFlexFieldPhotoModal';
@@ -19,7 +18,7 @@ const Overview = styled(Paper)<{ theme?: Theme }>`
 `;
 interface IndividualAdditionalRegistrationInformationProps {
   individual: IndividualDetail;
-  flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
+  flexFieldsData: any;
 }
 
 export const IndividualAdditionalRegistrationInformation = ({

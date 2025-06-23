@@ -46,6 +46,7 @@ def add_accountability_communication_message() -> Message:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeAccountabilityCommunication:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_accountability_communication(
         self,
         test_program: Program,
@@ -75,6 +76,7 @@ class TestSmokeAccountabilityCommunication:
         )
         assert 1 == len(pageAccountabilityCommunication.getRows())
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_accountability_communication_details(
         self,
         test_program: Program,

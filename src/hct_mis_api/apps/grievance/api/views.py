@@ -36,6 +36,10 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
+from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
+from hct_mis_api.apps.core.field_attributes.fields_types import Scope
+from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
 from hct_mis_api.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hct_mis_api.apps.grievance.api.mixins import (
@@ -262,6 +266,9 @@ class GrievanceTicketGlobalViewSet(
         "bulk_update_priority": [Permissions.GRIEVANCES_UPDATE],
         "bulk_update_urgency": [Permissions.GRIEVANCES_UPDATE],
         "bulk_add_note": [Permissions.GRIEVANCES_UPDATE],
+        "all_edit_household_fields_attributes": [Permissions.GRIEVANCES_CREATE],
+        "all_edit_people_fields_attributes": [Permissions.GRIEVANCES_CREATE],
+        "all_add_individuals_fields_attributes": [Permissions.GRIEVANCES_CREATE],
     }
     http_method_names = ["get", "post", "patch"]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
@@ -975,3 +982,56 @@ class GrievanceTicketGlobalViewSet(
             GrievanceTicketDetailSerializer(tickets, context={"request": request}, many=True).data,
             status=status.HTTP_202_ACCEPTED,
         )
+
+    @extend_schema(
+        responses={200: FieldAttributeSerializer(many=True)},
+    )
+    @action(detail=False, methods=["get"], url_path="all-edit-household-fields-attributes")
+    def all_edit_household_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        fields = (
+            FieldFactory.from_scope(Scope.HOUSEHOLD_UPDATE)
+            .associated_with_household()
+            .apply_business_area(self.business_area_slug)
+        )
+        all_options = list(fields) + list(
+            FlexibleAttribute.objects.filter(
+                associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
+            ).prefetch_related("choices")
+        )
+        sorted_list = sorted(all_options, key=lambda obj: obj.get("label", {}).get("English(EN)", ""))
+        return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        responses={200: FieldAttributeSerializer(many=True)},
+    )
+    @action(detail=False, methods=["get"], url_path="all-edit-people-fields-attributes")
+    def all_edit_people_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        fields = FieldFactory.from_scope(Scope.PEOPLE_UPDATE).apply_business_area(self.business_area_slug)
+        all_options = list(fields) + list(
+            FlexibleAttribute.objects.filter(
+                associated_with__in=[
+                    FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+                ]
+            ).prefetch_related("choices")
+        )
+
+        sorted_list = sorted(all_options, key=lambda obj: obj.get("label", {}).get("English(EN)", ""))
+        return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        responses={200: FieldAttributeSerializer(many=True)},
+    )
+    @action(detail=False, methods=["get"], url_path="all-add-individuals-fields-attributes")
+    def all_add_individuals_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        fields = (
+            FieldFactory.from_scope(Scope.INDIVIDUAL_UPDATE)
+            .associated_with_individual()
+            .apply_business_area(self.business_area_slug)
+        )
+        all_options = list(fields) + list(
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+            .exclude(type=FlexibleAttribute.PDU)
+            .prefetch_related("choices")
+        )
+        sorted_list = sorted(all_options, key=lambda obj: obj.get("label", {}).get("English(EN)", ""))
+        return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)

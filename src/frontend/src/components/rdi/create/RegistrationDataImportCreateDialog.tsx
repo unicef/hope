@@ -45,14 +45,13 @@ const StyledDialogFooter = styled(DialogFooter)`
 export const RegistrationDataImportCreateDialog = (): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [importType, setImportType] = useState('');
+  const [importType, setImportType] = useState('programPopulation');
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
   const { isActiveProgram, selectedProgram } = useProgramContext();
 
   useEffect(() => {
     if (!open) {
-      setImportType('');
       setSubmitDisabled(true);
     }
   }, [open]);
@@ -143,16 +142,17 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
               fullWidth
               data-cy="import-type-select"
             >
-              <MenuItem data-cy="excel-menu-item" key="excel" value="excel">
+              {/* <MenuItem data-cy="excel-menu-item" key="excel" value="excel">
                 Excel
               </MenuItem>
               <MenuItem data-cy="kobo-menu-item" key="kobo" value="kobo">
                 Kobo
-              </MenuItem>
+              </MenuItem> */}
               <MenuItem
                 data-cy="program-population-menu-item"
                 key="program-population"
                 value="programPopulation"
+                disabled
               >
                 Program Population
               </MenuItem>

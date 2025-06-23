@@ -1,7 +1,7 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useQuery } from '@tanstack/react-query';
 import { adjustHeadCells, dateToIsoString } from '@utils/utils';
 import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,10 +42,17 @@ function RegistrationDataImportTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: deduplicationFlags } = useDeduplicationFlagsQuery({
-    fetchPolicy: 'cache-and-network',
+  const { businessAreaSlug, programSlug, businessArea, programId } =
+    useBaseUrl();
+
+  const { data: deduplicationFlags } = useQuery({
+    queryKey: ['deduplicationFlags', businessAreaSlug, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug,
+        slug: programSlug,
+      }),
   });
-  const { businessArea, programId } = useBaseUrl();
 
   const initialVariables = useMemo(
     () => ({

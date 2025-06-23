@@ -1,20 +1,20 @@
-import { Grid2 as Grid, Tooltip } from '@mui/material';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Field, Form, useFormikContext } from 'formik';
-import { ReactElement, useMemo, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Grid2 as Grid, Tooltip } from '@mui/material';
+import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
-import { useQuery } from '@tanstack/react-query';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
-import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { Field, Form, useFormikContext } from 'formik';
+import { ReactElement, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { PaginatedBeneficiaryGroupList } from '@restgenerated/models/PaginatedBeneficiaryGroupList';
 
 interface ProgramFormPropTypes {
   values;
@@ -46,8 +46,45 @@ const ProgramForm = ({
 
   const { setFieldValue } = useFormikContext();
 
-  const filteredDataCollectionTypeChoicesData =
-    data?.dataCollectingTypeChoices.filter((el) => el.name !== '');
+  const isCopyProgramPage = location.pathname.includes('duplicate');
+
+  // For copy program pages, filter DCTs based on Beneficiary Group (BG → DCT)
+  // For normal create/edit, filter BGs based on DCT (DCT → BG)
+  const filteredDataCollectionTypeChoicesData = useMemo(() => {
+    const allDCTs = data?.dataCollectingTypeChoices.filter(
+      (el) => el.name !== '',
+    );
+
+    if (
+      !isCopyProgramPage ||
+      !values.beneficiaryGroup ||
+      !beneficiaryGroupsData?.results
+    ) {
+      return allDCTs;
+    }
+
+    // Find the selected beneficiary group to determine its masterDetail property
+    const selectedBG = beneficiaryGroupsData.results.find(
+      (bg) => bg.id === values.beneficiaryGroup,
+    );
+
+    if (!selectedBG) return allDCTs;
+
+    // Filter DCTs based on beneficiary group's masterDetail property
+    return allDCTs?.filter((dct) => {
+      if (selectedBG.masterDetail === true) {
+        return dct.type === 'STANDARD';
+      } else if (selectedBG.masterDetail === false) {
+        return dct.type === 'SOCIAL';
+      }
+      return true;
+    });
+  }, [
+    data?.dataCollectingTypeChoices,
+    isCopyProgramPage,
+    values.beneficiaryGroup,
+    beneficiaryGroupsData,
+  ]);
 
   const mappedBeneficiaryGroupsData = useMemo(() => {
     function getTypeByDataCollectingTypeCode(
@@ -59,11 +96,21 @@ const ProgramForm = ({
       );
       return foundObject ? foundObject.type : undefined;
     }
+
+    if (!beneficiaryGroupsData?.results) return [];
+
+    // For copy program pages, show all beneficiary groups (no filtering)
+    if (isCopyProgramPage) {
+      return beneficiaryGroupsData.results.map((el) => ({
+        name: el.name,
+        value: el.id,
+      }));
+    }
+
+    // For normal create/edit, filter BGs based on DCT
     const dctType = getTypeByDataCollectingTypeCode(
       values.dataCollectingTypeCode,
     );
-
-    if (!beneficiaryGroupsData?.results) return [];
 
     let filteredBeneficiaryGroups = [];
 
@@ -87,26 +134,7 @@ const ProgramForm = ({
     values.dataCollectingTypeCode,
     beneficiaryGroupsData,
     filteredDataCollectionTypeChoicesData,
-  ]);
-
-  const isCopyProgramPage = location.pathname.includes('duplicate');
-
-  useEffect(() => {
-    const isFieldDisabled =
-      !values.dataCollectingTypeCode || programHasRdi || isCopyProgramPage;
-
-    if (isFieldDisabled) {
-      const nonEmptyValue =
-        mappedBeneficiaryGroupsData[0]?.value || 'disabled-value';
-
-      setFieldValue('beneficiaryGroup', nonEmptyValue, false);
-    }
-  }, [
-    values.dataCollectingTypeCode,
-    programHasRdi,
     isCopyProgramPage,
-    mappedBeneficiaryGroupsData,
-    setFieldValue,
   ]);
 
   if (!data || !beneficiaryGroupsData) return null;
@@ -184,7 +212,10 @@ const ProgramForm = ({
             variant="outlined"
             required
             onChange={(e) => {
-              setFieldValue('beneficiaryGroup', '');
+              // Only clear Beneficiary Group if NOT copying a program
+              if (!isCopyProgramPage) {
+                setFieldValue('beneficiaryGroup', '');
+              }
               setFieldValue('dataCollectingTypeCode', e.target.value);
             }}
             choices={filteredDataCollectionTypeChoicesData || []}
@@ -195,12 +226,12 @@ const ProgramForm = ({
         <Grid size={{ xs: 6 }}>
           <Tooltip
             title={
-              !values.dataCollectingTypeCode
-                ? 'Select Data Collecting Type first'
-                : programHasRdi
-                  ? 'Field disabled because program has RDI'
-                  : isCopyProgramPage
-                    ? 'Field disabled for duplicate programs'
+              isCopyProgramPage
+                ? 'Beneficiary Group is fixed when copying programs'
+                : !values.dataCollectingTypeCode
+                  ? 'Select Data Collecting Type first'
+                  : programHasRdi
+                    ? 'Field disabled because program has RDI'
                     : ''
             }
             placement="top"
@@ -220,9 +251,9 @@ const ProgramForm = ({
                 component={FormikSelectField}
                 data-cy="input-beneficiary-group"
                 disabled={
-                  !values.dataCollectingTypeCode ||
-                  programHasRdi ||
-                  isCopyProgramPage
+                  isCopyProgramPage ||
+                  (!values.dataCollectingTypeCode && !isCopyProgramPage) ||
+                  programHasRdi
                 }
               />
             </span>

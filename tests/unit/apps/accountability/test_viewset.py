@@ -18,7 +18,11 @@ from hct_mis_api.apps.accountability.fixtures import (
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -356,7 +360,7 @@ class TestFeedbackViewSet:
             format="json",
         )
         assert response.status_code == expected_status
-        assert "In order to proceed this action, program status must not be finished" in response.json()
+        assert "It is not possible to create Feedback for a Finished Program." in response.json()
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -752,7 +756,7 @@ class TestFeedbackViewSet:
             format="json",
         )
         assert response.status_code == expected_status
-        assert "In order to proceed this action, program status must not be finished" in response.json()
+        assert "It is not possible to create Feedback for a Finished Program." in response.json()
 
     def test_list_feedback_issue_type(self) -> None:
         response_data = self.client.get(reverse("api:choices-feedback-issue-type")).data
@@ -880,15 +884,27 @@ class TestMessageViewSet:
         self.program_active = ProgramFactory(
             name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
         )
-        hoh1 = IndividualFactory(household=None)
-        self.hh_1 = HouseholdFactory(program=self.program_active, head_of_household=hoh1)
+        self.payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_LOCKED,
+            created_by=self.user,
+            business_area=self.afghanistan,
+            program_cycle=self.program_active.cycles.first(),
+        )
+        self.households = [create_household()[0] for _ in range(14)]
+        for hh in self.households:
+            PaymentFactory(
+                parent=self.payment_plan,
+                program=self.program_active,
+                household=hh,
+            )
+
         self.msg_1 = CommunicationMessageFactory(
             program=self.program_active,
             business_area=self.afghanistan,
             title="MSG title",
             body="MSG body",
             created_by=self.user,
-            sampling_type="FULL_LIST",
+            sampling_type=Survey.SAMPLING_FULL_LIST,
             payment_plan=PaymentPlanFactory(
                 status=PaymentPlan.Status.TP_LOCKED,
                 created_by=self.user,
@@ -896,13 +912,6 @@ class TestMessageViewSet:
                 program_cycle=self.program_active.cycles.first(),
             ),
         )
-        self.payment_plan = PaymentPlanFactory(
-            status=PaymentPlan.Status.TP_LOCKED,
-            created_by=self.user,
-            business_area=self.afghanistan,
-            program_cycle=self.program_active.cycles.first(),
-        )
-        self.payment = PaymentFactory(parent=self.payment_plan, program=self.program_active, household=self.hh_1)
         # Message without Program
         CommunicationMessageFactory(
             program=None,
@@ -910,7 +919,7 @@ class TestMessageViewSet:
             title="MSG title without Program",
             body="MSG body without Program",
             created_by=self.user,
-            sampling_type="RANDOM",
+            sampling_type=Survey.SAMPLING_RANDOM,
         )
         self.url_list = reverse(
             "api:accountability:messages-list",
@@ -1026,7 +1035,7 @@ class TestMessageViewSet:
             assert resp_data["households"] is not None
             assert resp_data["payment_plan"] is not None
             assert resp_data["registration_data_import"] is None
-            assert resp_data["sampling_type"] == "FULL_LIST"
+            assert resp_data["sampling_type"] == Survey.SAMPLING_FULL_LIST
             assert resp_data["full_list_arguments"]["excluded_admin_areas"] == []
             assert resp_data["random_sampling_arguments"] is None
             assert resp_data["sample_size"] == 0
@@ -1053,10 +1062,10 @@ class TestMessageViewSet:
                 {
                     "title": "New Message for Active Program",
                     "body": "Thank you for tests! Looks Good To Me!",
-                    "sampling_type": "FULL_LIST",
+                    "sampling_type": Survey.SAMPLING_FULL_LIST,
                     "full_list_arguments": {"excluded_admin_areas": []},
                     "random_sampling_arguments": None,
-                    "households": [str(self.hh_1.pk)],
+                    "households": [str(self.households[0].pk)],
                 },
                 format="json",
             )
@@ -1068,6 +1077,126 @@ class TestMessageViewSet:
             assert resp_data["title"] == "New Message for Active Program"
             assert resp_data["body"] == "Thank you for tests! Looks Good To Me!"
             assert resp_data["sample_size"] == 1
+
+    def test_create_new_message_by_households_full_list(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+        broadcast_message_mock = MagicMock(return_value=None)
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+        ):
+            response = self.client.post(
+                self.url_list,
+                {
+                    "title": "New Message 1 for Active Program",
+                    "body": "Thank you for tests! Looks Good To Me!",
+                    "sampling_type": Survey.SAMPLING_FULL_LIST,
+                    "full_list_arguments": {"excluded_admin_areas": []},
+                    "households": [str(hh.id) for hh in self.households],
+                },
+                format="json",
+            )
+        assert response.status_code == status.HTTP_201_CREATED
+        resp_data = response.json()
+        assert resp_data["sample_size"] == len(self.households)
+
+    def test_create_new_message_by_households_random(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+        broadcast_message_mock = MagicMock(return_value=None)
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+        ):
+            response = self.client.post(
+                self.url_list,
+                {
+                    "title": "New Message 2 for Active Program",
+                    "body": "Thank you for tests! Looks Good To Me!",
+                    "sampling_type": Survey.SAMPLING_RANDOM,
+                    "random_sampling_arguments": {
+                        "age": {"max": 80, "min": 30},
+                        "sex": "MALE",
+                        "margin_of_error": 20.0,
+                        "confidence_interval": 0.9,
+                        "excluded_admin_areas": [],
+                    },
+                    "households": [str(hh.id) for hh in self.households],
+                },
+                format="json",
+            )
+        assert response.status_code == status.HTTP_201_CREATED
+        resp_data = response.json()
+        assert resp_data["sample_size"] == 1
+
+    def test_create_new_message_by_target_population_full_list(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+        broadcast_message_mock = MagicMock(return_value=None)
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+        ):
+            response = self.client.post(
+                self.url_list,
+                {
+                    "title": "New Message 1 for Active Program",
+                    "body": "Thank you for tests! Looks Good To Me!",
+                    "sampling_type": Survey.SAMPLING_FULL_LIST,
+                    "full_list_arguments": {"excluded_admin_areas": []},
+                    "payment_plan": str(self.payment_plan.id),
+                },
+                format="json",
+            )
+        assert response.status_code == status.HTTP_201_CREATED
+        resp_data = response.json()
+        assert resp_data["sample_size"] == len(self.households)
+
+    def test_create_new_message_target_population_random(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+        broadcast_message_mock = MagicMock(return_value=None)
+        with (
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__", MagicMock(return_value=None)),
+            patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.broadcast_message", broadcast_message_mock),
+        ):
+            response = self.client.post(
+                self.url_list,
+                {
+                    "title": "New Message 2 for Active Program",
+                    "body": "Thank you for tests! Looks Good To Me!",
+                    "sampling_type": Survey.SAMPLING_RANDOM,
+                    "random_sampling_arguments": {
+                        "age": {"max": 80, "min": 30},
+                        "sex": "MALE",
+                        "margin_of_error": 20.0,
+                        "confidence_interval": 0.9,
+                        "excluded_admin_areas": [],
+                    },
+                    "payment_plan": str(self.payment_plan.id),
+                },
+                format="json",
+            )
+        assert response.status_code == status.HTTP_201_CREATED
+        resp_data = response.json()
+        assert resp_data["sample_size"] == 1
 
     def test_create_message_validation_error(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1090,9 +1219,8 @@ class TestMessageViewSet:
                 {
                     "title": "Test Error",
                     "body": "Thank you for tests!",
-                    "sampling_type": "FULL_LIST",
+                    "sampling_type": Survey.SAMPLING_FULL_LIST,
                     "full_list_arguments": {"excluded_admin_areas": []},
-                    "random_sampling_arguments": None,
                     "payment_plan": str(payment_plan.pk),
                 },
                 format="json",
@@ -1105,7 +1233,7 @@ class TestMessageViewSet:
                 {
                     "title": "Test Error",
                     "body": "Thank you for tests!",
-                    "sampling_type": "FULL_LIST",
+                    "sampling_type": Survey.SAMPLING_FULL_LIST,
                     "full_list_arguments": {"excluded_admin_areas": []},
                     "random_sampling_arguments": None,
                     "registration_data_import": str(rdi.pk),
@@ -1113,6 +1241,35 @@ class TestMessageViewSet:
                 format="json",
             )
         assert "No recipients found for the given criteria" in str(e.value)
+
+    def test_create_message_invalid_request(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE],
+            self.afghanistan,
+            self.program_active,
+        )
+
+        with pytest.raises(ValidationError) as e:
+            self.client.post(
+                self.url_list,
+                {
+                    "title": "Test Error",
+                    "body": "Thank you for tests!",
+                    "sampling_type": Survey.SAMPLING_RANDOM,
+                    "full_list_arguments": {"excluded_admin_areas": []},
+                    "random_sampling_arguments": {
+                        "age": {"max": 80, "min": 30},
+                        "sex": "MALE",
+                        "margin_of_error": 20.0,
+                        "confidence_interval": 0.9,
+                        "excluded_admin_areas": [],
+                    },
+                    "households": [str(self.households[0].pk)],
+                },
+                format="json",
+            )
+        assert f"Must not provide full_list_arguments for {Survey.SAMPLING_RANDOM}" in str(e.value)
 
     def test_sample_size(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1130,7 +1287,7 @@ class TestMessageViewSet:
         )
         data = {
             "payment_plan": str(self.payment_plan.pk),
-            "sampling_type": "RANDOM",
+            "sampling_type": Survey.SAMPLING_RANDOM,
             "random_sampling_arguments": {
                 "age": {"max": 80, "min": 30},
                 "sex": "MALE",
@@ -1142,7 +1299,7 @@ class TestMessageViewSet:
 
         response = self.client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED
-        assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
+        assert response.json() == {"number_of_recipients": 14, "sample_size": 1}
 
 
 class TestSurveyViewSet:
@@ -1173,7 +1330,7 @@ class TestSurveyViewSet:
             flow_id="id123",
             sample_file=None,
             sample_file_generated_at=None,
-            sampling_type="FULL_LIST",
+            sampling_type=Survey.SAMPLING_FULL_LIST,
             category="SMS",
             payment_plan=self.payment_plan,
         )
@@ -1253,6 +1410,7 @@ class TestSurveyViewSet:
             assert "has_valid_sample_file" in srv
             assert "sample_file_path" in srv
             assert "created_at" in srv
+            assert "number_of_recipients" in srv
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1321,9 +1479,8 @@ class TestSurveyViewSet:
                 "title": "New SRV",
                 "body": "LGTM",
                 "category": "MANUAL",
-                "sampling_type": "FULL_LIST",
+                "sampling_type": Survey.SAMPLING_FULL_LIST,
                 "full_list_arguments": {"excluded_admin_areas": []},
-                "random_sampling_arguments": None,
             },
             format="json",
         )
@@ -1342,7 +1499,7 @@ class TestSurveyViewSet:
                     "title": "New SRV with TP",
                     "body": "LGTM",
                     "category": "MANUAL",
-                    "sampling_type": "FULL_LIST",
+                    "sampling_type": Survey.SAMPLING_FULL_LIST,
                     "full_list_arguments": {"excluded_admin_areas": []},
                     "random_sampling_arguments": None,
                     "payment_plan": str(self.payment_plan.pk),
@@ -1421,7 +1578,7 @@ class TestSurveyViewSet:
         )
         data = {
             "payment_plan": str(self.payment_plan.pk),
-            "sampling_type": "RANDOM",
+            "sampling_type": Survey.SAMPLING_RANDOM,
             "random_sampling_arguments": {
                 "age": {"max": 80, "min": 30},
                 "sex": "MALE",
@@ -1436,7 +1593,7 @@ class TestSurveyViewSet:
         assert response.json() == {"number_of_recipients": 1, "sample_size": 0}
 
         data = {
-            "sampling_type": "FULL_LIST",
+            "sampling_type": Survey.SAMPLING_FULL_LIST,
             "full_list_arguments": {"excluded_admin_areas": []},
         }
 

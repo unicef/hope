@@ -47,8 +47,6 @@ export function DiscardVerificationPlan({
       await discardVerificationPlanMutation.mutateAsync();
       setDiscardDialogOpen(false);
       showMessage(t('Verification plan has been discarded.'));
-
-      // TODO: Implement proper React Query cache invalidation if needed
     } catch (error) {
       showMessage(error?.message || t('Error while submitting'));
     }

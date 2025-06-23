@@ -5,7 +5,6 @@ import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { getIndexForId } from './utils/helpers';
 import { ReactElement } from 'react';
 
@@ -14,8 +13,8 @@ export interface AgencyFieldProps {
   baseName: string;
   baseNameArray?;
   onDelete;
-  countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
-  identityTypeChoices: AllAddIndividualFieldsQuery['identityTypeChoices'];
+  countryChoices: any[];
+  identityTypeChoices: any[];
   isEdited?: boolean;
   values;
 }

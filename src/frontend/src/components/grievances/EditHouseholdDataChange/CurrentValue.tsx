@@ -1,17 +1,18 @@
 import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import {
-  AllEditHouseholdFieldsQuery,
-  AllEditPeopleFieldsQuery,
-} from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field:
-    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
-    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
   values;
 }

@@ -1,6 +1,5 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
-import { IndividualRdiMergeStatus } from '@generated/graphql';
 import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { adjustHeadCells } from '@utils/utils';
@@ -41,9 +40,7 @@ function ImportedIndividualsTable({
       household,
       duplicatesOnly: showDuplicates,
       businessArea,
-      rdiMergeStatus: isMerged
-        ? IndividualRdiMergeStatus.Merged
-        : IndividualRdiMergeStatus.Pending,
+      rdiMergeStatus: isMerged ? 'MERGED' : 'PENDING',
     }),
     [rdiId, household, showDuplicates, businessArea, isMerged],
   );

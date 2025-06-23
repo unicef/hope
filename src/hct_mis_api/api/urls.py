@@ -11,7 +11,6 @@ from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
 from hct_mis_api.apps.core.api.views import ChoicesViewSet
-from hct_mis_api.apps.core.rest_api import get_currency_choices
 from hct_mis_api.apps.steficon.views import RuleEngineViewSet
 from hct_mis_api.contrib.aurora.views import (
     OrganizationListView,
@@ -47,13 +46,13 @@ urlpatterns = [
         include("hct_mis_api.apps.geo.api.urls", namespace="geo"),
     ),
     path("", include("hct_mis_api.apps.account.api.urls", namespace="accounts")),
+    path("", include("hct_mis_api.apps.sanction_list.api.urls", namespace="sanction-list")),
     # choices
     path("", include(router.urls)),
     # old urls
     path("areas/", endpoints.lookups.AreaList().as_view(), name="area-list"),
     path("areatypes/", endpoints.lookups.AreaTypeList().as_view(), name="areatype-list"),
     path("constance/", ConstanceSettingsAPIView().as_view(), name="constance-list"),
-    path("currency/", get_currency_choices, name="currency_choices"),
     path("engine-rules/", RuleEngineViewSet().as_view(), name="engine-rules-list"),
     path("lookups/document/", endpoints.lookups.DocumentType().as_view(), name="document-list"),
     path("lookups/country/", endpoints.lookups.CountryAPIView().as_view(), name="country-list"),

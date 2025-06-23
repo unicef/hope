@@ -6,10 +6,6 @@ import Edit from '@mui/icons-material/Edit';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllAddIndividualFieldsQuery,
-  AllIndividualsQuery,
-} from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '../utils/helpers';
@@ -21,12 +17,30 @@ interface DisabledDivProps {
 const DisabledDiv = styled.div<DisabledDivProps>`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
 `;
+
+interface IdentityNode {
+  id: string;
+  number: string;
+  partner: string;
+  country: string;
+  countryIso3: string;
+}
+
+interface Identity {
+  node: IdentityNode;
+}
+
+interface AddIndividualFieldsData {
+  countriesChoices: Array<{ value: any; labelEn?: string }>;
+  identityTypeChoices: Array<{ value: any; labelEn?: string }>;
+}
+
 export interface EditIdentityRowProps {
-  setFieldValue;
-  values;
-  identity: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['identities']['edges'][number];
-  arrayHelpers;
-  addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  setFieldValue: (field: string, value: any) => void;
+  values: any;
+  identity: Identity;
+  arrayHelpers: any;
+  addIndividualFieldsData: AddIndividualFieldsData;
   id: string;
 }
 

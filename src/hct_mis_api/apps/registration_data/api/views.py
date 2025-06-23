@@ -248,7 +248,7 @@ class RegistrationDataImportViewSet(
         import_from_program_id = serializer.validated_data["import_from_program_id"]
         import_from_program = Program.objects.get(id=import_from_program_id)
         if self.program.status == Program.FINISHED:
-            raise ValidationError("In order to proceed this action, program status must not be finished.")
+            raise ValidationError("In order to perform this action, program status must not be finished.")
 
         if self.program.beneficiary_group != import_from_program.beneficiary_group:
             raise ValidationError("Cannot import data from a program with a different Beneficiary Group.")

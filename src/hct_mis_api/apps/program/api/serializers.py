@@ -1,7 +1,7 @@
 import re
 from typing import Any, Dict, List, Optional
 
-from django.db.models import F, Q, Value
+from django.db.models import Count, F, Q, Value
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 
@@ -306,6 +306,7 @@ class ProgramListSerializer(serializers.ModelSerializer):
     data_collecting_type = DataCollectingTypeSerializer()
     pdu_fields = serializers.SerializerMethodField()
     beneficiary_group = BeneficiaryGroupSerializer()
+    number_of_households_with_tp_in_program = serializers.SerializerMethodField()
 
     class Meta:
         model = Program
@@ -326,11 +327,27 @@ class ProgramListSerializer(serializers.ModelSerializer):
             "status",
             "pdu_fields",
             "household_count",
+            "number_of_households_with_tp_in_program",
         )
         extra_kwargs = {"status": {"help_text": "Status"}}  # for swagger purpose
 
     def get_pdu_fields(self, obj: Program) -> list[str]:
         return [pdu_field.id for pdu_field in obj.pdu_fields.all()]  # to save queries
+
+    def get_number_of_households_with_tp_in_program(self, obj: Program) -> int:
+        return (
+            Household.objects.filter(payment__parent__program_cycle__program=obj)
+            .annotate(
+                valid_payment_count=Count(
+                    "payment",
+                    filter=~Q(payment__parent__status=PaymentPlan.Status.TP_OPEN),
+                    distinct=True,
+                )
+            )
+            .filter(valid_payment_count__gt=0)
+            .distinct()
+            .count()
+        )
 
 
 class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
@@ -640,7 +657,6 @@ class ProgramCopySerializer(serializers.ModelSerializer):
             "cash_plus",
             "frequency_of_payments",
             "data_collecting_type",
-            "beneficiary_group",
             "start_date",
             "end_date",
             "pdu_fields",
@@ -665,7 +681,7 @@ class ProgramCopySerializer(serializers.ModelSerializer):
 
         # validate DCT against original program
         data_collecting_type = data["data_collecting_type"]
-        beneficiary_group = data["beneficiary_group"]
+        beneficiary_group = original_program.beneficiary_group
         if not original_program.data_collecting_type:
             raise serializers.ValidationError(
                 {"data_collecting_type": "The original Program must have a Data Collecting Type."}

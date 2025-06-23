@@ -24,12 +24,20 @@ from hct_mis_api.apps.core.api.mixins import BaseViewSet, CountActionMixin
 from hct_mis_api.apps.core.api.serializers import (
     BusinessAreaSerializer,
     ChoiceSerializer,
+    CollectorAttributeSerializer,
+    FieldAttributeSimpleSerializer,
+    GetKoboAssetListSerializer,
+    KoboAssetObjectSerializer,
 )
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_STRING
+from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.rest_api import CollectorAttributeSerializer
-from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.core.utils import (
+    get_fields_attr_generators,
+    resolve_assets_list,
+    to_choice_object,
+)
 from hct_mis_api.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
@@ -87,6 +95,32 @@ class BusinessAreaViewSet(
         result_list = sorted(definitions, key=lambda attr: attr["label"]["English(EN)"])  # type: ignore
         return Response(CollectorAttributeSerializer(result_list, many=True).data, status=200)
 
+    @extend_schema(
+        responses={
+            200: FieldAttributeSimpleSerializer(many=True),
+        },
+    )
+    @action(detail=False, methods=["get"], url_path="all-fields-attributes")
+    def all_fields_attributes(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        result_list = get_fields_attr_generators()
+        return Response(FieldAttributeSimpleSerializer(result_list, many=True).data, status=200)
+
+    @extend_schema(
+        request=GetKoboAssetListSerializer,
+        responses={
+            200: KoboAssetObjectSerializer(many=True),
+        },
+    )
+    @action(detail=True, methods=["post"], url_path="all-kobo-projects")
+    def all_kobo_projects(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """
+        All Kobo projects/assets.
+        """
+        assets_list = resolve_assets_list(
+            business_area_slug=self.kwargs["slug"], only_deployed=request.data.get("only_deployed", False)
+        )
+        return Response(KoboAssetObjectSerializer(assets_list, many=True).data, status=200)
+
 
 class ChoicesViewSet(ViewSet):
     """
@@ -134,4 +168,13 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="feedback-issue-type")
     def feedback_issue_type(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(Feedback.ISSUE_TYPE_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="languages")
+    def languages(self, request: Request) -> Response:
+        filter_code = request.query_params.get("code", "")
+        filtered_languages_data = Languages.filter_by_code(filter_code)
+        language_tuples = tuple((lang.code, lang.english) for lang in filtered_languages_data)
+        resp = ChoiceSerializer(to_choice_object(list(language_tuples)), many=True).data
         return Response(resp)

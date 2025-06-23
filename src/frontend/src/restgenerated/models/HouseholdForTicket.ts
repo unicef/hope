@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AreaSimple } from './AreaSimple';
 import type { HeadOfHousehold } from './HeadOfHousehold';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdForTicket = {
@@ -19,8 +20,8 @@ export type HouseholdForTicket = {
      * Household address
      */
     address?: string;
-    admin1?: string;
-    admin2?: string;
+    admin1: AreaSimple;
+    admin2: AreaSimple;
     country?: string;
     countryOrigin?: string;
     readonly geopoint: string | null;
