@@ -69,12 +69,19 @@ function CommunicationTable({
   });
 
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: ['businessAreasProgramsMessagesCount', programId, businessArea],
+    queryKey: [
+      'businessAreasProgramsMessagesCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsMessagesCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
+      RestService.restBusinessAreasProgramsMessagesCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
   });
 
   const renderRow = (message: MessageList): ReactElement => (

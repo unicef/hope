@@ -46,7 +46,7 @@ export const ProgramCyclesTablePaymentModule = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-    // Don't fetch data when viewing "all programs"
+  // Don't fetch data when viewing "all programs"
   const shouldFetchData = Boolean(!isAllPrograms && program?.id);
 
   const { data, refetch, error, isLoading } =
@@ -69,12 +69,15 @@ export const ProgramCyclesTablePaymentModule = ({
       'businessAreasProgramsCyclesCountRetrieve',
       programId,
       businessArea,
+      queryVariables,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsCyclesCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
+      RestService.restBusinessAreasProgramsCyclesCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
   });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =

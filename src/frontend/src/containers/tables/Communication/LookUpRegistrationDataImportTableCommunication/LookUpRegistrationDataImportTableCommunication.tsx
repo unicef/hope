@@ -102,13 +102,14 @@ function LookUpRegistrationDataImportTableCommunication({
       'businessAreasProgramsRegistrationDataImportsCount',
       programId,
       businessArea,
+      queryVariables,
     ],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve(
-        {
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-        },
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
       ),
   });
 

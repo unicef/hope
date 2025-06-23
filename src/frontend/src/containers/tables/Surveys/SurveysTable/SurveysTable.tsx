@@ -84,12 +84,18 @@ function SurveysTable({
       'businessAreasProgramsSurveysCount',
       businessAreaSlug,
       programId,
+      queryVariables,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsSurveysCountRetrieve({
-        businessAreaSlug,
-        programSlug: programId,
-      }),
+      RestService.restBusinessAreasProgramsSurveysCountRetrieve(
+        createApiParams(
+          {
+            businessAreaSlug: queryVariables.businessAreaSlug,
+            programSlug: queryVariables.programSlug,
+          },
+          queryVariables,
+        ),
+      ),
     enabled: !!businessAreaSlug && !!programId,
   });
 

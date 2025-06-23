@@ -106,12 +106,19 @@ export const HouseholdTable = ({
   });
 
   const { data: countData } = useQuery<CountResponse>({
-    queryKey: ['businessAreasProgramsHouseholdsCount', programId, businessArea],
+    queryKey: [
+      'businessAreasProgramsHouseholdsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
+      RestService.restBusinessAreasProgramsHouseholdsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
   });
 
   const replacements = {

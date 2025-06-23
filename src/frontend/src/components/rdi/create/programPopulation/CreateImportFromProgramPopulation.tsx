@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { useCreateRegistrationProgramPopulationImportMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
@@ -27,7 +26,6 @@ export const CreateImportFromProgramPopulationForm = ({
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [createImport] = useCreateRegistrationProgramPopulationImportMutation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const regex = isSocialDctType
@@ -85,22 +83,30 @@ export const CreateImportFromProgramPopulationForm = ({
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);
     try {
-      const data = await createImport({
-        variables: {
-          registrationDataImportData: {
-            name: values.name,
-            screenBeneficiary: values.screenBeneficiary,
-            importFromProgramId: values.importFromProgramId,
-            importFromIds: values.importFromIds,
+      const response =
+        await RestService.restBusinessAreasProgramsRegistrationDataImportsCreate(
+          {
             businessAreaSlug: businessArea,
+            programSlug: values.importFromProgramId,
+            requestBody: {
+              name: values.name,
+              screenBeneficiary: values.screenBeneficiary,
+              importFromProgramId: values.importFromProgramId,
+              importFromIds: values.importFromIds,
+            },
           },
-        },
-      });
-      navigate(
-        `/${baseUrl}/registration-data-import/${data.data.registrationProgramPopulationImport.registrationDataImport.id}`,
-      );
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+        );
+      navigate(`/${baseUrl}/registration-data-import/${response.id}`);
+    } catch (e: any) {
+      if (e?.body?.errors) {
+        Object.values(e.body.errors).forEach((msgArr: any) => {
+          if (Array.isArray(msgArr)) msgArr.forEach((msg) => showMessage(msg));
+        });
+      } else if (e?.message) {
+        showMessage(e.message);
+      } else {
+        showMessage('Unknown error');
+      }
       setSubmitDisabled(false);
     }
   };
@@ -134,7 +140,7 @@ export const CreateImportFromProgramPopulationForm = ({
 
   const mappedProgramChoices = programsData.results.map((element) => ({
     name: element.name,
-    value: element.id,
+    value: element.slug,
   }));
 
   return (
