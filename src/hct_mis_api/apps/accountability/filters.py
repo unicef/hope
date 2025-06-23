@@ -47,44 +47,6 @@ class MessagesFilter(FilterSet):
     )
 
 
-class MessageRecipientsMapFilter(FilterSet):
-    message_id = CharFilter(method="filter_message_id", required=True)
-    recipient_id = CharFilter(method="filter_recipient_id")
-    full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr=["exact", "icontains", "istartswith"])
-    phone_no = CharFilter(field_name="head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"])
-    sex = CharFilter(field_name="head_of_household__sex")
-
-    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        queryset = queryset.exclude(
-            head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
-        )
-        return super().filter_queryset(queryset)
-
-    def filter_message_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(messages__id=value)
-
-    def filter_recipient_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(head_of_household_id=value)
-
-    class Meta:
-        model = Household
-        fields = []
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            "id",
-            "unicef_id",
-            "withdrawn",
-            Lower("head_of_household__full_name"),
-            Lower("head_of_household__sex"),
-            "size",
-            Lower("admin_area__name"),
-            "residence_status",
-            "head_of_household__first_registration_date",
-        )
-    )
-
-
 class FeedbackFilter(FilterSet):
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
     created_at = filters.DateFromToRangeFilter(field_name="created_at")
@@ -116,14 +78,6 @@ class FeedbackFilter(FilterSet):
             "linked_grievance",
         )
     )
-
-
-class FeedbackMessageFilter(FilterSet):
-    feedback = UUIDFilter(field_name="feedback", required=True)
-
-    class Meta:
-        fields = ("id",)
-        model = FeedbackMessage
 
 
 class SurveyFilter(FilterSet):
@@ -170,25 +124,3 @@ class SurveyFilter(FilterSet):
             "created_at",
         )
     )
-
-
-class RecipientFilter(FilterSet):
-    survey = CharFilter(method="filter_survey", required=True)
-
-    class Meta:
-        model = Household
-        fields = []
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            "unicef_id",
-            "head_of_household__full_name",
-            "size",
-            "admin_area__name",
-            "residence_status",
-            "registered_at",
-        )
-    )
-
-    def filter_survey(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(surveys__id=value)
