@@ -1366,10 +1366,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             if main_key in {"primary_collector", "alternate_collector"}:
                 return household_data.get(main_key, {}).get("id")
 
-            if main_key == "bank_account_info":
-                bank_account_info_lookup = snapshot_field_path_split[1]
-                return collector_data.get("bank_account_info", {}).get(bank_account_info_lookup)
-
             if main_key == "documents":
                 doc_type, doc_lookup = snapshot_field_path_split[1], snapshot_field_path_split[2]
                 documents_list = collector_data.get("documents", [])

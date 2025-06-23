@@ -19,7 +19,6 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_drivers_licensee_issuer_query,
     get_electoral_card_document_number_query,
     get_electoral_card_issuer_query,
-    get_has_bank_account_number_query,
     get_has_phone_number_query,
     get_has_tax_id_query,
     get_national_id_document_number_query,
@@ -157,34 +156,6 @@ class TestAttributesGetQueries(APITestCase):
     def test_get_other_document_number_query(self) -> None:
         q = get_other_document_number_query(None, ["QRST"])
         self.assertEqual(q, Q(documents__type__key="other", documents__document_number="QRST"))
-
-    def test_get_has_bank_account_number_query_true(self) -> None:
-        # Test for individuals who have a bank account number
-        expected_query = Q(bank_account_info__isnull=False) & ~Q(bank_account_info__bank_account_number="")
-        result = get_has_bank_account_number_query(None, [True])
-        self.assertEqual(result, expected_query)
-
-    def test_get_has_bank_account_number_query_false(self) -> None:
-        # Test for individuals who do not have a bank account number
-        expected_query = Q(bank_account_info__isnull=True) | Q(bank_account_info__bank_account_number="")
-        result = get_has_bank_account_number_query(None, [False])
-        self.assertEqual(result, expected_query)
-
-    def test_get_has_bank_account_number_query_social_worker_true(self) -> None:
-        # Test with social worker prefix for individuals who have a bank account number
-        expected_query = Q(individuals__bank_account_info__isnull=False) & ~Q(
-            individuals__bank_account_info__bank_account_number=""
-        )
-        result = get_has_bank_account_number_query(None, [True], is_social_worker_query=True)
-        self.assertEqual(result, expected_query)
-
-    def test_get_has_bank_account_number_query_social_worker_false(self) -> None:
-        # Test with social worker prefix for individuals who do not have a bank account number
-        expected_query = Q(individuals__bank_account_info__isnull=True) | Q(
-            individuals__bank_account_info__bank_account_number=""
-        )
-        result = get_has_bank_account_number_query(None, [False], is_social_worker_query=True)
-        self.assertEqual(result, expected_query)
 
     def test_get_has_tax_id_query_true(self) -> None:
         # Test for individuals who have a tax ID

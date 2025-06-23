@@ -73,7 +73,6 @@ from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
     WORK_STATUS_CHOICE,
-    BankAccountInfo,
     Document,
     DocumentType,
     Household,
@@ -194,16 +193,6 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
         model = IndividualRoleInHousehold
 
 
-class BankAccountInfoNode(DjangoObjectType):
-    type = graphene.String(required=False)
-
-    class Meta:
-        model = BankAccountInfo
-        exclude = ("debit_card_number",)
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
 class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION),)
 
@@ -251,11 +240,9 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     )
     photo = graphene.String()
     age = graphene.Int()
-    bank_account_info = graphene.Field(BankAccountInfoNode, required=False)
     sanction_list_last_check = graphene.DateTime()
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
-    payment_channels = graphene.List(BankAccountInfoNode)
     preferred_language = graphene.String()
     accounts = graphene.List(AccountsNode)
     email = graphene.String(source="email")
@@ -287,16 +274,6 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     @staticmethod
     def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
         return parent.get_preferred_language_display()
-
-    @staticmethod
-    def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
-        return BankAccountInfo.all_merge_status_objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
-
-    def resolve_bank_account_info(parent, info: Any) -> Optional[BankAccountInfo]:
-        bank_account_info = parent.bank_account_info(manager="all_merge_status_objects").first()  # type: ignore
-        if bank_account_info:
-            return bank_account_info
-        return None
 
     def resolve_role(parent, info: Any) -> str:
         role = parent.households_and_roles(manager="all_merge_status_objects").first()

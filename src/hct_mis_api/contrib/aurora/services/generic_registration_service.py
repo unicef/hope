@@ -3,11 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.forms import (
-    BankAccountInfoForm,
-    DocumentForm,
-    IndividualForm,
-)
+from hct_mis_api.apps.household.forms import DocumentForm, IndividualForm
 from hct_mis_api.apps.household.models import (
     DISABLED,
     HEAD,
@@ -15,7 +11,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -37,7 +32,6 @@ SECONDARY_COLLECTOR = "secondary_collector"
 
 INDIVIDUAL_FIELD = "individual"
 DOCUMENT_FIELD = "document"
-BANK_FIELD = "bank"
 ACCOUNT_FIELD = "account_details"
 EXTRA_FIELD = "extra"
 
@@ -100,11 +94,6 @@ class GenericRegistrationService(BaseRegistrationService):
             "electoral_card_type_i_c": "document.doc_electoral-key",
             "electoral_card_no_i_c": "document.doc_electoral-document_number",
             "electoral_card_photo_i_c": "document.doc_electoral-photo",
-            "bank_account_h_f": "bank.bank1-bank_account_number",
-            "bank_name_h_f": "bank.bank1-bank_name",
-            "bank_debit_card_h_f": "bank.bank1-debit_card_number",
-            "account_holder_name_i_c": "bank.bank1-account_holder_name",
-            "bank_branch_name_i_c": "bank.bank1-bank_branch_name",
             "role_pr_i_c": "extra.primary_collector",
             "role_sec_i_c": "extra.secondary_collector",
         },
@@ -193,14 +182,13 @@ class GenericRegistrationService(BaseRegistrationService):
 
     @classmethod
     def create_individuals_dicts(cls, data_dict: List, mapping_dict: Dict, mapping: Dict) -> List:
-        """create individuals dicts, including documents and banks"""
+        """create individuals dicts, including documents"""
         individuals_dicts = []
         constances = mapping.get("individual_constances", {})
 
         for item in data_dict:
             my_dict = dict(extra=dict())
             my_dict["documents"] = dict()
-            my_dict["banks"] = dict()
             my_dict[ACCOUNT_FIELD] = dict()
             flex_fields = dict()
             for key, value in mapping_dict.items():
@@ -217,11 +205,6 @@ class GenericRegistrationService(BaseRegistrationService):
                         if doc_num not in my_dict["documents"]:
                             my_dict["documents"][doc_num] = dict()
                         my_dict["documents"][doc_num].update({doc_field: retrieved_value})
-                    if model == BANK_FIELD:
-                        bank_num, bank_field = field.split("-")
-                        if bank_num not in my_dict["banks"]:
-                            my_dict["banks"][bank_num] = dict()
-                        my_dict["banks"][bank_num].update({bank_field: retrieved_value})
                     if model == ACCOUNT_FIELD:
                         my_dict[ACCOUNT_FIELD][field] = retrieved_value
                     if model == EXTRA_FIELD:
@@ -293,7 +276,6 @@ class GenericRegistrationService(BaseRegistrationService):
 
         for individual_data in individuals_data:
             documents_data = individual_data.pop("documents")
-            banks_data = individual_data.pop("banks")
             account_data = individual_data.pop("account_details")
             extra_data = individual_data.pop("extra", dict())
 
@@ -317,10 +299,6 @@ class GenericRegistrationService(BaseRegistrationService):
                 if head:
                     raise ValidationError("Head of Household already exist")
                 head = individual
-
-            for _, bank_data in banks_data.items():
-                bank_data[INDIVIDUAL_FIELD] = individual
-                self._create_object_and_validate(bank_data, PendingBankAccountInfo, BankAccountInfoForm)
 
             for _, document_data in documents_data.items():
                 key = document_data.pop("key", None)  # skip documents' without key
