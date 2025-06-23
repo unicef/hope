@@ -1,0 +1,11 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+import type { SanctionListIndividual } from './SanctionListIndividual';
+export type PaginatedSanctionListIndividualList = {
+    next?: string | null;
+    previous?: string | null;
+    results: Array<SanctionListIndividual>;
+};
+
