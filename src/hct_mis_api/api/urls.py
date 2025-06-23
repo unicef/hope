@@ -46,6 +46,7 @@ urlpatterns = [
         include("hct_mis_api.apps.geo.api.urls", namespace="geo"),
     ),
     path("", include("hct_mis_api.apps.account.api.urls", namespace="accounts")),
+    path("", include("hct_mis_api.apps.sanction_list.api.urls", namespace="sanction-list")),
     # choices
     path("", include(router.urls)),
     # old urls
