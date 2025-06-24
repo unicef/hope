@@ -87,7 +87,7 @@ export const CreateImportFromProgramPopulationForm = ({
         await RestService.restBusinessAreasProgramsRegistrationDataImportsCreate(
           {
             businessAreaSlug: businessArea,
-            programSlug: values.importFromProgramId,
+            programSlug: programId,
             requestBody: {
               name: values.name,
               screenBeneficiary: values.screenBeneficiary,
@@ -140,7 +140,7 @@ export const CreateImportFromProgramPopulationForm = ({
 
   const mappedProgramChoices = programsData.results.map((element) => ({
     name: element.name,
-    value: element.slug,
+    value: element.id,
   }));
 
   return (
