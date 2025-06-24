@@ -14,10 +14,9 @@ from django.forms import (
 from django.utils import timezone
 
 from dateutil.parser import parse
-from django_filters import Filter, FilterSet
+from django_filters import Filter
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:
@@ -130,10 +129,3 @@ class BusinessAreaSlugFilter(Filter):
         if business_area_slug:
             return qs.filter(business_area_id=ba.id)
         return qs
-
-
-class GlobalProgramFilterMixin(FilterSet):
-    @property
-    def qs(self) -> QuerySet:
-        program_id = self.request.headers.get("Program")
-        return super().qs.filter(program_id=decode_id_string(program_id))

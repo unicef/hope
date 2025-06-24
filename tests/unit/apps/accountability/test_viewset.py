@@ -1,9 +1,11 @@
+import datetime
 from typing import Any, List
 from unittest.mock import MagicMock, patch
 from urllib.parse import urlencode
 
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils import timezone
 
 import pytest
 from rest_framework import status
@@ -46,6 +48,7 @@ class TestFeedbackViewSet:
         self.individual_1 = IndividualFactory(household_id=self.hh_1.id)
         self.area_1 = AreaFactory(name="AREA_name")
         self.area_2 = AreaFactory(name="Wroclaw")
+        self.user_creator = UserFactory(first_name="Creator", last_name="User", partner=self.partner)
 
         self.feedback_1 = FeedbackFactory(
             program=self.program_active,
@@ -72,7 +75,11 @@ class TestFeedbackViewSet:
             admin2=self.area_1,
         )
         self.program_2 = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
-        self.feedback_3 = FeedbackFactory(program=self.program_2)
+        self.feedback_3 = FeedbackFactory(
+            program=self.program_2,
+            issue_type="NEGATIVE_FEEDBACK",
+            created_by=self.user_creator,
+        )
 
         # per BA
         self.url_list = reverse(
@@ -594,7 +601,7 @@ class TestFeedbackViewSet:
     def test_feedback_get_count_per_program(
         self, permissions: List, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
-        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, whole_business_area_access=True)
         response = self.client.get(self.url_count_per_program)
 
         assert response.status_code == expected_status
@@ -873,6 +880,100 @@ class TestFeedbackViewSet:
             assert "id" in feedback_message
             assert "created_at" in feedback_message
 
+    @pytest.mark.parametrize(
+        "filter_value, expected_count",
+        [
+            ("POSITIVE_FEEDBACK", 1),
+            ("NEGATIVE_FEEDBACK", 2),
+        ],
+    )
+    def test_filter_feedback_by_issue_type(
+        self, filter_value: str, expected_count: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"issue_type": filter_value})
+        response_count = self.client.get(self.url_count, {"issue_type": filter_value})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == expected_count
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == expected_count
+
+    def test_filter_by_created_at(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        self.feedback_1.created_at = timezone.make_aware(datetime.datetime(year=2020, month=3, day=12))
+        self.feedback_1.save()
+        self.feedback_2.created_at = timezone.make_aware(datetime.datetime(year=2023, month=1, day=31))
+        self.feedback_2.save()
+        self.feedback_3.created_at = timezone.make_aware(datetime.datetime(year=2023, month=2, day=1))
+        self.feedback_3.save()
+        response = self.client.get(
+            self.url_list,
+            {
+                "created_at_after": "2023-01-30",
+                "created_at_before": "2023-03-01",
+            },
+        )
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 2
+        results_ids = [feedback["id"] for feedback in results]
+        assert str(self.feedback_1.id) not in results_ids
+        assert str(self.feedback_2.id) in results_ids
+        assert str(self.feedback_3.id) in results_ids
+
+        # check count
+        response_count = self.client.get(
+            self.url_count,
+            {
+                "created_at_after": "2023-01-30",
+                "created_at_before": "2023-03-01",
+            },
+        )
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 2
+
+    def test_filter_by_created_by(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"created_by": str(self.user_creator.id)})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.feedback_3.id)
+
+    def filter_by_is_active_program(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response_true = self.client.get(self.url_list, {"is_active_program": True})
+        assert response_true.status_code == status.HTTP_200_OK
+        results = response_true.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.feedback_1.id)
+
+        response_false = self.client.get(self.url_list, {"is_active_program": False})
+        assert response_false.status_code == status.HTTP_200_OK
+        results = response_false.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.feedback_2.id)
+
 
 class TestMessageViewSet:
     @pytest.fixture(autouse=True)
@@ -884,13 +985,21 @@ class TestMessageViewSet:
         self.program_active = ProgramFactory(
             name="Test Active Program", business_area=self.afghanistan, status=Program.ACTIVE
         )
+        self.program_finished = ProgramFactory(
+            name="Test Finished Program", business_area=self.afghanistan, status=Program.FINISHED
+        )
         self.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.TP_LOCKED,
             created_by=self.user,
             business_area=self.afghanistan,
             program_cycle=self.program_active.cycles.first(),
         )
-        self.households = [create_household()[0] for _ in range(14)]
+        self.households = [
+            create_household(
+                household_args={"program": self.program_active},
+            )[0]
+            for _ in range(14)
+        ]
         for hh in self.households:
             PaymentFactory(
                 parent=self.payment_plan,
@@ -912,12 +1021,26 @@ class TestMessageViewSet:
                 program_cycle=self.program_active.cycles.first(),
             ),
         )
-        # Message without Program
-        CommunicationMessageFactory(
-            program=None,
+        self.msg_2 = CommunicationMessageFactory(
+            program=self.program_active,
             business_area=self.afghanistan,
-            title="MSG title without Program",
-            body="MSG body without Program",
+            title="MSG title 2",
+            body="MSG body 2",
+            created_by=self.user,
+            sampling_type=Survey.SAMPLING_RANDOM,
+            payment_plan=PaymentPlanFactory(
+                status=PaymentPlan.Status.TP_LOCKED,
+                created_by=self.user,
+                business_area=self.afghanistan,
+                program_cycle=self.program_active.cycles.first(),
+            ),
+        )
+        # Message in different program
+        self.msg_3 = CommunicationMessageFactory(
+            program=self.program_finished,
+            business_area=self.afghanistan,
+            title="MSG title in different program",
+            body="MSG body in different program",
             created_by=self.user,
             sampling_type=Survey.SAMPLING_RANDOM,
         )
@@ -962,33 +1085,32 @@ class TestMessageViewSet:
 
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
-            assert response.status_code == status.HTTP_200_OK
-            resp_data = response.json()
-            assert len(resp_data["results"]) == 1
-            msg = resp_data["results"][0]
-            assert "id" in msg
-            assert "unicef_id" in msg
-            assert msg["title"] == "MSG title"
-            assert "number_of_recipients" in msg
-            assert "created_by" in msg
-            assert "created_at" in msg
+            response_results = response.json()["results"]
+            assert len(response_results) == 2
+            for i, message in enumerate([self.msg_1, self.msg_2]):
+                message_result = response_results[i]
+                assert message_result["id"] == str(message.id)
+                assert message_result["unicef_id"] == str(message.unicef_id)
+                assert message_result["title"] == message.title
+                assert message_result["number_of_recipients"] == message.number_of_recipients
+                assert message_result["created_by"] == f"{self.user.first_name} {self.user.last_name}"
+                assert message_result["created_at"] == f"{message.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
 
     def test_msg_filter_by_program(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,
             [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
             self.afghanistan,
-            self.program_active,
+            whole_business_area_access=True,
         )
         response = self.client.get(self.url_list + "?" + urlencode({"program": str(self.program_active.pk)}))
 
         assert response.status_code == status.HTTP_200_OK
         resp_data = response.json()
-        assert len(resp_data["results"]) == 1
-        msg = resp_data["results"][0]
-        assert "id" in msg
-        assert "unicef_id" in msg
-        assert msg["title"] == "MSG title"
+        assert len(resp_data["results"]) == 2
+        results_ids = [msg["id"] for msg in resp_data["results"]]
+        assert str(self.msg_1.id) in results_ids
+        assert str(self.msg_2.id) in results_ids
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1010,7 +1132,7 @@ class TestMessageViewSet:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert resp_data["count"] == 1
+            assert resp_data["count"] == 2
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1301,6 +1423,92 @@ class TestMessageViewSet:
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json() == {"number_of_recipients": 14, "sample_size": 1}
 
+    def test_filter_messages_by_created_at(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        self.msg_1.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
+        self.msg_1.save()
+        self.msg_2.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
+        self.msg_2.save()
+        response = self.client.get(
+            self.url_list,
+            {
+                "created_at_after": "2020-01-01",
+                "created_at_before": "2020-12-31",
+            },
+        )
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.msg_2.id)
+
+    def test_filter_messages_by_title(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"title": "MSG title"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 2
+        results_ids = [msg["id"] for msg in results]
+        assert str(self.msg_1.id) in results_ids
+        assert str(self.msg_2.id) in results_ids
+
+        response = self.client.get(self.url_list, {"title": "2"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        results_ids = [msg["id"] for msg in results]
+        assert str(self.msg_2.id) in results_ids
+
+    def test_filter_messages_by_body(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"body": "MSG body"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 2
+        results_ids = [msg["id"] for msg in results]
+        assert str(self.msg_1.id) in results_ids
+        assert str(self.msg_2.id) in results_ids
+
+        response = self.client.get(self.url_list, {"body": "2"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        results_ids = [msg["id"] for msg in results]
+        assert str(self.msg_2.id) in results_ids
+
+    def test_filter_messages_by_sampling_type(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"sampling_type": Survey.SAMPLING_FULL_LIST})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.msg_1.id)
+
+        response = self.client.get(self.url_list, {"sampling_type": Survey.SAMPLING_RANDOM})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.msg_2.id)
+
 
 class TestSurveyViewSet:
     @pytest.fixture(autouse=True)
@@ -1321,7 +1529,9 @@ class TestSurveyViewSet:
             program_cycle=self.program_active.cycles.first(),
         )
         self.payment = PaymentFactory(parent=self.payment_plan, program=self.program_active, household=self.hh_1)
+        self.user_creator = UserFactory(partner=self.partner, first_name="Creator", last_name="User")
         self.srv = SurveyFactory(
+            unicef_id="SUR-24-0012",
             program=self.program_active,
             business_area=self.afghanistan,
             created_by=self.user,
@@ -1331,7 +1541,20 @@ class TestSurveyViewSet:
             sample_file=None,
             sample_file_generated_at=None,
             sampling_type=Survey.SAMPLING_FULL_LIST,
-            category="SMS",
+            category=Survey.CATEGORY_SMS,
+            payment_plan=self.payment_plan,
+        )
+        self.srv_2 = SurveyFactory(
+            program=self.program_active,
+            business_area=self.afghanistan,
+            created_by=self.user_creator,
+            title="Survey 2",
+            body="Survey 2 body",
+            flow_id="id456",
+            sample_file=None,
+            sample_file_generated_at=None,
+            sampling_type=Survey.SAMPLING_RANDOM,
+            category=Survey.CATEGORY_MANUAL,
             payment_plan=self.payment_plan,
         )
         self.url_list = reverse(
@@ -1396,21 +1619,22 @@ class TestSurveyViewSet:
         assert response.status_code == expected_status
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
-            resp_data = response.json()
-            assert len(resp_data["results"]) == 1
-            srv = resp_data["results"][0]
-            assert "id" in srv
-            assert "unicef_id" in srv
-            assert srv["title"] == "Survey 1"
-            assert srv["body"] == "Survey 1 body"
-            assert srv["category"] == "SMS"
-            assert srv["flow_id"] == "id123"
-            assert srv["rapid_pro_url"] == "https://rapidpro.io/flow/results/id123/"
-            assert srv["created_by"] == "Test User"
-            assert "has_valid_sample_file" in srv
-            assert "sample_file_path" in srv
-            assert "created_at" in srv
-            assert "number_of_recipients" in srv
+            response_results = response.json()["results"]
+            assert len(response_results) == 2
+            for i, survey in enumerate([self.srv, self.srv_2]):
+                survey_result = response_results[i]
+                assert survey_result["id"] == str(survey.id)
+                assert survey_result["unicef_id"] == str(survey.unicef_id)
+                assert survey_result["title"] == survey.title
+                assert survey_result["body"] == survey.body
+                assert survey_result["category"] == survey.category
+                assert survey_result["flow_id"] == survey.flow_id
+                assert survey_result["rapid_pro_url"] == f"https://rapidpro.io/flow/results/{survey.flow_id}/"
+                assert survey_result["created_by"] == f"{survey.created_by.first_name} {survey.created_by.last_name}"
+                assert survey_result["has_valid_sample_file"] is None
+                assert survey_result["sample_file_path"] is None
+                assert survey_result["created_at"] == f"{survey.created_at:%Y-%m-%dT%H:%M:%S.%fZ}"
+                assert survey_result["number_of_recipients"] == survey.number_of_recipients
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1432,7 +1656,7 @@ class TestSurveyViewSet:
         if expected_status == status.HTTP_200_OK:
             assert response.status_code == status.HTTP_200_OK
             resp_data = response.json()
-            assert resp_data["count"] == 1
+            assert resp_data["count"] == 2
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1600,3 +1824,66 @@ class TestSurveyViewSet:
         response = self.client.post(url, data=data, format="json")
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert response.json() == {"number_of_recipients": 1, "sample_size": 1}
+
+    def test_filter_surveys_by_created_at(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        self.srv.created_at = timezone.make_aware(datetime.datetime(year=2021, month=3, day=12))
+        self.srv.save()
+        self.srv_2.created_at = timezone.make_aware(datetime.datetime(year=2020, month=5, day=15))
+        self.srv_2.save()
+        response = self.client.get(
+            self.url_list,
+            {
+                "created_at_after": "2020-01-01",
+                "created_at_before": "2020-12-31",
+            },
+        )
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.srv_2.id)
+
+    def test_filter_surveys_by_created_by(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"created_by": f"{self.user_creator.id}"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.srv_2.id)
+
+    def test_search_surveys(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST],
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.client.get(self.url_list, {"search": "Survey 1"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.srv.id)
+
+        response = self.client.get(self.url_list, {"search": "0012"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 1
+        assert results[0]["id"] == str(self.srv.id)
+
+        response = self.client.get(self.url_list, {"search": "SUR-"})
+        assert response.status_code == status.HTTP_200_OK
+        results = response.json()["results"]
+        assert len(results) == 2
+        results_ids = [survey["id"] for survey in results]
+        assert str(self.srv.id) in results_ids
+        assert str(self.srv_2.id) in results_ids
