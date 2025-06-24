@@ -79,7 +79,6 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             end_date="2023-05-25",
             created_by=cls.user,
         )
-        cls.program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.program.pk)}".encode()).decode()
         cls.list_url = reverse(
             "api:programs:cycles-list", kwargs={"business_area_slug": "afghanistan", "program_slug": cls.program.slug}
         )
@@ -225,7 +224,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
 
     def test_filter_by_program(self) -> None:
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.list_url, {"program": self.program_id_base64})
+        response = self.client.get(self.list_url, {"program": str(self.program.pk)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 3)
 
