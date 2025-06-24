@@ -49,6 +49,7 @@ from hct_mis_api.apps.payment.api.filters import (
 from hct_mis_api.apps.payment.api.serializers import (
     AcceptanceProcessSerializer,
     ApplyEngineFormulaSerializer,
+    AssignFundsCommitmentsSerializer,
     FspChoicesSerializer,
     FSPXlsxTemplateSerializer,
     PaymentDetailSerializer,
@@ -120,6 +121,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
 from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.api.serializers import TargetPopulationListSerializer
+from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
 logger = logging.getLogger(__name__)
 
@@ -586,6 +588,7 @@ class PaymentPlanViewSet(
         "split": SplitPaymentPlanSerializer,
         "reconciliation_import_xlsx": PaymentPlanImportFileSerializer,
         "fsp_xlsx_template_list": FSPXlsxTemplateSerializer,
+        "assign_funds_commitments": AssignFundsCommitmentsSerializer,
     }
     permissions_by_action = {
         "list": [
@@ -610,6 +613,7 @@ class PaymentPlanViewSet(
         "reconciliation_import_xlsx": [Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION],
         "export_pdf_payment_plan_summary": [Permissions.PM_EXPORT_PDF_SUMMARY],
         "fsp_xlsx_template_list": [Permissions.PM_EXPORT_XLSX_FOR_FSP],
+        "assign_funds_commitments": [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS],
     }
 
     def get_object(self) -> PaymentPlan:
@@ -1187,6 +1191,33 @@ class PaymentPlanViewSet(
             financial_service_providers__allowed_business_areas__slug=self.business_area_slug
         )
         return Response(data=FSPXlsxTemplateSerializer(qs, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(request=AssignFundsCommitmentsSerializer, responses={200: PaymentPlanDetailSerializer})
+    @action(detail=True, methods=["post"], url_path="assign-funds-commitments")
+    def assign_funds_commitments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        fund_commitment_items_ids = serializer.validated_data["fund_commitment_items_ids"]
+
+        payment_plan = self.get_object()
+        if payment_plan.status != PaymentPlan.Status.IN_REVIEW:
+            raise ValidationError("Payment plan must be in review")
+
+        funds_commitment_items = FundsCommitmentItem.objects.filter(rec_serial_number__in=fund_commitment_items_ids)
+        if funds_commitment_items.filter(payment_plan_id__isnull=False).exclude(payment_plan=payment_plan).exists():
+            raise ValidationError("Chosen Funds Commitments are already assigned to different Payment Plan")
+
+        if funds_commitment_items.exclude(office=payment_plan.business_area).exists():
+            raise ValidationError("Chosen Funds Commitments have wrong Business Area")
+
+        FundsCommitmentItem.objects.filter(payment_plan=payment_plan).update(payment_plan=None)
+        funds_commitment_items.update(payment_plan=payment_plan)
+
+        payment_plan.refresh_from_db()
+        return Response(
+            data=PaymentPlanDetailSerializer(payment_plan, context={"request": request}).data, status=status.HTTP_200_OK
+        )
 
 
 class TargetPopulationViewSet(

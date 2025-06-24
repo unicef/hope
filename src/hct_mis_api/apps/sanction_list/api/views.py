@@ -1,6 +1,12 @@
+from typing import Any
+
 from django_filters import rest_framework as filters
-from rest_framework import mixins
+from drf_spectacular.utils import extend_schema
+from rest_framework import mixins, status
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.api.mixins import (
@@ -8,11 +14,21 @@ from hct_mis_api.apps.core.api.mixins import (
     CountActionMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.registration_datahub.validators import (
+    XlsxException,
+    XLSXValidator,
+)
 from hct_mis_api.apps.sanction_list.api.serializers import (
+    CheckAgainstSanctionListCreateSerializer,
+    CheckAgainstSanctionListSerializer,
     SanctionListIndividualSerializer,
 )
+from hct_mis_api.apps.sanction_list.celery_tasks import check_against_sanction_list_task
 from hct_mis_api.apps.sanction_list.filters import SanctionListIndividualFilter
-from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
+from hct_mis_api.apps.sanction_list.models import (
+    SanctionListIndividual,
+    UploadedXLSXFile,
+)
 
 
 class SanctionListIndividualViewSet(
@@ -21,15 +37,21 @@ class SanctionListIndividualViewSet(
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     BaseViewSet,
+    XLSXValidator,
 ):
     queryset = SanctionListIndividual.objects.all()
     serializer_classes_by_action = {
         "list": SanctionListIndividualSerializer,
         "retrieve": SanctionListIndividualSerializer,
+        "check_against_sanction_list": CheckAgainstSanctionListCreateSerializer,
     }
     permissions_by_action = {
         "list": [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST, Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
-        "retrieve": [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS, Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS],
+        "retrieve": [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS, Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
+        "check_against_sanction_list": [
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+            Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+        ],
     }
     filter_backends = (
         filters.DjangoFilterBackend,
@@ -42,3 +64,29 @@ class SanctionListIndividualViewSet(
         "id",
         "full_name",
     )
+
+    @extend_schema(
+        request=CheckAgainstSanctionListCreateSerializer, responses={200: CheckAgainstSanctionListSerializer}
+    )
+    @action(detail=False, methods=["post"], url_path="check-against-sanction-list")
+    def check_against_sanction_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        file = serializer.validated_data["file"]
+        user = request.user
+        try:
+            self.validate(file=file)
+        except XlsxException as e:
+            return Response(
+                CheckAgainstSanctionListSerializer({"ok": False, "errors": e.errors}),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        uploaded_file = UploadedXLSXFile.objects.create(file=file, associated_email=user.email)
+
+        check_against_sanction_list_task.delay(
+            uploaded_file_id=str(uploaded_file.id),
+            original_file_name=file.name,
+        )
+        return Response(CheckAgainstSanctionListSerializer({"ok": False, "errors": []}).data, status=status.HTTP_200_OK)

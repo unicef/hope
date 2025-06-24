@@ -4,11 +4,14 @@
 /* eslint-disable */
 import type { AcceptanceProcess } from '../models/AcceptanceProcess';
 import type { ApplyEngineFormula } from '../models/ApplyEngineFormula';
+import type { AssignFundsCommitments } from '../models/AssignFundsCommitments';
 import type { BulkGrievanceTicketsAddNote } from '../models/BulkGrievanceTicketsAddNote';
 import type { BulkUpdateGrievanceTicketsAssignees } from '../models/BulkUpdateGrievanceTicketsAssignees';
 import type { BulkUpdateGrievanceTicketsPriority } from '../models/BulkUpdateGrievanceTicketsPriority';
 import type { BulkUpdateGrievanceTicketsUrgency } from '../models/BulkUpdateGrievanceTicketsUrgency';
 import type { BusinessArea } from '../models/BusinessArea';
+import type { CheckAgainstSanctionList } from '../models/CheckAgainstSanctionList';
+import type { CheckAgainstSanctionListCreate } from '../models/CheckAgainstSanctionListCreate';
 import type { Choice } from '../models/Choice';
 import type { CountResponse } from '../models/CountResponse';
 import type { CreateGrievanceTicket } from '../models/CreateGrievanceTicket';
@@ -772,25 +775,22 @@ export class RestService {
      */
     public static restBusinessAreasFeedbacksList({
         businessAreaSlug,
-        businessArea,
-        createdAtRange,
+        createdAtAfter,
+        createdAtBefore,
         createdBy,
-        feedbackId,
         isActiveProgram,
         issueType,
         limit,
         offset,
         orderBy,
         ordering,
-        program,
         search,
     }: {
         businessAreaSlug: string,
-        businessArea?: string,
-        createdAtRange?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
         createdBy?: string,
-        feedbackId?: string,
-        isActiveProgram?: string,
+        isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
          * * `NEGATIVE_FEEDBACK` - Negative feedback
@@ -825,7 +825,6 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        program?: string,
         /**
          * A search term.
          */
@@ -838,17 +837,15 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
             },
             query: {
-                'business_area': businessArea,
-                'created_at_range': createdAtRange,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
                 'created_by': createdBy,
-                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'limit': limit,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
-                'program': program,
                 'search': search,
             },
         });
@@ -4621,26 +4618,23 @@ export class RestService {
     public static restBusinessAreasProgramsFeedbacksList({
         businessAreaSlug,
         programSlug,
-        businessArea,
-        createdAtRange,
+        createdAtAfter,
+        createdAtBefore,
         createdBy,
-        feedbackId,
         isActiveProgram,
         issueType,
         limit,
         offset,
         orderBy,
         ordering,
-        program,
         search,
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        businessArea?: string,
-        createdAtRange?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
         createdBy?: string,
-        feedbackId?: string,
-        isActiveProgram?: string,
+        isActiveProgram?: boolean,
         /**
          * * `POSITIVE_FEEDBACK` - Positive feedback
          * * `NEGATIVE_FEEDBACK` - Negative feedback
@@ -4675,7 +4669,6 @@ export class RestService {
          * Which field to use when ordering the results.
          */
         ordering?: string,
-        program?: string,
         /**
          * A search term.
          */
@@ -4689,17 +4682,15 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'business_area': businessArea,
-                'created_at_range': createdAtRange,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
                 'created_by': createdBy,
-                'feedback_id': feedbackId,
                 'is_active_program': isActiveProgram,
                 'issue_type': issueType,
                 'limit': limit,
                 'offset': offset,
                 'order_by': orderBy,
                 'ordering': ordering,
-                'program': program,
                 'search': search,
             },
         });
@@ -6548,7 +6539,8 @@ export class RestService {
         businessAreaSlug,
         programSlug,
         body,
-        createdAtRange,
+        createdAtAfter,
+        createdAtBefore,
         createdBy,
         limit,
         numberOfRecipients,
@@ -6566,7 +6558,8 @@ export class RestService {
         businessAreaSlug: string,
         programSlug: string,
         body?: string,
-        createdAtRange?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
         createdBy?: string,
         /**
          * Number of results to return per page.
@@ -6622,7 +6615,8 @@ export class RestService {
             },
             query: {
                 'body': body,
-                'created_at_range': createdAtRange,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
                 'created_by': createdBy,
                 'limit': limit,
                 'number_of_recipients': numberOfRecipients,
@@ -7234,6 +7228,36 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/approve/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+                'program_slug': programSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns PaymentPlanDetail
+     * @throws ApiError
+     */
+    public static restBusinessAreasProgramsPaymentPlansAssignFundsCommitmentsCreate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this Payment Plan.
+         */
+        id: string,
+        programSlug: string,
+        requestBody?: AssignFundsCommitments,
+    }): CancelablePromise<PaymentPlanDetail> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/programs/{program_slug}/payment-plans/{id}/assign-funds-commitments/',
             path: {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
@@ -9233,8 +9257,8 @@ export class RestService {
     public static restBusinessAreasProgramsSurveysList({
         businessAreaSlug,
         programSlug,
-        businessArea,
-        createdAtRange,
+        createdAtAfter,
+        createdAtBefore,
         createdBy,
         limit,
         offset,
@@ -9246,8 +9270,8 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        businessArea?: string,
-        createdAtRange?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
         createdBy?: string,
         /**
          * Number of results to return per page.
@@ -9293,8 +9317,8 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'business_area': businessArea,
-                'created_at_range': createdAtRange,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
                 'created_by': createdBy,
                 'limit': limit,
                 'offset': offset,
@@ -9389,8 +9413,8 @@ export class RestService {
     public static restBusinessAreasProgramsSurveysAvailableFlowsList({
         businessAreaSlug,
         programSlug,
-        businessArea,
-        createdAtRange,
+        createdAtAfter,
+        createdAtBefore,
         createdBy,
         limit,
         offset,
@@ -9402,8 +9426,8 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        businessArea?: string,
-        createdAtRange?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
         createdBy?: string,
         /**
          * Number of results to return per page.
@@ -9449,8 +9473,8 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'business_area': businessArea,
-                'created_at_range': createdAtRange,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
                 'created_by': createdBy,
                 'limit': limit,
                 'offset': offset,
@@ -9469,8 +9493,8 @@ export class RestService {
     public static restBusinessAreasProgramsSurveysCategoryChoicesList({
         businessAreaSlug,
         programSlug,
-        businessArea,
-        createdAtRange,
+        createdAtAfter,
+        createdAtBefore,
         createdBy,
         limit,
         offset,
@@ -9482,8 +9506,8 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         programSlug: string,
-        businessArea?: string,
-        createdAtRange?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
         createdBy?: string,
         /**
          * Number of results to return per page.
@@ -9529,8 +9553,8 @@ export class RestService {
                 'program_slug': programSlug,
             },
             query: {
-                'business_area': businessArea,
-                'created_at_range': createdAtRange,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
                 'created_by': createdBy,
                 'limit': limit,
                 'offset': offset,
@@ -11213,6 +11237,22 @@ export class RestService {
             path: {
                 'id': id,
             },
+        });
+    }
+    /**
+     * @returns CheckAgainstSanctionList
+     * @throws ApiError
+     */
+    public static restSanctionListCheckAgainstSanctionListCreate({
+        requestBody,
+    }: {
+        requestBody: CheckAgainstSanctionListCreate,
+    }): CancelablePromise<CheckAgainstSanctionList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/sanction-list/check-against-sanction-list/',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
     /**

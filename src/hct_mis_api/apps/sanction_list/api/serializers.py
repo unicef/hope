@@ -44,3 +44,12 @@ class SanctionListIndividualSerializer(serializers.ModelSerializer):
 class SanctionListIndividualListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SanctionListIndividual
+
+
+class CheckAgainstSanctionListCreateSerializer(serializers.Serializer):
+    file = serializers.FileField(use_url=False, required=True)
+
+
+class CheckAgainstSanctionListSerializer(serializers.Serializer):
+    ok = serializers.BooleanField()
+    errors = serializers.ListField(child=serializers.CharField(), required=False)  # type: ignore
