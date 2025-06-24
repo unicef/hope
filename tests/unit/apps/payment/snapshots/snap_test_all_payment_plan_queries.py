@@ -629,7 +629,7 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 1'] = {
             'additionalCollectorName': None,
             'fullName': 'First1 Mid1 Last1',
             'reasonForUnsuccessfulPayment': 'reason 123',
-            'snapshotCollectorBankData': None,
+            'snapshotCollectorData': None,
             'totalPersonsCovered': 5,
             'verification': None
         }

@@ -533,8 +533,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             },
                             'previous_identities': {
                             },
-                            'previous_payment_channels': {
-                            },
                             'sex': {
                                 'approve_status': False,
                                 'previous_value': 'FEMALE',
