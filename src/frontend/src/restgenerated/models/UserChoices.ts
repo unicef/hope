@@ -6,5 +6,6 @@ export type UserChoices = {
     readonly roleChoices: Array<Record<string, any>>;
     readonly statusChoices: Array<Record<string, any>>;
     readonly partnerChoices: Array<Record<string, any>>;
+    readonly partnerChoicesTemp: Array<Record<string, any>>;
 };
 

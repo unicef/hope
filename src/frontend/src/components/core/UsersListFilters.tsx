@@ -61,7 +61,7 @@ export function UsersListFilters({
   }
 
   const choices = {
-    userPartnerChoices: choicesData.partnerChoices,
+    userPartnerChoices: choicesData.partnerChoicesTemp,
     userRolesChoices: choicesData.roleChoices,
     userStatusChoices: choicesData.statusChoices,
   };
