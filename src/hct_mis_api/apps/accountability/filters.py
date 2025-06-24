@@ -7,8 +7,7 @@ from django_filters import BooleanFilter, CharFilter, ChoiceFilter, FilterSet
 from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.accountability.models import Feedback, Message, Survey
-from hct_mis_api.apps.core.filters import BusinessAreaSlugFilter, DateTimeRangeFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.program.models import Program
 
 
@@ -69,7 +68,6 @@ class FeedbackFilter(FilterSet):
 
 
 class SurveyFilter(FilterSet):
-    business_area = BusinessAreaSlugFilter()
     created_at = filters.DateFromToRangeFilter(field_name="created_at")
     search = CharFilter(method="filter_search")
     created_by = CharFilter(method="filter_created_by")
@@ -91,9 +89,7 @@ class SurveyFilter(FilterSet):
         return queryset.filter(q_obj).distinct()
 
     def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Survey]:
-        if value is not None:
-            return queryset.filter(created_by__id=decode_id_string(value))
-        return queryset
+        return queryset.filter(created_by__pk=value)
 
     class Meta:
         model = Survey
