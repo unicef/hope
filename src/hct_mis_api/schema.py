@@ -7,7 +7,6 @@ import hct_mis_api.apps.core.schema
 import hct_mis_api.apps.grievance.schema_dashboard
 import hct_mis_api.apps.household.schema
 import hct_mis_api.apps.program.schema
-import hct_mis_api.apps.sanction_list.schema
 import hct_mis_api.apps.steficon.schema
 
 
@@ -17,7 +16,6 @@ class Query(
     hct_mis_api.apps.core.schema.Query,
     hct_mis_api.apps.steficon.schema.Query,
     hct_mis_api.apps.grievance.schema_dashboard.Query,
-    hct_mis_api.apps.sanction_list.schema.Query,
     graphene.ObjectType,
 ):
     debug = graphene.Field(DjangoDebug, name="_debug")
