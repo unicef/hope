@@ -268,7 +268,8 @@ class CountActionMixin:
         methods=["get"],
     )
     def count(self, request: Any, *args: Any, **kwargs: Any) -> Any:
-        queryset_count = self.get_queryset().count()
+        queryset = self.filter_queryset(self.get_queryset())
+        queryset_count = queryset.count()
         return DRFResponse({"count": queryset_count})
 
 

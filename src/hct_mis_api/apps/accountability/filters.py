@@ -3,27 +3,17 @@ import re
 from django.db.models import Q, QuerySet
 from django.db.models.functions import Lower
 
-from django_filters import CharFilter, ChoiceFilter, FilterSet, UUIDFilter
+from django_filters import BooleanFilter, CharFilter, ChoiceFilter, FilterSet
+from django_filters import rest_framework as filters
 
-from hct_mis_api.apps.accountability.models import (
-    Feedback,
-    FeedbackMessage,
-    Message,
-    Survey,
-)
-from hct_mis_api.apps.core.filters import BusinessAreaSlugFilter, DateTimeRangeFilter
-from hct_mis_api.apps.core.utils import (
-    CustomOrderingFilter,
-    decode_id_string,
-    decode_id_string_required,
-)
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.accountability.models import Feedback, Message, Survey
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.program.models import Program
 
 
 class MessagesFilter(FilterSet):
     program = CharFilter(method="filter_program")
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
     title = CharFilter(field_name="title", lookup_expr="icontains")
     body = CharFilter(field_name="body", lookup_expr="icontains")
     sampling_type = ChoiceFilter(field_name="sampling_type", choices=Message.SamplingChoices.choices)
@@ -44,72 +34,22 @@ class MessagesFilter(FilterSet):
     )
 
 
-class MessageRecipientsMapFilter(FilterSet):
-    message_id = CharFilter(method="filter_message_id", required=True)
-    recipient_id = CharFilter(method="filter_recipient_id")
-    full_name = CharFilter(field_name="head_of_household__full_name", lookup_expr=["exact", "icontains", "istartswith"])
-    phone_no = CharFilter(field_name="head_of_household__phone_no", lookup_expr=["exact", "icontains", "istartswith"])
-    sex = CharFilter(field_name="head_of_household__sex")
-
-    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        queryset = queryset.exclude(
-            head_of_household__phone_no_valid=False, head_of_household__phone_no_alternative_valid=False
-        )
-        return super().filter_queryset(queryset)
-
-    def filter_message_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(messages__id=value)
-
-    def filter_recipient_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(head_of_household_id=value)
-
-    class Meta:
-        model = Household
-        fields = []
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            "id",
-            "unicef_id",
-            "withdrawn",
-            Lower("head_of_household__full_name"),
-            Lower("head_of_household__sex"),
-            "size",
-            Lower("admin_area__name"),
-            "residence_status",
-            "head_of_household__first_registration_date",
-        )
-    )
-
-
 class FeedbackFilter(FilterSet):
-    business_area = BusinessAreaSlugFilter()
     issue_type = ChoiceFilter(field_name="issue_type", choices=Feedback.ISSUE_TYPE_CHOICES)
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")
-    feedback_id = CharFilter(method="filter_feedback_id")
-    is_active_program = CharFilter(method="filter_is_active_program")
-    program = CharFilter(method="filter_by_program")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
         return queryset.filter(created_by__pk=value)
 
-    def filter_feedback_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
-        return queryset.filter(unicef_id=value)
-
-    def filter_is_active_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         filter_q = Q(program__isnull=True)
-        if value in ["true", "True"]:
+        if value is True:
             filter_q |= Q(program__status=Program.ACTIVE)
-            return qs.filter(filter_q)
-        elif value in ["false", "False"]:
-            filter_q |= Q(program__status=Program.FINISHED)
-            return qs.filter(filter_q)
         else:
-            return qs
-
-    def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> QuerySet[Feedback]:
-        return qs.filter(program_id=decode_id_string_required(value))
+            filter_q |= Q(program__status=Program.FINISHED)
+        return qs.filter(filter_q)
 
     class Meta:
         model = Feedback
@@ -127,17 +67,8 @@ class FeedbackFilter(FilterSet):
     )
 
 
-class FeedbackMessageFilter(FilterSet):
-    feedback = UUIDFilter(field_name="feedback", required=True)
-
-    class Meta:
-        fields = ("id",)
-        model = FeedbackMessage
-
-
 class SurveyFilter(FilterSet):
-    business_area = BusinessAreaSlugFilter()
-    created_at_range = DateTimeRangeFilter(field_name="created_at")
+    created_at = filters.DateFromToRangeFilter(field_name="created_at")
     search = CharFilter(method="filter_search")
     created_by = CharFilter(method="filter_created_by")
 
@@ -158,9 +89,7 @@ class SurveyFilter(FilterSet):
         return queryset.filter(q_obj).distinct()
 
     def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Survey]:
-        if value is not None:
-            return queryset.filter(created_by__id=decode_id_string(value))
-        return queryset
+        return queryset.filter(created_by__pk=value)
 
     class Meta:
         model = Survey
@@ -179,25 +108,3 @@ class SurveyFilter(FilterSet):
             "created_at",
         )
     )
-
-
-class RecipientFilter(FilterSet):
-    survey = CharFilter(method="filter_survey", required=True)
-
-    class Meta:
-        model = Household
-        fields = []
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            "unicef_id",
-            "head_of_household__full_name",
-            "size",
-            "admin_area__name",
-            "residence_status",
-            "registered_at",
-        )
-    )
-
-    def filter_survey(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
-        return queryset.filter(surveys__id=value)
