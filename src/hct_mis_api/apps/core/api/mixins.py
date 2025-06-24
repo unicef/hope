@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from django.db.models import Q, QuerySet
 
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter
 from requests import Response, session
 from requests.adapters import HTTPAdapter
 from rest_framework import serializers, status
@@ -14,6 +14,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response as DRFResponse
 from rest_framework.viewsets import GenericViewSet
 from urllib3 import Retry
+from django_filters.rest_framework import DjangoFilterBackend
 
 from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
 from hct_mis_api.api.models import Grant
@@ -262,6 +263,7 @@ class CountActionMixin:
         responses={
             status.HTTP_200_OK: inline_serializer("CountResponse", fields={"count": serializers.IntegerField()})
         },
+        filters=True,
     )
     @action(
         detail=False,
