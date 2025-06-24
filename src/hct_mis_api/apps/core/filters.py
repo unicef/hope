@@ -14,10 +14,9 @@ from django.forms import (
 from django.utils import timezone
 
 from dateutil.parser import parse
-from django_filters import Filter, FilterSet
+from django_filters import Filter
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string
 
 
 def _clean_data_for_range_field(value: Any, field: Callable) -> Optional[Dict]:

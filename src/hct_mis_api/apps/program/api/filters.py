@@ -8,7 +8,7 @@ from django.db.models.functions import Coalesce, Lower
 from django_filters import rest_framework as filters
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
-from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
@@ -18,7 +18,6 @@ class ProgramCycleFilter(UpdatedAtFilter):
     status = filters.MultipleChoiceFilter(
         choices=ProgramCycle.STATUS_CHOICE,
     )
-    program = filters.CharFilter(method="filter_by_program")
     start_date = filters.DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = filters.DateFilter(field_name="end_date", lookup_expr="lte")
     title = filters.CharFilter(field_name="title", lookup_expr="istartswith")
@@ -37,9 +36,6 @@ class ProgramCycleFilter(UpdatedAtFilter):
             "total_delivered_quantity_usd_from",
             "total_delivered_quantity_usd_to",
         ]
-
-    def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(program_id=decode_id_string_required(value))
 
     def search_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         values = value.split(" ")
