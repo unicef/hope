@@ -7,7 +7,6 @@ import hct_mis_api.apps.core.schema
 import hct_mis_api.apps.grievance.schema_dashboard
 import hct_mis_api.apps.household.schema
 import hct_mis_api.apps.program.schema
-import hct_mis_api.apps.sanction_list.mutations
 import hct_mis_api.apps.sanction_list.schema
 import hct_mis_api.apps.steficon.schema
 

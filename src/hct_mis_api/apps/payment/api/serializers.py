@@ -1398,3 +1398,7 @@ class FSPXlsxTemplateSerializer(serializers.ModelSerializer):
             "id",
             "name",
         )
+
+
+class AssignFundsCommitmentsSerializer(serializers.Serializer):
+    fund_commitment_items_ids = serializers.ListSerializer(child=serializers.CharField(), required=False)
