@@ -164,7 +164,7 @@ docs = [
 
 [project]
 name = "hope"
-version = "3.2.5"
+version = "3.2.6"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = [
     { name = "Tivix" },
