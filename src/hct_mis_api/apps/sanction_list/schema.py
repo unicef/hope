@@ -11,8 +11,6 @@ from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualAliasName,
     SanctionListIndividualCountries,
-    SanctionListIndividualDateOfBirth,
-    SanctionListIndividualDocument,
     SanctionListIndividualNationalities,
 )
 
@@ -27,19 +25,6 @@ class SanctionListIndividualNode(DjangoObjectType):
 
     def resolve_country_of_birth(parent, info: Any) -> str:
         return parent.country_of_birth.name
-
-
-class SanctionListIndividualDocumentNode(DjangoObjectType):
-    issuing_country = graphene.String(description="Issuing country name")
-
-    class Meta:
-        model = SanctionListIndividualDocument
-        exclude = ("individual",)
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-    def resolve_issuing_country(parent, info: Any) -> str:
-        return parent.issuing_country.name
 
 
 class SanctionListIndividualNationalitiesNode(DjangoObjectType):
@@ -71,14 +56,6 @@ class SanctionListIndividualCountriesNode(DjangoObjectType):
 class SanctionListIndividualAliasNameNode(DjangoObjectType):
     class Meta:
         model = SanctionListIndividualAliasName
-        exclude = ("individual",)
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class SanctionListIndividualDateOfBirthNode(DjangoObjectType):
-    class Meta:
-        model = SanctionListIndividualDateOfBirth
         exclude = ("individual",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

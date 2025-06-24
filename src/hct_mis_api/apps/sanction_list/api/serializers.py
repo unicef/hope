@@ -41,11 +41,6 @@ class SanctionListIndividualSerializer(serializers.ModelSerializer):
         )
 
 
-class SanctionListIndividualListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SanctionListIndividual
-
-
 class CheckAgainstSanctionListCreateSerializer(serializers.Serializer):
     file = serializers.FileField(use_url=False, required=True)
 
