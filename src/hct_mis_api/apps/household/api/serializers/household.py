@@ -15,6 +15,8 @@ from hct_mis_api.apps.household.api.serializers.registration_data_import import 
 )
 from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
+    DEDUPLICATION_BATCH_STATUS_CHOICE,
+    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DUPLICATE,
     INDIVIDUAL_FLAGS_CHOICES,
     INDIVIDUAL_STATUS_CHOICES,
@@ -350,6 +352,8 @@ class IndividualChoicesSerializer(serializers.Serializer):
     sex_choices = serializers.SerializerMethodField()
     flag_choices = serializers.SerializerMethodField()
     status_choices = serializers.SerializerMethodField()
+    deduplication_batch_status_choices = serializers.SerializerMethodField()
+    deduplication_golden_record_status_choices = serializers.SerializerMethodField()
     # choices for grievance tickets
     relationship_choices = serializers.SerializerMethodField()
     role_choices = serializers.SerializerMethodField()
@@ -370,6 +374,12 @@ class IndividualChoicesSerializer(serializers.Serializer):
 
     def get_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(INDIVIDUAL_STATUS_CHOICES)
+
+    def get_deduplication_batch_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE)
+
+    def get_deduplication_golden_record_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE)
 
     def get_relationship_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(RELATIONSHIP_CHOICE)
