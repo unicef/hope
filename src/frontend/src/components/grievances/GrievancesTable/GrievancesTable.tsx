@@ -182,11 +182,15 @@ export const GrievancesTable = ({
 
   //ALL PROGRAMS COUNT
   const { data: allProgramsGrievanceTicketsCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasGrievanceTicketsCount', businessArea],
+    queryKey: [
+      'businessAreasGrievanceTicketsCount',
+      businessArea,
+      queryVariables,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasGrievanceTicketsCountRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      ),
     enabled: isAllPrograms,
   });
 
@@ -220,12 +224,15 @@ export const GrievancesTable = ({
         'businessAreasProgramsGrievanceTicketsCount',
         businessArea,
         programId,
+        queryVariables,
       ],
       queryFn: () =>
-        RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve({
-          businessAreaSlug: businessArea,
-          programSlug: programId,
-        }),
+        RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
+          createApiParams(
+            { businessAreaSlug: businessArea, programSlug: programId },
+            queryVariables,
+          ),
+        ),
       enabled: !isAllPrograms,
     });
 

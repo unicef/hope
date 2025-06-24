@@ -142,18 +142,13 @@ export function LookUpHouseholdTable({
     isLoading: isLoadingHouseholdsAllPrograms,
     error: errorHouseholdsAllPrograms,
   } = useQuery<PaginatedHouseholdListList>({
-    queryKey: [
-      'businessAreasHouseholdsList',
-      queryVariables,
-      programId,
-      businessArea,
-    ],
+    queryKey: ['businessAreasHouseholdsList', queryVariables, businessArea],
     queryFn: () => {
       // eslint-disable-next-line no-unused-vars
       const { programSlug, ...restQueryVariables } = queryVariables;
       return RestService.restBusinessAreasHouseholdsList(
         createApiParams(
-          { businessAreaSlug: businessArea, programSlug: programId },
+          { businessAreaSlug: businessArea },
           restQueryVariables,
           { withPagination: true },
         ),
@@ -164,12 +159,20 @@ export function LookUpHouseholdTable({
   //allPrograms
 
   const { data: dataHouseholdsAllProgramsCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasHouseholdsCountRetrieve', businessArea],
-    queryFn: () =>
-      RestService.restBusinessAreasHouseholdsCountRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+    queryKey: [
+      'businessAreasHouseholdsCountRetrieve',
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () => {
+      // eslint-disable-next-line no-unused-vars
+      const { programSlug, ...restQueryVariables } = queryVariables;
+      return RestService.restBusinessAreasHouseholdsCountRetrieve(
+        createApiParams({ businessAreaSlug: businessArea }, restQueryVariables),
+      );
+    },
   });
+
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
   );

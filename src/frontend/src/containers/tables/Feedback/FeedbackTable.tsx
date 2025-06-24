@@ -92,12 +92,15 @@ function FeedbackTable({
       'businessAreasProgramsFeedbacksCountRetrieve',
       businessArea,
       programId,
+      queryVariables,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsFeedbacksCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
+      RestService.restBusinessAreasProgramsFeedbacksCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
     enabled: !isAllPrograms,
   });
 
@@ -120,11 +123,15 @@ function FeedbackTable({
 
   // All Programs Count
   const { data: allProgramsFeedbacksCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasFeedbacksCountRetrieve', businessArea],
+    queryKey: [
+      'businessAreasFeedbacksCountRetrieve',
+      businessArea,
+      queryVariables,
+    ],
     queryFn: () =>
-      RestService.restBusinessAreasFeedbacksCountRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+      RestService.restBusinessAreasFeedbacksCountRetrieve(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      ),
     enabled: isAllPrograms,
   });
 

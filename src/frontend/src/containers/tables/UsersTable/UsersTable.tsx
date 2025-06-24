@@ -66,11 +66,9 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
   });
 
   const { data: dataUsersCount } = useQuery<CountResponse>({
-    queryKey: ['businessAreasUsersCount', businessArea],
+    queryKey: ['businessAreasUsersCount', businessArea, filteredQueryVariables],
     queryFn: () =>
-      RestService.restBusinessAreasUsersCountRetrieve({
-        businessAreaSlug: businessArea,
-      }),
+      RestService.restBusinessAreasUsersCountRetrieve(filteredQueryVariables),
   });
 
   return (

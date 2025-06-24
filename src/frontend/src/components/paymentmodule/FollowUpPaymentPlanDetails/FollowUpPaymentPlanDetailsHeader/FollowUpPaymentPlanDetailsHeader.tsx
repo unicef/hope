@@ -18,6 +18,7 @@ import { LockedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/Payment
 import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { AdminButton } from '@components/core/AdminButton';
 
 const StatusWrapper = styled.div`
   margin-left: 30px;
@@ -178,6 +179,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           ? breadCrumbsItems
           : null
       }
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

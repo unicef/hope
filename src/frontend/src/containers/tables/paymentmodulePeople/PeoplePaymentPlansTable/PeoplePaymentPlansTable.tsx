@@ -85,10 +85,12 @@ export const PeoplePaymentPlansTable = ({
       businessArea,
     ],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve({
-        businessAreaSlug: businessArea,
-        programSlug: programId,
-      }),
+      RestService.restBusinessAreasProgramsPaymentPlansCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
   });
 
   return (
