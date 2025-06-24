@@ -155,6 +155,7 @@ class UserChoicesSerializer(serializers.Serializer):
     role_choices = serializers.SerializerMethodField()
     status_choices = serializers.SerializerMethodField()
     partner_choices = serializers.SerializerMethodField()
+    partner_choices_temp = serializers.SerializerMethodField()
 
     def get_role_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return [dict(name=role.name, value=role.id, subsystem=role.subsystem) for role in Role.objects.order_by("name")]
@@ -168,6 +169,19 @@ class UserChoicesSerializer(serializers.Serializer):
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
                 .filter(allowed_business_areas__slug=business_area_slug)
+                .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
+                .values_list("id", "name")
+            )
+        )
+
+    def get_partner_choices_temp(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        # TODO: can be removed after proper solution is applied; this is the temp solution to skip the user input in
+        #  program mutations and retrieve partners already with a role in BA
+        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
+        return to_choice_object(
+            list(
+                Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
+                .filter(role_assignments__business_area__slug=business_area_slug, role_assignments__program=None)
                 .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
                 .values_list("id", "name")
             )

@@ -869,6 +869,11 @@ class TestUserChoices:
                 dict(name=partner.name, value=partner.id)
                 for partner in [self.partner, self.unicef_hq, self.unicef_partner_in_afghanistan]
             ],
+            # TODO: below assert can be removed after temporary solution is removed for partners
+            "partner_choices_temp": [
+                dict(name=partner.name, value=partner.id)
+                for partner in [self.unicef_hq, self.unicef_partner_in_afghanistan]
+            ],
         }
 
 
