@@ -13,6 +13,6 @@ export type FieldAttribute = {
     choices: Array<CoreFieldChoice>;
     readonly associatedWith: any;
     readonly isFlexField: boolean;
-    readonly pduData: string;
+    readonly pduData: Record<string, any> | null;
 };
 

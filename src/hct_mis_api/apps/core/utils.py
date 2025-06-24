@@ -35,7 +35,6 @@ from django.utils import timezone
 import pytz
 from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
-from graphene.types.resolver import attr_resolver, dict_resolver
 from PIL import Image
 from rest_framework.exceptions import ValidationError
 
@@ -949,22 +948,6 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
     return reduce_assets_list(assets, only_deployed=only_deployed)
 
 
-def _custom_dict_or_attr_resolver(attname: str, default_value: Optional[str], root: Any, info: Any, **args: Any) -> Any:
-    resolver = attr_resolver
-    if isinstance(root, dict):
-        resolver = dict_resolver
-    return resolver(attname, default_value, root, info, **args)
-
-
-def sort_by_attr(options: Iterable, attrs: str) -> List:
-    def key_extractor(el: Any) -> Any:
-        for attr in attrs.split("."):
-            el = _custom_dict_or_attr_resolver(attr, None, el, None)
-        return el
-
-    return list(sorted(options, key=key_extractor))
-
-
 def get_fields_attr_generators(
     flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
 ) -> Generator:
@@ -991,3 +974,20 @@ def get_fields_attr_generators(
             yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
                 business_area_slug=business_area_slug, program_id=program_id
             )
+
+
+def safe_getattr(obj: Any, attr: str) -> Any:
+    if isinstance(obj, dict):
+        return obj.get(attr)
+    return getattr(obj, attr, None)
+
+
+def sort_by_attr(options: Iterable, attrs: str) -> List:
+    def key_extractor(obj: Union[dict, Any]) -> str:
+        for attr in attrs.split("."):
+            obj = safe_getattr(obj, attr)
+            if obj is None:
+                return ""
+        return str(obj) if not isinstance(obj, dict) else ""
+
+    return sorted(options, key=key_extractor)
