@@ -48,6 +48,7 @@ from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactor
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
 pytestmark = pytest.mark.django_db()
 
@@ -1626,6 +1627,7 @@ class TestPaymentPlanActions:
         )
         self.url_pp_split = reverse("api:payments:payment-plans-split", kwargs=url_kwargs)
         self.url_create_follow_up = reverse("api:payments:payment-plans-create-follow-up", kwargs=url_kwargs)
+        self.url_funds_commitments = reverse("api:payments:payment-plans-assign-funds-commitments", kwargs=url_kwargs)
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -2363,3 +2365,90 @@ class TestPaymentPlanActions:
             assert response.json()["dispersion_start_date"] == "2024-01-01"
             assert response.json()["dispersion_end_date"] == "2026-01-01"
             assert response.json()["currency"] == self.pp.currency
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PM_ASSIGN_FUNDS_COMMITMENTS], status.HTTP_200_OK),
+            ([], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_assign_funds_commitments(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program_active)
+        self.pp.status = PaymentPlan.Status.IN_REVIEW
+        self.pp.save()
+
+        group = FundsCommitmentGroup.objects.create()
+
+        funds_commitment_item = FundsCommitmentItem.objects.create(
+            funds_commitment_group_id=group.pk,
+            office=self.afghanistan,
+            rec_serial_number="999",
+            payment_plan=None,
+        )
+        assert funds_commitment_item.payment_plan is None
+
+        response = self.client.post(
+            self.url_funds_commitments,
+            {"fund_commitment_items_ids": ["999"]},
+            format="json",
+        )
+        assert response.status_code == expected_status
+
+        if expected_status == status.HTTP_200_OK:
+            assert "id" in response.json()
+            funds_commitment_item.refresh_from_db()
+            assert funds_commitment_item.payment_plan_id == self.pp.pk
+
+    def test_assign_funds_commitments_validation_errors(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_ASSIGN_FUNDS_COMMITMENTS], self.afghanistan, self.program_active
+        )
+
+        response = self.client.post(
+            self.url_funds_commitments,
+            {"fund_commitment_items_ids": ["333"]},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Payment plan must be in review" in response.json()
+
+        self.pp.status = PaymentPlan.Status.IN_REVIEW
+        self.pp.save()
+        other_pp = PaymentPlanFactory(
+            business_area=self.afghanistan,
+            program_cycle=self.cycle,
+            status=PaymentPlan.Status.DRAFT,
+            created_by=self.user,
+        )
+        group = FundsCommitmentGroup.objects.create()
+        FundsCommitmentItem.objects.create(
+            funds_commitment_group_id=group.pk,
+            office=None,
+            rec_serial_number="333",
+            payment_plan=other_pp,
+        )
+
+        response = self.client.post(
+            self.url_funds_commitments,
+            {"fund_commitment_items_ids": ["333"]},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Chosen Funds Commitments are already assigned to different Payment Plan" in response.json()
+
+        FundsCommitmentItem.objects.create(
+            funds_commitment_group_id=group.pk,
+            office=None,
+            rec_serial_number="2355",
+            payment_plan=None,
+        )
+        response = self.client.post(
+            self.url_funds_commitments,
+            {"fund_commitment_items_ids": ["2355"]},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Chosen Funds Commitments have wrong Business Area" in response.json()
