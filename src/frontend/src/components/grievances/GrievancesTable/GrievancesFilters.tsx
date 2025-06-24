@@ -84,10 +84,10 @@ export const GrievancesFilters = ({
   );
 
   const showIssueType =
-    filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    filter.category === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
-    filter.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
+    filter.category.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    filter.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    filter.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
+    filter.category.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   const updatedPriorityChoices = useMemo(() => {
     const priorityChoices = choicesData.grievanceTicketPriorityChoices;
@@ -111,7 +111,15 @@ export const GrievancesFilters = ({
       .reverse();
   }, [choicesData.grievanceTicketUrgencyChoices]);
 
-  const subCategories = issueTypeDict[filter.category]?.subCategories || [];
+  const subCategoriesObj = issueTypeDict[filter.category]?.subCategories || [];
+
+  // Transform to array of { name, value }
+  const subcategories = Object.entries(subCategoriesObj).map(
+    ([value, name]) => ({
+      name,
+      value,
+    }),
+  );
 
   return (
     <FiltersSection
@@ -214,7 +222,7 @@ export const GrievancesFilters = ({
               value={filter.issueType}
               fullWidth
             >
-              {subCategories.map((item) => (
+              {subcategories.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
                 </MenuItem>
