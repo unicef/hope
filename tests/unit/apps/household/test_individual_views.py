@@ -36,6 +36,8 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
     CANNOT_DO,
+    DEDUPLICATION_BATCH_STATUS_CHOICE,
+    DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DISABLED,
     DUPLICATE,
     FEMALE,
@@ -1330,6 +1332,8 @@ class TestIndividualChoices:
             "sex_choices": to_choice_object(SEX_CHOICE),
             "flag_choices": to_choice_object(INDIVIDUAL_FLAGS_CHOICES),
             "status_choices": to_choice_object(INDIVIDUAL_STATUS_CHOICES),
+            "deduplication_batch_status_choices": to_choice_object(DEDUPLICATION_BATCH_STATUS_CHOICE),
+            "deduplication_golden_record_status_choices": to_choice_object(DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE),
             "relationship_choices": to_choice_object(RELATIONSHIP_CHOICE),
             "role_choices": to_choice_object(ROLE_CHOICE),
             "marital_status_choices": to_choice_object(MARITAL_STATUS_CHOICE),
