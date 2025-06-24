@@ -1196,8 +1196,7 @@ class PaymentPlanViewSet(
     @action(detail=True, methods=["post"], url_path="assign-funds-commitments")
     def assign_funds_commitments(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         fund_commitment_items_ids = serializer.validated_data["fund_commitment_items_ids"]
 
         payment_plan = self.get_object()
