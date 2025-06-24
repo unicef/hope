@@ -7,7 +7,9 @@ from hct_mis_api.apps.core.models import (
     DataCollectingType,
     FlexibleAttribute,
     FlexibleAttributeChoice,
-    PeriodicFieldData,
+)
+from hct_mis_api.apps.periodic_data_update.api.serializers import (
+    PeriodicFieldDataSerializer,
 )
 
 
@@ -158,9 +160,9 @@ class FieldAttributeSerializer(serializers.Serializer):
     pdu_data = serializers.SerializerMethodField()
 
     @staticmethod
-    def get_pdu_data(obj: Union[Dict, FlexibleAttribute]) -> Optional[PeriodicFieldData]:
+    def get_pdu_data(obj: Union[Dict, FlexibleAttribute]) -> Optional[Dict[str, Any]]:
         if isinstance(obj, FlexibleAttribute):
-            return obj.pdu_data
+            return PeriodicFieldDataSerializer(obj.pdu_data).data
         return None
 
     def get_labels(self, obj: Any) -> list[dict[str, Any]]:

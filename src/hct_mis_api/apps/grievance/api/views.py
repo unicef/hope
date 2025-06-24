@@ -40,7 +40,10 @@ from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.utils import check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    sort_by_attr,
+)
 from hct_mis_api.apps.grievance.api.caches import GrievanceTicketListKeyConstructor
 from hct_mis_api.apps.grievance.api.mixins import (
     GrievanceMutationMixin,
@@ -998,7 +1001,7 @@ class GrievanceTicketGlobalViewSet(
                 associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
             ).prefetch_related("choices")
         )
-        sorted_list = sorted(all_options, key=lambda obj: obj.get("label", {}).get("English(EN)", ""))
+        sorted_list = sort_by_attr(all_options, "label.English(EN)")
         return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -1014,8 +1017,7 @@ class GrievanceTicketGlobalViewSet(
                 ]
             ).prefetch_related("choices")
         )
-
-        sorted_list = sorted(all_options, key=lambda obj: obj.get("label", {}).get("English(EN)", ""))
+        sorted_list = sort_by_attr(all_options, "label.English(EN)")
         return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -1033,5 +1035,5 @@ class GrievanceTicketGlobalViewSet(
             .exclude(type=FlexibleAttribute.PDU)
             .prefetch_related("choices")
         )
-        sorted_list = sorted(all_options, key=lambda obj: obj.get("label", {}).get("English(EN)", ""))
+        sorted_list = sort_by_attr(all_options, "label.English(EN)")
         return Response(FieldAttributeSerializer(sorted_list, many=True).data, status=status.HTTP_200_OK)
