@@ -22,9 +22,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.celery_tasks import (
-    revalidate_phone_number_task,
-)
+from hct_mis_api.apps.household.celery_tasks import revalidate_phone_number_task
 from hct_mis_api.apps.household.models import (
     Household,
     Individual,

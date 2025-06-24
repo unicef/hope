@@ -43,7 +43,7 @@ class TestXlsxExportTargetingService(APITestCase):
         service._create_workbook()
         service._add_standard_columns_headers()
         headers = [cell.value for cell in service.ws_individuals[1]]
-        self.assertEqual(headers, ["Household unicef_id", "unicef_id", "Linked Households", "Bank account information"])
+        self.assertEqual(headers, ["Household unicef_id", "unicef_id", "Linked Households", "Accounts information"])
 
     def test_export_service_households_property(self) -> None:
         program = self.payment_plan.program_cycle.program

@@ -247,11 +247,7 @@ class TestPaymentPlanQueries(APITestCase):
           payment(id: $id) {
             totalPersonsCovered
             fullName
-            snapshotCollectorFullName
-            snapshotCollectorDeliveryPhoneNo
-            snapshotCollectorBankName
-            snapshotCollectorBankAccountNumber
-            snapshotCollectorDebitCardNumber
+            snapshotCollectorData
             additionalCollectorName
             reasonForUnsuccessfulPayment
             verification {

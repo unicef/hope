@@ -243,15 +243,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                                 }
                             ],
                             'marital_status': 'SINGLE',
-                            'payment_channels': [
-                                {
-                                    'account_holder_name': 'Holder Name 132',
-                                    'bank_account_number': '2356789789789789',
-                                    'bank_branch_name': 'newName 123',
-                                    'bank_name': 'privatbank',
-                                    'type': 'BANK_TRANSFER'
-                                }
-                            ],
                             'relationship': 'UNKNOWN',
                             'role': 'NO_ROLE',
                             'sex': 'MALE'
@@ -533,12 +524,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'previous_value': 'WIDOWED',
                                 'value': 'SINGLE'
                             },
-                            'payment_channels': [
-                            ],
-                            'payment_channels_to_edit': [
-                            ],
-                            'payment_channels_to_remove': [
-                            ],
                             'preferred_language': {
                                 'approve_status': False,
                                 'previous_value': None,
