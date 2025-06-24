@@ -170,12 +170,17 @@ export const GrievancesTable = ({
       queryVariables,
       businessArea,
       filter.grievanceType,
+      programId,
     ],
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsList(
-        createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
-          withPagination: true,
-        }),
+        createApiParams(
+          { businessAreaSlug: businessArea, program: programId },
+          queryVariables,
+          {
+            withPagination: true,
+          },
+        ),
       ),
     enabled: isAllPrograms,
   });

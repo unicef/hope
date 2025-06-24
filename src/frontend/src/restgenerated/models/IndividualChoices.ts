@@ -7,6 +7,8 @@ export type IndividualChoices = {
     readonly sexChoices: Array<Record<string, any>>;
     readonly flagChoices: Array<Record<string, any>>;
     readonly statusChoices: Array<Record<string, any>>;
+    readonly deduplicationBatchStatusChoices: Array<Record<string, any>>;
+    readonly deduplicationGoldenRecordStatusChoices: Array<Record<string, any>>;
     readonly relationshipChoices: Array<Record<string, any>>;
     readonly roleChoices: Array<Record<string, any>>;
     readonly maritalStatusChoices: Array<Record<string, any>>;

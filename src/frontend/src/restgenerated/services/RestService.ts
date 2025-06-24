@@ -741,14 +741,46 @@ export class RestService {
      */
     public static restBusinessAreasActivityLogsCountRetrieve({
         businessAreaSlug,
+        businessArea,
+        module,
+        objectId,
+        ordering,
+        programId,
+        search,
+        user,
+        userId,
     }: {
         businessAreaSlug: string,
+        businessArea?: string,
+        module?: string,
+        objectId?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        user?: string,
+        userId?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/activity-logs/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'module': module,
+                'object_id': objectId,
+                'ordering': ordering,
+                'program_id': programId,
+                'search': search,
+                'user': user,
+                'user_id': userId,
             },
         });
     }
@@ -954,14 +986,66 @@ export class RestService {
      */
     public static restBusinessAreasFeedbacksCountRetrieve({
         businessAreaSlug,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        isActiveProgram,
+        issueType,
+        orderBy,
+        ordering,
+        search,
     }: {
         businessAreaSlug: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        isActiveProgram?: boolean,
+        /**
+         * * `POSITIVE_FEEDBACK` - Positive feedback
+         * * `NEGATIVE_FEEDBACK` - Negative feedback
+         */
+        issueType?: 'NEGATIVE_FEEDBACK' | 'POSITIVE_FEEDBACK',
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `household_lookup` - Household lookup
+         * * `-household_lookup` - Household lookup (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `linked_grievance` - Linked grievance
+         * * `-linked_grievance` - Linked grievance (descending)
+         */
+        orderBy?: Array<'-created_at' | '-created_by' | '-household_lookup' | '-issue_type' | '-linked_grievance' | '-unicef_id' | 'created_at' | 'created_by' | 'household_lookup' | 'issue_type' | 'linked_grievance' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/feedbacks/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'is_active_program': isActiveProgram,
+                'issue_type': issueType,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'search': search,
             },
         });
     }
@@ -3464,14 +3548,215 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsCountRetrieve({
         businessAreaSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        householdId,
+        id,
+        idStartswith,
+        individualId,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        orderBy,
+        ordering,
+        paymentRecordIds,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
     }: {
         businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        householdId?: string,
+        id?: string,
+        idStartswith?: string,
+        individualId?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/grievance-tickets/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'household_id': householdId,
+                'id': id,
+                'id__startswith': idStartswith,
+                'individual_id': individualId,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
             },
         });
     }
@@ -3684,14 +3969,171 @@ export class RestService {
      */
     public static restBusinessAreasHouseholdsCountRetrieve({
         businessAreaSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        messageId,
+        orderBy,
+        ordering,
+        phoneNo,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        recipientId,
+        residenceStatus,
+        search,
+        sex,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        survey,
+        unicefId,
+        withdrawn,
     }: {
         businessAreaSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        messageId?: string,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        phoneNo?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sex?: string,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
+        withdrawn?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/households/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'message_id': messageId,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'phone_no': phoneNo,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
+                'residence_status': residenceStatus,
+                'search': search,
+                'sex': sex,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
+                'withdrawn': withdrawn,
             },
         });
     }
@@ -3874,14 +4316,141 @@ export class RestService {
      */
     public static restBusinessAreasIndividualsCountRetrieve({
         businessAreaSlug,
+        admin1,
+        admin2,
+        ageMax,
+        ageMin,
+        documentNumber,
+        documentType,
+        duplicatesOnly,
+        excludedId,
+        flags,
+        fullName,
+        householdAdminArea,
+        householdId,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        search,
+        sex,
+        status,
+        withdrawn,
     }: {
         businessAreaSlug: string,
+        admin1?: string,
+        admin2?: string,
+        ageMax?: string,
+        ageMin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        duplicatesOnly?: boolean,
+        excludedId?: any,
+        /**
+         * * `DUPLICATE` - Duplicate
+         * * `NEEDS_ADJUDICATION` - Needs adjudication
+         * * `SANCTION_LIST_CONFIRMED_MATCH` - Sanction list match
+         * * `SANCTION_LIST_POSSIBLE_MATCH` - Sanction list possible match
+         */
+        flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
+        fullName?: string,
+        householdAdminArea?: string,
+        householdId?: string,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `household__unicef_id` - Household  unicef id
+         * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `birth_date` - Birth date
+         * * `-birth_date` - Birth date (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `relationship` - Relationship
+         * * `-relationship` - Relationship (descending)
+         * * `household__admin_area__name` - Household  admin area  name
+         * * `-household__admin_area__name` - Household  admin area  name (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        search?: any,
+        /**
+         * Beneficiary gender
+         *
+         * * `MALE` - Male
+         * * `FEMALE` - Female
+         * * `OTHER` - Other
+         * * `NOT_COLLECTED` - Not collected
+         * * `NOT_ANSWERED` - Not answered
+         */
+        sex?: Array<'FEMALE' | 'MALE' | 'NOT_ANSWERED' | 'NOT_COLLECTED' | 'OTHER'>,
+        /**
+         * * `ACTIVE` - Active
+         * * `DUPLICATE` - Duplicate
+         * * `WITHDRAWN` - Withdrawn
+         */
+        status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        withdrawn?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/individuals/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'age_max': ageMax,
+                'age_min': ageMin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'duplicates_only': duplicatesOnly,
+                'excluded_id': excludedId,
+                'flags': flags,
+                'full_name': fullName,
+                'household__admin_area': householdAdminArea,
+                'household__id': householdId,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'search': search,
+                'sex': sex,
+                'status': status,
+                'withdrawn': withdrawn,
             },
         });
     }
@@ -4315,9 +4884,31 @@ export class RestService {
     public static restBusinessAreasProgramsActivityLogsCountRetrieve({
         businessAreaSlug,
         programSlug,
+        businessArea,
+        module,
+        objectId,
+        ordering,
+        programId,
+        search,
+        user,
+        userId,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        businessArea?: string,
+        module?: string,
+        objectId?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        programId?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        user?: string,
+        userId?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -4325,6 +4916,16 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'business_area': businessArea,
+                'module': module,
+                'object_id': objectId,
+                'ordering': ordering,
+                'program_id': programId,
+                'search': search,
+                'user': user,
+                'user_id': userId,
             },
         });
     }
@@ -4598,9 +5199,39 @@ export class RestService {
     public static restBusinessAreasProgramsCyclesCountRetrieve({
         businessAreaSlug,
         programSlug,
+        endDate,
+        ordering,
+        program,
+        search,
+        startDate,
+        status,
+        title,
+        totalDeliveredQuantityUsdFrom,
+        totalDeliveredQuantityUsdTo,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        endDate?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        search?: any,
+        startDate?: string,
+        /**
+         * * `DRAFT` - Draft
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         */
+        status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+        title?: string,
+        totalDeliveredQuantityUsdFrom?: any,
+        totalDeliveredQuantityUsdTo?: any,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -4608,6 +5239,19 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'end_date': endDate,
+                'ordering': ordering,
+                'program': program,
+                'search': search,
+                'start_date': startDate,
+                'status': status,
+                'title': title,
+                'total_delivered_quantity_usd_from': totalDeliveredQuantityUsdFrom,
+                'total_delivered_quantity_usd_to': totalDeliveredQuantityUsdTo,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -4812,9 +5456,51 @@ export class RestService {
     public static restBusinessAreasProgramsFeedbacksCountRetrieve({
         businessAreaSlug,
         programSlug,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        isActiveProgram,
+        issueType,
+        orderBy,
+        ordering,
+        search,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        isActiveProgram?: boolean,
+        /**
+         * * `POSITIVE_FEEDBACK` - Positive feedback
+         * * `NEGATIVE_FEEDBACK` - Negative feedback
+         */
+        issueType?: 'NEGATIVE_FEEDBACK' | 'POSITIVE_FEEDBACK',
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `household_lookup` - Household lookup
+         * * `-household_lookup` - Household lookup (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `linked_grievance` - Linked grievance
+         * * `-linked_grievance` - Linked grievance (descending)
+         */
+        orderBy?: Array<'-created_at' | '-created_by' | '-household_lookup' | '-issue_type' | '-linked_grievance' | '-unicef_id' | 'created_at' | 'created_by' | 'household_lookup' | 'issue_type' | 'linked_grievance' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -4822,6 +5508,16 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'is_active_program': isActiveProgram,
+                'issue_type': issueType,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'search': search,
             },
         });
     }
@@ -5065,9 +5761,173 @@ export class RestService {
     public static restBusinessAreasProgramsGrievanceTicketsCountRetrieve({
         businessAreaSlug,
         programSlug,
+        admin1,
+        admin2,
+        area,
+        areaStartswith,
+        assignedTo,
+        cashPlan,
+        category,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        documentNumber,
+        documentType,
+        fsp,
+        grievanceStatus,
+        grievanceType,
+        household,
+        householdId,
+        id,
+        idStartswith,
+        individualId,
+        isActiveProgram,
+        isCrossArea,
+        issueType,
+        orderBy,
+        ordering,
+        paymentRecordIds,
+        preferredLanguage,
+        priority,
+        program,
+        registrationDataImport,
+        scoreMax,
+        scoreMin,
+        search,
+        status,
+        urgency,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        admin1?: string,
+        admin2?: string,
+        area?: string,
+        areaStartswith?: string,
+        assignedTo?: string,
+        cashPlan?: string,
+        /**
+         * * `8` - Needs Adjudication
+         * * `1` - Payment Verification
+         * * `9` - System Flagging
+         * * `2` - Data Change
+         * * `4` - Grievance Complaint
+         * * `5` - Negative Feedback
+         * * `7` - Positive Feedback
+         * * `6` - Referral
+         * * `3` - Sensitive Grievance
+         */
+        category?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        documentNumber?: string,
+        documentType?: string,
+        fsp?: string,
+        grievanceStatus?: string,
+        grievanceType?: string,
+        household?: string,
+        householdId?: string,
+        id?: string,
+        idStartswith?: string,
+        individualId?: string,
+        isActiveProgram?: boolean,
+        isCrossArea?: boolean,
+        /**
+         * * `16` - Add Individual
+         * * `13` - Household Data Update
+         * * `14` - Individual Data Update
+         * * `15` - Withdraw Individual
+         * * `17` - Withdraw Household
+         * * `2` - Bribery, corruption or kickback
+         * * `1` - Data breach
+         * * `8` - Conflict of interest
+         * * `3` - Fraud and forgery
+         * * `4` - Fraud involving misuse of programme funds by third party
+         * * `9` - Gross mismanagement
+         * * `5` - Harassment and abuse of authority
+         * * `6` - Inappropriate staff conduct
+         * * `12` - Miscellaneous
+         * * `10` - Personal disputes
+         * * `11` - Sexual harassment and sexual exploitation
+         * * `7` - Unauthorized use, misuse or waste of UNICEF property or funds
+         * * `18` - Payment Related Complaint
+         * * `19` - FSP Related Complaint
+         * * `20` - Registration Related Complaint
+         * * `21` - Other Complaint
+         * * `22` - Partner Related Complaint
+         * * `23` - Unique Identifiers Similarity
+         * * `24` - Biographical Data Similarity
+         * * `25` - Biometrics Similarity
+         */
+        issueType?: 1 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 2 | 20 | 21 | 22 | 23 | 24 | 25 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | null,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `assigned_to__last_name` - Assigned to  last name
+         * * `-assigned_to__last_name` - Assigned to  last name (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `households_count` - Households count
+         * * `-households_count` - Households count (descending)
+         * * `user_modified` - User modified
+         * * `-user_modified` - User modified (descending)
+         * * `household_unicef_id` - Household unicef id
+         * * `-household_unicef_id` - Household unicef id (descending)
+         * * `issue_type` - Issue type
+         * * `-issue_type` - Issue type (descending)
+         * * `priority` - Priority
+         * * `-priority` - Priority (descending)
+         * * `urgency` - Urgency
+         * * `-urgency` - Urgency (descending)
+         * * `total_days` - Total days
+         * * `-total_days` - Total days (descending)
+         * * `linked_tickets` - Linked tickets
+         * * `-linked_tickets` - Linked tickets (descending)
+         */
+        orderBy?: Array<'-assigned_to__last_name' | '-category' | '-created_at' | '-household_unicef_id' | '-households_count' | '-issue_type' | '-linked_tickets' | '-priority' | '-status' | '-total_days' | '-unicef_id' | '-urgency' | '-user_modified' | 'assigned_to__last_name' | 'category' | 'created_at' | 'household_unicef_id' | 'households_count' | 'issue_type' | 'linked_tickets' | 'priority' | 'status' | 'total_days' | 'unicef_id' | 'urgency' | 'user_modified'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        paymentRecordIds?: Array<string>,
+        preferredLanguage?: string,
+        /**
+         * * `0` - Not set
+         * * `1` - High
+         * * `2` - Medium
+         * * `3` - Low
+         */
+        priority?: 0 | 1 | 2 | 3,
+        program?: string,
+        registrationDataImport?: string,
+        scoreMax?: string,
+        scoreMin?: string,
+        search?: string,
+        /**
+         * * `1` - New
+         * * `2` - Assigned
+         * * `6` - Closed
+         * * `5` - For Approval
+         * * `3` - In Progress
+         * * `4` - On Hold
+         */
+        status?: Array<1 | 2 | 3 | 4 | 5 | 6>,
+        /**
+         * * `0` - Not set
+         * * `1` - Very urgent
+         * * `2` - Urgent
+         * * `3` - Not urgent
+         */
+        urgency?: 0 | 1 | 2 | 3,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -5075,6 +5935,43 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'area': area,
+                'area__startswith': areaStartswith,
+                'assigned_to': assignedTo,
+                'cash_plan': cashPlan,
+                'category': category,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'fsp': fsp,
+                'grievance_status': grievanceStatus,
+                'grievance_type': grievanceType,
+                'household': household,
+                'household_id': householdId,
+                'id': id,
+                'id__startswith': idStartswith,
+                'individual_id': individualId,
+                'is_active_program': isActiveProgram,
+                'is_cross_area': isCrossArea,
+                'issue_type': issueType,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_record_ids': paymentRecordIds,
+                'preferred_language': preferredLanguage,
+                'priority': priority,
+                'program': program,
+                'registration_data_import': registrationDataImport,
+                'score_max': scoreMax,
+                'score_min': scoreMin,
+                'search': search,
+                'status': status,
+                'urgency': urgency,
             },
         });
     }
@@ -5939,9 +6836,132 @@ export class RestService {
     public static restBusinessAreasProgramsHouseholdsCountRetrieve({
         businessAreaSlug,
         programSlug,
+        address,
+        admin1,
+        admin2,
+        adminArea,
+        countryOrigin,
+        documentNumber,
+        documentType,
+        firstRegistrationDate,
+        headOfHouseholdFullName,
+        headOfHouseholdPhoneNoValid,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        messageId,
+        orderBy,
+        ordering,
+        phoneNo,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        recipientId,
+        residenceStatus,
+        search,
+        sex,
+        sizeGte,
+        sizeLte,
+        sizeRange,
+        sizeMax,
+        sizeMin,
+        survey,
+        unicefId,
+        withdrawn,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        address?: string,
+        admin1?: string,
+        admin2?: string,
+        adminArea?: string,
+        countryOrigin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        firstRegistrationDate?: string,
+        headOfHouseholdFullName?: string,
+        headOfHouseholdPhoneNoValid?: boolean,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        messageId?: string,
+        /**
+         * Ordering
+         *
+         * * `age` - Age
+         * * `-age` - Age (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `size` - Size
+         * * `-size` - Size (descending)
+         * * `status_label` - Status label
+         * * `-status_label` - Status label (descending)
+         * * `head_of_household__full_name` - Head of household  full name
+         * * `-head_of_household__full_name` - Head of household  full name (descending)
+         * * `admin_area__name` - Admin area  name
+         * * `-admin_area__name` - Admin area  name (descending)
+         * * `residence_status` - Residence status
+         * * `-residence_status` - Residence status (descending)
+         * * `registration_data_import__name` - Registration data import  name
+         * * `-registration_data_import__name` - Registration data import  name (descending)
+         * * `total_cash_received` - Total cash received
+         * * `-total_cash_received` - Total cash received (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        phoneNo?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        recipientId?: string,
+        /**
+         * Household residence status
+         *
+         * * `` - None
+         * * `IDP` - Displaced  |  Internally Displaced People
+         * * `REFUGEE` - Displaced  |  Refugee / Asylum Seeker
+         * * `OTHERS_OF_CONCERN` - Displaced  |  Others of Concern
+         * * `HOST` - Non-displaced  |   Host
+         * * `NON_HOST` - Non-displaced  |   Non-host
+         * * `RETURNEE` - Displaced  |   Returnee
+         */
+        residenceStatus?: '' | 'HOST' | 'IDP' | 'NON_HOST' | 'OTHERS_OF_CONCERN' | 'REFUGEE' | 'RETURNEE',
+        search?: any,
+        sex?: string,
+        sizeGte?: number,
+        sizeLte?: number,
+        /**
+         * Multiple values may be separated by commas.
+         */
+        sizeRange?: Array<number>,
+        /**
+         * Household size
+         */
+        sizeMax?: number | null,
+        /**
+         * Household size
+         */
+        sizeMin?: number | null,
+        survey?: string,
+        unicefId?: string,
+        withdrawn?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -5949,6 +6969,40 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'address': address,
+                'admin1': admin1,
+                'admin2': admin2,
+                'admin_area': adminArea,
+                'country_origin': countryOrigin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'first_registration_date': firstRegistrationDate,
+                'head_of_household__full_name': headOfHouseholdFullName,
+                'head_of_household__phone_no_valid': headOfHouseholdPhoneNoValid,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'message_id': messageId,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'phone_no': phoneNo,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'recipient_id': recipientId,
+                'residence_status': residenceStatus,
+                'search': search,
+                'sex': sex,
+                'size__gte': sizeGte,
+                'size__lte': sizeLte,
+                'size__range': sizeRange,
+                'size_max': sizeMax,
+                'size_min': sizeMin,
+                'survey': survey,
+                'unicef_id': unicefId,
+                'withdrawn': withdrawn,
             },
         });
     }
@@ -6518,9 +7572,110 @@ export class RestService {
     public static restBusinessAreasProgramsIndividualsCountRetrieve({
         businessAreaSlug,
         programSlug,
+        admin1,
+        admin2,
+        ageMax,
+        ageMin,
+        documentNumber,
+        documentType,
+        duplicatesOnly,
+        excludedId,
+        flags,
+        fullName,
+        householdAdminArea,
+        householdId,
+        isActiveProgram,
+        lastRegistrationDateAfter,
+        lastRegistrationDateBefore,
+        orderBy,
+        ordering,
+        program,
+        rdiId,
+        rdiMergeStatus,
+        search,
+        sex,
+        status,
+        withdrawn,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        admin1?: string,
+        admin2?: string,
+        ageMax?: string,
+        ageMin?: string,
+        documentNumber?: string,
+        documentType?: string,
+        duplicatesOnly?: boolean,
+        excludedId?: any,
+        /**
+         * * `DUPLICATE` - Duplicate
+         * * `NEEDS_ADJUDICATION` - Needs adjudication
+         * * `SANCTION_LIST_CONFIRMED_MATCH` - Sanction list match
+         * * `SANCTION_LIST_POSSIBLE_MATCH` - Sanction list possible match
+         */
+        flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
+        fullName?: string,
+        householdAdminArea?: string,
+        householdId?: string,
+        isActiveProgram?: boolean,
+        lastRegistrationDateAfter?: string,
+        lastRegistrationDateBefore?: string,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `household__id` - Household  id
+         * * `-household__id` - Household  id (descending)
+         * * `household__unicef_id` - Household  unicef id
+         * * `-household__unicef_id` - Household  unicef id (descending)
+         * * `birth_date` - Birth date
+         * * `-birth_date` - Birth date (descending)
+         * * `sex` - Sex
+         * * `-sex` - Sex (descending)
+         * * `relationship` - Relationship
+         * * `-relationship` - Relationship (descending)
+         * * `household__admin_area__name` - Household  admin area  name
+         * * `-household__admin_area__name` - Household  admin area  name (descending)
+         * * `last_registration_date` - Last registration date
+         * * `-last_registration_date` - Last registration date (descending)
+         * * `first_registration_date` - First registration date
+         * * `-first_registration_date` - First registration date (descending)
+         */
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        program?: string,
+        rdiId?: string,
+        /**
+         * * `PENDING` - Pending
+         * * `MERGED` - Merged
+         */
+        rdiMergeStatus?: 'MERGED' | 'PENDING',
+        search?: any,
+        /**
+         * Beneficiary gender
+         *
+         * * `MALE` - Male
+         * * `FEMALE` - Female
+         * * `OTHER` - Other
+         * * `NOT_COLLECTED` - Not collected
+         * * `NOT_ANSWERED` - Not answered
+         */
+        sex?: Array<'FEMALE' | 'MALE' | 'NOT_ANSWERED' | 'NOT_COLLECTED' | 'OTHER'>,
+        /**
+         * * `ACTIVE` - Active
+         * * `DUPLICATE` - Duplicate
+         * * `WITHDRAWN` - Withdrawn
+         */
+        status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        withdrawn?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -6528,6 +7683,32 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'admin1': admin1,
+                'admin2': admin2,
+                'age_max': ageMax,
+                'age_min': ageMin,
+                'document_number': documentNumber,
+                'document_type': documentType,
+                'duplicates_only': duplicatesOnly,
+                'excluded_id': excludedId,
+                'flags': flags,
+                'full_name': fullName,
+                'household__admin_area': householdAdminArea,
+                'household__id': householdId,
+                'is_active_program': isActiveProgram,
+                'last_registration_date_after': lastRegistrationDateAfter,
+                'last_registration_date_before': lastRegistrationDateBefore,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'program': program,
+                'rdi_id': rdiId,
+                'rdi_merge_status': rdiMergeStatus,
+                'search': search,
+                'sex': sex,
+                'status': status,
+                'withdrawn': withdrawn,
             },
         });
     }
@@ -6690,9 +7871,63 @@ export class RestService {
     public static restBusinessAreasProgramsMessagesCountRetrieve({
         businessAreaSlug,
         programSlug,
+        body,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        numberOfRecipients,
+        numberOfRecipientsGte,
+        numberOfRecipientsLte,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        samplingType,
+        search,
+        title,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        body?: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        numberOfRecipients?: number,
+        numberOfRecipientsGte?: number,
+        numberOfRecipientsLte?: number,
+        /**
+         * Ordering
+         *
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `number_of_recipients` - Number of recipients
+         * * `-number_of_recipients` - Number of recipients (descending)
+         * * `sampling_type` - Sampling type
+         * * `-sampling_type` - Sampling type (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-created_at' | '-created_by' | '-id' | '-number_of_recipients' | '-sampling_type' | '-title' | 'created_at' | 'created_by' | 'id' | 'number_of_recipients' | 'sampling_type' | 'title'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * * `FULL_LIST` - Full list
+         * * `RANDOM` - Random sampling
+         */
+        samplingType?: 'FULL_LIST' | 'RANDOM',
+        /**
+         * A search term.
+         */
+        search?: string,
+        title?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -6700,6 +7935,22 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'body': body,
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'number_of_recipients': numberOfRecipients,
+                'number_of_recipients__gte': numberOfRecipientsGte,
+                'number_of_recipients__lte': numberOfRecipientsLte,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'sampling_type': samplingType,
+                'search': search,
+                'title': title,
             },
         });
     }
@@ -7804,9 +9055,80 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentPlansCountRetrieve({
         businessAreaSlug,
         programSlug,
+        deliveryMechanism,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        fsp,
+        isFollowUp,
+        name,
+        ordering,
+        paymentVerificationSummaryStatus,
+        program,
+        programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
+        search,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        deliveryMechanism?: Array<string>,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        fsp?: string,
+        isFollowUp?: boolean,
+        name?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
+        program?: string,
+        programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         */
+        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -7814,6 +9136,26 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'delivery_mechanism': deliveryMechanism,
+                'dispersion_end_date__lte': dispersionEndDateLte,
+                'dispersion_start_date__gte': dispersionStartDateGte,
+                'fsp': fsp,
+                'is_follow_up': isFollowUp,
+                'name': name,
+                'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'program': program,
+                'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
+                'search': search,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
             },
         });
     }
@@ -8261,10 +9603,81 @@ export class RestService {
         businessAreaSlug,
         paymentVerificationPk,
         programSlug,
+        deliveryMechanism,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        fsp,
+        isFollowUp,
+        name,
+        ordering,
+        paymentVerificationSummaryStatus,
+        program,
+        programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
+        search,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         paymentVerificationPk: string,
         programSlug: string,
+        deliveryMechanism?: Array<string>,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        fsp?: string,
+        isFollowUp?: boolean,
+        name?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
+        program?: string,
+        programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         */
+        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -8273,6 +9686,26 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'payment_verification_pk': paymentVerificationPk,
                 'program_slug': programSlug,
+            },
+            query: {
+                'delivery_mechanism': deliveryMechanism,
+                'dispersion_end_date__lte': dispersionEndDateLte,
+                'dispersion_start_date__gte': dispersionStartDateGte,
+                'fsp': fsp,
+                'is_follow_up': isFollowUp,
+                'name': name,
+                'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'program': program,
+                'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
+                'search': search,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
             },
         });
     }
@@ -8604,9 +10037,80 @@ export class RestService {
     public static restBusinessAreasProgramsPaymentVerificationsCountRetrieve({
         businessAreaSlug,
         programSlug,
+        deliveryMechanism,
+        dispersionEndDateLte,
+        dispersionStartDateGte,
+        fsp,
+        isFollowUp,
+        name,
+        ordering,
+        paymentVerificationSummaryStatus,
+        program,
+        programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
+        search,
+        status,
+        totalEntitledQuantityGte,
+        totalEntitledQuantityLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        deliveryMechanism?: Array<string>,
+        dispersionEndDateLte?: string,
+        dispersionStartDateGte?: string,
+        fsp?: string,
+        isFollowUp?: boolean,
+        name?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
+        program?: string,
+        programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        /**
+         * Status [sys]
+         *
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         */
+        status?: 'ACCEPTED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalEntitledQuantityGte?: number,
+        totalEntitledQuantityLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -8614,6 +10118,26 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'delivery_mechanism': deliveryMechanism,
+                'dispersion_end_date__lte': dispersionEndDateLte,
+                'dispersion_start_date__gte': dispersionStartDateGte,
+                'fsp': fsp,
+                'is_follow_up': isFollowUp,
+                'name': name,
+                'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'program': program,
+                'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
+                'search': search,
+                'status': status,
+                'total_entitled_quantity__gte': totalEntitledQuantityGte,
+                'total_entitled_quantity__lte': totalEntitledQuantityLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
             },
         });
     }
@@ -9177,9 +10701,68 @@ export class RestService {
     public static restBusinessAreasProgramsRegistrationDataImportsCountRetrieve({
         businessAreaSlug,
         programSlug,
+        importDate,
+        importDateRange,
+        importedById,
+        name,
+        nameStartswith,
+        orderBy,
+        ordering,
+        search,
+        size,
+        status,
+        totalHouseholdsCountWithValidPhoneNoMax,
+        totalHouseholdsCountWithValidPhoneNoMin,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        importDate?: string,
+        importDateRange?: string,
+        importedById?: string,
+        name?: string,
+        nameStartswith?: string,
+        /**
+         * Ordering
+         *
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `import_date` - Import date
+         * * `-import_date` - Import date (descending)
+         * * `number_of_individuals` - Number of individuals
+         * * `-number_of_individuals` - Number of individuals (descending)
+         * * `number_of_households` - Number of households
+         * * `-number_of_households` - Number of households (descending)
+         * * `data_source` - Data source
+         * * `-data_source` - Data source (descending)
+         * * `imported_by__first_name` - Imported by  first name
+         * * `-imported_by__first_name` - Imported by  first name (descending)
+         */
+        orderBy?: Array<'-data_source' | '-import_date' | '-imported_by__first_name' | '-name' | '-number_of_households' | '-number_of_individuals' | '-status' | 'data_source' | 'import_date' | 'imported_by__first_name' | 'name' | 'number_of_households' | 'number_of_individuals' | 'status'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        search?: string,
+        size?: number,
+        /**
+         * * `LOADING` - Loading
+         * * `DEDUPLICATION` - Deduplication
+         * * `DEDUPLICATION_FAILED` - Deduplication Failed
+         * * `IMPORT_SCHEDULED` - Import Scheduled
+         * * `IMPORTING` - Importing
+         * * `IMPORT_ERROR` - Import Error
+         * * `IN_REVIEW` - In Review
+         * * `MERGE_SCHEDULED` - Merge Scheduled
+         * * `MERGED` - Merged
+         * * `MERGING` - Merging
+         * * `MERGE_ERROR` - Merge Error
+         * * `REFUSED` - Refused import
+         */
+        status?: 'DEDUPLICATION' | 'DEDUPLICATION_FAILED' | 'IMPORTING' | 'IMPORT_ERROR' | 'IMPORT_SCHEDULED' | 'IN_REVIEW' | 'LOADING' | 'MERGED' | 'MERGE_ERROR' | 'MERGE_SCHEDULED' | 'MERGING' | 'REFUSED',
+        totalHouseholdsCountWithValidPhoneNoMax?: any,
+        totalHouseholdsCountWithValidPhoneNoMin?: any,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -9187,6 +10770,20 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'import_date': importDate,
+                'import_date_range': importDateRange,
+                'imported_by__id': importedById,
+                'name': name,
+                'name__startswith': nameStartswith,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'search': search,
+                'size': size,
+                'status': status,
+                'total_households_count_with_valid_phone_no_max': totalHouseholdsCountWithValidPhoneNoMax,
+                'total_households_count_with_valid_phone_no_min': totalHouseholdsCountWithValidPhoneNoMin,
             },
         });
     }
@@ -9573,9 +11170,47 @@ export class RestService {
     public static restBusinessAreasProgramsSurveysCountRetrieve({
         businessAreaSlug,
         programSlug,
+        createdAtAfter,
+        createdAtBefore,
+        createdBy,
+        orderBy,
+        ordering,
+        paymentPlan,
+        program,
+        search,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        createdAtAfter?: string,
+        createdAtBefore?: string,
+        createdBy?: string,
+        /**
+         * Ordering
+         *
+         * * `unicef_id` - Unicef id
+         * * `-unicef_id` - Unicef id (descending)
+         * * `title` - Title
+         * * `-title` - Title (descending)
+         * * `category` - Category
+         * * `-category` - Category (descending)
+         * * `number_of_recipient` - Number of recipient
+         * * `-number_of_recipient` - Number of recipient (descending)
+         * * `created_by` - Created by
+         * * `-created_by` - Created by (descending)
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         */
+        orderBy?: Array<'-category' | '-created_at' | '-created_by' | '-number_of_recipient' | '-title' | '-unicef_id' | 'category' | 'created_at' | 'created_by' | 'number_of_recipient' | 'title' | 'unicef_id'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        paymentPlan?: string,
+        program?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -9583,6 +11218,16 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'created_at_after': createdAtAfter,
+                'created_at_before': createdAtBefore,
+                'created_by': createdBy,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'payment_plan': paymentPlan,
+                'program': program,
+                'search': search,
             },
         });
     }
@@ -10101,9 +11746,81 @@ export class RestService {
     public static restBusinessAreasProgramsTargetPopulationsCountRetrieve({
         businessAreaSlug,
         programSlug,
+        createdAtGte,
+        createdAtLte,
+        deliveryMechanism,
+        fsp,
+        name,
+        ordering,
+        paymentVerificationSummaryStatus,
+        program,
+        programCycle,
+        programCycleEndDate,
+        programCycleStartDate,
+        search,
+        status,
+        totalHouseholdsCountGte,
+        totalHouseholdsCountLte,
+        totalIndividualsCountGte,
+        totalIndividualsCountLte,
+        updatedAtGte,
+        updatedAtLte,
     }: {
         businessAreaSlug: string,
         programSlug: string,
+        createdAtGte?: string,
+        createdAtLte?: string,
+        deliveryMechanism?: Array<string>,
+        fsp?: string,
+        name?: string,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `FINISHED` - Finished
+         * * `PENDING` - Pending
+         */
+        paymentVerificationSummaryStatus?: 'ACTIVE' | 'FINISHED' | 'PENDING',
+        /**
+         * Filter by program slug
+         */
+        program?: string,
+        programCycle?: string,
+        programCycleEndDate?: string,
+        programCycleStartDate?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+        /**
+         * * `TP_OPEN` - Open
+         * * `TP_LOCKED` - Locked
+         * * `PROCESSING` - Processing
+         * * `STEFICON_WAIT` - Steficon Wait
+         * * `STEFICON_RUN` - Steficon Run
+         * * `STEFICON_COMPLETED` - Steficon Completed
+         * * `STEFICON_ERROR` - Steficon Error
+         * * `DRAFT` - Draft
+         * * `PREPARING` - Preparing
+         * * `OPEN` - Open
+         * * `LOCKED` - Locked
+         * * `LOCKED_FSP` - Locked FSP
+         * * `IN_APPROVAL` - In Approval
+         * * `IN_AUTHORIZATION` - In Authorization
+         * * `IN_REVIEW` - In Review
+         * * `ACCEPTED` - Accepted
+         * * `FINISHED` - Finished
+         * * `ASSIGNED` - Assigned
+         */
+        status?: 'ACCEPTED' | 'ASSIGNED' | 'DRAFT' | 'FINISHED' | 'IN_APPROVAL' | 'IN_AUTHORIZATION' | 'IN_REVIEW' | 'LOCKED' | 'LOCKED_FSP' | 'OPEN' | 'PREPARING' | 'PROCESSING' | 'STEFICON_COMPLETED' | 'STEFICON_ERROR' | 'STEFICON_RUN' | 'STEFICON_WAIT' | 'TP_LOCKED' | 'TP_OPEN',
+        totalHouseholdsCountGte?: number,
+        totalHouseholdsCountLte?: number,
+        totalIndividualsCountGte?: number,
+        totalIndividualsCountLte?: number,
+        updatedAtGte?: string,
+        updatedAtLte?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -10111,6 +11828,27 @@ export class RestService {
             path: {
                 'business_area_slug': businessAreaSlug,
                 'program_slug': programSlug,
+            },
+            query: {
+                'created_at__gte': createdAtGte,
+                'created_at__lte': createdAtLte,
+                'delivery_mechanism': deliveryMechanism,
+                'fsp': fsp,
+                'name': name,
+                'ordering': ordering,
+                'payment_verification_summary_status': paymentVerificationSummaryStatus,
+                'program': program,
+                'program_cycle': programCycle,
+                'program_cycle_end_date': programCycleEndDate,
+                'program_cycle_start_date': programCycleStartDate,
+                'search': search,
+                'status': status,
+                'total_households_count__gte': totalHouseholdsCountGte,
+                'total_households_count__lte': totalHouseholdsCountLte,
+                'total_individuals_count__gte': totalIndividualsCountGte,
+                'total_individuals_count__lte': totalIndividualsCountLte,
+                'updated_at__gte': updatedAtGte,
+                'updated_at__lte': updatedAtLte,
             },
         });
     }
@@ -10465,14 +12203,118 @@ export class RestService {
      */
     public static restBusinessAreasProgramsCountRetrieve({
         businessAreaSlug,
+        beneficiaryGroupMatch,
+        budgetMax,
+        budgetMin,
+        compatibleDct,
+        dataCollectingType,
+        endDate,
+        name,
+        numberOfHouseholdsMax,
+        numberOfHouseholdsMin,
+        numberOfHouseholdsWithTpInProgramMax,
+        numberOfHouseholdsWithTpInProgramMin,
+        orderBy,
+        ordering,
+        search,
+        sector,
+        startDate,
+        status,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         businessAreaSlug: string,
+        beneficiaryGroupMatch?: string,
+        /**
+         * Program budget
+         */
+        budgetMax?: string,
+        /**
+         * Program budget
+         */
+        budgetMin?: string,
+        compatibleDct?: string,
+        dataCollectingType?: string,
+        endDate?: string,
+        name?: string,
+        numberOfHouseholdsMax?: string,
+        numberOfHouseholdsMin?: string,
+        numberOfHouseholdsWithTpInProgramMax?: string,
+        numberOfHouseholdsWithTpInProgramMin?: string,
+        /**
+         * Ordering
+         *
+         * * `name` - Name
+         * * `-name` - Name (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `start_date` - Start date
+         * * `-start_date` - Start date (descending)
+         * * `end_date` - End date
+         * * `-end_date` - End date (descending)
+         * * `sector` - Sector
+         * * `-sector` - Sector (descending)
+         * * `number_of_households` - Number of households
+         * * `-number_of_households` - Number of households (descending)
+         * * `budget` - Budget
+         * * `-budget` - Budget (descending)
+         */
+        orderBy?: Array<'-budget' | '-end_date' | '-name' | '-number_of_households' | '-sector' | '-start_date' | '-status' | 'budget' | 'end_date' | 'name' | 'number_of_households' | 'sector' | 'start_date' | 'status'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        search?: any,
+        /**
+         * Program sector
+         *
+         * * `CHILD_PROTECTION` - Child Protection
+         * * `EDUCATION` - Education
+         * * `HEALTH` - Health
+         * * `MULTI_PURPOSE` - Multi Purpose
+         * * `NUTRITION` - Nutrition
+         * * `SOCIAL_POLICY` - Social Policy
+         * * `WASH` - WASH
+         */
+        sector?: Array<'CHILD_PROTECTION' | 'EDUCATION' | 'HEALTH' | 'MULTI_PURPOSE' | 'NUTRITION' | 'SOCIAL_POLICY' | 'WASH'>,
+        startDate?: string,
+        /**
+         * Program status
+         *
+         * * `ACTIVE` - Active
+         * * `DRAFT` - Draft
+         * * `FINISHED` - Finished
+         */
+        status?: Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/programs/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'beneficiary_group_match': beneficiaryGroupMatch,
+                'budget_max': budgetMax,
+                'budget_min': budgetMin,
+                'compatible_dct': compatibleDct,
+                'data_collecting_type': dataCollectingType,
+                'end_date': endDate,
+                'name': name,
+                'number_of_households_max': numberOfHouseholdsMax,
+                'number_of_households_min': numberOfHouseholdsMin,
+                'number_of_households_with_tp_in_program_max': numberOfHouseholdsWithTpInProgramMax,
+                'number_of_households_with_tp_in_program_min': numberOfHouseholdsWithTpInProgramMin,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'search': search,
+                'sector': sector,
+                'start_date': startDate,
+                'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -10590,14 +12432,73 @@ export class RestService {
      */
     public static restBusinessAreasUsersCountRetrieve({
         businessAreaSlug,
+        isFeedbackCreator,
+        isMessageCreator,
+        isSurveyCreator,
+        isTicketCreator,
+        orderBy,
+        ordering,
+        partner,
+        program,
+        roles,
+        search,
+        status,
     }: {
         businessAreaSlug: string,
+        isFeedbackCreator?: boolean,
+        isMessageCreator?: boolean,
+        isSurveyCreator?: boolean,
+        isTicketCreator?: boolean,
+        /**
+         * Ordering
+         *
+         * * `first_name` - First name
+         * * `-first_name` - First name (descending)
+         * * `last_name` - Last name
+         * * `-last_name` - Last name (descending)
+         * * `last_login` - Last login
+         * * `-last_login` - Last login (descending)
+         * * `status` - Status
+         * * `-status` - Status (descending)
+         * * `partner` - Partner
+         * * `-partner` - Partner (descending)
+         * * `email` - Email
+         * * `-email` - Email (descending)
+         */
+        orderBy?: Array<'-email' | '-first_name' | '-last_login' | '-last_name' | '-partner' | '-status' | 'email' | 'first_name' | 'last_login' | 'last_name' | 'partner' | 'status'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        partner?: Array<number>,
+        program?: string,
+        roles?: Array<string>,
+        search?: string,
+        /**
+         * * `ACTIVE` - Active
+         * * `INACTIVE` - Inactive
+         * * `INVITED` - Invited
+         */
+        status?: Array<'ACTIVE' | 'INACTIVE' | 'INVITED'>,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/{business_area_slug}/users/count/',
             path: {
                 'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'is_feedback_creator': isFeedbackCreator,
+                'is_message_creator': isMessageCreator,
+                'is_survey_creator': isSurveyCreator,
+                'is_ticket_creator': isTicketCreator,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'partner': partner,
+                'program': program,
+                'roles': roles,
+                'search': search,
+                'status': status,
             },
         });
     }
@@ -10767,10 +12668,20 @@ export class RestService {
      * @returns CountResponse
      * @throws ApiError
      */
-    public static restBusinessAreasCountRetrieve(): CancelablePromise<CountResponse> {
+    public static restBusinessAreasCountRetrieve({
+        ordering,
+    }: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+    }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/business-areas/count/',
+            query: {
+                'ordering': ordering,
+            },
         });
     }
     /**
@@ -11259,10 +13170,53 @@ export class RestService {
      * @returns CountResponse
      * @throws ApiError
      */
-    public static restSanctionListCountRetrieve(): CancelablePromise<CountResponse> {
+    public static restSanctionListCountRetrieve({
+        fullName,
+        fullNameStartswith,
+        id,
+        orderBy,
+        ordering,
+        referenceNumber,
+        search,
+    }: {
+        fullName?: string,
+        fullNameStartswith?: string,
+        id?: string,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `reference_number` - Reference number
+         * * `-reference_number` - Reference number (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `listed_on` - Listed on
+         * * `-listed_on` - Listed on (descending)
+         */
+        orderBy?: Array<'-full_name' | '-id' | '-listed_on' | '-reference_number' | 'full_name' | 'id' | 'listed_on' | 'reference_number'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        referenceNumber?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/sanction-list/count/',
+            query: {
+                'full_name': fullName,
+                'full_name__startswith': fullNameStartswith,
+                'id': id,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'reference_number': referenceNumber,
+                'search': search,
+            },
         });
     }
     /**

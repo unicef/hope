@@ -3,24 +3,22 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `UA13` - Cabreraland
- * * `HR75` - East Justin
- * * `AF19` - East Kristy
- * * `UA76` - Edwardsmouth
- * * `AF10` - Jonestown
- * * `UA61` - Kennethberg
- * * `HR85` - North David
- * * `AF46` - Port Bradleyhaven
- * * `HR26` - South Robert
+ * * `UA11` - Clayborough
+ * * `UA60` - Craigmouth
+ * * `UA62` - Deannafurt
+ * * `HR98` - Janetside
+ * * `HR14` - Matthewton
+ * * `AF22` - North David
+ * * `AF78` - West Deborah
+ * * `HR39` - West Kathrynview
  */
 export enum Admin1Enum {
-  UA13 = 'UA13',
-  HR75 = 'HR75',
-  AF19 = 'AF19',
-  UA76 = 'UA76',
-  AF10 = 'AF10',
-  UA61 = 'UA61',
-  HR85 = 'HR85',
-  AF46 = 'AF46',
-  HR26 = 'HR26',
+    UA11 = 'UA11',
+    UA60 = 'UA60',
+    UA62 = 'UA62',
+    HR98 = 'HR98',
+    HR14 = 'HR14',
+    AF22 = 'AF22',
+    AF78 = 'AF78',
+    HR39 = 'HR39',
 }
