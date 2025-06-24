@@ -1,10 +1,5 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import {
-  HouseholdChoiceDataQuery,
-  IndividualBiometricDeduplicationBatchStatus,
-  IndividualBiometricDeduplicationGoldenRecordStatus,
-} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -14,10 +9,11 @@ import { choicesToDict, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
 import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
 import { IndividualList } from '@restgenerated/models/IndividualList';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 interface ImportedIndividualsTableRowProps {
   individual: IndividualList;
-  choices: HouseholdChoiceDataQuery;
+  choices: IndividualChoices;
   rdi;
 }
 
@@ -50,24 +46,20 @@ export function ImportedPeopleTableRow({
   };
 
   const WORST_STATUS_PRIORITY = [
-    IndividualBiometricDeduplicationGoldenRecordStatus.Duplicate,
-    IndividualBiometricDeduplicationBatchStatus.DuplicateInBatch,
-    IndividualBiometricDeduplicationGoldenRecordStatus.NeedsAdjudication,
-    IndividualBiometricDeduplicationBatchStatus.SimilarInBatch,
-    IndividualBiometricDeduplicationGoldenRecordStatus.Postpone,
-    IndividualBiometricDeduplicationGoldenRecordStatus.Unique,
-    IndividualBiometricDeduplicationBatchStatus.UniqueInBatch,
-    IndividualBiometricDeduplicationGoldenRecordStatus.NotProcessed,
-    IndividualBiometricDeduplicationBatchStatus.NotProcessed,
+    'DUPLICATE',
+    'DUPLICATE_IN_BATCH',
+    'NEEDS_ADJUDICATION',
+    'SIMILAR_IN_BATCH',
+    'POSTPONE',
+    'UNIQUE',
+    'UNIQUE_IN_BATCH',
+    'NOT_PROCESSED',
+    'NOT_PROCESSED',
   ];
 
   function renderDeduplicationStatus(
-    goldenRecordStatus:
-      | IndividualBiometricDeduplicationGoldenRecordStatus
-      | IndividualBiometricDeduplicationBatchStatus,
-    batchStatus:
-      | IndividualBiometricDeduplicationGoldenRecordStatus
-      | IndividualBiometricDeduplicationBatchStatus,
+    goldenRecordStatus: any,
+    batchStatus: any,
     dict,
   ): string {
     const statuses = [goldenRecordStatus, batchStatus];

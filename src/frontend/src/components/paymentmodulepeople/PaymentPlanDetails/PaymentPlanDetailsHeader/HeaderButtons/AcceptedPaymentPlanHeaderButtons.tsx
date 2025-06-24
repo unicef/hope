@@ -14,14 +14,14 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { useAllFinancialServiceProviderXlsxTemplatesQuery } from '../../../../../__generated__/graphql';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { PaginatedFSPXlsxTemplateList } from '@restgenerated/models/PaginatedFSPXlsxTemplateList';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
@@ -39,7 +39,20 @@ export function AcceptedPaymentPlanHeaderButtons({
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
-  const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery({ variables: { businessArea } });
+
+  const {
+    data: templateData,
+    isLoading: loadingTemplates,
+    error: errorTemplates,
+  } = useQuery<PaginatedFSPXlsxTemplateList>({
+    queryKey: ['fsp-xlsx-templates', businessArea, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+      }),
+    enabled: !!businessArea && !!programId,
+  });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
     {
@@ -113,8 +126,9 @@ export function AcceptedPaymentPlanHeaderButtons({
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
+  if (loadingTemplates) return <LoadingComponent />;
+  if (errorTemplates) return null;
+  if (!templateData) return null;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -190,13 +204,11 @@ export function AcceptedPaymentPlanHeaderButtons({
               size="small"
               data-cy="select-template"
             >
-              {data.allFinancialServiceProviderXlsxTemplates.edges.map(
-                ({ node }) => (
-                  <MenuItem key={node.id} value={node.id}>
-                    {node.name}
-                  </MenuItem>
-                ),
-              )}
+              {templateData.results.map((template) => (
+                <MenuItem key={template.id} value={template.id}>
+                  {template.name}
+                </MenuItem>
+              ))}
             </Select>
           </DialogContent>
           <DialogActions>

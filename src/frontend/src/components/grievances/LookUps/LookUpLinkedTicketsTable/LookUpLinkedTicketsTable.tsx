@@ -120,9 +120,7 @@ export function LookUpLinkedTicketsTable({
         );
       } else {
         return RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
-          createApiParams({ businessAreaSlug: businessArea }, queryVariables, {
-            withPagination: false,
-          }),
+          createApiParams({ businessAreaSlug: businessArea }, queryVariables),
         );
       }
     },

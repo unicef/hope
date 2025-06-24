@@ -14,13 +14,13 @@
  * * `HR26` - South Robert
  */
 export enum Admin1Enum {
-    UA13 = 'UA13',
-    HR75 = 'HR75',
-    AF19 = 'AF19',
-    UA76 = 'UA76',
-    AF10 = 'AF10',
-    UA61 = 'UA61',
-    HR85 = 'HR85',
-    AF46 = 'AF46',
-    HR26 = 'HR26',
+  UA13 = 'UA13',
+  HR75 = 'HR75',
+  AF19 = 'AF19',
+  UA76 = 'UA76',
+  AF10 = 'AF10',
+  UA61 = 'UA61',
+  HR85 = 'HR85',
+  AF46 = 'AF46',
+  HR26 = 'HR26',
 }

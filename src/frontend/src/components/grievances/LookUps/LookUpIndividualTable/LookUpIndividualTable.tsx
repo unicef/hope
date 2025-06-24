@@ -161,7 +161,6 @@ export function LookUpIndividualTable({
         createApiParams(
           { businessAreaSlug: businessArea, programSlug: programId },
           queryVariables,
-          { withPagination: false },
         ),
       ),
     enabled: !!businessArea && !!programId && !isAllPrograms,
