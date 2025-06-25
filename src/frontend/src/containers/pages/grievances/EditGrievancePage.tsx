@@ -234,8 +234,6 @@ const EditGrievancePage = (): ReactElement => {
       'individualDataUpdateFieldsIdentities',
       'individualDataUpdateDocumentsToEdit',
       'individualDataUpdateIdentitiesToEdit',
-      'individualDataUpdateFieldsPaymentChannels',
-      'individualDataUpdatePaymentChannelsToEdit',
       'peopleDataUpdateFields',
     ].map(
       (fieldname) =>
