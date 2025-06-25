@@ -45,6 +45,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
+    photo = serializers.CharField(allow_blank=True, required=False)
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
 
@@ -141,6 +142,10 @@ class PeopleUploadMixin:
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
+        photo = individual_data.pop("photo", None)
+        if photo:
+            data = photo.removeprefix("data:image/png;base64,")
+            photo = get_photo_from_stream(data)
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
@@ -156,6 +161,7 @@ class PeopleUploadMixin:
             registration_data_import=rdi,
             program_id=rdi.program_id,
             relationship=relationship,
+            photo=photo,
             **individual_data,
         )
         ind.validate_phone_numbers()
