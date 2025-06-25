@@ -62,6 +62,10 @@ function PaymentDetails({
     PaymentStatus.TransactionErroneous,
   ].includes(payment.status);
 
+  const collectorAccountData = payment?.snapshotCollectorAccountData
+  ? JSON.parse(payment.snapshotCollectorAccountData)
+  : {};
+
   return (
     <>
       <ContainerColumnWithBorder>
@@ -233,7 +237,7 @@ function PaymentDetails({
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
-           {Object.entries(payment.snapshotCollectorAccountData).map(([key, value]) => (
+           {Object.entries(collectorAccountData).map(([key, value]) => (
               <Grid key={key} size={{ xs: 3 }}>
                 <LabelizedField
                   label={t(`Account ${key}`)}
@@ -241,22 +245,6 @@ function PaymentDetails({
                 />
               </Grid>
             ))}
-          {payment.deliveryType?.name === 'Deposit to Card' && (
-            <>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField
-                  label={t('Debit Card Issuer')}
-                  value={payment.debitCardIssuer}
-                />
-              </Grid>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField
-                  label={t('Debit Card Number')}
-                  value={payment.debitCardNumber}
-                />
-              </Grid>
-            </>
-          )}
         </Grid>
       </Overview>
       <Overview>

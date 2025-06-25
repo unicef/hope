@@ -316,7 +316,7 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     additional_document_number = graphene.String()
     total_persons_covered = graphene.Int(description="Get from Household Snapshot")
     snapshot_collector_full_name = graphene.String(description="Get from Household Snapshot")
-    snapshot_collector_account_data = graphene.String(description="Get from Household Snapshot")
+    snapshot_collector_account_data = graphene.JSONString(description="Get from Household Snapshot")
     fsp_auth_code = graphene.String()
 
     class Meta:

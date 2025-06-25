@@ -2447,7 +2447,7 @@ type PaymentNode implements Node {
   serviceProvider: FinancialServiceProviderNode
   totalPersonsCovered: Int
   snapshotCollectorFullName: String
-  snapshotCollectorAccountData: String
+  snapshotCollectorAccountData: JSONString
 }
 
 type PaymentNodeConnection {
