@@ -1189,7 +1189,7 @@ class PaymentPlanViewSet(
     def fsp_xlsx_template_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         qs = FinancialServiceProviderXlsxTemplate.objects.filter(
             financial_service_providers__allowed_business_areas__slug=self.business_area_slug
-        )
+        ).order_by("name")
         return Response(data=FSPXlsxTemplateSerializer(qs, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(request=AssignFundsCommitmentsSerializer, responses={200: PaymentPlanDetailSerializer})

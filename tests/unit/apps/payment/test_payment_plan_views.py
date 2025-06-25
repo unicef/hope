@@ -1584,11 +1584,11 @@ class TestPaymentPlanActions:
             "program_slug": self.program_active.slug,
             "pk": pp_id,
         }
-        url_kwargs_ba_program = {
+        self.url_kwargs_ba_program = {
             "business_area_slug": self.afghanistan.slug,
             "program_slug": self.program_active.slug,
         }
-        self.url_list = reverse("api:payments:payment-plans-list", kwargs=url_kwargs_ba_program)
+        self.url_list = reverse("api:payments:payment-plans-list", kwargs=self.url_kwargs_ba_program)
         self.url_lock = reverse("api:payments:payment-plans-lock", kwargs=url_kwargs)
         self.url_unlock = reverse("api:payments:payment-plans-unlock", kwargs=url_kwargs)
         self.url_exclude_hh = reverse("api:payments:payment-plans-exclude-beneficiaries", kwargs=url_kwargs)
@@ -2452,3 +2452,29 @@ class TestPaymentPlanActions:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "Chosen Funds Commitments have wrong Business Area" in response.json()
+
+    def test_fsp_xlsx_template_list(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.PM_EXPORT_XLSX_FOR_FSP], self.afghanistan, self.program_active
+        )
+
+        xlsx_1 = FinancialServiceProviderXlsxTemplateFactory(name="XLSX_1")
+        xlsx_2 = FinancialServiceProviderXlsxTemplateFactory(name="XLSX_2")
+        xlsx_3 = FinancialServiceProviderXlsxTemplateFactory(name="Other BA")
+
+        financial_service_provider = FinancialServiceProviderFactory()
+        financial_service_provider.allowed_business_areas.set([self.afghanistan])
+        fsp_2 = FinancialServiceProviderFactory()
+
+        financial_service_provider.xlsx_templates.set([xlsx_1, xlsx_2])
+        fsp_2.xlsx_templates.set([xlsx_3])
+
+        response = self.client.get(
+            reverse("api:payments:payment-plans-fsp-xlsx-template-list", kwargs=self.url_kwargs_ba_program),
+            {"fund_commitment_items_ids": ["333"]},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 2
+        assert response.json()[0]["name"] == "XLSX_1"
+        assert response.json()[1]["name"] == "XLSX_2"

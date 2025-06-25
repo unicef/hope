@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.core.management import call_command
 from django.urls import reverse
 
 import pytest
@@ -73,3 +74,12 @@ class TestChoicesViewSet:
         response_none = self.client.get(reverse("api:choices-languages"), {"code": "xyzabc"})
         assert response_none.status_code == 200
         assert len(response_none.data) == 0
+
+    def test_get_countries(self) -> None:
+        call_command("loadcountries")
+        response = self.client.get(reverse("api:choices-countries"))
+        assert response.status_code == 200
+        response_data = response.data
+        assert response_data is not None
+        assert len(response_data) == 250
+        assert response_data[0] == {"name": "ABW", "value": "Aruba"}
