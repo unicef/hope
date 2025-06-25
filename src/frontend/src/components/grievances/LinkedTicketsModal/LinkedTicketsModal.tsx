@@ -69,7 +69,7 @@ function LinkedTicketsModal({
 
     return issueTypeChoicesData
       .find((el) => el.category === row.category.toString())
-      .subCategories.find((el) => el.value === row.issueType.toString()).name;
+      ?.subCategories.find((el) => el.value === row.issueType.toString()).name;
   };
 
   const renderRow = (row): ReactElement => {

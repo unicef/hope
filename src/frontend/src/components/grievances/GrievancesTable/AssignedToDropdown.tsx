@@ -53,11 +53,13 @@ export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
     setInputValue(debouncedInputText);
   }, [debouncedInputText, setInputValue]);
 
-  const sortedOptions = [...optionsData.results].sort((a, b) => {
-    const emailA = a?.email?.toLowerCase();
-    const emailB = b?.email?.toLowerCase();
-    return emailA.localeCompare(emailB);
-  });
+  const sortedOptions = Array.isArray(optionsData?.results)
+    ? [...optionsData.results].sort((a, b) => {
+        const emailA = a?.email?.toLowerCase();
+        const emailB = b?.email?.toLowerCase();
+        return emailA.localeCompare(emailB);
+      })
+    : [];
 
   const handleOpen = (e: any) => {
     e.stopPropagation();
