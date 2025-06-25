@@ -73,7 +73,7 @@ jobs:
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
-          python-version: 3.12
+          python-version: 3.13
 
       - name: Restore cached vEnv
         id: cache-venv-restore
@@ -98,7 +98,7 @@ jobs:
 
 
       - name: Run Test suite
-        run: uv run tox -e unit -- -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml
+        run: uv run tox -e unit -- -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hct_mis_api
 
       - name: Test Report
         uses: dorny/test-reporter@v2
@@ -203,7 +203,7 @@ jobs:
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
-          python-version: 3.12
+          python-version: 3.13
 
       - name: Restore cached vEnv
         id: cache-venv-restore
@@ -227,7 +227,7 @@ jobs:
           key: ${{ runner.os }}-venv
 
       - name: Run Selenium suite
-        run: uv run tox -e selenium --  -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml
+        run: uv run tox -e selenium --  -n 4 --cov-report xml:test-coverage/coverage.xml --junit-xml=test-results.xml --cov-config=.coveragerc --cov=hct_mis_api
       - name: Test Report
         uses: dorny/test-reporter@v2
         if: success() || failure()

@@ -299,7 +299,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(16):
+            with self.assertNumQueries(15):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -309,7 +309,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(107):
+        with self.assertNumQueries(108):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
@@ -390,7 +390,7 @@ class TestPaymentPlanServices(APITestCase):
         p_force_failed = payments[2]
         p_manually_cancelled = payments[3]
 
-        with self.assertNumQueries(8):
+        with self.assertNumQueries(7):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -440,14 +440,14 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(8):
+        with self.assertNumQueries(7):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(49):
+        with self.assertNumQueries(50):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
@@ -741,7 +741,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(12):
+            with self.assertNumQueries(11):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -751,7 +751,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(80):
+        with self.assertNumQueries(81):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
@@ -864,8 +864,19 @@ class TestPaymentPlanServices(APITestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle,
             created_by=self.user,
-            status=PaymentPlan.Status.DRAFT,
+            status=PaymentPlan.Status.TP_LOCKED,
         )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).draft()
+        self.assertEqual(
+            str(e.exception),
+            "Can only promote to Payment Plan if DM/FSP is chosen.",
+        )
+
+        payment_plan.status = PaymentPlan.Status.DRAFT
+        payment_plan.financial_service_provider = self.fsp
+        payment_plan.save()
+
         with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).draft()
         self.assertEqual(

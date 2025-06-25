@@ -16,14 +16,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     Individual,
 )
-from hct_mis_api.apps.payment.fixtures import FinancialServiceProviderFactory
-from hct_mis_api.apps.payment.models import (
-    Account,
-    AccountType,
-    DeliveryMechanism,
-    DeliveryMechanismConfig,
-    FinancialServiceProvider,
-)
+from hct_mis_api.apps.payment.models import Account, AccountType, FinancialInstitution
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.universal_update_script.models import UniversalUpdate
@@ -74,9 +67,9 @@ def program(poland: Country, germany: Country) -> Program:
 
 
 @pytest.fixture
-def delivery_mechanism() -> DeliveryMechanism:
+def account_type() -> AccountType:
     ac_mobile, _ = AccountType.objects.update_or_create(key="mobile", label="Mobile")
-    return DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money", account_type=ac_mobile)
+    return ac_mobile
 
 
 @pytest.fixture
@@ -106,7 +99,7 @@ def individual(
     admin2: Area,
     flexible_attribute_individual: FlexibleAttribute,
     flexible_attribute_household: FlexibleAttribute,
-    delivery_mechanism: DeliveryMechanism,
+    account_type: AccountType,
 ) -> Individual:
     household, individuals = create_household_and_individuals(
         household_data={
@@ -139,25 +132,17 @@ def individual(
 
 
 @pytest.fixture()
-def wallet(individual: Individual, delivery_mechanism: DeliveryMechanism) -> Account:
-    fsp = FinancialServiceProviderFactory(
-        name="Western Union",
-        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-    )
-    DeliveryMechanismConfig.objects.get_or_create(
-        fsp=fsp,
-        delivery_mechanism=delivery_mechanism,
-        required_fields=[
-            "phone_number",
-            "provider",
-            "service_provider_code",
-        ],
+def wallet(individual: Individual, account_type: AccountType) -> Account:
+    financial_institution = FinancialInstitution.objects.create(
+        name="Test Financial Institution", type=FinancialInstitution.FinancialInstitutionType.TELCO
     )
 
     return Account.objects.create(
-        account_type=delivery_mechanism.account_type,
+        account_type=account_type,
+        financial_institution=financial_institution,
         individual=individual,
-        data={"phone_number": "1234567890"},
+        number="1234567890",
+        data={"number": "1234567890"},
         rdi_merge_status=Account.MERGED,
     )
 
@@ -184,7 +169,7 @@ class TestUniversalIndividualUpdateService:
         admin1: Area,
         admin2: Area,
         document_national_id: Document,
-        delivery_mechanism: DeliveryMechanism,
+        account_type: AccountType,
         wallet: Account,
     ) -> None:
         """
@@ -197,6 +182,12 @@ class TestUniversalIndividualUpdateService:
         :param program:
         :return:
         """
+        # create one more DeliveryMechanismConfig with empty account_type
+        # DeliveryMechanismConfig.objects.get_or_create(
+        #     fsp=FinancialServiceProviderFactory(),
+        #     delivery_mechanism=DeliveryMechanism.objects.create(name="Test", code="test", account_type=None),
+        #     required_fields=["phone_number"],
+        # )
         # save old values
         given_name_old = individual.given_name
         sex_old = individual.sex
@@ -208,7 +199,7 @@ class TestUniversalIndividualUpdateService:
         returnee_old = individual.household.returnee
         muac_old = individual.flex_fields.get("muac")
         eggs_old = individual.household.flex_fields.get("eggs")
-        wallet_number_old = wallet.data.get("phone_number")
+        wallet_number_old = wallet.data.get("number")
         document_number_old = document_national_id.document_number
         universal_update = UniversalUpdate(program=program)
         universal_update.unicef_ids = individual.unicef_id
@@ -218,7 +209,8 @@ class TestUniversalIndividualUpdateService:
         universal_update.household_fields = ["address", "admin1", "size", "returnee"]
         universal_update.save()
         universal_update.document_types.add(DocumentType.objects.first())
-        universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
+        universal_update.account_types.add(AccountType.objects.first())
+        AccountType.objects.create(label="Cash", key="cash")
         service = UniversalIndividualUpdateService(universal_update)
         template_file = service.generate_xlsx_template()
 
@@ -245,7 +237,8 @@ class TestUniversalIndividualUpdateService:
         household.save()
         document_national_id.document_number = "111"
         document_national_id.save()
-        wallet.data["phone_number"] = "0"
+        wallet.data["number"] = "0"
+        wallet.number = "0"
         wallet.save()
         service = UniversalIndividualUpdateService(universal_update)
         universal_update.clear_logs()
@@ -274,7 +267,8 @@ Update successful
         assert individual.household.returnee == returnee_old
         assert individual.flex_fields.get("muac") == muac_old
         assert individual.household.flex_fields.get("eggs") == eggs_old
-        assert wallet.data.get("phone_number") == wallet_number_old
+        assert wallet.data.get("number") == wallet_number_old
+        assert wallet.number == wallet_number_old
 
     def test_update_individual_empty_row(
         self,
@@ -283,7 +277,7 @@ Update successful
         admin1: Area,
         admin2: Area,
         document_national_id: Document,
-        delivery_mechanism: DeliveryMechanism,
+        account_type: AccountType,
         wallet: Account,
     ) -> None:
         # save old values
@@ -307,7 +301,7 @@ Update successful
         universal_update.household_fields = ["address", "admin1", "size", "returnee"]
         universal_update.save()
         universal_update.document_types.add(DocumentType.objects.first())
-        universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
+        universal_update.account_types.add(AccountType.objects.first())
         service = UniversalIndividualUpdateService(universal_update)
         template_file = service.generate_xlsx_template()
         universal_update.refresh_from_db()
@@ -366,7 +360,7 @@ Update successful
         admin1: Area,
         admin2: Area,
         document_national_id: Document,
-        delivery_mechanism: DeliveryMechanism,
+        account_type: AccountType,
         wallet: Account,
     ) -> None:
         # save old values
@@ -390,7 +384,7 @@ Update successful
         universal_update.household_fields = ["address", "admin1", "size", "returnee"]
         universal_update.save()
         universal_update.document_types.add(DocumentType.objects.first())
-        universal_update.delivery_mechanisms.add(DeliveryMechanism.objects.first())
+        universal_update.account_types.add(AccountType.objects.first())
         service = UniversalIndividualUpdateService(universal_update)
         template_file = service.generate_xlsx_template()
         universal_update.refresh_from_db()
@@ -429,6 +423,7 @@ Row: 2 - Invalid value TEST String for column sex allowed values are ['MALE', 'F
 Row: 2 - TEST String for column birth_date is not a valid date
 Row: 2 - TEST String for column phone_no is not a valid phone number
 Row: 2 - Country not found for field national_id_country_i_c and value TEST String
+Row: 2 - Financial institution ID must be a number for field account__mobile__financial_institution_pk
 """
         assert universal_update.saved_logs == expected_update_log
         assert universal_update.saved_logs == universal_update.logs
@@ -452,7 +447,7 @@ Row: 2 - Country not found for field national_id_country_i_c and value TEST Stri
         admin1: Area,
         admin2: Area,
         document_national_id: Document,
-        delivery_mechanism: DeliveryMechanism,
+        account_type: AccountType,
         wallet: Account,
     ) -> None:
         universal_update = UniversalUpdate(program=program)
@@ -495,3 +490,43 @@ Deduplicating documents
 Update successful
 """
         assert universal_update.saved_logs == expected_update_log
+
+    def test_accounts_validation(
+        self,
+        individual: Individual,
+        program: Program,
+        admin1: Area,
+        admin2: Area,
+        document_national_id: Document,
+        account_type: AccountType,
+        wallet: Account,
+    ) -> None:
+        universal_update = UniversalUpdate(program=program)
+        universal_update.save()
+        universal_update.document_types.add(DocumentType.objects.first())
+        universal_update.account_types.add(AccountType.objects.first())
+        service = UniversalIndividualUpdateService(universal_update)
+        headers = ["unicef_id", "account__mobile__financial_institution_pk", "account__mobile__number"]
+        row = (
+            individual.unicef_id,
+            wallet.financial_institution.id,
+            wallet.number,
+        )
+        errors = service.validate_accounts(row, headers, individual, 1)
+        assert errors == []
+        row = (
+            individual.unicef_id,
+            None,  # Missing financial institution
+            wallet.number,
+        )
+        errors = service.validate_accounts(row, headers, individual, 1)
+        assert errors == [
+            "Row: 1 - Financial institution ID must be provided for account type mobile if any other field is updated"
+        ]
+        row = (
+            individual.unicef_id,
+            None,  # Missing financial institution
+            None,  # Missing account number
+        )
+        errors = service.validate_accounts(row, headers, individual, 1)
+        assert errors == []

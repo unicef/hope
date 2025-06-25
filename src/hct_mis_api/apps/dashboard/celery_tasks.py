@@ -5,6 +5,7 @@ from typing import Any
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.services import (
+    GLOBAL_SLUG,
     DashboardDataCache,
     DashboardGlobalDataCache,
 )
@@ -24,11 +25,8 @@ def update_dashboard_figures(self: Any) -> None:
     business_areas_with_households = BusinessArea.objects.using("read_only").filter(active=True)
 
     for business_area in business_areas_with_households:
-        try:
-            set_sentry_business_area_tag(business_area.slug)
-            DashboardDataCache.refresh_data(business_area.slug)
-        except Exception as e:
-            raise self.retry(exc=e)
+        set_sentry_business_area_tag(business_area.slug)
+        DashboardDataCache.refresh_data(business_area.slug)
 
     set_sentry_business_area_tag("global")
     DashboardGlobalDataCache.refresh_data()
@@ -66,20 +64,19 @@ def update_recent_dashboard_figures(self: Any) -> None:
 @sentry_tags
 def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
     """
-    Celery task to refresh dashboard data for a specific business area (full refresh).
+    Celery task to refresh dashboard data for a specific business area (full refresh)
+    or the global dashboard.
     """
-    try:
-        business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
-    except BusinessArea.DoesNotExist:
-        logger.error(f"Dashboard report generation failed: Business area with slug '{business_area_slug}' not found.")
-        return
-
-    try:
+    if business_area_slug == GLOBAL_SLUG:
+        set_sentry_business_area_tag(GLOBAL_SLUG)
+        DashboardGlobalDataCache.refresh_data()
+    else:
+        try:
+            business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
+        except BusinessArea.DoesNotExist:
+            logger.error(
+                f"Dashboard report generation failed: Business area with slug '{business_area_slug}' not found."
+            )
+            return
         set_sentry_business_area_tag(business_area.slug)
         DashboardDataCache.refresh_data(business_area.slug)
-    except Exception as e:
-        logger.error(
-            f"Error refreshing dashboard data for {business_area_slug} in generate_dash_report_task: {e}",
-            exc_info=True,
-        )
-        raise self.retry(exc=e, countdown=60)
