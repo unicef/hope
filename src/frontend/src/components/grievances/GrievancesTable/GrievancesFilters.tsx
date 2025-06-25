@@ -1,3 +1,4 @@
+import { isShowIssueType } from '@components/grievances/utils/createGrievanceUtils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { DocumentSearchField } from '@core/DocumentSearchField';
 import { FiltersSection } from '@core/FiltersSection';
@@ -16,7 +17,6 @@ import { LanguageAutocompleteRestFilter } from '@shared/autocompletes/LanguageAu
 import { ProgramAutocompleteRestFilter } from '@shared/autocompletes/ProgramAutocompleteRestFilter';
 import { RdiAutocompleteRestFilter } from '@shared/autocompletes/RdiAutocompleteRestFilter';
 import {
-  GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
@@ -83,11 +83,7 @@ export const GrievancesFilters = ({
     [choicesData, filter.grievanceType],
   );
 
-  const showIssueType =
-    filter.category.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    filter.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    filter.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
-    filter.category.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
+  const showIssueType = isShowIssueType(filter.category);
 
   const updatedPriorityChoices = useMemo(() => {
     const priorityChoices = choicesData.grievanceTicketPriorityChoices;
@@ -224,7 +220,7 @@ export const GrievancesFilters = ({
             >
               {subcategories.map((item) => (
                 <MenuItem key={item.value} value={item.value}>
-                  {item.name}
+                  {item.name as string}
                 </MenuItem>
               ))}
             </SelectFilter>

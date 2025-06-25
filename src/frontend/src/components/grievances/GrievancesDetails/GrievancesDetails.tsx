@@ -9,7 +9,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Grid2 as Grid, GridSize, Typography } from '@mui/material';
-import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
   grievanceTicketBadgeColors,
@@ -19,7 +19,7 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import { replaceLabels } from '../utils/createGrievanceUtils';
+import { isShowIssueType, replaceLabels } from '../utils/createGrievanceUtils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
@@ -57,20 +57,13 @@ function GrievancesDetails({
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
-        .subCategories.filter(
+        ?.subCategories.filter(
           (el) => el.value === ticket.issueType.toString(),
         )[0].name
     : '-';
 
-  const showIssueType =
-    ticket.category.toString() ===
-      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
-    ticket.category.toString() ===
-      GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
-    ticket.category.toString() ===
-      GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString() ||
-    ticket.category.toString() ===
-      GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION.toString();
+  const showIssueType = isShowIssueType(ticket.category);
+
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 

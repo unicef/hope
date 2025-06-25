@@ -3,12 +3,29 @@ import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { thingForSpecificGrievanceType } from '@utils/utils';
 import { removeIdPropertyFromObjects } from './helpers';
 import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
+import { CategoryEnum } from '@restgenerated/models/CategoryEnum';
 
 export const replaceLabels = (text, _beneficiaryGroup) => {
+  if (!_beneficiaryGroup || !text) {
+    return '';
+  }
+  if (!_beneficiaryGroup) {
+    return text;
+  }
   return text
     .replace(/Individual/g, _beneficiaryGroup.memberLabel)
     .replace(/Household/g, _beneficiaryGroup.groupLabel);
 };
+
+export function isShowIssueType(category: string | CategoryEnum): boolean {
+  const cat = category?.toString();
+  return (
+    cat === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    cat === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    cat === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
+    cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+  );
+}
 
 export const selectedIssueType = (
   formValues,
@@ -17,7 +34,7 @@ export const selectedIssueType = (
   formValues.issueType
     ? grievanceTicketIssueTypeChoices
         .filter((el) => el.category === formValues.category.toString())[0]
-        .subCategories.filter(
+        ?.subCategories.filter(
           (el) => el.value === formValues.issueType.toString(),
         )[0].name
     : '-';

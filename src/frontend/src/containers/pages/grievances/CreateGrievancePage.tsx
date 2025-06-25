@@ -195,19 +195,22 @@ const CreateGrievancePage = (): ReactElement => {
   });
 
   const individualFieldsDict = useArrayToDict(
-    allAddIndividualFieldsData?.results,
+    //@ts-ignore
+    allAddIndividualFieldsData,
     'name',
     '*',
   );
 
   const householdFieldsDict = useArrayToDict(
-    householdFieldsData?.results,
+    //@ts-ignore
+    householdFieldsData,
     'name',
     '*',
   );
 
   const peopleFieldsDict = useArrayToDict(
-    allEditPeopleFieldsData?.results,
+    //@ts-ignore
+    allEditPeopleFieldsData,
     'name',
     '*',
   );
@@ -217,9 +220,9 @@ const CreateGrievancePage = (): ReactElement => {
     : individualFieldsDict;
 
   const showIssueType = (values): boolean =>
-    values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
+    values.category?.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    values.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    values.category?.toString() === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   if (
     choicesLoading ||
@@ -233,17 +236,6 @@ const CreateGrievancePage = (): ReactElement => {
 
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
     return <PermissionDenied />;
-
-  if (
-    !choicesData ||
-    !allAddIndividualFieldsData?.results ||
-    !householdFieldsData?.results ||
-    !householdFieldsDict ||
-    !individualFieldsDict ||
-    !programsData ||
-    !peopleFieldsDict
-  )
-    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
