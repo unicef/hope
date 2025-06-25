@@ -193,6 +193,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def draft(self) -> PaymentPlan:
+        if not self.payment_plan.financial_service_provider:
+            raise GraphQLError("Can only promote to Payment Plan if DM/FSP is chosen.")
         self.payment_plan.status_draft()
         self.payment_plan.save(update_fields=("status_date", "status"))
         return self.payment_plan
@@ -385,7 +387,9 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
-        pp_split = payment_plan.splits.first()
+        if not (pp_split := payment_plan.splits.first()):
+            pp_split = PaymentPlanSplit.objects.create(payment_plan=payment_plan)
+
         payments_to_create = []
         households = payment_plan.household_list
 
@@ -485,7 +489,6 @@ class PaymentPlanService:
                 excluded_ids=input_data.get("excluded_ids", "").strip(),
                 exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             )
-            PaymentPlanSplit.objects.create(payment_plan=payment_plan)
 
             fsp_id = input_data.get("fsp_id")
             delivery_mechanism_code = input_data.get("delivery_mechanism_code")
@@ -699,7 +702,10 @@ class PaymentPlanService:
         self.payment_plan.exchange_rate = self.payment_plan.get_exchange_rate()
         self.payment_plan.save(update_fields=["exchange_rate"])
         payments_to_copy = self.payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
-        split = self.payment_plan.splits.first()
+
+        if not (split := self.payment_plan.splits.first()):
+            split = PaymentPlanSplit.objects.create(payment_plan=self.payment_plan)
+
         follow_up_payments = [
             Payment(
                 parent=self.payment_plan,
@@ -757,7 +763,6 @@ class PaymentPlanService:
             delivery_mechanism=source_pp.delivery_mechanism,
             financial_service_provider=source_pp.financial_service_provider,
         )
-        PaymentPlanSplit.objects.create(payment_plan=follow_up_pp)
 
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
 

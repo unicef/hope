@@ -129,6 +129,8 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
 
 
 class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
+    business_area = CharFilter(method="business_area_filter", required=True)
+
     class Meta:
         fields = (
             "financial_service_providers",
@@ -143,6 +145,9 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
             ("created_by__first_name", "created_by"),
         )
     )
+
+    def business_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(financial_service_providers__allowed_business_areas__slug=value)
 
 
 class FinancialServiceProviderFilter(FilterSet):
@@ -400,4 +405,6 @@ class PaymentFilter(FilterSet):
         return qs.filter(parent__program_cycle__program_id=decode_id_string_required(value))
 
     def filter_by_household_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
-        return qs.filter(household_id=decode_id_string_required(value))
+        return qs.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(
+            household_id=decode_id_string_required(value)
+        )

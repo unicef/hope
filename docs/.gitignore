@@ -1,0 +1,5 @@
+!**/.pages
+!.includes
+_theme/.templates
+
+__pycache__

@@ -60,21 +60,16 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     external_code = serializers.SerializerMethodField()
     fsp = serializers.SerializerMethodField()
     payload = serializers.SerializerMethodField()
-    extra = serializers.SerializerMethodField()
 
     def get_fsp(self, obj: Any) -> str:
         return obj.financial_service_provider.payment_gateway_id
 
-    def get_extra(self, obj: Any) -> Dict:
-        return {
-            "user": self.context["user_email"],
-            "config_key": obj.payment_plan.business_area.code,
-            "delivery_mechanism": obj.delivery_mechanism.code,
-        }
-
     def get_payload(self, obj: Any) -> Dict:
         return {
             "destination_currency": obj.payment_plan.currency,
+            "user": self.context["user_email"],
+            "config_key": obj.payment_plan.business_area.code,
+            "delivery_mechanism": obj.delivery_mechanism.code,
         }
 
     def get_external_code(self, obj: Any) -> str:
@@ -87,7 +82,6 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
             "external_code",
             "fsp",
             "payload",
-            "extra",
         ]
 
 
@@ -98,9 +92,9 @@ class PaymentPayloadSerializer(serializers.Serializer):
     first_name = serializers.CharField(required=False, allow_blank=True)
     full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
-    origination_currency = serializers.CharField(required=True)
+    origination_currency = serializers.CharField(required=False)
     delivery_mechanism = serializers.CharField(required=True)
-    account_type = serializers.CharField(required=True)
+    account_type = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     account = serializers.DictField(required=False)
 
 
@@ -108,10 +102,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     record_code = serializers.CharField(source="unicef_id")
     payload = serializers.SerializerMethodField()
-    extra_data = serializers.SerializerMethodField()
-
-    def get_extra_data(self, obj: Payment) -> Dict:
-        return {}
 
     def get_payload(self, obj: Payment) -> Dict:
         snapshot = getattr(obj, "household_snapshot", None)
@@ -125,7 +115,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         payload_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
-            "origination_currency": obj.currency,
             "delivery_mechanism": obj.delivery_type.code,
             "account_type": obj.delivery_type.account_type and obj.delivery_type.account_type.key,
             "phone_no": collector_data.get("phone_no", ""),
@@ -186,7 +175,6 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "remote_id",
             "record_code",
             "payload",
-            "extra_data",
         ]
 
 
@@ -241,7 +229,6 @@ class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
     fsp: str
     system: int
     payload: dict
-    extra: dict
     id: Optional[int] = None
 
 
