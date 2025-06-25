@@ -141,6 +141,7 @@ class Command(BaseCommand):
 
         # Load fixtures
         self.stdout.write("Loading fixtures...")
+        call_command("generateroles")
         generate_unicef_partners()
         call_command("loadcountries")
         generate_country_codes()  # core
@@ -149,7 +150,6 @@ class Command(BaseCommand):
         user = create_superuser()
 
         call_command("generatedocumenttypes")
-        call_command("generateroles")
         # Create UserRoles for superuser
         role_with_all_perms = Role.objects.get(name="Role with all permissions")
         for ba_name in ["Global", "Afghanistan"]:
