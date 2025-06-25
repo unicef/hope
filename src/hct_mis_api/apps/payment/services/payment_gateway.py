@@ -508,19 +508,8 @@ class PaymentGatewayService:
         payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
-        update_fields = ["status", "status_date", "fsp_auth_code"]
-
-        if payment.status in [
-            Payment.STATUS_ERROR,
-            Payment.STATUS_MANUALLY_CANCELLED,
-        ]:
-            if matching_pg_payment.message:
-                payment.reason_for_unsuccessful_payment = matching_pg_payment.message
-            elif matching_pg_payment.payout_amount:
-                payment.reason_for_unsuccessful_payment = f"Delivered amount: {matching_pg_payment.payout_amount}"
-            else:
-                payment.reason_for_unsuccessful_payment = "Unknown error"
-            update_fields.append("reason_for_unsuccessful_payment")
+        payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+        update_fields = ["status", "status_date", "fsp_auth_code", "reason_for_unsuccessful_payment"]
 
         delivered_quantity = matching_pg_payment.payout_amount
         if payment.status in [
