@@ -195,12 +195,6 @@ export const individualDetailed = gql`
         unicefId
       }
     }
-    bankAccountInfo {
-      bankName
-      bankAccountNumber
-      accountHolderName
-      bankBranchName
-    }
     preferredLanguage
     paymentDeliveryPhoneNo
     walletName
