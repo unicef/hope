@@ -48,6 +48,7 @@ export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/Cons
 export type { ContentType as ContentTypeCamelCase } from './models/ContentType';
 export type { CoreFieldChoice as CoreFieldChoiceCamelCase } from './models/CoreFieldChoice';
 export type { CountResponse as CountResponseCamelCase } from './models/CountResponse';
+export { CountriesEnum as CountriesEnumCamelCase } from './models/CountriesEnum';
 export type { Country as CountryCamelCase } from './models/Country';
 export { CountryEnum as CountryEnumCamelCase } from './models/CountryEnum';
 export { CountryOriginEnum as CountryOriginEnumCamelCase } from './models/CountryOriginEnum';

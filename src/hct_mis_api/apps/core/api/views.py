@@ -38,6 +38,7 @@ from hct_mis_api.apps.core.utils import (
     resolve_assets_list,
     to_choice_object,
 )
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.payment.models import (
     AccountType,
     DeliveryMechanism,
@@ -177,4 +178,12 @@ class ChoicesViewSet(ViewSet):
         filtered_languages_data = Languages.filter_by_code(filter_code)
         language_tuples = tuple((lang.code, lang.english) for lang in filtered_languages_data)
         resp = ChoiceSerializer(to_choice_object(list(language_tuples)), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="countries")
+    def countries(self, request: Request) -> Response:
+        countries = Country.objects.all().order_by("name")
+        country_tuples = tuple((country.name, country.iso_code3) for country in countries)
+        resp = ChoiceSerializer(to_choice_object(list(country_tuples)), many=True).data
         return Response(resp)
