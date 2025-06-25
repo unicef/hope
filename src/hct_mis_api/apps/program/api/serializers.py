@@ -156,7 +156,7 @@ class ProgramCycleListSerializer(serializers.ModelSerializer):
 class ProgramCycleCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
     start_date = serializers.DateField(required=True)
-    end_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False, allow_null=True)
 
     class Meta:
         model = ProgramCycle
