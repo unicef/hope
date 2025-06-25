@@ -8,7 +8,7 @@ def replace_blank_with_null() -> None:
 
     households_to_update = []
 
-    for instance in Household.objects.iterator(chunk_size=BATCH_SIZE):
+    for instance in Household.all_objects.iterator(chunk_size=BATCH_SIZE):
         update_fields = []
 
         if instance.consent_sharing:
@@ -26,13 +26,13 @@ def replace_blank_with_null() -> None:
             households_to_update.append(instance)
 
     if households_to_update:
-        Household.objects.bulk_update(
+        Household.all_objects.bulk_update(
             households_to_update, ["consent_sharing", "org_enumerator", "registration_method", "residence_status"]
         )
 
     individuals_to_update = []
 
-    for instance in Individual.objects.iterator(chunk_size=BATCH_SIZE):
+    for instance in Individual.all_objects.iterator(chunk_size=BATCH_SIZE):
         update_fields = []
 
         if instance.observed_disability:
@@ -59,7 +59,7 @@ def replace_blank_with_null() -> None:
             individuals_to_update.append(instance)
 
     if individuals_to_update:
-        Individual.objects.bulk_update(
+        Individual.all_objects.bulk_update(
             individuals_to_update,
             [
                 "observed_disability",
