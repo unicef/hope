@@ -68,7 +68,7 @@ function EditPeopleDataChange({
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: ['countriesList'],
-    queryFn: () => RestService.restLookupsCountryList({}),
+    queryFn: () => RestService.restChoicesCountriesList(),
   });
 
   const { data: fullIndividual, isLoading: fullIndividualLoading } =
@@ -116,7 +116,7 @@ function EditPeopleDataChange({
 
   const combinedData = {
     results: editPeopleFieldsData?.results || [],
-    countriesChoices: countriesData?.results || [],
+    countriesChoices: countriesData || [],
     documentTypeChoices: choicesData?.documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
   };

@@ -156,7 +156,7 @@ function AddIndividualDataChange({
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: ['countriesList'],
-    queryFn: () => RestService.restLookupsCountryList({}),
+    queryFn: () => RestService.restChoicesCountriesList(),
   });
 
   if (
@@ -170,7 +170,7 @@ function AddIndividualDataChange({
 
   const combinedData = {
     results: data?.results || [],
-    countriesChoices: countriesData?.results || [],
+    countriesChoices: countriesData || [],
     documentTypeChoices: choicesData?.documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
   };

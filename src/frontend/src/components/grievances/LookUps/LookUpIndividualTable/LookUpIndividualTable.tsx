@@ -68,10 +68,10 @@ export function LookUpIndividualTable({
   };
   let householdId;
   if ('household' in filter) {
-    householdId = decodeIdString(filter.household);
+    householdId = filter.household;
   } else {
     householdId = valuesInner.selectedHousehold
-      ? decodeIdString(valuesInner.selectedHousehold.id)
+      ? valuesInner.selectedHousehold.id
       : null;
   }
 

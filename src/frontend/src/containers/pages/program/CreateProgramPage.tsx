@@ -258,7 +258,7 @@ export const CreateProgramPage = (): ReactElement => {
   if (!treeData || !userPartnerChoicesData || !choicesData) return null;
 
   const allAreasTree = treeData?.results || [];
-  const { partnerChoices: userPartnerChoices } = userPartnerChoicesData;
+  const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

@@ -283,7 +283,7 @@ const DuplicateProgramPage = (): ReactElement => {
   ];
 
   const allAreasTree = treeData?.results || [];
-  const { partnerChoices: userPartnerChoices } = userPartnerChoicesData;
+  const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
