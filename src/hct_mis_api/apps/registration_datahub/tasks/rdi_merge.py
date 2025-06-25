@@ -5,6 +5,7 @@ from typing import Iterable
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import QuerySet
+from django.utils import timezone
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -125,10 +126,10 @@ class RdiMergeTask:
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
                     PendingHousehold.objects.filter(id__in=household_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
+                        rdi_merge_status=MergeStatusModel.MERGED, updated_at=timezone.now()
                     )
                     PendingIndividual.objects.filter(id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
+                        rdi_merge_status=MergeStatusModel.MERGED, updated_at=timezone.now()
                     )
                     self._update_rdi_id_for_extra_rdi(
                         obj_hct.id, household_ids_from_extra_rdis, individuals_from_extra_rdis
