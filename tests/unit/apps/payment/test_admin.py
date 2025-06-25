@@ -12,6 +12,7 @@ import pytest
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.admin import ArrayFieldWidget, CommaSeparatedArrayField
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -82,10 +83,12 @@ class SyncWithPaymentGatewayTest(TestCase):
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
             payment_gateway_id="test123",
         )
+        self.dm = DeliveryMechanismFactory()
         self.payment_plan = PaymentPlanFactory(
             name="Test Plan",
             status=PaymentPlan.Status.ACCEPTED,
             financial_service_provider=self.financial_service_provider,
+            delivery_mechanism=self.dm,
         )
         self.payment = PaymentFactory(
             parent=self.payment_plan,
@@ -132,3 +135,12 @@ class SyncWithPaymentGatewayTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Do you confirm to Sync with Payment Gateway?")
+
+    def test_payment_plan_related_configs_button(self: Any) -> None:
+        url = reverse("admin:payment_paymentplan_related_configs", args=[self.payment_plan.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(
+            reverse("admin:payment_deliverymechanismconfig_changelist"),
+            response["Location"],
+        )
