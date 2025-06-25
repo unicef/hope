@@ -87,7 +87,7 @@ class RoleAssignmentFactory(DjangoModelFactory):
 
     class Meta:
         model = RoleAssignment
-        django_get_or_create = ("user", "partner", "role")
+        django_get_or_create = ("user", "partner", "role", "business_area")
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> RoleAssignment:
