@@ -51,6 +51,7 @@ function Selection({
 
   function replaceLabels(choices, _beneficiaryGroup) {
     if (!choices) return [];
+
     return choices.map((choice) => {
       let newName = choice.name;
       if (_beneficiaryGroup?.memberLabel) {
@@ -62,10 +63,17 @@ function Selection({
       return { ...choice, name: newName };
     });
   }
-  const updatedChoices = replaceLabels(
-    issueTypeDict[values.category]?.subCategories,
-    beneficiaryGroup,
+
+  const subCategoriesObj = issueTypeDict[values.category]?.subCategories || [];
+
+  // Transform to array of { name, value }
+  const subcategories = Object.entries(subCategoriesObj).map(
+    ([value, name]) => ({
+      name,
+      value,
+    }),
   );
+  const updatedChoices = replaceLabels(subcategories, beneficiaryGroup);
 
   const categoryDescriptions =
     getGrievanceCategoryDescriptions(beneficiaryGroup);

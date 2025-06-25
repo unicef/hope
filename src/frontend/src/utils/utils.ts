@@ -625,11 +625,17 @@ export function decodeIdString(idString: string): string | null {
     // Already decoded
     return idString.split(':')[1];
   }
+  // Check for valid base64 (length multiple of 4, only base64 chars)
+  const base64Pattern = /^[A-Za-z0-9+/=]+$/;
+  if (idString.length % 4 !== 0 || !base64Pattern.test(idString)) {
+    console.error('decodeIdString: Not a valid base64 string:', idString);
+    return null;
+  }
   try {
     const decoded = atob(idString);
     return decoded.split(':')[1];
   } catch (e) {
-    console.error('Failed to decode string:', e);
+    console.error('Failed to decode string:', e, idString);
     return null;
   }
 }

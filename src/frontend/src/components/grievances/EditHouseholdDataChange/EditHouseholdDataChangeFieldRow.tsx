@@ -31,7 +31,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const field = fields.find((item) => item.name === itemValue.fieldName);
+  const field = fields?.find((item) => item.name === itemValue.fieldName);
   const [, , helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,
   );
@@ -53,12 +53,12 @@ export const EditHouseholdDataChangeFieldRow = ({
           required
           component={FormikSelectField}
           choices={fields
-            .filter(
+            ?.filter(
               (item) =>
                 !notAvailableFields.includes(item.name) ||
                 item.name === itemValue?.fieldName,
             )
-            .map((item) => ({
+            ?.map((item) => ({
               value: item.name,
               name: item.labelEn,
             }))}

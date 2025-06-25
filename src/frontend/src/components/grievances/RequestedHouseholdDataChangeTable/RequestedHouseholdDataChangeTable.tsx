@@ -49,7 +49,7 @@ function RequestedHouseholdDataChangeTable({
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: ['countriesList'],
-    queryFn: () => RestService.restLookupsCountryList({}),
+    queryFn: () => RestService.restChoicesCountriesList(),
   });
 
   const selectedBioData = values.selected;
@@ -62,11 +62,7 @@ function RequestedHouseholdDataChangeTable({
   const entries = Object.entries(householdData);
   const entriesFlexFields = Object.entries(flexFields);
   const fieldsDict = useArrayToDict(householdFieldsData?.results, 'name', '*');
-  const countriesDict = useArrayToDict(
-    countriesData?.results,
-    'isoCode2',
-    'name',
-  );
+  const countriesDict = useArrayToDict(countriesData, 'isoCode2', 'name');
 
   if (loading || countriesLoading || !fieldsDict) {
     return <LoadingComponent />;
