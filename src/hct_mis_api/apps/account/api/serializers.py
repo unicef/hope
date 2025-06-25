@@ -7,7 +7,13 @@ from flags.state import flag_state
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
 
-from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role, User
+from hct_mis_api.apps.account.models import (
+    USER_STATUS_CHOICES,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_choice_object
@@ -42,7 +48,17 @@ class UserBusinessAreaSerializer(serializers.ModelSerializer):
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
-        exclude = ("id",)
+        fields = ("name", "subsystem", "is_visible_on_ui", "is_available_for_partner")
+
+
+class RoleAssignmentSerializer(serializers.ModelSerializer):
+    business_area = serializers.CharField(source="business_area.slug")
+    program = serializers.CharField(source="program.name", allow_null=True)
+    role = RoleSerializer()
+
+    class Meta:
+        model = RoleAssignment
+        fields = ("role", "business_area", "program")
 
 
 class PartnerSerializer(serializers.ModelSerializer):
@@ -80,13 +96,13 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_partner_roles(user: User) -> ReturnDict:
-        role_ids = user.partner.role_assignments.order_by("business_area__slug").values_list("role_id", flat=True)
-        return RoleSerializer(Role.objects.filter(id__in=role_ids), many=True).data
+        role_assignments = user.partner.role_assignments.order_by("business_area__slug")
+        return RoleAssignmentSerializer(role_assignments, many=True).data
 
     @staticmethod
     def get_user_roles(user: User) -> ReturnDict:
-        role_ids = user.role_assignments.order_by("business_area__slug").values_list("role_id", flat=True)
-        return RoleSerializer(Role.objects.filter(id__in=role_ids), many=True).data
+        role_assignments = user.role_assignments.order_by("business_area__slug")
+        return RoleAssignmentSerializer(role_assignments, many=True).data
 
     @staticmethod
     def get_business_areas(user: User) -> ReturnDict:
