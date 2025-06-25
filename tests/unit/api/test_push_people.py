@@ -8,10 +8,9 @@ from PIL import Image
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from build.lib.hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.api.endpoints.rdi.push_people import PeopleUploadMixin
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
