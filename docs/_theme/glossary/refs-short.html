@@ -1,0 +1,12 @@
+<p>
+<div class="mkdocs-ezglossary-refs list">
+    {% for entry in entries %}
+        <span>
+            <a title="{{ entry.page.title }}"
+               href="{{ root }}{{ entry.page.url }}#{{ entry.target }}">
+                [{{ loop.index }}]
+            </a>
+        </span>    
+    {% endfor %}
+</div>
+</p>

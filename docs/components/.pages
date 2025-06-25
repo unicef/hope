@@ -1,0 +1,10 @@
+nav:
+  - index.md
+
+  - Aurora: aurora.md
+  - Kobo: kobo
+  - Payment Gateway: pg.md
+  - Country Report: cr.md
+  - Deduplication: hde.md
+  - RapidPro: rapidpro
+  - Workspace: workspace.md

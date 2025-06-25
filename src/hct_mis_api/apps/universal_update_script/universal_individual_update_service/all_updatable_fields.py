@@ -1,13 +1,13 @@
 """
 This is static by design, it could be made dynamic by fetching the fields from the model itself.
 """
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from django.db.models import Model
 
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.apps.payment.models import DeliveryMechanismConfig
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.universal_update_script.universal_individual_update_service.validator_and_handlers import (
     handle_admin_field,
     handle_boolean_field,
@@ -175,15 +175,14 @@ def get_document_fields() -> list[Any]:
     return [(f"{x}_no_i_c", f"{x}_country_i_c") for x in DocumentType.objects.values_list("key", flat=True)]
 
 
-def get_wallet_fields() -> dict[Any, Any]:
+def get_account_fields() -> dict[Any, Any]:
     deliver_mechanism_data_fields = {}
-    for dm_config in DeliveryMechanismConfig.objects.all():
-        if not dm_config.delivery_mechanism.account_type:
-            continue
-        account_type = dm_config.delivery_mechanism.account_type.key
-        wallet_fields = []
-        for field in dm_config.required_fields:
-            wallet_fields.append((f"account__{account_type}__{field}", field))
+    for account_type_instance in AccountType.objects.all():
+        account_type = account_type_instance.key
+        wallet_fields: set[tuple[str, Optional[str]]] = set()
+        wallet_fields.add((f"account__{account_type}__*", None))
+        wallet_fields.add((f"account__{account_type}__number", "number"))
+        wallet_fields.add((f"account__{account_type}__financial_institution_pk", "financial_institution"))
         if len(wallet_fields) > 0:
             deliver_mechanism_data_fields[account_type] = tuple(wallet_fields)
     return deliver_mechanism_data_fields

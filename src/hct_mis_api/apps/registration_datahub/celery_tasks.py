@@ -37,9 +37,9 @@ def handle_rdi_exception(rdi_id: str, e: BaseException) -> None:
         from sentry_sdk import capture_exception
 
         err = capture_exception(e)
-    except Exception as e:  # pragma: no cover
+    except Exception as exc:  # pragma: no cover
         err = "N/A"  # pragma: no cover
-        logger.exception(e)  # pragma: no cover
+        logger.exception(exc)  # pragma: no cover
     RegistrationDataImport.objects.filter(
         id=rdi_id,
     ).update(status=RegistrationDataImport.IMPORT_ERROR, sentry_id=err, error_message=str(e))

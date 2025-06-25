@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.12.7-slim-bookworm as base
+FROM python:3.13-slim-bookworm as base
 ENV APP_PATH=/app
 ARG UID=82
 
@@ -21,6 +21,7 @@ RUN apt-get update \
     libpangocairo-1.0-0 \
     shared-mime-info \
     wkhtmltopdf \
+    screen \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && addgroup --system --gid "${UID}" hope \
