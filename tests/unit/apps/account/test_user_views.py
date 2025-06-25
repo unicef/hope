@@ -41,9 +41,6 @@ def get_role_data(role: Role) -> dict:
     return {
         "name": role.name,
         "subsystem": role.subsystem,
-        "created_at": f"{role.created_at:%Y-%m-%dT%H:%M:%S.%fZ}",
-        "updated_at": f"{role.updated_at:%Y-%m-%dT%H:%M:%S.%fZ}",
-        "permissions": [str(perm) for perm in role.permissions],
         "is_visible_on_ui": role.is_visible_on_ui,
         "is_available_for_partner": role.is_available_for_partner,
     }
@@ -109,12 +106,12 @@ class TestUserProfile:
         )
 
         # role in different BA
-        ukraine = create_ukraine()
-        ukraine.active = True
-        ukraine.save()
-        program_u = ProgramFactory(business_area=ukraine, status=Program.ACTIVE)
-        RoleAssignmentFactory(user=self.user, business_area=ukraine, program=program_u, role=self.role1)
-        RoleAssignmentFactory(partner=self.partner, business_area=ukraine, role=self.role_p1)
+        self.ukraine = create_ukraine()
+        self.ukraine.active = True
+        self.ukraine.save()
+        self.program_u = ProgramFactory(business_area=self.ukraine, status=Program.ACTIVE)
+        RoleAssignmentFactory(user=self.user, business_area=self.ukraine, program=self.program_u, role=self.role1)
+        RoleAssignmentFactory(partner=self.partner, business_area=self.ukraine, role=self.role_p1)
 
     def test_user_profile_in_scope_business_area(self) -> None:
         response = self.api_client.get(self.user_profile_url)
@@ -132,16 +129,54 @@ class TestUserProfile:
             "name": self.partner.name,
         }
         assert profile_data["partner_roles"] == [
-            get_role_data(self.role_p1),
-            get_role_data(self.role_p2),
-            get_role_data(self.role_p3),
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program2.name,
+                "role": get_role_data(self.role_p3),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program1.name,
+                "role": get_role_data(self.role_p2),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": None,
+                "role": get_role_data(self.role_p1),
+            },
+            {
+                "business_area": self.ukraine.slug,
+                "program": None,
+                "role": get_role_data(self.role_p1),
+            },
         ]
 
         assert profile_data["user_roles"] == [
-            get_role_data(self.role1),
-            get_role_data(self.role2),
-            get_role_data(self.role3),
-            get_role_data(self.role4),
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program3.name,
+                "role": get_role_data(self.role4),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program2.name,
+                "role": get_role_data(self.role3),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program1.name,
+                "role": get_role_data(self.role2),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": None,
+                "role": get_role_data(self.role1),
+            },
+            {
+                "business_area": self.ukraine.slug,
+                "program": self.program_u.name,
+                "role": get_role_data(self.role1),
+            },
         ]
         assert profile_data["business_areas"] == [
             {
@@ -158,7 +193,17 @@ class TestUserProfile:
                         *self.role_p3.permissions,
                     ]
                 },
-            }
+            },
+            {
+                **get_business_area_data(self.ukraine),
+                "permissions": {
+                    str(perm)
+                    for perm in [
+                        *self.role1.permissions,
+                        *self.role_p1.permissions,
+                    ]
+                },
+            },
         ]
 
         assert profile_data["permissions_in_scope"] == {
@@ -195,17 +240,56 @@ class TestUserProfile:
         }
 
         assert profile_data["partner_roles"] == [
-            get_role_data(self.role_p1),
-            get_role_data(self.role_p2),
-            get_role_data(self.role_p3),
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program2.name,
+                "role": get_role_data(self.role_p3),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program1.name,
+                "role": get_role_data(self.role_p2),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": None,
+                "role": get_role_data(self.role_p1),
+            },
+            {
+                "business_area": self.ukraine.slug,
+                "program": None,
+                "role": get_role_data(self.role_p1),
+            },
         ]
 
         assert profile_data["user_roles"] == [
-            get_role_data(self.role1),
-            get_role_data(self.role2),
-            get_role_data(self.role3),
-            get_role_data(self.role4),
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program3.name,
+                "role": get_role_data(self.role4),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program2.name,
+                "role": get_role_data(self.role3),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program1.name,
+                "role": get_role_data(self.role2),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": None,
+                "role": get_role_data(self.role1),
+            },
+            {
+                "business_area": self.ukraine.slug,
+                "program": self.program_u.name,
+                "role": get_role_data(self.role1),
+            },
         ]
+
         assert profile_data["business_areas"] == [
             {
                 **get_business_area_data(self.afghanistan),
@@ -221,7 +305,17 @@ class TestUserProfile:
                         *self.role_p3.permissions,
                     ]
                 },
-            }
+            },
+            {
+                **get_business_area_data(self.ukraine),
+                "permissions": {
+                    str(perm)
+                    for perm in [
+                        *self.role1.permissions,
+                        *self.role_p1.permissions,
+                    ]
+                },
+            },
         ]
 
         # change here - only permissions within the program
@@ -587,8 +681,14 @@ class TestProgramUsers:
             assert user_result["last_login"] == (f"{user.last_login:%Y-%m-%dT%H:%M:%SZ}" if user.last_login else None)
 
         # self.user
-        response_results[0]["partner_roles"] = []
-        response_results[0]["user_roles"] = [get_role_data(role_with_user_management_permissions)]
+        assert response_results[0]["partner_roles"] == []
+        assert response_results[0]["user_roles"] == [
+            {
+                "business_area": self.afghanistan.slug,
+                "program": None,
+                "role": get_role_data(role_with_user_management_permissions),
+            }
+        ]
         assert response_results[0]["business_areas"] == [
             {
                 **get_business_area_data(self.afghanistan),
@@ -600,8 +700,14 @@ class TestProgramUsers:
         }
 
         # self.user1
-        response_results[1]["partner_roles"] = []
-        response_results[1]["user_roles"] = [get_role_data(self.role1)]
+        assert response_results[1]["partner_roles"] == []
+        assert response_results[1]["user_roles"] == [
+            {
+                "business_area": self.afghanistan.slug,
+                "program": None,
+                "role": get_role_data(self.role1),
+            },
+        ]
         assert response_results[1]["business_areas"] == [
             {
                 **get_business_area_data(self.afghanistan),
@@ -611,8 +717,15 @@ class TestProgramUsers:
         assert response_results[1]["permissions_in_scope"] == {str(perm) for perm in self.role1.permissions}
 
         # self.user2
-        response_results[2]["partner_roles"] = []
-        response_results[2]["user_roles"] = [get_role_data(self.role2)]
+        assert response_results[2]["partner_roles"] == []
+        assert response_results[2]["user_roles"] == [
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program.name,
+                "role": get_role_data(self.role2),
+            },
+        ]
+
         assert response_results[2]["business_areas"] == [
             {
                 **get_business_area_data(self.afghanistan),
@@ -622,8 +735,14 @@ class TestProgramUsers:
         assert response_results[2]["permissions_in_scope"] == {str(perm) for perm in self.role2.permissions}
 
         # self.user3
-        response_results[3]["partner_roles"] = [get_role_data(self.role_p1)]
-        response_results[3]["user_roles"] = []
+        assert response_results[3]["partner_roles"] == [
+            {
+                "business_area": self.afghanistan.slug,
+                "program": None,
+                "role": get_role_data(self.role_p1),
+            },
+        ]
+        assert response_results[3]["user_roles"] == []
         assert response_results[3]["business_areas"] == [
             {
                 **get_business_area_data(self.afghanistan),
@@ -633,8 +752,14 @@ class TestProgramUsers:
         assert response_results[3]["permissions_in_scope"] == {str(perm) for perm in self.role_p1.permissions}
 
         # self.user4
-        response_results[4]["partner_roles"] = [get_role_data(self.role_p2)]
-        response_results[4]["user_roles"] = []
+        assert response_results[4]["partner_roles"] == [
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program.name,
+                "role": get_role_data(self.role_p2),
+            },
+        ]
+        assert response_results[4]["user_roles"] == []
         assert response_results[4]["business_areas"] == [
             {
                 **get_business_area_data(self.afghanistan),
@@ -644,8 +769,20 @@ class TestProgramUsers:
         assert response_results[4]["permissions_in_scope"] == {str(perm) for perm in self.role_p2.permissions}
 
         # self.user5
-        response_results[5]["partner_roles"] = [get_role_data(self.role_p2)]
-        response_results[5]["user_roles"] = [get_role_data(self.role3)]
+        assert response_results[5]["partner_roles"] == [
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program.name,
+                "role": get_role_data(self.role_p2),
+            }
+        ]
+        assert response_results[5]["user_roles"] == [
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program.name,
+                "role": get_role_data(self.role3),
+            },
+        ]
         assert response_results[5]["business_areas"] == [
             {
                 **get_business_area_data(self.afghanistan),
