@@ -19,6 +19,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_drivers_licensee_issuer_query,
     get_electoral_card_document_number_query,
     get_electoral_card_issuer_query,
+    get_has_bank_account_number_query,
     get_has_phone_number_query,
     get_has_tax_id_query,
     get_national_id_document_number_query,
@@ -156,6 +157,16 @@ class TestAttributesGetQueries(APITestCase):
     def test_get_other_document_number_query(self) -> None:
         q = get_other_document_number_query(None, ["QRST"])
         self.assertEqual(q, Q(documents__type__key="other", documents__document_number="QRST"))
+
+    def test_get_has_bank_account_number_query_true(self) -> None:
+        expected_query = Q(**{"accounts__account_type__key": "bank"})
+        result = get_has_bank_account_number_query(None, [True])
+        self.assertEqual(result, expected_query)
+
+    def test_get_has_bank_account_number_query_false(self) -> None:
+        expected_query = ~Q(**{"accounts__account_type__key": "bank"})
+        result = get_has_bank_account_number_query(None, [False])
+        self.assertEqual(result, expected_query)
 
     def test_get_has_tax_id_query_true(self) -> None:
         # Test for individuals who have a tax ID
