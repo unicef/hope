@@ -92,9 +92,6 @@ export function validate(
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
         !values.individualDataUpdateIdentitiesToEdit?.length &&
-        !values.individualDataUpdateFieldsPaymentChannels?.length &&
-        !values.individualDataUpdatePaymentChannelsToRemove?.length &&
-        !values.individualDataUpdatePaymentChannelsToEdit?.length &&
         !values.individualDataUpdateDeliveryMechanismDataToEdit?.length
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
@@ -165,26 +162,6 @@ export function validate(
             if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
-            }
-          });
-      }
-      if (values.individualDataUpdateFieldsPaymentChannelsToEdit?.length) {
-        values.individualDataUpdateFieldsPaymentChannelsToEdit
-          .filter((el) => el)
-          .forEach((doc) => {
-            if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannelsToEdit =
-                'Bank name and bank account number are required';
-            }
-          });
-      }
-      if (values.individualDataUpdateFieldsPaymentChannels?.length) {
-        values.individualDataUpdateFieldsPaymentChannels
-          .filter((el) => el)
-          .forEach((doc) => {
-            if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannels =
-                'Bank name and bank account number are required';
             }
           });
       }
@@ -337,9 +314,6 @@ export function validateUsingSteps(
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
         !values.individualDataUpdateIdentitiesToEdit?.length &&
-        !values.individualDataUpdateFieldsPaymentChannels?.length &&
-        !values.individualDataUpdatePaymentChannelsToRemove?.length &&
-        !values.individualDataUpdatePaymentChannelsToEdit?.length &&
         activeStep === GrievanceSteps.Description
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
@@ -407,29 +381,6 @@ export function validateUsingSteps(
             if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
-            }
-          },
-        );
-      }
-      if (values.individualDataUpdateFieldsPaymentChannelsToEdit?.length) {
-        values.individualDataUpdateFieldsPaymentChannelsToEdit.forEach(
-          (el, index) => {
-            const doc =
-              values.individualDataUpdateFieldsPaymentChannelsToEdit[index];
-            if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannelsToEdit =
-                'Bank name and bank account number are required';
-            }
-          },
-        );
-      }
-      if (values.individualDataUpdateFieldsPaymentChannels?.length) {
-        values.individualDataUpdateFieldsPaymentChannels.forEach(
-          (el, index) => {
-            const doc = values.individualDataUpdateFieldsPaymentChannels[index];
-            if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannels =
-                'Bank name and bank account number are required';
             }
           },
         );

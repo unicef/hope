@@ -315,7 +315,8 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     additional_document_type = graphene.String()
     additional_document_number = graphene.String()
     total_persons_covered = graphene.Int(description="Get from Household Snapshot")
-    snapshot_collector_data = graphene.String(description="Get from Household Snapshot")
+    snapshot_collector_full_name = graphene.String(description="Get from Household Snapshot")
+    snapshot_collector_account_data = graphene.String(description="Get from Household Snapshot")
     fsp_auth_code = graphene.String()
 
     class Meta:
@@ -369,7 +370,10 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_additional_document_number(self, info: Any) -> Optional[graphene.String]:
         return getattr(self, "additional_document_number", None)
 
-    def resolve_snapshot_collector_data(self, info: Any) -> Any:
+    def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
+        return PaymentNode.get_collector_field(self, "full_name")
+
+    def resolve_snapshot_collector_account_data(self, info: Any) -> Any:
         # TODO MB refactor FE
         return PaymentNode.get_collector_field(self, "account_data")
 

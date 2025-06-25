@@ -338,15 +338,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "number": "2222",
                                 }
                             ],
-                            "paymentChannels": [
-                                {
-                                    "type": "BANK_TRANSFER",
-                                    "bankName": "privatbank",
-                                    "bankAccountNumber": 2356789789789789,
-                                    "accountHolderName": "Holder Name Updated",
-                                    "bankBranchName": "Branch Name Updated",
-                                },
-                            ],
                         }
                     }
                 },

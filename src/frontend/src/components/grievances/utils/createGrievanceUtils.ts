@@ -236,10 +236,6 @@ function prepareEditIndividualVariables(requiredVariables, values) {
     values.individualDataUpdateFieldsIdentities,
   );
 
-  const newlyAddedPaymentChannelsWithoutIds = removeIdPropertyFromObjects(
-    values.individualDataUpdateFieldsPaymentChannels,
-  );
-
   return {
     variables: {
       input: {
@@ -259,11 +255,6 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
-                paymentChannels: newlyAddedPaymentChannelsWithoutIds,
-                paymentChannelsToRemove:
-                  values.individualDataUpdatePaymentChannelsToRemove,
-                paymentChannelsToEdit:
-                  values.individualDataUpdatePaymentChannelsToEdit,
               },
             },
           },

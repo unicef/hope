@@ -94,9 +94,6 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     identities,
     identities_to_remove: identitiesToRemove,
     identities_to_edit: identitiesToEdit,
-    payment_channels: paymentChannels,
-    payment_channels_to_remove: paymentChannelsToRemove,
-    payment_channels_to_edit: paymentChannelsToEdit,
     delivery_mechanism_data_to_edit: deliveryMechanismDataToEdit,
     ...rest
   } = individualData;
@@ -119,14 +116,6 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     individualDataUpdateDocumentsToEdit: camelizeArrayObjects(documentsToEdit),
     individualDataUpdateIdentitiesToEdit:
       camelizeArrayObjects(identitiesToEdit),
-    individualDataUpdateFieldsPaymentChannels:
-      camelizeArrayObjects(paymentChannels),
-    individualDataUpdatePaymentChannelsToRemove: camelizeArrayObjects(
-      paymentChannelsToRemove,
-    ),
-    individualDataUpdatePaymentChannelsToEdit: camelizeArrayObjects(
-      paymentChannelsToEdit,
-    ),
     individualDataUpdateDeliveryMechanismDataToEdit: camelizeArrayObjects(
       deliveryMechanismDataToEdit,
     ),
@@ -400,14 +389,6 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
               identitiesToEdit: transformNestedData(
                 values.individualDataUpdateIdentitiesToEdit,
-              ),
-              paymentChannels: transformNestedData(
-                values.individualDataUpdateFieldsPaymentChannels,
-              ),
-              paymentChannelsToRemove:
-                values.individualDataUpdatePaymentChannelsToRemove,
-              paymentChannelsToEdit: transformNestedData(
-                values.individualDataUpdatePaymentChannelsToEdit,
               ),
               deliveryMechanismDataToEdit:
                 values.individualDataUpdateDeliveryMechanismDataToEdit,
