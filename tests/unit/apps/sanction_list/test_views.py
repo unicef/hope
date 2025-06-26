@@ -25,8 +25,6 @@ class TestSanctionListIndividualViewSet:
         self.afghanistan = create_afghanistan()
         self.partner = PartnerFactory(name="unittest")
         self.user = UserFactory(partner=self.partner)
-        # self.program_active = ProgramFactory(business_area=self.afghanistan, status=Program.ACTIVE)
-        # self.cycle = self.program_active.cycles.first()
         self.client = api_client(self.user)
 
         sanction_list_individual = SanctionListIndividualFactory(
