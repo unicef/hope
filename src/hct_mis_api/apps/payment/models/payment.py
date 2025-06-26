@@ -1960,7 +1960,7 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         return f"{self.individual} - {self.account_type}"
 
     @property
-    def account_data(self):
+    def account_data(self) -> dict:
         data = self.data.copy()
         if self.number:
             data["number"] = self.number
