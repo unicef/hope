@@ -317,7 +317,7 @@ class GenericRegistrationService(BaseRegistrationService):
                 PendingAccount.objects.create(
                     individual_id=individual.id,
                     account_type=AccountType.objects.get(key="bank"),
-                    number=account_data["data"].get("number", None),
+                    number=account_data["data"].pop("number", None),
                     **account_data,
                 )
 

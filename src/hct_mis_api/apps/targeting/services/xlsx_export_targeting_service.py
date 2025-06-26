@@ -130,7 +130,7 @@ class XlsxExportTargetingService:
     @staticmethod
     def _accounts_info(individual: Individual) -> str:
         if individual.accounts.exists():
-            return ", ".join([str(account.data) for account in individual.accounts.all()])
+            return ", ".join([str(account.account_data) for account in individual.accounts.all()])
         return ""
 
     def _adjust_column_width_from_col(self, ws: Worksheet, min_row: int, min_col: int, max_col: int) -> None:

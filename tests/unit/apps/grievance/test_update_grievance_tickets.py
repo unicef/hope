@@ -364,15 +364,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "photoraw": "test_file_name.jpg",
                     }
                 ],
-                "payment_channels": [
-                    {
-                        "type": "BANK_TRANSFER",
-                        "bank_name": "privatbank",
-                        "bank_account_number": "2356789789789789",
-                        "account_holder_name": "Holder Name Updated",
-                        "bank_branch_name": "Branch Name Updated",
-                    },
-                ],
                 "identities": [{"partner": "UNHCR", "country": "POL", "number": "2222"}],
                 "full_name": "John Example",
                 "birth_date": "1981-02-02",
