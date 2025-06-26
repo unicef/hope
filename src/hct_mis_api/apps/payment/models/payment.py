@@ -293,6 +293,10 @@ class PaymentPlan(
     program_cycle = models.ForeignKey(
         "program.ProgramCycle", related_name="payment_plans", on_delete=models.CASCADE, help_text="Program Cycle"
     )
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider", blank=True, null=True, on_delete=models.PROTECT
+    )
     imported_file = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL, help_text="Imported File"
     )
@@ -510,10 +514,6 @@ class PaymentPlan(
     )
     status_date = models.DateTimeField(help_text="Date and time of Payment Plan status [sys]")
     is_cash_assist = models.BooleanField(default=False, help_text="Cash Assist Flag [sys]")
-    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", blank=True, null=True, on_delete=models.PROTECT
-    )
 
     class Meta:
         verbose_name = "Payment Plan"
