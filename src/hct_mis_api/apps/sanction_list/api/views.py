@@ -45,14 +45,10 @@ class SanctionListIndividualViewSet(
         "retrieve": SanctionListIndividualSerializer,
         "check_against_sanction_list": CheckAgainstSanctionListCreateSerializer,
     }
-    permissions_by_action = {
-        "list": [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST, Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
-        "retrieve": [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS, Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS],
-        "check_against_sanction_list": [
-            Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
-            Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
-        ],
-    }
+    PERMISSIONS = [
+        Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+        Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+    ]
     filter_backends = (
         filters.DjangoFilterBackend,
         SearchFilter,
@@ -66,20 +62,19 @@ class SanctionListIndividualViewSet(
     )
 
     @extend_schema(
-        request=CheckAgainstSanctionListCreateSerializer, responses={200: CheckAgainstSanctionListSerializer}
+        request=CheckAgainstSanctionListCreateSerializer, responses={202: CheckAgainstSanctionListSerializer}
     )
     @action(detail=False, methods=["post"], url_path="check-against-sanction-list")
     def check_against_sanction_list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         file = serializer.validated_data["file"]
         user = request.user
         try:
             self.validate(file=file)
         except XlsxException as e:
             return Response(
-                CheckAgainstSanctionListSerializer({"ok": False, "errors": e.errors}),
+                CheckAgainstSanctionListSerializer({"ok": False, "errors": e.errors}).data,
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -89,4 +84,6 @@ class SanctionListIndividualViewSet(
             uploaded_file_id=str(uploaded_file.id),
             original_file_name=file.name,
         )
-        return Response(CheckAgainstSanctionListSerializer({"ok": False, "errors": []}).data, status=status.HTTP_200_OK)
+        return Response(
+            CheckAgainstSanctionListSerializer({"ok": False, "errors": []}).data, status=status.HTTP_202_ACCEPTED
+        )

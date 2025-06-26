@@ -47,4 +47,4 @@ class CheckAgainstSanctionListCreateSerializer(serializers.Serializer):
 
 class CheckAgainstSanctionListSerializer(serializers.Serializer):
     ok = serializers.BooleanField()
-    errors = serializers.ListField(child=serializers.CharField(), required=False)  # type: ignore
+    errors = serializers.ListField(child=serializers.DictField(), required=False)  # type: ignore
