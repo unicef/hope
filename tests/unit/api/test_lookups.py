@@ -1,6 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from django.utils import timezone
 
 import pytz
+from parameterized import parameterized
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -330,22 +333,31 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
             name="Test Bank",
             type=FinancialInstitution.FinancialInstitutionType.BANK,
             country=cls.country_poland,
+            swift_code="TESTBANK123",
         )
         cls.fi_telco = FinancialInstitutionFactory(
             name="Test Telco",
             type=FinancialInstitution.FinancialInstitutionType.TELCO,
             country=cls.country_afghanistan,
+            swift_code="TESTTELCO456",
         )
         cls.fi_other = FinancialInstitutionFactory(
             name="Test Other Institution",
             type=FinancialInstitution.FinancialInstitutionType.OTHER,
             country=cls.country_poland,
+            swift_code="",
         )
 
     def get_result(self, financial_institution: FinancialInstitution) -> dict:
         return {
             "id": financial_institution.id,
             "name": financial_institution.name,
+            "type": financial_institution.type,
+            "swift_code": financial_institution.swift_code or "",
+            "country_iso_code3": financial_institution.country.iso_code3 if financial_institution.country else None,
+            "updated_at": financial_institution.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            if financial_institution.updated_at
+            else None,
         }
 
     def test_get_financial_institution_list(self) -> None:
@@ -379,3 +391,83 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
         self.assertIn("next", response_data)
         self.assertIn("previous", response_data)
         self.assertIn("results", response_data)
+
+    @parameterized.expand(
+        [
+            ("bank", 1),
+            ("telco", 1),
+            ("other", 1),
+        ]
+    )
+    def test_get_financial_institution_list_filter_by_type(self, institution_type: str, expected_count: int) -> None:
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url, {"type": institution_type})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()["results"]), expected_count)
+        self.assertLess(
+            expected_count, 3, f"Filtering by type '{institution_type}' should return fewer results than total"
+        )
+
+    @parameterized.expand(
+        [
+            ("updated_at_after", 3),
+            ("updated_at_before", 3),
+            ("updated_at_after_and_before", 3),
+        ]
+    )
+    def test_get_financial_institution_list_filter_by_updated_at(self, filter_type: str, expected_count: int) -> None:
+        now = timezone.now()
+        yesterday = now - timedelta(days=1)
+        tomorrow = now + timedelta(days=1)
+
+        if filter_type == "updated_at_after":
+            filter_data = {"updated_at_after": yesterday.strftime("%Y-%m-%d")}
+        elif filter_type == "updated_at_before":
+            filter_data = {"updated_at_before": tomorrow.strftime("%Y-%m-%d")}
+        else:
+            filter_data = {
+                "updated_at_after": yesterday.strftime("%Y-%m-%d"),
+                "updated_at_before": tomorrow.strftime("%Y-%m-%d"),
+            }
+
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url, filter_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()["results"]), expected_count)
+
+    @parameterized.expand(
+        [
+            ("bank", "Test Bank"),
+            ("telco", "Test Telco"),
+            ("other", "Test Other Institution"),
+        ]
+    )
+    def test_get_financial_institution_list_filter_by_type_returns_correct_institution(
+        self, institution_type: str, expected_name: str
+    ) -> None:
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url, {"type": institution_type})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        results = response.json()["results"]
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["name"], expected_name)
+        self.assertEqual(results[0]["type"], institution_type)
+
+    def test_get_financial_institution_list_filter_by_invalid_type_returns_empty(self) -> None:
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url, {"type": "invalid_type"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_financial_institution_list_filter_by_future_date_returns_empty(self) -> None:
+        future_date = timezone.now() + timedelta(days=365)
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url, {"updated_at_after": future_date.strftime("%Y-%m-%d")})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()["results"]), 0)
+
+    def test_get_financial_institution_list_filter_by_past_date_returns_all(self) -> None:
+        past_date = timezone.now() - timedelta(days=365)
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url, {"updated_at_before": past_date.strftime("%Y-%m-%d")})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()["results"]), 0)
