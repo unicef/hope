@@ -629,18 +629,18 @@ class TestPaymentModel(TestCase):
             ],
         )
 
-    def test_manager_annotations_pp_no_conflicts_for_follow_up(self) -> None:
+    def test_manager_annotations_conflicts_for_follow_up(self) -> None:
         rdi = RegistrationDataImportFactory(business_area=self.business_area)
         program = RealProgramFactory(business_area=self.business_area)
         program_cycle = program.cycles.first()
         pp1 = PaymentPlanFactory(
             program_cycle=program_cycle,
+            is_follow_up=False,
             business_area=self.business_area,
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentPlan.Status.FINISHED,
             created_by=self.user,
         )
-        # create follow up pp
-        pp2 = PaymentPlanFactory(
+        pp2_follow_up = PaymentPlanFactory(
             business_area=self.business_area,
             status=PaymentPlan.Status.LOCKED,
             is_follow_up=True,
@@ -658,39 +658,50 @@ class TestPaymentModel(TestCase):
         )
         p1 = PaymentFactory(
             parent=pp1,
-            conflicted=False,
+            is_follow_up=False,
             currency="PLN",
             household__registration_data_import=rdi,
             household__program=program,
+            status=Payment.STATUS_ERROR,
         )
         p2 = PaymentFactory(
-            parent=pp2,
+            parent=pp2_follow_up,
             household=p1.household,
-            conflicted=False,
-            is_follow_up=True,
-            source_payment=p1,
-            currency="PLN",
-        )
-        p3 = PaymentFactory(
-            parent=pp3,
-            household=p1.household,
-            conflicted=False,
             is_follow_up=True,
             source_payment=p1,
             currency="PLN",
         )
 
-        for _ in [pp1, pp2, pp3, p1, p2, p3]:
+        for _ in [pp1, pp2_follow_up, pp3, p1, p2]:
             _.refresh_from_db()  # update unicef_id from trigger
 
         p2_data = Payment.objects.filter(id=p2.id).values()[0]
         self.assertEqual(p2_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p2_data["payment_plan_soft_conflicted"], True)
+        self.assertEqual(p2_data["payment_plan_soft_conflicted"], False)
+
+        p3 = PaymentFactory(
+            parent=pp3,
+            household=p1.household,
+            is_follow_up=False,
+            currency="PLN",
+        )
+        p3.refresh_from_db()  # update unicef_id from trigger
+        self.maxDiff = None
         p3_data = Payment.objects.filter(id=p3.id).values()[0]
-        self.assertEqual(p3_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p3_data["payment_plan_soft_conflicted"], True)
-        self.assertEqual(p2_data["payment_plan_hard_conflicted_data"], [])
-        self.assertIsNotNone(p3_data["payment_plan_hard_conflicted_data"])
+        self.assertEqual(p3_data["payment_plan_hard_conflicted"], True)
+        self.assertEqual(p3_data["payment_plan_soft_conflicted"], False)
+        import json
+
+        data = {
+            "payment_id": str(p2.id),
+            "payment_plan_id": str(pp2_follow_up.id),
+            "payment_unicef_id": str(p2.unicef_id),
+            "payment_plan_status": "LOCKED",
+            "payment_plan_end_date": pp2_follow_up.program_cycle.end_date.isoformat(),
+            "payment_plan_unicef_id": str(pp2_follow_up.unicef_id),
+            "payment_plan_start_date": pp2_follow_up.program_cycle.start_date.isoformat(),
+        }
+        self.assertEqual(p3_data["payment_plan_hard_conflicted_data"], [json.dumps(data)])
 
 
 class TestPaymentPlanSplitModel(TestCase):
