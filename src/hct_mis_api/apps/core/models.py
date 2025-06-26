@@ -175,9 +175,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             for business_area in cls.objects.all()
         ]
 
-    def should_check_against_sanction_list(self) -> bool:
-        return self.screen_beneficiary
-
     def get_sys_option(self, key: str, default: None = None) -> Any:
         if "hope" in self.custom_fields:
             return self.custom_fields["hope"].get(key, default)

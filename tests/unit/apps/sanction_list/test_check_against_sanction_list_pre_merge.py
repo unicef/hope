@@ -25,7 +25,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.sanction_list.models import SanctionList
 from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
-    CheckAgainstSanctionListPreMergeTask,
+    check_against_sanction_list_pre_merge,
 )
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -54,7 +54,9 @@ class TestSanctionListPreMerge(TestCase):
         from test_utils.factories.sanction_list import SanctionListFactory
 
         full_sanction_list_path = f"{cls.TEST_FILES_PATH}/full_sanction_list.xml"
-        task = LoadSanctionListXMLTask(SanctionListFactory())
+        sanction_list = SanctionListFactory()
+        sanction_list.save()
+        task = LoadSanctionListXMLTask(sanction_list)
         task.load_from_file(full_sanction_list_path)
 
         cls.business_area = BusinessArea.objects.create(
@@ -66,6 +68,7 @@ class TestSanctionListPreMerge(TestCase):
             has_data_sharing_agreement=True,
         )
         cls.program = ProgramFactory(business_area=cls.business_area)
+        cls.program.sanction_lists.add(sanction_list)
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area, program=cls.program
         )
@@ -154,7 +157,7 @@ class TestSanctionListPreMerge(TestCase):
         rebuild_search_index()
 
     def test_execute(self) -> None:
-        CheckAgainstSanctionListPreMergeTask.execute()
+        check_against_sanction_list_pre_merge(program_id=self.program.id)
 
         expected = [
             {"full_name": "Abdul Afghanistan", "sanction_list_possible_match": False},
@@ -172,7 +175,7 @@ class TestSanctionListPreMerge(TestCase):
         self.assertEqual(result, expected)
 
     def test_create_system_flag_tickets(self) -> None:
-        CheckAgainstSanctionListPreMergeTask.execute()
+        check_against_sanction_list_pre_merge(program_id=self.program.id)
         self.assertEqual(
             GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(),
             0,

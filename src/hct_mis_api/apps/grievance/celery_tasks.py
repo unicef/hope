@@ -27,7 +27,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
     """
     try:
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
-            DeduplicateAndCheckAgainstSanctionsListTask,
+            deduplicate_and_check_against_sanctions_list_task_single_individual,
         )
         from hct_mis_api.apps.household.models import Individual
 
@@ -36,7 +36,7 @@ def deduplicate_and_check_against_sanctions_list_task_single_individual(
             business_area_name = individual.business_area.name
             set_sentry_business_area_tag(business_area_name)
 
-        DeduplicateAndCheckAgainstSanctionsListTask().execute(should_populate_index, individual)
+        deduplicate_and_check_against_sanctions_list_task_single_individual(should_populate_index, individual)
     except Exception as e:
         logger.warning(e)
         raise self.retry(exc=e)
