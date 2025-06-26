@@ -90,6 +90,7 @@ class PaymentPayloadSerializer(serializers.Serializer):
     phone_no = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
+    middle_name = serializers.CharField(required=False, allow_blank=True)
     full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
     origination_currency = serializers.CharField(required=False)
