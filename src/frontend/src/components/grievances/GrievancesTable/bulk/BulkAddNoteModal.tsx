@@ -31,7 +31,7 @@ export function BulkAddNoteModal({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = useState<string>('');
-  const { businessAreaSlug } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
   const queryClient = useQueryClient();
 
   const { mutateAsync } = useMutation({
@@ -42,12 +42,18 @@ export function BulkAddNoteModal({
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsGrievanceTickets'],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasGrievanceTickets'],
-      });
+      if (isAllPrograms) {
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasGrievanceTickets'],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'businessAreasProgramsGrievanceTickets',
+            { program: programId },
+          ],
+        });
+      }
       setSelected([]);
     },
     onError: (error: any) => {

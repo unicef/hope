@@ -74,7 +74,7 @@ function EditHouseholdDataChange({
         ),
     });
 
-  const householdFieldsDict = householdFieldsData?.results;
+  const householdFieldsDict = householdFieldsData;
 
   if (!household) {
     return (

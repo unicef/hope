@@ -34,6 +34,7 @@ export type PushPeople = {
     maritalStatus?: string;
     documents?: Array<Document>;
     birthDate: string;
+    photo?: string;
     type: PushPeopleTypeEnum;
     countryOrigin?: CountryOriginEnum;
     country: CountryEnum;
@@ -59,10 +60,6 @@ export type PushPeople = {
      * Individual ID
      */
     individualId?: string;
-    /**
-     * Photo
-     */
-    photo?: string;
     /**
      * Full Name of the Beneficiary
      */

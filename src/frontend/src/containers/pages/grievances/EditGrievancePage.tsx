@@ -39,11 +39,13 @@ import {
   Typography,
 } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
@@ -71,8 +73,6 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
-import { createApiParams } from '@utils/apiUtils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -96,6 +96,7 @@ const EditGrievancePage = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { id } = useParams();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const queryClient = useQueryClient();
 
   const {
     data: ticketData,
@@ -150,7 +151,17 @@ const EditGrievancePage = (): ReactElement => {
         id: data.id,
         requestBody: data.requestBody,
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessAreaSlug,
+          id,
+        ],
+      });
+    },
   });
+
   const {
     data: allAddIndividualFieldsData,
     isLoading: allAddIndividualFieldsDataLoading,

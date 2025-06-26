@@ -8,8 +8,8 @@ export type CreateGrievanceTicket = {
     description: string;
     assignedTo?: string;
     category: number;
-    issueType?: number;
-    admin?: string;
+    issueType: number;
+    admin?: string | null;
     area?: string;
     language: string;
     consent: boolean;
@@ -17,10 +17,10 @@ export type CreateGrievanceTicket = {
     extras: CreateGrievanceTicketExtras;
     priority?: number;
     urgency?: number;
-    partner?: number;
-    program?: string;
-    comments?: string;
-    linkedFeedbackId?: string;
-    documentation?: Array<GrievanceDocumentCreate>;
+    partner?: number | null;
+    program?: string | null;
+    comments?: string | null;
+    linkedFeedbackId?: string | null;
+    documentation?: Array<GrievanceDocumentCreate> | null;
 };
 

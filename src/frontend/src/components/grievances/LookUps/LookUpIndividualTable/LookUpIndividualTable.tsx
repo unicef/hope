@@ -9,7 +9,7 @@ import { RdiMergeStatusEnum } from '@restgenerated/models/RdiMergeStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { adjustHeadCells, decodeIdString } from '@utils/utils';
+import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';

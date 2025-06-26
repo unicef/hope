@@ -589,11 +589,11 @@ export function prepareRestVariables(
     extras: Object.keys(extras).length > 0 ? extras : {},
     priority:
       values.priority === 'Not set' || values.priority === null
-        ? undefined
+        ? 0
         : values.priority,
     urgency:
       values.urgency === 'Not set' || values.urgency === null
-        ? undefined
+        ? 0
         : values.urgency,
     partner: values.partner ? parseInt(values.partner, 10) : undefined,
     program: values.program,

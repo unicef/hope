@@ -292,8 +292,7 @@ const CreateGrievancePage = (): ReactElement => {
           try {
             const requestData = prepareRestVariables(businessArea, values);
             const data = await mutateAsync(requestData);
-            // Handle the REST API response structure - data.results contains the created tickets
-            const grievanceTickets = data.results || [];
+            const grievanceTickets = data || [];
             const grievanceTicket = grievanceTickets[0];
             let msg: string;
             let url: string;

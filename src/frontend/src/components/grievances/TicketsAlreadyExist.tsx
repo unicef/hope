@@ -34,7 +34,7 @@ export function TicketsAlreadyExist({ values }): ReactElement {
   const { baseUrl, businessAreaSlug } = useBaseUrl();
   const { t } = useTranslation();
 
-  const { data, isPending: loading } = useQuery({
+  const { data, isLoading: loading } = useQuery({
     queryKey: [
       'existingGrievanceTickets',
       businessAreaSlug,
