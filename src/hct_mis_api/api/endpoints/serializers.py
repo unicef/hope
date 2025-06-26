@@ -25,3 +25,8 @@ class CountrySerializer(serializers.ModelSerializer):
             "valid_until",
             "updated_at",
         )
+
+
+class FinancialInstitutionListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
