@@ -6,7 +6,10 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
-from hct_mis_api.api.endpoints.serializers import CountrySerializer
+from hct_mis_api.api.endpoints.serializers import (
+    CountrySerializer,
+    FinancialInstitutionListSerializer,
+)
 from hct_mis_api.api.filters import CountryFilter
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
@@ -18,6 +21,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_CHOICE,
     SEX_CHOICE,
 )
+from hct_mis_api.apps.payment.models import FinancialInstitution
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -41,6 +45,11 @@ class CountryAPIView(HOPEAPIView, ListAPIView):
         "short_name",
         "iso_num",
     )
+
+
+class FinancialInstitutionAPIView(HOPEAPIView, ListAPIView):
+    queryset = FinancialInstitution.objects.only("id", "name").order_by("name")
+    serializer_class = FinancialInstitutionListSerializer
 
 
 class ResidenceStatus(HOPEAPIView):
