@@ -7,6 +7,8 @@ from rest_framework.reverse import reverse
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from hct_mis_api.apps.payment.fixtures import FinancialInstitutionFactory
+from hct_mis_api.apps.payment.models import FinancialInstitution
 from hct_mis_api.apps.program.models import Program
 from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
@@ -311,3 +313,69 @@ class AreaTypeListTests(HOPEApiTestCase):
                 self.get_result(area_type),
                 response.json()["results"],
             )
+
+
+class FinancialInstitutionListTests(HOPEApiTestCase):
+    databases = {"default"}
+    user_permissions = []
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.url = reverse("api:financial-institution-list")
+        cls.country_poland = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
+        cls.country_afghanistan = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="040")
+
+        cls.fi_bank = FinancialInstitutionFactory(
+            name="Test Bank",
+            type=FinancialInstitution.FinancialInstitutionType.BANK,
+            country=cls.country_poland,
+        )
+        cls.fi_telco = FinancialInstitutionFactory(
+            name="Test Telco",
+            type=FinancialInstitution.FinancialInstitutionType.TELCO,
+            country=cls.country_afghanistan,
+        )
+        cls.fi_other = FinancialInstitutionFactory(
+            name="Test Other Institution",
+            type=FinancialInstitution.FinancialInstitutionType.OTHER,
+            country=cls.country_poland,
+        )
+
+    def get_result(self, financial_institution: FinancialInstitution) -> dict:
+        return {
+            "id": financial_institution.id,
+            "name": financial_institution.name,
+        }
+
+    def test_get_financial_institution_list(self) -> None:
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for fi in [self.fi_bank, self.fi_telco, self.fi_other]:
+            expected_result = self.get_result(fi)
+            self.assertIn(
+                expected_result,
+                response.json()["results"],
+            )
+
+    def test_get_financial_institution_list_ordering(self) -> None:
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()["results"]
+        names = [result["name"] for result in results]
+
+        self.assertEqual(names, sorted(names))
+
+    def test_get_financial_institution_list_pagination(self) -> None:
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+        self.assertIn("count", response_data)
+        self.assertIn("next", response_data)
+        self.assertIn("previous", response_data)
+        self.assertIn("results", response_data)
