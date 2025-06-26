@@ -268,6 +268,7 @@ dependencies = [
     "django-fernet-fields>=0.6",
     "msoffcrypto-tool>=5.4.2",
     "pyzipper>=0.3.6",
+    "legacy-cgi>=2.6.3",
 ]
 requires-python = "==3.13.*"
 readme = "README.md"

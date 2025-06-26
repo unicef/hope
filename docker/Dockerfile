@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.12.7-slim-bookworm as base
+FROM python:3.13-slim-bookworm as base
 ENV APP_PATH=/app
 ARG UID=82
 
