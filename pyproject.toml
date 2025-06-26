@@ -164,7 +164,7 @@ docs = [
 
 [project]
 name = "hope"
-version = "3.2.5"
+version = "3.2.6"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = [
     { name = "Tivix" },
@@ -269,6 +269,7 @@ dependencies = [
     "msoffcrypto-tool>=5.4.2",
     "pyzipper>=0.3.6",
     "freezegun>=1.5.2",
+    "legacy-cgi>=2.6.3",
 ]
 requires-python = "==3.13.*"
 readme = "README.md"
