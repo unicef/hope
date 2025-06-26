@@ -71,16 +71,9 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         soft_conflicting_pps = (
             self.eligible()
             .select_related("parent")
-            .exclude(id=OuterRef("id"))
-            .exclude(parent__id=OuterRef("parent_id"))
-            .exclude(is_follow_up=True)
-            .exclude(parent__is_removed=True)
-            .filter(parent__program_cycle_id=OuterRef("parent__program_cycle_id"))
+            .exclude(Q(id=OuterRef("id")) | Q(parent__id=OuterRef("parent_id")) | Q(parent__is_removed=True))
             .filter(
-                Q(parent__program_cycle__start_date__lte=OuterRef("parent__program_cycle__end_date"))
-                | Q(parent__program_cycle__end_date__isnull=True),
-                Q(parent__program_cycle__end_date__gte=OuterRef("parent__program_cycle__start_date"))
-                | Q(parent__program_cycle__end_date__isnull=True),
+                Q(parent__program_cycle_id=OuterRef("parent__program_cycle_id")),
                 ~Q(status__in=Payment.FAILED_STATUSES),
                 parent__status=PaymentPlan.Status.OPEN,
                 household=OuterRef("household"),
@@ -91,20 +84,12 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         hard_conflicting_pps = (
             self.eligible()
             .select_related("parent")
-            .exclude(id=OuterRef("id"))
-            .exclude(parent__id=OuterRef("parent_id"))
-            .exclude(is_follow_up=True)
-            .exclude(parent__is_removed=True)
-            .filter(parent__program_cycle_id=OuterRef("parent__program_cycle_id"))
+            .exclude(Q(id=OuterRef("id")) | Q(parent__id=OuterRef("parent_id")) | Q(parent__is_removed=True))
             .filter(
-                Q(parent__program_cycle__start_date__lte=OuterRef("parent__program_cycle__end_date"))
-                | Q(parent__program_cycle__end_date__isnull=True),
-                Q(parent__program_cycle__end_date__gte=OuterRef("parent__program_cycle__start_date"))
-                | Q(parent__program_cycle__end_date__isnull=True),
-                Q(household=OuterRef("household")) & Q(conflicted=False),
-                ~Q(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES),  # old TP statuses + DRAFT
-                ~Q(parent__status=PaymentPlan.Status.OPEN),
+                Q(parent__program_cycle_id=OuterRef("parent__program_cycle_id")),
                 ~Q(status__in=Payment.FAILED_STATUSES),
+                Q(parent__status__in=PaymentPlan.HARD_CONFLICT_STATUSES),
+                Q(household=OuterRef("household")) & Q(conflicted=False),
             )
         )
         hard_conflicting_pps = _annotate_conflict_data(hard_conflicting_pps)

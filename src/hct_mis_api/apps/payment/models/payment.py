@@ -219,6 +219,16 @@ class PaymentPlan(
         Status.DRAFT,
     )
 
+    HARD_CONFLICT_STATUSES = (
+        Status.LOCKED,
+        Status.LOCKED_FSP,
+        Status.IN_APPROVAL,
+        Status.IN_AUTHORIZATION,
+        Status.IN_REVIEW,
+        Status.ACCEPTED,
+        Status.FINISHED,
+    )
+
     CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT = (Status.LOCKED,)
     CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE = (
         Status.TP_LOCKED,
