@@ -10,7 +10,7 @@ from hct_mis_api.api.endpoints.serializers import (
     CountrySerializer,
     FinancialInstitutionListSerializer,
 )
-from hct_mis_api.api.filters import CountryFilter
+from hct_mis_api.api.filters import CountryFilter, FinancialInstitutionFilter
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
@@ -48,8 +48,10 @@ class CountryAPIView(HOPEAPIView, ListAPIView):
 
 
 class FinancialInstitutionAPIView(HOPEAPIView, ListAPIView):
-    queryset = FinancialInstitution.objects.only("id", "name").order_by("name")
+    queryset = FinancialInstitution.objects.select_related("country").order_by("name")
     serializer_class = FinancialInstitutionListSerializer
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = FinancialInstitutionFilter
 
 
 class ResidenceStatus(HOPEAPIView):
