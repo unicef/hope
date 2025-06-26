@@ -526,7 +526,7 @@ class CreateGrievanceTicketSerializer(serializers.Serializer):
     description = serializers.CharField()
     assigned_to = serializers.PrimaryKeyRelatedField(required=False, queryset=User.objects.all())
     category = serializers.IntegerField()
-    issue_type = serializers.IntegerField()
+    issue_type = serializers.IntegerField(required=False)
     admin = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Area.objects.all())
     area = serializers.CharField(required=False, allow_blank=True)
     language = serializers.CharField(allow_blank=True)
