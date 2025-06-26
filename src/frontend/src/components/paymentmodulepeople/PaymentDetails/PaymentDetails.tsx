@@ -242,7 +242,7 @@ export function PaymentDetails({
             <Grid key={key} size={{ xs: 3 }}>
               <LabelizedField
                 label={t(`Account ${key}`)}
-                value={value}
+                value={String(value)}
               />
             </Grid>
           ))}
