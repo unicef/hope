@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -52,10 +53,11 @@ def _get_query_dict(sanction_list_individual: SanctionListIndividual, individual
         }
         for doc in documents
     ]
-    birth_dates_queries = [
-        {"match": {"birth_date": {"query": dob.date, "boost": 1}}}
-        for dob in sanction_list_individual.dates_of_birth.all()
-    ]
+    birth_dates_queries = []
+    #     [
+    #     {"match": {"birth_date": {"query": dob.date, "boost": 1}}}
+    #     for dob in sanction_list_individual.dates_of_birth.all()
+    # ]
 
     queries: List = [
         {
@@ -82,8 +84,9 @@ def _get_query_dict(sanction_list_individual: SanctionListIndividual, individual
         "_source": ["id", "full_name"],
     }
     if individuals_ids:
-        query_dict["filter"] = [{"terms": {"id": individuals_ids}}]
+        query_dict["query"]["bool"]["filter"] = [{"terms": {"id": [str(ind_id) for ind_id in individuals_ids]}}]  # type: ignore
 
+    print(json.dumps(query_dict))
     return query_dict
 
 
@@ -138,7 +141,7 @@ def check_against_sanction_list_pre_merge(
         log.debug(f"No sanction lists found for program {program_id}. Skipping check against sanction list.")
         return
     sanction_list_individuals_queryset = SanctionListIndividual.objects.filter(
-        sanction_list__in=sanction_lists,
+        sanction_list__in=sanction_lists.all(),
         active=True,
     )
     if sanction_list_individuals is not None:
