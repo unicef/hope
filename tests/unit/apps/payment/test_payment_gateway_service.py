@@ -781,6 +781,8 @@ class TestPaymentGatewayService(APITestCase):
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         expected_payload["account"]["code"] = "456"
         expected_payload["account"]["service_provider_code"] = "789"
+        # update 'extra_data' with new snapshot_data
+        expected_body["extra_data"] = self.payments[0].household_snapshot.snapshot_data
 
         actual_args, actual_kwargs = post_mock.call_args
         assert actual_args[0] == "payment_instructions/123/add_records/"
