@@ -7,7 +7,7 @@ export type EditBankTransfer = {
     type: string;
     bankName: string;
     bankAccountNumber: string;
-    bankBranchName?: string;
+    bankBranchName?: string | null;
     accountHolderName: string;
 };
 

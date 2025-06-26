@@ -50,7 +50,7 @@ export function GrievancesTableRow({
   optionsData,
   setInputValue,
 }: GrievancesTableRowProps): ReactElement {
-  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
@@ -82,7 +82,10 @@ export function GrievancesTableRow({
         queryKey: ['businessAreasProgramsGrievanceTickets'],
       });
       queryClient.invalidateQueries({
-        queryKey: ['businessAreasGrievanceTickets'],
+        queryKey: [
+          'businessAreasProgramsGrievanceTickets',
+          { program: programId },
+        ],
       });
     },
     onError: (error: any) => {

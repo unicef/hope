@@ -11,7 +11,7 @@ import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export interface EditHouseholdDataChangeFieldRowProps {
-  fields: any[];
+  fields;
   household: HouseholdDetail;
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
@@ -42,6 +42,7 @@ export const EditHouseholdDataChangeFieldRow = ({
     helpers.setValue(field?.isFlexField);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
+
   return (
     <>
       <Grid size={{ xs: 4 }}>

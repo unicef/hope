@@ -8,10 +8,10 @@ import type { UpdateAddIndividualIssueTypeExtras } from './UpdateAddIndividualIs
 import type { UpdateHouseholdDataUpdateIssueTypeExtras } from './UpdateHouseholdDataUpdateIssueTypeExtras';
 import type { UpdateIndividualDataUpdateIssueTypeExtras } from './UpdateIndividualDataUpdateIssueTypeExtras';
 export type UpdateGrievanceTicketExtras = {
-    householdDataUpdateIssueTypeExtras?: UpdateHouseholdDataUpdateIssueTypeExtras;
-    individualDataUpdateIssueTypeExtras?: UpdateIndividualDataUpdateIssueTypeExtras;
-    addIndividualIssueTypeExtras?: UpdateAddIndividualIssueTypeExtras;
-    category?: CategoryExtras;
-    ticketPaymentVerificationDetailsExtras?: TicketPaymentVerificationDetailsExtras;
+    householdDataUpdateIssueTypeExtras?: UpdateHouseholdDataUpdateIssueTypeExtras | null;
+    individualDataUpdateIssueTypeExtras?: UpdateIndividualDataUpdateIssueTypeExtras | null;
+    addIndividualIssueTypeExtras?: UpdateAddIndividualIssueTypeExtras | null;
+    category?: CategoryExtras | null;
+    ticketPaymentVerificationDetailsExtras?: TicketPaymentVerificationDetailsExtras | null;
 };
 

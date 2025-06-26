@@ -1,28 +1,28 @@
-import { Box, Button } from '@mui/material';
-import EditIcon from '@mui/icons-material/EditRounded';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { useMutation } from '@tanstack/react-query';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { RestService } from '@restgenerated/services/RestService';
-import { MiśTheme } from '../../theme';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_TICKET_STATES,
-} from '@utils/constants';
+import { AdminButton } from '@core/AdminButton';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { ButtonDialog } from '@core/ButtonDialog';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from '../../programContext';
-import { getGrievanceEditPath } from './utils/createGrievanceUtils';
-import { AdminButton } from '@core/AdminButton';
-import { ReactElement } from 'react';
+import { useSnackbar } from '@hooks/useSnackBar';
+import EditIcon from '@mui/icons-material/EditRounded';
+import { Box, Button } from '@mui/material';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_TICKET_STATES,
+} from '@utils/constants';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { useProgramContext } from '../../programContext';
+import { MiśTheme } from '../../theme';
+import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 
 const Separator = styled.div`
   width: 1px;
@@ -71,6 +71,8 @@ export const GrievanceDetailsToolbar = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
+
   const confirm = useConfirmation();
   const navigate = useNavigate();
   const { isActiveProgram, selectedProgram } = useProgramContext();
@@ -99,6 +101,15 @@ export const GrievanceDetailsToolbar = ({
       } else {
         showMessage(error?.message || 'An error occurred');
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessArea,
+          ticket.id,
+        ],
+      });
     },
   });
 
@@ -284,7 +295,7 @@ export const GrievanceDetailsToolbar = ({
     ticket?.ticketDetails?.isMultipleDuplicatesVersion;
   const selectedIndividual = ticket?.ticketDetails?.selectedIndividual;
   const selectedIndividualsLength =
-    ticket?.ticketDetails?.selectedDuplicates.length;
+    ticket?.ticketDetails?.selectedDuplicates?.length;
 
   const shouldShowButtonDialog =
     isDeduplicationCategory &&

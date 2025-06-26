@@ -166,7 +166,7 @@ export const GrievancesTable = ({
     error: errorAll,
   } = useQuery<PaginatedGrievanceTicketListList>({
     queryKey: [
-      'businessAreasGrievanceTicketsList',
+      'businessAreasGrievanceTickets',
       queryVariables,
       businessArea,
       filter.grievanceType,
@@ -206,7 +206,7 @@ export const GrievancesTable = ({
     error: errorSelected,
   } = useQuery<PaginatedGrievanceTicketListList>({
     queryKey: [
-      'businessAreasProgramsHouseholdsList',
+      'businessAreasProgramsGrievanceTickets',
       queryVariables,
       programId,
       businessArea,

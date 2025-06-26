@@ -30,7 +30,7 @@ export function BulkSetUrgencyModal({
 }: BulkSetUrgencyModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { businessAreaSlug } = useBaseUrl();
+  const { businessAreaSlug, isAllPrograms, programId } = useBaseUrl();
   const [value, setValue] = useState<number>(0);
   const queryClient = useQueryClient();
 
@@ -44,12 +44,18 @@ export function BulkSetUrgencyModal({
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasProgramsGrievanceTickets'],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['businessAreasGrievanceTickets'],
-      });
+      if (isAllPrograms) {
+        queryClient.invalidateQueries({
+          queryKey: ['businessAreasGrievanceTickets'],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'businessAreasProgramsGrievanceTickets',
+            { program: programId },
+          ],
+        });
+      }
       setSelected([]);
     },
     onError: (error: any) => {
