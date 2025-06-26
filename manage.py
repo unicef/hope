@@ -27,7 +27,7 @@ def run_dev() -> None:
         )
         processes.append(
             start(
-                f"watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- {sys.executable} -m celery -A hct_mis_api.apps.core.celery worker -E -l info -Q default,priority --max-tasks-per-child=4 --concurrency=4"
+                f"watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- {sys.executable} -m celery -A hct_mis_api.apps.core.celery worker -E -l info -Q default --max-tasks-per-child=4 --concurrency=4"
             )
         )
     except subprocess.CalledProcessError as exc:
