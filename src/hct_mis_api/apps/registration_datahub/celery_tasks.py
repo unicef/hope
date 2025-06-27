@@ -283,7 +283,7 @@ def merge_registration_data_import_task(self: Any, registration_data_import_id: 
     return True
 
 
-@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
