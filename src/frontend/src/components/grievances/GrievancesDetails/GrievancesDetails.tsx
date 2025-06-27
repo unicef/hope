@@ -19,7 +19,11 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
-import { isShowIssueType, replaceLabels } from '../utils/createGrievanceUtils';
+import {
+  getIssueTypeToDisplay,
+  isShowIssueType,
+  replaceLabels,
+} from '../utils/createGrievanceUtils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { GrievanceChoices } from '@restgenerated/models/GrievanceChoices';
@@ -54,15 +58,8 @@ function GrievancesDetails({
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
-  const issueType = ticket.issueType
-    ? choicesData.grievanceTicketIssueTypeChoices
-        .filter((el) => el.category === ticket.category.toString())[0]
-        ?.subCategories.filter(
-          (el) => el.value === ticket.issueType.toString(),
-        )[0].name
-    : '-';
-
   const showIssueType = isShowIssueType(ticket.category);
+  const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
 
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
@@ -210,7 +207,9 @@ function GrievancesDetails({
               showIssueType && {
                 label: t('Issue Type'),
                 value: (
-                  <span>{replaceLabels(issueType, beneficiaryGroup)}</span>
+                  <span>
+                    {replaceLabels(issueTypeToDisplay, beneficiaryGroup)}
+                  </span>
                 ),
                 size: 3,
               },

@@ -61,7 +61,8 @@ function RequestedHouseholdDataChangeTable({
   delete householdData.flexFields;
   const entries = Object.entries(householdData);
   const entriesFlexFields = Object.entries(flexFields);
-  const fieldsDict = useArrayToDict(householdFieldsData?.results, 'name', '*');
+  //@ts-ignore
+  const fieldsDict = useArrayToDict(householdFieldsData, 'name', '*');
   const countriesDict = useArrayToDict(countriesData, 'isoCode2', 'name');
 
   if (loading || countriesLoading || !fieldsDict) {

@@ -227,6 +227,12 @@ const EditGrievancePage = (): ReactElement => {
     '*',
   );
 
+  const issueTypeDict = useArrayToDict(
+    choicesData?.grievanceTicketIssueTypeChoices,
+    'category',
+    '*',
+  );
+
   if (
     choicesLoading ||
     ticketLoading ||
@@ -238,19 +244,6 @@ const EditGrievancePage = (): ReactElement => {
   )
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (
-    !choicesData ||
-    !ticketData ||
-    !currentUserData ||
-    permissions === null ||
-    !householdFieldsData ||
-    !householdFieldsDict ||
-    !individualFieldsDict ||
-    !peopleFieldsDict ||
-    !programsData
-  )
-    return null;
-
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
@@ -439,10 +432,7 @@ const EditGrievancePage = (): ReactElement => {
                       {showIssueType(values) ? (
                         <Grid size={{ xs: 6 }}>
                           <LabelizedField label={t('Issue Type')}>
-                            {selectedIssueType(
-                              values,
-                              choicesData.grievanceTicketIssueTypeChoices,
-                            )}
+                            {selectedIssueType(values, issueTypeDict)}
                           </LabelizedField>
                         </Grid>
                       ) : null}

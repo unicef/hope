@@ -18,7 +18,10 @@ import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
 import LinkedTicketsModal from '../LinkedTicketsModal/LinkedTicketsModal';
 import { AssignedToDropdown } from './AssignedToDropdown';
-import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
+import {
+  getGrievanceDetailsPath,
+  getIssueTypeToDisplay,
+} from '../utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
@@ -59,12 +62,7 @@ export function GrievancesTableRow({
     ticket.category,
     baseUrl,
   );
-  const issueType = ticket.issueType
-    ? issueTypeChoicesData
-        .find((el) => el.category === ticket.category.toString())
-        ?.subCategories.find((el) => el.value === ticket.issueType.toString())
-        .name
-    : '-';
+  const issueTypeToDisplay = getIssueTypeToDisplay(ticket.issueType);
 
   const queryClient = useQueryClient();
 
@@ -185,7 +183,7 @@ export function GrievancesTableRow({
         )}
       </TableCell>
       <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
-      <TableCell align="left">{issueType}</TableCell>
+      <TableCell align="left">{issueTypeToDisplay}</TableCell>
       <TableCell align="left">{targetId || '-'}</TableCell>
       <TableCell align="left">
         <StatusBox
