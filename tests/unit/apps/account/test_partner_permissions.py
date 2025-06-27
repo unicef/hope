@@ -103,7 +103,6 @@ class UserPartnerTest(TestCase):
             "PAYMENT_VERIFICATION_VIEW_LIST",
             "POPULATION_VIEW_HOUSEHOLDS_DETAILS",
             "RDI_VIEW_LIST",
-            "REPORTING_EXPORT",
             "TARGETING_VIEW_LIST",
             "POPULATION_VIEW_HOUSEHOLDS_LIST",
             "POPULATION_VIEW_INDIVIDUALS_DETAILS",
