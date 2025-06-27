@@ -72,7 +72,7 @@ from hct_mis_api.apps.grievance.utils import (
     filter_grievance_tickets_based_on_partner_areas_2,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
+from hct_mis_api.apps.payment.schema import PaymentNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.registration_data.nodes import (
@@ -106,7 +106,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
     )
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
-    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+    payment_record = graphene.Field(PaymentNode)
     admin = graphene.String()
     admin2 = graphene.Field(AreaNode)
     linked_tickets = graphene.List(lambda: GrievanceTicketNode)
@@ -238,7 +238,7 @@ class TicketNoteNode(DjangoObjectType):
 
 
 class TicketComplaintDetailsNode(DjangoObjectType):
-    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+    payment_record = graphene.Field(PaymentNode)
 
     class Meta:
         model = TicketComplaintDetails
@@ -251,7 +251,7 @@ class TicketComplaintDetailsNode(DjangoObjectType):
 
 
 class TicketSensitiveDetailsNode(DjangoObjectType):
-    payment_record = graphene.Field(PaymentRecordAndPaymentNode)
+    payment_record = graphene.Field(PaymentNode)
 
     class Meta:
         model = TicketSensitiveDetails
@@ -316,6 +316,17 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
                     current_value["photo"] = default_storage.url(current_value.get("photo"))
                     documents[index]["value"] = current_value
             individual_data["documents"] = documents
+
+        if admin_area_title := individual_data.get("admin_area_title"):
+            if value := admin_area_title.get("value"):
+                area = Area.objects.get(p_code=value)
+                admin_area_title["value"] = f"{area.name} - {area.p_code}"
+
+            if previous_value := admin_area_title.get("previous_value"):
+                area = Area.objects.get(p_code=previous_value)
+                admin_area_title["previous_value"] = f"{area.name} - {area.p_code}"
+
+            individual_data["admin_area_title"] = admin_area_title
 
         return individual_data
 

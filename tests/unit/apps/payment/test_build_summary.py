@@ -14,10 +14,7 @@ from hct_mis_api.apps.payment.models import (
     build_summary,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 
 class TestBuildSummary(TestCase):
@@ -29,15 +26,12 @@ class TestBuildSummary(TestCase):
 
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.program.admin_areas.set(Area.objects.order_by("?")[:3])
-        cls.target_population = TargetPopulationFactory(
-            created_by=cls.user,
-            targeting_criteria=TargetingCriteriaFactory(),
-            business_area=cls.business_area,
-        )
         cls.payment_plan = PaymentPlanFactory(
             name="TEST",
             program_cycle=cls.program.cycles.first(),
             business_area=cls.business_area,
+            targeting_criteria=TargetingCriteriaFactory(),
+            created_by=cls.user,
         )
         PaymentVerificationSummaryFactory(payment_plan=cls.payment_plan)
 
@@ -83,6 +77,5 @@ class TestBuildSummary(TestCase):
             self.user,
             self.business_area,
             self.program,
-            self.target_population,
             status,
         )

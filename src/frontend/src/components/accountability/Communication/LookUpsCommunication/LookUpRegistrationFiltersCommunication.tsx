@@ -1,5 +1,5 @@
 import GroupIcon from '@mui/icons-material/Group';
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '@generated/graphql';
@@ -60,7 +60,7 @@ export function LookUpRegistrationFiltersCommunication({
       isOnPaper={false}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -68,7 +68,7 @@ export function LookUpRegistrationFiltersCommunication({
             data-cy="filter-search"
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <AssigneeAutocomplete
             name="importedBy"
             label={t('Imported By')}
@@ -81,7 +81,7 @@ export function LookUpRegistrationFiltersCommunication({
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel={t('Num. of Recipients')}
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
@@ -96,7 +96,7 @@ export function LookUpRegistrationFiltersCommunication({
             data-cy="filter-size-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
             placeholder="To"
@@ -110,7 +110,7 @@ export function LookUpRegistrationFiltersCommunication({
             data-cy="filter-size-max"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Import Date')}
             placeholder={t('From')}
@@ -119,7 +119,7 @@ export function LookUpRegistrationFiltersCommunication({
             dataCy="filter-import-date-range-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('importDateRangeMax', date)}

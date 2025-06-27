@@ -9,6 +9,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { PeoplePaymentPlanTableRow } from './PeoplePaymentPlanTableRow';
 import { headCells } from './PeoplePaymentPlansHeadCells';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PeoplePaymentPlansTableProps {
   filter;
@@ -31,6 +32,7 @@ export const PeoplePaymentPlansTable = ({
     dispersionEndDate: filter.dispersionEndDate || null,
     isFollowUp: filter.isFollowUp ? true : null,
     program: programId,
+    isPaymentPlan: true,
   };
 
   return (
@@ -51,3 +53,8 @@ export const PeoplePaymentPlansTable = ({
     />
   );
 };
+
+export default withErrorBoundary(
+  PeoplePaymentPlansTable,
+  'PeoplePaymentPlansTable',
+);

@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, Grid } from '@mui/material';
+import { Box, Button, DialogContent, Grid2 as Grid } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,12 +45,12 @@ export function TotalNumberOfIndividualsReachedSection({
       <DashboardCard color="#345DA0">
         <CardTitle>{t('TOTAL NUMBER OF INDIVIDUALS REACHED')}</CardTitle>
         <Grid container justifyContent="space-between" alignItems="center">
-          <Grid item data-cy="total-number-of-individuals-reached">
+          <Grid data-cy="total-number-of-individuals-reached">
             <CardAmountLink onClick={() => setDialogOpen(true)}>
               {formatNumber(data?.total)}
             </CardAmountLink>
           </Grid>
-          <Grid item>
+          <Grid>
             <IconContainer bg="#D9E2EF" color="#023F90">
               <PersonIcon fontSize="inherit" />
             </IconContainer>

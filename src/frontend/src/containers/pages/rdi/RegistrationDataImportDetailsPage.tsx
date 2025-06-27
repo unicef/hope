@@ -1,28 +1,29 @@
-import { Typography } from '@mui/material';
-import { ReactElement, ReactNode, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  RegistrationDataImportStatus,
-  useHouseholdChoiceDataQuery,
-  useRegistrationDataImportQuery,
-} from '@generated/graphql';
-import { Tabs, Tab } from '@core/Tabs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { Title } from '@components/core/Title';
-import { RegistrationDataImportDetailsPageHeader } from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
-import { RegistrationDetails } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import RegistrationDataImportDetailsPageHeader from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
+import { Tab, Tabs } from '@core/Tabs';
+import {
+  RegistrationDataImportStatus,
+  useHouseholdChoiceDataQuery,
+  useRegistrationDataImportQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Typography } from '@mui/material';
 import { isPermissionDeniedError } from '@utils/utils';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import RegistrationDetails from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
 
 const Container = styled.div`
   && {
@@ -54,11 +55,12 @@ const TabPanel = ({ children, index, value }: TabPanelProps): ReactElement => {
   );
 };
 
-export const RegistrationDataImportDetailsPage = (): ReactElement => {
+const RegistrationDataImportDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
-  const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { businessArea } = useBaseUrl();
   const { data, loading, error, stopPolling, startPolling } =
@@ -124,8 +126,14 @@ export const RegistrationDataImportDetailsPage = (): ReactElement => {
                   variant="fullWidth"
                   aria-label="full width tabs example"
                 >
-                  <Tab data-cy="tab-Households" label={t('Households')} />
-                  <Tab data-cy="tab-Individuals" label={t('Individuals')} />
+                  <Tab
+                    data-cy="tab-Households"
+                    label={beneficiaryGroup?.groupLabelPlural}
+                  />
+                  <Tab
+                    data-cy="tab-Individuals"
+                    label={beneficiaryGroup?.memberLabelPlural}
+                  />
                 </StyledTabs>
               </TabsContainer>
               <TabPanel value={selectedTab} index={0}>
@@ -155,14 +163,7 @@ export const RegistrationDataImportDetailsPage = (): ReactElement => {
   }
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'RegistrationDataImportDetailsPage.tsx');
-      }}
-      componentName="RegistrationDataImportDetailsPage"
-    >
+    <>
       <RegistrationDataImportDetailsPageHeader
         registration={data.registrationDataImport}
         canMerge={hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions)}
@@ -174,6 +175,11 @@ export const RegistrationDataImportDetailsPage = (): ReactElement => {
         canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
       />
       <RegistrationContainer isErased={data.registrationDataImport.erased} />
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(
+  RegistrationDataImportDetailsPage,
+  'RegistrationDataImportDetailsPage',
+);

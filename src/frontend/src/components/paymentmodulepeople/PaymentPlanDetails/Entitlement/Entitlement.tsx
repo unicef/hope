@@ -2,7 +2,7 @@ import {
   Box,
   Button,
   FormControl,
-  Grid,
+  Grid2 as Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -161,7 +161,7 @@ export function Entitlement({
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
           <Grid alignItems="center" container>
-            <Grid item xs={11}>
+            <Grid size={{ xs:11 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box mb={1}>
                   <InputLabel>{t('Entitlement Formula')}</InputLabel>
@@ -195,7 +195,7 @@ export function Entitlement({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item>
+            <Grid>
               <Box ml={2}>
                 <Button
                   variant="contained"
@@ -215,6 +215,7 @@ export function Entitlement({
                         variables: {
                           paymentPlanId: paymentPlan.id,
                           steficonRuleId: steficonRuleValue,
+                          version: paymentPlan.version,
                         },
                       });
                       showMessage(

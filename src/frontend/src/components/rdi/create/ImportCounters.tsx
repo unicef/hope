@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramQuery } from '@generated/graphql';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 export interface ImportCountersPropTypes {
@@ -14,6 +15,9 @@ export function ImportCounters({
 }: ImportCountersPropTypes): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: programData } = useProgramQuery({
     variables: { id: programId },
   });
@@ -34,7 +38,7 @@ export function ImportCounters({
       <div data-cy="number-of-households">
         {numberOfHouseholds}{' '}
         {t(
-          'Household'
+          `${beneficiaryGroup?.groupLabel}`
             .concat(numberOfHouseholds > 1 ? 's' : '')
             .concat(' available to import'),
         )}
@@ -42,7 +46,7 @@ export function ImportCounters({
       <div data-cy="number-of-individuals">
         {numberOfIndividuals}{' '}
         {t(
-          'Individual'
+          `${beneficiaryGroup?.memberLabel}`
             .concat(numberOfIndividuals > 1 ? 's' : '')
             .concat(' available to import'),
         )}

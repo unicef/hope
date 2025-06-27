@@ -1,6 +1,4 @@
-from django.utils import timezone
-
-from pytz import utc
+import datetime
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -18,13 +16,15 @@ mutation createFollowUpPaymentPlan($paymentPlanId: ID!, $dispersionStartDate: Da
     paymentPlan {
       status
       isFollowUp
+      canCreateFollowUp
+      totalWithdrawnHouseholdsCount
     }
   }
 }
 """
 
 
-class TestExportPDFPaymentPlanSummary(APITestCase):
+class TestCreateFollowUpPaymentPlan(APITestCase):
     databases = ("default",)
 
     @classmethod
@@ -34,18 +34,20 @@ class TestExportPDFPaymentPlanSummary(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
-        cls.payment_plan = PaymentPlanFactory(business_area=cls.business_area, status=PaymentPlan.Status.ACCEPTED)
+        cls.payment_plan = PaymentPlanFactory(
+            business_area=cls.business_area, status=PaymentPlan.Status.ACCEPTED, created_by=cls.user
+        )
         PaymentFactory.create_batch(
             5, parent=cls.payment_plan, excluded=False, currency="PLN", status=Payment.STATUS_ERROR
         )
 
-    def test_export_pdf_payment_plan_summary_mutation(self) -> None:
+    def test_create_follow_up_pp_mutation(self) -> None:
         self.snapshot_graphql_request(
             request_string=CREATE_FOLLOW_UP_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),
-                "dispersionStartDate": timezone.datetime(2022, 8, 25, tzinfo=utc),
-                "dispersionEndDate": timezone.datetime(2022, 8, 30, tzinfo=utc),
+                "dispersionStartDate": datetime.date(2022, 8, 25),
+                "dispersionEndDate": datetime.date(2022, 8, 30),
             },
         )

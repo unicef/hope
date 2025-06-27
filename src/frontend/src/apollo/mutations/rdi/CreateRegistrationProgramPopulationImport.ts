@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-export const CREATE_REGISTRATION_DATA_IMPORT_MUTATION = gql`
+export const CREATE_REGISTRATION_PROGRAM_POPULATION_IMPORT_MUTATION = gql`
   mutation CreateRegistrationProgramPopulationImport(
     $registrationDataImportData: RegistrationProgramPopulationImportMutationInput!
   ) {
@@ -11,7 +11,6 @@ export const CREATE_REGISTRATION_DATA_IMPORT_MUTATION = gql`
         id
         name
         dataSource
-        datahubId
         screenBeneficiary
       }
       validationErrors

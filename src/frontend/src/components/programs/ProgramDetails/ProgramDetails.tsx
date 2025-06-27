@@ -7,7 +7,7 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -65,7 +65,7 @@ export const ProgramDetails = ({
     return (
       <Grid container spacing={6}>
         {Object.keys(counts).map((level) => (
-          <Grid item xs={3} key={level}>
+          <Grid size={{ xs: 3 }} key={level}>
             <LabelizedField
               dataCy={`admin-area-${level}-total-count`}
               label={t(`Admin Area ${level}`)}
@@ -90,7 +90,7 @@ export const ProgramDetails = ({
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField label={t('status')}>
               <StatusBox
                 status={program.status}
@@ -98,37 +98,43 @@ export const ProgramDetails = ({
               />
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('START DATE')}
               value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('END DATE')}
               value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Programme Code')}
               value={program.programmeCode}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Sector')}
               value={programSectorChoicesDict[program.sector]}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Data Collecting Type')}
               value={program?.dataCollectingType?.label}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
+            <LabelizedField
+              label={t('Beneficiary Group')}
+              value={program?.beneficiaryGroup?.name}
+            />
+          </Grid>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Frequency of Payment')}
               value={
@@ -139,25 +145,25 @@ export const ProgramDetails = ({
             />
           </Grid>
 
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Administrative Areas of implementation')}
               value={program.administrativeAreasOfImplementation}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Description')}
               value={program.description}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('CASH+')}
               value={program.cashPlus ? t('Yes') : t('No')}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <LabelizedField
               label={t('Partner Access')}
               value={PartnerAccess[program.partnerAccess]}
@@ -181,11 +187,7 @@ export const ProgramDetails = ({
           <OverviewContainer>
             <Grid container spacing={6}>
               {partners.map((partner) => (
-                <Grid
-                  key={partner.id}
-                  item
-                  xs={partner.areaAccess === 'BUSINESS_AREA' ? 3 : 6}
-                >
+                <Grid key={partner.id} size={{ xs: 12 }}>
                   <StyledBox p={6} flexDirection="column">
                     <Typography data-cy="label-partner-name" variant="h6">
                       {partner.name}

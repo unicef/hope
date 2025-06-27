@@ -5,10 +5,7 @@ from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, List, Tuple
 
 from django.conf import settings
-from django.contrib.postgres.aggregates.general import ArrayAgg
-from django.contrib.postgres.fields import ArrayField
 from django.core.files import File
-from django.db import models
 from django.db.models import (
     Case,
     Count,
@@ -24,7 +21,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce, Concat, Greatest, Least
+from django.db.models.functions import Coalesce, Greatest, Least
 from django.template.loader import render_to_string
 
 import openpyxl
@@ -46,9 +43,8 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
-    CashPlan,
+    Payment,
     PaymentPlan,
-    PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
 )
@@ -78,7 +74,7 @@ class GenerateReportContentHelpers:
         return Individual.objects.filter(**filter_vars)
 
     @classmethod
-    def format_individual_row(self, individual: Individual) -> tuple:
+    def format_individual_row(cls, individual: Individual) -> tuple:
         return (
             individual.household.id,
             individual.household.country_origin.name if individual.household.country_origin else "",
@@ -97,7 +93,7 @@ class GenerateReportContentHelpers:
             individual.selfcare_disability,
             individual.pregnant,
             individual.relationship,
-            self._to_values_list(individual.households_and_roles.all(), "role"),
+            cls._to_values_list(individual.households_and_roles.all(), "role"),
             dict(WORK_STATUS_CHOICE).get(individual.work_status, ""),
             individual.sanction_list_possible_match,
             individual.deduplication_batch_status,
@@ -112,8 +108,8 @@ class GenerateReportContentHelpers:
                 if individual.deduplication_golden_record_results
                 else ""
             ),
-            self._format_date(individual.first_registration_date),
-            self._format_date(individual.last_registration_date),
+            cls._format_date(individual.first_registration_date),
+            cls._format_date(individual.last_registration_date),
         )
 
     @staticmethod
@@ -131,7 +127,7 @@ class GenerateReportContentHelpers:
         return Household.objects.filter(**filter_vars)
 
     @classmethod
-    def format_household_row(self, household: Household) -> tuple:
+    def format_household_row(cls, household: Household) -> tuple:
         row = [
             household.id,
             household.country_origin.name if household.country_origin else "",
@@ -164,28 +160,30 @@ class GenerateReportContentHelpers:
             household.male_age_group_18_59_disabled_count,
             household.male_age_group_60_count,
             household.male_age_group_60_disabled_count,
-            self._format_date(household.first_registration_date),
-            self._format_date(household.last_registration_date),
+            cls._format_date(household.first_registration_date),
+            cls._format_date(household.last_registration_date),
             household.org_name_enumerator,
+            household.program,
         ]
-        for program in household.programs.all():
-            row.append(program.name)
+
         return tuple(row)
 
     @staticmethod
     def get_cash_plan_verifications(report: Report) -> QuerySet:
         pp_business_area_ids = list(
-            CashPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
+            PaymentPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
         )
         filter_vars = {
-            "payment_plan_object_id__in": pp_business_area_ids,
+            "payment_plan_id__in": pp_business_area_ids,
             "completion_date__isnull": False,
             "completion_date__gte": report.date_from,
             "completion_date__lte": report.date_to,
         }
         if report.program:
-            pp_program_ids = list(CashPlan.objects.filter(program=report.program).values_list("id", flat=True))
-            filter_vars["payment_plan_object_id__in"] = pp_program_ids
+            pp_program_ids = list(
+                PaymentPlan.objects.filter(program_cycle__program=report.program).values_list("id", flat=True)
+            )
+            filter_vars["payment_plan_id__in"] = pp_program_ids
         return PaymentVerificationPlan.objects.filter(**filter_vars)
 
     @staticmethod
@@ -225,14 +223,14 @@ class GenerateReportContentHelpers:
         filter_vars = {
             "business_area": report.business_area,
             "delivery_date__date__range": (report.date_from, report.date_to),
-            "parent__program": report.program,
+            "parent__program_cycle__program": report.program,
         }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
-        return PaymentRecord.objects.filter(**filter_vars)
+        return Payment.objects.filter(**filter_vars)
 
     @classmethod
-    def format_payment_row(cls, payment: PaymentRecord) -> tuple:
+    def format_payment_row(cls, payment: Payment) -> tuple:
         cash_or_voucher = ""
         if payment.delivery_type:
             if payment.delivery_type in [
@@ -255,10 +253,8 @@ class GenerateReportContentHelpers:
             payment.delivered_quantity_usd or payment.delivered_quantity,
             cls._format_date(payment.delivery_date),
             payment.delivery_type,
-            payment.parent.unicef_id,
             payment.entitlement_quantity,
-            payment.parent.target_population.id,
-            payment.parent.target_population.name,
+            payment.parent.name,
             cash_or_voucher,
             payment.household.id,
         )
@@ -274,7 +270,9 @@ class GenerateReportContentHelpers:
             "payment_verification_plan__completion_date__date__range": (report.date_from, report.date_to),
         }
         if report.program:
-            pp_program_ids = list(PaymentPlan.objects.filter(program=report.program).values_list("id", flat=True))
+            pp_program_ids = list(
+                PaymentPlan.objects.filter(program_cycle__program=report.program).values_list("id", flat=True)
+            )
             filter_vars["payment_verification_plan__payment_plan_id__in"] = pp_program_ids
         return PaymentVerification.objects.filter(**filter_vars)
 
@@ -316,44 +314,6 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def get_cash_plans(report: Report) -> QuerySet:
-        filter_vars = {
-            "business_area": report.business_area,
-            "end_date__gte": report.date_from,
-            "end_date__lte": report.date_to,
-        }
-        if report.program:
-            filter_vars["program"] = report.program
-        return CashPlan.objects.filter(**filter_vars)
-
-    @classmethod
-    def format_cash_plan_row(cls, cash_plan: CashPlan) -> tuple:
-        return (
-            cash_plan.ca_id,
-            cash_plan.name,
-            cls._format_date(cash_plan.start_date),
-            cls._format_date(cash_plan.end_date),
-            cash_plan.program.name,
-            cash_plan.funds_commitment,
-            cash_plan.assistance_measurement,
-            cash_plan.assistance_through,
-            cash_plan.delivery_type,
-            cls._format_date(cash_plan.dispersion_date),
-            cash_plan.down_payment,
-            cash_plan.total_delivered_quantity,
-            cash_plan.total_undelivered_quantity,
-            cash_plan.total_entitled_quantity,
-            cash_plan.total_entitled_quantity_revised,
-            cash_plan.total_persons_covered,
-            cash_plan.total_persons_covered_revised,
-            cash_plan.status,
-            cls._format_date(cash_plan.status_date),
-            cash_plan.vision_id,
-            cash_plan.validation_alerts_count,
-            # cash_plan.verification_status,
-        )
-
-    @staticmethod
     def get_payments_for_individuals(report: Report) -> QuerySet:
         if isinstance(report.date_to, str):
             report.date_to = datetime.strptime(report.date_to, "%Y-%m-%d").date()
@@ -362,54 +322,36 @@ class GenerateReportContentHelpers:
         date_to_time += timedelta(days=1)
         filter_q = Q(
             #  Q(household__program=report.program) & # TODO Uncomment after add program to household
-            Q(
-                Q(household__paymentrecord__business_area=report.business_area)
-                | Q(household__payment__business_area=report.business_area)
-            )
-            & Q(
-                Q(household__paymentrecord__delivery_date__gte=report.date_from)
-                | Q(household__payment__delivery_date__gte=report.date_from)
-            )
-            & Q(
-                Q(household__paymentrecord__delivery_date__lt=date_to_time)
-                | Q(household__payment__delivery_date__lt=date_to_time)
-            )
+            Q(household__payment__business_area=report.business_area)
+            & Q(household__payment__delivery_date__gte=report.date_from)
+            & Q(household__payment__delivery_date__lt=date_to_time)
         )
         if report.admin_area.all().exists():
             filter_q &= Q(household__admin_area__in=report.admin_area.all())
         if report.program:
-            filter_q &= Q(
-                Q(household__paymentrecord__parent__program=report.program)
-                | Q(household__payment__parent__program=report.program)
-            )
+            filter_q &= Q(household__payment__parent__program_cycle__program=report.program)
 
         return (
             Individual.objects.filter(filter_q)
-            .annotate(first_delivery_date_paymentrecord=Min("household__paymentrecord__delivery_date"))
             .annotate(first_delivery_date_payment=Min("household__payment__delivery_date"))
             .annotate(
                 first_delivery_date=Least(
-                    F("first_delivery_date_paymentrecord"),
                     F("first_delivery_date_payment"),
+                    Value("2099-12-31"),
                     output_field=DateTimeField(),
                 )
             )
-            .annotate(last_delivery_date_paymentrecord=Max("household__paymentrecord__delivery_date"))
             .annotate(last_delivery_date_payment=Max("household__payment__delivery_date"))
             .annotate(
                 last_delivery_date=Greatest(
-                    F("last_delivery_date_paymentrecord"),
                     F("last_delivery_date_payment"),
+                    Value("1990-01-01"),
                     output_field=DateTimeField(),
                 )
             )
             .annotate(
                 payments_made=Count(
                     Case(
-                        When(
-                            Q(household__paymentrecord__delivered_quantity__gte=0),
-                            then=F("household__paymentrecord__id"),
-                        ),
                         When(
                             Q(household__payment__delivered_quantity__gte=0),
                             then=F("household__payment__id"),
@@ -418,27 +360,16 @@ class GenerateReportContentHelpers:
                     )
                 )
             )
-            .annotate(
-                payment_currency=ArrayAgg(
-                    Concat(
-                        "household__paymentrecord__currency",
-                        Value(" "),
-                        "household__payment__currency",
-                        output_field=ArrayField(models.CharField()),
-                    )
-                )
-            )
+            .annotate(payment_currency=F("household__payment__currency"))
             .annotate(
                 total_delivered_quantity_local=Coalesce(
-                    Sum("household__paymentrecord__delivered_quantity"), Value(0), output_field=DecimalField()
+                    Sum("household__payment__delivered_quantity"), Value(0), output_field=DecimalField()
                 )
-                + Coalesce(Sum("household__payment__delivered_quantity"), Value(0), output_field=DecimalField())
             )
             .annotate(
                 total_delivered_quantity_usd=Coalesce(
-                    Sum("household__paymentrecord__delivered_quantity_usd"), Value(0), output_field=DecimalField()
+                    Sum("household__payment__delivered_quantity_usd"), Value(0), output_field=DecimalField()
                 )
-                + Coalesce(Sum("household__payment__delivered_quantity_usd"), Value(0), output_field=DecimalField())
             )
             .order_by("household__id")
             .distinct()
@@ -662,30 +593,6 @@ class GenerateReportService:
             "dispersion start date",
             "dispersion end date",
         ),
-        Report.CASH_PLAN: (
-            "cash plan ID",  # ANT-21-CSH-00001
-            "cash plan name",
-            "start date",
-            "end date",
-            "programme",
-            "funds commitment",  # 234567
-            "assistance measurement",  # Euro
-            "assistance through",  # Cairo Amman Bank
-            "delivery type",  # DEPOSIT_TO_CARD
-            "dispersion date",
-            "down payment",
-            "total delivered quantity",  # 220,00
-            "total undelivered quantity",  # 10,00
-            "total entitled quantity",  # 230,00
-            "total entitled quantity revised",  # 230,00
-            "total persons covered",  # 12
-            "total persons covered revised",  # 12
-            "status",  # DISTRIBUTION_COMPLETED_WITH_ERRORS
-            "status date",
-            "VISION ID",  # 2345253423
-            "validation alerts count",  # 2
-            # "cash plan verification status",  # FINISHED
-        ),
         Report.INDIVIDUALS_AND_PAYMENT: (
             "household id",
             "country of origin",
@@ -747,7 +654,6 @@ class GenerateReportService:
         Report.PAYMENTS: ("Delivery Date From", "Delivery Date To"),
         Report.PAYMENT_PLAN: ("Dispersion Start Date", "Dispersion End Date"),
         Report.INDIVIDUALS_AND_PAYMENT: ("Delivery Date From", "Delivery Date To"),
-        Report.CASH_PLAN: ("End Date From", "End Date To"),
         Report.GRIEVANCES: ("End Date From", "End Date To"),
     }
     ROW_CONTENT_METHODS = {
@@ -771,10 +677,6 @@ class GenerateReportService:
         Report.PAYMENT_PLAN: (
             GenerateReportContentHelpers.get_payment_plans,
             GenerateReportContentHelpers.format_payment_plan_row,
-        ),
-        Report.CASH_PLAN: (
-            GenerateReportContentHelpers.get_cash_plans,
-            GenerateReportContentHelpers.format_cash_plan_row,
         ),
         Report.INDIVIDUALS_AND_PAYMENT: (
             GenerateReportContentHelpers.get_payments_for_individuals,

@@ -11,8 +11,12 @@ snapshots['TestAllCollectorsFields::test_collectors_fields_choices_data 1'] = {
     'data': {
         'allCollectorFieldsAttributes': [
             {
-                'labelEn': 'Delivery Data Field Random Name (Test Name Delivery Mechanism)',
-                'name': 'delivery_data_field__random_name'
+                'labelEn': 'Bank Number',
+                'name': 'bank__number'
+            },
+            {
+                'labelEn': 'Mobile Number',
+                'name': 'mobile__number'
             }
         ]
     }
@@ -57,14 +61,17 @@ snapshots['TestDataCollectionTypeSchema::test_dct_with_unknown_code_is_not_in_li
         'dataCollectionTypeChoices': [
             {
                 'name': 'Size Only',
+                'type': 'STANDARD',
                 'value': 'size_only'
             },
             {
                 'name': 'Partial',
+                'type': 'SOCIAL',
                 'value': 'partial'
             },
             {
                 'name': 'Full',
+                'type': 'STANDARD',
                 'value': 'full'
             }
         ]

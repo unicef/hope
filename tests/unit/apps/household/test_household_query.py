@@ -31,9 +31,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    migrate_data_to_representations_per_business_area,
-)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -137,6 +134,7 @@ HOUSEHOLD_QUERY = """
     """
 
 
+@pytest.mark.elasticsearch
 @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
 class TestHouseholdQuery(APITestCase):
     databases = "__all__"
@@ -198,11 +196,7 @@ class TestHouseholdQuery(APITestCase):
                     "program": program,
                 },
             )
-            household.programs.add(program)
             household.save()
-            # added for testing migrate_data_to_representations script
-            if family_size == 14:
-                household.programs.add(cls.program_one)
 
             area_type_level_1 = AreaTypeFactory(
                 name="State1",
@@ -219,7 +213,7 @@ class TestHouseholdQuery(APITestCase):
             cls.households.append(household)
 
         household = cls.households[0]
-        household.registration_id = 123
+        household.detail_id = 123
         household.save()
         household.refresh_from_db()
         household.head_of_household.phone_no = "+18663567905"
@@ -265,7 +259,6 @@ class TestHouseholdQuery(APITestCase):
         BusinessAreaFactory(name="Trinidad & Tobago")
         BusinessAreaFactory(name="Slovakia")
         BusinessAreaFactory(name="Sri Lanka")
-        migrate_data_to_representations_per_business_area(business_area=cls.business_area)
         rebuild_search_index()
 
     @parameterized.expand(
@@ -338,6 +331,8 @@ class TestHouseholdQuery(APITestCase):
           }
         }
         """
+        household.detail_id = None
+        household.enumerator_rec_id = None
 
         if field_name is not None:
             setattr(household, field_name, field_value)
@@ -410,7 +405,10 @@ class TestHouseholdQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"search": f"{household.unicef_id}"},
+            variables={
+                "search": f"{household.unicef_id}",
+                "program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+            },
         )
 
     @parameterized.expand(

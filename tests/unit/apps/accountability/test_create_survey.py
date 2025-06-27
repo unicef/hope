@@ -10,9 +10,10 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProFlowResponse
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 class TestCreateSurvey(APITestCase):
@@ -48,7 +49,9 @@ class TestCreateSurvey(APITestCase):
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(first_name="John", last_name="Doe", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.tp = TargetPopulationFactory(business_area=cls.business_area, program=cls.program)
+        cls.pp = PaymentPlanFactory(
+            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+        )
         cls.update_partner_access_to_program(partner, cls.program)
 
     def test_create_survey_without_permission(self) -> None:
@@ -69,7 +72,7 @@ class TestCreateSurvey(APITestCase):
                     "category": Survey.CATEGORY_MANUAL,
                     "samplingType": Survey.SAMPLING_RANDOM,
                     "flow": "flow123",
-                    "targetPopulation": self.id_to_base64(str(self.tp.pk), "TargetPopulationNode"),
+                    "paymentPlan": self.id_to_base64(str(self.pp.pk), "PaymentPlanNode"),
                 }
             },
         )
@@ -105,7 +108,8 @@ class TestCreateSurvey(APITestCase):
 
         create_household({"size": 3})
         households = [create_household({"size": 3})[0] for _ in range(3)]
-        self.tp.households.set(households)
+        for household in households:
+            PaymentFactory(parent=self.pp, household=household)
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_SURVEY_MUTATION,
@@ -121,7 +125,7 @@ class TestCreateSurvey(APITestCase):
                     "title": "Test survey",
                     "category": Survey.CATEGORY_MANUAL,
                     "samplingType": Survey.SAMPLING_FULL_LIST,
-                    "targetPopulation": self.id_to_base64(str(self.tp.id), "TargetPopulationNode"),
+                    "paymentPlan": self.id_to_base64(str(self.pp.id), "PaymentPlanNode"),
                     "fullListArguments": {
                         "excludedAdminAreas": [],
                     },
@@ -137,7 +141,8 @@ class TestCreateSurvey(APITestCase):
 
         create_household({"size": 3})
         households = [create_household({"size": 3})[0] for _ in range(3)]
-        self.tp.households.set(households)
+        for household in households:
+            PaymentFactory(parent=self.pp, household=household)
 
         with (
             patch.object(django.db.transaction, "on_commit", lambda t: t()),
@@ -157,7 +162,7 @@ class TestCreateSurvey(APITestCase):
                         "title": "Test survey",
                         "category": Survey.CATEGORY_RAPID_PRO,
                         "samplingType": Survey.SAMPLING_FULL_LIST,
-                        "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
+                        "paymentPlan": self.id_to_base64(self.pp.id, "PaymentPlanNode"),
                         "fullListArguments": {
                             "excludedAdminAreas": [],
                         },
@@ -169,7 +174,8 @@ class TestCreateSurvey(APITestCase):
             self.assertTrue(task_mock.called)
             self.assertEqual(task_mock.call_args[0][0], survey.id)
 
-        households = self.tp.households.all()
+        households_ids = self.pp.payment_items.values_list("household_id", flat=True)
+        households = Household.objects.filter(id__in=households_ids)
         self.assertEqual(households[0].individuals.count(), 3)
         phone_number_1 = households[0].head_of_household.phone_no
         phone_number_2 = households[1].head_of_household.phone_no
@@ -251,7 +257,7 @@ class TestCreateSurvey(APITestCase):
                     "title": "Test survey",
                     "category": Survey.CATEGORY_MANUAL,
                     "samplingType": Survey.SAMPLING_FULL_LIST,
-                    "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
+                    "paymentPlan": self.id_to_base64(self.pp.id, "PaymentPlanNode"),
                     "fullListArguments": {
                         "excludedAdminAreas": [],
                     },

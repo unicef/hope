@@ -1,4 +1,4 @@
-import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
+import { Button, DialogContent, DialogTitle, Grid2 as Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
@@ -6,7 +6,6 @@ import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useCopyTargetPopulationMutation } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
@@ -16,6 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { ReactElement } from 'react';
+import { useCopyCriteriaMutation } from '@generated/graphql';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
@@ -37,7 +37,7 @@ export const DuplicateTargetPopulation = ({
 }: DuplicateTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [mutate, { loading }] = useCopyTargetPopulationMutation();
+  const [mutate, { loading }] = useCopyCriteriaMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
   const initialValues = {
@@ -64,13 +64,15 @@ export const DuplicateTargetPopulation = ({
             const programCycleId = values.programCycleId.value;
             const res = await mutate({
               variables: {
-                input: { targetPopulationData: { ...values, programCycleId } },
+                name: values.name,
+                paymentPlanId: targetPopulationId,
+                programCycleId,
               },
             });
             setOpen(false);
             showMessage(t('Target Population Duplicated'));
             navigate(
-              `/${baseUrl}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
+              `/${baseUrl}/target-population/${res.data.copyTargetingCriteria.paymentPlan.id}`,
             );
           } catch (e) {
             e.graphQLErrors.map((x) => showMessage(x.message));
@@ -94,7 +96,7 @@ export const DuplicateTargetPopulation = ({
                 )}
               </DialogDescription>
               <Grid container spacing={4}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Field
                     name="name"
                     fullWidth
@@ -104,7 +106,7 @@ export const DuplicateTargetPopulation = ({
                     component={FormikTextField}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <ProgramCycleAutocompleteRest
                     value={values.programCycleId}
                     onChange={async (e) => {

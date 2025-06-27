@@ -120,7 +120,7 @@ class RegistrationDataImport(BaseComponents):
         return self.wait_for(self.buttonImportRDI)
 
     def disappearButtonImportFile(self) -> None:
-        self.wait_for_disappear(self.buttonImportRDI, timeout=30)
+        self.wait_for_disappear(self.buttonImportRDI, timeout=60)
 
     def getExcelItem(self) -> WebElement:
         return self.wait_for(self.excelItem)
@@ -145,7 +145,7 @@ class RegistrationDataImport(BaseComponents):
 
     def buttonImportFileIsEnabled(self, timeout: int = 30) -> bool:
         for _ in range(timeout):
-            if self.getButtonImportFile().is_enabled():  # type: ignore
+            if self.getButtonImportFile().is_enabled():
                 return True
             sleep(1)
         return False

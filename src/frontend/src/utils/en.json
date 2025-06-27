@@ -909,5 +909,9 @@
   "FX Rate Applied": "FX Rate Applied",
   "If displayed exchange rate differs from Vision, please contact your designated focal point for resolution. If displayed exchange rate differs from Vision, please contact your designated focal point for resolution": "If displayed exchange rate differs from Vision, please contact your designated focal point for resolution",
   "View Biometrics Results": "View Biometrics Results",
-  "Individual Delivery Mechanisms": "Individual Delivery Mechanisms"
+  "Individual Delivery Mechanisms": "Individual Delivery Mechanisms",
+  "Beneficiary Group": "Beneficiary Group",
+  "Password has been sent.": "Password has been sent.",
+  "Grievance Supporting Documents: upload of documents for the ticket": "Grievance Supporting Documents: upload of documents for the ticket",
+  "Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents": "Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents"
 }

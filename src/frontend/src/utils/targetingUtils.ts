@@ -1,5 +1,86 @@
 import * as Yup from 'yup';
 
+// validationHelpers.ts
+
+export const filterNullOrNoSelections = (filter): boolean =>
+  !filter.isNull &&
+  (filter.value === null ||
+    filter.value === '' ||
+    (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
+      filter.value &&
+      filter.value.length === 0));
+
+export const filterEmptyFromTo = (filter): boolean =>
+  !filter.isNull &&
+  typeof filter.value === 'object' &&
+  filter.value !== null &&
+  Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
+  Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
+  !filter.value.from &&
+  !filter.value.to;
+
+export const validate = (values, beneficiaryGroup) => {
+  const hasHouseholdsFiltersBlocksErrors =
+    values.householdsFiltersBlocks.some(filterNullOrNoSelections) ||
+    values.householdsFiltersBlocks.some(filterEmptyFromTo);
+
+  const hasBlockFiltersErrors = (blocks) => {
+    if (!blocks || !Array.isArray(blocks)) {
+      return false;
+    }
+
+    return blocks.some((block) => {
+      if (!block.blockFilters || !Array.isArray(block.blockFilters)) {
+        return false;
+      }
+
+      const hasNulls = block.blockFilters.some(filterNullOrNoSelections);
+      const hasFromToError = block.blockFilters.some(filterEmptyFromTo);
+      return hasNulls || hasFromToError;
+    });
+  };
+
+  const hasIndividualsFiltersBlocksErrors = hasBlockFiltersErrors(
+    values.individualsFiltersBlocks,
+  );
+  const hasCollectorsFiltersBlocksErrors = hasBlockFiltersErrors(
+    values.collectorsFiltersBlocks,
+  );
+
+  const errors: { nonFieldErrors?: string[] } = {};
+  if (
+    hasHouseholdsFiltersBlocksErrors ||
+    hasIndividualsFiltersBlocksErrors ||
+    hasCollectorsFiltersBlocksErrors
+  ) {
+    errors.nonFieldErrors = ['You need to fill out missing values.'];
+  }
+  if (
+    values.householdsFiltersBlocks.length +
+      values.individualsFiltersBlocks.length +
+      values.collectorsFiltersBlocks.length ===
+      0 &&
+    (!values.householdIds || values.householdIds.length === 0) &&
+    (!values.individualIds || values.individualIds.length === 0)
+  ) {
+    errors.nonFieldErrors = [
+      `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
+    ];
+  } else if (
+    values.individualsFiltersBlocks.filter(
+      (block) => block.blockFilters && block.blockFilters.length === 0,
+    ).length > 0 ||
+    values.collectorsFiltersBlocks.filter(
+      (block) => block.blockFilters && block.blockFilters.length === 0,
+    ).length > 0
+  ) {
+    errors.nonFieldErrors = [
+      `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
+    ];
+  }
+  return errors;
+};
+
 export const HhIndIdValidation = Yup.string().test(
   'testName',
   'ID is not in the correct format',
@@ -170,9 +251,10 @@ function mapBlockFilters(blocks, blockKey) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
-  console.log('criteria', criteria);
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
+  const deliveryMechanism = criteria.deliveryMechanism || '';
+  const fsp = criteria.fsp || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
@@ -190,6 +272,8 @@ export function mapCriteriaToInitialValues(criteria) {
   );
 
   return {
+    deliveryMechanism,
+    fsp,
     individualIds,
     householdIds,
     householdsFiltersBlocks: mapFiltersToInitialValues(householdsFiltersBlocks),
@@ -210,7 +294,6 @@ export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
     let comparisonMethod;
     let values;
-    console.log('each', each);
     switch (each?.fieldAttribute?.type || each?.type) {
       case 'SELECT_ONE':
         comparisonMethod = 'EQUALS';
@@ -222,7 +305,7 @@ export function formatCriteriaFilters(filters) {
         break;
       case 'STRING':
         comparisonMethod = 'CONTAINS';
-        if (each.associatedWith === 'DeliveryMechanismData') {
+        if (each.associatedWith === 'Account') {
           comparisonMethod = 'EQUALS';
         }
         values = [each.value];
@@ -336,7 +419,7 @@ interface Result {
 
 function mapFilterToVariable(filter: Filter): Result {
   let preparedArguments = [];
-  if (filter?.associatedWith === 'DeliveryMechanismData') {
+  if (filter?.associatedWith === 'Account') {
     preparedArguments = filter.isNull ? [null] : filter.arguments;
   } else {
     preparedArguments = filter.isNull

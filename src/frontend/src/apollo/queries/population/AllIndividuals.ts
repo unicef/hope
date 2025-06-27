@@ -13,7 +13,6 @@ export const AllIndividuals = gql`
     $search: String
     $documentType: String
     $documentNumber: String
-    $programs: [ID]
     $status: [String]
     $lastRegistrationDate: String
     $householdId: UUID
@@ -38,7 +37,6 @@ export const AllIndividuals = gql`
       search: $search
       documentType: $documentType
       documentNumber: $documentNumber
-      programs: $programs
       status: $status
       lastRegistrationDate: $lastRegistrationDate
       household_Id: $householdId
@@ -64,6 +62,49 @@ export const AllIndividuals = gql`
           sanctionListPossibleMatch
           sanctionListConfirmedMatch
           deduplicationGoldenRecordStatus
+          deduplicationBatchStatus
+          biometricDeduplicationGoldenRecordStatus
+          biometricDeduplicationBatchStatus
+          biometricDeduplicationBatchResults {
+            id
+            unicefId
+            fullName
+            age
+            location
+            similarityScore
+            photo
+          }
+          biometricDeduplicationGoldenRecordResults {
+            id
+            unicefId
+            fullName
+            age
+            location
+            similarityScore
+            photo
+          }
+          deduplicationBatchResults {
+            unicefId
+            hitId
+            fullName
+            score
+            proximityToScore
+            location
+            age
+            duplicate
+            distinct
+          }
+          deduplicationGoldenRecordResults {
+            unicefId
+            hitId
+            fullName
+            score
+            proximityToScore
+            location
+            age
+            duplicate
+            distinct
+          }
           sanctionListLastCheck
           fullName
           household {
@@ -73,13 +114,9 @@ export const AllIndividuals = gql`
               id
               name
             }
-            programs {
-              edges {
-                node {
-                  id
-                  name
-                }
-              }
+            program {
+              id
+              name
             }
           }
           relationship

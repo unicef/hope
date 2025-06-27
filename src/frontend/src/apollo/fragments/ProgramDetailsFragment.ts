@@ -8,8 +8,6 @@ export const programDetails = gql`
     startDate
     endDate
     status
-    caId
-    caHashId
     description
     budget
     frequencyOfPayments
@@ -58,5 +56,14 @@ export const programDetails = gql`
       }
     }
     canFinish
+    beneficiaryGroup {
+      id
+      name
+      groupLabel
+      groupLabelPlural
+      memberLabel
+      memberLabelPlural
+      masterDetail
+    }
   }
 `;

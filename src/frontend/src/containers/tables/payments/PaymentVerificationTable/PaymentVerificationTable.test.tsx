@@ -2,16 +2,16 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react';
 
 import wait from 'waait';
-import { fakeApolloAllCashPlansAndPaymentPlans } from '../../../../../fixtures/payments/fakeApolloAllCashPlansAndPaymentPlans';
-import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
-import { PaymentVerificationTable } from '.';
+import { render } from '../../../../testUtils/testUtils';
+import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
+import PaymentVerificationTable from './PaymentVerificationTable';
 
 describe('containers/tables/payments/PaymentVerificationTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
-        mocks={fakeApolloAllCashPlansAndPaymentPlans}
+        mocks={fakeApolloAllPaymentPlansForTable}
       >
         <PaymentVerificationTable
           canViewDetails={false}
@@ -36,7 +36,7 @@ describe('containers/tables/payments/PaymentVerificationTable', () => {
     const { container } = render(
       <MockedProvider
         addTypename={false}
-        mocks={fakeApolloAllCashPlansAndPaymentPlans}
+        mocks={fakeApolloAllPaymentPlansForTable}
       >
         <PaymentVerificationTable
           canViewDetails={false}

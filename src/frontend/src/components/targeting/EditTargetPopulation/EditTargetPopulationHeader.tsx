@@ -1,21 +1,22 @@
 import { Box, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { TargetPopulationQuery } from '@generated/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;
   values;
   baseUrl: string;
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   loading: boolean;
 }
 
-export const EditTargetPopulationHeader = ({
+const EditTargetPopulationHeader = ({
   handleSubmit,
   values,
   baseUrl,
@@ -84,3 +85,8 @@ export const EditTargetPopulationHeader = ({
     </PageHeader>
   );
 };
+
+export default withErrorBoundary(
+  EditTargetPopulationHeader,
+  'EditTargetPopulationHeader',
+);

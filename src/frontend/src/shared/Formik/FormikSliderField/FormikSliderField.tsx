@@ -1,5 +1,5 @@
 import { styled } from '@mui/system';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Slider from '@mui/material/Slider';
 import { Typography, Box } from '@mui/material';
 import { ReactElement } from 'react';
@@ -25,18 +25,17 @@ export const FormikSliderField = ({
     <StyledBox>
       <Typography variant="caption">{otherProps.label}</Typography>
       <Grid container spacing={2} alignItems="center">
-        <Grid item xs>
-          <Slider
-            {...otherProps}
-            data-cy={dataCy}
-            min={min}
-            max={max}
-            value={typeof field.value === 'number' ? field.value : 0}
-            onChange={handleSliderChange}
-            aria-labelledby="input-slider"
-          />
-        </Grid>
-        <Grid item>
+        <Slider
+          {...otherProps}
+          data-cy={dataCy}
+          min={min}
+          max={max}
+          size="medium"
+          value={typeof field.value === 'number' ? field.value : 0}
+          onChange={handleSliderChange}
+          aria-labelledby="input-slider"
+        />
+        <Grid>
           <p>
             {field.value}
             {suffix || null}

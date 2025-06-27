@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime
+from typing import Any
 
 from django.conf import settings
 from django.core.management import call_command
@@ -28,6 +29,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,
 )
@@ -113,11 +115,19 @@ def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
+@pytest.fixture(autouse=True)
+def clear_default_cache() -> None:
+    from django.core.cache import cache
+
+    cache.clear()
+
+
 def pytest_configure(config) -> None:  # type: ignore
-    env = Env()
-    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
     config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
     # delete all old screenshots
+
+    env = Env()
+    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
     settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
     settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
     settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
@@ -146,12 +156,7 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.CACHE_ENABLED = False
-    settings.CACHES = {
-        "default": {
-            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
-            "TIMEOUT": 1800,
-        }
-    }
+    settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
 
     settings.LOGGING["loggers"].update(
         {
@@ -219,7 +224,7 @@ def download_path(worker_id: str) -> str:
         yield settings.DOWNLOAD_DIRECTORY
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def driver(download_path: str) -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -241,18 +246,14 @@ def driver(download_path: str) -> Chrome:
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
-    # try:
-    #     shutil.rmtree(download_path)
-    # except FileNotFoundError:
-    #     pass
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def live_server() -> LiveServer:
     yield LiveServer("localhost")
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=True)
 def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
     try:
         driver.live_server = live_server
@@ -265,7 +266,7 @@ def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
 def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
 
-    browser.execute_script(  # type: ignore
+    browser.execute_script(
         """
     window.indexedDB.databases().then(dbs => dbs.forEach(db => {
         console.log('Deleting database:', db.name);
@@ -287,6 +288,9 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.ID, login).send_keys("superuser")
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, loginButton).click()
+    from time import sleep
+
+    sleep(0.3)  # TODO: added just for test in CI
     browser.get(f"{browser.live_server.url}/")
     from django.core.cache import cache
 
@@ -517,7 +521,6 @@ def business_area() -> BusinessArea:
             "slug": "afghanistan",
             "screen_beneficiary": True,
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": True,
             "is_accountability_applicable": True,
             "kobo_token": "XXX",
         },
@@ -548,6 +551,26 @@ def change_super_user(business_area: BusinessArea) -> None:
 
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
+    BeneficiaryGroupFactory(
+        id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
+        name="Main Menu",
+        group_label="Items Group",
+        group_label_plural="Items Groups",
+        member_label="Item",
+        member_label_plural="Items",
+        master_detail=True,
+    )
+
+    BeneficiaryGroupFactory(
+        id="9cf21adb-74a9-4c3c-9057-6fb27feb4220",
+        name="People",
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=False,
+    )
+
     Partner.objects.get_or_create(name="TEST")
     partner, _ = Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")
@@ -567,6 +590,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             username="superuser",
             password="testtest2",
             email="test@example.com",
+            first_name="Test",
+            last_name="Selenium",
             partner=partner,
         )
     UserRole.objects.get_or_create(
@@ -578,7 +603,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     for partner in Partner.objects.exclude(name="UNICEF"):
         partner.allowed_business_areas.add(business_area)
         role = RoleFactory(name=f"Role for {partner.name}")
-        partner_through = BusinessAreaPartnerThrough.objects.create(
+        partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=business_area,
             partner=partner,
         )
@@ -614,7 +639,7 @@ def create_super_user(business_area: BusinessArea) -> User:
             "code": "partial",
             "description": "Partial individuals collected",
             "active": True,
-            "type": DataCollectingType.Type.STANDARD,
+            "type": DataCollectingType.Type.SOCIAL,
         },
         {
             "label": "size/age/gender disaggregated",
@@ -626,7 +651,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     ]
 
     for dct in dct_list:
-        data_collecting_type = DataCollectingType.objects.create(
+        data_collecting_type, _ = DataCollectingType.objects.get_or_create(
             label=dct["label"],
             code=dct["code"],
             description=dct["description"],
@@ -688,3 +713,56 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.migrations.loader import MigrationLoader
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    orig = getattr(settings, "MIGRATION_MODULES", None)
+    settings.MIGRATION_MODULES = {}
+
+    loader = MigrationLoader(None, load=False)
+    loader.load_disk()
+    all_migrations = loader.disk_migrations
+    if orig is not None:
+        settings.MIGRATION_MODULES = orig
+    apps = set()
+    all_sqls = []
+    for (app_label, _), migration in all_migrations.items():
+        apps.add(app_label)
+
+        for operation in migration.operations:
+            from django.db.migrations.operations.special import RunSQL
+
+            if isinstance(operation, RunSQL):
+                sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
+                for stmt in sql_statements:
+                    all_sqls.append(stmt)
+
+    def pre_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
+        with open(filename, "r") as file:
+            pre_sql = file.read()
+        conn = connections[using]
+        conn.cursor().execute(pre_sql)
+
+    def post_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        app_label = app_config.label
+        if app_label not in apps:
+            return
+        apps.remove(app_label)
+        if apps:
+            return
+        conn = connections[using]
+        for stmt in all_sqls:
+            conn.cursor().execute(stmt)
+
+    pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
+    post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)

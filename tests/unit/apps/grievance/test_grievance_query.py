@@ -18,6 +18,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
+    TicketIndividualDataUpdateDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import (
@@ -820,6 +821,40 @@ class TestGrievanceQuery(APITestCase):
                 },
             },
             variables={"scoreMin": 900, "scoreMax": 999},
+        )
+
+    def test_people_upd_individual_data_admin_area_title(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR],
+            self.business_area,
+            self.program,
+        )
+        AreaFactory(p_code="AAA333", name="Test_Name")
+        AreaFactory(p_code="A22", name="Old_Name")
+        individual_data = {"admin_area_title": {"value": "AAA333", "approve_status": True, "previous_value": "A22"}}
+        ticket = GrievanceTicket.objects.first()
+        TicketIndividualDataUpdateDetailsFactory(
+            ticket=ticket, individual_data=individual_data, individual=self.individual_1
+        )
+        self.snapshot_graphql_request(
+            request_string="""
+                query GrievanceTicket($id: ID!) {
+                  grievanceTicket(id: $id) {
+                    individualDataUpdateTicketDetails{
+                      individualData
+                    }
+                  }
+                }
+                """,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(str(ticket.id), "GrievanceTicketNode")},
         )
 
 

@@ -16,4 +16,4 @@ def soft_delete_original_objects() -> None:
     IndividualIdentity.objects.filter(individual__program__isnull=True).delete()
     BankAccountInfo.objects.filter(individual__program__isnull=True).delete()
     # objects that cannot be deleted because they do not support soft-delete:
-    # Feedback, Message, GrievanceTicket, HouseholdSelection
+    # Feedback, Message, GrievanceTicket

@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Grid, Typography } from '@mui/material';
+import { Box, Button, Collapse, Grid2 as Grid, Typography } from '@mui/material';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import { Field } from 'formik';
@@ -7,8 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
 import { useProgramContext } from '../../../programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function Exclusions({
+function Exclusions({
   initialOpen = false,
 }: {
   initialOpen?: boolean;
@@ -16,15 +17,16 @@ export function Exclusions({
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <PaperContainer>
       <Box display="flex" justifyContent="space-between">
         <Typography data-cy="title-excluded-entries" variant="h6">
           {isSocialDctType
             ? t('Excluded Target Population Entries')
-            : t(
-                'Excluded Target Population Entries (Households or Individuals)',
-              )}
+            : `Excluded Target Population Entries (${beneficiaryGroup?.groupLabelPlural} or ${beneficiaryGroup?.memberLabelPlural})`}
         </Typography>
         <Button
           variant="outlined"
@@ -41,7 +43,7 @@ export function Exclusions({
       <Collapse in={isExclusionsOpen}>
         <Box mt={2}>
           <Grid container>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <Field
                 data-cy="input-excluded-ids"
                 name="excludedIds"
@@ -49,8 +51,10 @@ export function Exclusions({
                 variant="outlined"
                 label={
                   isSocialDctType
-                    ? t('Individual IDs to exclude')
-                    : t('Household or Individual IDs to exclude')
+                    ? t(`${beneficiaryGroup?.memberLabel} IDs to exclude`)
+                    : t(
+                        `${beneficiaryGroup?.groupLabel} or ${beneficiaryGroup?.memberLabel} IDs to exclude`,
+                      )
                 }
                 component={FormikTextField}
               />
@@ -59,7 +63,7 @@ export function Exclusions({
         </Box>
         <Box mt={2}>
           <Grid container>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <Field
                 data-cy="input-exclusion-reason"
                 name="exclusionReason"
@@ -76,3 +80,5 @@ export function Exclusions({
     </PaperContainer>
   );
 }
+
+export default withErrorBoundary(Exclusions, 'Exclusions');

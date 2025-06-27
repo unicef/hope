@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ExchangeRateClient(abc.ABC):
     @abc.abstractmethod
-    def fetch_exchange_rates(self, with_history: bool = True) -> Dict:
+    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
         pass
 
 
@@ -23,7 +23,7 @@ class ExchangeRateClientDummy(ExchangeRateClient):
     def __init__(self, exchange_rates: Optional[Dict] = None):
         self.exchange_rates = exchange_rates or self.populate_from_file()
 
-    def fetch_exchange_rates(self, with_history: bool = True) -> Dict:
+    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
         return self.exchange_rates
 
     def populate_from_file(self) -> Dict:
@@ -47,17 +47,19 @@ class ExchangeRateClientAPI(ExchangeRateClient):
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Ocp-Apim-Subscription-Key": self.api_key})
 
-    def fetch_exchange_rates(self, with_history: bool = True) -> Dict:
+    def fetch_exchange_rates(self, mode: str = "short") -> Dict:
         params = {}
 
-        if with_history is True:
+        if mode == "yes":
             params["history"] = "yes"
+        elif mode == "short":
+            params["history"] = "short"
         response = self._client.get(self.api_url, params=params)
 
         try:
             response.raise_for_status()
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
         return response.json()
 

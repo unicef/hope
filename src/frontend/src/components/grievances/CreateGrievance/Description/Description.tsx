@@ -1,4 +1,10 @@
-import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
+import {
+  Box,
+  FormHelperText,
+  Grid2 as Grid,
+  GridSize,
+  Typography,
+} from '@mui/material';
 import { Field } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +29,8 @@ import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentation
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { useProgramContext } from 'src/programContext';
+import { replaceLabels } from '@components/grievances/utils/createGrievanceUtils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -51,7 +59,7 @@ export interface DescriptionProps {
   permissions: string[];
 }
 
-export function Description({
+function Description({
   values,
   showIssueType,
   selectedIssueType,
@@ -73,6 +81,8 @@ export function Description({
     },
     fetchPolicy: 'network-only',
   });
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   // Set program value based on selected household or individual
   useEffect(() => {
@@ -117,15 +127,19 @@ export function Description({
               {
                 label: t('Category'),
                 value: <span>{categoryChoices[values.category]}</span>,
-                size: 3,
+                size: 4,
               },
               showIssueType(values) && {
                 label: t('Issue Type'),
-                value: <span>{selectedIssueType(values)}</span>,
-                size: 9,
+                value: (
+                  <span>
+                    {replaceLabels(selectedIssueType(values), beneficiaryGroup)}
+                  </span>
+                ),
+                size: 8,
               },
               {
-                label: t('Household ID'),
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {values.selectedHousehold?.id &&
@@ -144,7 +158,7 @@ export function Description({
                 size: 3,
               },
               {
-                label: t('Individual ID'),
+                label: `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
                     {values.selectedIndividual?.id &&
@@ -167,7 +181,7 @@ export function Description({
                 isSocialDctType ? el.label !== 'Household ID' : el,
               )
               .map((el) => (
-                <Grid key={el.label} item xs={el.size as GridSize}>
+                <Grid key={el.label} size={{ xs: el.size as GridSize }}>
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>
                 </Grid>
               ))}
@@ -177,7 +191,7 @@ export function Description({
         <BoxPadding />
         <Grid container spacing={3}>
           {values.issueType === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT && (
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <Field
                 name="partner"
                 fullWidth
@@ -188,7 +202,7 @@ export function Description({
               />
             </Grid>
           )}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Field
               name="description"
               multiline
@@ -203,7 +217,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Field
               name="comments"
               multiline
@@ -213,7 +227,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="admin"
               variant="outlined"
@@ -221,7 +235,7 @@ export function Description({
               disabled={Boolean(values.selectedHousehold?.admin2)}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="area"
               fullWidth
@@ -230,7 +244,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Field
               name="language"
               multiline
@@ -240,7 +254,7 @@ export function Description({
               component={FormikTextField}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Field
               name="priority"
               multiline
@@ -251,7 +265,7 @@ export function Description({
               component={FormikSelectField}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Field
               name="urgency"
               multiline
@@ -262,7 +276,7 @@ export function Description({
               component={FormikSelectField}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <Field
               name="program"
               label={t('Programme Name')}
@@ -277,7 +291,7 @@ export function Description({
         <Box pt={5}>
           <BoxWithBorders>
             <Grid container spacing={4}>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Box py={3}>
                   <LookUpLinkedTickets
                     values={values}
@@ -287,7 +301,7 @@ export function Description({
               </Grid>
               {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
                 values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <Box py={3}>
                     <LookUpPaymentRecord
                       values={values}
@@ -307,7 +321,11 @@ export function Description({
         <Box mt={3}>
           <BoxWithBorderBottom>
             <Title>
-              <Typography variant="h6">{t('Documentation')}</Typography>
+              <Typography variant="h6">
+                {t(
+                  'Grievance Supporting Documents: upload of documents for the ticket',
+                )}
+              </Typography>
             </Title>
             <NewDocumentationFieldArray
               values={values}
@@ -320,3 +338,4 @@ export function Description({
     </>
   );
 }
+export default withErrorBoundary(Description, 'Description');

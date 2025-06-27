@@ -16,6 +16,10 @@ describe('containers/tables/rdi/ImportedIndividualsTable', () => {
           businessArea="afghanistan"
           choicesData={fakeHouseholdChoices}
           rdiId="UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl"
+          rdi={{
+            id: 'UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl',
+            name: 'Rdi Name',
+          }}
         />
       </MockedProvider>,
     );
@@ -32,6 +36,10 @@ describe('containers/tables/rdi/ImportedIndividualsTable', () => {
           businessArea="afghanistan"
           choicesData={fakeHouseholdChoices}
           rdiId="UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl"
+          rdi={{
+            id: 'UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl',
+            name: 'Rdi Name',
+          }}
         />
       </MockedProvider>,
     );

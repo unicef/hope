@@ -1,12 +1,16 @@
 import json
 from datetime import datetime
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest import mock
+from unittest.mock import MagicMock
 
 from django import forms
-from django.db import models
+from django.contrib.admin.options import get_content_type_for_model
+from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from django.db import models, transaction
 from django.db.utils import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase, tag
 from django.utils import timezone
 
 import pytest
@@ -15,7 +19,7 @@ from dateutil.relativedelta import relativedelta
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.currencies import USDC
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
@@ -23,34 +27,47 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    LOT_DIFFICULTY,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
     ApprovalFactory,
     ApprovalProcessFactory,
-    DeliveryMechanismDataFactory,
-    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentPlanSplitFactory,
     RealProgramFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    Account,
+    AccountType,
     Approval,
     DeliveryMechanism,
-    FinancialServiceProvider,
+    DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProviderXlsxTemplate,
+    FspNameMapping,
     Payment,
+    PaymentDataCollector,
     PaymentPlan,
-    PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import ProgramCycle
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
+from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -111,7 +128,7 @@ class TestBasePaymentPlanModel:
         [
             PaymentPlan.Status.FINISHED,
             PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.PREPARING,
+            PaymentPlan.Status.DRAFT,
             PaymentPlan.Status.OPEN,
             PaymentPlan.Status.LOCKED,
             PaymentPlan.Status.LOCKED_FSP,
@@ -135,15 +152,15 @@ class TestPaymentPlanModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
 
     def test_create(self) -> None:
-        pp = PaymentPlanFactory()
+        pp = PaymentPlanFactory(created_by=self.user)
         self.assertIsInstance(pp, PaymentPlan)
 
     def test_update_population_count_fields(self) -> None:
-        pp = PaymentPlanFactory()
+        pp = PaymentPlanFactory(created_by=self.user)
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
@@ -182,11 +199,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
 
-    @patch(
-        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
-        return_value=2.0,
-    )
-    def test_update_money_fields(self, get_exchange_rate_mock: Any) -> None:
+    def test_update_money_fields(self) -> None:
         pp = PaymentPlanFactory()
         PaymentFactory(
             parent=pp,
@@ -208,7 +221,6 @@ class TestPaymentPlanModel(TestCase):
         pp.update_money_fields()
 
         pp.refresh_from_db()
-        self.assertEqual(pp.exchange_rate, 2.0)
         self.assertEqual(pp.total_entitled_quantity, 200.00)
         self.assertEqual(pp.total_entitled_quantity_usd, 400.00)
         self.assertEqual(pp.total_delivered_quantity, 100.00)
@@ -217,7 +229,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.total_undelivered_quantity_usd, 200.00)
 
     def test_not_excluded_payments(self) -> None:
-        pp = PaymentPlanFactory()
+        pp = PaymentPlanFactory(created_by=self.user)
         PaymentFactory(parent=pp, conflicted=False, currency="PLN")
         PaymentFactory(parent=pp, conflicted=True, currency="PLN")
 
@@ -228,13 +240,14 @@ class TestPaymentPlanModel(TestCase):
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create hard conflicted payment
         pp1_conflicted = PaymentPlanFactory(
             status=PaymentPlan.Status.LOCKED,
             program_cycle=program_cycle,
+            created_by=self.user,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         PaymentFactory(
@@ -250,12 +263,16 @@ class TestPaymentPlanModel(TestCase):
         PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         self.assertEqual(pp1.can_be_locked, True)
 
+    def test_is_population_finalized(self) -> None:
+        payment_plan = PaymentPlanFactory(created_by=self.user, status=PaymentPlan.Status.TP_PROCESSING)
+        self.assertTrue(payment_plan.is_population_finalized())
+
     def test_get_exchange_rate_for_usdc_currency(self) -> None:
-        pp = PaymentPlanFactory(currency=USDC)
+        pp = PaymentPlanFactory(currency=USDC, created_by=self.user)
         self.assertEqual(pp.get_exchange_rate(), 1.0)
 
     def test_is_reconciled(self) -> None:
-        pp = PaymentPlanFactory(currency=USDC)
+        pp = PaymentPlanFactory(currency=USDC, created_by=self.user)
         self.assertEqual(pp.is_reconciled, False)
 
         PaymentFactory(parent=pp, currency="PLN", excluded=True)
@@ -286,45 +303,224 @@ class TestPaymentPlanModel(TestCase):
         p2.save()
         self.assertEqual(pp.is_reconciled, True)
 
+    def test_save_pp_steficon_rule_validation(self) -> None:
+        pp = PaymentPlanFactory(created_by=self.user)
+        rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, version=11)
+        rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, version=22)
+
+        self.assertIsNone(pp.steficon_rule_targeting_id)
+        self.assertIsNone(pp.steficon_rule_id)
+
+        with self.assertRaisesMessage(
+            ValidationError, f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
+        ):
+            pp.steficon_rule = rule_for_tp
+            pp.save()
+
+        with self.assertRaisesMessage(
+            ValidationError, f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
+        ):
+            pp.steficon_rule_targeting = rule_for_pp
+            pp.save()
+
+    def test_payment_plan_exclude_hh_property(self) -> None:
+        ind = IndividualFactory(household=None)
+        hh = HouseholdFactory(head_of_household=ind)
+        pp: PaymentPlan = PaymentPlanFactory(created_by=self.user)
+        pp.excluded_ids = f"{hh.unicef_id},{ind.unicef_id}"
+        pp.save(update_fields=["excluded_ids"])
+        pp.refresh_from_db()
+
+        self.assertEqual(pp.excluded_household_ids_targeting_level, [hh.unicef_id])
+
+    def test_payment_plan_has_empty_criteria_property(self) -> None:
+        pp: PaymentPlan = PaymentPlanFactory(created_by=self.user)
+        self.assertTrue(pp.has_empty_criteria)
+
+    def test_payment_plan_has_empty_ids_criteria_property(self) -> None:
+        targeting_criteria = TargetingCriteriaFactory()
+        pp: PaymentPlan = PaymentPlanFactory(targeting_criteria=targeting_criteria, created_by=self.user)
+
+        self.assertTrue(pp.has_empty_ids_criteria)
+
+    def test_remove_export_file_entitlement(self) -> None:
+        pp = PaymentPlanFactory(created_by=self.user, status=PaymentPlan.Status.LOCKED)
+        file_temp = FileTemp.objects.create(
+            object_id=pp.pk,
+            content_type=get_content_type_for_model(pp),
+            created=timezone.now(),
+            file=ContentFile(b"abc", "Test_123.xlsx"),
+        )
+        pp.export_file_entitlement = file_temp
+        pp.save()
+        pp.refresh_from_db()
+        self.assertTrue(pp.has_export_file)
+        self.assertEqual(pp.export_file_entitlement.pk, file_temp.pk)
+
+        pp.remove_export_file_entitlement()
+        pp.save()
+        pp.refresh_from_db()
+        self.assertFalse(pp.has_export_file)
+        self.assertIsNone(pp.export_file_entitlement)
+
+    def test_remove_imported_file(self) -> None:
+        pp = PaymentPlanFactory(
+            created_by=self.user, status=PaymentPlan.Status.LOCKED, imported_file_date=timezone.now()
+        )
+        file_temp = FileTemp.objects.create(
+            object_id=pp.pk,
+            content_type=get_content_type_for_model(pp),
+            created=timezone.now(),
+            file=ContentFile(b"abc", "Test_777.xlsx"),
+        )
+        pp.imported_file = file_temp
+        pp.save()
+        pp.refresh_from_db()
+        self.assertEqual(pp.imported_file.pk, file_temp.pk)
+        self.assertEqual(pp.imported_file_name, "Test_777.xlsx")
+
+        pp.remove_imported_file()
+        pp.save()
+        pp.refresh_from_db()
+        self.assertEqual(pp.imported_file_name, "")
+        self.assertIsNone(pp.imported_file)
+        self.assertIsNone(pp.imported_file_date)
+
+    def test_has_empty_ids_criteria(self) -> None:
+        pp = PaymentPlanFactory(created_by=self.user)
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=pp.targeting_criteria,
+            household_ids="HH-1, HH-2",
+            individual_ids="IND-01, IND-02",
+        )
+        self.assertFalse(pp.has_empty_ids_criteria)
+
 
 class TestPaymentModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
+        cls.pp = PaymentPlanFactory(created_by=cls.user)
 
     def test_create(self) -> None:
         p1 = PaymentFactory()
         self.assertIsInstance(p1, Payment)
 
     def test_unique_together(self) -> None:
-        pp = PaymentPlanFactory()
+        pp = PaymentPlanFactory(created_by=self.user)
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         PaymentFactory(parent=pp, household=hh1, currency="PLN")
         with self.assertRaises(IntegrityError):
             PaymentFactory(parent=pp, household=hh1, currency="PLN")
 
+    def test_payment_status_property(self) -> None:
+        payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_PENDING)
+        self.assertEqual(payment.payment_status, "Pending")
+
+        payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_DISTRIBUTION_SUCCESS)
+        self.assertEqual(payment.payment_status, "Delivered Fully")
+
+        payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_SUCCESS)
+        self.assertEqual(payment.payment_status, "Delivered Fully")
+
+        payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_DISTRIBUTION_PARTIAL)
+        self.assertEqual(payment.payment_status, "Delivered Partially")
+
+        payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_NOT_DISTRIBUTED)
+        self.assertEqual(payment.payment_status, "Not Delivered")
+
+        payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_ERROR)
+        self.assertEqual(payment.payment_status, "Unsuccessful")
+
+        payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_FORCE_FAILED)
+        self.assertEqual(payment.payment_status, "Force Failed")
+
+        payment = PaymentFactory(parent=self.pp, status=Payment.STATUS_MANUALLY_CANCELLED)
+        self.assertEqual(payment.payment_status, "-")
+
+    def test_mark_as_failed(self) -> None:
+        payment_invalid_status = PaymentFactory(parent=self.pp, status=Payment.STATUS_FORCE_FAILED)
+        payment = PaymentFactory(
+            parent=self.pp,
+            entitlement_quantity=999,
+            delivered_quantity=111,
+            delivered_quantity_usd=22,
+            status=Payment.STATUS_DISTRIBUTION_PARTIAL,
+        )
+        with self.assertRaises(ValidationError) as e:
+            payment_invalid_status.mark_as_failed()
+        self.assertIn("Status shouldn't be failed", e.exception)
+
+        payment.mark_as_failed()
+        payment.save()
+        payment.refresh_from_db()
+        self.assertEqual(payment.delivered_quantity, 0)
+        self.assertEqual(payment.delivered_quantity_usd, 0)
+        self.assertIsNone(payment.delivery_date)
+        self.assertEqual(payment.status, Payment.STATUS_FORCE_FAILED)
+
+    def test_revert_mark_as_failed(self) -> None:
+        payment_entitlement_quantity_none = PaymentFactory(
+            parent=self.pp,
+            entitlement_quantity=None,
+            entitlement_quantity_usd=None,
+            delivered_quantity=None,
+            delivered_quantity_usd=None,
+            status=Payment.STATUS_FORCE_FAILED,
+        )
+        payment_invalid_status = PaymentFactory(parent=self.pp, entitlement_quantity=999, status=Payment.STATUS_PENDING)
+        payment = PaymentFactory(
+            parent=self.pp, entitlement_quantity=999, delivered_quantity=111, status=Payment.STATUS_FORCE_FAILED
+        )
+        date = timezone.now().date()
+
+        with self.assertRaises(ValidationError) as e:
+            payment_invalid_status.revert_mark_as_failed(999, date)
+        self.assertIn("Only payment marked as force failed can be reverted", e.exception)
+
+        with self.assertRaises(ValidationError) as e:
+            payment_entitlement_quantity_none.revert_mark_as_failed(999, date)
+        self.assertIn("Entitlement quantity need to be set in order to revert", e.exception)
+
+        payment.revert_mark_as_failed(999, date)
+        payment.save()
+        payment.refresh_from_db()
+        self.assertEqual(payment.delivered_quantity, 999)
+        self.assertEqual(payment.delivery_date.date(), date)
+        self.assertEqual(payment.status, Payment.STATUS_DISTRIBUTION_SUCCESS)
+
+    def test_get_revert_mark_as_failed_status(self) -> None:
+        payment = PaymentFactory(parent=self.pp, entitlement_quantity=999)
+        delivered_quantity_with_status = (
+            (0, Payment.STATUS_NOT_DISTRIBUTED),
+            (100, Payment.STATUS_DISTRIBUTION_PARTIAL),
+            (999, Payment.STATUS_DISTRIBUTION_SUCCESS),
+        )
+        for delivered_quantity, status in delivered_quantity_with_status:
+            result_status = payment.get_revert_mark_as_failed_status(delivered_quantity)
+            self.assertEqual(result_status, status)
+
+        with self.assertRaises(ValidationError) as e:
+            payment.get_revert_mark_as_failed_status(1000)
+        self.assertIn("Wrong delivered quantity 1000 for entitlement quantity 999", e.exception)
+
     def test_manager_annotations_pp_conflicts(self) -> None:
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle, created_by=self.user)
 
         # create hard conflicted payment
-        pp2 = PaymentPlanFactory(
-            status=PaymentPlan.Status.LOCKED,
-            program_cycle=program_cycle,
-        )
+        pp2 = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, program_cycle=program_cycle, created_by=self.user)
         # create soft conflicted payments
-        pp3 = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN,
-            program_cycle=program_cycle,
-        )
+        pp3 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user)
         pp4 = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
             program_cycle=program_cycle,
+            created_by=self.user,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         p2 = PaymentFactory(parent=pp2, household=p1.household, conflicted=False, currency="PLN")
@@ -424,51 +620,79 @@ class TestPaymentModel(TestCase):
             ],
         )
 
-    def test_manager_annotations_pp_no_conflicts_for_follow_up(self) -> None:
-        program_cycle = RealProgramFactory().cycles.first()
-        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
-        # create follow up pp
-        pp2 = PaymentPlanFactory(
+    def test_manager_annotations_conflicts_for_follow_up(self) -> None:
+        rdi = RegistrationDataImportFactory(business_area=self.business_area)
+        program = RealProgramFactory(business_area=self.business_area)
+        program_cycle = program.cycles.first()
+        pp1 = PaymentPlanFactory(
+            program_cycle=program_cycle,
+            is_follow_up=False,
+            business_area=self.business_area,
+            status=PaymentPlan.Status.FINISHED,
+            created_by=self.user,
+        )
+        pp2_follow_up = PaymentPlanFactory(
+            business_area=self.business_area,
             status=PaymentPlan.Status.LOCKED,
             is_follow_up=True,
             source_payment_plan=pp1,
             program_cycle=program_cycle,
+            created_by=self.user,
         )
         pp3 = PaymentPlanFactory(
+            business_area=self.business_area,
             status=PaymentPlan.Status.OPEN,
             is_follow_up=True,
             source_payment_plan=pp1,
             program_cycle=program_cycle,
+            created_by=self.user,
         )
-        p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
-        p2 = PaymentFactory(
-            parent=pp2,
-            household=p1.household,
-            conflicted=False,
-            is_follow_up=True,
-            source_payment=p1,
+        p1 = PaymentFactory(
+            parent=pp1,
+            is_follow_up=False,
             currency="PLN",
+            household__registration_data_import=rdi,
+            household__program=program,
+            status=Payment.STATUS_ERROR,
         )
-        p3 = PaymentFactory(
-            parent=pp3,
+        p2 = PaymentFactory(
+            parent=pp2_follow_up,
             household=p1.household,
-            conflicted=False,
             is_follow_up=True,
             source_payment=p1,
             currency="PLN",
         )
 
-        for _ in [pp1, pp2, pp3, p1, p2, p3]:
+        for _ in [pp1, pp2_follow_up, pp3, p1, p2]:
             _.refresh_from_db()  # update unicef_id from trigger
 
         p2_data = Payment.objects.filter(id=p2.id).values()[0]
         self.assertEqual(p2_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p2_data["payment_plan_soft_conflicted"], True)
+        self.assertEqual(p2_data["payment_plan_soft_conflicted"], False)
+
+        p3 = PaymentFactory(
+            parent=pp3,
+            household=p1.household,
+            is_follow_up=False,
+            currency="PLN",
+        )
+        p3.refresh_from_db()  # update unicef_id from trigger
+        self.maxDiff = None
         p3_data = Payment.objects.filter(id=p3.id).values()[0]
-        self.assertEqual(p3_data["payment_plan_hard_conflicted"], False)
-        self.assertEqual(p3_data["payment_plan_soft_conflicted"], True)
-        self.assertEqual(p2_data["payment_plan_hard_conflicted_data"], [])
-        self.assertIsNotNone(p3_data["payment_plan_hard_conflicted_data"])
+        self.assertEqual(p3_data["payment_plan_hard_conflicted"], True)
+        self.assertEqual(p3_data["payment_plan_soft_conflicted"], False)
+        import json
+
+        data = {
+            "payment_id": str(p2.id),
+            "payment_plan_id": str(pp2_follow_up.id),
+            "payment_unicef_id": str(p2.unicef_id),
+            "payment_plan_status": "LOCKED",
+            "payment_plan_end_date": pp2_follow_up.program_cycle.end_date.isoformat(),
+            "payment_plan_unicef_id": str(pp2_follow_up.unicef_id),
+            "payment_plan_start_date": pp2_follow_up.program_cycle.start_date.isoformat(),
+        }
+        self.assertEqual(p3_data["payment_plan_hard_conflicted_data"], [json.dumps(data)])
 
 
 class TestPaymentPlanSplitModel(TestCase):
@@ -476,26 +700,8 @@ class TestPaymentPlanSplitModel(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        cls.user = UserFactory()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-    def test_properties(self) -> None:
-        pp = PaymentPlanFactory()
-        dm = DeliveryMechanismPerPaymentPlanFactory(
-            payment_plan=pp,
-            chosen_configuration="key1",
-        )
-        p1 = PaymentFactory(parent=pp, currency="PLN")
-        p2 = PaymentFactory(parent=pp, currency="PLN")
-        pp_split1 = PaymentPlanSplitFactory(
-            payment_plan=pp,
-            split_type=PaymentPlanSplit.SplitType.BY_RECORDS,
-            chunks_no=2,
-            order=0,
-        )
-        pp_split1.payments.set([p1, p2])
-        self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
-        self.assertEqual(pp_split1.chosen_configuration, dm.chosen_configuration)
-        self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
 
 
 class TestFinancialServiceProviderModel(TestCase):
@@ -504,26 +710,6 @@ class TestFinancialServiceProviderModel(TestCase):
         super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-    def test_properties(self) -> None:
-        fsp1 = FinancialServiceProviderFactory(
-            data_transfer_configuration=[
-                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
-                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
-            ],
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            payment_gateway_id=123,
-        )
-        fsp2 = FinancialServiceProviderFactory(
-            data_transfer_configuration=[
-                {"key": "key1", "label": "label1", "id": 1, "random_key": "random"},
-                {"key": "key2", "label": "label2", "id": 2, "random_key": "random"},
-            ],
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        )
-
-        self.assertEqual(fsp1.configurations, [])
-        self.assertEqual(fsp2.configurations, [])
 
     def test_fsp_template_get_column_from_core_field(self) -> None:
         household, individuals = create_household(
@@ -555,9 +741,12 @@ class TestFinancialServiceProviderModel(TestCase):
 
         payment = PaymentFactory(program=ProgramFactory(), household=household, collector=individuals[0])
         data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+        beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplate
         payment.parent.program.data_collecting_type = data_collecting_type
+        payment.parent.program.beneficiary_group = beneficiary_group
         payment.parent.program.save()
+
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
         # update primary collector
         primary.household = household
@@ -574,16 +763,6 @@ class TestFinancialServiceProviderModel(TestCase):
             document_number="id_doc_number_123",
         )
         generate_delivery_mechanisms()
-        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        dmd = DeliveryMechanismDataFactory(
-            individual=primary,
-            delivery_mechanism=dm_atm_card,
-            data={
-                "card_number__atm_card": "333111222",
-                "card_expiry_date__atm_card": "2025-11-11",
-                "name_of_cardholder__atm_card": "Just Random Test Name",
-            },
-        )
 
         # get None if no snapshot
         none_resp = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
@@ -640,10 +819,6 @@ class TestFinancialServiceProviderModel(TestCase):
         primary_collector_id = fsp_xlsx_template.get_column_from_core_field(payment, "primary_collector_id")
         self.assertEqual(primary_collector_id, str(primary.pk))
 
-        # get delivery_mechanisms_data field
-        dmd_resp = fsp_xlsx_template.get_column_from_core_field(payment, "name_of_cardholder__atm_card", dmd)
-        self.assertEqual(dmd_resp, "Just Random Test Name")
-
         # country_origin
         country_origin = fsp_xlsx_template.get_column_from_core_field(payment, "country_origin")
         self.assertEqual(household.country_origin.iso_code3, country_origin)
@@ -689,3 +864,251 @@ class TestFinancialServiceProviderXlsxTemplate(TestCase):
             form.errors,
             {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]},
         )
+
+
+class TestAccountModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        create_afghanistan()
+        cls.program1 = ProgramFactory()
+        cls.user = UserFactory.create()
+        cls.ind = IndividualFactory(household=None, program=cls.program1)
+        cls.ind2 = IndividualFactory(household=None, program=cls.program1)
+        cls.hh = HouseholdFactory(head_of_household=cls.ind)
+        cls.ind.household = cls.hh
+        cls.ind.save()
+        cls.ind2.household = cls.hh
+        cls.ind2.save()
+
+        cls.fsp = FinancialServiceProviderFactory()
+        generate_delivery_mechanisms()
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.financial_institution = FinancialInstitution.objects.create(
+            name="ABC", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
+
+    def test_str(self) -> None:
+        dmd = AccountFactory(individual=self.ind)
+        self.assertEqual(str(dmd), f"{dmd.individual} - {dmd.account_type}")
+
+    def test_get_associated_object(self) -> None:
+        dmd = AccountFactory(data={"test": "test"}, individual=self.ind)
+        self.assertEqual(
+            PaymentDataCollector.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value, self.ind, dmd),
+            dmd.data,
+        )
+        self.assertEqual(
+            PaymentDataCollector.get_associated_object(
+                FspNameMapping.SourceModel.HOUSEHOLD.value,
+                self.ind,
+            ),
+            dmd.individual.household,
+        )
+        self.assertEqual(
+            PaymentDataCollector.get_associated_object(
+                FspNameMapping.SourceModel.INDIVIDUAL.value,
+                self.ind,
+            ),
+            dmd.individual,
+        )
+
+    def test_delivery_data(self) -> None:
+        dmd = AccountFactory(
+            data={
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+            },
+            individual=self.ind,
+            account_type=AccountType.objects.get(key="bank"),
+            number="test",
+            financial_institution=self.financial_institution,
+        )
+
+        fsp2 = FinancialServiceProviderFactory()  # no dm config (no required fields), just unpack dmd.data
+        self.assertEqual(
+            PaymentDataCollector.delivery_data(fsp2, self.dm_atm_card, self.ind),
+            dmd.data,
+        )
+
+        dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
+        dm_config.required_fields.extend(["custom_ind_name", "custom_hh_address", "address"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="number", hope_name="number", source=FspNameMapping.SourceModel.ACCOUNT, fsp=self.fsp
+        )
+        FspNameMapping.objects.create(
+            external_name="expiry_date",
+            hope_name="expiry_date",
+            source=FspNameMapping.SourceModel.ACCOUNT,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="custom_ind_name",
+            hope_name="my_custom_ind_name",
+            source=FspNameMapping.SourceModel.INDIVIDUAL,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="custom_hh_address",
+            hope_name="my_custom_hh_address",
+            source=FspNameMapping.SourceModel.HOUSEHOLD,
+            fsp=self.fsp,
+        )
+        FspNameMapping.objects.create(
+            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+        )
+
+        def my_custom_ind_name(self: Any) -> str:
+            return f"{self.full_name} Custom"
+
+        dmd.individual.__class__.my_custom_ind_name = property(my_custom_ind_name)
+
+        def my_custom_hh_address(self: Any) -> str:
+            return f"{self.address} Custom"
+
+        self.hh.__class__.my_custom_hh_address = property(my_custom_hh_address)
+
+        self.assertEqual(
+            PaymentDataCollector.delivery_data(self.fsp, self.dm_atm_card, self.ind),
+            {
+                "number": "test",
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+                "custom_ind_name": f"{dmd.individual.full_name} Custom",
+                "custom_hh_address": f"{self.hh.address} Custom",
+                "address": self.hh.address,
+                "financial_institution": str(self.financial_institution.id),
+            },
+        )
+
+    def test_validate(self) -> None:
+        AccountFactory(
+            data={
+                "number": "test",
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+            },
+            individual=self.ind,
+            account_type=AccountType.objects.get(key="bank"),
+        )
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), True)
+
+        dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
+        dm_config.required_fields.extend(["address"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="address", hope_name="address", source=FspNameMapping.SourceModel.HOUSEHOLD, fsp=self.fsp
+        )
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), True)
+
+        dm_config.required_fields.extend(["missing_field"])
+        dm_config.save()
+
+        FspNameMapping.objects.create(
+            external_name="missing_field",
+            hope_name="missing_field",
+            source=FspNameMapping.SourceModel.INDIVIDUAL,
+            fsp=self.fsp,
+        )
+        self.assertEqual(PaymentDataCollector.validate_account(self.fsp, self.dm_atm_card, self.ind), False)
+
+    def test_validate_uniqueness(self) -> None:
+        AccountFactory(data={"name_of_cardholder": "test"}, individual=self.ind)
+        Account.update_unique_field = mock.Mock()  # type: ignore
+        Account.validate_uniqueness(Account.objects.all())
+        Account.update_unique_field.assert_called_once()
+
+    def test_unique_active_wallet_constraint(self) -> None:
+        AccountFactory(**{"individual": self.ind, "unique_key": "wallet-1", "active": True, "is_unique": True})
+
+        test_cases = [
+            # (desc, active, is_unique, unique_key, should_raise)
+            ("Inactive, should pass", False, True, "wallet-1", False),
+            ("is_unique=False, should pass", True, False, "wallet-1", False),
+            ("Both False, should pass", False, False, "wallet-1", False),
+            ("Null key, should pass", True, True, None, False),
+            ("Different key, should pass", True, True, "wallet-2", False),
+            ("Duplicate violating row", True, True, "wallet-1", True),
+        ]
+
+        for desc, active, is_unique, unique_key, should_raise in test_cases:
+            with self.subTest(msg=desc, active=active, is_unique=is_unique, key=unique_key):
+                kwargs = {
+                    "individual": self.ind,
+                    "unique_key": unique_key,
+                    "active": active,
+                    "is_unique": is_unique,
+                }
+                if should_raise:
+                    with transaction.atomic():
+                        with self.assertRaises(IntegrityError):
+                            AccountFactory(**kwargs)
+                else:
+                    AccountFactory(**kwargs)
+
+
+@tag("isolated")
+class TestAccountModelUniqueField(TransactionTestCase):
+    def test_update_unique_fields(self) -> None:
+        create_afghanistan()
+        self.program1 = ProgramFactory()
+        self.user = UserFactory.create()
+        self.ind = IndividualFactory(household=None, program=self.program1)
+        self.ind2 = IndividualFactory(household=None, program=self.program1)
+        self.hh = HouseholdFactory(head_of_household=self.ind)
+        self.ind.household = self.hh
+        self.ind.save()
+        self.ind2.household = self.hh
+        self.ind2.save()
+
+        account_type_bank, _ = AccountType.objects.update_or_create(
+            key="bank",
+            label="Bank",
+            defaults=dict(
+                unique_fields=[
+                    "number",
+                    "seeing_disability",
+                    "name_of_cardholder__atm_card",
+                ],
+                payment_gateway_id="123",
+            ),
+        )
+
+        dmd_1 = AccountFactory(
+            data={"name_of_cardholder__atm_card": "test"},
+            individual=self.ind,
+            account_type=account_type_bank,
+            number="123",
+        )
+        dmd_1.individual.seeing_disability = LOT_DIFFICULTY
+        dmd_1.individual.save()
+        self.assertIsNone(dmd_1.unique_key)
+        self.assertEqual(dmd_1.is_unique, True)
+
+        dmd_2 = AccountFactory(
+            data={"name_of_cardholder__atm_card": "test2"},
+            individual=self.ind2,
+            account_type=account_type_bank,
+            number="123",
+        )
+        dmd_2.individual.seeing_disability = LOT_DIFFICULTY
+        dmd_2.individual.save()
+        self.assertIsNone(dmd_2.unique_key)
+        self.assertEqual(dmd_2.is_unique, True)
+
+        dmd_1.update_unique_field()
+        dmd_2.update_unique_field()
+
+
+class TestAccountTypeModel(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.fsp = FinancialServiceProviderFactory()
+        generate_delivery_mechanisms()
+
+    def test_get_targeting_field_names(self) -> None:
+        self.assertEqual(AccountType.get_targeting_field_names(), ["bank__number", "mobile__number"])

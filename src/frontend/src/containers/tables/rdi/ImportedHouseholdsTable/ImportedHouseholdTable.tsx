@@ -9,12 +9,11 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
+import { useProgramContext } from 'src/programContext';
+import { adjustHeadCells } from '@utils/utils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function ImportedHouseholdTable({
-  rdi,
-  businessArea,
-  isMerged,
-}): ReactElement {
+function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const initialVariables = {
     rdiId: rdi.id,
     businessArea,
@@ -23,10 +22,38 @@ export function ImportedHouseholdTable({
       : HouseholdRdiMergeStatus.Pending,
   };
 
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const mergedReplacements = {
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    head_of_household__full_name: (_beneficiaryGroup) =>
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+  };
+
+  const adjustedMergedHeadCells = adjustHeadCells(
+    mergedHeadCells,
+    beneficiaryGroup,
+    mergedReplacements,
+  );
+
+  const importedReplacements = {
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    head_of_household__full_name: (_beneficiaryGroup) =>
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+  };
+
+  const adjustedImportedHeadCells = adjustHeadCells(
+    importedHeadCells,
+    beneficiaryGroup,
+    importedReplacements,
+  );
   if (isMerged) {
     return (
       <UniversalTable<HouseholdMinimalFragment, AllHouseholdsQueryVariables>
-        headCells={mergedHeadCells}
+        headCells={adjustedMergedHeadCells}
         query={useAllHouseholdsQuery}
         queriedObjectName="allHouseholds"
         rowsPerPageOptions={[10, 15, 20]}
@@ -45,7 +72,7 @@ export function ImportedHouseholdTable({
   }
   return (
     <UniversalTable<HouseholdMinimalFragment, AllHouseholdsQueryVariables>
-      headCells={importedHeadCells}
+      headCells={adjustedImportedHeadCells}
       query={useAllHouseholdsQuery}
       queriedObjectName="allHouseholds"
       rowsPerPageOptions={[10, 15, 20]}
@@ -62,3 +89,8 @@ export function ImportedHouseholdTable({
     />
   );
 }
+
+export default withErrorBoundary(
+  ImportedHouseholdTable,
+  'ImportedHouseholdTable',
+);

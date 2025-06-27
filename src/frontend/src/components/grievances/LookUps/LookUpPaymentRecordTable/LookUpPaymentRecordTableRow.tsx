@@ -1,6 +1,6 @@
 import { Checkbox } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import { PaymentRecordAndPaymentNode } from '@generated/graphql';
+import { PaymentNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { formatCurrencyWithSymbol, paymentStatusToColor } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
@@ -9,12 +9,12 @@ import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { MouseEvent, ReactElement } from 'react';
 
 interface LookUpPaymentRecordTableRowProps {
-  paymentRecord: PaymentRecordAndPaymentNode;
+  paymentRecord: PaymentNode;
   openInNewTab: boolean;
-  selected: Array<PaymentRecordAndPaymentNode>;
+  selected: Array<PaymentNode>;
   checkboxClickHandler: (
     event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
-    selectedPaymentRecord: PaymentRecordAndPaymentNode,
+    selectedPaymentRecord: PaymentNode,
   ) => void;
 }
 
@@ -28,12 +28,10 @@ export function LookUpPaymentRecordTableRow({
     selected.some((selectedItem) => selectedItem.id === item.id);
   const paymentRecordIsSelected = isItemSelected(paymentRecord);
   const received = paymentRecord?.verification?.receivedAmount;
-  const renderUrl = (objType): string => {
-    if (objType === 'Payment') {
-      return `/${baseUrl}/payment-module/payments/${paymentRecord.id}`;
-    }
-    return `/${baseUrl}/payment-records/${paymentRecord.id}`;
+  const renderUrl = (): string => {
+    return `/${baseUrl}/payment-module/payments/${paymentRecord.id}`;
   };
+  const url = renderUrl();
 
   return (
     <ClickableTableRow
@@ -52,11 +50,9 @@ export function LookUpPaymentRecordTableRow({
       </TableCell>
       <TableCell align="left">
         {!isAllPrograms ? (
-          <BlackLink to={renderUrl(paymentRecord.objType)}>
-            {paymentRecord.caId}
-          </BlackLink>
+          <BlackLink to={url}>{paymentRecord.unicefId}</BlackLink>
         ) : (
-          <span>{paymentRecord.caId}</span>
+          <span>{paymentRecord.unicefId}</span>
         )}
       </TableCell>
       <TableCell align="left">
@@ -69,7 +65,7 @@ export function LookUpPaymentRecordTableRow({
           '-'
         )}
       </TableCell>
-      <TableCell align="left">{paymentRecord.parent.programName}</TableCell>
+      <TableCell align="left">{paymentRecord.parent.program.name}</TableCell>
       <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,

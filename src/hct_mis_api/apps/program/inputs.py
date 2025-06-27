@@ -32,6 +32,7 @@ class CreateProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
     data_collecting_type_code = graphene.String()
+    beneficiary_group = graphene.String()
     partners = graphene.List(ProgramPartnerThroughInput)
     partner_access = graphene.String()
     programme_code = graphene.String()
@@ -52,6 +53,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
     data_collecting_type_code = graphene.String()
+    beneficiary_group = graphene.String()
     programme_code = graphene.String()
     pdu_fields = graphene.List(PDUFieldInput)
 

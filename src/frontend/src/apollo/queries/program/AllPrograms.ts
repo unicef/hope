@@ -49,7 +49,6 @@ export const ALL_PROGRAMS_QUERY = gql`
           startDate
           endDate
           status
-          caId
           description
           budget
           frequencyOfPayments

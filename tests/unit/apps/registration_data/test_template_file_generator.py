@@ -5,7 +5,6 @@ from hct_mis_api.apps.core.fixtures import (
     create_pdu_flexible_attribute,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
 from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_data.services.template_generator_service import (
     TemplateFileGeneratorService,
@@ -53,7 +52,6 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual(expected, result)
 
     def test_add_template_columns(self) -> None:
-        generate_delivery_mechanisms()
         result_wb = TemplateFileGeneratorService(self.program).create_workbook()
 
         households_rows = tuple(result_wb["Households"].iter_rows(values_only=True))
@@ -68,12 +66,6 @@ class TestTemplateFileGenerator(TestCase):
 
         self.assertEqual("age", individuals_rows[0][0])
         self.assertEqual("Age (calculated) - INTEGER", individuals_rows[1][0])
-
-        self.assertIn("wallet_name__transfer_to_digital_wallet_i_c", individuals_rows[0])
-        self.assertIn(
-            "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism) - STRING",
-            individuals_rows[1],
-        )
 
         people_rows = tuple(result_wb["People"].iter_rows(values_only=True))
 
@@ -92,13 +84,7 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual("pp_village_i_c", people_rows[0][69])
         self.assertEqual("Village - STRING", people_rows[1][69])
 
-        self.assertEqual("pp_bank_branch_name_i_c", people_rows[0][85])
+        self.assertEqual("pp_bank_branch_name_i_c", people_rows[0][87])
 
         self.assertEqual("pp_index_id", people_rows[0][83])
         self.assertEqual("Index ID - INTEGER - required", people_rows[1][83])
-
-        self.assertIn("pp_wallet_name__transfer_to_digital_wallet_i_c", people_rows[0])
-        self.assertIn(
-            "Wallet Name Transfer To Digital Wallet (Transfer to Digital Wallet Delivery Mechanism) - STRING",
-            people_rows[1],
-        )

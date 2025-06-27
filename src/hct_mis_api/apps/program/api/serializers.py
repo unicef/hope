@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 
 def validate_cycle_timeframes_overlapping(
@@ -217,3 +217,17 @@ class ProgramCycleDeleteSerializer(EncodedIdSerializerMixin):
     class Meta:
         model = ProgramCycle
         fields = ["id"]
+
+
+class BeneficiaryGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiaryGroup
+        fields = (
+            "id",
+            "name",
+            "group_label",
+            "group_label_plural",
+            "member_label",
+            "member_label_plural",
+            "master_detail",
+        )

@@ -1,25 +1,24 @@
-import { Box } from '@mui/material';
-import { ChangeEvent, ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
-import get from 'lodash/get';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { TabPanel } from '@core/TabPanel';
+import { Tab, Tabs } from '@core/Tabs';
 import {
   useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box } from '@mui/material';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { LoadingComponent } from '@core/LoadingComponent';
-import { Tab, Tabs } from '@core/Tabs';
-import { TabPanel } from '@core/TabPanel';
+import get from 'lodash/get';
+import { ChangeEvent, ReactElement, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useProgramContext } from 'src/programContext';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -46,7 +45,6 @@ export function LookUpHouseholdIndividualSelectionDetail({
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
 }): ReactElement {
-  const { t } = useTranslation();
   const location = useLocation();
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
@@ -98,6 +96,9 @@ export function LookUpHouseholdIndividualSelectionDetail({
     getFilterFromQueryParams(location, initialFilterHH),
   );
 
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: programsData, loading: programsLoading } =
     useAllProgramsForChoicesQuery({
       variables: { businessArea, first: 100 },
@@ -133,7 +134,10 @@ export function LookUpHouseholdIndividualSelectionDetail({
             aria-label="look up tabs"
           >
             {!isSocialDctType && (
-              <Tab data-cy="look-up-household" label={t('LOOK UP HOUSEHOLD')} />
+              <Tab
+                data-cy="look-up-household"
+                label={`LOOK UP ${beneficiaryGroup?.groupLabel}`}
+              />
             )}
             <Tab
               disabled={
@@ -144,7 +148,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
                 initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
               }
               data-cy="look-up-individual"
-              label={t('LOOK UP INDIVIDUAL')}
+              label={`LOOK UP ${beneficiaryGroup?.memberLabel}`}
             />
           </StyledTabs>
         </Box>

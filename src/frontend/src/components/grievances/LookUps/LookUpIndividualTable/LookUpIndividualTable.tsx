@@ -2,10 +2,11 @@ import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
   AllIndividualsForPopulationTableQueryVariables,
+  IndividualRdiMergeStatus,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
-import { decodeIdString } from '@utils/utils';
+import { adjustHeadCells, decodeIdString } from '@utils/utils';
 import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
@@ -51,6 +52,8 @@ export function LookUpIndividualTable({
 }: LookUpIndividualTableProps): ReactElement {
   const { isSocialDctType } = useProgramContext();
   const { programId, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const handleRadioChange = (individual): void => {
     setSelectedIndividual(individual);
@@ -90,14 +93,27 @@ export function LookUpIndividualTable({
     excludedId: excludedId || ticket?.individual?.id || null,
     program: isAllPrograms ? filter.program : programId,
     isActiveProgram: filter.programState === 'active' ? true : null,
+    withdrawn: false,
+    rdiMergeStatus: IndividualRdiMergeStatus.Merged,
+  };
+
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    household__id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const headCells = isSocialDctType
     ? headCellsSocialProgram
     : headCellsStandardProgram;
 
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const headCellsWithProgramColumn = [
-    ...headCells,
+    ...adjustedHeadCells,
     {
       disablePadding: false,
       label: 'Programme',
@@ -109,7 +125,7 @@ export function LookUpIndividualTable({
 
   const preparedHeadcells = isAllPrograms
     ? headCellsWithProgramColumn
-    : headCells;
+    : adjustedHeadCells;
 
   const renderTable = (): ReactElement => (
     <UniversalTable<

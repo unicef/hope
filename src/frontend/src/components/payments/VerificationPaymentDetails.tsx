@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
@@ -38,7 +38,7 @@ export function VerificationPaymentDetails({
           <Typography variant="h6">{t('Payment Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('STATUS')}>
               <StatusBox
                 status={payment.status}
@@ -47,13 +47,13 @@ export function VerificationPaymentDetails({
               />
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('TARGET POPULATION')}
-              value={payment.targetPopulation.name}
+              value={payment.parent.name}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DISTRIBUTION MODALITY')}
               value={payment.distributionModality}
@@ -66,7 +66,7 @@ export function VerificationPaymentDetails({
           <Typography variant="h6">{t('Verification Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('STATUS')}>
               <StatusBox
                 status={payment.verification.status}
@@ -74,7 +74,7 @@ export function VerificationPaymentDetails({
               />
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('AMOUNT RECEIVED')}
               value={formatCurrencyWithSymbol(
@@ -95,34 +95,34 @@ export function VerificationPaymentDetails({
           <Typography variant="h6">{t('Entitlement Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('ENTITLEMENT QUANTITY')}
               value={payment.entitlementQuantity}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERED QUANTITY')}
               value={payment.deliveredQuantity}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('CURRENCY')} value={payment.currency} />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
               value={payment.deliveryType?.name}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('DELIVERY DATE')}
               value={<UniversalMoment>{payment.deliveryDate}</UniversalMoment>}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField
               label={t('FSP')}
               value={payment.serviceProvider.fullName}

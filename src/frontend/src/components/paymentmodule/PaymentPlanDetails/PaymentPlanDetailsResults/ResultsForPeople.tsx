@@ -1,6 +1,6 @@
 import { PaymentPlanQuery } from '@generated/graphql';
 import { useTranslation } from 'react-i18next';
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import {
   SummaryBorder,
   SummaryValue,
@@ -16,9 +16,9 @@ export const ResultsForPeople = ({ paymentPlan }: ResultsForPeopleProps) => {
   const { totalHouseholdsCount } = paymentPlan;
 
   return (
-    <Grid item xs={4}>
+    <Grid size={{ xs: 4 }}>
       <Grid container spacing={0} justifyContent="flex-end">
-        <Grid item>
+        <Grid>
           <SummaryBorder>
             <LabelizedField label={t('Total Number of People')}>
               <SummaryValue>{totalHouseholdsCount || '0'}</SummaryValue>

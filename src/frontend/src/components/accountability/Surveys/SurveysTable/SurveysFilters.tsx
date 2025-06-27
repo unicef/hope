@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
@@ -49,7 +49,7 @@ export function SurveysFilters({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="center" spacing={3}>
-        <Grid xs={4} item>
+        <Grid size={{ xs: 4 }} >
           <SearchTextField
             value={filter.search}
             label="Search"
@@ -58,7 +58,7 @@ export function SurveysFilters({
             fullWidth
           />
         </Grid>
-        <Grid xs={4} item>
+        <Grid size={{ xs: 4 }} >
           <TargetPopulationAutocomplete
             name="targetPopulation"
             value={filter.targetPopulation}
@@ -69,7 +69,7 @@ export function SurveysFilters({
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <CreatedByAutocomplete
             name="createdBy"
             label={t('Created by')}
@@ -82,8 +82,8 @@ export function SurveysFilters({
             additionalVariables={{ isSurveyCreator: true }}
           />
         </Grid>
-        <Grid container item xs={12} spacing={3} alignItems="flex-end">
-          <Grid item xs={3}>
+        <Grid container  size={{ xs: 12 }} spacing={3} alignItems="flex-end">
+          <Grid size={{ xs: 3 }}>
             <DatePickerFilter
               topLabel={t('Creation Date')}
               label="From"
@@ -92,7 +92,7 @@ export function SurveysFilters({
               dataCy="filters-creation-date-from"
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <DatePickerFilter
               label={t('To')}
               onChange={(date) => handleFilterChange('createdAtRangeMax', date)}

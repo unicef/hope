@@ -8,7 +8,6 @@ import requests
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
@@ -30,18 +29,17 @@ class TestPhoneNumberVerification(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
+        cls.afghanistan = create_afghanistan()
         cls.payment_record_amount = 110
         user = UserFactory()
 
-        ###
-
-        program = ProgramFactory(business_area=BusinessArea.objects.first())
+        program = ProgramFactory(business_area=cls.afghanistan)
         program.admin_areas.set(Area.objects.order_by("?")[:3])
 
         payment_plan = PaymentPlanFactory(
             program_cycle=program.cycles.first(),
-            business_area=BusinessArea.objects.first(),
+            business_area=cls.afghanistan,
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         cash_plan_payment_verification = PaymentVerificationPlanFactory(
@@ -52,7 +50,7 @@ class TestPhoneNumberVerification(TestCase):
         cls.individuals = []
         for i in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
-                imported_by=user, business_area=BusinessArea.objects.first(), program=program
+                imported_by=user, business_area=cls.afghanistan, program=program
             )
             household, individuals = create_household(
                 {
@@ -66,8 +64,6 @@ class TestPhoneNumberVerification(TestCase):
                 },
             )
             cls.individuals.append(individuals[0])
-
-            household.programs.add(program)
 
             payment = PaymentFactory(
                 parent=payment_plan,
@@ -88,12 +84,13 @@ class TestPhoneNumberVerification(TestCase):
 
         ###
 
-        other_program = ProgramFactory(business_area=BusinessArea.objects.first())
+        other_program = ProgramFactory(business_area=cls.afghanistan)
         other_program.admin_areas.set(Area.objects.order_by("?")[:3])
 
         other_payment_plan = PaymentPlanFactory(
             program_cycle=other_program.cycles.first(),
-            business_area=BusinessArea.objects.first(),
+            business_area=cls.afghanistan,
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=other_payment_plan)
         other_payment_plan_payment_verification = PaymentVerificationPlanFactory(
@@ -104,7 +101,7 @@ class TestPhoneNumberVerification(TestCase):
         cls.other_individuals = []
         for _ in range(cls.payment_record_amount):
             other_registration_data_import = RegistrationDataImportFactory(
-                imported_by=user, business_area=BusinessArea.objects.first(), program=other_program
+                imported_by=user, business_area=cls.afghanistan, program=other_program
             )
             other_household, other_individuals = create_household(
                 {
@@ -116,8 +113,6 @@ class TestPhoneNumberVerification(TestCase):
             )
             cls.other_individuals.append(other_individuals[0])
 
-            other_household.programs.add(program)
-
             other_payment_record = PaymentFactory(
                 parent=other_payment_plan,
                 household=other_household,
@@ -128,7 +123,7 @@ class TestPhoneNumberVerification(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=other_payment_plan_payment_verification,
-                payment_obj=other_payment_record,
+                payment=other_payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=other_household)

@@ -37,7 +37,7 @@ class GrievanceDetailsPage(BaseComponents):
     administrativeLevel = 'div[data-cy="label-Administrative Level 2"]'
     areaVillage = 'div[data-cy="label-Area / Village / Pay point"]'
     languagesSpoken = 'div[data-cy="label-Languages Spoken"]'
-    documentation = 'div[data-cy="label-Documentation"]'
+    documentation = 'div[data-cy="label-Grievance Supporting Documents"]'
     ticketDescription = 'div[data-cy="label-Description"]'
     labelCreatedBy = 'div[data-cy="label-Created By"]'
     comments = 'div[data-cy="label-Comments"]'
@@ -57,7 +57,7 @@ class GrievanceDetailsPage(BaseComponents):
     newNoteField = 'textarea[data-cy="input-newNote"]'
     buttonNewNote = 'button[data-cy="button-add-note"]'
     labelLanguagesSpoken = 'div[data-cy="label-Languages Spoken"]'
-    labelDocumentation = 'div[data-cy="label-Documentation"]'
+    labelDocumentation = 'div[data-cy="label-Grievance Supporting Documents"]'
     labelDescription = 'div[data-cy="label-Description"]'
     noteRow = '[data-cy="note-row"]'
     noteName = '[data-cy="note-name"]'
@@ -182,6 +182,7 @@ class GrievanceDetailsPage(BaseComponents):
     statusContainer = 'div[data-cy="status-container"]'
     labelPriority = 'div[data-cy="label-Priority"]'
     labelUrgency = 'div[data-cy="label-Urgency"]'
+    labelTicketId = '[data-cy="label-Ticket Id"]'
 
     def getLabelGender(self) -> WebElement:
         return self.wait_for(self.labelGender)
@@ -206,6 +207,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getTitle(self) -> WebElement:
         return self.wait_for(self.title)
+
+    def getGrievanceLinedTicket(self) -> WebElement:
+        return self.wait_for(self.labelTicketId)
 
     def getButtonCloseTicket(self) -> WebElement:
         # Workaround because elements overlapped even though Selenium saw that they were available:

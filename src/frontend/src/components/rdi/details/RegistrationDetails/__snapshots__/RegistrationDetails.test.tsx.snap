@@ -3,38 +3,39 @@
 exports[`components/rdi/details/RegistrationDetails should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
+    style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-keTIit jYOYMO"
+      class="sc-jUkaYT gbpHCW"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
       >
         Import Details
       </h6>
     </div>
     <div
-      class="sc-fAUdSK dKXDYV"
+      class="sc-fLDLck dwnEET"
     >
       <div
-        class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1nmjuun-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-auto css-1djy14n-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
                 class="MuiBox-root css-j7qwjs"
               >
                 <div>
                   <span
-                    class="sc-gtLWhw bkWrmx"
+                    class="sc-gjcoXW bMjypC"
                     color="textSecondary"
                   >
                     status
@@ -43,14 +44,14 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                     data-cy="label-status"
                   >
                     <span
-                      class="sc-egkSDF XYdBd"
+                      class="sc-dVBluf fZAisw"
                       color="textSecondary"
                     >
                       <div
-                        class="sc-dntaoT gQSLBb"
+                        class="sc-dycHyt gCnfnG"
                       >
                         <div
-                          class="sc-ivxoEo gsVMTT status-box-container"
+                          class="sc-jbAkgO hLrAIx status-box-container"
                           data-cy="status-container"
                         >
                           MERGED
@@ -62,11 +63,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-gtLWhw bkWrmx"
+                  class="sc-gjcoXW bMjypC"
                   color="textSecondary"
                 >
                   Source of Data
@@ -75,7 +76,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   data-cy="label-Source of Data"
                 >
                   <span
-                    class="sc-egkSDF XYdBd"
+                    class="sc-dVBluf fZAisw"
                     color="textSecondary"
                   >
                     XLS
@@ -84,11 +85,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-gtLWhw bkWrmx"
+                  class="sc-gjcoXW bMjypC"
                   color="textSecondary"
                 >
                   Import Date
@@ -97,7 +98,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   data-cy="label-Import Date"
                 >
                   <span
-                    class="sc-egkSDF XYdBd"
+                    class="sc-dVBluf fZAisw"
                     color="textSecondary"
                   >
                     <time
@@ -110,11 +111,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-gtLWhw bkWrmx"
+                  class="sc-gjcoXW bMjypC"
                   color="textSecondary"
                 >
                   Imported by
@@ -123,7 +124,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   data-cy="label-Imported by"
                 >
                   <span
-                    class="sc-egkSDF XYdBd"
+                    class="sc-dVBluf fZAisw"
                     color="textSecondary"
                   >
                     Maciej Szewczyk
@@ -134,22 +135,22 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-auto css-1djy14n-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-dpBQxM ldTXDC"
+                class="sc-eiwqOE eTWafa"
               >
                 <div
                   data-cy="labelized-field-container-households"
                 >
                   <span
-                    class="sc-gtLWhw bkWrmx"
+                    class="sc-gjcoXW bMjypC"
                     color="textSecondary"
                   >
                     Total Number of Households
@@ -158,11 +159,11 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                     data-cy="label-Total Number of Households"
                   >
                     <span
-                      class="sc-egkSDF XYdBd"
+                      class="sc-dVBluf fZAisw"
                       color="textSecondary"
                     >
                       <div
-                        class="sc-jwIPbr ddMOai"
+                        class="sc-dPKAra feoYCh"
                       >
                         2
                       </div>
@@ -172,29 +173,29 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-dpBQxM ldTXDC"
+                class="sc-eiwqOE eTWafa"
               >
                 <div
                   data-cy="labelized-field-container-individuals"
                 >
                   <span
-                    class="sc-gtLWhw bkWrmx"
+                    class="sc-gjcoXW bMjypC"
                     color="textSecondary"
                   >
-                    Total Number of Registered Individuals
+                    Total Number of Individuals
                   </span>
                   <div
-                    data-cy="label-Total Number of Registered Individuals"
+                    data-cy="label-Total Number of Individuals"
                   >
                     <span
-                      class="sc-egkSDF XYdBd"
+                      class="sc-dVBluf fZAisw"
                       color="textSecondary"
                     >
                       <div
-                        class="sc-jwIPbr ddMOai"
+                        class="sc-dPKAra feoYCh"
                       >
                         6
                       </div>
@@ -206,41 +207,41 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-auto css-1wrgmsj-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-auto css-1djy14n-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-column css-1k7z4bv-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-3 MuiGrid-grid-xs-12 css-1jerruy-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 MuiGrid2-spacing-xs-3 css-13omhve-MuiGrid2-root"
             >
               <div
-                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
               />
               <div
-                class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
               >
                 <span
-                  class="sc-jtQUzJ ekrqrM"
+                  class="sc-gjXmFk chCOXp"
                 >
                   Biographical
                 </span>
               </div>
             </div>
             <div
-              class="sc-ghWlax XhyEc"
+              class="sc-gNZgCX jNDIFY"
             >
               <div
-                class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
+                class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
               >
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
                 >
                   <div
                     class="MuiBox-root css-1yp4ln"
                   >
                     <span
-                      class="sc-dstKZu hSfkvd"
+                      class="sc-cMqPwU jVNDod"
                       color="textSecondary"
                       data-cy="label-Within Batch"
                     >
@@ -249,22 +250,22 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </div>
                 </div>
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
                 >
                   <div
-                    class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
+                    class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-column css-1k7z4bv-MuiGrid2-root"
                   >
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-mhc70k-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
-                          class="sc-ixGGxD hKRJr"
+                          class="sc-hRDKVd bTjjOb"
                         >
                           <span
-                            class="sc-khLCKb bLUYQb"
+                            class="sc-jBIHhB gRBTLv"
                             data-cy="label-Unique"
                           >
                             Unique
@@ -272,13 +273,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Unique"
                           >
                             66.67
@@ -286,10 +287,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Unique"
                           >
                             (
@@ -299,13 +300,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Unique"
                           >
                             66.67
@@ -313,10 +314,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Unique"
                           >
                             (
@@ -326,13 +327,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Unique"
                           >
                             66.67
@@ -340,10 +341,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Unique"
                           >
                             (
@@ -354,16 +355,16 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       </div>
                     </div>
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-mhc70k-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
-                          class="sc-ixGGxD hKRJr"
+                          class="sc-hRDKVd bTjjOb"
                         >
                           <span
-                            class="sc-khLCKb bLUYQb"
+                            class="sc-jBIHhB gRBTLv"
                             data-cy="label-Duplicates"
                           >
                             Duplicates
@@ -371,13 +372,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Duplicates"
                           >
                             33.33
@@ -385,10 +386,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Duplicates"
                           >
                             (
@@ -398,13 +399,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Duplicates"
                           >
                             33.33
@@ -412,10 +413,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Duplicates"
                           >
                             (
@@ -425,13 +426,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Duplicates"
                           >
                             33.33
@@ -439,10 +440,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Duplicates"
                           >
                             (
@@ -457,19 +458,19 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               </div>
             </div>
             <div
-              class="sc-ghWlax XhyEc"
+              class="sc-gNZgCX jNDIFY"
             >
               <div
-                class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
+                class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
               >
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
                 >
                   <div
                     class="MuiBox-root css-1yp4ln"
                   >
                     <span
-                      class="sc-dstKZu hSfkvd"
+                      class="sc-cMqPwU jVNDod"
                       color="textSecondary"
                       data-cy="label-In Population"
                     >
@@ -478,22 +479,22 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                   </div>
                 </div>
                 <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
                 >
                   <div
-                    class="MuiGrid-root MuiGrid-container MuiGrid-direction-xs-column css-1vpwcmr-MuiGrid-root"
+                    class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-column css-1k7z4bv-MuiGrid2-root"
                   >
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-mhc70k-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
-                          class="sc-ixGGxD hKRJr"
+                          class="sc-hRDKVd bTjjOb"
                         >
                           <span
-                            class="sc-khLCKb bLUYQb"
+                            class="sc-jBIHhB gRBTLv"
                             data-cy="label-Unique"
                           >
                             Unique
@@ -501,13 +502,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Unique"
                           >
                             100.00
@@ -515,10 +516,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Unique"
                           >
                             (
@@ -528,13 +529,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Unique"
                           >
                             100.00
@@ -542,10 +543,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Unique"
                           >
                             (
@@ -555,13 +556,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Unique"
                           >
                             100.00
@@ -569,10 +570,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Unique"
                           >
                             (
@@ -583,16 +584,16 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       </div>
                     </div>
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-mhc70k-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
-                          class="sc-ixGGxD hKRJr"
+                          class="sc-hRDKVd bTjjOb"
                         >
                           <span
-                            class="sc-khLCKb bLUYQb"
+                            class="sc-jBIHhB gRBTLv"
                             data-cy="label-Duplicates"
                           >
                             Duplicates
@@ -600,13 +601,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Duplicates"
                           >
                             0.00
@@ -614,10 +615,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Duplicates"
                           >
                             (
@@ -627,13 +628,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Duplicates"
                           >
                             0.00
@@ -641,10 +642,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Duplicates"
                           >
                             (
@@ -654,13 +655,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Duplicates"
                           >
                             0.00
@@ -668,10 +669,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Duplicates"
                           >
                             (
@@ -682,16 +683,16 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       </div>
                     </div>
                     <div
-                      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-4 css-mhc70k-MuiGrid-root"
+                      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-4 css-14dudm3-MuiGrid2-root"
                     >
                       <div
-                        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
                       >
                         <span
-                          class="sc-ixGGxD hKRJr"
+                          class="sc-hRDKVd bTjjOb"
                         >
                           <span
-                            class="sc-khLCKb bLUYQb"
+                            class="sc-jBIHhB gRBTLv"
                             data-cy="label-Need Adjudication"
                           >
                             Need Adjudication
@@ -699,13 +700,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </span>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Need Adjudication"
                           >
                             0.00
@@ -713,10 +714,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Need Adjudication"
                           >
                             (
@@ -726,13 +727,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Need Adjudication"
                           >
                             0.00
@@ -740,10 +741,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Need Adjudication"
                           >
                             (
@@ -753,13 +754,13 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                         </div>
                       </div>
                       <div
-                        class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-4 MuiGrid-grid-xs-4 css-hkrvy0-MuiGrid-root"
+                        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 MuiGrid2-spacing-xs-4 css-oppe0l-MuiGrid2-root"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-kLhKbu jgRYFD"
+                            class="sc-kfeOyU fGgrYF"
                             data-cy="percentage-Need Adjudication"
                           >
                             0.00
@@ -767,10 +768,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                           </span>
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                         >
                           <span
-                            class="sc-ixGGxD hKRJr"
+                            class="sc-hRDKVd bTjjOb"
                             data-cy="value-Need Adjudication"
                           >
                             (

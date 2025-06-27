@@ -1,4 +1,4 @@
-import { Box, Grid, MenuItem } from '@mui/material';
+import { Box, Grid2 as Grid, MenuItem } from '@mui/material';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SearchTextField } from '@components/core/SearchTextField';
@@ -29,7 +29,7 @@ export function FlexFieldTab(): ReactElement {
   return (
     <Box p={3}>
       <Grid container spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={searchValue}
@@ -38,7 +38,7 @@ export function FlexFieldTab(): ReactElement {
             fullWidth
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           {selectOptions.length && (
             <SelectFilter
               onChange={(e) => setSelectedOption(e.target.value)}
@@ -59,7 +59,7 @@ export function FlexFieldTab(): ReactElement {
             </SelectFilter>
           )}
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => setSelectedFieldType(e.target.value)}
             label={t('Field Type')}

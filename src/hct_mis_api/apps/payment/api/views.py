@@ -96,6 +96,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             program_cycle__program__in=program_ids,
         )
 
+    # TODO: e2e failed probably because of cache here
     @etag_decorator(PaymentPlanKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=PaymentPlanKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:

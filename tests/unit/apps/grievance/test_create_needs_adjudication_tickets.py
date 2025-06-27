@@ -25,6 +25,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestCreateNeedsAdjudicationTickets(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -37,7 +38,6 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
         cls.household = HouseholdFactory.build(
-            id="12a123ed-d2a5-123a-b123-1234da1d5d23",
             size=2,
             program=program,
         )
@@ -45,7 +45,6 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = program
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program)
         cls.individuals_to_create = [
             {
                 "full_name": "test name",
@@ -129,6 +128,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         self.assertEqual(GrievanceTicket.objects.all().count(), 1)
 
 
+@pytest.mark.elasticsearch
 class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -142,27 +142,36 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             name="Test HOPE",
             business_area=BusinessArea.objects.first(),
         )
+        program2 = ProgramFactory(
+            name="Test HOPE2",
+            business_area=BusinessArea.objects.first(),
+        )
         cls.household = HouseholdFactory.build(
-            id="12a123ed-d2a5-123a-b123-1234da1d5d11",
             size=2,
             program=program,
         )
         cls.household2 = HouseholdFactory.build(
-            id="12a123ed-d2a5-123a-b123-1234da1d5d22",
             size=1,
             program=program,
+        )
+        cls.household3 = HouseholdFactory.build(
+            size=1,
+            program=program2,
         )
         cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = program
         cls.household.registration_data_import.save()
-        cls.household.programs.add(program)
         cls.household2.household_collection.save()
         cls.household2.registration_data_import.imported_by.save()
         cls.household2.registration_data_import.program = program
         cls.household2.registration_data_import.save()
-        cls.household2.programs.add(program)
+        cls.household3.household_collection.save()
+        cls.household3.registration_data_import.imported_by.save()
+        cls.household3.registration_data_import.program = program2
+        cls.household3.registration_data_import.save()
         cls.rdi = cls.household.registration_data_import
+        cls.rd2 = cls.household3.registration_data_import
         individuals_to_create = [
             {
                 "id": "11111111-1111-1111-1111-111111111111",
@@ -203,6 +212,21 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
                 "photo": ContentFile(b"aaa", name="fooa.png"),
             },
         ]
+        individuals_to_create_3 = [
+            {
+                "id": "33333333-3333-3333-4444-333333333333",
+                "full_name": "test name 2",
+                "given_name": "test 2",
+                "family_name": "name 2",
+                "birth_date": "1999-01-22",
+                "deduplication_golden_record_results": {
+                    "duplicates": [],
+                    "possible_duplicates": [],
+                },
+                "photo": ContentFile(b"aaa", name="fooa2.png"),
+            },
+        ]
+
         individuals = [
             IndividualFactory(household=cls.household, program=program, **individual)
             for individual in individuals_to_create
@@ -211,26 +235,33 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             IndividualFactory(household=cls.household2, program=program, **individual)
             for individual in individuals_to_create_2
         ][0]
+        other_individual2 = [
+            IndividualFactory(household=cls.household3, program=program2, **individual)
+            for individual in individuals_to_create_3
+        ][0]
         cls.household.head_of_household = individuals[0]
         cls.household.save()
         cls.household2.head_of_household = other_individual
         cls.household2.save()
+        cls.household3.head_of_household = other_individual2
+        cls.household3.save()
 
         cls.ind1, cls.ind2 = sorted(individuals, key=lambda x: x.id)
+        cls.ind1.registration_data_import = cls.rdi
+        cls.ind2.registration_data_import = cls.rdi
+        cls.ind1.save()
+        cls.ind2.save()
         cls.ind3, cls.ind4 = sorted([cls.ind1, other_individual], key=lambda x: x.id)
+        cls.ind5 = other_individual2
 
         cls.dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
-            program=program,
-            individual1=cls.ind1,
-            individual2=cls.ind2,
-            similarity_score=55.55,
+            program=program, individual1=cls.ind1, individual2=cls.ind2, similarity_score=55.55, status_code="200"
         )
-
         cls.dedup_engine_similarity_pair_2 = DeduplicationEngineSimilarityPair.objects.create(
-            program=program,
-            individual1=cls.ind3,
-            individual2=cls.ind4,
-            similarity_score=75.25,
+            program=program, individual1=cls.ind3, individual2=cls.ind4, similarity_score=75.25, status_code="200"
+        )
+        cls.dedup_engine_similarity_pair_3 = DeduplicationEngineSimilarityPair.objects.create(
+            program=program2, individual1=cls.ind5, individual2=None, similarity_score=0.0, status_code="429"
         )
 
     def test_create_na_tickets_biometrics(self) -> None:
@@ -242,7 +273,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
 
-        self.assertEqual(DeduplicationEngineSimilarityPair.objects.all().count(), 2)
+        self.assertEqual(DeduplicationEngineSimilarityPair.objects.all().count(), 3)
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair.pk),
             self.rdi,
@@ -279,6 +310,33 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         )
         self.assertEqual(GrievanceTicket.objects.all().count(), 2)
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
+
+    def test_create_na_tickets_biometrics_for_1_ind(self) -> None:
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
+
+        create_needs_adjudication_tickets_for_biometrics(
+            DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_3.pk),
+            self.rdi,
+        )
+
+        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
+        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 1)
+        grievance_ticket = GrievanceTicket.objects.first()
+        na_ticket = TicketNeedsAdjudicationDetails.objects.first()
+
+        self.assertEqual(grievance_ticket.category, GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION)
+        self.assertEqual(
+            grievance_ticket.issue_type,
+            GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+        )
+
+        self.assertEqual(str(na_ticket.golden_records_individual.id), str(self.ind5.id))
+        self.assertIsNone(na_ticket.possible_duplicate)
+        self.assertEqual(
+            na_ticket.extra_data["dedup_engine_similarity_pair"],
+            self.dedup_engine_similarity_pair_3.serialize_for_ticket(),
+        )
 
     def test_ticket_biometric_query_response(self) -> None:
         query_all = """

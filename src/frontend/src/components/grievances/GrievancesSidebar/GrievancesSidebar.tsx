@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { isEmpty } from 'lodash';
 import {
   GRIEVANCE_CATEGORIES,
@@ -22,23 +22,41 @@ export function GrievancesSidebar({
   const shouldShowReassignBoxDataChange = (): boolean => {
     let { individual, household } = ticket;
     const { category, issueType, status } = ticket;
+
     if (category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
       individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
       household =
         ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
     }
     const isOneIndividual = household?.activeIndividualsCount === 1;
-
     if (isOneIndividual) return false;
-    const isRightCategory =
-      (category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-        issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) ||
-      (category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-        issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) ||
-      (category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
-        ticket?.systemFlaggingTicketDetails?.approveStatus) ||
-      (category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-        ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
+
+    const isRightCategory = [
+      {
+        category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
+        issueType: GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL,
+      },
+      {
+        category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
+        issueType: GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL,
+      },
+      {
+        category: GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
+        issueType: undefined,
+        approveStatus: ticket?.systemFlaggingTicketDetails?.approveStatus,
+      },
+      {
+        category: GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION,
+        selectedIndividual:
+          ticket?.needsAdjudicationTicketDetails?.selectedIndividual,
+      },
+    ].some(
+      (condition) =>
+        category.toString() === condition.category &&
+        (issueType?.toString() === condition.issueType ||
+          condition.approveStatus ||
+          condition.selectedIndividual),
+    );
 
     if (!isRightCategory) return false;
 
@@ -47,23 +65,22 @@ export function GrievancesSidebar({
 
     const householdsAndRoles = individual?.householdsAndRoles || [];
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
-    const hasRolesToReassign =
-      householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
+    const hasRolesToReassign = householdsAndRoles.some(
+      (el) => el.role !== 'NO_ROLE',
+    );
 
     let isProperDataChange = true;
     if (
       category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
       issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
     ) {
-      if (
-        isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role) &&
-        isEmpty(
-          ticket.individualDataUpdateTicketDetails.individualData.relationship,
-        )
-      ) {
+      const { role, relationship } =
+        ticket.individualDataUpdateTicketDetails.individualData;
+      if (isEmpty(role) && isEmpty(relationship)) {
         isProperDataChange = false;
       }
     }
+
     return (
       (isHeadOfHousehold || hasRolesToReassign) &&
       isProperDataChange &&
@@ -90,7 +107,7 @@ export function GrievancesSidebar({
                   ticket.paymentVerificationTicketDetails?.paymentVerifications?.edges.map(
                     (edge) => ({
                       id: edge.node.id,
-                      caId: ticket.paymentRecord.caId,
+                      paymentId: ticket.paymentRecord.unicefId,
                     }),
                   ) || []
                 }
@@ -139,7 +156,7 @@ export function GrievancesSidebar({
   };
 
   return (
-    <Grid item xs={4}>
+    <Grid size={{ xs: 4 }}>
       {renderRightSection()}
     </Grid>
   );

@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   Table,
   TableBody,
   TableCell,
@@ -27,6 +27,7 @@ import {
 } from '@generated/graphql';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 const StyledTable = styled(Table)`
@@ -57,6 +58,9 @@ export function WarningTooltipTable({
   canViewDetails = false,
 }: WarningTooltipTableProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (!payment) return null;
   const mappedPaymentPlanRows = (): ReactElement[] => {
     const {
@@ -122,12 +126,12 @@ export function WarningTooltipTable({
         </Box>
         <GreyBox p={3}>
           <Grid container>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <LabelizedField label={t('Start Date')}>
                 <UniversalMoment>{paymentPlan.startDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <LabelizedField label={t('End Date')}>
                 <UniversalMoment>{paymentPlan.endDate}</UniversalMoment>
               </LabelizedField>
@@ -135,7 +139,8 @@ export function WarningTooltipTable({
           </Grid>
         </GreyBox>
         <Box mt={10} mb={10} display="flex">
-          {t('Household ID')} <Bold>{payment.household?.unicefId}</Bold>{' '}
+          {`${beneficiaryGroup?.groupLabel} ID`}{' '}
+          <Bold>{payment.household?.unicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>
         <StyledTable>

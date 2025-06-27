@@ -87,6 +87,8 @@ class TargetingCreate(BaseComponents):
     selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
     programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
     selectRefugee = 'li[data-cy="select-option-REFUGEE"]'
+    fieldChooser = 'data-cy="field-chooser-householdsFiltersBlocks[{}]"'
+    noValidationFspAccept = 'button[data-cy="button-confirm"]'
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -94,7 +96,7 @@ class TargetingCreate(BaseComponents):
     def getPageHeaderTitle(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
 
-    def getButtonTargetPopulationCreate(self) -> bool:
+    def getButtonTargetPopulationCreate(self) -> WebElement:
         return self.wait_for(self.buttonTargetPopulationCreate)
 
     def clickButtonTargetPopulationCreate(self) -> bool:
@@ -331,3 +333,9 @@ class TargetingCreate(BaseComponents):
 
     def getSelectRefugee(self) -> WebElement:
         return self.wait_for(self.selectRefugee)
+
+    def getFieldChooser(self, num: int) -> WebElement:
+        return self.wait_for(self.fieldChooser.format(str(num)))
+
+    def getNoValidationFspAccept(self) -> WebElement:
+        return self.wait_for(self.noValidationFspAccept)

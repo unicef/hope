@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
   AllIndividualsQueryVariables,
@@ -13,6 +13,7 @@ import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHead
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 
 interface ImportedPeopleTableProps {
+  rdi;
   rdiId: string;
   household?: string;
   title?: string;
@@ -25,6 +26,7 @@ interface ImportedPeopleTableProps {
 }
 
 export function ImportedPeopleTable({
+  rdi,
   rdiId,
   isOnPaper = false,
   title,
@@ -48,7 +50,7 @@ export function ImportedPeopleTable({
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
         <Grid container justifyContent="flex-end" spacing={3}>
-          <Grid item>
+          <Grid>
             <Box p={3}>
               <FormControlLabel
                 control={
@@ -80,8 +82,8 @@ export function ImportedPeopleTable({
             <ImportedPeopleTableRow
               choices={choicesData}
               key={row.id}
-              isMerged={isMerged}
               individual={row}
+              rdi={rdi}
             />
           )}
         />
@@ -98,8 +100,8 @@ export function ImportedPeopleTable({
             <ImportedPeopleTableRow
               choices={choicesData}
               key={row.id}
-              isMerged={isMerged}
               individual={row}
+              rdi={rdi}
             />
           )}
         />

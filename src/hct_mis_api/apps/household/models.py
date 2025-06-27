@@ -4,7 +4,8 @@ from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
-from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
+from django.contrib.gis.db.models import Q, UniqueConstraint
+from django.contrib.gis.geos import Point
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
@@ -29,6 +30,10 @@ from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.core.utils import FlexFieldsEncoder
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.mixins import (
+    HouseholdDeliveryDataMixin,
+    IndividualDeliveryDataMixin,
+)
 from hct_mis_api.apps.household.signals import (
     household_deleted,
     household_withdrawn,
@@ -168,20 +173,6 @@ YES_NO_CHOICE = (
     (BLANK, _("None")),
     (YES, _("Yes")),
     (NO, _("No")),
-)
-
-COLLECT_TYPE_UNKNOWN = ""
-COLLECT_TYPE_NONE = "0"
-COLLECT_TYPE_FULL = "1"
-COLLECT_TYPE_PARTIAL = "2"
-COLLECT_TYPE_SIZE_ONLY = "3"
-
-COLLECT_TYPES = (
-    (COLLECT_TYPE_UNKNOWN, _("Unknown")),
-    (COLLECT_TYPE_PARTIAL, _("Partial individuals collected")),
-    (COLLECT_TYPE_FULL, _("Full individual collected")),
-    (COLLECT_TYPE_SIZE_ONLY, _("Size only collected")),
-    (COLLECT_TYPE_NONE, _("No individual data")),
 )
 
 NOT_PROVIDED = "NOT_PROVIDED"
@@ -329,9 +320,7 @@ logger = logging.getLogger(__name__)
 
 
 class HouseholdCollection(UnicefIdentifiedModel):
-    """
-    Collection of household representations.
-    """
+    """Collection of household representations."""
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -349,6 +338,7 @@ class Household(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    HouseholdDeliveryDataMixin,
 ):
     class CollectType(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
@@ -373,7 +363,8 @@ class Household(
             "admin3",
             "admin4",
             "representatives",
-            "geopoint",
+            "latitude",
+            "longitude",
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
             "female_age_group_12_17_count",
@@ -395,8 +386,10 @@ class Household(
             "male_age_group_12_17_disabled_count",
             "male_age_group_18_59_disabled_count",
             "male_age_group_60_disabled_count",
+            "other_sex_group_count",
+            "unknown_sex_group_count",
             "registration_data_import",
-            "programs",
+            "program",
             "returnee",
             "flex_fields",
             "first_registration_date",
@@ -412,146 +405,48 @@ class Household(
             "org_name_enumerator",
             "village",
             "registration_method",
-            "collect_individual_data",
             "currency",
             "unhcr_id",
             "detail_id",
-            "registration_id",
             "program_registration_id",
         ]
     )
-    household_collection = models.ForeignKey(
-        HouseholdCollection,
+    business_area = models.ForeignKey(
+        "core.BusinessArea", on_delete=models.CASCADE, help_text="Household business area"
+    )
+    program = models.ForeignKey(
+        "program.Program",
+        db_index=True,
+        on_delete=models.PROTECT,
         related_name="households",
-        on_delete=models.CASCADE,
-        null=True,
+        help_text="Household program",
     )
-    withdrawn = models.BooleanField(default=False, db_index=True)
-    withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
-    consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.BooleanField(null=True)
-    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
-    residence_status = models.CharField(max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True)
-
-    country_origin = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
-    country = models.ForeignKey("geo.Country", related_name="+", blank=True, null=True, on_delete=models.PROTECT)
-    address = CICharField(max_length=1024, blank=True)
-    zip_code = models.CharField(max_length=12, blank=True, null=True)
-    """location contains lowest administrative area info"""
-    admin_area = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True)
-    admin1 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
-    admin2 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
-    admin3 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
-    admin4 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
-    geopoint = PointField(blank=True, null=True)
-
-    size = models.PositiveIntegerField(db_index=True, null=True, blank=True)
-    representatives = models.ManyToManyField(
-        to="household.Individual",
-        through="household.IndividualRoleInHousehold",
-        help_text="""This is only used to track collector (primary or secondary) of a household.
-            They may still be a HOH of this household or any other household.
-            Through model will contain the role (ROLE_CHOICE) they are connected with on.""",
-        related_name="represented_households",
-    )
-    female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    pregnant_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    children_count = models.PositiveIntegerField(default=None, null=True)
-    male_children_count = models.PositiveIntegerField(default=None, null=True)
-    female_children_count = models.PositiveIntegerField(default=None, null=True)
-    children_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    male_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
-    female_children_disabled_count = models.PositiveIntegerField(default=None, null=True)
-
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
         related_name="households",
         blank=True,
         null=True,
         on_delete=models.CASCADE,
+        help_text="Household registration data import",
     )
-    programs = models.ManyToManyField(
-        "program.Program",
+    household_collection = models.ForeignKey(
+        HouseholdCollection,
         related_name="households",
-        blank=True,
-    )  # TODO: remove after migration
-    returnee = models.BooleanField(null=True)
-    flex_fields = JSONField(default=dict, blank=True)
-    first_registration_date = models.DateTimeField()
-    last_registration_date = models.DateTimeField()
-    head_of_household = models.OneToOneField(
-        "Individual", related_name="heading_household", on_delete=models.CASCADE, null=True
-    )
-    fchild_hoh = models.BooleanField(null=True)
-    child_hoh = models.BooleanField(null=True)
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    start = models.DateTimeField(blank=True, null=True)
-    deviceid = models.CharField(max_length=250, blank=True, default=BLANK)
-    name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
-    org_enumerator = models.CharField(max_length=250, choices=ORG_ENUMERATOR_CHOICES, default=BLANK)
-    org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
-    village = models.CharField(max_length=250, blank=True, default=BLANK)
-    registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(
-        max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN
-    )  # TODO remove
-    currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
-    unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
-    detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
-    )
-    registration_id = CICharField(
-        max_length=100,
-        blank=True,
+        on_delete=models.CASCADE,
         null=True,
-        db_index=True,
-        verbose_name=_("Aurora Registration Id"),
+        help_text="Collection of household representations",
     )
-    program_registration_id = CICharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        db_index=True,
-        unique=True,
-        verbose_name=_("Beneficiary Program Registration Id"),
+    representatives = models.ManyToManyField(
+        to="household.Individual",
+        through="household.IndividualRoleInHousehold",
+        help_text="""This is only used to track collector (primary or secondary) of a household.
+                    They may still be a HOH of this household or any other household.
+                    Through model will contain the role (ROLE_CHOICE) they are connected with on.""",
+        related_name="represented_households",
     )
-    total_cash_received_usd = models.DecimalField(
-        null=True,
-        decimal_places=2,
-        max_digits=64,
-        blank=True,
+    storage_obj = models.ForeignKey(
+        StorageFile, on_delete=models.SET_NULL, blank=True, null=True, help_text="Household storage object"
     )
-    total_cash_received = models.DecimalField(
-        null=True,
-        decimal_places=2,
-        max_digits=64,
-        blank=True,
-    )
-
-    family_id = models.CharField(max_length=100, blank=True, null=True)  # eDopomoga household id
-    storage_obj = models.ForeignKey(StorageFile, on_delete=models.SET_NULL, blank=True, null=True)
-    program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, on_delete=models.SET_NULL
-    )  # TODO Add later related name, when no clash with programs, set null=False after migration
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -561,34 +456,284 @@ class Household(
         help_text="If this household was copied from another household, "
         "this field will contain the household it was copied from.",
     )
-    origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
-    is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
-    collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
+    country_origin = models.ForeignKey(
+        "geo.Country",
+        related_name="+",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        help_text="Household country origin",
+    )
+    country = models.ForeignKey(
+        "geo.Country",
+        related_name="+",
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        help_text="Household country",
+    )
+    admin_area = models.ForeignKey(
+        "geo.Area", null=True, on_delete=models.SET_NULL, blank=True, help_text="Household lowest administrative area"
+    )
+    """location contains lowest administrative area info"""
+    admin1 = models.ForeignKey(
+        "geo.Area",
+        null=True,
+        on_delete=models.SET_NULL,
+        blank=True,
+        related_name="+",
+        help_text="Household administrative area level 1",
+    )
+    admin2 = models.ForeignKey(
+        "geo.Area",
+        null=True,
+        on_delete=models.SET_NULL,
+        blank=True,
+        related_name="+",
+        help_text="Household administrative area level 2",
+    )
+    admin3 = models.ForeignKey(
+        "geo.Area",
+        null=True,
+        on_delete=models.SET_NULL,
+        blank=True,
+        related_name="+",
+        help_text="Household administrative area level 3",
+    )
+    admin4 = models.ForeignKey(
+        "geo.Area",
+        null=True,
+        on_delete=models.SET_NULL,
+        blank=True,
+        related_name="+",
+        help_text="Household administrative area level 4",
+    )
+    head_of_household = models.OneToOneField(
+        "Individual",
+        related_name="heading_household",
+        on_delete=models.CASCADE,
+        null=True,
+        help_text="Household head of household",
+    )
+    consent_sign = ImageField(
+        validators=[validate_image_file_extension], blank=True, help_text="Household consent sign image"
+    )
+    consent = models.BooleanField(null=True, help_text="Household consent")
+    consent_sharing = MultiSelectField(
+        choices=DATA_SHARING_CHOICES, default=BLANK, help_text="Household consent sharing"
+    )
+    residence_status = models.CharField(
+        max_length=254, choices=RESIDENCE_STATUS_CHOICE, blank=True, help_text="Household residence status"
+    )
 
-    kobo_submission_uuid = models.UUIDField(null=True, default=None)
-    kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
-    enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
-    mis_unicef_id = models.CharField(max_length=255, null=True)
-    flex_registrations_record_id = models.PositiveIntegerField(blank=True, null=True)
+    address = CICharField(max_length=1024, blank=True, help_text="Household address")
+    zip_code = models.CharField(max_length=12, blank=True, null=True, help_text="Household zip code")
+
+    size = models.PositiveIntegerField(db_index=True, null=True, blank=True, help_text="Household size")
+    female_age_group_0_5_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 0-5"
+    )
+    female_age_group_6_11_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 6-11"
+    )
+    female_age_group_12_17_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 12-17"
+    )
+    female_age_group_18_59_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 18-59"
+    )
+    female_age_group_60_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 60"
+    )
+    pregnant_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household pregnant count"
+    )
+    male_age_group_0_5_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 0-5"
+    )
+    male_age_group_6_11_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 6-11"
+    )
+    male_age_group_12_17_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 12-17"
+    )
+    male_age_group_18_59_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 18-59"
+    )
+    male_age_group_60_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 60"
+    )
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 0-5"
+    )
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 6-11"
+    )
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 12-17"
+    )
+    female_age_group_18_59_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 18-59"
+    )
+    female_age_group_60_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female age group 60"
+    )
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 0-5"
+    )
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 6-1"
+    )
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 12-17"
+    )
+    male_age_group_18_59_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 18-59"
+    )
+    male_age_group_60_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male age group 60"
+    )
+    children_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household children count"
+    )
+    male_children_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male children count"
+    )
+    female_children_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female children count"
+    )
+    children_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household children disabled count"
+    )
+    male_children_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household male children disabled count"
+    )
+    female_children_disabled_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household female children disabled count"
+    )
+    other_sex_group_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household other sex group count"
+    )  # OTHER
+    unknown_sex_group_count = models.PositiveIntegerField(
+        default=None, null=True, blank=True, help_text="Household unknown sex group count"
+    )  # NOT_COLLECTED
+
+    returnee = models.BooleanField(null=True, help_text="Household returnee status")
+    fchild_hoh = models.BooleanField(null=True, help_text="Female child headed household flag")
+    child_hoh = models.BooleanField(null=True, help_text="Child headed household flag")
+    village = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household village")
+    currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK, help_text="Household currency")
+    unhcr_id = models.CharField(
+        max_length=250, blank=True, default=BLANK, db_index=True, help_text="Household unhcr id"
+    )
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID"
+    )
+    start = models.DateTimeField(blank=True, null=True, help_text="Data collection start date")
+
+    # System fields
+    registration_method = models.CharField(
+        max_length=250,
+        choices=REGISTRATION_METHOD_CHOICES,
+        default=BLANK,
+        help_text="Household registration method [sys]",
+    )
+    family_id = models.CharField(
+        max_length=100, blank=True, null=True, help_text="Family ID eDopomoga household id [sys]"
+    )
+    origin_unicef_id = models.CharField(
+        max_length=100, blank=True, null=True, help_text="Household origin unicef id [sys]"
+    )
+    is_migration_handled = models.BooleanField(default=False, help_text="Household migration status [sys]")
+    migrated_at = models.DateTimeField(null=True, blank=True, help_text="Household migrated at [sys]")
+    collect_type = models.CharField(
+        choices=CollectType.choices,
+        default=CollectType.STANDARD.value,
+        max_length=8,
+        help_text="Household collect type [sys]",
+    )
+    program_registration_id = CICharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_index=True,
+        unique=True,
+        verbose_name=_("Beneficiary Program Registration Id"),
+        help_text="Beneficiary Program Registration id [sys]",
+    )
+    total_cash_received_usd = models.DecimalField(
+        null=True,
+        decimal_places=2,
+        max_digits=64,
+        blank=True,
+        help_text="Household cash received usd [sys]",
+    )
+    total_cash_received = models.DecimalField(
+        null=True,
+        decimal_places=2,
+        max_digits=64,
+        blank=True,
+        help_text="Household cash received [sys]",
+    )
+
+    flex_fields = JSONField(default=dict, blank=True, help_text="Household flex fields [sys]")
+    first_registration_date = models.DateTimeField(help_text="Household first registration date [sys]")
+    last_registration_date = models.DateTimeField(help_text="Household last registration date [sys]")
+    withdrawn = models.BooleanField(default=False, db_index=True, help_text="Household withdrawn [sys]")
+    withdrawn_date = models.DateTimeField(
+        null=True, blank=True, db_index=True, help_text="Household withdrawn date [sys]"
+    )
+    longitude = models.FloatField(blank=True, null=True, help_text="Household longitude [sys]")
+    latitude = models.FloatField(blank=True, null=True, help_text="Household latitude [sys]")
+    deviceid = models.CharField(max_length=250, blank=True, default=BLANK, help_text="Household deviceid [sys]")
+    name_enumerator = models.CharField(
+        max_length=250, blank=True, default=BLANK, help_text="Household name enumerator [sys]"
+    )
+    org_enumerator = models.CharField(
+        max_length=250, choices=ORG_ENUMERATOR_CHOICES, default=BLANK, help_text="Household org enumerator [sys]"
+    )
+    org_name_enumerator = models.CharField(
+        max_length=250, blank=True, default=BLANK, help_text="Household org name enumerator [sys]"
+    )
+    kobo_submission_uuid = models.UUIDField(null=True, default=None, help_text="Household Kobo submission uuid [sys]")
+    kobo_submission_time = models.DateTimeField(
+        max_length=150, blank=True, null=True, help_text="Household Kobo submission time [sys]"
+    )
+    enumerator_rec_id = models.PositiveIntegerField(
+        blank=True, null=True, help_text="Household enumerator record [sys]"
+    )
+    flex_registrations_record_id = models.PositiveIntegerField(
+        blank=True, null=True, help_text="Household flex registrations record [sys]"
+    )
+
+    extra_rdis = models.ManyToManyField(
+        to="registration_data.RegistrationDataImport",
+        blank=True,
+        related_name="extra_hh_rdis",
+        help_text="This relation is filed when collision of Household happens.",
+    )
+    identification_key = models.CharField(
+        null=True, blank=True, max_length=255, help_text="Key used to identify Collisions in the system"
+    )
+    collision_flag = models.BooleanField(
+        default=False, help_text="Flag used to identify if the household is in collision state"
+    )
 
     class Meta:
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        from hct_mis_api.apps.targeting.models import (
-            HouseholdSelection,
-            TargetPopulation,
-        )
-
-        if self.withdrawn:
-            HouseholdSelection.objects.filter(
-                household=self, target_population__status=TargetPopulation.STATUS_LOCKED
-            ).delete()
-        cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
-        super().save(*args, **kwargs)
+        constraints = [
+            UniqueConstraint(
+                fields=["unicef_id", "program"],
+                condition=Q(is_removed=False),
+                name="unique_hh_unicef_id_in_program",
+            ),
+            UniqueConstraint(
+                fields=["identification_key", "program"],
+                condition=Q(is_removed=False) & Q(identification_key__isnull=False),
+                name="identification_key_unique_constraint",
+            ),
+        ]
 
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
         household_deleted.send(self.__class__, instance=self)
@@ -658,6 +803,20 @@ class Household(
 
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
+    @property
+    def geopoint(self) -> Optional[str]:
+        if self.latitude and self.longitude:
+            return f"{self.latitude},{self.longitude}"
+        return None
+
+    @geopoint.setter
+    def geopoint(self, value: Optional[Point]) -> None:
+        if value:
+            self.latitude, self.longitude = value.y, value.x
+        else:
+            self.latitude = None
+            self.longitude = None
+
     def __str__(self) -> str:
         return self.unicef_id or ""
 
@@ -699,6 +858,16 @@ class DocumentType(TimeStampedUUIDModel):
     def __str__(self) -> str:
         return f"{self.label}"
 
+    @classmethod
+    def get_all_doc_types_choices(cls) -> List[Tuple[str, str]]:
+        """return list of Document Types choices"""
+        return [(obj.key, obj.label) for obj in cls.objects.all()]
+
+    @classmethod
+    def get_all_doc_types(cls) -> List[str]:
+        """return list of Document Types keys"""
+        return list(cls.objects.all().only("key").values_list("key", flat=True))
+
 
 class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
@@ -712,18 +881,18 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         (STATUS_INVALID, _("Invalid")),
     )
 
-    document_number = models.CharField(max_length=255, blank=True, db_index=True)
-    photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
+    document_number = models.CharField(max_length=255, blank=True, db_index=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    photo = models.ImageField(blank=True)
     cleared = models.BooleanField(default=False)
     cleared_date = models.DateTimeField(default=timezone.now)
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
-    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
 
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
@@ -740,7 +909,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
 
         for validator in self.type.validators.all():
             if not re.match(validator.regex, self.document_number):
-                logger.error("Document number is not validating")
+                logger.warning("Document number is not validating")
                 raise ValidationError("Document number is not validating")
 
     class Meta:
@@ -787,11 +956,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
 
 
 class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
-    # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
-    number = models.CharField(
-        max_length=255,
-    )
     partner = models.ForeignKey(
         "account.Partner",
         related_name="individual_identities",
@@ -799,6 +964,7 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
+    number = models.CharField(max_length=255)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
@@ -871,6 +1037,7 @@ class Individual(
     ConcurrencyModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    IndividualDeliveryDataMixin,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -898,7 +1065,6 @@ class Individual(
             "last_registration_date",
             "flex_fields",
             "enrolled_in_nutrition_programme",
-            "administration_of_rutf",
             "unicef_id",
             "deduplication_golden_record_status",
             "deduplication_batch_status",
@@ -919,45 +1085,24 @@ class Individual(
             "who_answers_phone",
             "who_answers_alt_phone",
             "detail_id",
-            "registration_id",
             "program_registration_id",
             "payment_delivery_phone_no",
         ]
     )
-    individual_collection = models.ForeignKey(
-        IndividualCollection,
+
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
+    program = models.ForeignKey(
+        "program.Program",
+        db_index=True,
+        related_name="individuals",
+        on_delete=models.PROTECT,
+        help_text="Program",
+    )
+    registration_data_import = models.ForeignKey(
+        "registration_data.RegistrationDataImport",
         related_name="individuals",
         on_delete=models.CASCADE,
-        null=True,
-    )
-    duplicate = models.BooleanField(default=False, db_index=True)
-    duplicate_date = models.DateTimeField(null=True, blank=True)
-    withdrawn = models.BooleanField(default=False, db_index=True)
-    withdrawn_date = models.DateTimeField(null=True, blank=True)
-    individual_id = models.CharField(max_length=255, blank=True)
-    photo = models.ImageField(blank=True)
-    full_name = CICharField(max_length=255, validators=[MinLengthValidator(2)], db_index=True)
-    given_name = CICharField(max_length=85, blank=True, db_index=True)
-    middle_name = CICharField(max_length=85, blank=True, db_index=True)
-    family_name = CICharField(max_length=85, blank=True, db_index=True)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True)
-    birth_date = models.DateField(db_index=True)
-    estimated_birth_date = models.BooleanField(default=False)
-    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
-
-    phone_no = PhoneNumberField(blank=True, db_index=True)
-    phone_no_valid = models.BooleanField(null=True, db_index=True)
-    phone_no_alternative = PhoneNumberField(blank=True, db_index=True)
-    phone_no_alternative_valid = models.BooleanField(null=True, db_index=True)
-    email = models.CharField(max_length=255, blank=True)
-    payment_delivery_phone_no = PhoneNumberField(blank=True, null=True)
-
-    relationship = models.CharField(
-        max_length=255,
-        blank=True,
-        choices=RELATIONSHIP_CHOICE,
-        help_text="""This represents the MEMBER relationship. can be blank
-            as well if household is null!""",
+        help_text="RDI where Beneficiary was imported",
     )
     household = models.ForeignKey(
         "Household",
@@ -970,79 +1115,13 @@ class Individual(
             simply means they are a representative of one or more households
             and not a member of one.""",
     )
-    registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport",
+    individual_collection = models.ForeignKey(
+        IndividualCollection,
         related_name="individuals",
         on_delete=models.CASCADE,
-    )
-    work_status = models.CharField(
-        max_length=20,
-        choices=WORK_STATUS_CHOICE,
-        blank=True,
-        default=NOT_PROVIDED,
-    )
-    first_registration_date = models.DateField()
-    last_registration_date = models.DateField()
-    flex_fields = JSONField(default=dict, blank=True, encoder=FlexFieldsEncoder)
-    enrolled_in_nutrition_programme = models.BooleanField(null=True)
-    administration_of_rutf = models.BooleanField(null=True)
-    deduplication_golden_record_status = models.CharField(
-        max_length=50,
-        default=UNIQUE,
-        choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
-        db_index=True,
-    )
-    deduplication_batch_status = models.CharField(
-        max_length=50,
-        default=UNIQUE_IN_BATCH,
-        choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
-        db_index=True,
-    )
-    deduplication_golden_record_results = JSONField(default=dict, blank=True)
-    deduplication_batch_results = JSONField(default=dict, blank=True)
-    imported_individual_id = models.UUIDField(null=True, blank=True)
-    sanction_list_possible_match = models.BooleanField(default=False, db_index=True)
-    sanction_list_confirmed_match = models.BooleanField(default=False, db_index=True)
-    pregnant = models.BooleanField(null=True)
-
-    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
-    observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
-    disability_certificate_picture = models.ImageField(blank=True, null=True)
-
-    seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    physical_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    memory_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    selfcare_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-    comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
-
-    who_answers_phone = models.CharField(max_length=150, blank=True)
-    who_answers_alt_phone = models.CharField(max_length=150, blank=True)
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    fchild_hoh = models.BooleanField(default=False)
-    child_hoh = models.BooleanField(default=False)
-    detail_id = models.CharField(
-        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
-    )
-    registration_id = CICharField(
-        max_length=100,
-        blank=True,
         null=True,
-        verbose_name=_("Aurora Registration Id"),
+        help_text="Collection of individual representations",
     )
-    program_registration_id = CICharField(
-        max_length=100, blank=True, null=True, verbose_name=_("Beneficiary Program Registration Id")
-    )
-    preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
-    relationship_confirmed = models.BooleanField(default=False)
-    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
-    wallet_name = models.CharField(max_length=64, blank=True, default="")
-    blockchain_name = models.CharField(max_length=64, blank=True, default="")
-    wallet_address = models.CharField(max_length=128, blank=True, default="")
-
-    program = models.ForeignKey(
-        "program.Program", null=True, blank=True, db_index=True, related_name="individuals", on_delete=models.SET_NULL
-    )  # TODO set null=False after migration
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -1053,12 +1132,165 @@ class Individual(
         help_text="If this individual was copied from another individual, "
         "this field will contain the individual it was copied from.",
     )
-    origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
-    mis_unicef_id = models.CharField(max_length=255, null=True)
 
-    vector_column = SearchVectorField(null=True)
+    individual_id = models.CharField(max_length=255, blank=True, help_text="Individual ID")
+    photo = models.ImageField(blank=True, help_text="Photo")
+    full_name = CICharField(
+        max_length=255, validators=[MinLengthValidator(2)], db_index=True, help_text="Full Name of the Beneficiary"
+    )
+    given_name = CICharField(max_length=85, blank=True, db_index=True, help_text="First name of the Beneficiary")
+    middle_name = CICharField(max_length=85, blank=True, db_index=True, help_text="Middle name of the Beneficiary")
+    family_name = CICharField(max_length=85, blank=True, db_index=True, help_text="Last name of the Beneficiary")
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True, help_text="Beneficiary gender")
+    birth_date = models.DateField(db_index=True, help_text="Beneficiary date of birth")
+    estimated_birth_date = models.BooleanField(default=False, help_text="Estimated birth date flag")
+    marital_status = models.CharField(
+        max_length=255,
+        choices=MARITAL_STATUS_CHOICE,
+        default=BLANK,
+        db_index=True,
+        help_text="Beneficiary marital status",
+    )
+
+    phone_no = PhoneNumberField(blank=True, db_index=True, help_text="Beneficiary phone number")
+    phone_no_alternative = PhoneNumberField(blank=True, db_index=True, help_text="Beneficiary phone number alternative")
+    email = models.CharField(max_length=255, blank=True, help_text="Beneficiary email address")
+    payment_delivery_phone_no = PhoneNumberField(blank=True, null=True, help_text="Beneficiary contact phone number")
+    relationship = models.CharField(
+        max_length=255,
+        blank=True,
+        choices=RELATIONSHIP_CHOICE,
+        help_text="""This represents the MEMBER relationship. can be blank
+            as well if household is null!""",
+    )
+    work_status = models.CharField(
+        max_length=20,
+        choices=WORK_STATUS_CHOICE,
+        blank=True,
+        default=NOT_PROVIDED,
+        help_text="Work status",
+    )
+    pregnant = models.BooleanField(null=True, help_text="Pregnant status")
+    fchild_hoh = models.BooleanField(default=False, help_text="Child is female and Head of Household flag")
+    child_hoh = models.BooleanField(default=False, help_text="Child is Head of Household flag")
+    disability = models.CharField(
+        max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED, help_text="Disability status"
+    )
+    observed_disability = MultiSelectField(
+        choices=OBSERVED_DISABILITY_CHOICE, default=NONE, help_text="Observed disability status"
+    )
+    disability_certificate_picture = models.ImageField(
+        blank=True, null=True, help_text="Disability certificate picture"
+    )
+    seeing_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Seeing disability"
+    )
+    hearing_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Hearing disability"
+    )
+    physical_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Physical disability"
+    )
+    memory_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Memory disability"
+    )
+    selfcare_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Selfcare disability"
+    )
+    comms_disability = models.CharField(
+        max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True, help_text="Comms disability"
+    )
+
+    who_answers_phone = models.CharField(max_length=150, blank=True, help_text="Who answers phone number")
+    who_answers_alt_phone = models.CharField(
+        max_length=150, blank=True, help_text="Who answers alternative phone number"
+    )
+    preferred_language = models.CharField(
+        max_length=6, choices=Languages.get_tuple(), null=True, blank=True, help_text="Preferred language"
+    )
+    relationship_confirmed = models.BooleanField(default=False, help_text="Relationship confirmed status")
+    wallet_name = models.CharField(max_length=64, blank=True, default="", help_text="Cryptocurrency wallet name")
+    blockchain_name = models.CharField(
+        max_length=64, blank=True, default="", help_text="Cryptocurrency blockchain name"
+    )
+    wallet_address = models.CharField(max_length=128, blank=True, default="", help_text="Cryptocurrency wallet address")
+
+    # System fields
+    duplicate = models.BooleanField(default=False, db_index=True, help_text="Duplicate status [sys]")
+    duplicate_date = models.DateTimeField(null=True, blank=True, help_text="Duplicate date [sys]")
+    withdrawn = models.BooleanField(default=False, db_index=True, help_text="Withdrawn status [sys]")
+    withdrawn_date = models.DateTimeField(null=True, blank=True, help_text="Withdrawn date [sys]")
+    flex_fields = JSONField(
+        default=dict, blank=True, encoder=FlexFieldsEncoder, help_text="FlexFields JSON representation [sys]"
+    )
+    phone_no_valid = models.BooleanField(null=True, db_index=True, help_text="Beneficiary phone number valid [sys]")
+    phone_no_alternative_valid = models.BooleanField(
+        null=True, db_index=True, help_text="Beneficiary phone number alternative valid [sys]"
+    )
+    first_registration_date = models.DateField(help_text="First registration date [sys]")
+    last_registration_date = models.DateField(help_text="Last registration date [sys]")
+    enrolled_in_nutrition_programme = models.BooleanField(null=True, help_text="Enrolled in nutrition program [sys]")
+    deduplication_golden_record_status = models.CharField(
+        max_length=50,
+        default=UNIQUE,
+        choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        db_index=True,
+        help_text="Deduplication golden record status [sys]",
+    )
+    deduplication_batch_status = models.CharField(
+        max_length=50,
+        default=UNIQUE_IN_BATCH,
+        choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        db_index=True,
+        help_text="Deduplication batch status [sys]",
+    )
+    deduplication_golden_record_results = JSONField(
+        default=dict, blank=True, help_text="Deduplication golden record results [sys]"
+    )
+    deduplication_batch_results = JSONField(default=dict, blank=True, help_text="Deduplication batch results [sys]")
+    biometric_deduplication_golden_record_status = models.CharField(
+        max_length=50,
+        default=NOT_PROCESSED,
+        choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        db_index=True,
+        help_text="Deduplication golden record status [sys]",
+    )
+    biometric_deduplication_batch_status = models.CharField(
+        max_length=50,
+        default=NOT_PROCESSED,
+        choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        db_index=True,
+        help_text="Deduplication batch status [sys]",
+    )
+    biometric_deduplication_golden_record_results = JSONField(
+        default=list, blank=True, help_text="Deduplication golden record results [sys]"
+    )
+    biometric_deduplication_batch_results = JSONField(
+        default=list, blank=True, help_text="Deduplication batch results [sys]"
+    )
+    imported_individual_id = models.UUIDField(null=True, blank=True, help_text="Imported individual ID [sys]")
+    sanction_list_possible_match = models.BooleanField(
+        default=False, db_index=True, help_text="Sanction list possible match [sys]"
+    )
+    sanction_list_confirmed_match = models.BooleanField(
+        default=False, db_index=True, help_text="Sanction list confirmed match [sys]"
+    )
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora registration ID [sys]"
+    )
+    program_registration_id = CICharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_("Beneficiary Program Registration Id"),
+        help_text="Beneficiary Program Registration ID [sys]",
+    )
+    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Age at registration [sys]")
+    origin_unicef_id = models.CharField(max_length=100, blank=True, null=True, help_text="Original unicef_id [sys]")
+    is_migration_handled = models.BooleanField(default=False, help_text="Migration status [sys]")
+    migrated_at = models.DateTimeField(null=True, blank=True, help_text="Migrated at [sys]")
+
+    vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
         individual_deleted.send(self.__class__, instance=self)
@@ -1142,6 +1374,7 @@ class Individual(
 
     def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
+        self.accounts.update(active=False)
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.save()
@@ -1149,6 +1382,7 @@ class Individual(
 
     def unwithdraw(self) -> None:
         self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)
+        self.accounts.update(active=True)
         self.withdrawn = False
         self.withdrawn_date = None
         self.save()
@@ -1157,12 +1391,14 @@ class Individual(
         if original_individual is not None:
             self.unicef_id = str(original_individual.unicef_id)
         self.documents.update(status=Document.STATUS_INVALID)
+        self.accounts.update(active=False)
         self.duplicate = True
         self.duplicate_date = timezone.now()
         self.save()
 
     def mark_as_distinct(self) -> None:
         self.documents.update(status=Document.STATUS_VALID)
+        self.accounts.update(active=True)
         self.duplicate = False
         self.duplicate_date = timezone.now()
         self.save()
@@ -1177,6 +1413,14 @@ class Individual(
     class Meta:
         verbose_name = "Individual"
         indexes = (GinIndex(fields=["vector_column"]),)
+        constraints = [
+            UniqueConstraint(
+                fields=["unicef_id", "program"],
+                condition=Q(is_removed=False) & Q(duplicate=False),
+                name="unique_ind_unicef_id_in_program",
+            )
+        ]
+        permissions = (("update_individual_iban", "Can update individual IBAN"),)
 
     def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
         update_fields = ["disability"]

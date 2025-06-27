@@ -22,7 +22,7 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
     for model in _get_model_list_is_original():
         if model.__name__ == "GrievanceTicket":
             model_qs = model.default_for_migrations_fix
-        elif model.__name__ in ["HouseholdSelection", "EntitlementCard", "Feedback", "Message"]:
+        elif model.__name__ in ["EntitlementCard", "Feedback", "Message"]:
             model_qs = model.original_and_repr_objects
         else:
             model_qs = model.all_objects
@@ -58,7 +58,7 @@ def get_statistic_is_original() -> None:
         if model.__name__ == "GrievanceTicket":
             queryset_all = model.default_for_migrations_fix.all().only("is_original", "id")
             queryset_is_original = queryset_all.filter(is_original=True)
-        elif model.__name__ in ["HouseholdSelection", "EntitlementCard", "Feedback", "Message"]:
+        elif model.__name__ in ["EntitlementCard", "Feedback", "Message"]:
             queryset_all = model.original_and_repr_objects.all().only("is_original", "id")
             queryset_is_original = queryset_all.filter(is_original=True)
         else:

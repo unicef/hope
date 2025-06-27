@@ -3,7 +3,7 @@ import { act } from 'react';
 
 import wait from 'waait';
 import { fakeApolloAllTargetPopulation } from '../../../../../fixtures/targeting/fakeApolloAllTargetPopulation';
-import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { render } from '../../../../testUtils/testUtils';
 import { TargetPopulationTable } from '.';
 
 describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', () => {

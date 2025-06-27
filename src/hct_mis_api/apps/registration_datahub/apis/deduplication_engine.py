@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 
@@ -7,8 +7,9 @@ from hct_mis_api.apps.core.api.mixins import BaseAPI
 @dataclasses.dataclass
 class SimilarityPair:
     score: float
-    first: str
-    second: str
+    status_code: str
+    first: Optional[str] = None
+    second: Optional[str] = None
 
 
 @dataclasses.dataclass

@@ -3,29 +3,29 @@
 exports[`components/population/HouseholdDetails should render 1`] = `
 <div>
   <div
-    class="sc-hJRrWL bEariC"
+    class="sc-lertIE iXrrNu"
   >
     <div
-      class="sc-fAUdSK cpcECW"
+      class="sc-fLDLck hGbkJg"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
       >
         Details
       </h6>
     </div>
     <div
-      class="sc-fwzISk kOsYtq"
+      class="sc-bHTlQz fSnBDv"
     >
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Household Size
@@ -34,7 +34,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Household Size"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 4
@@ -43,11 +43,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Residence Status
@@ -56,7 +56,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Residence Status"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 None
@@ -65,11 +65,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Head of Household
@@ -78,11 +78,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Head of Household"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 <a
-                  class="sc-blHHSb hLtlEI"
+                  class="sc-FEMpB bpAlwN"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
                 >
                   Jan Kowalski
@@ -92,20 +92,20 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
-              FEMALE CHILD HEADED HOUSEHOLD
+              FEMALE CHILD HEADED Household
             </span>
             <div
-              data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
+              data-cy="label-FEMALE CHILD HEADED Household"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 No
@@ -114,20 +114,20 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
-              CHILD HEADED HOUSEHOLD
+              CHILD HEADED Household
             </span>
             <div
-              data-cy="label-CHILD HEADED HOUSEHOLD"
+              data-cy="label-CHILD HEADED Household"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 No
@@ -136,11 +136,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Country
@@ -153,11 +153,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Country of Origin
@@ -170,11 +170,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Address
@@ -183,7 +183,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Address"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 Ohio
@@ -192,11 +192,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Village
@@ -209,11 +209,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Zip code
@@ -226,11 +226,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Administrative Level 1
@@ -243,11 +243,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Administrative Level 2
@@ -260,11 +260,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Administrative Level 3
@@ -277,11 +277,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Administrative Level 4
@@ -294,11 +294,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Geolocation
@@ -307,7 +307,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Geolocation"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 -
@@ -316,11 +316,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               UNHCR CASE ID
@@ -333,11 +333,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               LENGTH OF TIME SINCE ARRIVAL
@@ -350,11 +350,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               NUMBER OF TIMES DISPLACED
@@ -367,20 +367,20 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
-              IS THIS A RETURNEE HOUSEHOLD?
+              IS THIS A RETURNEE Household?
             </span>
             <div
-              data-cy="label-IS THIS A RETURNEE HOUSEHOLD?"
+              data-cy="label-IS THIS A RETURNEE Household?"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 No
@@ -389,11 +389,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Linked Grievances
@@ -402,7 +402,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Linked Grievances"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 <span>
@@ -413,11 +413,35 @@ exports[`components/population/HouseholdDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
+              color="textSecondary"
+            >
+              Linked Grievances
+            </span>
+            <div
+              data-cy="label-Linked Grievances"
+            >
+              <span
+                class="sc-dVBluf fZAisw"
+                color="textSecondary"
+              >
+                <span>
+                  -
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
+        >
+          <div>
+            <span
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Data Collecting Type
@@ -426,7 +450,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Data Collecting Type"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 data collecting type
@@ -438,26 +462,27 @@ exports[`components/population/HouseholdDetails should render 1`] = `
     </div>
   </div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-hbtGpV dsjZFY css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jdabBK bsdLOJ css-1gtchvp-MuiPaper-root"
+    style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-fAUdSK cpcECW"
+      class="sc-fLDLck hGbkJg"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
       >
         Benefits
       </h6>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
       >
         <div>
           <span
-            class="sc-gtLWhw bkWrmx"
+            class="sc-gjcoXW bMjypC"
             color="textSecondary"
           >
             Cash received
@@ -466,17 +491,17 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             data-cy="label-Cash received"
           >
             <span
-              class="sc-egkSDF XYdBd"
+              class="sc-dVBluf fZAisw"
               color="textSecondary"
             >
               <div
                 class="MuiBox-root css-19idom"
               >
                 <div
-                  class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+                  class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
                 >
                   <div
-                    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                    class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
                   >
                     <div
                       class="MuiBox-root css-j7qwjs"
@@ -505,14 +530,14 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
       >
         <div
-          class="sc-jwIPbr iTDanY"
+          class="sc-dPKAra kHfZVn"
         >
           <div>
             <span
-              class="sc-gtLWhw bkWrmx"
+              class="sc-gjcoXW bMjypC"
               color="textSecondary"
             >
               Total Cash Received
@@ -521,11 +546,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Total Cash Received"
             >
               <span
-                class="sc-egkSDF XYdBd"
+                class="sc-dVBluf fZAisw"
                 color="textSecondary"
               >
                 <div
-                  class="sc-cHqXqK iAzTMC"
+                  class="sc-fuExOL fQRxDJ"
                 >
                   USD 0.00
                 </div>

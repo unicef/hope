@@ -77,19 +77,11 @@ export const fakeHousehold = {
             status: 'ACTIVE',
             admin1: null,
             admin2: null,
-            programs: {
-              edges: [
-                {
-                  node: {
-                    id:
-                      'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
-                    name: 'Test Program',
-                    __typename: 'ProgramNode',
-                  },
-                  __typename: 'ProgramNodeEdge',
-                },
-              ],
-              __typename: 'ProgramNodeConnection',
+            program: {
+                id:
+                  'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+                name: 'Test Program',
+                __typename: 'ProgramNode',
             },
             __typename: 'HouseholdNode',
           },
@@ -99,19 +91,11 @@ export const fakeHousehold = {
       },
     ],
   },
-  programs: {
-    edges: [
-      {
-        node: {
-          id:
-            'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
-          name: 'Test Program',
-          __typename: 'ProgramNode',
-        },
-        __typename: 'ProgramNodeEdge',
-      },
-    ],
-    __typename: 'ProgramNodeConnection',
+  program: {
+      id:
+        'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
+      name: 'Test Program',
+      __typename: 'ProgramNode',
   },
   __typename: 'HouseholdNode',
   activeIndividualsCount: 1,
@@ -151,7 +135,6 @@ export const fakeHousehold = {
   orgEnumerator: 'A_',
   updatedAt: '2024-01-17T09:20:12.470481+00:00',
   consent: null,
-  collectIndividualData: 'A_',
   registrationDataImport: {
     name: 'Test Import',
     dataSource: 'FLEX_REGISTRATION',

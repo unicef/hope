@@ -6,7 +6,14 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
-from hct_mis_api.apps.household.models import Individual, PendingIndividual
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
+    UNIQUE,
+    UNIQUE_IN_BATCH,
+    Individual,
+    PendingIndividual,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
@@ -167,19 +174,76 @@ class BiometricDeduplicationService:
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED)
 
+    @staticmethod
+    def mark_rdis_as_error(deduplication_set_id: str) -> None:
+        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+        RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
+
     def store_rdis_deduplication_statistics(self, deduplication_set_id: str) -> None:
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         rdis = RegistrationDataImport.objects.filter(
             status=RegistrationDataImport.IN_REVIEW,
             program=program,
-            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         )
         for rdi in rdis:
-            rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
-            rdi.dedup_engine_golden_record_duplicates = self.get_duplicate_individuals_for_rdi_against_population_count(
-                rdi
-            )
+            rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi)
+            rdi_individuals_ids = rdi_individuals.values_list("id", flat=True)
+
+            batch_duplicates = self.get_duplicates_for_rdi_against_batch(rdi)
+            batch_unique_individuals = set()
+            for pair in batch_duplicates:
+                batch_unique_individuals.add(pair.individual1_id)
+                batch_unique_individuals.add(pair.individual2_id)
+            rdi.dedup_engine_batch_duplicates = len(batch_unique_individuals)
+
+            population_duplicates = self.get_duplicates_for_rdi_against_population(rdi, rdi_merged=False)
+            population_unique_individuals = set()
+            for pair in population_duplicates:
+                if pair.individual1_id in rdi_individuals_ids:
+                    population_unique_individuals.add(pair.individual1_id)
+                if pair.individual2_id in rdi_individuals_ids:
+                    population_unique_individuals.add(pair.individual2_id)  # pragma: no cover
+            rdi.dedup_engine_golden_record_duplicates = len(population_unique_individuals)
+
             rdi.save(update_fields=["dedup_engine_batch_duplicates", "dedup_engine_golden_record_duplicates"])
+
+            for individual in rdi_individuals:
+                population_ind_duplicates = population_duplicates.filter(
+                    Q(individual1=individual) | Q(individual2=individual),
+                )
+                individual.biometric_deduplication_golden_record_results = (
+                    DeduplicationEngineSimilarityPair.serialize_for_individual(
+                        individual,
+                        population_ind_duplicates,
+                    )
+                )
+                individual.biometric_deduplication_golden_record_status = (
+                    DUPLICATE if population_ind_duplicates.exists() else UNIQUE
+                )
+
+                batch_ind_duplicates = batch_duplicates.filter(
+                    Q(individual1=individual) | Q(individual2=individual),
+                )
+                individual.biometric_deduplication_batch_results = (
+                    DeduplicationEngineSimilarityPair.serialize_for_individual(
+                        individual,
+                        batch_ind_duplicates,
+                    )
+                )
+                individual.biometric_deduplication_batch_status = (
+                    DUPLICATE_IN_BATCH if batch_ind_duplicates.exists() else UNIQUE_IN_BATCH
+                )
+
+                individual.save(
+                    update_fields=[
+                        "biometric_deduplication_golden_record_results",
+                        "biometric_deduplication_golden_record_status",
+                        "biometric_deduplication_batch_results",
+                        "biometric_deduplication_batch_status",
+                    ]
+                )
 
     def update_rdis_deduplication_statistics(self, program: Program, exclude_rdi: RegistrationDataImport) -> None:
         rdis = RegistrationDataImport.objects.filter(
@@ -188,10 +252,39 @@ class BiometricDeduplicationService:
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         ).exclude(id=exclude_rdi.id)
         for rdi in rdis:
-            rdi.dedup_engine_golden_record_duplicates = self.get_duplicate_individuals_for_rdi_against_population_count(
-                rdi
-            )
+            rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi)
+            rdi_individuals_ids = rdi_individuals.values_list("id", flat=True)
+            population_duplicates = self.get_duplicates_for_rdi_against_population(rdi, rdi_merged=False)
+            population_unique_individuals = set()
+            for pair in population_duplicates:
+                if pair.individual1_id in rdi_individuals_ids:
+                    population_unique_individuals.add(pair.individual1_id)
+                if pair.individual2_id in rdi_individuals_ids:
+                    population_unique_individuals.add(pair.individual2_id)  # pragma: no cover
+
+            rdi.dedup_engine_golden_record_duplicates = len(population_unique_individuals)
             rdi.save(update_fields=["dedup_engine_golden_record_duplicates"])
+
+            for individual in rdi_individuals:
+                population_ind_duplicates = population_duplicates.filter(
+                    Q(individual1=individual) | Q(individual2=individual),
+                )
+                individual.biometric_deduplication_golden_record_results = (
+                    DeduplicationEngineSimilarityPair.serialize_for_individual(
+                        individual,
+                        population_ind_duplicates,
+                    )
+                )
+                individual.biometric_deduplication_golden_record_status = (
+                    DUPLICATE if population_ind_duplicates.exists() else UNIQUE
+                )
+
+                individual.save(
+                    update_fields=[
+                        "biometric_deduplication_golden_record_results",
+                        "biometric_deduplication_golden_record_status",
+                    ]
+                )
 
     def get_duplicates_for_rdi_against_batch(
         self, rdi: RegistrationDataImport
@@ -200,21 +293,11 @@ class BiometricDeduplicationService:
         return DeduplicationEngineSimilarityPair.objects.filter(
             Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
             program=rdi.program,
+            similarity_score__gt=0,
         ).distinct()
 
-    def get_duplicate_individuals_for_rdi_against_batch_count(self, rdi: RegistrationDataImport) -> int:
-        duplicates = self.get_duplicates_for_rdi_against_batch(rdi)
-
-        unique_individuals = set()
-
-        for pair in duplicates:
-            unique_individuals.add(pair.individual1_id)
-            unique_individuals.add(pair.individual2_id)
-
-        return len(unique_individuals)
-
     def get_duplicates_for_rdi_against_population(
-        self, rdi: RegistrationDataImport, rdi_merged: bool = False
+        self, rdi: RegistrationDataImport, rdi_merged: bool = False, exclude_not_valid: bool = True
     ) -> QuerySet[DeduplicationEngineSimilarityPair]:
         if rdi_merged:
             rdi_individuals = Individual.objects.filter(registration_data_import=rdi).only("id")
@@ -225,34 +308,25 @@ class BiometricDeduplicationService:
                 id__in=rdi_individuals
             )
 
-        return (
-            DeduplicationEngineSimilarityPair.objects.filter(
-                Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
-                Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
-                Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
+        qs = DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
+            (Q(individual1__duplicate=False) | Q(individual1__isnull=True))
+            & (Q(individual2__duplicate=False) | Q(individual2__isnull=True)),
+            (Q(individual1__withdrawn=False) | Q(individual1__isnull=True))
+            & (Q(individual2__withdrawn=False) | Q(individual2__isnull=True)),
+            (
                 Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
-                | Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
-                program=rdi.program,
-            )
-            .exclude(
-                Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals)
-            )
-            .distinct()
-        )
+                | Q(individual1__isnull=True)
+                | Q(individual2__rdi_merge_status=MergeStatusModel.MERGED)
+                | Q(individual2__isnull=True)
+            ),
+            program=rdi.program,
+        ).exclude(Q(individual1__in=other_pending_rdis_individuals) | Q(individual2__in=other_pending_rdis_individuals))
 
-    def get_duplicate_individuals_for_rdi_against_population_count(self, rdi: RegistrationDataImport) -> int:
-        duplicates = self.get_duplicates_for_rdi_against_population(rdi, rdi_merged=False)
-        rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).values_list("id", flat=True)
+        if exclude_not_valid:
+            qs.exclude(similarity_score=0)
 
-        unique_individuals = set()
-
-        for pair in duplicates:
-            if pair.individual1_id in rdi_individuals:
-                unique_individuals.add(pair.individual1_id)
-            if pair.individual2_id in rdi_individuals:
-                unique_individuals.add(pair.individual2_id)  # pragma: no cover
-
-        return len(unique_individuals)
+        return qs.distinct()
 
     def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
         # create tickets only against merged individuals
@@ -260,7 +334,9 @@ class BiometricDeduplicationService:
             create_needs_adjudication_tickets_for_biometrics,
         )
 
-        deduplication_pairs = self.get_duplicates_for_rdi_against_population(rdi, rdi_merged=True)
+        deduplication_pairs = self.get_duplicates_for_rdi_against_population(
+            rdi, rdi_merged=True, exclude_not_valid=False
+        )
 
         create_needs_adjudication_tickets_for_biometrics(deduplication_pairs, rdi)
 
@@ -268,19 +344,30 @@ class BiometricDeduplicationService:
         deduplication_set_data = self.get_deduplication_set(deduplication_set_id)
 
         if deduplication_set_data.state == "Clean":
-            data = self.get_deduplication_set_results(deduplication_set_id)
-            similarity_pairs = [
-                SimilarityPair(
-                    score=item["score"],
-                    first=item["first"]["reference_pk"],
-                    second=item["second"]["reference_pk"],
-                )
-                for item in data
-            ]
-            with transaction.atomic():
-                self.store_similarity_pairs(deduplication_set_id, similarity_pairs)
-                self.store_rdis_deduplication_statistics(deduplication_set_id)
-                self.mark_rdis_as_deduplicated(deduplication_set_id)
+            try:
+                data = self.get_deduplication_set_results(deduplication_set_id)
+                similarity_pairs = [
+                    SimilarityPair(
+                        score=item["score"],
+                        status_code=item["status_code"],
+                        first=item["first"]["reference_pk"] or None,
+                        second=item["second"]["reference_pk"] or None,
+                    )
+                    for item in data
+                    if item["status_code"]
+                    in [
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value,
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_412.value,
+                        DeduplicationEngineSimilarityPair.StatusCode.STATUS_429.value,
+                    ]
+                ]
+                with transaction.atomic():
+                    self.store_similarity_pairs(deduplication_set_id, similarity_pairs)
+                    self.store_rdis_deduplication_statistics(deduplication_set_id)
+                    self.mark_rdis_as_deduplicated(deduplication_set_id)
+            except Exception:
+                logger.exception(f"Dedupe Engine processing results error for dedupe_set_id {deduplication_set_id}")
+                self.mark_rdis_as_error(deduplication_set_id)
 
     def report_false_positive_duplicate(
         self, individual1_photo: str, individual2_photo: str, deduplication_set_id: str

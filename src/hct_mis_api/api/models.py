@@ -30,14 +30,13 @@ class Grant(Enum):
 class APIToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     key = models.CharField(_("Key"), max_length=40, unique=True, blank=True)
-    allowed_ips = models.CharField(_("IPs"), max_length=200, blank=True, null=True)
-    valid_from = models.DateField(default=timezone.now)
-    valid_to = models.DateField(blank=True, null=True)
-
-    valid_for = models.ManyToManyField(BusinessArea)
     grants = ChoiceArrayField(
         models.CharField(choices=Grant.choices(), max_length=255),
     )
+    valid_from = models.DateField(default=timezone.now)
+    valid_to = models.DateField(blank=True, null=True)
+    valid_for = models.ManyToManyField(BusinessArea)
+    allowed_ips = models.CharField(_("IPs"), max_length=200, blank=True, null=True)
 
     def __str__(self) -> str:
         return f"Token #{self.pk}"

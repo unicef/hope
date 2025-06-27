@@ -1,16 +1,24 @@
-import { Grid, Typography } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+  List,
+  ListItem,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  TargetPopulationBuildStatus,
-  TargetPopulationQuery,
-} from '@generated/graphql';
 import { MiśTheme } from '../../theme';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
-import { Pie } from 'react-chartjs-2';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
+import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Pointer } from '@components/core/Pointer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -18,12 +26,6 @@ const colors = {
   femaleAdult: '#DFCCF5',
   maleAdult: '#B1E3E0',
 };
-
-const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
-  margin: 0 auto;
-`;
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -50,16 +52,23 @@ const SummaryValue = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
-export function ResultsForPeople({
-  targetPopulation,
-}: ResultsProps): ReactElement {
+function ResultsForPeople({ targetPopulation }: ResultsProps): ReactElement {
   const { t } = useTranslation();
-  if (targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok) {
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleOpen = () => {
+    if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
+      setOpenDialog(true);
+    }
+  };
+  const handleClose = () => setOpenDialog(false);
+
+  if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
+
   return (
     <div>
       <PaperContainer>
@@ -68,50 +77,90 @@ export function ResultsForPeople({
         </Title>
         <ContentWrapper>
           <Grid container>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-start">
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
-                      value={targetPopulation.childFemaleCount}
+                      value={targetPopulation.femaleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
-                      value={targetPopulation.adultFemaleCount}
+                      value={targetPopulation.femaleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
-                      value={targetPopulation.childMaleCount}
+                      value={targetPopulation.maleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
-                      value={targetPopulation.adultMaleCount}
+                      value={targetPopulation.maleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid
                 container
                 spacing={0}
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid item xs={4}>
+                <Grid size={{ xs: 6 }}>
+                  <SummaryBorder>
+                    <>
+                      <LabelizedField
+                        label={t(
+                          'Collectors failed payment channel validation',
+                        )}
+                      >
+                        <SummaryValue
+                          onClick={() => handleOpen()}
+                          data-cy="total-collectors-failed-count"
+                        >
+                          <Pointer>
+                            {targetPopulation
+                              ?.failedWalletValidationCollectorsIds?.length ||
+                              '-'}
+                          </Pointer>
+                        </SummaryValue>
+                      </LabelizedField>
+                      <Dialog open={openDialog} onClose={handleClose}>
+                        <DialogTitle>View IDs</DialogTitle>
+                        <DialogContent>
+                          <List>
+                            {targetPopulation?.failedWalletValidationCollectorsIds?.map(
+                              (id, index) => (
+                                <ListItem key={index}>{id}</ListItem>
+                              ),
+                            )}
+                          </List>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose} color="primary">
+                            Close
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </>
+                  </SummaryBorder>
+                </Grid>
+
+                {/* <Grid item xs={4}>
                   <ChartContainer>
                     <Pie
                       width={100}
@@ -133,10 +182,10 @@ export function ResultsForPeople({
                         datasets: [
                           {
                             data: [
-                              targetPopulation.childFemaleCount,
-                              targetPopulation.adultFemaleCount,
-                              targetPopulation.childMaleCount,
-                              targetPopulation.adultMaleCount,
+                              targetPopulation.femaleChildrenCount,
+                              targetPopulation.femaleAdultsCount,
+                              targetPopulation.maleChildrenCount,
+                              targetPopulation.maleAdultsCount,
                             ],
                             backgroundColor: [
                               colors.femaleChildren,
@@ -149,12 +198,12 @@ export function ResultsForPeople({
                       }}
                     />
                   </ChartContainer>
-                </Grid>
+                </Grid> */}
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of People')}>
                       <SummaryValue>
@@ -171,3 +220,5 @@ export function ResultsForPeople({
     </div>
   );
 }
+
+export default withErrorBoundary(ResultsForPeople, 'ResultsForPeople');

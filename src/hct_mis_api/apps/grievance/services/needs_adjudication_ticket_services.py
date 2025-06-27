@@ -101,7 +101,7 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                     str(ticket_details.ticket.registration_data_import.program.deduplication_set_id),
                 )
             except service.api.API_EXCEPTION_CLASS:
-                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
+                logger.warning("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:
@@ -122,7 +122,7 @@ def _get_min_max_score(golden_records: List[Dict]) -> Tuple[float, float]:
 
 def create_grievance_ticket_with_details(
     main_individual: Individual,
-    possible_duplicate: Individual,
+    possible_duplicate: Optional[Individual],
     business_area: BusinessArea,
     issue_type: int,
     dedup_engine_similarity_pair: Optional[DeduplicationEngineSimilarityPair] = None,
@@ -135,10 +135,10 @@ def create_grievance_ticket_with_details(
         TicketNeedsAdjudicationDetails,
     )
 
-    if not possible_duplicates:
+    if not possible_duplicates and issue_type != GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
         return None, None
 
-    ticket_all_individuals = {main_individual, *possible_duplicates}
+    ticket_all_individuals = {main_individual, *(possible_duplicates or [])}
 
     ticket_already_exists = (
         TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
@@ -166,14 +166,25 @@ def create_grievance_ticket_with_details(
         issue_type=issue_type,
     )
     ticket.programs.set([main_individual.program])
+
     golden_records = main_individual.get_deduplication_golden_record()
     extra_data = {
         "golden_records": golden_records,
-        "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
+        "possible_duplicate": possible_duplicate.get_deduplication_golden_record() if possible_duplicate else None,
     }
+
     if dedup_engine_similarity_pair:
-        extra_data["dedup_engine_similarity_pair"] = dedup_engine_similarity_pair.serialize_for_ticket()  # type: ignore
-    score_min, score_max = _get_min_max_score(golden_records)
+        extra_data.update({"dedup_engine_similarity_pair": dedup_engine_similarity_pair.serialize_for_ticket()})  # type: ignore
+        score_min, score_max = (
+            dedup_engine_similarity_pair.similarity_score,
+            dedup_engine_similarity_pair.similarity_score,
+        )
+        if dedup_engine_similarity_pair.status_code != DeduplicationEngineSimilarityPair.StatusCode.STATUS_200.value:
+            ticket.description = f"Error Status Code: {dedup_engine_similarity_pair.status_code} {dedup_engine_similarity_pair.get_status_code_display()}"
+            ticket.save(update_fields=["description"])
+    else:
+        score_min, score_max = _get_min_max_score(golden_records)
+
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
         golden_records_individual=main_individual,
@@ -185,7 +196,8 @@ def create_grievance_ticket_with_details(
         score_max=score_max,
     )
 
-    ticket_details.possible_duplicates.add(*possible_duplicates)
+    if possible_duplicates:
+        ticket_details.possible_duplicates.add(*possible_duplicates)
     ticket_details.populate_cross_area_flag()
 
     GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
@@ -247,30 +259,38 @@ def create_needs_adjudication_tickets(
 def create_needs_adjudication_tickets_for_biometrics(
     deduplication_pairs: QuerySet[DeduplicationEngineSimilarityPair], rdi: RegistrationDataImport
 ) -> None:
-    # if both individuals are from the same rdi mark second as duplicate
-    # if one of individuals is in already merged population mark it as original
-
     if not deduplication_pairs.exists():
         return None
 
     new_tickets = []
 
     for pair in deduplication_pairs:
-        if (
-            pair.individual1.registration_data_import == pair.individual2.registration_data_import
-        ) or pair.individual2.registration_data_import == rdi:
-            original_individual = pair.individual1
-            duplicate_individual = pair.individual2
+        # if only one individual exists mark it as original
+        if not (pair.individual1 and pair.individual2):
+            duplicate_individual = None
+            if pair.individual1:
+                original_individual = pair.individual1
+            else:
+                original_individual = pair.individual2  # pragma: no_cover
+
         else:
-            original_individual = pair.individual2
-            duplicate_individual = pair.individual1
+            # if both individuals are from the same rdi mark second as duplicate
+            # if one of individuals is in already merged population mark it as original
+            if (
+                pair.individual1.registration_data_import == pair.individual2.registration_data_import
+            ) or pair.individual2.registration_data_import == rdi:
+                original_individual = pair.individual1
+                duplicate_individual = pair.individual2
+            else:
+                original_individual = pair.individual2
+                duplicate_individual = pair.individual1
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=original_individual,
             possible_duplicate=duplicate_individual,
             business_area=rdi.program.business_area,
             registration_data_import=rdi,
-            possible_duplicates=[duplicate_individual],
+            possible_duplicates=[duplicate_individual] if duplicate_individual else None,
             is_multiple_duplicates_version=True,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
             dedup_engine_similarity_pair=pair,

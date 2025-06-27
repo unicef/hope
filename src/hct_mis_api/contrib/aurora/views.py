@@ -9,9 +9,23 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import ProcessFormView
 
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
+from constance import config
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import ListAPIView
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework_extensions.cache.decorators import cache_response
 from sentry_sdk import set_tag
 
-from hct_mis_api.contrib.aurora.models import Registration
+from hct_mis_api.api.endpoints.base import HOPEAPIView
+from hct_mis_api.api.filters import ProjectFilter, RegistrationFilter
+from hct_mis_api.contrib.aurora.api import (
+    OrganizationSerializer,
+    ProjectSerializer,
+    RegistrationSerializer,
+)
+from hct_mis_api.contrib.aurora.caches import AuroraKeyConstructor
+from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 from hct_mis_api.contrib.aurora.utils import fetch_metadata
 
 
@@ -60,3 +74,34 @@ class RegistrationDataView(PermissionRequiredMixin, TemplateView):
             return reg
         except Registration.DoesNotExist:  # pragma: no coalidateer
             raise Http404
+
+
+class OrganizationListView(HOPEAPIView, ListAPIView):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
+
+    @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().get(request, *args, **kwargs)
+
+
+class ProjectListView(HOPEAPIView, ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProjectFilter
+
+    @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().get(request, *args, **kwargs)
+
+
+class RegistrationListView(HOPEAPIView, ListAPIView):
+    queryset = Registration.objects.all()
+    serializer_class = RegistrationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RegistrationFilter
+
+    @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().get(request, *args, **kwargs)

@@ -5,7 +5,6 @@ import { StatusBox } from '@core/StatusBox';
 import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -23,11 +22,13 @@ import { useSnackbar } from '@hooks/useSnackBar';
 interface ProgramCyclesTablePaymentModuleProps {
   program;
   filters;
+  adjustedHeadCells;
 }
 
 export const ProgramCyclesTablePaymentModule = ({
   program,
   filters,
+  adjustedHeadCells,
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
   const [queryVariables, setQueryVariables] = useState<ProgramCyclesQuery>({
@@ -37,15 +38,19 @@ export const ProgramCyclesTablePaymentModule = ({
     ...filters,
   });
 
-  const { businessArea } = useBaseUrl();
+  const { businessArea, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  // Don't fetch data when viewing "all programs"
+  const shouldFetchData = Boolean(!isAllPrograms && program?.id);
 
   const { data, refetch, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
     queryFn: async () => {
       return fetchProgramCycles(businessArea, program.id, queryVariables);
     },
+    enabled: shouldFetchData,
   });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
@@ -58,6 +63,7 @@ export const ProgramCyclesTablePaymentModule = ({
           queryKey: ['programCycles', businessArea, program.id],
         });
       },
+      mutationKey: ['finishProgramCycle', businessArea, program.id],
     });
 
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
@@ -70,6 +76,7 @@ export const ProgramCyclesTablePaymentModule = ({
           queryKey: ['programCycles', businessArea, program.id],
         });
       },
+      mutationKey: ['reactivateProgramCycle', businessArea, program.id],
     });
 
   useEffect(() => {
@@ -86,7 +93,9 @@ export const ProgramCyclesTablePaymentModule = ({
       await finishMutation({ programCycleId: decodedProgramCycleId });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      if (e.data && Array.isArray(e.data)) {
+        e.data.forEach((message: string) => showMessage(message));
+      }
     }
   };
 
@@ -96,7 +105,9 @@ export const ProgramCyclesTablePaymentModule = ({
       await reactivateMutation({ programCycleId: decodedProgramCycleId });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      if (e.data && Array.isArray(e.data)) {
+        e.data.forEach((message: string) => showMessage(message));
+      }
     }
   };
 
@@ -150,7 +161,7 @@ export const ProgramCyclesTablePaymentModule = ({
     <UniversalRestTable
       title="Programme Cycles"
       renderRow={renderRow}
-      headCells={headCells}
+      headCells={adjustedHeadCells}
       data={data}
       error={error}
       isLoading={isLoading}

@@ -16,9 +16,9 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 pytestmark = pytest.mark.django_db
 
@@ -33,28 +33,28 @@ class TestTargetPopulationViews:
         self.program1 = ProgramFactory(business_area=self.afghanistan, name="Program1")
         self.program2 = ProgramFactory(business_area=self.afghanistan, name="Program2")
 
-        self.tp1 = TargetPopulationFactory(
+        self.tp1 = PaymentPlanFactory(
             business_area=self.afghanistan,
-            program=self.program1,
-            status=TargetPopulation.STATUS_OPEN,
+            program_cycle=self.program1.cycles.first(),
+            status=PaymentPlan.Status.TP_OPEN,
             name="Test TP 1",
         )
-        self.tp2 = TargetPopulationFactory(
+        self.tp2 = PaymentPlanFactory(
             business_area=self.afghanistan,
-            program=self.program1,
-            status=TargetPopulation.STATUS_LOCKED,
+            program_cycle=self.program1.cycles.first(),
+            status=PaymentPlan.Status.TP_LOCKED,
             name="Test TP 2",
         )
-        self.tp3 = TargetPopulationFactory(
+        self.tp3 = PaymentPlanFactory(
             business_area=self.afghanistan,
-            program=self.program1,
-            status=TargetPopulation.STATUS_ASSIGNED,
+            program_cycle=self.program1.cycles.first(),
+            status=PaymentPlan.Status.OPEN,
             name="Test 3 TP",
         )
-        self.tp_program2 = TargetPopulationFactory(
+        self.tp_program2 = PaymentPlanFactory(
             business_area=self.afghanistan,
-            program=self.program2,
-            status=TargetPopulation.STATUS_ASSIGNED,
+            program_cycle=self.program2.cycles.first(),
+            status=PaymentPlan.Status.OPEN,
             name="Test TP Program 2",
         )
 
@@ -135,31 +135,31 @@ class TestTargetPopulationViews:
         response_json = response.json()["results"]
         assert len(response_json) == 3
         assert {
-            "id": id_to_base64(self.tp1.id, "TargetPopulation"),
+            "id": id_to_base64(self.tp1.id, "PaymentPlan"),
             "name": self.tp1.name,
             "status": self.tp1.get_status_display(),
             "created_by": self.tp1.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp2.id, "TargetPopulation"),
+            "id": id_to_base64(self.tp2.id, "PaymentPlan"),
             "name": self.tp2.name,
             "status": self.tp2.get_status_display(),
             "created_by": self.tp2.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp3.id, "TargetPopulation"),
+            "id": id_to_base64(self.tp3.id, "PaymentPlan"),
             "name": self.tp3.name,
-            "status": self.tp3.get_status_display(),
+            "status": "Assigned",
             "created_by": self.tp3.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp_program2.id, "TargetPopulation"),
+            "id": id_to_base64(self.tp_program2.id, "PaymentPlan"),
             "name": self.tp_program2.name,
             "created_by": self.tp1.created_by.get_full_name(),
-            "status": self.tp1.get_status_display(),
+            "status": "Assigned",
             "created_at": "2022-01-01T00:00:00Z",
         } not in response_json
 
@@ -177,7 +177,7 @@ class TestTargetPopulationViews:
             self.afghanistan,
             self.program1,
         )
-        response = self.client.get(self.url_list, {"status": TargetPopulation.STATUS_OPEN})
+        response = self.client.get(self.url_list, {"status": PaymentPlan.Status.TP_OPEN})
         assert response.status_code == status.HTTP_200_OK
 
         response_json = response.json()["results"]
@@ -237,7 +237,7 @@ class TestTargetPopulationViews:
             assert etag_second_call == etag
 
         # After update, it does not use the cached data
-        self.tp1.status = TargetPopulation.STATUS_PROCESSING
+        self.tp1.status = PaymentPlan.Status.TP_PROCESSING
         self.tp1.save()
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(self.url_list)

@@ -21,7 +21,7 @@ import {
   SCOPE_ALL_PROGRAMS,
   SCOPE_PROGRAM,
 } from './menuItems';
-import { useProgramContext } from 'src/programContext';
+import { ProgramInterface, useProgramContext } from 'src/programContext';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -61,12 +61,13 @@ export const DrawerItems = ({
   open,
 }: DrawerItemsProps): ReactElement => {
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
     fetchPolicy: 'cache-first',
   });
+
   const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
   const navigate = useNavigate();
   const initialIndex = menuItems.findIndex((item) => {
@@ -121,12 +122,41 @@ export const DrawerItems = ({
     return updatedMenuItems;
   };
 
-  const preparedMenuItems = prepareMenuItems(menuItems);
+  const beneficiaryGroupTransformator = (
+    array: MenuItem[],
+    _beneficiaryGroup: ProgramInterface['beneficiaryGroup'],
+  ): MenuItem[] => {
+    if (!_beneficiaryGroup) {
+      return array;
+    }
 
-  const { isPaymentPlanApplicable, isAccountabilityApplicable } =
-    businessAreaData.businessArea;
+    return array.map((item, index) => {
+      if (index === 2 && !isAllPrograms) {
+        item.name = _beneficiaryGroup.name;
+        if (item.secondaryActions) {
+          item.secondaryActions = item.secondaryActions.map(
+            (action, actionIndex) => {
+              if (actionIndex === 0) {
+                action.name = _beneficiaryGroup.groupLabelPlural;
+              } else if (actionIndex === 1) {
+                action.name = _beneficiaryGroup.memberLabelPlural;
+              }
+              return action;
+            },
+          );
+        }
+      }
+      return item;
+    });
+  };
+
+  const preparedMenuItems = beneficiaryGroupTransformator(
+    prepareMenuItems(menuItems),
+    selectedProgram?.beneficiaryGroup,
+  );
+
+  const { isAccountabilityApplicable } = businessAreaData.businessArea;
   const flags = {
-    isPaymentPlanApplicable,
     isAccountabilityApplicable,
   };
 

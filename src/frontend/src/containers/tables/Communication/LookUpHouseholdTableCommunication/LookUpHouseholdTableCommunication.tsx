@@ -12,6 +12,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
+import { adjustHeadCells } from '@utils/utils';
+import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
@@ -34,7 +37,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export function LookUpHouseholdTableCommunication({
+function LookUpHouseholdTableCommunication({
   businessArea,
   filter,
   choicesData,
@@ -48,6 +51,9 @@ export function LookUpHouseholdTableCommunication({
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableCommunicationProps): ReactElement {
   const { programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -123,12 +129,27 @@ export function LookUpHouseholdTableCommunication({
     setFieldValue('identityVerified', false);
   };
 
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    head_of_household__full_name: (_beneficiaryGroup) =>
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const renderTable = (): ReactElement => (
     <UniversalTable<
       AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
       AllHouseholdsQueryVariables
     >
-      headCells={householdMultiSelect ? headCells.slice(1) : headCells}
+      headCells={
+        householdMultiSelect ? adjustedHeadCells.slice(1) : adjustedHeadCells
+      }
       rowsPerPageOptions={[5, 10, 15, 20]}
       query={useAllHouseholdsForPopulationTableQuery}
       queriedObjectName="allHouseholds"
@@ -158,3 +179,8 @@ export function LookUpHouseholdTableCommunication({
     <TableWrapper>{renderTable()}</TableWrapper>
   );
 }
+
+export default withErrorBoundary(
+  LookUpHouseholdTableCommunication,
+  'LookUpHouseholdTableCommunication',
+);

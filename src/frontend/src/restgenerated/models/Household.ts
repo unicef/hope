@@ -86,7 +86,6 @@ export type Household = {
     origin_unicef_id?: string | null;
     is_migration_handled?: boolean;
     migrated_at?: string | null;
-    is_recalculated_group_ages?: boolean;
     collect_type?: CollectTypeEnum;
     enumerator_rec_id?: number | null;
     mis_unicef_id?: string | null;

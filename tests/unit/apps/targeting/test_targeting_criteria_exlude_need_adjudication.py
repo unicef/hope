@@ -9,10 +9,8 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaQueryingBase,
 )
@@ -56,11 +54,15 @@ class TestTargetingCriteriaFlags(APITestCase):
             flag_exclude_if_active_adjudication_ticket=True,
             flag_exclude_if_on_sanction_list=True,
         )
-        TargetPopulationFactory(
+        pp = PaymentPlanFactory(
             targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
-            households=[cls.household1, cls.household2],
         )
+        for hh in [cls.household1, cls.household2]:
+            PaymentFactory(
+                household=hh,
+                parent=pp,
+            )
         cls.representative2 = IndividualFactory(household=None)
         cls.household2.representatives.set([cls.representative2])
 

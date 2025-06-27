@@ -114,7 +114,7 @@ class NewTicket(BaseComponents):
     inputDocumentationName = 'input[data-cy="input-documentation[{}].name"]'
     inputFile = 'input[type="file"]'
     inputQuestionnaire_size = 'span[data-cy="input-questionnaire_size"]'
-    labelHouseholdSize = 'div[data-cy="label-Household Size"]'
+    labelHouseholdSize = 'div[data-cy="label-Group Size"]'
     inputQuestionnaire_malechildrencount = 'span[data-cy="input-questionnaire_maleChildrenCount"]'
     labelNumberOfMaleChildren = 'div[data-cy="label-Number of Male Children"]'
     inputQuestionnaire_femalechildrencount = 'span[data-cy="input-questionnaire_femaleChildrenCount"]'
@@ -122,7 +122,7 @@ class NewTicket(BaseComponents):
     inputQuestionnaire_childrendisabledcount = 'span[data-cy="input-questionnaire_childrenDisabledCount"]'
     labelNumberOfDisabledChildren = 'div[data-cy="label-Number of Disabled Children"]'
     inputQuestionnaire_headofhousehold = 'span[data-cy="input-questionnaire_headOfHousehold"]'
-    labelHeadOfHousehold = 'div[data-cy="label-Head of Household"]'
+    labelHeadOfHousehold = 'div[data-cy="label-Head of Group"]'
     inputQuestionnaire_countryorigin = 'span[data-cy="input-questionnaire_countryOrigin"]'
     labelCountryOfOrigin = 'div[data-cy="label-Country of Origin"]'
     inputQuestionnaire_address = 'span[data-cy="input-questionnaire_address"]'
@@ -140,7 +140,7 @@ class NewTicket(BaseComponents):
     inputQuestionnaire_months_displaced_h_f = 'span[data-cy="input-questionnaire_months_displaced_h_f"]'
     labelLengthOfTimeSinceArrival = 'div[data-cy="label-LENGTH OF TIME SINCE ARRIVAL"]'
     inputQuestionnaire_fullname = 'span[data-cy="input-questionnaire_fullName"]'
-    labelIndividualFullName = 'div[data-cy="label-Individual Full Name"]'
+    labelIndividualFullName = 'div[data-cy="label-Member full name"]'
     inputQuestionnaire_birthdate = 'span[data-cy="input-questionnaire_birthDate"]'
     labelBirthDate = 'div[data-cy="label-Birth Date"]'
     inputQuestionnaire_sex = 'span[data-cy="input-questionnaire_sex"]'
@@ -148,7 +148,7 @@ class NewTicket(BaseComponents):
     inputQuestionnaire_phoneno = 'span[data-cy="input-questionnaire_phoneNo"]'
     labelPhoneNumber = 'div[data-cy="label-Phone Number"]'
     inputQuestionnaire_relationship = 'span[data-cy="input-questionnaire_relationship"]'
-    labelRelationshipToHoh = 'div[data-cy="label-Relationship to HOH"]'
+    labelRelationshipToHoh = 'div[data-cy="label-Relationship to Head of Group"]'
 
     # Texts
     textLookUpHousehold = "LOOK UP HOUSEHOLD"

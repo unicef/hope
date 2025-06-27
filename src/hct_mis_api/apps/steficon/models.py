@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -64,6 +64,14 @@ class Rule(LimitBusinessAreaModelMixin):
         choices=TYPE_CHOICES, max_length=50, default=TYPE_TARGETING, help_text="Use Rule for Targeting or Payment Plan"
     )
     flags = JSONField(default=dict, blank=True)
+
+    class Meta:
+        permissions = (
+            ("process_file", "Can Process File"),
+            ("check_diff", "Can Check Diff"),
+            ("changelog", "Can Check Changelog"),
+            ("rerun_rule", "Can Rerun Rule"),
+        )
 
     def __str__(self) -> str:
         return self.name
@@ -146,14 +154,14 @@ class Rule(LimitBusinessAreaModelMixin):
         return commit
 
     @property
-    def latest(self) -> Union[QuerySet, None]:
+    def latest(self) -> Optional["RuleCommit"]:
         try:
             return self.history.filter(is_release=True).order_by("-version").first()
         except RuleCommit.DoesNotExist:
             return None
 
     @property
-    def latest_commit(self) -> Optional[QuerySet]:
+    def latest_commit(self) -> Optional["RuleCommit"]:
         try:
             return self.history.order_by("version").last()
         except RuleCommit.DoesNotExist:

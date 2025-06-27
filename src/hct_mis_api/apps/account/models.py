@@ -162,27 +162,14 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
-    # TODO: in future will remove null=True after migrate prod data
-    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True)
+    partner = models.ForeignKey(Partner, on_delete=models.PROTECT)
     email = models.EmailField(_("email address"), unique=True)
-    available_for_export = models.BooleanField(
-        default=True, help_text="Indicating if a User can be exported to CashAssist"
-    )
     custom_fields = JSONField(default=dict, blank=True)
 
     job_title = models.CharField(max_length=255, blank=True)
     ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
-    # CashAssist DOAP fields
     last_modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
-    last_doap_sync = models.DateTimeField(
-        default=None, null=True, blank=True, help_text="Timestamp of last sync with CA"
-    )
-    doap_hash = models.TextField(
-        editable=False,
-        default="",
-        help_text="System field used to check if changes need to be sent to CA",
-    )
 
     def __str__(self) -> str:
         if self.first_name or self.last_name:
@@ -190,7 +177,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return self.email or self.username
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        if not self.partner:
+        if not self.partner_id:
             self.partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
         if not self.partner.pk:
             self.partner.save()
@@ -298,12 +285,13 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_create_kobo_user", "Can create users in Kobo"),
             ("can_import_from_kobo", "Can import and sync users from Kobo"),
             ("can_upload_to_kobo", "Can upload CSV file to Kobo"),
-            ("can_debug", "Can access debug informations"),
+            ("can_debug", "Can access debug information"),
             ("can_inspect", "Can inspect objects"),
             ("quick_links", "Can see quick links in admin"),
             ("restrict_help_desk", "Limit fields to be editable for help desk"),
             ("can_reindex_programs", "Can reindex programs"),
             ("can_add_business_area_to_partner", "Can add business area to partner"),
+            ("can_import_fixture", "Can import fixture"),
         )
 
 
@@ -320,9 +308,9 @@ class HorizontalChoiceArrayField(ArrayField):
 
 
 class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     expiry_date = models.DateField(
         blank=True, null=True, help_text="After expiry date this User Role will be inactive."
     )
@@ -335,9 +323,9 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class UserGroup(NaturalKeyModel, models.Model):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_groups", on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name="user_groups", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("business_area", "user", "group")
@@ -438,7 +426,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
     def clean(self) -> None:
         super().clean()
         if self.role_one == self.role_two:
-            logger.error(f"Provided roles are the same role={self.role_one}")
+            logger.warning(f"Provided roles are the same role={self.role_one}")
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
@@ -452,7 +440,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
                     failing_users.add(userrole.user.email)
 
         if failing_users:
-            logger.error(
+            logger.warning(
                 f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. "
                 "Please fix them before creating this incompatible roles pair."
             )
@@ -468,7 +456,7 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
         if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():
-            logger.error(
+            logger.warning(
                 f"This combination of roles ({self.role_one}, {self.role_two}) already exists as incompatible pair."
             )
             raise ValidationError(_("This combination of roles already exists as incompatible pair."))

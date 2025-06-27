@@ -21,12 +21,13 @@ from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
 from rest_framework.exceptions import ValidationError as DRFValidationError
+from strategy_field.fields import StrategyField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.program.collision_detectors import collision_detectors_registry
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -64,6 +65,23 @@ class ProgramPartnerThrough(TimeStampedUUIDModel):
         ]
 
 
+class BeneficiaryGroup(TimeStampedUUIDModel):
+    name = models.CharField(max_length=255, unique=True)
+    group_label = models.CharField(max_length=255)
+    group_label_plural = models.CharField(max_length=255)
+    member_label = models.CharField(max_length=255)
+    member_label_plural = models.CharField(max_length=255)
+    master_detail = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Beneficiary Group"
+        verbose_name_plural = "Beneficiary Groups"
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -72,8 +90,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             "start_date",
             "end_date",
             "description",
-            "ca_id",
-            "ca_hash_id",
             "business_area",
             "budget",
             "frequency_of_payments",
@@ -139,6 +155,23 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         (SELECTED_PARTNERS_ACCESS, _("Selected partners access")),
     )
 
+    data_collecting_type = models.ForeignKey(
+        "core.DataCollectingType",
+        related_name="programs",
+        on_delete=models.PROTECT,
+        help_text="Program data collecting type",
+    )
+    beneficiary_group = models.ForeignKey(
+        BeneficiaryGroup,
+        on_delete=models.PROTECT,
+        related_name="programs",
+        help_text="Program beneficiary group",
+    )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE, help_text="Business area")
+    partners = models.ManyToManyField(
+        to="account.Partner", through=ProgramPartnerThrough, related_name="programs", help_text="Program partners"
+    )
+    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True, help_text="Admin areas")
     name = CICharField(
         max_length=255,
         validators=[
@@ -149,66 +182,83 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             ProhibitNullCharactersValidator(),
         ],
         db_index=True,
+        help_text="Program name",
     )
-    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
-    start_date = models.DateField(db_index=True)
-    end_date = models.DateField(null=True, blank=True, db_index=True)
+    programme_code = models.CharField(max_length=4, null=True, blank=True, help_text="Program code")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, help_text="Program status")
     description = models.CharField(
         blank=True,
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+        help_text="Program description",
     )
-    ca_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    ca_hash_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
-    admin_areas = models.ManyToManyField("geo.Area", related_name="programs", blank=True)
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    start_date = models.DateField(db_index=True, help_text="Program start date")
+    end_date = models.DateField(null=True, blank=True, db_index=True, help_text="Program end date")
+    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True, help_text="Program sector")
     budget = models.DecimalField(
         decimal_places=2,
         max_digits=11,
         validators=[MinValueValidator(Decimal("0.00"))],
         db_index=True,
+        help_text="Program budget",
     )
     frequency_of_payments = models.CharField(
         max_length=50,
         choices=FREQUENCY_OF_PAYMENTS_CHOICE,
+        help_text="Program frequency of payments",
     )
-    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True)
     scope = models.CharField(
         blank=True,
         null=True,
         max_length=50,
         choices=SCOPE_CHOICE,
+        help_text="Program scope",
     )
-    cash_plus = models.BooleanField()
-    population_goal = models.PositiveIntegerField()
-    administrative_areas_of_implementation = models.CharField(
-        max_length=255,
-        blank=True,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
-    data_collecting_type = models.ForeignKey(
-        "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT
-    )
-    is_visible = models.BooleanField(default=True)
-    household_count = models.PositiveIntegerField(default=0)
-    individual_count = models.PositiveIntegerField(default=0)
-    programme_code = models.CharField(max_length=4, null=True, blank=True)
 
     partner_access = models.CharField(
         max_length=50,
         choices=PARTNER_ACCESS_CHOICE,
         default=SELECTED_PARTNERS_ACCESS,
+        help_text="Program partner access",
     )
-    partners = models.ManyToManyField(to="account.Partner", through=ProgramPartnerThrough, related_name="programs")
-
+    cash_plus = models.BooleanField(help_text="Program cash+")
+    population_goal = models.PositiveIntegerField(help_text="Program population goal")
+    administrative_areas_of_implementation = models.CharField(
+        max_length=255,
+        blank=True,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+        help_text="Program administrative area of implementation",
+    )
     biometric_deduplication_enabled = models.BooleanField(
         default=False, help_text="Enable Deduplication of Face Images"
     )
-    deduplication_set_id = models.UUIDField(blank=True, null=True)
+    collision_detection_enabled = models.BooleanField(default=False, help_text="don't create duplicated")
+    collision_detector = StrategyField(
+        registry=collision_detectors_registry, null=True, blank=True, help_text="Object which detects collisions"
+    )
+    # System fields
+    is_visible = models.BooleanField(default=True, help_text="Program is visible in UI [sys]")
+    household_count = models.PositiveIntegerField(default=0, help_text="Program household count [sys]")
+    individual_count = models.PositiveIntegerField(default=0, help_text="Program individual count [sys]")
+
+    deduplication_set_id = models.UUIDField(blank=True, null=True, help_text="Program deduplication set id [sys]")
 
     objects = SoftDeletableIsVisibleManager()
 
+    def clean(self) -> None:
+        super().clean()
+        if self.data_collecting_type and self.beneficiary_group:
+            if (
+                self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+                and self.beneficiary_group.master_detail
+            ) or (
+                self.data_collecting_type.type == DataCollectingType.Type.STANDARD
+                and not self.beneficiary_group.master_detail
+            ):
+                raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+
     def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
         if not self.programme_code:
             self.programme_code = self._generate_programme_code()
         if self.data_collecting_type_id is None and self.data_collecting_type:
@@ -233,15 +283,20 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         )
 
     def adjust_program_size(self) -> None:
-        self.household_count = self.household_set.count()
+        self.household_count = self.households.count()
         self.individual_count = self.individuals.count()
 
     @property
-    def households_with_tp_in_program(self) -> QuerySet:
-        target_populations_in_program_ids = (
-            TargetPopulation.objects.filter(program=self).exclude(status=TargetPopulation.STATUS_OPEN).values("id")
+    def households_with_payments_in_program(self) -> QuerySet:
+        # for now all Payments or maybe can filter just status__in=Payment.DELIVERED_STATUSES
+        household_ids = (
+            Payment.objects.filter(program=self)
+            .exclude(conflicted=True, excluded=True)
+            .values_list("household_id", flat=True)
+            .distinct()
         )
-        return Household.objects.filter(target_populations__id__in=target_populations_in_program_ids).distinct()
+
+        return Household.objects.filter(id__in=household_ids, program=self)
 
     @property
     def admin_areas_log(self) -> str:
@@ -249,8 +304,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def is_social_worker_program(self) -> bool:
-        if self.data_collecting_type is None:
-            return False
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     class Meta:
@@ -307,10 +360,10 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         (FINISHED, _("Finished")),
     )
     title = models.CharField(_("Title"), max_length=255, null=True, blank=True, default="Default Programme Cycle")
+    program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True, default=DRAFT)
     start_date = models.DateField()  # first from program
     end_date = models.DateField(null=True, blank=True)
-    program = models.ForeignKey("Program", on_delete=models.CASCADE, related_name="cycles")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -349,12 +402,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     @property
     def can_remove_cycle(self) -> bool:
-        return (
-            not self.target_populations.exists()
-            and not self.payment_plans.exists()
-            and self.program.cycles.count() > 1
-            and self.status == ProgramCycle.DRAFT
-        )
+        return not self.payment_plans.exists() and self.program.cycles.count() > 1 and self.status == ProgramCycle.DRAFT
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:
@@ -395,12 +443,14 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
             raise DRFValidationError("Program should be within Active status.")
 
     def validate_payment_plan_status(self) -> None:
+        """validate status for Finishing Cycle"""
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         if (
             PaymentPlan.objects.filter(program_cycle=self)
             .exclude(
-                status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+                status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES
+                + (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED),
             )
             .exists()
         ):

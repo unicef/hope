@@ -111,10 +111,8 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     )
     p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="P Code")
     area_type = models.ForeignKey(AreaType, on_delete=models.CASCADE)
-
-    geom = models.MultiPolygonField(null=True, blank=True)
-    point = models.PointField(null=True, blank=True)
-
+    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
     valid_from = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     valid_until = models.DateTimeField(blank=True, null=True)
     extras = JSONField(default=dict, blank=True)
@@ -131,6 +129,7 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
                 condition=~Q(p_code=""),
             )
         ]
+        permissions = (("import_areas", "Can import areas"),)
 
     class MPTTMeta:
         order_insertion_by = ("name", "p_code")

@@ -21,7 +21,7 @@ class AccountabilityRandomSamplingArguments(AccountabilityFullListArguments):
 
 class GetAccountabilityCommunicationMessageSampleSizeInput(graphene.InputObjectType):
     households = graphene.List(graphene.ID)
-    target_population = graphene.ID()
+    payment_plan = graphene.ID()
     registration_data_import = graphene.ID()
     sampling_type = graphene.Enum.from_enum(Message.SamplingChoices)(required=True)
     full_list_arguments = AccountabilityFullListArguments()
@@ -64,7 +64,7 @@ class CreateSurveyInput(graphene.InputObjectType):
     title = graphene.String(required=True)
     body = graphene.String(required=False)
     category = graphene.String(required=True)
-    target_population = graphene.ID()
+    payment_plan = graphene.ID()
     program = graphene.ID()
     sampling_type = graphene.String(required=True)
     full_list_arguments = AccountabilityFullListArguments()
@@ -73,7 +73,7 @@ class CreateSurveyInput(graphene.InputObjectType):
 
 
 class AccountabilitySampleSizeInput(graphene.InputObjectType):
-    target_population = graphene.ID()
+    payment_plan = graphene.ID()
     program = graphene.ID()
     sampling_type = graphene.String(required=True)
     full_list_arguments = AccountabilityFullListArguments()

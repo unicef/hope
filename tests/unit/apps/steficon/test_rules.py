@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.steficon.admin import RuleAdmin, RuleCommitAdmin
 from hct_mis_api.apps.steficon.models import Rule
@@ -34,6 +34,7 @@ class TestBasicRule(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        BusinessAreaFactory()
         cls.user = get_user_model().objects.create_superuser(username="test", password="test")
         cls.household = HouseholdFactory.build()
 

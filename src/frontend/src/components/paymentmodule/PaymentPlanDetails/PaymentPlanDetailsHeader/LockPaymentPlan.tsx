@@ -16,6 +16,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '@generated/graphql';
 import { GreyText } from '@core/GreyText';
 import { LoadingButton } from '@core/LoadingButton';
+import { useProgramContext } from 'src/programContext';
 
 export interface LockPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -26,6 +27,8 @@ export function LockPaymentPlan({
 }: LockPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { mutatePaymentPlanAction: lock, loading: loadingLock } =
     usePaymentPlanAction(
@@ -73,8 +76,8 @@ export function LockPaymentPlan({
                     : t('There are')}{' '}
                   {paymentPlan.paymentsConflictsCount}{' '}
                   {paymentPlan.paymentsConflictsCount === 1
-                    ? t('household')
-                    : t('households')}{' '}
+                    ? t(beneficiaryGroup?.groupLabel)
+                    : t(beneficiaryGroup?.groupLabelPlural)}{' '}
                   {t('that will be ignored in this Payment Plan.')}
                 </GreyText>
               </Box>

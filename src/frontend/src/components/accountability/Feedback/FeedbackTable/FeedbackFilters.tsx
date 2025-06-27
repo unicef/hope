@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useFeedbackIssueTypeChoicesQuery } from '@generated/graphql';
@@ -12,6 +12,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -20,7 +21,7 @@ interface FeedbackFiltersProps {
   setAppliedFilter: (filter) => void;
   filter;
 }
-export const FeedbackFilters = ({
+const FeedbackFilters = ({
   setFilter,
   initialFilter,
   appliedFilter,
@@ -60,7 +61,7 @@ export const FeedbackFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             value={filter.feedbackId}
             label="Search"
@@ -69,7 +70,7 @@ export const FeedbackFilters = ({
           />
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <ProgramAutocomplete
               filter={filter}
               name="program"
@@ -81,7 +82,7 @@ export const FeedbackFilters = ({
             />
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('issueType', e.target.value)}
             label={t('Issue Type')}
@@ -95,7 +96,7 @@ export const FeedbackFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <CreatedByAutocomplete
             name="createdBy"
             filter={filter}
@@ -108,8 +109,8 @@ export const FeedbackFilters = ({
             additionalVariables={{ isFeedbackCreator: true }}
           />
         </Grid>
-        {!isAllPrograms && <Grid item xs={3} />}
-        <Grid item xs={3}>
+        {!isAllPrograms && <Grid size={{ xs: 3 }} />}
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
             label="From"
@@ -118,7 +119,7 @@ export const FeedbackFilters = ({
             dataCy="filters-creation-date-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             label={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
@@ -127,7 +128,7 @@ export const FeedbackFilters = ({
           />
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -147,3 +148,5 @@ export const FeedbackFilters = ({
     </FiltersSection>
   );
 };
+
+export default withErrorBoundary(FeedbackFilters, 'FeedbackFilters');

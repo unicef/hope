@@ -57,7 +57,30 @@ class TestSouthSudanUpdateScript(TestCase):
         individual.unicef_id = "IND-0"
         individual.save()
         individual.refresh_from_db()
+
+        household2, individuals2 = create_household_and_individuals(
+            household_data={
+                "business_area": business_area,
+                "program_id": program.id,
+            },
+            individuals_data=[
+                {
+                    "business_area": business_area,
+                    "program_id": program.id,
+                },
+            ],
+        )
+        individual = individuals[0]
+        individual.unicef_id = "IND-0"
+        individual.save()
+        individual.refresh_from_db()
         cls.individual = individual
+
+        individual2 = individuals2[0]
+        individual2.unicef_id = "IND-1"
+        individual2.save()
+        individual2.refresh_from_db()
+        cls.individual2 = individual2
         rebuild_search_index()
 
     def test_south_sudan_update_script(self) -> None:
@@ -77,13 +100,33 @@ class TestSouthSudanUpdateScript(TestCase):
             country=poland,
             rdi_merge_status="MERGED",
         )
-
-        with Capturing():
+        Document.objects.create(
+            individual=self.individual,
+            type=DocumentType.objects.get(key="birth_certificate"),
+            document_number="OLD",
+            country=germany,
+            rdi_merge_status="MERGED",
+        )
+        with Capturing() as output:
             south_sudan_update_script(
-                f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id
+                f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id, 1
             )
+        expected_output = [
+            "Validating row 0 to 1 Indivduals",
+            "Validating row 1 to 2 Indivduals",
+            "Validation successful",
+            "Updating row 0 to 1 Individuals",
+            "Updating row 1 to 2 Individuals",
+            "Deduplicating individuals Elasticsearch",
+            "Deduplicating documents",
+            "Update successful",
+        ]
+
+        self.assertEqual(output, expected_output)
         self.individual.refresh_from_db()
+        self.individual2.refresh_from_db()
         individual = self.individual
+        individual2 = self.individual2
         household = individual.household
         self.assertEqual(household.admin1.p_code, "AF11")
         self.assertEqual(household.admin2.p_code, "AF1115")
@@ -93,6 +136,7 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(individual.full_name, "Jan Romaniak")
         self.assertEqual(individual.birth_date, datetime.date(1991, 11, 18))
         self.assertEqual(individual.sex, MALE)
+        self.assertEqual(individual.phone_no, "+48603499023")
         self.assertEqual(individual.flex_fields.get("ss_hw_lot_num_i_f"), 32.0)
         self.assertEqual(individual.flex_fields.get("ss_health_facility_name_i_f"), "ed")
         self.assertEqual(individual.flex_fields.get("ss_hw_title_i_f"), "foo")
@@ -102,22 +146,24 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(individual.flex_fields.get("ss_hw_cadre_i_f"), "aaaaa")
         self.assertEqual(individual.documents.get(type__key="national_id").document_number, "TEST123")
         self.assertEqual(individual.documents.get(type__key="national_id").country.iso_code3, "POL")
-        self.assertEqual(individual.documents.get(type__key="birth_certificate").document_number, "TEST456")
+
+        self.assertEqual(individual.documents.get(type__key="birth_certificate").document_number, "OLD")
         self.assertEqual(individual.documents.get(type__key="birth_certificate").country.iso_code3, "DEU")
+        self.assertEqual(individual2.middle_name, "Testowy")
+        self.assertEqual(individual2.family_name, "Tesciak")
 
     def test_south_sudan_update_script_validation_fails(self) -> None:
         with Capturing() as output:
             south_sudan_update_script(
-                f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id
+                f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id, 1
             )
         expected_output = [
-            "Validating row 0 to 100 Indivduals",
+            "Validating row 0 to 1 Indivduals",
+            "Validating row 1 to 2 Indivduals",
             "Validation failed",
             "Row: 2 - Administrative area admin1 with p_code AF11 not found",
             "Row: 2 - Administrative area admin2 with p_code AF1115 not found",
             "Row: 2 - Country not found for field national_id_country_i_c and value Poland",
             "Row: 2 - Document type not found for field national_id_no_i_c",
-            "Row: 2 - Country not found for field birth_certificate_country_i_c and value Germany",
-            "Row: 2 - Document type not found for field birth_certificate_no_i_c",
         ]
         self.assertEqual(output, expected_output)

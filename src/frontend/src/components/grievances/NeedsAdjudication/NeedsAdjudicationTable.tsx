@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { BlackLink } from '@core/BlackLink';
 import { UniversalMoment } from '@core/UniversalMoment';
 import PeopleIcon from '@mui/icons-material/People';
@@ -44,6 +44,9 @@ export const NeedsAdjudicationTable = ({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const { isActiveProgram, isSocialDctType } = useProgramContext();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const details = ticket?.needsAdjudicationTicketDetails;
 
   const handleSelect = (id: string) => {
@@ -97,7 +100,10 @@ export const NeedsAdjudicationTable = ({
     !isActiveProgram;
 
   const renderPossibleDuplicateRow = (possibleDuplicate) => (
-    <TableRow key={possibleDuplicate.id} data-cy={`possible-duplicate-row-${possibleDuplicate?.unicefId}`}>
+    <TableRow
+      key={possibleDuplicate.id}
+      data-cy={`possible-duplicate-row-${possibleDuplicate?.unicefId}`}
+    >
       <TableCell align="left" data-cy="checkbox-cell">
         <Checkbox
           color="primary"
@@ -199,11 +205,11 @@ export const NeedsAdjudicationTable = ({
             {t('Uniqueness')}
           </TableCell>
           <TableCell data-cy="table-cell-individual-id" align="left">
-            {t('Individual ID')}
+            {beneficiaryGroup?.memberLabel} ID
           </TableCell>
           {!isSocialDctType && (
             <TableCell data-cy="table-cell-household-id" align="left">
-              {t('Household ID')}
+              {beneficiaryGroup?.groupLabel} ID
             </TableCell>
           )}
           <TableCell data-cy="table-cell-full-name" align="left">
@@ -236,7 +242,9 @@ export const NeedsAdjudicationTable = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableRow data-cy={`possible-duplicate-row-${details.goldenRecordsIndividual?.unicefId}`}>
+        <TableRow
+          data-cy={`possible-duplicate-row-${details.goldenRecordsIndividual?.unicefId}`}
+        >
           <TableCell align="left">
             <Checkbox
               color="primary"

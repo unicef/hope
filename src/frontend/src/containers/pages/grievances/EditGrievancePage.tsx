@@ -1,7 +1,13 @@
-import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid2 as Grid,
+  Typography,
+} from '@mui/material';
 import { Field, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   GrievanceTicketDocument,
@@ -56,12 +62,12 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
-  GRIEVANCE_CATEGORY_DESCRIPTIONS,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
-  GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import {
@@ -71,9 +77,9 @@ import {
   thingForSpecificGrievanceType,
 } from '@utils/utils';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -87,15 +93,15 @@ const BoxWithBottomBorders = styled.div`
   padding: 15px 0;
 `;
 
-export const EditGrievancePage = (): ReactElement => {
+const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const {
     data: ticketData,
@@ -251,452 +257,354 @@ export const EditGrievancePage = (): ReactElement => {
     baseUrl,
   );
 
-  const categoryDescription =
-    GRIEVANCE_CATEGORY_DESCRIPTIONS[
-      GRIEVANCE_CATEGORIES_NAMES[ticket.category]
-    ] || '';
-  const issueTypeDescription =
-    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-      GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
-    ] || '';
-
   const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
-
-  const deliveryMechanismDataToEdit =
-    ticket?.individualDataUpdateTicketDetails?.individualData
-      ?.delivery_mechanism_data_to_edit;
 
   const individualFieldsDictForValidation = isSocialDctType
     ? peopleFieldsDict
     : individualFieldsDict;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'EditGrievancePage.tsx');
-      }}
-      componentName="EditGrievancePage"
-    >
-      <Formik
-        initialValues={initialValues}
-        onSubmit={async (values) => {
-          try {
-            const { variables } = prepareVariables(
-              businessArea,
-              values,
-              ticket,
-            );
-            await mutate({
-              variables,
-              refetchQueries: () => [
-                {
-                  query: GrievanceTicketDocument,
-                  variables: { id: ticket.id },
-                },
-              ],
-            });
-            showMessage(t('Grievance Ticket edited.'));
-            navigate(grievanceDetailsPath);
-          } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
-          }
-          if (
-            ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-            ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD
-          ) {
-            changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
-          }
-        }}
-        validate={(values) =>
-          validate(
-            values,
-            allAddIndividualFieldsData,
-            individualFieldsDictForValidation,
-            householdFieldsDict,
-          )
+    <Formik
+      initialValues={initialValues}
+      onSubmit={async (values) => {
+        try {
+          const { variables } = prepareVariables(businessArea, values, ticket);
+          await mutate({
+            variables,
+            refetchQueries: () => [
+              {
+                query: GrievanceTicketDocument,
+                variables: { id: ticket.id },
+              },
+            ],
+          });
+          showMessage(t('Grievance Ticket edited.'));
+          navigate(grievanceDetailsPath);
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
         }
-        validationSchema={validationSchema}
-      >
-        {({ submitForm, values, setFieldValue, errors, touched }) => {
-          const DataChangeComponent = thingForSpecificGrievanceType(
-            values,
-            dataChangeComponentDict,
-            EmptyComponent,
-          );
-          return (
-            <>
-              <AutoSubmitFormOnEnter />
-              <PageHeader
-                title={`${t('Edit Ticket')} #${ticket.unicefId}`}
-                breadCrumbs={breadCrumbsItems}
-              >
-                <Box display="flex" alignContent="center">
-                  <Box mr={3}>
-                    <Button component={Link} to={grievanceDetailsPath}>
-                      {t('Cancel')}
-                    </Button>
-                  </Box>
-                  <LoadingButton
-                    loading={loading}
-                    color="primary"
-                    variant="contained"
-                    onClick={submitForm}
-                    data-cy="button-submit"
-                  >
-                    {t('Save')}
-                  </LoadingButton>
+        if (
+          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+          ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD
+        ) {
+          changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
+        }
+      }}
+      validate={(values) =>
+        validate(
+          values,
+          allAddIndividualFieldsData,
+          individualFieldsDictForValidation,
+          householdFieldsDict,
+          beneficiaryGroup,
+        )
+      }
+      validationSchema={validationSchema}
+    >
+      {({ submitForm, values, setFieldValue, errors, touched }) => {
+        const DataChangeComponent = thingForSpecificGrievanceType(
+          values,
+          dataChangeComponentDict,
+          EmptyComponent,
+        );
+        const categoryDescriptions =
+          getGrievanceCategoryDescriptions(beneficiaryGroup);
+        const issueTypeDescriptions =
+          getGrievanceIssueTypeDescriptions(beneficiaryGroup);
+
+        const categoryDescription =
+          categoryDescriptions[GRIEVANCE_CATEGORIES_NAMES[values.category]] ||
+          '';
+        const issueTypeDescription =
+          issueTypeDescriptions[
+            GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
+          ] || '';
+        return (
+          <>
+            <AutoSubmitFormOnEnter />
+            <PageHeader
+              title={`${t('Edit Ticket')} #${ticket.unicefId}`}
+              breadCrumbs={breadCrumbsItems}
+            >
+              <Box display="flex" alignContent="center">
+                <Box mr={3}>
+                  <Button component={Link} to={grievanceDetailsPath}>
+                    {t('Cancel')}
+                  </Button>
                 </Box>
-              </PageHeader>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <NewTicket>
-                    <ContainerColumnWithBorder>
-                      <Grid container spacing={3}>
-                        <Grid item xs={3}>
-                          <LabelizedField label={t('Category')}>
-                            {categoryChoices[ticket.category]}
+                <LoadingButton
+                  loading={loading}
+                  color="primary"
+                  variant="contained"
+                  onClick={submitForm}
+                  data-cy="button-submit"
+                >
+                  {t('Save')}
+                </LoadingButton>
+              </Box>
+            </PageHeader>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12 }}>
+                <NewTicket>
+                  <ContainerColumnWithBorder>
+                    <Grid container spacing={3}>
+                      <Grid size={{ xs: 3 }}>
+                        <LabelizedField label={t('Category')}>
+                          {categoryChoices[ticket.category]}
+                        </LabelizedField>
+                      </Grid>
+                      {showIssueType(values) ? (
+                        <Grid size={{ xs: 6 }}>
+                          <LabelizedField label={t('Issue Type')}>
+                            {selectedIssueType(
+                              values,
+                              choicesData.grievanceTicketIssueTypeChoices,
+                            )}
                           </LabelizedField>
                         </Grid>
-                        {showIssueType(values) ? (
-                          <Grid item xs={6}>
-                            <LabelizedField label={t('Issue Type')}>
-                              {selectedIssueType(
-                                values,
-                                choicesData.grievanceTicketIssueTypeChoices,
-                              )}
+                      ) : null}
+                      {values.category && (
+                        <>
+                          <DividerLine />
+                          <Grid size={{ xs: 6 }}>
+                            <LabelizedField label={t('Category Description')}>
+                              {categoryDescription}
                             </LabelizedField>
                           </Grid>
-                        ) : null}
-                        {values.category && (
-                          <>
-                            <DividerLine />
-                            <Grid item xs={6}>
-                              <LabelizedField label={t('Category Description')}>
-                                {categoryDescription}
+                          {issueTypeDescription && (
+                            <Grid size={{ xs: 6 }}>
+                              <LabelizedField
+                                label={t('Issue Type Description')}
+                              >
+                                {issueTypeDescription}
                               </LabelizedField>
                             </Grid>
-                            {issueTypeDescription && (
-                              <Grid item xs={6}>
-                                <LabelizedField
-                                  label={t('Issue Type Description')}
-                                >
-                                  {issueTypeDescription}
-                                </LabelizedField>
-                              </Grid>
-                            )}
-                            <DividerLine />
-                          </>
-                        )}
-                        <Grid container xs={12} item>
-                          <Grid item xs={3}>
-                            <LabelizedField label={t('Household ID')}>
-                              <span>
-                                {ticket.household?.id &&
-                                canViewHouseholdDetails &&
-                                !isAllPrograms ? (
-                                  <BlackLink
-                                    to={`/${baseUrl}/population/household/${ticket.household.id}`}
-                                  >
-                                    {ticket.household.unicefId}
-                                  </BlackLink>
-                                ) : (
-                                  <div>
-                                    {ticket.household?.id
-                                      ? ticket.household.unicefId
-                                      : '-'}
-                                  </div>
-                                )}
-                              </span>
-                            </LabelizedField>
-                          </Grid>
-                          <Grid item xs={3}>
-                            <LabelizedField label={t('Individual ID')}>
-                              <span>
-                                {ticket.individual?.id &&
-                                canViewIndividualDetails &&
-                                !isAllPrograms ? (
-                                  <BlackLink
-                                    to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
-                                  >
-                                    {ticket.individual.unicefId}
-                                  </BlackLink>
-                                ) : (
-                                  <div>
-                                    {ticket.individual?.id
-                                      ? ticket.individual.unicefId
-                                      : '-'}
-                                  </div>
-                                )}
-                              </span>
-                            </LabelizedField>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                      <BoxPadding>
-                        <Grid container spacing={3}>
-                          <Grid item xs={12}>
-                            <Field
-                              name="description"
-                              multiline
-                              fullWidth
-                              disabled={Boolean(ticket.description)}
-                              variant="outlined"
-                              label="Description"
-                              required
-                              component={FormikTextField}
-                            />
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Field
-                              name="comments"
-                              multiline
-                              fullWidth
-                              disabled={Boolean(ticket.comments)}
-                              variant="outlined"
-                              label="Comments"
-                              component={FormikTextField}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name="admin"
-                              disabled={Boolean(ticket.admin)}
-                              variant="outlined"
-                              component={FormikAdminAreaAutocomplete}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name="area"
-                              fullWidth
-                              disabled={Boolean(ticket.area)}
-                              variant="outlined"
-                              label={t('Area / Village / Pay point')}
-                              component={FormikTextField}
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name="language"
-                              multiline
-                              fullWidth
-                              disabled={Boolean(ticket.language)}
-                              variant="outlined"
-                              label={t('Languages Spoken')}
-                              component={FormikTextField}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <Field
-                              name="priority"
-                              multiline
-                              fullWidth
-                              variant="outlined"
-                              label={t('Priority')}
-                              choices={
-                                choicesData.grievanceTicketPriorityChoices
-                              }
-                              component={FormikSelectField}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <Field
-                              name="urgency"
-                              multiline
-                              fullWidth
-                              variant="outlined"
-                              label={t('Urgency')}
-                              choices={
-                                choicesData.grievanceTicketUrgencyChoices
-                              }
-                              component={FormikSelectField}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <Field
-                              name="program"
-                              label={t('Programme Name')}
-                              fullWidth
-                              variant="outlined"
-                              choices={mappedProgramChoices}
-                              component={FormikSelectField}
-                              disabled={
-                                !isAllPrograms ||
-                                Boolean(ticket.programs?.[0]?.id)
-                              }
-                            />
-                          </Grid>
-                        </Grid>
-                        {canAddDocumentation && (
-                          <Box mt={3}>
-                            <Title>
-                              <Typography variant="h6">
-                                {t('Documentation')}
-                              </Typography>
-                            </Title>
-                            <ExistingDocumentationFieldArray
-                              values={values}
-                              setFieldValue={setFieldValue}
-                              errors={errors}
-                              ticket={ticket}
-                            />
-                            <NewDocumentationFieldArray
-                              values={values}
-                              setFieldValue={setFieldValue}
-                              errors={errors}
-                            />
-                          </Box>
-                        )}
-                      </BoxPadding>
-                      <BoxPadding>
-                        <Grid item xs={6}>
-                          <Box py={3}>
-                            <LookUpLinkedTickets
-                              values={values}
-                              onValueChange={setFieldValue}
-                              disabled={Boolean(ticket.linkedTickets)}
-                            />
-                          </Box>
-                        </Grid>
-                        {(ticket.issueType?.toString() ===
-                          GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
-                          ticket.issueType?.toString() ===
-                            GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
-                          <BoxWithBottomBorders>
-                            <Grid item xs={6}>
-                              <Box py={3}>
-                                <LookUpPaymentRecord
-                                  values={values}
-                                  disabled={Boolean(ticket.paymentRecord)}
-                                  onValueChange={setFieldValue}
-                                />
-                              </Box>
-                            </Grid>
-                          </BoxWithBottomBorders>
-                        )}
-                      </BoxPadding>
-                      {hasCreatorOrOwnerPermissions(
-                        PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
-                        isCreator,
-                        PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
-                        isOwner,
-                        PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
-                        permissions,
-                      ) && (
-                        <>
-                          <BoxPadding>
-                            <DataChangeComponent
-                              values={values}
-                              setFieldValue={setFieldValue}
-                            />
-                            {dataChangeErrors(errors, touched)}
-                          </BoxPadding>
-                          <BoxPadding>
-                            {deliveryMechanismDataToEdit && (
-                              <>
-                                <Title>
-                                  <Typography variant="h6">
-                                    {t('Delivery Mechanisms Data to Edit')}
-                                  </Typography>
-                                </Title>
-                                <Grid container spacing={3}>
-                                  {values.individualDataUpdateDeliveryMechanismDataToEdit?.map(
-                                    (
-                                      item: {
-                                        id: string;
-                                        label: string;
-                                        dataFields: Record<
-                                          string,
-                                          {
-                                            name: string;
-                                            previousValue: string;
-                                            value: string;
-                                          }
-                                        >;
-                                      },
-                                      index: number,
-                                    ) => (
-                                      <Grid
-                                        container
-                                        item
-                                        xs={12}
-                                        key={item.id}
-                                      >
-                                        <Typography variant="subtitle1">
-                                          Delivery Mechanism: {item.label}
-                                        </Typography>
-                                        {Object.entries(item.dataFields).map(
-                                          (
-                                            [, field]: [
-                                              string,
-                                              {
-                                                name: string;
-                                                previousValue: string;
-                                                value: string;
-                                              },
-                                            ],
-                                            fieldIndex: number,
-                                          ) => (
-                                            <Grid
-                                              key={field.name}
-                                              container
-                                              alignItems="flex-end"
-                                              spacing={3}
-                                            >
-                                              <Grid item xs={4}>
-                                                <LabelizedField
-                                                  label={t('Field Name')}
-                                                >
-                                                  {field.name}
-                                                </LabelizedField>
-                                              </Grid>
-                                              <Grid item xs={4}>
-                                                <Field
-                                                  name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].dataFields[${fieldIndex}].previous_value`}
-                                                  type="text"
-                                                  label={t('Current Value')}
-                                                  component={FormikTextField}
-                                                  disabled
-                                                />
-                                              </Grid>
-                                              <Grid item xs={4}>
-                                                <Field
-                                                  name={`individualDataUpdateDeliveryMechanismDataToEdit[${index}].dataFields[${fieldIndex}].value`}
-                                                  type="text"
-                                                  label={t('New Value')}
-                                                  component={FormikTextField}
-                                                  required
-                                                />
-                                              </Grid>
-                                            </Grid>
-                                          ),
-                                        )}
-                                      </Grid>
-                                    ),
-                                  )}
-                                </Grid>
-                              </>
-                            )}
-                          </BoxPadding>
+                          )}
+                          <DividerLine />
                         </>
                       )}
-                    </ContainerColumnWithBorder>
-                  </NewTicket>
-                </Grid>
-                <Grid item xs={6}>
-                  <NewTicket>
-                    <OtherRelatedTicketsCreate values={values} />
-                  </NewTicket>
-                </Grid>
+                      <Grid container size={{ xs: 12 }}>
+                        <Grid size={{ xs: 3 }}>
+                          <LabelizedField
+                            label={`${beneficiaryGroup?.groupLabel}`}
+                          >
+                            <span>
+                              {ticket.household?.id &&
+                              canViewHouseholdDetails &&
+                              !isAllPrograms ? (
+                                <BlackLink
+                                  to={`/${baseUrl}/population/household/${ticket.household.id}`}
+                                >
+                                  {ticket.household.unicefId}
+                                </BlackLink>
+                              ) : (
+                                <div>
+                                  {ticket.household?.id
+                                    ? ticket.household.unicefId
+                                    : '-'}
+                                </div>
+                              )}
+                            </span>
+                          </LabelizedField>
+                        </Grid>
+                        <Grid size={{ xs: 3 }}>
+                          <LabelizedField label={t('Individual ID')}>
+                            <span>
+                              {ticket.individual?.id &&
+                              canViewIndividualDetails &&
+                              !isAllPrograms ? (
+                                <BlackLink
+                                  to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
+                                >
+                                  {ticket.individual.unicefId}
+                                </BlackLink>
+                              ) : (
+                                <div>
+                                  {ticket.individual?.id
+                                    ? ticket.individual.unicefId
+                                    : '-'}
+                                </div>
+                              )}
+                            </span>
+                          </LabelizedField>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    <BoxPadding>
+                      <Grid container spacing={3}>
+                        <Grid size={{ xs: 12 }}>
+                          <Field
+                            name="description"
+                            multiline
+                            fullWidth
+                            disabled={Boolean(ticket.description)}
+                            variant="outlined"
+                            label="Description"
+                            required
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                          <Field
+                            name="comments"
+                            multiline
+                            fullWidth
+                            disabled={Boolean(ticket.comments)}
+                            variant="outlined"
+                            label="Comments"
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <Field
+                            name="admin"
+                            disabled={Boolean(ticket.admin)}
+                            variant="outlined"
+                            component={FormikAdminAreaAutocomplete}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <Field
+                            name="area"
+                            fullWidth
+                            disabled={Boolean(ticket.area)}
+                            variant="outlined"
+                            label={t('Area / Village / Pay point')}
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 6 }}>
+                          <Field
+                            name="language"
+                            multiline
+                            fullWidth
+                            disabled={Boolean(ticket.language)}
+                            variant="outlined"
+                            label={t('Languages Spoken')}
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 3 }}>
+                          <Field
+                            name="priority"
+                            multiline
+                            fullWidth
+                            variant="outlined"
+                            label={t('Priority')}
+                            choices={choicesData.grievanceTicketPriorityChoices}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 3 }}>
+                          <Field
+                            name="urgency"
+                            multiline
+                            fullWidth
+                            variant="outlined"
+                            label={t('Urgency')}
+                            choices={choicesData.grievanceTicketUrgencyChoices}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 3 }}>
+                          <Field
+                            name="program"
+                            label={t('Programme Name')}
+                            fullWidth
+                            variant="outlined"
+                            choices={mappedProgramChoices}
+                            component={FormikSelectField}
+                            disabled={
+                              !isAllPrograms ||
+                              Boolean(ticket.programs?.[0]?.id)
+                            }
+                          />
+                        </Grid>
+                      </Grid>
+                      {canAddDocumentation && (
+                        <Box mt={3}>
+                          <Title>
+                            <Typography variant="h6">
+                              {t(
+                                'Grievance Supporting Documents: upload of document: support documentation for the ticket',
+                              )}
+                            </Typography>
+                          </Title>
+                          <ExistingDocumentationFieldArray
+                            values={values}
+                            setFieldValue={setFieldValue}
+                            errors={errors}
+                            ticket={ticket}
+                          />
+                          <NewDocumentationFieldArray
+                            values={values}
+                            setFieldValue={setFieldValue}
+                            errors={errors}
+                          />
+                        </Box>
+                      )}
+                    </BoxPadding>
+                    <BoxPadding>
+                      <Grid size={{ xs: 6 }}>
+                        <Box py={3}>
+                          <LookUpLinkedTickets
+                            values={values}
+                            onValueChange={setFieldValue}
+                            disabled={Boolean(ticket.linkedTickets)}
+                          />
+                        </Box>
+                      </Grid>
+                      {(ticket.issueType?.toString() ===
+                        GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
+                        ticket.issueType?.toString() ===
+                          GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
+                        <BoxWithBottomBorders>
+                          <Grid size={{ xs: 6 }}>
+                            <Box py={3}>
+                              <LookUpPaymentRecord
+                                values={values}
+                                disabled={Boolean(ticket.paymentRecord)}
+                                onValueChange={setFieldValue}
+                              />
+                            </Box>
+                          </Grid>
+                        </BoxWithBottomBorders>
+                      )}
+                    </BoxPadding>
+                    {hasCreatorOrOwnerPermissions(
+                      PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                      isCreator,
+                      PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
+                      isOwner,
+                      PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+                      permissions,
+                    ) && (
+                      <>
+                        <BoxPadding>
+                          <DataChangeComponent
+                            values={values}
+                            setFieldValue={setFieldValue}
+                          />
+                          {dataChangeErrors(errors, touched)}
+                        </BoxPadding>
+                      </>
+                    )}
+                  </ContainerColumnWithBorder>
+                </NewTicket>
               </Grid>
-            </>
-          );
-        }}
-      </Formik>
-    </UniversalErrorBoundary>
+              <Grid size={{ xs: 6 }}>
+                <NewTicket>
+                  <OtherRelatedTicketsCreate values={values} />
+                </NewTicket>
+              </Grid>
+            </Grid>
+          </>
+        );
+      }}
+    </Formik>
   );
 };
+
+export default withErrorBoundary(EditGrievancePage, 'EditGrievancePage');

@@ -27,7 +27,11 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
-from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
+from hct_mis_api.apps.core.field_attributes.fields_types import (
+    FILTERABLE_TYPES,
+    TYPE_STRING,
+    Scope,
+)
 from hct_mis_api.apps.core.kobo.api import CountryCodeNotProvided, KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
@@ -62,6 +66,7 @@ class DataCollectingTypeChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
     description = String()
+    type = String()
 
 
 class PDUSubtypeChoiceObject(graphene.ObjectType):
@@ -306,18 +311,14 @@ def get_fields_attr_generators(
             )
 
 
-def get_collector_fields_attr_generator() -> Generator:
-    yield from FieldFactory.from_scope(Scope.DELIVERY_MECHANISM)
-
-
 def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     try:
         assets = KoboAPI().get_single_project_data(uid)
     except ObjectDoesNotExist as e:
-        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
     except AttributeError as error:  # pragma: no cover
-        logger.exception(error)
+        logger.warning(error)
         raise GraphQLError(str(error)) from error
 
     return reduce_asset(assets)
@@ -330,10 +331,10 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
         )
         assets = KoboAPI().get_all_projects_data(business_area.country_code)
     except ObjectDoesNotExist as e:
-        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
     except AttributeError as error:  # pragma: no cover
-        logger.exception(error)
+        logger.warning(error)
         raise GraphQLError(str(error)) from error
     except CountryCodeNotProvided:
         raise GraphQLError(f"Business area {business_area_slug} does not have a country code.")
@@ -459,8 +460,25 @@ class Query(graphene.ObjectType):
         parent,
         info: Any,
     ) -> List[Any]:
+        from hct_mis_api.apps.payment.models.payment import AccountType
+
+        account_types = AccountType.objects.all()
+        definitions = [
+            {
+                "id": f"{account_type.key}__{field}",
+                "type": TYPE_STRING,
+                "name": f"{account_type.key}__{field}",
+                "lookup": f"{account_type.key}__{field}",
+                "label": {"English(EN)": f"{account_type.key.title()} {field.title()}"},
+                "hint": "",
+                "required": False,
+                "choices": [],
+            }
+            for account_type in account_types
+            for field in account_type.unique_fields
+        ]
         return sort_by_attr(
-            (attr for attr in get_collector_fields_attr_generator()),
+            (attr for attr in definitions),
             "label.English(EN)",
         )
 
@@ -487,8 +505,8 @@ class Query(graphene.ObjectType):
                 deprecated=False,
             )
             .exclude(code__iexact="unknown")
-            .only("code", "label", "description")
-            .values("code", "label", "description")
+            .only("code", "label", "description", "type")
+            .values("code", "label", "description", "type")
         )
         result = []
         for data_collection_type in data_collecting_types:
@@ -497,6 +515,7 @@ class Query(graphene.ObjectType):
                     "name": data_collection_type["label"],
                     "value": data_collection_type["code"],
                     "description": data_collection_type["description"],
+                    "type": data_collection_type["type"],
                 }
             )
         return result

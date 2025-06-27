@@ -2,7 +2,7 @@ import { Button, DialogContent, DialogTitle } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useLockTpMutation } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
@@ -11,6 +11,7 @@ import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ReactElement } from 'react';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 
 export interface LockTargetPopulationDialogProps {
   open: boolean;
@@ -28,7 +29,10 @@ export const LockTargetPopulationDialog = ({
   const { baseUrl } = useBaseUrl();
 
   const { showMessage } = useSnackbar();
-  const [mutate, { loading }] = useLockTpMutation();
+  const { mutatePaymentPlanAction: lock, loading: loadingLock } =
+    usePaymentPlanAction(Action.TpLock, targetPopulationId, () =>
+      showMessage(t('Payment Plan has been locked.')),
+    );
   return (
     <Dialog
       open={open}
@@ -58,11 +62,9 @@ export const LockTargetPopulationDialog = ({
             <LoadingButton
               color="primary"
               variant="contained"
-              loading={loading}
+              loading={loadingLock}
               onClick={() => {
-                mutate({
-                  variables: { id: targetPopulationId },
-                }).then(() => {
+                lock().then(() => {
                   setOpen(false);
                   showMessage(t('Target Population Locked'));
                   navigate(

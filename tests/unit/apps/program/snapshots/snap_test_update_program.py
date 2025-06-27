@@ -51,6 +51,9 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
     'data': {
         'updateProgram': {
             'program': {
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'dataCollectingType': {
                     'code': 'full_collection',
                     'label': 'Full'
@@ -95,7 +98,8 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                     }
                 ],
                 'status': 'FINISHED'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -144,6 +148,9 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
     'data': {
         'updateProgram': {
             'program': {
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'dataCollectingType': {
                     'code': 'partial_individuals',
                     'label': 'Partial'
@@ -188,7 +195,8 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                     }
                 ],
                 'status': 'ACTIVE'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -226,6 +234,83 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_2_without_permis
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_beneficiary_group 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': {
+                'beneficiaryGroup': {
+                    'name': 'Other Group'
+                },
+                'dataCollectingType': {
+                    'code': 'full_collection',
+                    'label': 'Full'
+                },
+                'name': 'initial name',
+                'pduFields': [
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
+                        'name': 'pdu_field_to_be_preserved',
+                        'pduData': {
+                            'numberOfRounds': 1,
+                            'roundsNames': [
+                                'Round To Be Preserved'
+                            ],
+                            'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
+                        'name': 'pdu_field_to_be_removed',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 To Be Removed',
+                                'Round 2 To Be Removed',
+                                'Round 3 To Be Removed'
+                            ],
+                            'subtype': 'DECIMAL'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
+                        'name': 'pdu_field_to_be_updated',
+                        'pduData': {
+                            'numberOfRounds': 2,
+                            'roundsNames': [
+                                'Round 1 To Be Updated',
+                                'Round 2 To Be Updated'
+                            ],
+                            'subtype': 'STRING'
+                        }
+                    }
+                ],
+                'status': 'DRAFT'
+            },
+            'validationErrors': None
+        }
+    }
+}
+
+snapshots['TestUpdateProgram::test_update_program_beneficiary_group_when_imported_population 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': '["You cannot update a program\'s Beneficiary Group if it has imported population."]',
             'path': [
                 'updateProgram'
             ]
@@ -291,6 +376,19 @@ snapshots['TestUpdateProgram::test_update_program_end_date_validation 3'] = {
             ]
         }
     ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_incompatible_beneficiary_group 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': None,
+            'validationErrors': {
+                '__all__': [
+                    'Selected combination of data collecting type and beneficiary group is invalid.'
+                ]
+            }
+        }
+    }
 }
 
 snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
@@ -463,6 +561,9 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
     'data': {
         'updateProgram': {
             'program': {
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'dataCollectingType': {
                     'code': 'full_collection',
                     'label': 'Full'
@@ -509,7 +610,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -586,6 +688,9 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
     'data': {
         'updateProgram': {
             'program': {
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'dataCollectingType': {
                     'code': 'full_collection',
                     'label': 'Full'
@@ -632,7 +737,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -641,6 +747,9 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
     'data': {
         'updateProgram': {
             'program': {
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'dataCollectingType': {
                     'code': 'full_collection',
                     'label': 'Full'
@@ -687,7 +796,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -716,6 +826,9 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
     'data': {
         'updateProgram': {
             'program': {
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'dataCollectingType': {
                     'code': 'full_collection',
                     'label': 'Full'
@@ -762,7 +875,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -811,6 +925,9 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
     'data': {
         'updateProgram': {
             'program': {
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'dataCollectingType': {
                     'code': 'full_collection',
                     'label': 'Full'
@@ -855,7 +972,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -864,6 +982,9 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
     'data': {
         'updateProgram': {
             'program': {
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'dataCollectingType': {
                     'code': 'full_collection',
                     'label': 'Full'
@@ -908,7 +1029,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }

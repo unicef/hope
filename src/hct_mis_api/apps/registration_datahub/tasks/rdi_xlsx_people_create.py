@@ -23,7 +23,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
@@ -49,9 +49,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self.index_id: Optional[int] = None
         self.households_to_update = []
         self.COMBINED_FIELDS: Dict = {
-            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE, Scope.DELIVERY_MECHANISM])
-            .apply_business_area()
-            .to_dict_by("xlsx_field"),
+            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
             **serialize_flex_attributes()["individuals"],
         }
 
@@ -76,6 +74,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         collectors_to_create = []
         for index_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
+                if index_id not in self.households:
+                    continue
                 collector.household_id = self.households.get(int(index_id)).pk
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
@@ -88,12 +88,18 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
         for cell, header_cell in zip(row, first_row):
             try:
-                if header_cell in self._pdu_column_names:
+                if header_cell.value in self._pdu_column_names:
                     continue
+                elif header_cell.value.startswith(f"pp_{Account.ACCOUNT_FIELD_PREFIX}"):
+                    self._handle_delivery_mechanism_fields(cell.value, header_cell.value, cell.row, obj_to_create)
+                    continue
+
                 header = header_cell.value
                 combined_fields = self.COMBINED_FIELDS
                 current_field = combined_fields.get(header, {})
-
+                if header == "identification_key_h_c":
+                    identification_key = cell.value
+                    obj_to_create.identification_key = identification_key
                 if not current_field and header not in complex_fields[sheet_title]:
                     continue
                 is_not_image = current_field.get("type") != "IMAGE"
@@ -109,6 +115,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     continue
 
                 if header in complex_fields[sheet_title]:
+                    if self.index_id in self.households_to_ignore:
+                        continue
                     fn_complex: Callable = complex_fields[sheet_title][header]
                     value = fn_complex(
                         value=cell_value,
@@ -175,10 +183,15 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         obj_to_create.detail_id = row[0].row
         obj_to_create.business_area = registration_data_import.business_area
         if sheet_title == "households":
-            obj_to_create.set_admin_areas()
-            obj_to_create.save()
-            self.households[self.index_id] = obj_to_create
+            if not self._check_collision(obj_to_create):  # Dont create household if collision
+                obj_to_create.set_admin_areas()
+                obj_to_create.save()
+                self.households[self.index_id] = obj_to_create
+            else:
+                self.households_to_ignore.append(self.index_id)
         else:
+            if self.index_id in self.households_to_ignore:
+                return
             obj_to_create = self._validate_birth_date(obj_to_create)
             obj_to_create.age_at_registration = calculate_age_at_registration(
                 registration_data_import.created_at, str(obj_to_create.birth_date)
@@ -194,8 +207,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
             self.individuals.append(obj_to_create)
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
-        delivery_mechanism_xlsx_fields = DeliveryMechanismData.get_scope_delivery_mechanisms_fields(by="xlsx_field")
-
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "pp_photo_i_c": self._handle_image_field,
@@ -226,9 +237,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 "pp_first_registration_date_i_c": self._handle_datetime,
             },
         }
-        complex_fields["individuals"].update(
-            {f"pp_{field}": self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
-        )
         document_complex_types: Dict[str, Callable] = {}
         for document_type in DocumentType.objects.all():
             document_complex_types[f"pp_{document_type.key}_i_c"] = self._handle_document_fields
@@ -284,7 +292,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_identities()
         self._create_collectors()
         self._create_bank_accounts_infos()
-        self._create_delivery_mechanisms_data()
+        self._create_accounts()
+        self.registration_data_import.extra_hh_rdis.add(*self.colided_households_pks)
 
     @transaction.atomic()
     def execute(

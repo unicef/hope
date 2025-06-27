@@ -40,15 +40,15 @@ def get_individual(tax_id: str, business_area_code: Optional[str]) -> PendingInd
     raise Exception("Document with given tax_id not found")
 
 
-def get_household(registration_id: str, business_area_code: Optional[str]) -> Union[PendingHousehold, Household]:
-    kobo_asset_value = _prepare_kobo_asset_id_value(registration_id)
+def get_household(detail_id: str, business_area_code: Optional[str]) -> Union[PendingHousehold, Household]:
+    kobo_asset_value = _prepare_kobo_asset_id_value(detail_id)
     households = (
         Household.objects.all()
         if not business_area_code
         else Household.objects.filter(business_area__code=business_area_code)
     ).filter(detail_id__endswith=kobo_asset_value)
     if households.count() > 1:
-        raise Exception(f"Multiple households ({households.count()}) with given registration_id found")
+        raise Exception(f"Multiple households ({households.count()}) with given detail_id found")
     if households.count() == 1:
         return households.first()  # type: ignore
 
@@ -65,29 +65,27 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Un
 
     imported_households = pending_households_by_business_area.filter(detail_id__endswith=kobo_asset_value)
     if imported_households.count() > 1:
-        raise Exception(
-            f"Multiple imported households ({imported_households.count()}) with given registration_id found"
-        )
+        raise Exception(f"Multiple imported households ({imported_households.count()}) with given detail_id found")
     if imported_households.count() == 1:
         return imported_households.first()
-    raise Exception("Household with given registration_id not found")
+    raise Exception("Household with given detail_id not found")
 
 
 def get_household_or_individual(
-    tax_id: Optional[str], registration_id: Optional[str], business_area_code: Optional[str]
+    tax_id: Optional[str], detail_id: Optional[str], business_area_code: Optional[str]
 ) -> Dict:
-    if tax_id and registration_id:
-        raise Exception("tax_id and registration_id are mutually exclusive")
+    if tax_id and detail_id:
+        raise Exception("tax_id and detail_id are mutually exclusive")
 
     if tax_id:
         individual = get_individual(tax_id, business_area_code)
         return serialize_by_individual(individual, tax_id)
 
-    if registration_id:
-        household = get_household(registration_id, business_area_code)
+    if detail_id:
+        household = get_household(detail_id, business_area_code)
         return serialize_by_household(household)
 
-    raise Exception("tax_id or registration_id is required")
+    raise Exception("tax_id or detail_id is required")
 
 
 class HouseholdStatusView(APIView):
@@ -98,13 +96,13 @@ class HouseholdStatusView(APIView):
         query_params = request.query_params
 
         tax_id = query_params.get("tax_id", None)
-        registration_id = query_params.get("registration_id", None)
+        detail_id = query_params.get("detail_id", None)
         business_area_code: Optional[str] = query_params.get("business_area_code")
 
         try:
-            data = get_household_or_individual(tax_id, registration_id, business_area_code)
+            data = get_household_or_individual(tax_id, detail_id, business_area_code)
         except Exception as e:  # pragma: no cover
-            logger.exception(e)
+            logger.warning(e)
             return Response({"status": "not found", "error_message": "Household not Found"}, status=404)
 
         return Response(data, status=200)

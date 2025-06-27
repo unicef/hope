@@ -3,38 +3,39 @@
 exports[`components/dashboard/TotalNumberOfIndividualsReachedSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kLhKbu bmwOMh css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kfeOyU eEiiRL css-1gtchvp-MuiPaper-root"
     color="#345DA0"
+    style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-egkSDF DXwdF"
+      class="sc-dVBluf kpTlSk"
     >
       TOTAL NUMBER OF INDIVIDUALS REACHED
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container css-9cyib4-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-15fcp3v-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
         data-cy="total-number-of-individuals-reached"
       >
         <div
-          class="sc-khLCKb hScFTY"
+          class="sc-jBIHhB eBsxKg"
         >
           0
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row css-1fzlhpv-MuiGrid2-root"
       >
         <div
           bg="#D9E2EF"
-          class="sc-ghWlax gTXmEW"
+          class="sc-gNZgCX dFqKIK"
           color="#023F90"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1vooibu-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1ckov0h-MuiSvgIcon-root"
             data-testid="PersonIcon"
             focusable="false"
             viewBox="0 0 24 24"

@@ -30,7 +30,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     mutation ApproveSystemFlagging($grievanceTicketId: ID!, $approveStatus: Boolean!) {
       approveSystemFlagging(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
         grievanceTicket {
-          id
+          description
           systemFlaggingTicketDetails {
             approveStatus
           }
@@ -50,10 +50,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
       clearIndividualIds: $clearIndividualIds,
       ) {
         grievanceTicket {
-          id
+          description
           needsAdjudicationTicketDetails {
             selectedIndividual {
-              id
+              unicefId
             }
           }
         }
@@ -70,16 +70,36 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
       duplicateIndividualIds: $duplicateIndividualIds
       ) {
         grievanceTicket {
-          id
+          description
           needsAdjudicationTicketDetails {
             possibleDuplicates {
-              id
+              unicefId
             }
           }
         }
       }
     }
     """
+    APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION_WITH_ID = """
+        mutation ApproveNeedsAdjudicationTicket(
+        $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID]
+        ) {
+          approveNeedsAdjudication(
+          grievanceTicketId: $grievanceTicketId,
+          selectedIndividualId: $selectedIndividualId,
+          duplicateIndividualIds: $duplicateIndividualIds
+          ) {
+            grievanceTicket {
+              id
+              needsAdjudicationTicketDetails {
+                possibleDuplicates {
+                  id
+                }
+              }
+            }
+          }
+        }
+        """
     APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS = """
         mutation ApproveNeedsAdjudicationTicket(
         $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID], $clearIndividualIds: [ID]
@@ -92,10 +112,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
           clearIndividualIds: $clearIndividualIds,
           ) {
             grievanceTicket {
-              id
+              description
               needsAdjudicationTicketDetails {
                 selectedIndividual {
-                  id
+                  unicefId
                 }
                 selectedDistinct {
                   unicefId
@@ -146,7 +166,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         )
         partner = PartnerFactory()
         household_one = HouseholdFactory.build(
-            id="07a901ed-d2a5-422a-b962-3570da1d5d07",
             registration_data_import__imported_by__partner=partner,
             program=program_one,
         )
@@ -154,11 +173,9 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = household_one.program
         household_one.registration_data_import.save()
-        household_one.programs.add(program_one)
 
         cls.individuals_to_create = [
             {
-                "id": "f9e27ca8-11f7-4386-bafb-e077b0bb47f3",
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
                 "family_name": "Butler",
@@ -168,7 +185,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "photo": ContentFile(b"111", name="foo1.png"),
             },
             {
-                "id": "94b09ff2-9e6d-4f34-a72c-c319e1db7115",
                 "full_name": "Robin Ford",
                 "given_name": "Robin",
                 "family_name": "Ford",
@@ -219,7 +235,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         cls.sanction_list_individual = SanctionListIndividual.objects.create(**sanction_list_individual_data)
 
         cls.system_flagging_grievance_ticket = GrievanceTicketFactory(
-            id="43c59eda-6664-41d6-9339-05efcb11da82",
+            description="system_flagging_grievance_ticket",
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             admin2=cls.admin_area_1,
             business_area=cls.business_area,
@@ -233,7 +249,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         )
 
         cls.needs_adjudication_grievance_ticket = GrievanceTicketFactory(
-            id="2b419ce3-3297-47ee-a47f-43442abac73e",
+            description="needs_adjudication_grievance_ticket",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
             admin2=cls.admin_area_1,
             business_area=cls.business_area,
@@ -342,7 +358,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
 
     def approve_multiple_needs_adjudication_ticket(self, grievance_ticket_id: str) -> Dict:
         return self.graphql_request(
-            request_string=self.APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION,
+            request_string=self.APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION_WITH_ID,
             context={"user": self.user},
             variables={
                 "grievanceTicketId": grievance_ticket_id,

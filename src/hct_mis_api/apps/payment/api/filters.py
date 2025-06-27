@@ -12,6 +12,7 @@ class PaymentPlanFilter(FilterSet):
         choices=PaymentPlan.Status.choices,
     )
     program = django_filters.CharFilter(method="filter_by_program")
+    name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
 
     class Meta:
         model = PaymentPlan
@@ -23,4 +24,4 @@ class PaymentPlanFilter(FilterSet):
         }
 
     def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(program_id=decode_id_string_required(value))
+        return qs.filter(program_cycle__program_id=decode_id_string_required(value))

@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@mui/material';
+import { Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
@@ -12,17 +12,22 @@ import {
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
+import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export interface EditHouseholdDataChangeProps {
   values;
   setFieldValue;
 }
-export function EditHouseholdDataChange({
+function EditHouseholdDataChange({
   values,
   setFieldValue,
 }: EditHouseholdDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const isEditTicket = location.pathname.includes('edit-ticket');
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
@@ -46,13 +51,15 @@ export function EditHouseholdDataChange({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+    useAllEditHouseholdFieldsQuery({ fetchPolicy: 'network-only' });
 
   const householdFieldsDict =
     householdFieldsData?.allEditHouseholdFieldsAttributes;
 
   if (!household) {
-    return <div>{t('You have to select a household earlier')}</div>;
+    return (
+      <div>{`You have to select a ${beneficiaryGroup?.groupLabel} earlier`}</div>
+    );
   }
   if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
     return <LoadingComponent />;
@@ -64,7 +71,7 @@ export function EditHouseholdDataChange({
     !isEditTicket && (
       <>
         <Title>
-          <Typography variant="h6">{t('Household Data')}</Typography>
+          <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} Data`}</Typography>
         </Title>
         <Grid container spacing={3}>
           <FieldArray
@@ -84,7 +91,7 @@ export function EditHouseholdDataChange({
                     values={values}
                   />
                 ))}
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <Button
                     color="primary"
                     startIcon={<AddCircleOutline />}
@@ -104,3 +111,8 @@ export function EditHouseholdDataChange({
     )
   );
 }
+
+export default withErrorBoundary(
+  EditHouseholdDataChange,
+  'EditHouseholdDataChange',
+);

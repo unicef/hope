@@ -3,16 +3,16 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBusinessArea } from '@hooks/useBusinessArea';
-import { decodeIdString } from '@utils/utils';
-import {
-  AllActiveTargetPopulationsQueryVariables,
-  TargetPopulationNode,
-  TargetPopulationStatus,
-  useAllActiveTargetPopulationsQuery,
-} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsCommunication';
 import { LookUpTargetPopulationTableRowCommunication } from './LookUpTargetPopulationTableRowCommunication';
+import {
+  AllPaymentPlansForTableQueryVariables,
+  PaymentPlanNode,
+  PaymentPlanStatus,
+  useAllPaymentPlansForTableQuery,
+} from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LookUpTargetPopulationTableCommunicationProps {
   filter;
@@ -31,7 +31,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export const LookUpTargetPopulationTableCommunication = ({
+const LookUpTargetPopulationTableCommunication = ({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -42,46 +42,33 @@ export const LookUpTargetPopulationTableCommunication = ({
 }: LookUpTargetPopulationTableCommunicationProps): ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const initialVariables: AllActiveTargetPopulationsQueryVariables = {
-    name: filter.name,
+  const initialVariables: AllPaymentPlansForTableQueryVariables = {
+    businessArea,
     totalHouseholdsCountWithValidPhoneNoMin:
       filter.totalHouseholdsCountWithValidPhoneNoMin || 0,
     totalHouseholdsCountWithValidPhoneNoMax:
       filter.totalHouseholdsCountWithValidPhoneNoMax || null,
-    status: filter.status,
-    businessArea,
+    status: [filter.status],
     createdAtRange: JSON.stringify({
       min: filter.createdAtRangeMin || null,
       max: filter.createdAtRangeMax || null,
     }),
-    statusNot: TargetPopulationStatus.Open,
+    statusNot: PaymentPlanStatus.Open,
+    isTargetPopulation: true,
   };
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
 
-  if (filter.program) {
-    if (Array.isArray(filter.program)) {
-      initialVariables.program = filter.program.map((programId) =>
-        decodeIdString(programId),
-      );
-    } else {
-      initialVariables.program = [decodeIdString(filter.program)];
-    }
-  }
-
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<
-        TargetPopulationNode,
-        AllActiveTargetPopulationsQueryVariables
-      >
+      <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllActiveTargetPopulationsQuery}
-        queriedObjectName="allActiveTargetPopulations"
+        query={useAllPaymentPlansForTableQuery}
+        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
         initialVariables={initialVariables}
@@ -103,3 +90,8 @@ export const LookUpTargetPopulationTableCommunication = ({
     renderTable()
   );
 };
+
+export default withErrorBoundary(
+  LookUpTargetPopulationTableCommunication,
+  'LookUpTargetPopulationTableCommunication',
+);

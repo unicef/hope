@@ -9,7 +9,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
       class="MuiBox-root css-38zrbw"
     >
       <div
-        class="sc-ixGGxD foWIaj"
+        class="sc-hRDKVd hxueLb"
       >
         Test top message
          on
@@ -21,7 +21,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
       </div>
     </div>
     <div
-      class="sc-dstKZu chYUKh MuiBox-root css-e6xxd1"
+      class="sc-cMqPwU kzIWjN MuiBox-root css-e6xxd1"
     >
       <div
         class="MuiBox-root css-fv3lde"
@@ -31,13 +31,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
           class="MuiBox-root css-15fzge"
         >
           <div
-            class="sc-kLhKbu fsBovP"
+            class="sc-kfeOyU cLxrbp"
           >
             on 
             <time
-              datetime="1661843741787"
+              datetime="1737727797921"
             >
-              30 Aug 2022
+              24 Jan 2025
             </time>
           </div>
         </div>
@@ -45,7 +45,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
           class="MuiBox-root css-1el3gal"
         >
           <div
-            class="sc-khLCKb kDroYd"
+            class="sc-jBIHhB bICrbh"
           />
         </div>
       </div>

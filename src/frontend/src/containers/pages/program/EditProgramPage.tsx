@@ -33,10 +33,10 @@ import {
   editPartnersValidationSchema,
   editProgramDetailsValidationSchema,
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { omit } from 'lodash';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const EditProgramPage = (): ReactElement => {
+const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
@@ -60,18 +60,19 @@ export const EditProgramPage = (): ReactElement => {
   const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
     usePduSubtypeChoicesDataQuery();
 
-  const [updateProgramDetails] = useUpdateProgramMutation({
-    refetchQueries: [
-      {
-        query: ALL_LOG_ENTRIES_QUERY,
-        variables: {
-          objectId: decodeIdString(id),
-          count: 5,
-          businessArea,
+  const [updateProgramDetails, { loading: loadingUpdate }] =
+    useUpdateProgramMutation({
+      refetchQueries: [
+        {
+          query: ALL_LOG_ENTRIES_QUERY,
+          variables: {
+            objectId: decodeIdString(id),
+            count: 5,
+            businessArea,
+          },
         },
-      },
-    ],
-  });
+      ],
+    });
 
   const [updateProgramPartners] = useUpdateProgramPartnersMutation({
     refetchQueries: [
@@ -104,6 +105,7 @@ export const EditProgramPage = (): ReactElement => {
     endDate,
     sector,
     dataCollectingType,
+    beneficiaryGroup,
     description,
     budget = '',
     administrativeAreasOfImplementation,
@@ -167,6 +169,9 @@ export const EditProgramPage = (): ReactElement => {
         'partnerAccess',
         'pduFields',
       ]);
+      const pduFieldsToSendWithoutTypename = pduFieldsToSend.map((pduField) =>
+        omit(pduField, ['__typename']),
+      );
       const response = await updateProgramDetails({
         variables: {
           programData: {
@@ -174,7 +179,7 @@ export const EditProgramPage = (): ReactElement => {
             ...requestValuesDetails,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
-            pduFields: pduFieldsToSend,
+            pduFields: pduFieldsToSendWithoutTypename,
           },
           version,
         },
@@ -232,6 +237,7 @@ export const EditProgramPage = (): ReactElement => {
     endDate,
     sector,
     dataCollectingTypeCode: dataCollectingType?.code,
+    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
     description,
     budget,
     administrativeAreasOfImplementation,
@@ -268,6 +274,7 @@ export const EditProgramPage = (): ReactElement => {
       'endDate',
       'sector',
       'dataCollectingTypeCode',
+      'beneficiaryGroup',
       'description',
       'budget',
       'administrativeAreasOfImplementation',
@@ -305,14 +312,7 @@ export const EditProgramPage = (): ReactElement => {
   ];
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'EditProgramPage.tsx');
-      }}
-      componentName="EditProgramPage"
-    >
+    <>
       <PageHeader
         title={`${t('Edit Programme')}: (${name})`}
         breadCrumbs={
@@ -331,6 +331,7 @@ export const EditProgramPage = (): ReactElement => {
             t,
             initialValuesProgramDetails,
           )}
+          validateOnChange={true}
         >
           {({
             submitForm,
@@ -374,6 +375,7 @@ export const EditProgramPage = (): ReactElement => {
                             handleNext={handleNextStep}
                             programId={id}
                             errors={errors}
+                            programHasRdi={programHasRdi}
                           />
                         )}
                       </div>
@@ -431,6 +433,7 @@ export const EditProgramPage = (): ReactElement => {
                       submitForm={submitForm}
                       setFieldValue={setFieldValue}
                       programId={id}
+                      loading={loadingUpdate}
                     />
                   </div>
                 </Fade>
@@ -439,6 +442,7 @@ export const EditProgramPage = (): ReactElement => {
           }}
         </Formik>
       )}
-    </UniversalErrorBoundary>
+    </>
   );
 };
+export default withErrorBoundary(EditProgramPage, 'EditProgramPage');

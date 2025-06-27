@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -17,7 +17,9 @@ import {
 } from '@generated/graphql';
 import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -51,11 +53,14 @@ interface RegistrationDetailsProps {
   isSocialWorkerProgram?: boolean;
 }
 
-export function RegistrationDetails({
+function RegistrationDetails({
   registration,
   isSocialWorkerProgram,
 }: RegistrationDetailsProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const withinBatchOptions: OptionType[] = [
     {
       name: 'Unique',
@@ -90,9 +95,9 @@ export function RegistrationDetails({
   let numbersComponent: ReactElement;
   if (isSocialWorkerProgram) {
     numbersComponent = (
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <Grid container>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
                 label={t('Total Number of Registered People')}
@@ -107,22 +112,22 @@ export function RegistrationDetails({
     );
   } else {
     numbersComponent = (
-      <Grid item xs={'auto'}>
+      <Grid size={{ xs: 'auto' }}>
         <Grid container>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
-                label={t('Total Number of Households')}
+                label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
                 dataCy="households"
               >
                 <BigValue>{registration?.numberOfHouseholds}</BigValue>
               </LabelizedField>
             </BigValueContainer>
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <BigValueContainer>
               <LabelizedField
-                label={t('Total Number of Registered Individuals')}
+                label={`Total Number of ${beneficiaryGroup?.memberLabelPlural}`}
                 dataCy="individuals"
               >
                 <BigValue>{registration?.numberOfIndividuals}</BigValue>
@@ -140,9 +145,9 @@ export function RegistrationDetails({
       </Title>
       <OverviewContainer>
         <Grid alignItems="center" container>
-          <Grid item xs={'auto'}>
+          <Grid size={{ xs: 'auto' }}>
             <Grid container spacing={3}>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Box display="flex" flexDirection="column">
                   <LabelizedField label={t('status')}>
                     <StatusBox
@@ -156,7 +161,7 @@ export function RegistrationDetails({
                 </Box>
               </Grid>
               {registration?.biometricDeduplicationEnabled && (
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <Box display="flex" flexDirection="column">
                     <LabelizedField
                       label={t('Biometrics Deduplication Status')}
@@ -174,13 +179,13 @@ export function RegistrationDetails({
                   </Box>
                 </Grid>
               )}
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Source of Data')}
                   value={registration?.dataSource}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Import Date')}
                   value={
@@ -190,7 +195,7 @@ export function RegistrationDetails({
                   }
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Imported by')}
                   value={renderImportedBy()}
@@ -198,7 +203,7 @@ export function RegistrationDetails({
               </Grid>
               {registration.status === RegistrationDataImportStatus.Refused &&
               registration.refuseReason ? (
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <LabelizedField
                     label={t('Refuse Reason')}
                     value={registration?.refuseReason}
@@ -209,15 +214,15 @@ export function RegistrationDetails({
           </Grid>
           {numbersComponent}
           {registration.status === 'DEDUPLICATION_FAILED' ? null : (
-            <Grid item xs={'auto'}>
+            <Grid size={{ xs: 'auto' }}>
               <Grid container direction="column">
-                <Grid container item xs={12} spacing={3}>
-                  <Grid item xs={4}></Grid>
-                  <Grid item xs={4}>
+                <Grid container size={{ xs: 12 }} spacing={3}>
+                  <Grid size={{ xs: 4 }}></Grid>
+                  <Grid size={{ xs: 4 }}>
                     <BoldGrey>{t('Biographical')}</BoldGrey>
                   </Grid>
                   {registration.biometricDeduplicationEnabled && (
-                    <Grid item xs={4}>
+                    <Grid size={{ xs: 4 }}>
                       <BoldGrey>{t('Biometrics')}</BoldGrey>
                     </Grid>
                   )}
@@ -232,3 +237,5 @@ export function RegistrationDetails({
     </ContainerColumnWithBorder>
   );
 }
+
+export default withErrorBoundary(RegistrationDetails, 'RegistrationDetails');

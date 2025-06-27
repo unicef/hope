@@ -21,7 +21,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import FEMALE, MALE
-from hct_mis_api.apps.payment.fixtures import PaymentFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
@@ -33,7 +33,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 class TestPeriodicDataUpdateExportTemplateService(TestCase):
@@ -229,11 +228,11 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
                 },
             ],
         )
-        tp = TargetPopulationFactory()
+        pp = PaymentPlanFactory()
         self.periodic_data_update_template.filters = {
-            "target_population_id": encode_id_base64(str(tp.pk), "TargetPopulation")
+            "target_population_id": encode_id_base64(str(pp.pk), "TargetPopulation")
         }
-        tp.households.add(self.household)
+        PaymentFactory(parent=pp, household=self.household)
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()

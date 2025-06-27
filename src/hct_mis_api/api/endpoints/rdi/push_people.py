@@ -19,7 +19,7 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
     BLANK,
-    COLLECT_TYPES,
+    DATA_SHARING_CHOICES,
     HEAD,
     NON_BENEFICIARY,
     RESIDENCE_STATUS_CHOICE,
@@ -45,12 +45,12 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
+    photo = serializers.CharField(allow_blank=True, required=False)
 
     type = serializers.ChoiceField(choices=PEOPLE_TYPE_CHOICES, required=True)
 
     country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     country = serializers.ChoiceField(choices=Countries())
-    collect_individual_data = serializers.ChoiceField(choices=COLLECT_TYPES)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
 
@@ -61,6 +61,8 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     admin2 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin3 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
     admin4 = serializers.ChoiceField(allow_blank=True, allow_null=True, required=False, default="", choices=[])
+
+    consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -83,6 +85,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
             "unicef_id",
             "household",
             "detail_id",
+            "program",
         ]
 
 
@@ -139,6 +142,10 @@ class PeopleUploadMixin:
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
+        photo = individual_data.pop("photo", None)
+        if photo:
+            data = photo.removeprefix("data:image/png;base64,")
+            photo = get_photo_from_stream(data)
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
@@ -154,6 +161,7 @@ class PeopleUploadMixin:
             registration_data_import=rdi,
             program_id=rdi.program_id,
             relationship=relationship,
+            photo=photo,
             **individual_data,
         )
         ind.validate_phone_numbers()

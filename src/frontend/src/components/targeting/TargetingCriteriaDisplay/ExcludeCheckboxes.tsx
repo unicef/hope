@@ -1,9 +1,11 @@
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import styled from 'styled-components';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FC } from 'react';
+import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const NoWrapCheckbox = styled(FormControlLabel)`
   white-space: nowrap;
@@ -17,7 +19,7 @@ interface ExcludeCheckboxesProps {
   targetPopulation: any;
 }
 
-export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
+const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
   isStandardDctType,
   isSocialDctType,
   screenBeneficiary,
@@ -25,13 +27,15 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
   targetPopulation,
 }) => {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <Box mt={3} p={3}>
       {isDetailsPage ? (
         <Box mt={3} p={3}>
           <Grid container spacing={3}>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               {isStandardDctType && (
                 <NoWrapCheckbox
                   disabled
@@ -47,7 +51,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                     />
                   }
                   label={t(
-                    'Exclude Households with Active Adjudication Ticket',
+                    `Exclude ${beneficiaryGroup?.groupLabelPlural} with Active Adjudication Ticket`,
                   )}
                 />
               )}
@@ -69,7 +73,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                 />
               )}
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               {screenBeneficiary && isSocialDctType && (
                 <NoWrapCheckbox
                   disabled
@@ -85,7 +89,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                       ?.flagExcludeIfOnSanctionList,
                   )}
                   label={t(
-                    'Exclude People with an Active Sanction Screen Flag',
+                    `Exclude ${beneficiaryGroup?.memberLabelPlural} with an Active Sanction Screen Flag`,
                   )}
                 />
               )}
@@ -104,7 +108,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                       ?.flagExcludeIfOnSanctionList,
                   )}
                   label={t(
-                    'Exclude Households with an Active Sanction Screen Flag',
+                    `Exclude ${beneficiaryGroup?.groupLabelPlural} with an Active Sanction Screen Flag`,
                   )}
                 />
               )}
@@ -115,11 +119,11 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
         <Box mt={3} p={3}>
           <Grid container spacing={3}>
             {isStandardDctType && (
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="flagExcludeIfActiveAdjudicationTicket"
                   label={t(
-                    'Exclude Households with Active Adjudication Ticket',
+                    `Exclude ${beneficiaryGroup?.groupLabelPlural} with Active Adjudication Ticket`,
                   )}
                   color="primary"
                   component={FormikCheckboxField}
@@ -128,10 +132,12 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {isSocialDctType && (
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="flagExcludeIfActiveAdjudicationTicket"
-                  label={t('Exclude People with Active Adjudication Ticket')}
+                  label={t(
+                    `Exclude ${beneficiaryGroup?.memberLabelPlural} with Active Adjudication Ticket`,
+                  )}
                   color="primary"
                   component={FormikCheckboxField}
                   data-cy="input-active-adjudication-ticket"
@@ -139,11 +145,11 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {screenBeneficiary && isStandardDctType && (
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="flagExcludeIfOnSanctionList"
                   label={t(
-                    'Exclude Households with an Active Sanction Screen Flag',
+                    `Exclude ${beneficiaryGroup?.groupLabelPlural} with an Active Sanction Screen Flag`,
                   )}
                   color="primary"
                   component={FormikCheckboxField}
@@ -152,11 +158,11 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
               </Grid>
             )}
             {screenBeneficiary && isSocialDctType && (
-              <Grid item xs={6}>
+              <Grid size={{ xs:6 }}>
                 <Field
                   name="flagExcludeIfOnSanctionList"
                   label={t(
-                    'Exclude People with an Active Sanction Screen Flag',
+                    `Exclude ${beneficiaryGroup?.memberLabelPlural} with an Active Sanction Screen Flag`,
                   )}
                   color="primary"
                   component={FormikCheckboxField}
@@ -170,3 +176,5 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
     </Box>
   );
 };
+
+export default withErrorBoundary(ExcludeCheckboxes, 'ExcludeCheckboxes');

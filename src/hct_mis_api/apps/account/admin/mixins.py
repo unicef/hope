@@ -47,13 +47,11 @@ class DjAdminManager:
     class ResponseException(Exception):
         pass
 
-    def __init__(self, kf_host: str = settings.KOBO_KF_URL, kc_host: str = settings.KOBO_KC_URL) -> None:
+    def __init__(self, kf_host: str = settings.KOBO_URL) -> None:
         self.admin_path = "/admin/"
         self.admin_url = f"{kf_host}{self.admin_path}"
         self.login_url = f"{self.admin_url}login/"
 
-        self.admin_url_kc = f"{kc_host}{self.admin_path}"
-        self.login_url_kc = f"{self.admin_url_kc}login/"
         self._logged = False
         self._last_error: Optional[Response] = None
         self._last_response: Optional[Response] = None
@@ -122,7 +120,7 @@ class DjAdminManager:
                 )
 
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             raise
 
     def _get(self, url: str) -> Any:
@@ -163,23 +161,22 @@ class DjAdminManager:
 
     def delete_user(self, username: str, pk: UUID) -> None:
         self.login()
-        for url in (f"{self.admin_url_kc}auth/user/{pk}/delete/", f"{self.admin_url}auth/user/{pk}/delete/"):
-            self._get(url)
-            self.assert_response([200, 404, 302], custom_error=url)
-            if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
-                raise Exception(f"Cannot access to {url}")
+        url = f"{self.admin_url}auth/user/{pk}/delete/"
+        self._get(url)
+        self.assert_response([200, 404, 302], custom_error=url)
+        if self._last_response.status_code == 302 and "/login/" in self._last_response.headers["Location"]:
+            raise Exception(f"Cannot access to {url}")
 
-            if self._last_response.status_code == 200:
-                # csrftoken = self.client.cookies.get_dict()['csrftoken']
-                csrftoken = self.get_csrfmiddlewaretoken()
-                self._post(url, {"csrfmiddlewaretoken": csrftoken, "post": "yes"})
-                self.assert_response(302, custom_error=f"{url} - {csrftoken}")
+        if self._last_response.status_code == 200:
+            csrftoken = self.get_csrfmiddlewaretoken()
+            self._post(url, {"csrfmiddlewaretoken": csrftoken, "post": "yes"})
+            self.assert_response(302, custom_error=f"{url} - {csrftoken}")
 
 
 class KoboAccessMixin:
     def _grant_kobo_accesss_to_user(self, user: User, notify: bool = True, sync: bool = True) -> None:
         password = get_random_string(length=12)
-        url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
+        url = f"{settings.KOBO_URL}/authorized_application/users/"
         username = get_valid_kobo_username(user)
         res = requests.post(
             url,
@@ -208,7 +205,7 @@ class KoboAccessMixin:
         if res.status_code == 201 and notify:
             send_mail(
                 "Kobo credentials",
-                KOBO_ACCESS_EMAIL.format(email=user.email, password=password, kobo_url=settings.KOBO_KF_URL),
+                KOBO_ACCESS_EMAIL.format(email=user.email, password=password, kobo_url=settings.KOBO_URL),
                 settings.DEFAULT_FROM_EMAIL,
                 [user.email],
             )
@@ -220,7 +217,7 @@ class KoboAccessMixin:
             try:
                 self._grant_kobo_accesss_to_user(user)
             except Exception as e:
-                logger.exception(e)
+                logger.warning(e)
                 self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
         self.message_user(
             request,
@@ -235,9 +232,9 @@ class KoboAccessMixin:
     def create_kobo_user(self, request: HttpRequest, pk: "UUID") -> None:
         try:
             self._grant_kobo_accesss_to_user(self.get_queryset(request).get(pk=pk))
-            self.message_user(request, f"Granted access to {settings.KOBO_KF_URL}", messages.SUCCESS)
+            self.message_user(request, f"Granted access to {settings.KOBO_URL}", messages.SUCCESS)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     def delete_view(self, request: HttpRequest, object_id: str, extra_context: Optional[Dict] = None) -> HttpResponse:
@@ -273,7 +270,7 @@ class KoboAccessMixin:
                 api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
             super().delete_model(request, obj)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, str(e), messages.ERROR)
             raise
 
@@ -291,11 +288,11 @@ class KoboAccessMixin:
             obj.save()
             self.message_user(
                 request,
-                f"Kobo Access removed from {settings.KOBO_KF_URL}",
+                f"Kobo Access removed from {settings.KOBO_URL}",
                 messages.WARNING,
             )
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
 
     @button(label="Sync users from Kobo", permission="account.can_import_from_kobo")
@@ -335,6 +332,6 @@ class KoboAccessMixin:
                 ctx["users"] = users
 
             except Exception as e:
-                logger.exception(e)
+                logger.warning(e)
                 self.message_user(request, str(e), messages.ERROR)
         return TemplateResponse(request, "admin/kobo_users.html", ctx)

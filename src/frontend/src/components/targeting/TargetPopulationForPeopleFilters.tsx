@@ -1,12 +1,12 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TargetPopulationStatus } from '@generated/graphql';
 import {
-  createHandleApplyFilterChange,
-  targetPopulationStatusMapping,
-} from '@utils/utils';
+  PaymentPlanStatus,
+  usePaymentPlanStatusChoicesQueryQuery,
+} from '@generated/graphql';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
@@ -51,9 +51,27 @@ export const TargetPopulationForPeopleFilters = ({
     clearFilter();
   };
 
-  const preparedStatusChoices = isAccountability
-    ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
-    : Object.values(TargetPopulationStatus);
+  const allowedStatusChoices = [
+    'ASSIGNED',
+    PaymentPlanStatus.TpOpen,
+    PaymentPlanStatus.TpLocked,
+    PaymentPlanStatus.Processing,
+    PaymentPlanStatus.SteficonRun,
+    PaymentPlanStatus.SteficonWait,
+    PaymentPlanStatus.SteficonCompleted,
+    PaymentPlanStatus.SteficonError,
+  ];
+
+  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
+
+  const preparedStatusChoices = [
+    { name: 'Assigned', value: 'ASSIGNED' },
+    ...(statusChoicesData?.paymentPlanStatusChoices || []),
+  ]
+    .filter((el) =>
+      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    )
+    .filter((el) => !isAccountability || el.value !== 'OPEN');
 
   return (
     <FiltersSection
@@ -61,7 +79,7 @@ export const TargetPopulationForPeopleFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
@@ -70,7 +88,7 @@ export const TargetPopulationForPeopleFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -79,14 +97,14 @@ export const TargetPopulationForPeopleFilters = ({
             fullWidth
             data-cy="filters-status"
           >
-            {preparedStatusChoices.sort().map((key) => (
-              <MenuItem key={key} value={key}>
-                {targetPopulationStatusMapping(key)}
+            {preparedStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel={t('Number of People')}
             value={filter.totalHouseholdsCountMin}
@@ -98,7 +116,7 @@ export const TargetPopulationForPeopleFilters = ({
             data-cy="filters-total-households-count-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             value={filter.totalHouseholdsCountMax}
             placeholder={t('To')}
@@ -109,7 +127,7 @@ export const TargetPopulationForPeopleFilters = ({
             data-cy="filters-total-households-count-max"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
@@ -117,7 +135,7 @@ export const TargetPopulationForPeopleFilters = ({
             value={filter.createdAtRangeMin}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}

@@ -1,9 +1,9 @@
 import { useRoutes } from 'react-router-dom';
-import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopulationPage';
-import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
-import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
-import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
 import { ReactElement } from 'react';
+import CreateTargetPopulationPage from '@containers/pages/targeting/CreateTargetPopulationPage';
+import EditTargetPopulationPage from '@containers/pages/targeting/EditTargetPopulationPage';
+import TargetPopulationDetailsPage from '@containers/pages/targeting/TargetPopulationDetailsPage';
+import TargetPopulationsPage from '@containers/pages/targeting/TargetPopulationsPage';
 
 export const TargetingRoutes = (): ReactElement => {
   const targetingRoutes = [

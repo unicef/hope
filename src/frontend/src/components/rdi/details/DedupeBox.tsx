@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { MiśTheme } from '../../../theme';
 import { CountAndPercentageNode } from '@generated/graphql';
 import { ReactElement } from 'react';
@@ -44,18 +44,18 @@ export const DedupeBox = ({ label, options }: DedupeBoxProps): ReactElement => {
   return (
     <GreyBox>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Box display="flex" alignItems="flex-start">
             <Label data-cy={`label-${label}`} color="textSecondary">
               {label}
             </Label>
           </Box>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Grid container direction="column">
             {options.map((option) => (
               <Grid key={option.name} container spacing={4}>
-                <Grid item xs={4}>
+                <Grid size={{ xs: 4 }}>
                   <BoldGrey>
                     <Small data-cy={`label-${option.name}`}>
                       {option.name}
@@ -66,16 +66,15 @@ export const DedupeBox = ({ label, options }: DedupeBoxProps): ReactElement => {
                   <Grid
                     key={option.name + index}
                     container
-                    item
-                    xs={4}
+                    size={{ xs: 4 }}
                     spacing={4}
                   >
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:6 }}>
                       <Bold data-cy={`percentage-${option.name}`}>
                         {item.percentage.toFixed(2)}%
                       </Bold>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid size={{ xs:6 }}>
                       <BoldGrey data-cy={`value-${option.name}`}>
                         ({item.count})
                       </BoldGrey>

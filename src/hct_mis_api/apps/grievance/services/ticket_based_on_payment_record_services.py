@@ -29,8 +29,7 @@ def create_tickets_based_on_payment_records_service(
         model.objects.create(
             individual=individual,
             household=household,
-            payment_content_type=None,
-            payment_object_id=None,
+            payment=None,
             ticket=grievance_ticket,
         )
         grievance_ticket.refresh_from_db()

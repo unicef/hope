@@ -12,19 +12,18 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useAllTargetPopulationsQuery,
-  useCreatePpMutation,
+  useOpenPpMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const CreatePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const location = useLocation();
-  const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
+  const [mutate, { loading: loadingCreate }] = useOpenPpMutation();
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -34,8 +33,8 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     useAllTargetPopulationsQuery({
       variables: {
         businessArea,
-        paymentPlanApplicable: true,
-        program: [programId],
+        status: 'DRAFT',
+        program: programId,
         programCycle: programCycleId,
       },
       fetchPolicy: 'network-only',
@@ -48,7 +47,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    targetingId: Yup.string().required(t('Target Population is required')),
+    paymentPlanId: Yup.string().required(t('Target Population is required')),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -70,7 +69,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    targetingId: '',
+    paymentPlanId: '',
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
@@ -84,58 +83,51 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       const dispersionEndDate = values.dispersionEndDate
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
-      const { currency, targetingId } = values;
+      const { currency } = values;
 
       const res = await mutate({
         variables: {
-          input: {
-            businessAreaSlug: businessArea,
-            currency,
-            targetingId,
-            dispersionStartDate,
-            dispersionEndDate,
-          },
+          paymentPlanId: values.paymentPlanId,
+          dispersionStartDate,
+          dispersionEndDate,
+          currency,
         },
       });
       showMessage(t('Payment Plan Created'));
-      navigate(`../${res.data.createPaymentPlan.paymentPlan.id}`);
+      navigate(`../${res.data.openPaymentPlan.paymentPlan.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'CreatePaymentPlanPage.tsx');
-      }}
-      componentName="CreatePaymentPlanPage"
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+      validateOnChange
+      validateOnBlur
     >
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-        validateOnChange
-        validateOnBlur
-      >
-        {({ submitForm, values }) => (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <CreatePaymentPlanHeader
-              handleSubmit={submitForm}
-              permissions={permissions}
-              loadingCreate={loadingCreate}
-            />
-            <PaymentPlanTargeting
-              allTargetPopulations={allTargetPopulationsData}
-              loading={loadingTargetPopulations}
-            />
-            <PaymentPlanParameters values={values} />
-          </Form>
-        )}
-      </Formik>
-    </UniversalErrorBoundary>
+      {({ submitForm, values }) => (
+        <Form>
+          <AutoSubmitFormOnEnter />
+          <CreatePaymentPlanHeader
+            handleSubmit={submitForm}
+            permissions={permissions}
+            loadingCreate={loadingCreate}
+          />
+          <PaymentPlanTargeting
+            allTargetPopulations={allTargetPopulationsData}
+            loading={loadingTargetPopulations}
+          />
+          <PaymentPlanParameters values={values} />
+        </Form>
+      )}
+    </Formik>
   );
 };
+
+export default withErrorBoundary(
+  CreatePaymentPlanPage,
+  'CreatePaymentPlanPage',
+);

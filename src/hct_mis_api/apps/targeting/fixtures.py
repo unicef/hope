@@ -1,29 +1,17 @@
-import datetime as dt
 import random
 import typing
-from typing import Any, Iterable, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import factory
 from factory.django import DjangoModelFactory
-from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
-from hct_mis_api.apps.program.fixtures import (
-    ProgramCycleFactory,
-    get_program_with_dct_type_and_name,
-)
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
-    HouseholdSelection,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
 )
 
 
@@ -77,43 +65,3 @@ class TargetingCriteriaRuleFactory(DjangoModelFactory):
 class TargetingCriteriaFactory(DjangoModelFactory):
     class Meta:
         model = TargetingCriteria
-
-
-class TargetPopulationFactory(DjangoModelFactory):
-    class Meta:
-        model = TargetPopulation
-
-    name = factory.Faker(
-        "sentence",
-        nb_words=6,
-        variable_nb_words=True,
-        ext_word_list=None,
-    )
-    created_by = factory.SubFactory(UserFactory)
-    created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
-    updated_at = factory.LazyAttribute(lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000)))
-    status = TargetPopulation.STATUS_OPEN
-    program = factory.LazyAttribute(
-        lambda t: Program.objects.filter(status=Program.ACTIVE).first() or get_program_with_dct_type_and_name()
-    )
-    business_area = factory.LazyAttribute(lambda t: BusinessArea.objects.first())
-    program_cycle = factory.LazyAttribute(lambda t: t.program.cycles.first() or ProgramCycleFactory(program=t.program))
-
-    @factory.post_generation
-    def households(self, create: bool, extracted: Iterable, **kwargs: Any) -> None:
-        if not create:
-            households = HouseholdFactory.create_batch(5)
-            self.households.add(*households)
-
-        if extracted:
-            for household in extracted:
-                self.households.add(household)
-
-
-class HouseholdSelectionFactory(DjangoModelFactory):
-    class Meta:
-        model = HouseholdSelection
-
-    household = factory.SubFactory(HouseholdFactory)
-    target_population = factory.SubFactory(TargetPopulationFactory)
-    vulnerability_score = factory.fuzzy.FuzzyInteger(0, 100)

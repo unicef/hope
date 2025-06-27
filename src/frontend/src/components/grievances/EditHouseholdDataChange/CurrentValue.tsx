@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
   AllEditHouseholdFieldsQuery,
@@ -54,7 +54,7 @@ export function CurrentValue({
         break;
       case 'IMAGE':
         return (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <GrievanceFlexFieldPhotoModalNewHousehold
               flexField={field}
               householdId={values?.selectedHousehold?.id || null}
@@ -66,7 +66,7 @@ export function CurrentValue({
     }
   }
   return (
-    <Grid item xs={3}>
+    <Grid size={{ xs: 3 }}>
       <LabelizedField label={t('Current Value')} value={displayValue} />
     </Grid>
   );

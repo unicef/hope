@@ -1,7 +1,7 @@
 import { Form, Formik } from 'formik';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import {
   useAllTargetPopulationsQuery,
@@ -19,12 +19,11 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { today } from '@utils/utils';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const EditFollowUpPaymentPlanPage = (): ReactElement => {
+const EditFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { paymentPlanId } = useParams();
   const { t } = useTranslation();
   const { data: paymentPlanData, loading: loadingPaymentPlan } =
@@ -44,8 +43,8 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
     useAllTargetPopulationsQuery({
       variables: {
         businessArea,
-        paymentPlanApplicable: false,
-        program: [programId],
+        status: 'DRAFT',
+        program: programId,
       },
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
@@ -58,7 +57,7 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
-    targetingId: paymentPlan.targetPopulation.id,
+    paymentPlanId: paymentPlan.id,
     currency: {
       name: paymentPlan.currencyName,
       value: paymentPlan.currency,
@@ -68,7 +67,7 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
   };
 
   const validationSchema = Yup.object().shape({
-    targetingId: Yup.string().required(t('Target Population is required')),
+    paymentPlanId: Yup.string().required(t('Target Population is required')),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -94,15 +93,12 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
     try {
       const res = await mutate({
         variables: {
-          input: {
-            paymentPlanId,
-            targetingId: values.targetingId,
-            dispersionStartDate: values.dispersionStartDate,
-            dispersionEndDate: values.dispersionEndDate,
-            currency: values.currency?.value
-              ? values.currency.value
-              : values.currency,
-          },
+          paymentPlanId,
+          dispersionStartDate: values.dispersionStartDate,
+          dispersionEndDate: values.dispersionEndDate,
+          currency: values.currency?.value
+            ? values.currency.value
+            : values.currency,
         },
       });
       showMessage(t('Follow-up Payment Plan Edited'));
@@ -115,37 +111,32 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'EditFollowUpPaymentPlanPage.tsx');
-      }}
-      componentName="EditFollowUpPaymentPlanPage"
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
     >
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ submitForm, values }) => (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <EditPaymentPlanHeader
-              paymentPlan={paymentPlan}
-              handleSubmit={submitForm}
-              baseUrl={baseUrl}
-              permissions={permissions}
-            />
-            <PaymentPlanTargeting
-              allTargetPopulations={allTargetPopulationsData}
-              loading={loadingTargetPopulations}
-              disabled
-            />
-            <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
-          </Form>
-        )}
-      </Formik>
-    </UniversalErrorBoundary>
+      {({ submitForm, values }) => (
+        <Form>
+          <AutoSubmitFormOnEnter />
+          <EditPaymentPlanHeader
+            paymentPlan={paymentPlan}
+            handleSubmit={submitForm}
+            baseUrl={baseUrl}
+            permissions={permissions}
+          />
+          <PaymentPlanTargeting
+            allTargetPopulations={allTargetPopulationsData}
+            loading={loadingTargetPopulations}
+            disabled
+          />
+          <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
+        </Form>
+      )}
+    </Formik>
   );
 };
+export default withErrorBoundary(
+  EditFollowUpPaymentPlanPage,
+  'EditFollowUpPaymentPlanPage',
+);

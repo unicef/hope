@@ -1,4 +1,4 @@
-import { Box, FormHelperText, Grid } from '@mui/material';
+import { Box, FormHelperText, Grid2 as Grid } from '@mui/material';
 import { ReactElement, useEffect, useState } from 'react';
 import { isInvalid } from '@utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
@@ -64,8 +64,8 @@ export function LookUpHouseholdIndividualSelection({
         />
         {isInvalid('selectedIndividual', errors, touched) && (
           <Grid container spacing={4}>
-            {!isSocialDctType && <Grid item xs={4} />}
-            <Grid item xs={4}>
+            {!isSocialDctType && <Grid size={{ xs:4 }} />}
+            <Grid size={{ xs: 4 }}>
               {!selectedIndividual && (
                 <FormHelperText error>
                   {errors?.selectedIndividual}

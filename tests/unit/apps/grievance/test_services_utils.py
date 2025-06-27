@@ -15,6 +15,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import (
@@ -24,6 +25,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
+    convert_to_empty_string_if_null,
     handle_add_document,
     handle_add_payment_channel,
     handle_role,
@@ -69,6 +71,13 @@ class FlexibleAttribute:
 
 
 class TestGrievanceUtils(TestCase):
+    def test_convert_to_empty_string_if_null(self) -> None:
+        self.assertEqual(convert_to_empty_string_if_null(None), "")
+        self.assertTrue(convert_to_empty_string_if_null(True))
+        self.assertFalse(convert_to_empty_string_if_null(False))
+        self.assertEqual(convert_to_empty_string_if_null("test"), "test")
+        self.assertEqual(convert_to_empty_string_if_null(123), 123)
+
     def test_to_phone_number_str(self) -> None:
         data = {"phone_number": 123456789}
         to_phone_number_str(data, "phone_number")
@@ -139,6 +148,21 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValueError) as e:
             verify_flex_fields({"key": "value"}, "individuals")
             assert str(e.value) == "key is not a correct `flex field"
+
+    def test_verify_flex_fields_with_date_type(self) -> None:
+        national_id_issue_date_i_f = Core_FlexibleAttribute(
+            type=Core_FlexibleAttribute.DATE,
+            name="national_id_issue_date_i_f",
+            associated_with=Core_FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value123"},
+        )
+        national_id_issue_date_i_f.save()
+
+        verify_flex_fields({"national_id_issue_date_i_f": "2025-01-15"}, "individuals")
+
+        with pytest.raises(ValueError) as e:
+            verify_flex_fields({"national_id_issue_date_i_f": "invalid"}, "individuals")
+            assert str(e.value) == "time data 'invalid' does not match format '%Y-%m-%d'"
 
     def test_handle_role(self) -> None:
         create_afghanistan()
@@ -284,12 +308,10 @@ class TestGrievanceUtils(TestCase):
                     "full_name": "Tester Test",
                 },
             )
-            individuals[0].unicef_id = "IND-333"
-            individuals[0].save()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
             assert (
                 str(e.value)
-                == "The selected individual IND-333 is not valid, must be one of those attached to the ticket"
+                == f"The selected individual {individuals[0].unicef_id} is not valid, must be one of those attached to the ticket"
             )
 
         ticket_details.possible_duplicates.add(individuals[0])
@@ -297,7 +319,10 @@ class TestGrievanceUtils(TestCase):
         with pytest.raises(ValidationError) as e:
             individuals[0].withdraw()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
-            assert str(e.value) == "The selected individual IND-333 is not valid, must be not withdrawn"
+            assert (
+                str(e.value)
+                == f"The selected individual {individuals[0].unicef_id} is not valid, must be not withdrawn"
+            )
 
             individuals[0].unwithdraw()
             validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
@@ -584,10 +609,7 @@ class TestGrievanceUtils(TestCase):
             is_multiple_duplicates_version=True,
             issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
             dedup_engine_similarity_pair=DeduplicationEngineSimilarityPair.objects.create(
-                program=program,
-                individual1=ind_1,
-                individual2=ind_2,
-                similarity_score=90.55,
+                program=program, individual1=ind_1, individual2=ind_2, similarity_score=90.55, status_code="200"
             ),
         )
         if not ticket:
@@ -612,3 +634,28 @@ class TestGrievanceUtils(TestCase):
             str(ind_2.photo.name),
             str(deduplication_set_id),
         )
+
+    def test_create_grievance_ticket_with_details__no_possible_duplicates(self) -> None:
+        ba = BusinessAreaFactory(slug="afghanistan")
+        deduplication_set_id = uuid.uuid4()
+        program = ProgramFactory(business_area=ba, deduplication_set_id=deduplication_set_id)
+        hh1, individuals_1 = create_household(
+            {"size": 2, "business_area": ba, "program": program},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
+        )
+        ticket, ticket_details = create_grievance_ticket_with_details(
+            main_individual=individuals_1[1],
+            possible_duplicate=None,
+            business_area=ba,
+            registration_data_import=hh1.registration_data_import,
+            possible_duplicates=[],
+            is_multiple_duplicates_version=True,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
+        assert ticket is None
+        assert ticket_details is None

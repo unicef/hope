@@ -9,11 +9,10 @@ import {
   AllProgramsQuery,
   ChoiceObject,
   PaymentPlanBackgroundActionStatus,
+  PaymentPlanBuildStatus,
   PaymentPlanStatus,
   PaymentStatus,
   ProgramStatus,
-  TargetPopulationBuildStatus,
-  TargetPopulationStatus,
 } from '@generated/graphql';
 import {
   GRIEVANCE_CATEGORIES,
@@ -191,6 +190,32 @@ export function paymentStatusDisplayMap(status: string): string {
       return 'UNSUCCESSFUL';
   }
 }
+
+export function targetPopulationStatusDisplayMap(status: string): string {
+  switch (status) {
+    case PaymentPlanStatus.TpOpen:
+      return 'OPEN';
+    case PaymentPlanStatus.Draft:
+      return 'READY FOR PAYMENT MODULE';
+    case PaymentPlanStatus.TpLocked:
+      return 'LOCKED';
+    case PaymentPlanStatus.Processing:
+      return 'PROCESSING';
+    case PaymentPlanStatus.SteficonWait:
+      return 'STEFICON WAIT';
+    case PaymentPlanStatus.SteficonRun:
+      return 'STEFICON RUN';
+    case PaymentPlanStatus.SteficonError:
+      return 'STEFICON ERROR';
+    case PaymentPlanStatus.SteficonCompleted:
+      return 'STEFICON COMPLETED';
+
+    //   if other PP statuses ==> ASSIGNED
+    default:
+      return 'ASSIGNED';
+  }
+}
+
 export function paymentVerificationStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -264,21 +289,45 @@ export function registrationDataImportDeduplicationEngineStatusToColor(
 export const registrationDataImportErasedColor = (): string =>
   themeObj.palette.error.main;
 
-export function targetPopulationStatusToColor(
+export function paymentPlanStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {
   const colorsMap = {
-    [TargetPopulationStatus.Open]: theme.hctPalette.gray,
-    [TargetPopulationStatus.Locked]: theme.hctPalette.red,
-    [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
-    [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
-    [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
-    [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
-    [TargetPopulationStatus.SteficonWait]: theme.hctPalette.orange,
-    [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
-    [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
-    [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
+    ['ASSIGNED']: theme.hctPalette.gray,
+    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
+    [PaymentPlanStatus.Draft]: theme.hctPalette.green,
+    [PaymentPlanStatus.Finished]: theme.hctPalette.gray,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.blue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.blue,
+    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.red,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.red,
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Preparing]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Processing]: theme.hctPalette.blue,
+    [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
+    [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
+    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
+    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.orange,
+    [PaymentPlanStatus.TpLocked]: theme.hctPalette.red,
+    [PaymentPlanStatus.TpOpen]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.hctPalette.gray;
+}
+
+export function paymentPlanBuildStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanBuildStatus.Ok]: theme.hctPalette.green,
+    [PaymentPlanBuildStatus.Failed]: theme.hctPalette.red,
+    [PaymentPlanBuildStatus.Building]: theme.hctPalette.orange,
+    [PaymentPlanBuildStatus.Pending]: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -286,21 +335,6 @@ export function targetPopulationStatusToColor(
   return theme.palette.error.main;
 }
 
-export function targetPopulationBuildStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  const colorsMap = {
-    [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
-    [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
-    [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
-    [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
-  };
-  if (status in colorsMap) {
-    return colorsMap[status];
-  }
-  return theme.palette.error.main;
-}
 export function periodicDataUpdateTemplateStatusToColor(
   theme: typeof themeObj,
   status: string,
@@ -329,27 +363,6 @@ export function periodicDataUpdatesUpdatesStatusToColor(
     ['NOT_SCHEDULED']: theme.hctPalette.gray,
     ['CANCELED']: theme.hctPalette.gray,
     PROCESSING: theme.hctPalette.orange,
-  };
-  if (status in colorsMap) {
-    return colorsMap[status];
-  }
-  return theme.palette.error.main;
-}
-
-export function paymentPlanStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  const colorsMap = {
-    [PaymentPlanStatus.Preparing]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
-    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
-    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
-    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
-    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
-    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
-    [PaymentPlanStatus.Finished]: theme.hctPalette.green,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -578,14 +591,22 @@ export function programStatusToPriority(status: ProgramStatus): number {
       return 3;
   }
 }
-export function decodeIdString(idString): string | null {
+export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
   }
-  const decoded = atob(idString);
-  return decoded.split(':')[1];
+  if (idString.includes(':')) {
+    // Already decoded
+    return idString.split(':')[1];
+  }
+  try {
+    const decoded = atob(idString);
+    return decoded.split(':')[1];
+  } catch (e) {
+    console.error('Failed to decode string:', e);
+    return null;
+  }
 }
-
 export function programCompare(
   a: AllProgramsQuery['allPrograms']['edges'][number],
   b: AllProgramsQuery['allPrograms']['edges'][number],
@@ -652,7 +673,7 @@ export function formatThousands(value: string): string {
   return value;
 }
 
-export function targetPopulationStatusMapping(status): string {
+export function PaymentPlanStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
@@ -866,19 +887,28 @@ export const getFilterFromQueryParams = (
   initialFilter: Filter = {},
 ): Filter => {
   const filter: Filter = { ...initialFilter };
-  const searchParams = new URLSearchParams(location.search);
-  for (const [key, value] of searchParams.entries()) {
-    if (key in filter) {
-      const existingValue = filter[key];
-      if (Array.isArray(existingValue)) {
-        const values = value.split(',');
-        filter[key] = [...existingValue, ...values];
-      } else {
-        filter[key] =
-          value !== 'true' && value !== 'false' ? value : value === 'true';
+
+  try {
+    const searchParams = new URLSearchParams(location.search);
+
+    for (const [key, value] of searchParams.entries()) {
+      if (key in filter) {
+        const existingValue = filter[key];
+
+        if (Array.isArray(existingValue)) {
+          const values = value.split(',');
+          filter[key] = [...existingValue, ...values];
+        } else {
+          filter[key] =
+            value !== 'true' && value !== 'false' ? value : value === 'true';
+        }
       }
     }
+  } catch (error) {
+    console.error('Error parsing query parameters:', error);
+    return { ...initialFilter };
   }
+
   return filter;
 };
 
@@ -1165,3 +1195,20 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
+
+export function adjustHeadCells(
+  headCells,
+  beneficiaryGroup: any | undefined,
+  replacements: {
+    [key: string]: (beneficiaryGroup) => string;
+  },
+) {
+  if (!beneficiaryGroup) return headCells;
+
+  return headCells.map((cell) => {
+    if (replacements[cell.id]) {
+      return { ...cell, label: replacements[cell.id](beneficiaryGroup) };
+    }
+    return cell;
+  });
+}

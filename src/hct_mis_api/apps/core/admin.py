@@ -1,6 +1,4 @@
-import csv
 import logging
-from io import StringIO
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django import forms
@@ -10,9 +8,7 @@ from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
-from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 from django.db import transaction
 from django.forms import inlineformset_factory
@@ -26,23 +22,19 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 import xlrd
 from admin_extra_buttons.api import button
-from admin_extra_buttons.decorators import choice, view
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin, AdminFiltersMixin
-from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
-from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
@@ -55,7 +47,6 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
-    MigrationStatus,
     PeriodicFieldData,
     StorageFile,
     XLSXKoboTemplate,
@@ -208,11 +199,29 @@ class BusinessAreaAdmin(
         "region_name",
         "region_code",
         "active",
+        "has_data_sharing_agreement",
+        "screen_beneficiary",
+        "postpone_deduplication",
+        "is_split",
+        "parent",
+        "enable_email_notification",
+        "is_accountability_applicable",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
+    list_filter = (
+        "has_data_sharing_agreement",
+        "active",
+        "region_name",
+        BusinessofficeFilter,
+        "has_data_sharing_agreement",
+        "screen_beneficiary",
+        "postpone_deduplication",
+        "is_split",
+        "enable_email_notification",
+        "is_accountability_applicable",
+    )
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
-    filter_horizontal = ("countries",)
+    filter_horizontal = ("countries", "partners")
 
     def document_types_valid_for_deduplication(self, obj: Any) -> List:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
@@ -225,10 +234,6 @@ class BusinessAreaAdmin(
                 kwargs = {"widget": JsonWidget}
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
-
-    @choice(label="DOAP", change_list=False)
-    def doap(self, button: button) -> None:
-        button.choices = [self.force_sync_doap, self.send_doap, self.export_doap, self.view_ca_doap]
 
     @button(label="Create Business Office", permission="core.can_split")
     def split_business_area(self, request: HttpRequest, pk: "UUID") -> Union[HttpResponseRedirect, TemplateResponse]:
@@ -265,127 +270,6 @@ class BusinessAreaAdmin(
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
 
-    def _get_doap_matrix(self, obj: Any) -> List[Any]:
-        matrix = []
-        ca_roles = Role.objects.filter(subsystem=Role.CA).order_by("name").values_list("name", flat=True)
-        fields = ["org", "Last Name", "First Name", "Email", "Business Unit", "Partner Instance ID", "Action"]
-        fields += list(ca_roles)
-        matrix.append(fields)
-        all_user_data = {}
-        for member in obj.user_roles.all():
-            user_data = {}
-            if member.user.pk not in all_user_data:
-                user_roles = list(
-                    member.user.user_roles.filter(role__subsystem="CA").values_list("role__name", flat=True)
-                )
-                user_data["org"] = member.user.partner.name
-                user_data["Last Name"] = member.user.last_name
-                user_data["First Name"] = member.user.first_name
-                user_data["Email"] = member.user.email
-                user_data["Business Unit"] = f"UNICEF - {obj.name}"
-                user_data["Partner Instance ID"] = int(obj.cash_assist_code)
-                user_data["Action"] = ""
-                for role in ca_roles:
-                    user_data[role] = {True: "Yes", False: ""}[role in user_roles]
-
-                # user_data["user_roles"] = user_roles
-                all_user_data[member.user.pk] = user_data
-
-                values = {key: value for (key, value) in user_data.items() if key != "action"}
-                signature = str(hash(frozenset(values.items())))
-
-                user_data["signature"] = signature
-                user_data["hash"] = member.user.doap_hash
-                user_data["values"] = values
-                action = None
-                if member.user.doap_hash:
-                    if signature == member.user.doap_hash:
-                        action = "ACTIVE"
-                    elif len(user_roles) == 0:
-                        action = "REMOVE"
-                    else:
-                        action = "EDIT"
-                elif len(user_roles):
-                    action = "ADD"
-
-                if action:
-                    user_data["Action"] = action
-                    matrix.append(user_data)  # type: ignore
-        return matrix
-
-    @view(label="Force DOAP SYNC", permission="core.can_reset_doap", group="doap")
-    def force_sync_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        context = self.get_common_context(request, pk, title="Members")
-        obj = context["original"]
-        matrix = self._get_doap_matrix(obj)
-        for row in matrix[1:]:
-            User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
-        return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
-
-    @view(label="Send DOAP", group="doap")
-    def send_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
-        context = self.get_common_context(request, pk, title="Members")
-        obj = context["original"]
-        try:
-            matrix = self._get_doap_matrix(obj)
-            buffer = StringIO()
-            writer = csv.DictWriter(buffer, matrix[0], extrasaction="ignore")
-            writer.writeheader()
-            for row in matrix[1:]:
-                writer.writerow(row)
-            recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
-            self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
-            buffer.seek(0)
-            environment = Site.objects.first().name
-            mail = EmailMessage(
-                f"CashAssist - UNICEF - {obj.name} user updates",
-                f"""Dear GSD,\n
-In CashAssist, please update the users in {environment} UNICEF - {obj.name} business unit as per the attached DOAP.
-Many thanks,
-UNICEF HOPE""",
-                to=recipients,
-            )
-            mail.attach(f"UNICEF - {obj.name} {environment} DOAP.csv", buffer.read(), "text/csv")
-            mail.send()
-            for row in matrix[1:]:
-                if row["Action"] == "REMOVE":
-                    User.objects.filter(email=row["Email"]).update(doap_hash="")
-                else:
-                    User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
-            obj.custom_fields.update({"hope": {"last_doap_sync": str(timezone.now())}})
-            obj.save()
-            self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
-        except Exception as e:
-            logger.exception(e)
-            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
-
-        return HttpResponseRedirect(reverse("admin:core_businessarea_view_ca_doap", args=[obj.pk]))
-
-    @view(label="Export DOAP", group="doap", permission="core.can_export_doap")
-    def export_doap(self, request: HttpRequest, pk: "UUID") -> HttpResponse:
-        context = self.get_common_context(request, pk, title="DOAP matrix")
-        obj = context["original"]
-        environment = Site.objects.first().name
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename=UNICEF - {obj.name} {environment} DOAP.csv"
-        matrix = self._get_doap_matrix(obj)
-        writer = csv.DictWriter(response, matrix[0], extrasaction="ignore")
-        writer.writeheader()
-        for row in matrix[1:]:
-            writer.writerow(row)
-        return response
-
-    @view(permission="core.can_send_doap")
-    def view_ca_doap(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
-        context = self.get_common_context(request, pk, title="DOAP matrix")
-        context["aeu_groups"] = ["doap"]
-        obj = context["original"]
-        matrix = self._get_doap_matrix(obj)
-        context["headers"] = matrix[0]
-        context["rows"] = matrix[0:]
-        context["matrix"] = matrix
-        return TemplateResponse(request, "core/admin/ca_doap.html", context)
-
     @button(permission="account.view_user")
     def members(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Members")
@@ -402,7 +286,7 @@ UNICEF HOPE""",
         )
         return TemplateResponse(request, "core/admin/ba_members.html", context)
 
-    @button(label="Test RapidPro Connection")
+    @button(label="Test RapidPro Connection", permission="core.ping_rapidpro")
     def _test_rapidpro_connection(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context: Dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
@@ -450,7 +334,7 @@ UNICEF HOPE""",
                 result = task.execute()
                 self.message_user(request, result["message"], messages.SUCCESS)
             except Exception as e:
-                logger.exception(e)
+                logger.warning(e)
                 self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:core_businessarea_change", args=[business_area.id]))
         else:
@@ -474,32 +358,38 @@ class FlexibleAttributeInline(admin.TabularInline):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
-    list_display = ("type", "name", "required")
+class FlexibleAttributeAdmin(AdminFiltersMixin, GetManyFromRemoteMixin, SoftDeletableAdminMixin):
+    list_display = ("name", "type", "required", "program", "pdu_data", "group")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
         ("associated_with", ChoicesFieldComboFilter),
         "required",
+        ("group", AutoCompleteFilter),
     )
     search_fields = ("name",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
-    raw_id_fields = ("group",)
+    raw_id_fields = ("group", "program", "pdu_data")
+
+    def get_queryset(self, request: HttpRequest) -> "QuerySet":
+        return super().get_queryset(request).select_related("group", "program", "pdu_data")
 
 
 @admin.register(PeriodicFieldData)
 class PeriodicFieldDataAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ("subtype", "number_of_rounds")
+    list_display = ("__str__", "subtype", "number_of_rounds")
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin, MPTTModelAdmin):
+class FlexibleAttributeGroupAdmin(AdminFiltersMixin, GetManyFromRemoteMixin, SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
     # autocomplete_fields = ("parent",)
     raw_id_fields = ("parent",)
     list_filter = (
+        ("parent", AutoCompleteFilter),
         "repeatable",
         "required",
     )
@@ -524,7 +414,7 @@ class FlexibleAttributeChoiceAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMix
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
-    list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
+    list_display = ("file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",
         ("uploaded_by", AutoCompleteFilter),
@@ -533,11 +423,12 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     date_hierarchy = "created_at"
     exclude = ("is_removed", "file_name", "status", "template_id")
     readonly_fields = (
-        "original_file_name",
+        "file_name",
         "uploaded_by",
         "file",
         "import_status",
         "error_description",
+        "first_connection_failed_time",
     )
 
     def import_status(self, obj: Any) -> str:
@@ -554,15 +445,12 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             obj.status,
         )
 
-    def original_file_name(self, obj: Any) -> str:
-        return obj.file_name
-
     def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
 
-    @button()
+    @button(permission="core.download_last_valid_file")
     def download_last_valid_file(
         self, request: HttpRequest
     ) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:
@@ -579,6 +467,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     @button(
         label="Rerun KOBO Import",
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
+        permission="core.rerun_kobo_import",
     )
     def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponsePermanentRedirect:
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
@@ -591,7 +480,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None
     ) -> Union[HttpResponsePermanentRedirect, TemplateResponse]:
         if not self.has_add_permission(request):
-            logger.error("The user did not have permission to do that")
+            logger.warning("The user did not have permission to do that")
             raise PermissionDenied
 
         opts = self.model._meta
@@ -664,7 +553,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 @admin.register(CountryCodeMap)
 class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
-    search_fields = ("country",)
+    search_fields = ("country", "alpha2", "alpha3", "ca_code")
     raw_id_fields = ("country",)
 
     def alpha2(self, obj: Any) -> str:
@@ -672,6 +561,15 @@ class CountryCodeMapAdmin(HOPEModelAdminBase):
 
     def alpha3(self, obj: Any) -> str:
         return obj.country.iso_code3
+
+    def get_queryset(self, request: HttpRequest) -> "QuerySet":
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "country",
+            )
+        )
 
 
 @admin.register(StorageFile)
@@ -691,11 +589,6 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return request.user.can_download_storage_files()
 
 
-@admin.register(MigrationStatus)
-class MigrationStatusAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(DataCollectingType)
 class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
     form = DataCollectingTypeForm
@@ -704,18 +597,23 @@ class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
         "label",
         "code",
         "type",
-        "description",
         "active",
         "deprecated",
         "individual_filters_available",
         "household_filters_available",
         "recalculate_composition",
+        "weight",
     )
     list_filter = (
         ("limit_to", AutoCompleteFilter),
+        "type",
         "active",
         "individual_filters_available",
         "household_filters_available",
         "recalculate_composition",
     )
     filter_horizontal = ("compatible_types", "limit_to")
+    search_fields = (
+        "label",
+        "code",
+    )

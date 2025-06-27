@@ -1,5 +1,5 @@
 import TableCell from '@mui/material/TableCell';
-import { HouseholdNode } from '@generated/graphql';
+import { PaymentNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { BlackLink } from '@components/core/BlackLink';
@@ -7,16 +7,16 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
 interface TargetPopulationPeopleTableRowProps {
-  household: HouseholdNode;
+  payment: PaymentNode;
   canViewDetails?: boolean;
 }
 
 export function TargetPopulationPeopleTableRow({
-  household,
+  payment,
   canViewDetails,
 }): ReactElement<TargetPopulationPeopleTableRowProps> {
   const { baseUrl } = useBaseUrl();
-  const householdDetailsPath = `/${baseUrl}/population/people/${household.headOfHousehold.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/people/${payment.collector?.id}`;
   const handleClick = (): void => {
     const win = window.open(householdDetailsPath, '_blank');
     if (win != null) {
@@ -30,23 +30,27 @@ export function TargetPopulationPeopleTableRow({
       onClick={canViewDetails ? handleClick : undefined}
       role="checkbox"
       data-cy="target-population-people-row"
-      key={household.id}
+      key={payment.household.id}
     >
       <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={householdDetailsPath}>
-            {household.headOfHousehold.unicefId}
+            {payment.household.headOfHousehold.unicefId}
           </BlackLink>
         ) : (
-          household.unicefId
+          payment.household.unicefId
         )}
       </TableCell>
-      <AnonTableCell>{household.headOfHousehold?.fullName}</AnonTableCell>
-      <TableCell align="left">{household.adminArea?.name || '-'}</TableCell>
+      <AnonTableCell>
+        {payment.household.headOfHousehold.fullName}
+      </AnonTableCell>
       <TableCell align="left">
-        {household.selection?.vulnerabilityScore == null
+        {payment.household.admin2?.name || '-'}
+      </TableCell>
+      <TableCell align="left">
+        {payment?.vulnerabilityScore == null
           ? '-'
-          : household.selection?.vulnerabilityScore}
+          : payment?.vulnerabilityScore}
       </TableCell>
     </ClickableTableRow>
   );

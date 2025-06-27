@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
@@ -15,6 +17,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
+@pytest.mark.elasticsearch
 class TestEnrollHouseholdsToProgramTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -87,9 +90,9 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         cls.individual2_repr_in_target_program = individuals2_repr[0]
 
     def test_enroll_households_to_program_task(self) -> None:
-        self.assertEqual(self.program_target.household_set.count(), 1)
+        self.assertEqual(self.program_target.households.count(), 1)
         self.assertEqual(self.program_target.individuals.count(), 1)
-        self.assertEqual(self.program_source.household_set.count(), 2)
+        self.assertEqual(self.program_source.households.count(), 2)
         self.assertEqual(self.program_source.individuals.count(), 2)
 
         self.assertIsNone(self.household1.household_collection)
@@ -105,9 +108,9 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         self.household1.refresh_from_db()
         self.household2.refresh_from_db()
 
-        self.assertEqual(self.program_target.household_set.count(), 2)
+        self.assertEqual(self.program_target.households.count(), 2)
         self.assertEqual(self.program_target.individuals.count(), 2)
-        self.assertEqual(self.program_source.household_set.count(), 2)
+        self.assertEqual(self.program_source.households.count(), 2)
         self.assertEqual(self.program_source.individuals.count(), 2)
 
         self.assertIsNotNone(self.household1.household_collection)

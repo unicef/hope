@@ -24,17 +24,14 @@ from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import JSONBSet, decode_id_string_required
+from hct_mis_api.apps.core.utils import JSONBSet
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.admin.mixins import (
-    CustomTargetPopulationMixin,
-    HouseholdWithDrawnMixin,
-)
+from hct_mis_api.apps.household.admin.mixins import HouseholdWithDrawnMixin
 from hct_mis_api.apps.household.celery_tasks import (
     enroll_households_to_program_task,
     mass_withdraw_households_from_list_task,
 )
-from hct_mis_api.apps.household.forms import MassEnrollForm
+from hct_mis_api.apps.household.forms import MassEnrollForm, WithdrawHouseholdsForm
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -82,14 +79,6 @@ class HouseholdRepresentationInline(admin.TabularInline):
 
 class HouseholdWithdrawFromListMixin:
     @staticmethod
-    def get_program_from_encoded_id(program_id: str) -> Optional[Program]:
-        try:
-            decoded_program_id = decode_id_string_required(program_id)
-            return Program.objects.filter(id=decoded_program_id).first()
-        except Exception:
-            return None
-
-    @staticmethod
     def get_household_queryset_from_list(household_id_list: list, program: Program) -> QuerySet:
         return Household.objects.filter(
             unicef_id__in=household_id_list,
@@ -133,65 +122,57 @@ class HouseholdWithdrawFromListMixin:
 
     @staticmethod
     def get_and_set_context_data(request: HttpRequest, context: dict) -> None:
-        household_list = request.POST.get("household_list")
-        tag = request.POST.get("tag")
-        program_id = request.POST.get("program_id")
-        context["household_list"] = household_list
-        context["tag"] = tag
-        context["program_id"] = program_id
+        context["household_list"] = request.POST.get("household_list")
+        context["tag"] = request.POST.get("tag")
+        context["program"] = request.POST.get("program")
+        context["business_area"] = request.POST.get("business_area")
 
     def withdraw_households_from_list(self, request: HttpRequest) -> Optional[HttpResponse]:
+        step = request.POST.get("step", "0")
         context = self.get_common_context(request, title="Withdraw households from list")
-        if request.method == "POST":
-            step = request.POST.get("step")
-            if step == "1":
-                context["step"] = "2"
+
+        if step == "0":
+            context["form"] = WithdrawHouseholdsForm()
+            context["step"] = "0"
+            return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+
+        if step == "1":
+            business_area = request.POST.get("business_area")
+            request.session["business_area"] = business_area
+            context.update(
+                {
+                    "form": WithdrawHouseholdsForm(request.POST, business_area=business_area),
+                    "business_area": business_area,
+                    "step": "1",
+                }
+            )
+            return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
+
+        business_area = request.session.get("business_area")
+        form = WithdrawHouseholdsForm(request.POST, business_area=business_area)
+        context["form"] = form
+
+        if form.is_valid():
+            household_id_list = [hh_id.strip() for hh_id in form.cleaned_data["household_list"].split(",")]
+            program = form.cleaned_data["program"]
+            tag = form.cleaned_data["tag"]
+
+            if step == "2":
+                context.update(
+                    {
+                        "step": "2",
+                        "household_count": self.get_household_queryset_from_list(household_id_list, program).count(),
+                    }
+                )
                 self.get_and_set_context_data(request, context)
                 return TemplateResponse(
-                    request,
-                    "admin/household/household/withdraw_households_from_list.html",
-                    context,
+                    request, "admin/household/household/withdraw_households_from_list.html", context
                 )
-            elif step == "2":
-                context["step"] = "2"
-                self.get_and_set_context_data(request, context)
-                household_id_list = self.split_list_of_ids(context["household_list"])
-                program = self.get_program_from_encoded_id(context["program_id"])
-                if not program:
-                    self.message_user(
-                        request,
-                        f"Program with ID '{context['program_id']}' not found.",
-                        level=messages.ERROR,
-                    )
-                    return HttpResponseRedirect(reverse("admin:household_household_changelist"))
 
-                context["household_count"] = self.get_household_queryset_from_list(
-                    household_id_list,
-                    program,
-                ).count()
-                return TemplateResponse(
-                    request,
-                    "admin/household/household/withdraw_households_from_list.html",
-                    context,
-                )
-            else:
-                household_list = request.POST.get("household_list", "")
-                tag = request.POST.get("tag", "")
-                program_id = request.POST.get("program_id", "")
-
-                program = self.get_program_from_encoded_id(program_id)
-                household_id_list = self.split_list_of_ids(household_list)
-                household_count = self.get_household_queryset_from_list(
-                    household_id_list,
-                    program,  # type: ignore
-                ).count()
-
-                mass_withdraw_households_from_list_task.delay(household_id_list, tag, program.id)  # type: ignore
-                self.message_user(request, f"{household_count} Households are being withdrawn.")
-
+            if step == "3":
+                mass_withdraw_households_from_list_task.delay(household_id_list, tag, str(program.id))
+                self.message_user(request, f"{len(household_id_list)} Households are being withdrawn.")
                 return HttpResponseRedirect(reverse("admin:household_household_changelist"))
-
-        context["step"] = "1"
         return TemplateResponse(request, "admin/household/household/withdraw_households_from_list.html", context)
 
 
@@ -203,7 +184,6 @@ class HouseholdAdmin(
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
     HouseholdWithDrawnMixin,
-    CustomTargetPopulationMixin,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     HouseholdWithdrawFromListMixin,
@@ -213,23 +193,34 @@ class HouseholdAdmin(
         "unicef_id",
         "business_area",
         "country",
-        "head_of_household",
-        "size",
-        "withdrawn",
         "program",
+        "head_of_household",
         "rdi_merge_status",
+        "registration_data_import",
+        "registration_method",
+        "residence_status",
+        "collect_type",
+        "withdrawn",
+        "size",
+        "consent",
+        "consent_sharing",
     )
     list_filter = (
         DepotManager,
+        QueryStringFilter,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
-        QueryStringFilter,
+        "registration_method",
+        "residence_status",
+        "collect_type",
         "withdrawn",
+        "consent",
+        "consent_sharing",
     )
     search_fields = ("head_of_household__family_name", "unicef_id")
     readonly_fields = ("created_at", "updated_at")
-    filter_horizontal = ("representatives", "programs")
+    filter_horizontal = ("representatives",)
     raw_id_fields = (
         "admin_area",
         "admin1",
@@ -244,6 +235,8 @@ class HouseholdAdmin(
         "head_of_household",
         "registration_data_import",
         "household_collection",
+        "storage_obj",
+        "copied_from",
     )
     fieldsets = [
         (None, {"fields": (("unicef_id", "head_of_household"),)}),
@@ -289,7 +282,17 @@ class HouseholdAdmin(
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
-            "head_of_household", "country", "country_origin", "admin_area", "admin1", "admin2", "admin3", "admin4"
+            "business_area",
+            "head_of_household",
+            "country",
+            "country_origin",
+            "admin_area",
+            "admin1",
+            "admin2",
+            "admin3",
+            "admin4",
+            "program",
+            "registration_data_import",
         )
         ordering = self.get_ordering(request)
         if ordering:
@@ -310,7 +313,7 @@ class HouseholdAdmin(
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return False
 
-    @button()
+    @button(permission="grievance.view_grievanceticket")
     def tickets(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Tickets")
         obj = context["original"]
@@ -320,17 +323,16 @@ class HouseholdAdmin(
         context["tickets"] = tickets
         return TemplateResponse(request, "admin/household/household/tickets.html", context)
 
-    @button()
+    @button(permission="household.view_household")
     def members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Household.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         flt = f"&qs=household_id={obj.id}"
         return HttpResponseRedirect(f"{url}?{flt}")
 
-    @button()
+    @button(permission=is_root)
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
-        # NOTE: this code is should be optimized in the future and it is not
-        # intended to be used in bulk
+        # NOTE: this code should be optimized in the future, and it is not intended to be used in bulk
         hh = self.get_object(request, str(pk))
         warnings: List[List] = []
         primary = None
@@ -354,14 +356,6 @@ class HouseholdAdmin(
 
         active_individuals = hh.individuals(manager="all_objects").exclude(Q(duplicate=True) | Q(withdrawn=True))
         ghosts_individuals = hh.individuals(manager="all_objects").filter(Q(duplicate=True) | Q(withdrawn=True))
-        all_individuals = hh.individuals(manager="all_objects").all()
-        if hh.collect_individual_data:
-            if active_individuals.count() != hh.size:
-                warnings.append([messages.WARNING, "HH size does not match"])
-
-        else:
-            if all_individuals.count() > 1:
-                warnings.append([messages.ERROR, "Individual data not collected but members found"])
 
         if hh.size != total_in_ranges:
             warnings.append(
@@ -472,7 +466,7 @@ class HouseholdAdmin(
 
     @button(
         label="Withdraw households from list",
-        permission=is_root,
+        permission="household.can_withdrawn",
     )
     def withdraw_households_from_list_button(self, request: HttpRequest) -> Optional[HttpResponse]:
         return self.withdraw_households_from_list(request)
@@ -488,6 +482,15 @@ class HouseholdCollectionAdmin(admin.ModelAdmin):
     search_fields = ("unicef_id",)
     list_filter = [BusinessAreaForHouseholdCollectionListFilter]
     inlines = [HouseholdRepresentationInline]
+
+    def get_queryset(self, request: HttpRequest) -> "QuerySet":
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                "households",
+            )
+        )
 
     def number_of_representations(self, obj: HouseholdCollection) -> int:
         return obj.households(manager="all_objects").count()

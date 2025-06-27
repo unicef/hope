@@ -1,17 +1,14 @@
 import camelCase from 'lodash/camelCase';
-import {
-  GrievanceTicketQuery,
-  PaymentRecordAndPaymentNode,
-} from '@generated/graphql';
+import { GrievanceTicketQuery, PaymentNode } from '@generated/graphql';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   camelizeArrayObjects,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
-import { AddIndividualDataChange } from '../AddIndividualDataChange';
-import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
-import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
 import { ReactElement } from 'react';
+import AddIndividualDataChange from '../AddIndividualDataChange';
+import EditHouseholdDataChange from '../EditHouseholdDataChange/EditHouseholdDataChange';
+import EditIndividualDataChange from '../EditIndividualDataChange/EditIndividualDataChange';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -27,8 +24,8 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: Pick<
-    PaymentRecordAndPaymentNode,
-    'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
+    PaymentNode,
+    'id' | 'deliveredQuantity' | 'entitlementQuantity'
   >[];
   paymentRecord?: string;
   selectedLinkedTickets: string[];
@@ -367,6 +364,20 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       return prev;
     }, {});
   individualData.flexFields = flexFields;
+
+  // Transform documents and identities to extract value from nested structure
+  const transformNestedData = (items) => {
+    if (!items || !Array.isArray(items)) return items;
+    return items.map((item) => {
+      // Handle nested structure {approveStatus, value: {country, key, number}}
+      if (item.value && typeof item.value === 'object') {
+        return item.value;
+      }
+      // Handle direct structure {country, key, number} for backward compatibility
+      return item;
+    });
+  };
+
   return {
     variables: {
       input: {
@@ -376,17 +387,28 @@ function prepareEditIndividualVariables(requiredVariables, values) {
           individualDataUpdateIssueTypeExtras: {
             individualData: {
               ...individualData,
-              documents: values.individualDataUpdateFieldsDocuments,
+              documents: transformNestedData(
+                values.individualDataUpdateFieldsDocuments,
+              ),
               documentsToRemove: values.individualDataUpdateDocumentsToRemove,
-              documentsToEdit: values.individualDataUpdateDocumentsToEdit,
-              identities: values.individualDataUpdateFieldsIdentities,
+              documentsToEdit: transformNestedData(
+                values.individualDataUpdateDocumentsToEdit,
+              ),
+              identities: transformNestedData(
+                values.individualDataUpdateFieldsIdentities,
+              ),
               identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
-              identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
-              paymentChannels: values.individualDataUpdateFieldsPaymentChannels,
+              identitiesToEdit: transformNestedData(
+                values.individualDataUpdateIdentitiesToEdit,
+              ),
+              paymentChannels: transformNestedData(
+                values.individualDataUpdateFieldsPaymentChannels,
+              ),
               paymentChannelsToRemove:
                 values.individualDataUpdatePaymentChannelsToRemove,
-              paymentChannelsToEdit:
+              paymentChannelsToEdit: transformNestedData(
                 values.individualDataUpdatePaymentChannelsToEdit,
+              ),
               deliveryMechanismDataToEdit:
                 values.individualDataUpdateDeliveryMechanismDataToEdit,
             },

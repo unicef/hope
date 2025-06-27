@@ -3,12 +3,10 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Count, JSONField, Q, UniqueConstraint, UUIDField
+from django.db.models import Count, JSONField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -24,8 +22,9 @@ from hct_mis_api.apps.utils.models import (
     UnicefIdentifiedModel,
 )
 
-if TYPE_CHECKING:
-    from hct_mis_api.apps.program.models import Program  # pragma: no cover
+if TYPE_CHECKING:  # pragma: no cover
+    from hct_mis_api.apps.payment.models import PaymentPlan
+    from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -79,19 +78,17 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         (VERIFICATION_CHANNEL_RAPIDPRO, "RAPIDPRO"),
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
-
-    # TODO TP DROP
-    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_plan_object_id = UUIDField(null=True)
-    payment_plan_obj = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
 
     payment_plan = models.ForeignKey(
-        "payment.PaymentPlan", on_delete=models.CASCADE, related_name="payment_verification_plans", null=True
+        "payment.PaymentPlan", on_delete=models.CASCADE, related_name="payment_verification_plans"
     )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
 
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
+    sex_filter = models.CharField(null=True, max_length=10, blank=True)
+    activation_date = models.DateTimeField(null=True)
+    completion_date = models.DateTimeField(null=True)
     sample_size = models.PositiveIntegerField(null=True, blank=True)
     responded_count = models.PositiveIntegerField(null=True, blank=True)
     received_count = models.PositiveIntegerField(null=True, blank=True)
@@ -99,23 +96,19 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     received_with_problems_count = models.PositiveIntegerField(null=True, blank=True)
     confidence_interval = models.FloatField(null=True, blank=True)
     margin_of_error = models.FloatField(null=True, blank=True)
+
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
     rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
-    age_filter = JSONField(null=True, blank=True)
-    excluded_admin_areas_filter = JSONField(null=True, blank=True)
-    sex_filter = models.CharField(null=True, max_length=10, blank=True)
-    activation_date = models.DateTimeField(null=True)
-    completion_date = models.DateTimeField(null=True)
+
     xlsx_file_exporting = models.BooleanField(default=False)
     xlsx_file_imported = models.BooleanField(default=False)
+
     error = models.CharField(max_length=500, null=True, blank=True)
+    age_filter = JSONField(null=True, blank=True)
+    excluded_admin_areas_filter = JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ("created_at",)
-        # TODO TP DROP
-        indexes = [
-            models.Index(fields=["payment_plan_content_type", "payment_plan_object_id"]),
-        ]
 
     @property
     def business_area(self) -> BusinessArea:
@@ -128,7 +121,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         except FileTemp.DoesNotExist:  # pragma: no cover
             raise GraphQLError("Xlsx Verification File does not exist.")
         except FileTemp.MultipleObjectsReturned as e:  # pragma: no cover
-            logger.exception(e)
+            logger.warning(e)
             raise GraphQLError("Query returned multiple Xlsx Verification Files when only one was expected.")
 
     @property
@@ -173,7 +166,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         return self.payment_plan.program_cycle.program
 
 
-def build_summary(payment_plan: Optional[Any]) -> None:
+def build_summary(payment_plan: Optional["PaymentPlan"]) -> None:
     if not payment_plan:
         return
 
@@ -234,22 +227,15 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
         (STATUS_RECEIVED, "RECEIVED"),
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
+    payment = models.ForeignKey(
+        "payment.Payment",
+        on_delete=models.CASCADE,
+        related_name="payment_verifications",
+    )
     payment_verification_plan = models.ForeignKey(
         "payment.PaymentVerificationPlan",
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
-    )
-
-    # TODO TP DROP
-    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_object_id = UUIDField(null=True)
-    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
-
-    payment = models.OneToOneField(
-        "payment.Payment",
-        on_delete=models.CASCADE,
-        related_name="payment_verification",
-        null=True,
     )
 
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
@@ -261,17 +247,6 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
         null=True,
     )
     sent_to_rapid_pro = models.BooleanField(default=False)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["payment_content_type", "payment_object_id"]),
-        ]
-        constraints = [
-            UniqueConstraint(
-                fields=["payment_content_type", "payment_object_id"],
-                name="payment_content_type_and_payment_id",
-            )
-        ]
 
     @property
     def is_manually_editable(self) -> bool:
@@ -311,23 +286,6 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
         related_name="payment_verification_summary",
         null=True,
     )
-
-    # TODO TP drop
-    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_plan_object_id = UUIDField(null=True)
-    payment_plan_obj = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
-
-    class Meta:
-        # TODO TP DROP
-        indexes = [
-            models.Index(fields=["payment_plan_content_type", "payment_plan_object_id"]),
-        ]
-        constraints = [
-            UniqueConstraint(
-                fields=["payment_plan_content_type", "payment_plan_object_id"],
-                name="payment_plan_content_type_and_payment_plan_id",
-            )
-        ]
 
     def mark_as_active(self) -> None:
         self.status = self.STATUS_ACTIVE

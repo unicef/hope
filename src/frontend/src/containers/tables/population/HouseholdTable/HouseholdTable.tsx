@@ -8,8 +8,9 @@ import {
   useAllHouseholdsForPopulationTableQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { adjustHeadCells } from '@utils/utils';
 import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
@@ -27,7 +28,8 @@ export function HouseholdTable({
   choicesData,
   canViewDetails,
 }: HouseholdTableProps): ReactElement {
-  const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
@@ -56,11 +58,24 @@ export function HouseholdTable({
     program: programId,
     rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
   };
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    head_of_household__full_name: (_beneficiaryGroup) =>
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   return (
     <TableWrapper>
       <UniversalTable<HouseholdNode, AllHouseholdsQueryVariables>
-        title={t('Households')}
-        headCells={headCells}
+        title={`${beneficiaryGroup?.groupLabelPlural}`}
+        headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName="allHouseholds"

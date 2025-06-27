@@ -11,7 +11,6 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     DocumentType,
@@ -81,7 +80,6 @@ class TestDelegatePeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village1",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "John Doe",
                 "birth_date": "2000-01-01",
                 "sex": "MALE",
@@ -100,7 +98,6 @@ class TestDelegatePeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village2",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "Mary Doe",
                 "birth_date": "1990-01-01",
                 "sex": "FEMALE",
@@ -110,7 +107,6 @@ class TestDelegatePeople(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village3",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "Jack Jones",
                 "birth_date": "1980-01-01",
                 "sex": "MALE",

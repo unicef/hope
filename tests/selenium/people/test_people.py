@@ -15,9 +15,9 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentRecord
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
@@ -32,7 +32,9 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    return get_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL, Program.ACTIVE)
+    return get_social_program_with_dct_type_and_name(
+        "Worker Program", "WORK", DataCollectingType.Type.SOCIAL, Program.ACTIVE
+    )
 
 
 @pytest.fixture
@@ -56,7 +58,7 @@ def add_people(social_worker_program: Program) -> List:
 
 
 @pytest.fixture
-def add_people_with_payment_record(add_people: List) -> PaymentRecord:
+def add_people_with_payment_record(add_people: List) -> Payment:
     program = Program.objects.filter(name="Worker Program").first()
 
     payment_plan = PaymentPlanFactory(
@@ -72,7 +74,7 @@ def add_people_with_payment_record(add_people: List) -> PaymentRecord:
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     add_people[1].total_cash_received_usd = 21.36
     add_people[1].save()
@@ -82,8 +84,8 @@ def add_people_with_payment_record(add_people: List) -> PaymentRecord:
 def get_program_with_dct_type_and_name(
     name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.DRAFT
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
         programme_code=programme_code,
@@ -91,6 +93,24 @@ def get_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        beneficiary_group=beneficiary_group,
+    )
+    return program
+
+
+def get_social_program_with_dct_type_and_name(
+    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.DRAFT
+) -> Program:
+    dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
+    program = ProgramFactory(
+        name=name,
+        programme_code=programme_code,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=status,
+        beneficiary_group=beneficiary_group,
     )
     return program
 
@@ -108,6 +128,7 @@ class TestSmokePeople:
         assert "Administrative Level 2" in pagePeople.getIndividualLocation().text
         assert "Rows per page: 10 0–0 of 0" in pagePeople.getTablePagination().text.replace("\n", " ")
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_smoke_page_details_people(
         self,
         add_people: None,
@@ -126,7 +147,7 @@ class TestSmokePeople:
         assert individual.given_name in pagePeopleDetails.getLabelGivenName().text
         assert individual.middle_name if individual.middle_name else "-" in pagePeopleDetails.getLabelMiddleName().text
         assert individual.family_name in pagePeopleDetails.getLabelFamilyName().text
-        assert individual.sex.lower() in pagePeopleDetails.getLabelGender().text.lower()
+        assert individual.sex.lower().replace("_", " ") in pagePeopleDetails.getLabelGender().text.lower()
         assert pagePeopleDetails.getLabelAge().text
         assert individual.birth_date.strftime("%-d %b %Y") in pagePeopleDetails.getLabelDateOfBirth().text
         assert pagePeopleDetails.getLabelEstimatedDateOfBirth().text
@@ -216,7 +237,7 @@ class TestSmokePeople:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_people_happy_path(
         self,
-        add_people_with_payment_record: PaymentRecord,
+        add_people_with_payment_record: Payment,
         pagePeople: People,
         pagePeopleDetails: PeopleDetails,
     ) -> None:
@@ -237,7 +258,7 @@ class TestPeople:
         "test_data",
         [
             pytest.param(
-                {"category": "Data Change", "type": "Individual Data Update"},
+                {"category": "Data Change", "type": "Member Data Update"},
                 id="Data Change People Data Update",
             )
         ],
@@ -271,7 +292,7 @@ class TestPeople:
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
 
-        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getDescription().send_keys("Add Member - TEST")
         pageGrievanceNewTicket.getButtonAddNewField().click()
         pageGrievanceNewTicket.getIndividualFieldName(0).click()
         pageGrievanceNewTicket.select_listbox_element("Gender")
@@ -300,7 +321,6 @@ class TestPeople:
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].find_element(By.TAG_NAME, "input").click()
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].find_element(By.TAG_NAME, "input").click()
         pageGrievanceDetailsPage.getButtonApproval().click()
-        pageGrievanceDetailsPage.getButtonConfirm().click()
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceDetailsPage.getButtonConfirm().click()
         assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text

@@ -1,30 +1,29 @@
-import { Form, Formik } from 'formik';
-import moment from 'moment';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
+import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
+import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import {
   useAllTargetPopulationsQuery,
   usePaymentPlanQuery,
   useUpdatePpMutation,
 } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
-import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
-import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { today } from '@utils/utils';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { Form, Formik } from 'formik';
+import moment from 'moment';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
+import * as Yup from 'yup';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 
-export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
+const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { paymentPlanId } = useParams();
   const { t } = useTranslation();
   const { data: paymentPlanData, loading: loadingPaymentPlan } =
@@ -44,8 +43,8 @@ export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
     useAllTargetPopulationsQuery({
       variables: {
         businessArea,
-        paymentPlanApplicable: false,
-        program: [programId],
+        status: 'DRAFT',
+        program: programId,
       },
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
@@ -58,7 +57,7 @@ export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
-    targetingId: paymentPlan.targetPopulation.id,
+    paymentPlanId: paymentPlan.id,
     currency: {
       name: paymentPlan.currencyName,
       value: paymentPlan.currency,
@@ -94,15 +93,12 @@ export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
     try {
       const res = await mutate({
         variables: {
-          input: {
-            paymentPlanId,
-            targetingId: values.targetingId,
-            dispersionStartDate: values.dispersionStartDate,
-            dispersionEndDate: values.dispersionEndDate,
-            currency: values.currency?.value
-              ? values.currency.value
-              : values.currency,
-          },
+          paymentPlanId: values.paymentPlanId,
+          dispersionStartDate: values.dispersionStartDate,
+          dispersionEndDate: values.dispersionEndDate,
+          currency: values.currency?.value
+            ? values.currency.value
+            : values.currency,
         },
       });
       showMessage(t('Follow-up Payment Plan Edited'));
@@ -115,37 +111,33 @@ export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'EditPeopleFollowUpPaymentPlanPage.tsx');
-      }}
-      componentName="EditPeopleFollowUpPaymentPlanPage"
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
     >
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ submitForm, values }) => (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <EditPaymentPlanHeader
-              paymentPlan={paymentPlan}
-              handleSubmit={submitForm}
-              baseUrl={baseUrl}
-              permissions={permissions}
-            />
-            <PaymentPlanTargeting
-              allTargetPopulations={allTargetPopulationsData}
-              loading={loadingTargetPopulations}
-              disabled
-            />
-            <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
-          </Form>
-        )}
-      </Formik>
-    </UniversalErrorBoundary>
+      {({ submitForm, values }) => (
+        <Form>
+          <AutoSubmitFormOnEnter />
+          <EditPaymentPlanHeader
+            paymentPlan={paymentPlan}
+            handleSubmit={submitForm}
+            baseUrl={baseUrl}
+            permissions={permissions}
+          />
+          <PaymentPlanTargeting
+            allTargetPopulations={allTargetPopulationsData}
+            loading={loadingTargetPopulations}
+            disabled
+          />
+          <PaymentPlanParameters paymentPlan={paymentPlan} values={values} />
+        </Form>
+      )}
+    </Formik>
   );
 };
+
+export default withErrorBoundary(
+  EditPeopleFollowUpPaymentPlanPage,
+  'EditPeopleFollowUpPaymentPlanPage',
+);

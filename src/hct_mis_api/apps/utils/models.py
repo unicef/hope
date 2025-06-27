@@ -152,9 +152,7 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
     class Meta:
         abstract = True
 
-    # objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
-    # now we use 'rdi_merge_status' field for filtering
-    objects = SoftDeletableRepresentationManager()
+    objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
     all_merge_status_objects = SoftDeletableRepresentationManager()
     available_objects = SoftDeletableRepresentationMergedManager()
     all_objects = models.Manager()
@@ -407,7 +405,6 @@ class SignatureManager(models.Manager):
         bulk_create_payment_snapshot_data([x.id for x in created_objects])
         for obj in created_objects:
             obj.update_signature_hash()
-            # print(obj.signature_hash)
         super().bulk_update(created_objects, ["signature_hash"])
         return created_objects
 
@@ -606,12 +603,15 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
         except Exception as e:
             return str(e)
 
-    def queue(self) -> Optional[str]:
+    def queue(self, task_handler: Optional[Callable[[Any], Any]] = None) -> Optional[str]:
         if self.celery_status not in self.CELERY_STATUS_SCHEDULED:
-            res = self.task_handler.delay(self.pk)
+            if not task_handler:
+                res = self.task_handler.delay(self.pk)
+            else:
+                res = task_handler.delay(self.pk)
             self.curr_async_result_id = res.id
             self.save(update_fields=["curr_async_result_id"])
-            return res.id
+            return res
         return None
 
     def terminate(self) -> None:
@@ -636,7 +636,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
 
 
 class InternalDataFieldModel(models.Model):
-    internal_data = models.JSONField(default=dict)
+    internal_data = models.JSONField(default=dict, blank=True)
 
     class Meta:
         abstract = True

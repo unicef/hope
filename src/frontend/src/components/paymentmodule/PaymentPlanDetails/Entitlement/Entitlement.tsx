@@ -2,7 +2,7 @@ import {
   Box,
   Button,
   FormControl,
-  Grid,
+  Grid2 as Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -33,6 +33,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { useProgramContext } from '../../../../programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -93,7 +94,7 @@ interface EntitlementProps {
   permissions: string[];
 }
 
-export function Entitlement({
+function Entitlement({
   paymentPlan,
   permissions,
 }: EntitlementProps): ReactElement {
@@ -161,7 +162,7 @@ export function Entitlement({
           </Title>
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
           <Grid alignItems="center" container>
-            <Grid item xs={11}>
+            <Grid size={{ xs: 11 }}>
               <FormControl size="small" variant="outlined" fullWidth>
                 <Box mb={1}>
                   <InputLabel>{t('Entitlement Formula')}</InputLabel>
@@ -195,7 +196,7 @@ export function Entitlement({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item>
+            <Grid>
               <Box ml={2}>
                 <Button
                   variant="contained"
@@ -215,6 +216,7 @@ export function Entitlement({
                         variables: {
                           paymentPlanId: paymentPlan.id,
                           steficonRuleId: steficonRuleValue,
+                          version: paymentPlan.version,
                         },
                       });
                       showMessage(
@@ -344,3 +346,5 @@ export function Entitlement({
     </Box>
   );
 }
+
+export default withErrorBoundary(Entitlement, 'Entitlement');

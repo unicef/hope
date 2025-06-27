@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,7 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { individualTableOrderOptions } from '@utils/constants';
+import { generateTableOrderOptionsMember } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -47,6 +47,7 @@ export function IndividualsFilter({
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -71,6 +72,9 @@ export function IndividualsFilter({
     selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
 
+  const individualTableOrderOptions =
+    generateTableOrderOptionsMember(beneficiaryGroup);
+
   return (
     <FiltersSection
       clearHandler={handleClearFilter}
@@ -78,7 +82,7 @@ export function IndividualsFilter({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -93,7 +97,7 @@ export function IndividualsFilter({
           choices={choicesData?.documentTypeChoices}
         />
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -102,7 +106,7 @@ export function IndividualsFilter({
               icon={<FlashOnIcon />}
               data-cy="filters-program"
             >
-              {programs.map((program) => (
+              {programs?.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
                   {program.name}
                 </MenuItem>
@@ -111,7 +115,7 @@ export function IndividualsFilter({
           </Grid>
         )}
         {showAdminAreaFilter && (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <AdminAreaAutocomplete
               level={2}
               name="admin2"
@@ -125,7 +129,7 @@ export function IndividualsFilter({
             />
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}
@@ -140,7 +144,7 @@ export function IndividualsFilter({
             <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <NumberTextField
             fullWidth
             topLabel={t('Age')}
@@ -154,7 +158,7 @@ export function IndividualsFilter({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <NumberTextField
             fullWidth
             placeholder={t('To')}
@@ -167,7 +171,7 @@ export function IndividualsFilter({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('flags', e.target.value)}
             label={t('Flags')}
@@ -187,7 +191,7 @@ export function IndividualsFilter({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -203,7 +207,7 @@ export function IndividualsFilter({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -221,7 +225,7 @@ export function IndividualsFilter({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -232,7 +236,7 @@ export function IndividualsFilter({
             dataCy="ind-filters-reg-date-from"
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -243,7 +247,7 @@ export function IndividualsFilter({
           />
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={2}>
+          <Grid size={{ xs:2 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)

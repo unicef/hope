@@ -35,6 +35,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.steficon.forms import (
     RuleCommitAdminForm,
     RuleDownloadCSVFileProcessForm,
@@ -60,6 +61,7 @@ class AutocompleteWidget(forms.Widget):
         choices: Tuple = (),
         using: Optional[Any] = None,
         pk_field: str = "id",
+        business_area: Optional[UUID] = None,
     ) -> None:
         self.model = model
         self.pk_field = pk_field
@@ -67,6 +69,7 @@ class AutocompleteWidget(forms.Widget):
         self.db = using
         self.choices = choices
         self.attrs = {} if attrs is None else attrs.copy()
+        self.business_area = business_area
 
     class Media:
         extra = "" if settings.DEBUG else ".min"
@@ -100,12 +103,15 @@ class AutocompleteWidget(forms.Widget):
         }
 
     def get_url(self) -> str:
-        return reverse("admin:autocomplete")
+        url = reverse("admin:autocomplete")
+        if self.business_area:
+            url += f"?business_area={self.business_area}"  #
+        return url
 
     def get_context(self, name: str, value: Any, attrs: Optional[Dict[str, Any]]) -> Dict:
         return {
             "widget": {
-                "query_string": "",
+                "query_string": f"business_area__exact={self.business_area}" if self.business_area else "",
                 "lookup_kwarg": "term",
                 "url": self.get_url(),
                 "target_opts": {
@@ -125,7 +131,7 @@ class AutocompleteWidget(forms.Widget):
 
 
 class TestRuleMixin:
-    @button()
+    @button(permission="steficon.view_rule")
     def test(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         rule: Rule = self.get_object(request, str(pk))
         context = self.get_common_context(
@@ -186,9 +192,7 @@ class TestRuleMixin:
         else:
             context["form"] = RuleTestForm(initial={"raw_data": '{"a": 1, "b":2}', "opt": "optFile"})
         if "form" in context:
-            from hct_mis_api.apps.targeting.models import TargetPopulation
-
-            context["form"].fields["target_population"].widget = AutocompleteWidget(TargetPopulation, self.admin_site)
+            context["form"].fields["target_population"].widget = AutocompleteWidget(PaymentPlan, self.admin_site)
             context["form"].fields["content_type"].widget = AutocompleteWidget(ContentType, self.admin_site)
         return TemplateResponse(request, "admin/steficon/rule/test.html", context)
 
@@ -220,8 +224,27 @@ class RuleResource(ModelResource):
 
 @register(Rule)
 class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
-    list_filter = ("language", "enabled", "deprecated", "type")
+    list_display = (
+        "name",
+        "created_by",
+        "updated_by",
+        "type",
+        "stable",
+        "version",
+        "enabled",
+        "deprecated",
+        "language",
+        "security",
+    )
+    list_filter = (
+        ("created_by", AutoCompleteFilter),
+        ("updated_by", AutoCompleteFilter),
+        "type",
+        "enabled",
+        "deprecated",
+        "language",
+        "security",
+    )
     search_fields = ("name",)
     filter_horizontal = ("allowed_business_areas",)
     form = RuleForm
@@ -235,6 +258,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     change_form_template = None
     change_list_template = None
     resource_class = RuleResource
+    date_hierarchy = "created_at"
     fieldsets = [
         (
             None,
@@ -346,7 +370,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             escapechar=form.cleaned_data["escapechar"],
         )
 
-    @button(visible=lambda o, r: "/change/" in r.path)
+    @button(visible=lambda o, r: "/change/" in r.path, permission="steficon.process_file")
     def process_file(self, request: HttpRequest, pk: UUID) -> HttpResponse:
         context = self.get_common_context(
             request,
@@ -421,13 +445,10 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
 
         return TemplateResponse(request, "admin/steficon/rule/file_process.html", context)
 
-    @button(visible=lambda btn: "/changelog/" not in btn.request.path)
+    @button(visible=lambda btn: "/changelog/" not in btn.request.path, permission="steficon.changelog")
     def changelog(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
-
-    # urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"],
-    # @button(visible=lambda btn: "/change/" in btn.request.path)
 
     @view(pattern=r"<int:pk>/rule_do_revert/<int:state>/")
     def do_revert(self, request: HttpRequest, pk: UUID, state: bool) -> None:
@@ -455,11 +476,11 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 url = reverse("admin:steficon_rule_change", args=[self.object.id])
                 return HttpResponseRedirect(url)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @button(visible=lambda btn: "/change/" in btn.request.path)
+    @button(visible=lambda btn: "/change/" in btn.request.path, permission="steficon.check_diff")
     def diff(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, TemplateResponse]:
         try:
             context = self.get_common_context(request, pk, action="Code history")
@@ -485,7 +506,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
             )
             return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
         except Exception as e:
-            logger.exception(e)
+            logger.warning(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
@@ -538,8 +559,15 @@ class RuleCommitResource(ModelResource):
 
 @register(RuleCommit)
 class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPEModelAdminBase):
-    list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
-    list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
+    list_display = ("rule", "version", "updated_by", "timestamp", "is_release", "enabled", "deprecated", "language")
+    list_filter = (
+        ("rule", AutoCompleteFilter),
+        ("updated_by", AutoCompleteFilter),
+        "is_release",
+        "enabled",
+        "deprecated",
+        "language",
+    )
     search_fields = ("rule__name",)
     readonly_fields = ("updated_by",)
     change_form_template = None
@@ -557,6 +585,17 @@ class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPE
         "affected_fields",
         "updated_by",
     )
+    date_hierarchy = "timestamp"
+
+    def get_queryset(self, request: HttpRequest) -> "QuerySet":
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "rule",
+                "updated_by",
+            )
+        )
 
     def get_readonly_fields(self, request: HttpRequest, obj: Optional[RuleCommit] = None) -> List[str]:
         if is_root(request):

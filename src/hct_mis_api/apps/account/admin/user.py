@@ -53,7 +53,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             },
         ),
     )
-    readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
+    readonly_fields = ("ad_uuid", "last_modify_date")
 
     change_form_template = None
     hijack_success_url = f"/api/{settings.ADMIN_PANEL_URL}/"
@@ -94,7 +94,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     extra_fieldsets = (
         (
             _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields", "doap_hash", "ad_uuid")},
+            {"classes": ["collapse"], "fields": ("custom_fields", "ad_uuid")},
         ),
         (
             _("Permissions"),
@@ -118,7 +118,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                     "last_login",
                     "date_joined",
                     "last_modify_date",
-                    "last_doap_sync",
                 ),
             },
         ),
@@ -168,7 +167,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             to_delete.append(f"Kobo: {kobo_username}")  # type: ignore # this is somehow intentional
         return to_delete, model_count, perms_needed, protected
 
-    @button()
+    @button(permission="auth.view_permission")
     def privileges(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk)
         user: account_models.User = context["original"]
@@ -322,7 +321,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                         except Exception:
                             raise
                 except Exception as e:
-                    logger.exception(e)
+                    logger.warning(e)
                     context["form"] = form
                     context["errors"] = [str(e)]
                     self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)

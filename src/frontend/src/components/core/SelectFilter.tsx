@@ -50,7 +50,6 @@ export const SelectFilter = ({
   children,
   onChange,
   icon = null,
-  borderRadius = '4px',
   fullWidth = true,
   disableClearable = false,
   dataCy = 'select-filter',
@@ -68,7 +67,6 @@ export const SelectFilter = ({
   return (
     <SelectWrapper>
       <StyledFormControl
-        theme={{ borderRadius }}
         fullWidth={fullWidth}
         variant="outlined"
         size="small"
@@ -99,7 +97,7 @@ export const SelectFilter = ({
               const selectedOptions = Children.toArray(children).filter(
                 (child): child is ReactElement<any> =>
                   isValidElement(child) &&
-                  selectedValues.includes(child.props.value),
+                  selectedValues.includes((child as ReactElement<any>).props.value),
               );
 
               return (

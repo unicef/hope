@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import { IndividualQuery } from '@generated/graphql';

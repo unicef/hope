@@ -1,24 +1,24 @@
-import { Grid, MenuItem } from '@mui/material';
-import CakeIcon from '@mui/icons-material/Cake';
-import FlashOnIcon from '@mui/icons-material/FlashOn';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 import {
   DataCollectingTypeType,
   IndividualChoiceDataQuery,
   ProgramNode,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import CakeIcon from '@mui/icons-material/Cake';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { individualTableOrderOptions } from '@utils/constants';
+import { generateTableOrderOptionsMember } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { DatePickerFilter } from '@core/DatePickerFilter';
-import { FiltersSection } from '@core/FiltersSection';
-import { NumberTextField } from '@core/NumberTextField';
-import { SearchTextField } from '@core/SearchTextField';
-import { SelectFilter } from '@core/SelectFilter';
-import { useProgramContext } from '../../programContext';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useProgramContext } from '../../programContext';
 
 interface PeopleFilterProps {
   filter;
@@ -46,6 +46,7 @@ export function PeopleFilter({
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup || null;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -70,6 +71,9 @@ export function PeopleFilter({
     selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
 
+  const individualTableOrderOptions =
+    generateTableOrderOptionsMember(beneficiaryGroup) || [];
+
   return (
     <FiltersSection
       clearHandler={handleClearFilter}
@@ -77,7 +81,7 @@ export function PeopleFilter({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -85,8 +89,8 @@ export function PeopleFilter({
             data-cy="ind-filters-search"
           />
         </Grid>
-        <Grid container item xs={6} spacing={3}>
-          <Grid item xs={6}>
+        <Grid container size={{ xs: 6 }} spacing={3}>
+          <Grid size={{ xs: 6 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('documentType', e.target.value)
@@ -98,14 +102,14 @@ export function PeopleFilter({
               fullWidth
               disableClearable
             >
-              {choicesData?.documentTypeChoices.map(({ name, value }) => (
+              {choicesData?.documentTypeChoices?.map(({ name, value }) => (
                 <MenuItem key={value} value={value}>
                   {name}
                 </MenuItem>
-              ))}
+              )) || null}
             </SelectFilter>
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <SearchTextField
               label={t('Document number')}
               value={filter.documentNumber}
@@ -117,7 +121,7 @@ export function PeopleFilter({
           </Grid>
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={2}>
+          <Grid size={{ xs: 2 }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -136,7 +140,7 @@ export function PeopleFilter({
         )}
         {showAdminAreaFilter && (
           <>
-            <Grid item xs={2}>
+            <Grid size={{ xs: 2 }}>
               <AdminAreaAutocomplete
                 level={1}
                 name="admin1"
@@ -150,7 +154,7 @@ export function PeopleFilter({
                 dataCy="ind-filters-admin1"
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid size={{ xs: 2 }}>
               <AdminAreaAutocomplete
                 level={2}
                 name="admin2"
@@ -166,7 +170,7 @@ export function PeopleFilter({
             </Grid>
           </>
         )}
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}
@@ -181,7 +185,7 @@ export function PeopleFilter({
             <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <NumberTextField
             fullWidth
             topLabel={t('Age')}
@@ -195,7 +199,7 @@ export function PeopleFilter({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <NumberTextField
             fullWidth
             placeholder={t('To')}
@@ -208,7 +212,7 @@ export function PeopleFilter({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('flags', e.target.value)}
             label={t('Flags')}
@@ -228,7 +232,7 @@ export function PeopleFilter({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -244,7 +248,7 @@ export function PeopleFilter({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -262,7 +266,7 @@ export function PeopleFilter({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -273,7 +277,7 @@ export function PeopleFilter({
             dataCy="ind-filters-reg-date-from"
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -284,7 +288,7 @@ export function PeopleFilter({
           />
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={2}>
+          <Grid size={{ xs: 2 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)

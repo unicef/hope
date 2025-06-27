@@ -6,6 +6,7 @@ export const DataCollectionTypeChoiceData = gql`
       name
       value
       description
+      type
     }
   }
 `;

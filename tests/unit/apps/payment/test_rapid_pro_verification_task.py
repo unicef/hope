@@ -87,6 +87,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=program.cycles.first(),
             business_area=BusinessArea.objects.first(),
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
@@ -103,12 +104,11 @@ class TestRapidProVerificationTask(TestCase):
                 {
                     "registration_data_import": registration_data_import,
                     "admin_area": Area.objects.order_by("?").first(),
+                    "program": program,
                 },
                 {"registration_data_import": registration_data_import},
             )
             cls.individuals.extend(individuals)
-
-            household.programs.add(program)
 
             payment = PaymentFactory(
                 parent=payment_plan,

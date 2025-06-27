@@ -1,56 +1,58 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllCashPlansAndPaymentPlansQueryVariables,
-  CashPlanAndPaymentPlanNode,
-  useAllCashPlansAndPaymentPlansQuery,
+  AllPaymentPlansForTableQueryVariables,
+  useAllPaymentPlansForTableQuery,
+  PaymentPlanNode,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentVerificationTableProps {
   filter?;
   businessArea: string;
   canViewDetails: boolean;
 }
-export function PaymentVerificationTable({
+function PaymentVerificationTable({
   filter,
   canViewDetails,
   businessArea,
 }: PaymentVerificationTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
+  const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
     search: filter.search,
     verificationStatus: filter.verificationStatus,
     serviceProvider: filter.serviceProvider,
-    deliveryType: filter.deliveryType,
-    startDateGte: dateToIsoString(filter.startDate, 'startOfDay'),
-    endDateLte: dateToIsoString(filter.endDate, 'endOfDay'),
+    deliveryTypes: filter.deliveryTypes,
+    startDate: dateToIsoString(filter.startDate, 'startOfDay'),
+    endDate: dateToIsoString(filter.endDate, 'endOfDay'),
     program: programId,
-    isPaymentVerificationPage: true,
   };
   return (
-    <UniversalTable<
-    CashPlanAndPaymentPlanNode,
-    AllCashPlansAndPaymentPlansQueryVariables
-    >
+    <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
       title={t('List of Payment Plans')}
       headCells={headCells}
-      query={useAllCashPlansAndPaymentPlansQuery}
-      queriedObjectName="allCashPlansAndPaymentPlans"
+      query={useAllPaymentPlansForTableQuery}
+      queriedObjectName="allPaymentPlans"
       initialVariables={initialVariables}
-      renderRow={(cashPlanAndPaymentPlanNode) => (
+      renderRow={(paymentPlan) => (
         <PaymentVerificationTableRow
-          key={cashPlanAndPaymentPlanNode.id}
-          plan={cashPlanAndPaymentPlanNode}
+          key={paymentPlan.id}
+          plan={paymentPlan}
           canViewDetails={canViewDetails}
         />
       )}
     />
   );
 }
+
+export default withErrorBoundary(
+  PaymentVerificationTable,
+  'PaymentVerificationTable',
+);

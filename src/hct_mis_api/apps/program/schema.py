@@ -17,6 +17,7 @@ import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
@@ -43,10 +44,10 @@ from hct_mis_api.apps.core.utils import (
     get_program_id_from_headers,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentPlan
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
@@ -82,6 +83,13 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class BeneficiaryGroupNode(DjangoObjectType):
+    class Meta:
+        model = BeneficiaryGroup
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
@@ -96,6 +104,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     total_number_of_households = graphene.Int()
     total_number_of_households_with_tp_in_program = graphene.Int()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
+    beneficiary_group = graphene.Field(BeneficiaryGroupNode, source="beneficiary_group")
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
     pdu_fields = graphene.List(PeriodicFieldNode)
@@ -117,7 +126,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_total_number_of_households_with_tp_in_program(program: Program, info: Any, **kwargs: Any) -> int:
-        return program.households_with_tp_in_program.count()
+        return program.households_with_payments_in_program.count()
 
     @staticmethod
     def resolve_partners(program: Program, info: Any, **kwargs: Any) -> QuerySet[Partner]:
@@ -140,7 +149,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_target_populations_count(program: Program, info: Any, **kwargs: Any) -> int:
-        return program.targetpopulation_set.count()
+        return PaymentPlan.objects.filter(program_cycle__program=program).count()
 
     @staticmethod
     def resolve_can_finish(program: Program, info: Any, **kwargs: Any) -> bool:
@@ -232,6 +241,8 @@ class Query(graphene.ObjectType):
         return is_still_processing or all_rdis_deduplicated or rdi_merging
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        if not info.context.headers.get("Business-Area"):
+            raise GraphQLError("Not found header Business-Area")
         user = info.context.user
         filters = {
             "business_area__slug": info.context.headers.get("Business-Area").lower(),

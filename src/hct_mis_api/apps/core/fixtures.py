@@ -19,9 +19,7 @@ from hct_mis_api.apps.program.models import Program
 faker = Faker()
 
 
-def create_afghanistan(
-    is_payment_plan_applicable: bool = False,
-) -> BusinessArea:
+def create_afghanistan() -> BusinessArea:
     return BusinessArea.objects.get_or_create(
         code="0060",
         defaults={
@@ -32,15 +30,12 @@ def create_afghanistan(
             "region_name": "SAR",
             "slug": "afghanistan",
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": is_payment_plan_applicable,
             "kobo_token": "XXX",
         },
     )[0]
 
 
-def create_ukraine(
-    is_payment_plan_applicable: bool = False,
-) -> BusinessArea:
+def create_ukraine() -> BusinessArea:
     return BusinessArea.objects.create(
         **{
             "code": "4410",
@@ -50,15 +45,12 @@ def create_ukraine(
             "region_name": "ECAR",
             "slug": "ukraine",
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": is_payment_plan_applicable,
             "kobo_token": "YYY",
         }
     )
 
 
-def create_kenya(
-    is_payment_plan_applicable: bool = False,
-) -> BusinessArea:
+def create_kenya() -> BusinessArea:
     return BusinessArea.objects.create(
         **{
             "code": "2400",
@@ -68,7 +60,6 @@ def create_kenya(
             "region_name": "ESAR",
             "slug": "kenya",
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": is_payment_plan_applicable,
             "kobo_token": "ZZZ",
         }
     )

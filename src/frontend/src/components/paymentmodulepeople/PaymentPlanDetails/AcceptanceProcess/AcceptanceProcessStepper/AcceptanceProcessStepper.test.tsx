@@ -9,7 +9,9 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
   it('should render default step Sent for Approval Date', async () => {
     const { container } = render(
       <AcceptanceProcessStepper
-        acceptanceProcess={fakeApolloPaymentPlan.approvalProcess.edges[0].node}
+        acceptanceProcess={
+          fakeApolloPaymentPlan?.approvalProcess?.edges[0]?.node
+        }
       />,
     );
     await act(() => wait(0)); // wait for response
@@ -19,7 +21,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
     const { container } = render(
       <AcceptanceProcessStepper
         acceptanceProcess={{
-          ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
+          ...fakeApolloPaymentPlan?.approvalProcess?.edges[0]?.node,
           sentForApprovalDate: '2020-01-01',
         }}
       />,
@@ -31,7 +33,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
     const { container } = render(
       <AcceptanceProcessStepper
         acceptanceProcess={{
-          ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
+          ...fakeApolloPaymentPlan?.approvalProcess?.edges[0]?.node,
           sentForAuthorizationDate: '2020-01-01',
         }}
       />,
@@ -43,7 +45,7 @@ describe('components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptan
     const { container } = render(
       <AcceptanceProcessStepper
         acceptanceProcess={{
-          ...fakeApolloPaymentPlan.approvalProcess.edges[0].node,
+          ...fakeApolloPaymentPlan?.approvalProcess?.edges[0]?.node,
           sentForFinanceReleaseDate: '2020-01-02',
         }}
       />,

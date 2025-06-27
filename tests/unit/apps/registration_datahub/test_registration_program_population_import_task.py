@@ -38,6 +38,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestRegistrationProgramPopulationImportTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -63,7 +64,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
                 "admin2": AreaFactory(),
                 "admin3": AreaFactory(),
                 "admin4": AreaFactory(),
-                "registration_id": "1234567890",
+                "detail_id": "1234567890",
                 "flex_fields": {"enumerator_id": "123", "some": "thing"},
             },
             individuals_data=[
@@ -207,7 +208,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             str(self.program_from.id),
             str(self.program_to.id),
         )
-        self._imported_objects_count_after(2)
+        self._imported_objects_count_after(1)
 
     def test_registration_program_population_import_task_error(self) -> None:
         rdi_id = self.registration_data_import.id

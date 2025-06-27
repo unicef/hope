@@ -19,7 +19,12 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import (
+    BeneficiaryGroup,
+    Program,
+    ProgramCycle,
+    ProgramPartnerThrough,
+)
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
 )
@@ -36,12 +41,15 @@ from mptt.forms import TreeNodeMultipleChoiceField
 
 @admin.register(ProgramCycle)
 class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("program", "status", "start_date", "end_date")
+    list_display = ("title", "program", "status", "start_date", "end_date", "created_by")
     date_hierarchy = "start_date"
     list_filter = (
-        ("status", ChoicesFieldComboFilter),
+        ("program__business_area", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
+        ("created_by", AutoCompleteFilter),
+        ("status", ChoicesFieldComboFilter),
     )
+    search_fields = ("title", "program__name")
     raw_id_fields = ("program", "created_by")
     exclude = ("unicef_id",)
 
@@ -49,12 +57,18 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
 class ProgramCycleAdminInline(admin.TabularInline):
     model = ProgramCycle
     extra = 0
-    readonly_fields = (
+    fields = readonly_fields = (
+        "unicef_id",
+        "title",
+        "status",
+        "start_date",
+        "end_date",
         "created_at",
         "updated_at",
+        "created_by",
     )
-    exclude = ("unicef_id",)
     ordering = ["-start_date"]
+    raw_id_fields = ("created_by",)
 
 
 class PartnerAreaForm(forms.Form):
@@ -66,17 +80,40 @@ class PartnerAreaForm(forms.Form):
 
 @admin.register(Program)
 class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
-    list_display = ("name", "status", "start_date", "end_date", "business_area", "data_collecting_type")
+    list_display = (
+        "name",
+        "programme_code",
+        "status",
+        "start_date",
+        "end_date",
+        "business_area",
+        "data_collecting_type",
+        "beneficiary_group",
+        "sector",
+        "scope",
+        "frequency_of_payments",
+        "partner_access",
+        "biometric_deduplication_enabled",
+        "cash_plus",
+        "is_visible",
+    )
     date_hierarchy = "start_date"
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
+        ("data_collecting_type", AutoCompleteFilter),
+        ("beneficiary_group", AutoCompleteFilter),
         ("scope", ChoicesFieldComboFilter),
+        ("sector", ChoicesFieldComboFilter),
+        "frequency_of_payments",
+        ("partner_access", ChoicesFieldComboFilter),
+        "biometric_deduplication_enabled",
+        "cash_plus",
         "is_visible",
     )
-    search_fields = ("name",)
-    raw_id_fields = ("business_area",)
-    filter_horizontal = ("admin_areas",)
+    search_fields = ("name", "programme_code")
+    raw_id_fields = ("business_area", "data_collecting_type", "beneficiary_group", "admin_areas")
+    filter_horizontal = ("admin_areas", "partners")
 
     inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)
@@ -93,10 +130,12 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         super().save_model(request, obj, *args)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
-        return super().get_queryset(request).select_related("data_collecting_type", "business_area")
+        return (
+            super().get_queryset(request).select_related("data_collecting_type", "business_area", "beneficiary_group")
+        )
 
     @button(
-        permission="targeting.add_targetpopulation",
+        permission="payment.add_paymentplan",
     )
     def create_target_population_from_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         context = self.get_common_context(request, title="Create TargetPopulation")
@@ -111,7 +150,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
                 context["total"] = len(form.cleaned_data["criteria"])
 
         elif "confirm" in request.POST:
-            create_tp_from_list.delay(request.POST.dict(), request.user.pk, program.pk)
+            create_tp_from_list.delay(request.POST.dict(), str(request.user.pk), str(program.pk))
             message = mark_safe(f'Creation of target population <b>{request.POST["name"]}</b> scheduled.')
             messages.success(request, message)
             url = reverse("admin:targeting_targetpopulation_changelist")
@@ -127,7 +166,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         context["form"] = form
         return TemplateResponse(request, "admin/program/program/create_target_population_from_text.html", context)
 
-    @button()
+    @button(permission="account.view_partner")
     def partners(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner access")
         program: Program = context["original"]
@@ -195,3 +234,16 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         populate_index(Household.all_merge_status_objects.filter(program=program), HouseholdDocument)
         messages.success(request, f"Program {program.name} reindexed.")
         return HttpResponseRedirect(reverse("admin:program_program_changelist"))
+
+
+@admin.register(BeneficiaryGroup)
+class BeneficiaryGroupAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
+    list_display = ("name", "group_label", "group_label_plural", "member_label", "member_label_plural", "master_detail")
+    search_fields = (
+        "name",
+        "group_label",
+        "group_label_plural",
+        "member_label",
+        "member_label_plural",
+    )
+    ordering = ("name",)

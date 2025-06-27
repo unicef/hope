@@ -9,8 +9,6 @@ export const fakeProgram = {
   startDate: '2020-02-25',
   endDate: '2020-10-18',
   status: 'FINISHED',
-  caId: '123-21-PRG-00001',
-  caHashId: null,
   description: 'Yeah worry might newspaper drive her many.',
   budget: '507922706.44',
   frequencyOfPayments: 'REGULAR',

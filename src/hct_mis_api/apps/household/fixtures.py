@@ -147,8 +147,13 @@ class HouseholdFactory(DjangoModelFactory):
     @classmethod
     def build(cls, **kwargs: Any) -> Household:
         """Build an instance of the associated class, with overriden attrs."""
+        if "program" not in kwargs:
+            kwargs["program"] = ProgramFactory()
+        if "registration_data_import" not in kwargs:
+            kwargs["registration_data_import"] = RegistrationDataImportFactory(program=kwargs["program"])
         if "registration_data_import__imported_by__partner" not in kwargs:
             kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
+
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
 
@@ -219,7 +224,7 @@ class IndividualFactory(DjangoModelFactory):
     phone_no_valid = True
     phone_no_alternative = ""
     phone_no_alternative_valid = True
-    email = factory.Sequence(lambda n: f'factory.Faker("email"){n}')
+    email = factory.Sequence(lambda n: f"user{n}@example.com")
     relationship = factory.fuzzy.FuzzyChoice([value for value, label in RELATIONSHIP_CHOICE[1:] if value != "HEAD"])
     household = factory.SubFactory(HouseholdFactory)
     registration_data_import = factory.SubFactory(RegistrationDataImportFactory)
@@ -366,6 +371,69 @@ def create_household(
         rdi_merge_status=MergeStatusModel.MERGED,
     )
     alternate_collector_irh.save()
+
+    return household, individuals
+
+
+def create_household_with_individual_with_collectors(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[Household, List[Individual]]:
+    """HH.size default is 2, first Ind is Primary Collector and second id so will be Alternate Collector"""
+    if household_args is None:
+        household_args = {}
+    if individual_args is None:
+        individual_args = {}
+
+    if household_args.get("size") is None:
+        household_args["size"] = 2
+
+    partner = PartnerFactory(name="UNICEF")
+    household_args["registration_data_import__imported_by__partner"] = partner
+
+    household = HouseholdFactory.build(**household_args)
+    individuals = IndividualFactory.create_batch(
+        household.size, household=None, program=household.program, **individual_args
+    )
+
+    household.head_of_household = individuals[0]
+    household.household_collection.save()
+    household.program.save()
+    # household.registration_data_import.imported_by.partner.save()
+    household.registration_data_import.imported_by.save()
+    household.registration_data_import.program.save()
+    household.registration_data_import.save()
+    household.program.save()
+    household.save()
+
+    individuals_to_update = []
+    for index, individual in enumerate(individuals):
+        if index == 0:
+            individual.relationship = "HEAD"
+        individual.household = household
+        individuals_to_update.append(individual)
+
+    Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
+
+    primary_collector = individuals[0]
+    if len(individuals) > 1:
+        alternate_collector = individuals[1]
+        alternate_collector.relationship = "NON_BENEFICIARY"
+        alternate_collector.save()
+    else:
+        alternate_collector = None
+
+    primary_collector_irh = IndividualRoleInHousehold(
+        individual=primary_collector, household=household, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+    )
+    primary_collector_irh.save()
+    if alternate_collector:
+        alternate_collector_irh = IndividualRoleInHousehold(
+            individual=alternate_collector,
+            household=household,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        alternate_collector_irh.save()
 
     return household, individuals
 

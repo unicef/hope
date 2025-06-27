@@ -1,12 +1,13 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import {
-  TargetPopulationQuery,
-  TargetPopulationStatus,
-  useUpdateTpMutation,
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+  useUpdatePpMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid2 as Grid, Typography } from '@mui/material';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   getTargetingCriteriaVariables,
@@ -15,56 +16,89 @@ import {
   IndIdValidation,
 } from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import { Exclusions } from '../CreateTargetPopulation/Exclusions';
+import Exclusions from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
-import { AddFilterTargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
-import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
-import { ReactElement } from 'react';
+import AddFilterTargetingCriteriaDisplay from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import EditTargetPopulationHeader from './EditTargetPopulationHeader';
 
 interface EditTargetPopulationProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
   screenBeneficiary: boolean;
 }
 
-export const EditTargetPopulation = ({
-  targetPopulation,
+type TargetingCriteriaRuleNodeExtended = {
+  __typename: 'TargetingCriteriaRuleNode';
+  id: any;
+  householdIds: string;
+  individualIds: string;
+  individualsFiltersBlocks?: {
+    __typename: 'TargetingIndividualRuleFilterBlockNode';
+    individualBlockFilters?: {
+      // Define the properties of individualBlockFilters here
+    }[];
+  }[];
+  collectorsFiltersBlocks: {
+    // Define the properties of collectorsFiltersBlocks here
+  }[];
+  householdsFiltersBlocks?: {
+    // Define the properties of householdsFiltersBlocks here
+  }[];
+  deliveryMechanism?: string;
+  fsp?: string;
+};
+
+const EditTargetPopulation = ({
+  paymentPlan,
   screenBeneficiary,
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const targetingCriteriaCopy: TargetingCriteriaRuleNodeExtended[] =
+    paymentPlan.targetingCriteria?.rules.map((rule) => ({ ...rule })) || [];
+
+  if (targetingCriteriaCopy.length > 0) {
+    targetingCriteriaCopy[0].deliveryMechanism =
+      paymentPlan.deliveryMechanism?.code;
+    targetingCriteriaCopy[0].fsp = paymentPlan.financialServiceProvider?.id;
+  }
+
   const initialValues = {
-    id: targetPopulation.id,
-    name: targetPopulation.name || '',
-    program: targetPopulation.program?.id || '',
-    targetingCriteria: targetPopulation.targetingCriteria.rules || [],
-    excludedIds: targetPopulation.excludedIds || '',
-    exclusionReason: targetPopulation.exclusionReason || '',
+    id: paymentPlan.id,
+    name: paymentPlan.name || '',
+    program: paymentPlan.program?.id || '',
+    targetingCriteria: targetingCriteriaCopy || [],
+    excludedIds: paymentPlan.excludedIds || '',
+    exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      targetPopulation.targetingCriteria
-        .flagExcludeIfActiveAdjudicationTicket || false,
+      paymentPlan.targetingCriteria.flagExcludeIfActiveAdjudicationTicket ||
+      false,
     flagExcludeIfOnSanctionList:
-      targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
+      paymentPlan.targetingCriteria.flagExcludeIfOnSanctionList || false,
     programCycleId: {
-      value: targetPopulation.programCycle.id,
-      name: targetPopulation.programCycle.title,
+      value: paymentPlan.programCycle.id,
+      name: paymentPlan.programCycle.title,
     },
   };
-  const [mutate, { loading }] = useUpdateTpMutation();
+
+  const [mutate, { loading }] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
-  const { isSocialDctType, isStandardDctType } = useProgramContext();
+  const { selectedProgram, isSocialDctType, isStandardDctType } =
+    useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria, householdIds, individualIds } = values;
     const errors: { targetingCriteria?: string } = {};
     if (!targetingCriteria.length && !householdIds && !individualIds) {
       errors.targetingCriteria = t(
-        'You need to select at least one targeting criteria or individual ID or household ID',
+        `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
     }
     return errors;
@@ -87,21 +121,21 @@ export const EditTargetPopulation = ({
     try {
       await mutate({
         variables: {
-          input: {
-            id: values.id,
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
-            programCycleId: values.programCycleId.value,
-            ...(targetPopulation.status === TargetPopulationStatus.Open && {
-              name: values.name,
-            }),
-            ...getTargetingCriteriaVariables({
-              flagExcludeIfActiveAdjudicationTicket:
-                values.flagExcludeIfActiveAdjudicationTicket,
-              flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-              criterias: values.targetingCriteria,
-            }),
-          },
+          paymentPlanId: values.id,
+          fspId: values.targetingCriteria[0]?.fsp,
+          deliveryMechanismCode: values.targetingCriteria[0]?.deliveryMechanism,
+          excludedIds: values.excludedIds,
+          exclusionReason: values.exclusionReason,
+          programCycleId: values.programCycleId.value,
+          ...(paymentPlan.status === PaymentPlanStatus.TpOpen && {
+            name: values.name,
+          }),
+          ...getTargetingCriteriaVariables({
+            flagExcludeIfActiveAdjudicationTicket:
+              values.flagExcludeIfActiveAdjudicationTicket,
+            flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
+            criterias: values.targetingCriteria,
+          }),
         },
       });
       showMessage(t('Target Population Updated'));
@@ -126,7 +160,7 @@ export const EditTargetPopulation = ({
             values={values}
             loading={loading}
             baseUrl={baseUrl}
-            targetPopulation={targetPopulation}
+            targetPopulation={paymentPlan}
             data-cy="edit-target-population-header"
           />
           <PaperContainer data-cy="paper-container">
@@ -134,7 +168,7 @@ export const EditTargetPopulation = ({
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
             <Grid container mb={5}>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <ProgramCycleAutocompleteRest
                   value={values.programCycleId}
                   onChange={async (e) => {
@@ -148,7 +182,7 @@ export const EditTargetPopulation = ({
               </Grid>
             </Grid>
             <Grid container>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <Field
                   name="name"
                   label={t('Target Population Name')}
@@ -157,7 +191,7 @@ export const EditTargetPopulation = ({
                   required
                   component={FormikTextField}
                   variant="outlined"
-                  disabled={targetPopulation.status === 'LOCKED'}
+                  disabled={paymentPlan.status === 'LOCKED'}
                 />
               </Grid>
             </Grid>
@@ -174,6 +208,7 @@ export const EditTargetPopulation = ({
                   screenBeneficiary={screenBeneficiary}
                   isStandardDctType={isStandardDctType}
                   isSocialDctType={isSocialDctType}
+                  targetPopulation={paymentPlan}
                   data-cy="add-filter-targeting-criteria-display"
                 />
               )}
@@ -192,10 +227,14 @@ export const EditTargetPopulation = ({
             data-cy="save-message-box"
           >
             <Typography style={{ color: '#b1b1b5' }} variant="h6">
-              {t('Save to see the list of households')}
+              {t(
+                `Save to see the list of ${beneficiaryGroup?.groupLabelPlural}`,
+              )}
             </Typography>
             <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
-              {t('List of households will be available after saving')}
+              {t(
+                `List of ${beneficiaryGroup?.groupLabelPlural} will be available after saving`,
+              )}{' '}
             </Typography>
           </Box>
         </Form>
@@ -203,3 +242,5 @@ export const EditTargetPopulation = ({
     </Formik>
   );
 };
+
+export default withErrorBoundary(EditTargetPopulation, 'EditTargetPopulation');

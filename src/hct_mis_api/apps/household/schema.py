@@ -5,6 +5,7 @@ from django.db.models import (
     Case,
     F,
     Func,
+    Model,
     OuterRef,
     Prefetch,
     Q,
@@ -83,11 +84,13 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.nodes import DeduplicationResultNode
-from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.registration_data.nodes import (
+    DeduplicationEngineSimilarityPairIndividualNode,
+    DeduplicationResultNode,
+)
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
@@ -181,11 +184,6 @@ class ExtendedHouseHoldConnection(graphene.Connection):
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
-class HouseholdSelectionNode(DjangoObjectType):
-    class Meta:
-        model = HouseholdSelection
-
-
 class DeliveredQuantityNode(graphene.ObjectType):
     total_delivered_quantity = graphene.Decimal()
     currency = graphene.String()
@@ -206,21 +204,25 @@ class BankAccountInfoNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class DeliveryMechanismDataNode(BaseNodePermissionMixin, DjangoObjectType):
+class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION),)
 
     name = graphene.String(required=False)
-    is_valid = graphene.Boolean()
     individual_tab_data = graphene.JSONString()
 
     def resolve_name(self, info: Any) -> str:
-        return self.delivery_mechanism.name
+        return self.account_type.label
 
     def resolve_individual_tab_data(self, info: Any) -> dict:
-        return {key: self._data.get(key, None) for key in self.all_dm_fields}
+        data = dict(sorted(self.data.items()))
+        if self.number:
+            data["number"] = self.number
+        if self.financial_institution:
+            data["financial_institution"] = str(self.financial_institution.id)
+        return data
 
     class Meta:
-        model = DeliveryMechanismData
+        model = Account
         exclude = ("unique_key", "signature_hash")
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
@@ -240,6 +242,8 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     flex_fields = FlexFieldsScalar()
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
+    biometric_deduplication_golden_record_results = graphene.List(DeduplicationEngineSimilarityPairIndividualNode)
+    biometric_deduplication_batch_results = graphene.List(DeduplicationEngineSimilarityPairIndividualNode)
     observed_disability = graphene.List(graphene.String)
     relationship = graphene.Enum(
         "IndividualRelationship",
@@ -253,7 +257,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     phone_no_alternative_valid = graphene.Boolean()
     payment_channels = graphene.List(BankAccountInfoNode)
     preferred_language = graphene.String()
-    delivery_mechanisms_data = graphene.List(DeliveryMechanismDataNode)
+    accounts = graphene.List(AccountsNode)
     email = graphene.String(source="email")
     import_id = graphene.String()
 
@@ -264,17 +268,21 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         IndividualIdentityNode,
     )
 
+    @classmethod
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
+        return super().get_node(info, object_id, get_object_queryset=Individual.all_merge_status_objects)
+
     @staticmethod
     def resolve_documents(parent: Individual, info: Any) -> QuerySet[Document]:
-        return Document.objects.filter(pk__in=parent.documents.values("id"))
+        return parent.documents(manager="all_merge_status_objects")
 
     @staticmethod
     def resolve_identities(parent: Individual, info: Any) -> QuerySet[IndividualIdentity]:
-        return IndividualIdentity.objects.filter(pk__in=parent.identities.values("id"))
+        return parent.identities(manager="all_merge_status_objects")
 
     @staticmethod
     def resolve_import_id(parent: Individual, info: Any) -> str:
-        return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.unicef_id else parent.unicef_id
+        return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.detail_id else parent.unicef_id
 
     @staticmethod
     def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
@@ -282,16 +290,16 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
 
     @staticmethod
     def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
-        return BankAccountInfo.objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
+        return BankAccountInfo.all_merge_status_objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
 
     def resolve_bank_account_info(parent, info: Any) -> Optional[BankAccountInfo]:
-        bank_account_info = parent.bank_account_info.first()
+        bank_account_info = parent.bank_account_info(manager="all_merge_status_objects").first()  # type: ignore
         if bank_account_info:
             return bank_account_info
         return None
 
     def resolve_role(parent, info: Any) -> str:
-        role = parent.households_and_roles.first()
+        role = parent.households_and_roles(manager="all_merge_status_objects").first()
         if role is not None:
             return role.role
         return ROLE_NO_ROLE
@@ -304,7 +312,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     def resolve_deduplication_batch_results(parent, info: Any) -> List[Dict]:
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
-        return encode_ids(results, "ImportedIndividual", "hit_id")
+        return encode_ids(results, "Individual", "hit_id")
 
     def resolve_relationship(parent, info: Any) -> Optional[Enum]:
         # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
@@ -332,16 +340,18 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     def resolve_phone_no_alternative_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_alternative_valid
 
-    def resolve_delivery_mechanisms_data(parent, info: Any) -> QuerySet[DeliveryMechanismData]:
+    def resolve_accounts(parent, info: Any) -> QuerySet[Account]:
         program_id = get_program_id_from_headers(info.context.headers)
         if not info.context.user.has_permission(
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
             parent.business_area,
             program_id,
         ):
-            return parent.delivery_mechanisms_data.none()
+            return parent.accounts.none()
 
-        return parent.delivery_mechanisms_data.all()
+        return (
+            parent.accounts(manager="all_objects").filter(rdi_merge_status=parent.rdi_merge_status).exclude(data={})  # type: ignore
+        )
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
@@ -422,7 +432,6 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     country = graphene.String(description="Country name")
     currency = graphene.String()
     flex_fields = FlexFieldsScalar()
-    selection = graphene.Field(HouseholdSelectionNode)
     sanction_list_possible_match = graphene.Boolean()
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
@@ -444,6 +453,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     residence_status = graphene.String()
     program_registration_id = graphene.String()
     import_id = graphene.String()
+    geopoint = graphene.String()
 
     @staticmethod
     def resolve_sanction_list_possible_match(parent: Household, info: Any) -> bool:
@@ -476,18 +486,15 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         return getattr(parent.country_origin, "name", "")
 
     @staticmethod
-    def resolve_selection(parent: Household, info: Any) -> HouseholdSelection:
-        return parent.selections.first()
-
-    @staticmethod
     def resolve_individuals(parent: Household, info: Any, *arg: Any, **kwargs: Any) -> QuerySet:
-        individuals_ids = list(parent.individuals.values_list("id", flat=True))
-        collectors_ids = list(parent.representatives.values_list("id", flat=True))
+        individuals_ids = list(parent.individuals(manager="all_merge_status_objects").values_list("id", flat=True))
+
+        collectors_ids = list(parent.representatives(manager="all_merge_status_objects").values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
-        return Individual.objects.filter(id__in=ids).prefetch_related(
+        return Individual.all_merge_status_objects.filter(id__in=ids).prefetch_related(
             Prefetch(
                 "households_and_roles",
-                queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),
+                queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=parent.id),
             )
         )
 
@@ -577,6 +584,10 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         )
         qs = super().get_queryset(queryset, info)
         return qs
+
+    @classmethod
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
+        return super().get_node(info, object_id, get_object_queryset=Household.all_merge_status_objects)
 
     class Meta:
         model = Household
@@ -706,7 +717,7 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Individual.objects.none()
 
-        queryset = Individual.objects.all()
+        queryset = Individual.all_merge_status_objects.all()
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")
         if does_path_exist_in_query("edges.node.household.admin2", info):
@@ -762,7 +773,7 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Household.objects.none()
 
-        queryset = Household.objects.all()
+        queryset = Household.all_merge_status_objects.all()
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
@@ -856,6 +867,9 @@ class Query(graphene.ObjectType):
         return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)
 
     def resolve_work_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(WORK_STATUS_CHOICE)
+
+    def resolve_deduplication_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])

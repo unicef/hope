@@ -11,9 +11,9 @@ from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 PROGRAM_QUERY = """
     query Program($id: ID!) {
@@ -99,7 +99,7 @@ class TestProgramQuery(APITestCase):
             label="PDU Field Other",
             pdu_data=pdu_data_other,
         )
-        TargetPopulationFactory(program=cls.program)
+        PaymentPlanFactory(program_cycle=cls.program.cycles.first())
 
     @parameterized.expand(
         [

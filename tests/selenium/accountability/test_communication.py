@@ -4,12 +4,9 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.accountability.fixtures import CommunicationMessageFactory
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,
@@ -28,20 +25,22 @@ def test_program() -> Program:
 
 @pytest.fixture
 def add_accountability_communication_message() -> Message:
-    targeting_criteria = TargetingCriteriaFactory()
-
-    target_population = TargetPopulationFactory(
-        created_by=User.objects.first(),
-        targeting_criteria=targeting_criteria,
-        business_area=BusinessArea.objects.first(),
+    ba = BusinessArea.objects.first()
+    user = User.objects.first()
+    cycle = Program.objects.get(name="Test Program").cycles.first()
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_LOCKED,
+        created_by=user,
+        business_area=ba,
+        program_cycle=cycle,
     )
     return CommunicationMessageFactory(
         unicef_id="MSG-24-0666",
         title="You got credit of USD 100",
         body="Greetings, we have sent you USD 100 in your registered account on 2022-09-19 20:00:00 UTC",
-        business_area=BusinessArea.objects.first(),
-        target_population=target_population,
-        created_by=User.objects.first(),
+        business_area=ba,
+        payment_plan=payment_plan,
+        created_by=user,
     )
 
 
@@ -102,14 +101,13 @@ class TestSmokeAccountabilityCommunication:
             in pageAccountabilityCommunicationDetails.getLabelDateCreated().text
         )
         assert (
-            TargetPopulation.objects.first().name
-            in pageAccountabilityCommunicationDetails.getLabelTargetPopulation().text
+            PaymentPlan.objects.first().name in pageAccountabilityCommunicationDetails.getLabelTargetPopulation().text
         )
         assert "Recipients" in pageAccountabilityCommunicationDetails.getTableTitle().text
-        assert "Household Id" in pageAccountabilityCommunicationDetails.getHouseholdId().text
+        assert "Items Group ID" in pageAccountabilityCommunicationDetails.getHouseholdId().text
         assert "Status" in pageAccountabilityCommunicationDetails.getStatus().text
-        assert "Head of Household" in pageAccountabilityCommunicationDetails.getHouseholdHeadName().text
-        assert "Household Size" in pageAccountabilityCommunicationDetails.getHouseholdSize().text
+        assert "Head of Items Group" in pageAccountabilityCommunicationDetails.getHouseholdHeadName().text
+        assert "Items Group Size" in pageAccountabilityCommunicationDetails.getHouseholdSize().text
         assert "Administrative Level 2" in pageAccountabilityCommunicationDetails.getHouseholdLocation().text
         assert "Residence Status" in pageAccountabilityCommunicationDetails.getHouseholdResidenceStatus().text
         assert "Registration Date" in pageAccountabilityCommunicationDetails.getHouseholdRegistrationDate().text

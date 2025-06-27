@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -15,6 +15,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHouseholdGrievanceDetails';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 const Info = styled(InfoIcon)`
@@ -31,6 +32,8 @@ export function DeleteHouseholdGrievanceDetails({
 }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
@@ -48,13 +51,16 @@ export function DeleteHouseholdGrievanceDetails({
     <ApproveBox>
       <Title>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">{t('Household to be withdrawn')}</Typography>
+          <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} to be withdrawn`}</Typography>
           {approveStatus &&
             ticket.deleteHouseholdTicketDetails.reasonHousehold && (
               <Box display="flex" alignItems="center">
                 <Info />
                 <Box mr={2}>
-                  <p>This household is a duplicate of a household ID:</p>
+                  <p>
+                    This {beneficiaryGroup?.groupLabel} is a duplicate of a{' '}
+                    {beneficiaryGroup?.groupLabel} ID:
+                  </p>
                 </Box>
                 {!isAllPrograms ? (
                   <BlackLink
@@ -90,18 +96,18 @@ export function DeleteHouseholdGrievanceDetails({
         </Box>
       </Title>
       <Grid container spacing={6}>
-        <Grid item xs={3}>
-          <LabelizedField label={t('Household Size')}>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
             {ticket.household.size}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Residence Status')}>
             {residenceChoicesDict[ticket.household.residenceStatus]}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
-          <LabelizedField label={t('Head of Household')}>
+        <Grid size={{ xs: 3 }}>
+          <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
             <ContentLink
               href={`/${baseUrl}/population/individuals/${ticket.household.headOfHousehold.id}`}
             >
@@ -109,45 +115,43 @@ export function DeleteHouseholdGrievanceDetails({
             </ContentLink>
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Country')}>
             {ticket.household.country}
           </LabelizedField>
         </Grid>
 
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Country of Origin')}>
             {ticket.household.countryOrigin}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Address')}>
             {ticket.household.address}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Village')}>
             {ticket.household.village}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 1')}>
             {ticket.household.admin1?.name}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Administrative Level 2')}>
             {ticket.household.admin2?.name}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('Geolocation')}>
-            {ticket.household.geopoint
-              ? `${ticket.household.geopoint.coordinates[0]}, ${ticket.household.geopoint.coordinates[1]}`
-              : '-'}
+            {ticket.household?.geopoint || '-'}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <LabelizedField label={t('UNHCR CASE ID')}>
             {ticket.household?.unhcrId}
           </LabelizedField>

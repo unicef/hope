@@ -1,9 +1,39 @@
 repos:
-  - repo: local
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
     hooks:
-      - id: Linters checks
-        name: Linters checks
-        entry: docker compose -f development_tools/compose.yml run --no-TTY -i --rm backend sh -c 'black . --check && isort . --check-only && flake8 . && mypy .'
-        language: system
+      - id: black
+        exclude: "migrations|snapshots"
+        args: [--check,--config=pyproject.toml]        # don’t re-write files
+        language_version: python3.13   # adapt if you target a different runtime
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.2.0
+    hooks:
+      - id: flake8
+        args: [--config=.flake8]
+        exclude: "migrations|snapshots"
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.982
+    hooks:
+      - id: mypy
+        exclude: "migrations|snapshots"
         pass_filenames: false
-        verbose: true
+        args: [ "--config-file", "pyproject.toml", "."]
+        additional_dependencies:
+          - django-stubs==1.12.0
+          - django-stubs-ext==0.7.0
+          - djangorestframework-stubs==1.7.0
+          - graphene-stubs==0.15
+          - openpyxl-stubs==0.1.24
+          - types-freezegun==1.1.10
+          - types-redis==4.3.21.2
+          - types-requests==2.31.0.6
+          - types-python-dateutil==2.8.19.2
+          - types-pytz==2022.4.0.0

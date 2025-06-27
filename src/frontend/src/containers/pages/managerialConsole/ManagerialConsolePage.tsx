@@ -14,15 +14,14 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { FC, SetStateAction, useState } from 'react';
+import { FC, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-import { useLocation } from 'react-router-dom';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+
 export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const location = useLocation();
   const [selectedApproved, setSelectedApproved] = useState([]);
   const [selectedAuthorized, setSelectedAuthorized] = useState([]);
   const [selectedInReview, setSelectedInReview] = useState([]);
@@ -150,14 +149,7 @@ export const ManagerialConsolePage: FC = () => {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ManagerialConsolePage.tsx');
-      }}
-      componentName="ManagerialConsolePage"
-    >
+    <>
       <PageHeader title={t('Managerial Console')} />
       {canApprove && (
         <Box mb={6}>
@@ -200,6 +192,11 @@ export const ManagerialConsolePage: FC = () => {
         </Box>
       )}
       {canSeeReleased && <ReleasedSection releasedData={releasedData} />}
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(
+  ManagerialConsolePage,
+  'ManagerialConsolePage',
+);

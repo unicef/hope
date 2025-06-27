@@ -3,7 +3,7 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   IconButton,
   Typography,
 } from '@mui/material';
@@ -27,6 +27,7 @@ import {
   GrievanceTicketQuery,
   useApproveDeleteHouseholdDataChangeMutation,
 } from '@generated/graphql';
+import { useProgramContext } from 'src/programContext';
 
 const EditIcon = styled(Edit)`
   color: ${({ theme }) => theme.hctPalette.darkerBlue};
@@ -47,6 +48,8 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const { approveStatus, reasonHousehold } =
     ticket.deleteHouseholdTicketDetails;
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const validationSchema = Yup.object().shape({
     reasonHhId: Yup.string().when(
@@ -55,7 +58,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
         const value = String(withdrawReasonValue);
         if (value === 'duplicate' && !approveStatus) {
           return Yup.string()
-            .required('Household Unicef Id is required')
+            .required(`${beneficiaryGroup?.groupLabel} Unicef Id is required`)
             .max(15, 'Too long');
         }
         return Yup.string();
@@ -159,10 +162,10 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                     <Typography variant="body2">
                       {showWithdraw()
                         ? t(
-                            'Please provide the reason of withdrawal of this household.',
+                            `Please provide the reason of withdrawal of this ${beneficiaryGroup?.groupLabel}.`,
                           )
                         : t(
-                            'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
+                            `You did not approve the following ${beneficiaryGroup?.groupLabel} to be withdrawn. Are you sure you want to continue?`,
                           )}
                     </Typography>
                   </Box>
@@ -173,7 +176,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                         choices={[
                           {
                             value: 'duplicate',
-                            name: 'This household is a duplicate of another household',
+                            name: `This ${beneficiaryGroup?.groupLabel} is a duplicate of another ${beneficiaryGroup?.groupLabel}`,
                           },
                         ]}
                         component={FormikRadioGroup}
@@ -181,12 +184,12 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                       />
                       {values.withdrawReason === 'duplicate' && (
                         <Grid container>
-                          <Grid item xs={6}>
+                          <Grid size={{ xs:6 }}>
                             <Field
                               name="reasonHhId"
                               fullWidth
                               variant="outlined"
-                              label={t('Household Unicef Id')}
+                              label={`${beneficiaryGroup?.groupLabel} Unicef Id`}
                               component={FormikTextField}
                               required
                             />

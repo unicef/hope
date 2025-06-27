@@ -19,7 +19,7 @@ snapshots['TestPaymentPlanReconciliation::test_apply_steficon_rule_with_wrong_pa
                     'line': 3
                 }
             ],
-            'message': "You can run formula only for 'Locked' status of Payment Plan",
+            'message': "You can run formula only for 'Locked', 'Error' or 'Completed' statuses.",
             'path': [
                 'setSteficonRuleOnPaymentPlanPaymentList'
             ]
@@ -125,6 +125,98 @@ snapshots['TestPaymentPlanReconciliation::test_error_message_when_engine_rule_no
             ]
         }
     ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 1'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans.',
+            'path': [
+                'exportXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 2'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Export failed: The Payment List is empty.',
+            'path': [
+                'exportXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 3'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Export failed: Payment Plan already has created exported file.',
+            'path': [
+                'exportXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_with_auth_code 1'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': "Export failed: There could be not Pending Payments and FSP communication channel should be set to API.",
+            'path': [
+                'exportXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_with_auth_code 2'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': {
+            'paymentPlan': {
+                'canCreateXlsxWithFspAuthCode': True,
+                'hasPaymentListExportFile': True,
+                'status': 'FINISHED'
+            }
+        }
+    }
 }
 
 snapshots['TestPaymentPlanReconciliation::test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule 1'] = {

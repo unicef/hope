@@ -1,138 +1,32 @@
 volumes:
-  backend-data:
   db:
   data_es:
-  ipython_data_local:
 
 
 services:
-
-  backend:
-    image: unicef/hct-mis-backend
-    profiles:
-      - default
-    entrypoint: entrypoint.sh
-    stdin_open: true
-    env_file:
-      - .env
-    environment:
-      - PYTHONUNBUFFERED=1
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile
-      target: dev
-    ports:
-      - "8080:8000"
-    volumes:
-      - ../.:/code/
-      - backend-data:/data
-      - ../pyproject.toml:/packages/pyproject.toml
-      - ../pdm.lock:/packages/pdm.lock
-      - ipython_data_local:/root/.ipython
-    command: "dev"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    healthcheck:
-      test: [
-        "CMD",
-        "python3",
-        "-c",
-        "import http.client; \
-        conn = http.client.HTTPConnection('localhost', 8000); \
-        conn.request('GET', '/_health'); \
-        response = conn.getresponse(); \
-        exit(0) if response.status == 200 else exit(1);"
-      ]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-
-  celery-worker:
-    profiles:
-      - default
-    stdin_open: true
-    tty: true
-    image: unicef/hct-mis-backend
-    env_file:
-      - .env
-    volumes:
-      - ../src:/code/
-      - backend-data:/data
-    command: "celery-worker"
-    depends_on:
-      backend:
-        condition: service_started
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "celery", "status" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-
-  celery-beat:
-    profiles:
-      - default
-    stdin_open: true
-    tty: true
-    image: unicef/hct-mis-backend
-    env_file:
-      - .env
-    volumes:
-      - ../src:/code/
-      - backend-data:/data
-    command: "celery-beat"
-    depends_on:
-      backend:
-        condition: service_started
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "celery", "status" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-
   db:
     image: kartoza/postgis:14-3
-    profiles:
-      - default
-      - services
     command: -c 'max_connections=200'
     volumes:
       - db:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_MULTIPLE_DATABASES: unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
-      EXTRA_CONF: max_connections=1000
-    env_file:
-      - .env
+      - EXTRA_CONF=max_connections=1000
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASS=postgres
+      - PGUSER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
       - "5432:5432"
     healthcheck:
       test: [ "CMD-SHELL", "su - postgres -c 'pg_isready -h db -U postgres'" ]
-      interval: 10s
+      interval: 3s
       timeout: 10s
       retries: 5
 
   redis:
     image: redis:4.0.11-alpine3.8
-    profiles:
-      - default
-      - services
     ports:
       - "6379:6379"
     healthcheck:
@@ -142,27 +36,21 @@ services:
       retries: 5
 
   elasticsearch:
-    image: unicef/hct-elasticsearch
-    profiles:
-      - default
-      - services
-    container_name: elasticsearch
-    build:
-      context: elasticsearch
-      dockerfile: ./Dockerfile
+    image: bitnami/elasticsearch:8.14.0
     environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=es01
-      - bootstrap.memory_lock=true
+#      - node.name=es01
+#      - cluster.name=es-docker-cluster
+#      - cluster.initial_master_nodes=es01
+#      - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
-      - xpack.security.enabled=false
+#      - xpack.security.enabled=false
+      - ELASTICSEARCH_PLUGINS=analysis-phonetic
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - data_es:/usr/share/elasticsearch/data
+      - data_es:/bitnami/elasticsearch/data
     ports:
       - "9200:9200"
     healthcheck:
@@ -171,21 +59,3 @@ services:
       timeout: 10s
       retries: 3
 
-  celery-flower:
-    profiles:
-      - default
-    stdin_open: true
-    image: unicef/hct-mis-backend
-    env_file:
-      - .env
-    command: "celery-flower"
-    volumes:
-      - ../src:/code/
-      - backend-data:/data
-    ports:
-      - "5555:5555"
-    environment:
-      - PYTHONUNBUFFERED=1
-    depends_on:
-      - celery-worker
-      - redis

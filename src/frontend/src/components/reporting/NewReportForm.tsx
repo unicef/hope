@@ -2,7 +2,7 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
   Paper,
   Typography,
 } from '@mui/material';
@@ -34,8 +34,9 @@ import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export const NewReportForm = (): ReactElement => {
+const NewReportForm = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -147,7 +148,7 @@ export const NewReportForm = (): ReactElement => {
 
   const renderConditionalFields = (values): ReactElement => {
     const adminArea2Field = (
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <Field
           name="adminArea2"
           label={t('Administrative Level 2')}
@@ -158,7 +159,7 @@ export const NewReportForm = (): ReactElement => {
       </Grid>
     );
     const programField = (
-      <Grid item xs={12}>
+      <Grid size={{ xs: 12 }}>
         <Field
           name="program"
           label={t('Programme')}
@@ -259,7 +260,7 @@ export const NewReportForm = (): ReactElement => {
               <DialogContent>
                 <Form>
                   <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <Field
                         name="reportType"
                         label={t('Report Type')}
@@ -270,13 +271,13 @@ export const NewReportForm = (): ReactElement => {
                         component={FormikSelectField}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <FieldLabel>
                         {renderTimeframeLabel(values.reportType)}
                       </FieldLabel>
 
                       <Grid container spacing={3}>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <Field
                             name="dateFrom"
                             label={t('From Date')}
@@ -288,7 +289,7 @@ export const NewReportForm = (): ReactElement => {
                             }
                           />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={{ xs:6 }}>
                           <Field
                             name="dateTo"
                             label={t('To Date')}
@@ -309,7 +310,7 @@ export const NewReportForm = (): ReactElement => {
                     {values.reportType ===
                       REPORT_TYPES.INDIVIDUALS_AND_PAYMENT && (
                       <>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Field
                             name="adminArea1"
                             label={t('Administrative Level 1')}
@@ -322,7 +323,7 @@ export const NewReportForm = (): ReactElement => {
                             }
                           />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Field
                             name="adminArea2"
                             label={t('Administrative Level 2')}
@@ -331,7 +332,7 @@ export const NewReportForm = (): ReactElement => {
                             parentId={values.adminArea1?.node?.id}
                           />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Field
                             name="program"
                             label={t('Programme')}
@@ -370,3 +371,5 @@ export const NewReportForm = (): ReactElement => {
     </>
   );
 };
+
+export default withErrorBoundary(NewReportForm, 'NewReportForm');
