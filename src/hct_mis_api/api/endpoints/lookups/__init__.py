@@ -2,6 +2,7 @@ from hct_mis_api.api.endpoints.lookups.area import AreaList, AreaTypeList  # noq
 from hct_mis_api.api.endpoints.lookups.base import (  # noqa: F401
     CountryAPIView,
     DocumentType,
+    FinancialInstitutionAPIView,
     MaritalStatus,
     ObservedDisability,
     ProgramStatuses,
