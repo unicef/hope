@@ -147,7 +147,6 @@ export const fakeApolloAllUsers = [
                         'GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR',
                         'GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER',
                         'GRIEVANCE_ASSIGN',
-                        'REPORTING_EXPORT',
                         'ALL_VIEW_PII_DATA_ON_LISTS',
                         'ACTIVITY_LOG_VIEW',
                         'ACTIVITY_LOG_DOWNLOAD',

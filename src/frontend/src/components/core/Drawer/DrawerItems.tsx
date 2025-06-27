@@ -96,12 +96,6 @@ export const DrawerItems = ({
     const getIndexByName = (name: string): number =>
       updatedMenuItems.findIndex((item) => item?.name === name);
     const programDetailsIndex = getIndexByName('Programme Details');
-    const reportingIndex = getIndexByName('Reporting');
-
-    // Remove 'Reporting' item when program is selected
-    if (reportingIndex !== -1 && !isAllPrograms) {
-      updatedMenuItems.splice(reportingIndex, 1);
-    }
 
     // When GlobalProgramFilter applied
     if (!isAllPrograms) {
