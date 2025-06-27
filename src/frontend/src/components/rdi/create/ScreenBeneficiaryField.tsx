@@ -1,17 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import { Field } from 'formik';
-import { useBusinessAreaDataQuery } from '@generated/graphql';
+import { useBusinessAreaDataQuery, useProgramQuery } from '@generated/graphql';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
 export function ScreenBeneficiaryField(): ReactElement {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
+  const { programId } = useBaseUrl();
+  const { data: programData } = useProgramQuery({
+    variables: { id: programId },
   });
-  if (!businessAreaData?.businessArea?.screenBeneficiary) {
+  if (!programData?.program?.screenBeneficiary) {
     return null;
   }
   return (

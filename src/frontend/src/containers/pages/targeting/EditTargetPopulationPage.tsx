@@ -22,11 +22,6 @@ const EditTargetPopulationPage = (): ReactElement => {
       variables: { id },
       fetchPolicy: 'cache-and-network',
     });
-  const { businessArea } = useBaseUrl();
-
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
   const buildStatus = data?.paymentPlan?.buildStatus;
   useEffect(() => {
     if (
@@ -46,14 +41,14 @@ const EditTargetPopulationPage = (): ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null || !businessAreaData) return null;
+  if (!data || permissions === null) return null;
 
   const { paymentPlan } = data;
 
   return (
     <EditTargetPopulation
       paymentPlan={paymentPlan}
-      screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
+      screenBeneficiary={paymentPlan?.program?.screenBeneficiary}
     />
   );
 };
