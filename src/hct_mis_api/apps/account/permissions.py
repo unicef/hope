@@ -210,9 +210,6 @@ class Permissions(Enum):
     GRIEVANCES_FEEDBACK_VIEW_UPDATE = auto()
     GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE = auto()
 
-    # Reporting
-    REPORTING_EXPORT = auto()
-
     # Periodic Data Update
     PDU_VIEW_LIST_AND_DETAILS = auto()
     PDU_TEMPLATE_CREATE = auto()
@@ -296,7 +293,6 @@ DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER = (
     Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
     Permissions.GRIEVANCES_CROSS_AREA_FILTER,
     Permissions.USER_MANAGEMENT_VIEW_LIST,
-    Permissions.REPORTING_EXPORT,
     Permissions.ACTIVITY_LOG_VIEW,
 )
 
