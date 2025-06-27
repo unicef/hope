@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -6,24 +6,26 @@ import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface IndividualQuestionnaireProps {
   values;
 }
 
-export const IndividualQuestionnaire = ({
+const IndividualQuestionnaire = ({
   values,
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const questionFields = isSocialDctType
     ? [
         {
           name: 'questionnaire_fullName',
-          label: t('Individual Full Name'),
+          label: t(`${beneficiaryGroup?.memberLabel} Full Name`),
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
@@ -97,7 +99,7 @@ export const IndividualQuestionnaire = ({
     : [
         {
           name: 'questionnaire_fullName',
-          label: t('Individual Full Name'),
+          label: `${beneficiaryGroup?.memberLabel} full name`,
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
@@ -127,7 +129,7 @@ export const IndividualQuestionnaire = ({
         },
         {
           name: 'questionnaire_relationship',
-          label: t('Relationship to HOH'),
+          label: `Relationship to Head of ${beneficiaryGroup?.groupLabel}`,
           value: selectedIndividualData.relationship,
           size: 3,
         },
@@ -135,7 +137,7 @@ export const IndividualQuestionnaire = ({
   return (
     <Grid container spacing={6}>
       {questionFields.map((el) => (
-        <Grid key={el.name} item xs={3}>
+        <Grid key={el.name} size={{ xs: 3 }}>
           <Field
             data-cy={`input-${el.name}`}
             name={el.name}
@@ -149,3 +151,8 @@ export const IndividualQuestionnaire = ({
     </Grid>
   );
 };
+
+export default withErrorBoundary(
+  IndividualQuestionnaire,
+  'IndividualQuestionnaire',
+);

@@ -16,6 +16,7 @@ import {
 import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { useProgramContext } from 'src/programContext';
 
 export interface Individual {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
@@ -29,6 +30,7 @@ export interface BiometricsResultsProps {
   similarityScore: string;
   individual1?: Individual;
   individual2?: Individual;
+  statusCode?: string
 }
 
 const Placeholder: FC = () => (
@@ -50,6 +52,7 @@ export const BiometricsResults = ({
   similarityScore,
   individual1,
   individual2,
+  statusCode,
 }: BiometricsResultsProps): ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -58,6 +61,8 @@ export const BiometricsResults = ({
     PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
     permissions,
   );
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [loadData] = useGrievanceTicketLazyQuery({
     variables: {
@@ -97,8 +102,9 @@ export const BiometricsResults = ({
         <DialogContent data-cy="dialog-content">
           <DialogContainer>
             <Box display="flex" justifyContent="space-between" p={5}>
-              <Box display="flex" flexDirection="column">
-                {individual1?.photo ? (
+                {individual1?.unicefId && (
+                   <Box display="flex" flexDirection="column">
+                     {individual1?.photo ? (
                   <img
                     src={individual1?.photo}
                     alt="Image 1"
@@ -113,10 +119,14 @@ export const BiometricsResults = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  Individual {individual1?.unicefId}: {individual1?.fullName}
+                  {beneficiaryGroup?.memberLabel} {individual1?.unicefId}:{' '}
+                  {individual1?.fullName}
                 </Typography>
               </Box>
-              <Box display="flex" flexDirection="column">
+                )}
+
+              {individual2?.unicefId && (
+                              <Box display="flex" flexDirection="column">
                 {individual2?.photo ? (
                   <img
                     src={individual2?.photo}
@@ -132,9 +142,12 @@ export const BiometricsResults = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  Individual {individual2?.unicefId}: {individual2?.fullName}
+                  {beneficiaryGroup?.memberLabel} {individual2?.unicefId}:{' '}
+                  {individual2?.fullName}
                 </Typography>
               </Box>
+              )}
+
             </Box>
             <Box p={5} data-cy="results-info">
               <div>
@@ -142,7 +155,7 @@ export const BiometricsResults = ({
                   {t('Algorithm similarity score:')} {similarityScore}
                 </strong>
               </div>
-              <div>{t('Face images matching suggests: Duplicates')}</div>
+              {Number(similarityScore) > 0 ? (<div>{t('Face images matching suggests: Duplicates')}</div>) : (statusCode)}
             </Box>
           </DialogContainer>
         </DialogContent>

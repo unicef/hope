@@ -69,7 +69,6 @@ class TestIndividualPermissionsQuery(APITestCase):
         cls.household, cls.individuals = create_household(
             {"size": 2, "address": "Lorem Ipsum 2", "country_origin": country_origin},
         )
-        cls.household.programs.add(cls.program_one)
         cls.household.program = cls.program_one
         cls.individuals[0].program = cls.program_one
         cls.individuals[0].save()

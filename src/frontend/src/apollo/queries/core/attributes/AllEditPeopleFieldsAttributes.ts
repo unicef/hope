@@ -25,5 +25,17 @@ export const AllEditPeopleFieldsAttributes = gql`
       }
       isFlexField
     }
+    countriesChoices {
+      name
+      value
+    }
+    documentTypeChoices {
+      name
+      value
+    }
+    identityTypeChoices {
+      name
+      value
+    }
   }
 `;

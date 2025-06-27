@@ -1,4 +1,4 @@
-import { Grid, IconButton } from '@mui/material';
+import { Grid2 as Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
@@ -40,7 +40,7 @@ export function AgencyField({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <Field
           name={`${agencyFieldName}.partner`}
           fullWidth
@@ -48,11 +48,11 @@ export function AgencyField({
           label={t('Partner')}
           component={FormikSelectField}
           choices={identityTypeChoices}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <Field
           name={`${agencyFieldName}.country`}
           fullWidth
@@ -60,23 +60,23 @@ export function AgencyField({
           label={t('Country')}
           component={FormikSelectField}
           choices={countryChoices}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <Field
           name={`${agencyFieldName}.number`}
           fullWidth
           variant="outlined"
           label={t('Identity Number')}
           component={FormikTextField}
-          required
+          required={!isEditTicket}
           disabled={isEditTicket}
         />
       </Grid>
       {!isEdited ? (
-        <Grid item xs={1}>
+        <Grid size={{ xs: 1 }}>
           <IconButton disabled={isEditTicket} onClick={onDelete}>
             <Delete />
           </IconButton>

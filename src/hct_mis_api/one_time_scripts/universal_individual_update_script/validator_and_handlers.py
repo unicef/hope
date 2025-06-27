@@ -6,6 +6,7 @@ from hct_mis_api.apps.core.utils import timezone_datetime
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import SEX_CHOICE
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 
 def handle_date_field(
@@ -54,6 +55,17 @@ def validate_date(
         timezone_datetime(value).date()
     except Exception:
         return f"{value} for column {name} is not a valid date"
+    return None
+
+
+def validate_phone_number(
+    value: Any, name: str, modified_object: Any, business_area: BusinessArea, program: Program
+) -> Optional[str]:
+    if value is None or value == "":
+        return None
+    is_valid = is_valid_phone_number(value)
+    if not is_valid:
+        return f"{value} for column {name} is not a valid phone number"
     return None
 
 

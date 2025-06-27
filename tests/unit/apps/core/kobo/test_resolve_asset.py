@@ -14,7 +14,7 @@ class TestResolveAsset:
     @pytest.fixture(autouse=True)
     def use_kobo_master_token(self, settings: Any) -> None:
         settings.KOBO_MASTER_API_TOKEN = "token-from-env"
-        settings.KOBO_KF_URL = "https://kf.hope.unicef.org"
+        settings.KOBO_URL = "https://kf.hope.unicef.org"
         settings.KOBO_PROJECT_VIEWS_ID = "pvEsUUfAgYyyV7jpR6i3FvM"
 
     @pytest.mark.vcr()

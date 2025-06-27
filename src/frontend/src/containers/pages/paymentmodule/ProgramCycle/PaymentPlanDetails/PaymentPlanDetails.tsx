@@ -1,5 +1,10 @@
-import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import {
+  Box,
+  Grid2 as Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -34,45 +39,45 @@ export const PaymentPlanDetails = ({
   } = paymentPlan;
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container>
-            <Grid container item xs={9} spacing={6}>
-              <Grid item xs={3}>
+            <Grid container size={{ xs: 9 }} spacing={6}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Created By')}>
                   {renderUserName(createdBy)}
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Start Date')}>
                   <UniversalMoment>{startDate}</UniversalMoment>
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('End Date')}>
                   <UniversalMoment>{endDate}</UniversalMoment>
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Currency')}>
                   {currency}
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Dispersion Start Date')}>
                   <UniversalMoment>{dispersionStartDate}</UniversalMoment>
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <LabelizedField label={t('Dispersion End Date')}>
                   <UniversalMoment>{dispersionEndDate}</UniversalMoment>
                 </LabelizedField>
               </Grid>
-              <Grid item xs={3}>
+              <Grid size={{ xs: 3 }}>
                 <Box display="flex" alignItems="center">
                   <Box mr={1}>
                     <LabelizedField label={t('FX Rate Applied')}>
@@ -95,8 +100,8 @@ export const PaymentPlanDetails = ({
                 </Box>
               </Grid>
             </Grid>
-            <Grid container direction="column" item xs={3} spacing={6}>
-              <Grid item xs={12}>
+            <Grid container direction="column" size={{ xs: 3 }} spacing={6}>
+              <Grid size={{ xs: 12 }}>
                 <FieldBorder color="#84A1CA">
                   <RelatedFollowUpPaymentPlans
                     followUps={followUps}

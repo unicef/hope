@@ -7,22 +7,16 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-
-const validationSchema = Yup.object().shape({
-  name: Yup.string()
-    .required('Title is required')
-    .min(4, 'Too short')
-    .max(255, 'Too long'),
-  program: Yup.string().required('Programme is required'),
-});
 
 export const CreateImportFromProgramPopulationForm = ({
   setSubmitForm,
@@ -33,12 +27,42 @@ export const CreateImportFromProgramPopulationForm = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [createImport] = useCreateRegistrationProgramPopulationImportMutation();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const regex = isSocialDctType
+    ? /^\s*(IND)-\d{2}-\d{4}\.\d{4}\s*$/
+    : /^\s*(HH)-\d{2}-\d{4}\.\d{4}\s*$/;
+
+  const validationSchema = Yup.object().shape({
+    name: Yup.string()
+      .required('Title is required')
+      .min(4, 'Too short')
+      .max(255, 'Too long'),
+    importFromProgramId: Yup.string().required('Programme is required'),
+    importType: Yup.string(),
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    importFromIds: Yup.string().when('importType', ([importType], schema) =>
+      importType === 'usingIds'
+        ? schema
+            .required('IDs are required')
+            .test('testName', 'ID is not in the correct format', (ids) => {
+              if (!ids?.length) {
+                return true;
+              }
+              const idsArr = ids.split(',');
+              return idsArr.every((el) => regex.test(el));
+            })
+        : schema,
+    ),
+  });
+
   const { data: programsData, loading: programsDataLoading } =
     useAllProgramsForChoicesQuery({
       variables: {
         first: 100,
         businessArea,
         compatibleDct: true,
+        beneficiaryGroupMatch: true,
       },
       fetchPolicy: 'network-only',
     });
@@ -51,7 +75,8 @@ export const CreateImportFromProgramPopulationForm = ({
           registrationDataImportData: {
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
-            importFromProgramId: values.program,
+            importFromProgramId: values.importFromProgramId,
+            importFromIds: values.importFromIds,
             businessAreaSlug: businessArea,
           },
         },
@@ -69,15 +94,25 @@ export const CreateImportFromProgramPopulationForm = ({
     initialValues: {
       name: '',
       screenBeneficiary: false,
-      program: '',
+      importFromIds: '',
+      importType: 'all',
+      importFromProgramId: '',
     },
     validationSchema,
     onSubmit,
   });
 
+  const { values } = formik;
+
   useEffect(() => {
     setSubmitForm(formik.submitForm);
   }, [formik.submitForm]);
+
+  useEffect(() => {
+    if (formik.values.importType !== 'usingIds') {
+      formik.setFieldValue('importFromIds', '');
+    }
+  }, [formik.values.importType]);
 
   if (programsDataLoading) return <LoadingComponent />;
   if (!programsData) return null;
@@ -101,7 +136,7 @@ export const CreateImportFromProgramPopulationForm = ({
       <ScreenBeneficiaryField />
       <Box mt={2}>
         <Field
-          name="program"
+          name="importFromProgramId"
           label={t('Programme Name')}
           fullWidth
           variant="outlined"
@@ -109,6 +144,39 @@ export const CreateImportFromProgramPopulationForm = ({
           component={FormikSelectField}
         />
       </Box>
+      <Box mt={2}>
+        <Field
+          name="importType"
+          data-cy="checkbox-verification-channel"
+          choices={[
+            {
+              value: 'all',
+              name: 'All Programme Population',
+              dataCy: 'radio-all',
+            },
+            { value: 'usingIds', name: 'Using Ids', dataCy: 'radio-ids' },
+          ]}
+          component={FormikRadioGroup}
+          alignItems="center"
+        />
+      </Box>
+      {values.importType === 'usingIds' && (
+        <Box mt={2}>
+          <Field
+            data-cy="input-import-from-ids"
+            name="importFromIds"
+            fullWidth
+            multiline
+            variant="outlined"
+            label={t(
+              isSocialDctType
+                ? `${beneficiaryGroup?.memberLabelPlural} IDs`
+                : `${beneficiaryGroup?.groupLabelPlural} IDs`,
+            )}
+            component={FormikTextField}
+          />
+        </Box>
+      )}
     </FormikProvider>
   );
 };

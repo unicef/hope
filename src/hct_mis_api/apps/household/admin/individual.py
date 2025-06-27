@@ -9,11 +9,12 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import LinkedAutoCompleteFilter
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
@@ -36,7 +37,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
     XlsxUpdateFile,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.utils.admin import (
     BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
@@ -51,16 +52,20 @@ from hct_mis_api.apps.utils.security import is_root
 logger = logging.getLogger(__name__)
 
 
-class IndividualDeliveryMechanismDataInline(admin.TabularInline):
-    model = DeliveryMechanismData
+class IndividualAccountInline(admin.TabularInline):
+    model = Account
     extra = 0
-    fields = ("delivery_mechanism", "data", "is_valid")
-    readonly_fields = ("delivery_mechanism", "data", "is_valid")
-    show_change_link = True
-    can_delete = False
+    fields = ("account_type", "number", "data", "view_link")
 
-    def has_add_permission(self, request: HttpRequest, obj: Optional[Individual] = None) -> bool:
-        return False
+    readonly_fields = ("view_link",)
+
+    def view_link(self, obj: Any) -> str:
+        if obj.pk:
+            url = reverse("admin:payment_account_change", args=[obj.pk])
+            return format_html('<a href="{}" target="_blank">View</a>', url)
+        return ""
+
+    view_link.short_description = "View"
 
 
 @admin.register(Individual)
@@ -82,11 +87,16 @@ class IndividualAdmin(
         "unicef_id",
         "given_name",
         "family_name",
-        "household",
         "sex",
         "relationship",
         "birth_date",
+        "marital_status",
+        "duplicate",
+        "withdrawn",
+        "household",
+        "business_area",
         "program",
+        "registration_data_import",
         "rdi_merge_status",
     )
     advanced_filter_fields = (
@@ -98,7 +108,7 @@ class IndividualAdmin(
         ("business_area__name", "business area"),
     )
 
-    search_fields = ("family_name", "unicef_id")
+    search_fields = ("family_name", "unicef_id", "household__unicef_id", "given_name", "family_name", "full_name")
     readonly_fields = ("created_at", "updated_at", "registration_data_import")
     exclude = ("created_at", "updated_at")
     list_filter = (
@@ -109,6 +119,11 @@ class IndividualAdmin(
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
+        "sex",
+        "relationship",
+        "marital_status",
+        "duplicate",
+        "withdrawn",
         "updated_at",
         "last_sync_at",
     )
@@ -164,15 +179,14 @@ class IndividualAdmin(
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = ["count_queryset", "revalidate_phone_number_sync", "revalidate_phone_number_async"]
-    inlines = [IndividualDeliveryMechanismDataInline]
+    inlines = [IndividualAccountInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             super()
             .get_queryset(request)
             .select_related(
-                "household",
-                "registration_data_import",
+                "household", "registration_data_import", "individual_collection", "program", "business_area"
             )
         )
 
@@ -190,14 +204,14 @@ class IndividualAdmin(
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    @button()
+    @button(permission="household.view_individual")
     def household_members(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         obj = Individual.all_merge_status_objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         flt = f"&qs=household_id={obj.household.id}&qs__negate=false"
         return HttpResponseRedirect(f"{url}?{flt}")
 
-    @button(html_attrs={"class": "aeb-green"})
+    @button(html_attrs={"class": "aeb-green"}, permission=is_root)
     def sanity_check(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
         context = self.get_common_context(request, pk, title="Sanity Check")
         obj = context["original"]
@@ -206,7 +220,7 @@ class IndividualAdmin(
 
         return TemplateResponse(request, "admin/household/individual/sanity_check.html", context)
 
-    @button(label="Add/Update Individual IBAN by xlsx")
+    @button(label="Add/Update Individual IBAN by xlsx", permission="household.update_individual_iban")
     def add_update_individual_iban_from_xlsx(self, request: HttpRequest) -> Any:
         if request.method == "GET":
             form = UpdateIndividualsIBANFromXlsxForm()
@@ -289,8 +303,14 @@ class BusinessAreaSlugFilter(InputFilter):
 class IndividualRoleInHouseholdAdmin(
     SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase, RdiMergeStatusAdminMixin
 ):
-    list_display = ("individual", "household", "role")
-    list_filter = (DepotManager, QueryStringFilter, "role", BusinessAreaSlugFilter)
+    search_fields = ("individual__unicef_id", "household__unicef_id")
+    list_display = ("individual", "household", "role", "copied_from", "is_removed")
+    list_filter = (
+        DepotManager,
+        QueryStringFilter,
+        BusinessAreaSlugFilter,
+        "role",
+    )
     raw_id_fields = ("individual", "household", "copied_from")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -313,12 +333,20 @@ class IndividualRoleInHouseholdAdmin(
 
 @admin.register(IndividualIdentity)
 class IndividualIdentityAdmin(HOPEModelAdminBase, RdiMergeStatusAdminMixin):
-    list_display = ("partner", "individual", "number")
-    list_filter = (("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),)
-    raw_id_fields = ("individual", "partner", "copied_from")
+    list_display = (
+        "number",
+        "partner",
+        "individual",
+    )
+    list_filter = (
+        ("individual__unicef_id", ValueFilter.factory(label="Individual's UNICEF Id")),
+        ("partner", AutoCompleteFilter),
+    )
+    raw_id_fields = ("individual", "partner", "copied_from", "country")
+    search_fields = ("number", "individual__unicef_id")
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).select_related("individual", "partner")
+        return super().get_queryset(request).select_related("individual", "partner", "copied_from", "country")
 
     def formfield_for_foreignkey(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if db_field.name == "individual":
@@ -356,6 +384,15 @@ class IndividualCollectionAdmin(admin.ModelAdmin):
     search_fields = ("unicef_id",)
     list_filter = [BusinessAreaForIndividualCollectionListFilter]
     inlines = [IndividualRepresentationInline]
+
+    def get_queryset(self, request: HttpRequest) -> "QuerySet":
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                "individuals",
+            )
+        )
 
     def number_of_representations(self, obj: IndividualCollection) -> int:
         return obj.individuals(manager="all_objects").count()

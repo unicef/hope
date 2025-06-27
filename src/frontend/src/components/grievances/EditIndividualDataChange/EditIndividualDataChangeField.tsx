@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -95,7 +95,7 @@ export const EditIndividualDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <Grid item xs={4}>
+    <Grid size={{ xs: 4 }}>
       <Field
         name={name}
         variant="outlined"

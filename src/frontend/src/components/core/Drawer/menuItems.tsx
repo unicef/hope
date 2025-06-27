@@ -145,7 +145,6 @@ export const menuItems: MenuItem[] = [
     collapsable: true,
     permissionModule: 'PM',
     scopes: [SCOPE_PROGRAM],
-    flag: 'isPaymentPlanApplicable',
     secondaryActions: [
       {
         name: 'Programme Cycles',

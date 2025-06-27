@@ -21,7 +21,7 @@ class TestPullKoboSubmissions:
     @pytest.fixture(autouse=True)
     def use_kobo_master_token(self, settings: Any) -> None:
         settings.KOBO_MASTER_API_TOKEN = "token-from-env"
-        settings.KOBO_KF_URL = "https://kf.hope.unicef.org"
+        settings.KOBO_URL = "https://kf.hope.unicef.org"
 
     def test_pull_kobo_submissions(self) -> None:
         create_afghanistan()

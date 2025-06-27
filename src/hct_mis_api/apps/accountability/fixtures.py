@@ -62,17 +62,17 @@ class SurveyFactory(DjangoModelFactory):
     title = factory.Faker("sentence", nb_words=2, variable_nb_words=True, ext_word_list=None)
     category = factory.fuzzy.FuzzyChoice(Survey.CATEGORY_CHOICES, getter=lambda c: c[0])
     created_by = factory.SubFactory(UserFactory)
-    target_population = None
+    payment_plan = None
     program = None
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
 
     @factory.post_generation
-    def cash_plan_payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
+    def payment_plan_payment_verification_summary(self, create: bool, extracted: bool, **kwargs: Any) -> None:
         if not create:
             return
 
-        if self.target_population is not None:
-            self.program = self.target_population.program
+        if self.payment_plan is not None:
+            self.program = self.payment_plan.program_cycle.program
             self.save()
 
 

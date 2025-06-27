@@ -24,7 +24,7 @@ class CountryCodeNotProvided(Exception):
 
 
 class KoboRequestsSession(requests.Session):
-    AUTH_DOMAINS = [urlparse(settings.KOBO_KF_URL).hostname, urlparse(settings.KOBO_KC_URL).hostname]
+    AUTH_DOMAINS = [urlparse(settings.KOBO_URL).hostname, urlparse(settings.KOBO_URL).hostname]
 
     def should_strip_auth(self, old_url: str, new_url: str) -> bool:
         new_parsed = urlparse(new_url)
@@ -42,7 +42,7 @@ class KoboAPI:
     def __init__(
         self, kpi_url: Optional[str] = None, token: Optional[str] = None, project_views_id: Optional[str] = None
     ) -> None:
-        self._kpi_url = kpi_url or settings.KOBO_KF_URL
+        self._kpi_url = kpi_url or settings.KOBO_URL
         self._token = token or settings.KOBO_MASTER_API_TOKEN
         self._project_views_id = project_views_id or settings.KOBO_PROJECT_VIEWS_ID
 
@@ -99,7 +99,7 @@ class KoboAPI:
             try:
                 asset_response.raise_for_status()
             except requests.exceptions.HTTPError as e:
-                logger.exception(e)
+                logger.warning(e)
                 raise
             asset_response_dict = asset_response.json()
             asset_uid = asset_response_dict.get("uid")

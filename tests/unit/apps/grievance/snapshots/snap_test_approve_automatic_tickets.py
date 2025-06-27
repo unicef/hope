@@ -11,10 +11,10 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
     'data': {
         'approveNeedsAdjudication': {
             'grievanceTicket': {
-                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'description': 'needs_adjudication_grievance_ticket',
                 'needsAdjudicationTicketDetails': {
                     'selectedIndividual': {
-                        'id': 'SW5kaXZpZHVhbE5vZGU6OTRiMDlmZjItOWU2ZC00ZjM0LWE3MmMtYzMxOWUxZGI3MTE1'
+                        'unicefId': 'IND-222-222'
                     }
                 }
             }
@@ -86,7 +86,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
     'data': {
         'approveNeedsAdjudication': {
             'grievanceTicket': {
-                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'description': 'needs_adjudication_grievance_ticket',
                 'needsAdjudicationTicketDetails': {
                     'extraData': {
                         'dedupEngineSimilarityPair': None
@@ -109,7 +109,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
     'data': {
         'approveNeedsAdjudication': {
             'grievanceTicket': {
-                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'description': 'needs_adjudication_grievance_ticket',
                 'needsAdjudicationTicketDetails': {
                     'extraData': {
                         'dedupEngineSimilarityPair': None
@@ -135,7 +135,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
     'data': {
         'approveNeedsAdjudication': {
             'grievanceTicket': {
-                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'description': 'needs_adjudication_grievance_ticket',
                 'needsAdjudicationTicketDetails': {
                     'extraData': {
                         'dedupEngineSimilarityPair': None
@@ -158,7 +158,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
     'data': {
         'approveNeedsAdjudication': {
             'grievanceTicket': {
-                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'description': 'needs_adjudication_grievance_ticket',
                 'needsAdjudicationTicketDetails': {
                     'selectedIndividual': None
                 }
@@ -191,7 +191,7 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_system_flagging_0
     'data': {
         'approveSystemFlagging': {
             'grievanceTicket': {
-                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTo0M2M1OWVkYS02NjY0LTQxZDYtOTMzOS0wNWVmY2IxMWRhODI=',
+                'description': 'system_flagging_grievance_ticket',
                 'systemFlaggingTicketDetails': {
                     'approveStatus': False
                 }

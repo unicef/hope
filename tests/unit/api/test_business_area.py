@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
@@ -35,10 +36,10 @@ class APIBusinessAreaTests(HOPEApiTestCase):
         business_area1.refresh_from_db()
         business_area2.refresh_from_db()
         response = self.client.get(self.list_url)
-        assert response.status_code == 403
+        assert response.status_code == status.HTTP_403_FORBIDDEN
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["results"]), 3)
         self.assertIn(
             {

@@ -10,7 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import { styled } from '@mui/system';
 import { ReactElement } from 'react';
-import { MiśTheme, theme } from 'src/theme';
+import {  theme as muiTheme } from 'src/theme';
 
 const StyledToolbar = styled(Toolbar)(() => ({
   display: 'flex',
@@ -26,11 +26,9 @@ interface AppBarProps {
   open: boolean;
 }
 
-interface StyledAppBarProps extends AppBarProps {
-  theme: MiśTheme;
-}
-const StyledAppBar = styled(MuiAppBar)<StyledAppBarProps>(
-  ({ theme: muiTheme, open }) => ({
+
+const StyledAppBar = styled(MuiAppBar)<AppBarProps>(
+  ({  open }) => ({
     position: 'fixed',
     top: 0,
     zIndex: muiTheme.zIndex.drawer + 1,
@@ -77,7 +75,7 @@ export const AppBar = ({ open, handleDrawerOpen }): ReactElement => {
     return null;
   }
   return (
-    <StyledAppBar theme={theme} open={open}>
+    <StyledAppBar  open={open}>
       <StyledToolbar>
         <Box display="flex" alignItems="center" justifyContent="center">
           <Box ml={1}>

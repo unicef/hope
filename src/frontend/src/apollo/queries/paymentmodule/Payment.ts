@@ -12,7 +12,7 @@ export const Payment = gql`
       snapshotCollectorBankAccountNumber
       debitCardNumber
       debitCardIssuer
-      targetPopulation {
+      parent {
         id
         name
       }
@@ -78,7 +78,7 @@ export const Payment = gql`
       }
       deliveredQuantityUsd
       deliveryType {
-          name
+        name
       }
       transactionReferenceId
       serviceProvider {

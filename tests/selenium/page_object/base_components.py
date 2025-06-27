@@ -19,9 +19,10 @@ class BaseComponents(Common):
     sideNav = 'div[data-cy="side-nav"]'
     navCountryDashboard = 'a[data-cy="nav-Country Dashboard"]'
     navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]'
-    navProgrammePopulation = 'a[data-cy="nav-Programme Population"]'
-    navHouseholds = 'a[data-cy="nav-Households"]'
-    navIndividuals = 'a[data-cy="nav-Household Members"]'
+    navProgrammePopulation = 'a[data-cy="nav-{}"]'
+    navHouseholdMembers = 'a[data-cy="nav-{}"]'
+    navHouseholds = 'a[data-cy="nav-{}"]'
+    navIndividuals = 'a[data-cy="nav-{}"]'
     navPeople = 'a[data-cy="nav-People"]'
     navProgrammeManagement = 'a[data-cy="nav-Programmes"]'
     navManagerialConsole = 'a[data-cy="nav-Managerial Console"]'
@@ -93,14 +94,17 @@ class BaseComponents(Common):
     def getNavRegistrationDataImport(self) -> WebElement:
         return self.wait_for(self.navRegistrationDataImport)
 
-    def getNavProgrammePopulation(self) -> WebElement:
-        return self.wait_for(self.navProgrammePopulation)
+    def getNavProgrammePopulation(self, name: str = "Main Menu") -> WebElement:
+        return self.wait_for(self.navProgrammePopulation.format(name))
 
-    def getNavHouseholds(self) -> WebElement:
-        return self.wait_for(self.navHouseholds)
+    def getNavHouseholdMembers(self, name: str = "Items") -> WebElement:
+        return self.wait_for(self.navHouseholdMembers.format(name))
 
-    def getNavIndividuals(self) -> WebElement:
-        return self.wait_for(self.navIndividuals)
+    def getNavHouseholds(self, name: str = "Items Groups") -> WebElement:
+        return self.wait_for(self.navHouseholds.format(name))
+
+    def getNavIndividuals(self, name: str = "Items") -> WebElement:
+        return self.wait_for(self.navIndividuals.format(name))
 
     def getNavPeople(self) -> WebElement:
         return self.wait_for(self.navPeople)
@@ -183,7 +187,7 @@ class BaseComponents(Common):
         self.getGlobalProgramFilterSearchInput().clear()
         self.getGlobalProgramFilterSearchInput().send_keys(Keys.CONTROL + "a")  # Select all (use COMMAND on Mac)
         self.getGlobalProgramFilterSearchInput().send_keys(Keys.DELETE)
-        for _ in range(len(self.getGlobalProgramFilterSearchInput().get_attribute("value"))):  # type: ignore
+        for _ in range(len(self.getGlobalProgramFilterSearchInput().get_attribute("value"))):
             self.getGlobalProgramFilterSearchInput().send_keys(Keys.BACKSPACE)
         self.getGlobalProgramFilterSearchButton().click()
         if name != "All Programmes":

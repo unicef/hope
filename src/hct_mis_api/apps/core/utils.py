@@ -254,9 +254,7 @@ def get_combined_attributes() -> Dict:
 
     flex_attrs = serialize_flex_attributes()
     return {
-        **FieldFactory.from_scopes(
-            [Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR, Scope.DELIVERY_MECHANISM]
-        )
+        **FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_ID, Scope.COLLECTOR])
         .apply_business_area()
         .to_dict_by("xlsx_field"),
         **flex_attrs["individuals"],
@@ -293,7 +291,7 @@ def nested_getattr(obj: Any, attr: Any, default: object = raise_attribute_error)
     except AttributeError as e:
         if default != raise_attribute_error:
             return default
-        logger.exception(e)
+        logger.warning(e)
         raise
 
 
@@ -686,19 +684,6 @@ def chart_create_filter_query_for_payment_verification_gfk(
     return filter_query
 
 
-class CaIdIterator:
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.last_id = 0
-
-    def __iter__(self: "CaIdIterator") -> "CaIdIterator":
-        return self
-
-    def __next__(self: "CaIdIterator") -> str:
-        self.last_id += 1
-        return f"123-21-{self.name.upper()}-{self.last_id:05d}"
-
-
 def resolve_flex_fields_choices_to_string(parent: Any) -> Dict:
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
@@ -779,7 +764,7 @@ def fix_flex_type_fields(items: Any, flex_fields: Dict) -> List[Dict]:
     return items
 
 
-def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: List[str]) -> List:
+def map_unicef_ids_to_households_unicef_ids(excluded_ids_string: str) -> List:
     excluded_ids_array = excluded_ids_string.split(",")
     excluded_ids_array = [excluded_id.strip() for excluded_id in excluded_ids_array]
     excluded_household_ids_array = [excluded_id for excluded_id in excluded_ids_array if excluded_id.startswith("HH")]

@@ -17,7 +17,6 @@ from hct_mis_api.apps.household.forms import (
     IndividualForm,
 )
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_PARTIAL,
     GOVERNMENT_PARTNER,
     HEAD,
     HUMANITARIAN_PARTNER,
@@ -121,7 +120,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             "country_origin": GeoCountry.objects.get(iso_code2="CZ"),
             "country": GeoCountry.objects.get(iso_code2="CZ"),
             "consent_sharing": [],
-            "collect_individual_data": COLLECT_TYPE_PARTIAL,
             "business_area": registration_data_import.business_area,
         }
         if needs_assessment:

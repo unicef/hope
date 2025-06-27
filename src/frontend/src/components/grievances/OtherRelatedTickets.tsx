@@ -13,6 +13,7 @@ import {
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
+import { useProgramContext } from 'src/programContext';
 
 export function OtherRelatedTickets({
   ticket,
@@ -22,6 +23,8 @@ export function OtherRelatedTickets({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { id } = useParams();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [show, setShow] = useState(false);
   const { existingTickets, linkedTickets } = ticket;
@@ -80,7 +83,7 @@ export function OtherRelatedTickets({
       </Title>
       <Box display="flex" flexDirection="column">
         <LabelizedField
-          label={`For Household ${ticket.household?.unicefId || '-'} `}
+          label={`For ${beneficiaryGroup?.groupLabel} ${ticket.household?.unicefId || '-'}`}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
@@ -100,9 +103,7 @@ export function OtherRelatedTickets({
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${
-                ticket.household?.unicefId || '-'
-              } `}
+              label={`${t(`For ${beneficiaryGroup?.groupLabel}`)} ${ticket.household?.unicefId || '-'}`}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>

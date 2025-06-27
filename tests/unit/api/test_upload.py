@@ -1,4 +1,5 @@
 import base64
+import copy
 from pathlib import Path
 
 from django.core.management import call_command
@@ -9,7 +10,6 @@ from rest_framework.reverse import reverse
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
@@ -18,6 +18,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SON_DAUGHTER,
     DocumentType,
+    Household,
     PendingHousehold,
     PendingIndividual,
 )
@@ -50,13 +51,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -100,13 +99,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": COLLECT_TYPE_FULL,
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -149,13 +146,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": "FULL",
                     "members": [
                         {
                             "relationship": HEAD,
@@ -207,13 +202,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -266,13 +259,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "IDP",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -316,7 +307,6 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village2",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -347,7 +337,6 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village3",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -388,7 +377,6 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNotNone(hh.alternate_collector)
 
-        self.assertEqual(hh.collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(hh.primary_collector.full_name, "Jhon Primary #1")
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
 
@@ -399,13 +387,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -441,13 +427,11 @@ class UploadRDITests(HOPEApiTestCase):
         data = {
             "name": "aaaa",
             "program": str(self.program.id),
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -491,7 +475,6 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -527,13 +510,11 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_multiple_errors(self) -> None:
         data = {
             "name": "aaaa",
-            "collect_individual_data": "FULL",
             "households": [
                 {
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": NON_BENEFICIARY,
@@ -577,7 +558,6 @@ class UploadRDITests(HOPEApiTestCase):
                     "residence_status": "",
                     "village": "village1",
                     "country": "AF",
-                    "collect_individual_data": COLLECT_TYPE_FULL,
                     "members": [
                         {
                             "relationship": HEAD,
@@ -630,3 +610,68 @@ class UploadRDITests(HOPEApiTestCase):
 """,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, str(response.json()))
+
+    def test_upload_collision(self) -> None:
+        program = Program.objects.get(pk=self.program.id)
+        program.collision_detection_enabled = True
+        program.collision_detector = "hct_mis_api.apps.program.collision_detectors.IdentificationKeyCollisionDetector"
+        program.save()
+        input_data = {
+            "program": str(self.program.id),
+            "households": [
+                {
+                    "residence_status": "IDP",
+                    "village": "village1",
+                    "country": "AF",
+                    "identification_key": "ab1",
+                    "members": [
+                        {
+                            "relationship": HEAD,
+                            "role": ROLE_PRIMARY,
+                            "full_name": "John Doe",
+                            "birth_date": "2000-01-01",
+                            "sex": "MALE",
+                        },
+                        {
+                            "relationship": SON_DAUGHTER,
+                            "full_name": "Mary Doe",
+                            "birth_date": "2000-01-01",
+                            "role": "",
+                            "sex": "FEMALE",
+                        },
+                    ],
+                    "size": 1,
+                }
+            ],
+        }
+        input_data["name"] = "Origin"
+        response = self.client.post(self.url, copy.deepcopy(input_data), format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        data = response.json()
+        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
+        self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
+        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_PENDING)
+
+        hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
+        self.assertEqual(Household.all_objects.count(), 1)
+        self.assertIsNotNone(hh)
+        self.assertIsNotNone(hh.head_of_household)
+        self.assertIsNotNone(hh.primary_collector)
+        self.assertIsNone(hh.alternate_collector)
+
+        self.assertEqual(hh.head_of_household.full_name, "John Doe")
+        self.assertEqual(hh.head_of_household.sex, MALE)
+        self.assertEqual(data["households"], 1)
+        self.assertEqual(data["individuals"], 2)
+
+        input_data["name"] = "Collision"
+        response = self.client.post(self.url, copy.deepcopy(input_data), format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+        data = response.json()
+        rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
+        self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
+        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_PENDING)
+        self.assertEqual(Household.all_objects.count(), 1)
+        self.assertEqual(hh.unicef_id, Household.all_objects.first().unicef_id)

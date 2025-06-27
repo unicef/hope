@@ -29,10 +29,6 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
-    COLLECT_TYPE_NONE,
-    COLLECT_TYPE_PARTIAL,
-    COLLECT_TYPE_UNKNOWN,
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
@@ -45,7 +41,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PeriodicDataUpdateImportService,
 )
@@ -81,6 +77,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.bank_accounts = defaultdict(dict)
         self.program = None
         self.pdu_flexible_attributes: Optional[QuerySet[FlexibleAttribute]] = None
+        self.households_to_ignore = []  # household ids (excel ids) to ignore when creating individuals
+        self.colided_households_pks = []  # households pks to add extra_rdis
         super().__init__()
 
     @cached_property
@@ -90,25 +88,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_value")
             list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_collection_date")
         return list_of_pdu_column_names
-
-    def _handle_collect_individual_data(
-        self,
-        value: Any,
-        header: str,
-        row_num: int,
-        individual: PendingIndividual,
-        *args: Any,
-        **kwargs: Any,
-    ) -> str:
-        try:
-            return {
-                "FULL": COLLECT_TYPE_FULL,
-                "PARTIAL": COLLECT_TYPE_PARTIAL,
-                "NONE": COLLECT_TYPE_NONE,
-                "UNKNOWN": COLLECT_TYPE_UNKNOWN,
-            }[value]
-        except KeyError:
-            return COLLECT_TYPE_UNKNOWN
 
     def _handle_bank_account_fields(
         self,
@@ -446,6 +425,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         collectors_to_create = []
         for hh_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
+                if hh_id not in self.households:
+                    continue
                 collector.household_id = self.households.get(hh_id).pk
                 collectors_to_create.append(collector)
         PendingIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
@@ -494,10 +475,18 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 individual, flexible_attribute.name, 1, value, collection_date
             )
 
+    def _check_collision(self, identification_key: Optional[str]) -> bool:
+        if not self.program.collision_detection_enabled:
+            return False
+        if not identification_key:
+            return False
+        collided_household_id = self.program.collision_detector.detect_collision(identification_key)
+        if not collided_household_id:
+            return False
+        self.colided_households_pks.append(collided_household_id)
+        return True
+
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
-        delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
-            by="xlsx_field"
-        )
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
                 "photo_i_c": self._handle_image_field,
@@ -526,12 +515,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "child_hoh_h_c": self._handle_bool_field,
                 "consent_h_c": self._handle_bool_field,
                 "first_registration_date_h_c": self._handle_datetime,
-                "collect_individual_data": self._handle_collect_individual_data,
             },
         }
-        complex_fields["individuals"].update(
-            {field: self._handle_delivery_mechanism_fields for field in delivery_mechanism_xlsx_fields}
-        )
+
         document_complex_types: Dict[str, Callable] = {}
         for document_type in DocumentType.objects.all():
             document_complex_types[f"{document_type.key}_i_c"] = self._handle_document_fields
@@ -577,16 +563,24 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 household_id = None
 
                 excluded = ("age",)
+                identification_key = None
                 for cell, header_cell in zip(row, first_row):
                     try:
                         header = header_cell.value
                         if header in self._pdu_column_names:
                             continue
+                        elif header.startswith(Account.ACCOUNT_FIELD_PREFIX):
+                            self._handle_delivery_mechanism_fields(cell.value, header, cell.row, obj_to_create)
+                            continue
+
                         combined_fields = self.COMBINED_FIELDS
                         current_field = combined_fields.get(header, {})
 
                         if not current_field and header not in complex_fields[sheet_title]:
                             continue
+                        if header == "identification_key_h_c":
+                            identification_key = cell.value
+                            obj_to_create.identification_key = identification_key
 
                         is_not_image = current_field.get("type") != "IMAGE"
 
@@ -611,6 +605,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 obj_to_create.household = self.households.get(household_id)
 
                         if header in complex_fields[sheet_title]:
+                            if household_id in self.households_to_ignore:
+                                continue
                             fn_complex: Callable = complex_fields[sheet_title][header]
                             value = fn_complex(
                                 value=cell_value,
@@ -683,6 +679,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 )
                             if value is not None:
                                 obj_to_create.flex_fields[header] = value
+
                     except Exception as e:
                         raise Exception(
                             f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
@@ -692,8 +689,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create.detail_id = row[0].row
                 obj_to_create.business_area = rdi.business_area
                 if sheet_title == "households":
-                    self.households[household_id] = obj_to_create
+                    if not self._check_collision(obj_to_create):  # Dont create household if collision
+                        self.households[household_id] = obj_to_create
+                    else:
+                        self.households_to_ignore.append(
+                            household_id
+                        )  # When collision add to ignore all individuals connected to this hh
                 else:
+                    if household_id in self.households_to_ignore:
+                        continue
                     if household_id is None:
                         obj_to_create.relationship = NON_BENEFICIARY
                     obj_to_create = self._validate_birth_date(obj_to_create)
@@ -720,8 +724,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_identities()
             self._create_collectors()
             self._create_bank_accounts_infos()
-            self._create_delivery_mechanisms_data()
+            self._create_accounts()
             rdi.bulk_update_household_size()
+            # Assign extra rdis for colided households which already exist inside system
+            self.registration_data_import.extra_hh_rdis.add(*self.colided_households_pks)
 
     def execute_individuals_additional_steps(self, individuals: list[PendingIndividual]) -> None:
         for individual in individuals:
@@ -729,8 +735,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 individual.phone_no_valid = is_valid_phone_number(str(individual.phone_no))
             if individual.phone_no_alternative:
                 individual.phone_no_alternative_valid = is_valid_phone_number(str(individual.phone_no_alternative))
-            if individual.household:
-                individual.registration_id = individual.household.registration_id
+            if individual.household and not individual.detail_id:  # pragma: no cover
+                individual.detail_id = individual.household.detail_id
 
     @transaction.atomic
     def execute(

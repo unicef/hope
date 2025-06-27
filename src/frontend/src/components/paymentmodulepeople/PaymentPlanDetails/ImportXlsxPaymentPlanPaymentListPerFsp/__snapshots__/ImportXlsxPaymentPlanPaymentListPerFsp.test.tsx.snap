@@ -2,37 +2,4 @@
 
 exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp should not render 1`] = `<div />`;
 
-exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp should render 1`] = `
-<div>
-  <div
-    class="MuiBox-root css-0"
-  >
-    <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
-      data-cy="button-import"
-      tabindex="0"
-      type="button"
-    >
-      <span
-        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
-      >
-        <svg
-          aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-ghWlax kkkBTc css-i4bv87-MuiSvgIcon-root"
-          data-testid="PublishIcon"
-          focusable="false"
-          viewBox="0 0 24 24"
-        >
-          <path
-            d="M5 4v2h14V4zm0 10h4v6h6v-6h4l-7-7z"
-          />
-        </svg>
-      </span>
-      Upload Reconciliation Info
-      <span
-        class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-      />
-    </button>
-  </div>
-</div>
-`;
+exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp should render 1`] = `<div />`;

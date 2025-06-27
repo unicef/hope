@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
 import {
@@ -31,15 +31,16 @@ export function ExistingIdentityFieldArray({
         render={(arrayHelpers) => (
           <>
             {individual.identities.edges.map((item) => (
-              <EditIdentityRow
-                key={item.node.id}
-                setFieldValue={setFieldValue}
-                values={values}
-                identity={item}
-                id={item.node.id}
-                arrayHelpers={arrayHelpers}
-                addIndividualFieldsData={addIndividualFieldsData}
-              />
+              <Grid size={{ xs: 12 }} key={item.node.id}>
+                <EditIdentityRow
+                  setFieldValue={setFieldValue}
+                  values={values}
+                  identity={item}
+                  id={item.node.id}
+                  arrayHelpers={arrayHelpers}
+                  addIndividualFieldsData={addIndividualFieldsData}
+                />
+              </Grid>
             ))}
           </>
         )}

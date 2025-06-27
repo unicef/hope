@@ -3,26 +3,27 @@
 exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ixGGxD fHLnXR css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-cSaEAk jvhemQ css-1gtchvp-MuiPaper-root"
+    style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-egkSDF flCGEE"
+      class="sc-dVBluf fNFrix"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
       >
         Additional Registration information
       </h6>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
+      class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-6 css-ipzchf-MuiGrid2-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       >
         <div>
           <span
-            class="sc-blHHSb dUfUKp"
+            class="sc-FEMpB ddgbkI"
             color="textSecondary"
           >
             muac
@@ -31,7 +32,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
             data-cy="label-muac"
           >
             <span
-              class="sc-gtLWhw dynQwi"
+              class="sc-gjcoXW fZsJNd"
               color="textSecondary"
             >
               334
@@ -40,11 +41,11 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       >
         <div>
           <span
-            class="sc-blHHSb dUfUKp"
+            class="sc-FEMpB ddgbkI"
             color="textSecondary"
           >
             school enrolled
@@ -53,7 +54,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
             data-cy="label-school enrolled"
           >
             <span
-              class="sc-gtLWhw dynQwi"
+              class="sc-gjcoXW fZsJNd"
               color="textSecondary"
             >
               Yes
@@ -62,11 +63,11 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
       >
         <div>
           <span
-            class="sc-blHHSb dUfUKp"
+            class="sc-FEMpB ddgbkI"
             color="textSecondary"
           >
             school enrolled before
@@ -75,7 +76,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
             data-cy="label-school enrolled before"
           >
             <span
-              class="sc-gtLWhw dynQwi"
+              class="sc-gjcoXW fZsJNd"
               color="textSecondary"
             >
               No

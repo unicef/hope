@@ -7,18 +7,18 @@ import {
   FileCopy,
   RefreshRounded,
 } from '@mui/icons-material';
-import {
-  TargetPopulationQuery,
-  useRebuildTpMutation,
-} from '@generated/graphql';
+import { Action, PaymentPlanQuery } from '@generated/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { t } from 'i18next';
+import { useSnackbar } from '@hooks/useSnackBar';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canDuplicate: boolean;
   canRemove: boolean;
   canEdit: boolean;
@@ -33,13 +33,17 @@ export function OpenTargetPopulationHeaderButtons({
   canRemove,
 }: InProgressTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const [openLock, setOpenLock] = useState(false);
+  const { showMessage } = useSnackbar();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
 
-  const [rebuildTargetPopulation, { loading: rebuildTargetPopulationLoading }] =
-    useRebuildTpMutation();
+  const { mutatePaymentPlanAction: rebuild, loading: loadingRebuild } =
+    usePaymentPlanAction(Action.TpRebuild, targetPopulation.id, () =>
+      showMessage(t('Payment Plan has been rebuilt.')),
+    );
+
   return (
     <Box display="flex" alignItems="center">
       {canDuplicate && (
@@ -81,13 +85,9 @@ export function OpenTargetPopulationHeaderButtons({
             data-cy="button-rebuild"
             variant="outlined"
             color="primary"
-            disabled={rebuildTargetPopulationLoading || !isActiveProgram}
+            disabled={loadingRebuild || !isActiveProgram}
             startIcon={<RefreshRounded />}
-            onClick={() =>
-              rebuildTargetPopulation({
-                variables: { id: targetPopulation.id },
-              })
-            }
+            onClick={() => rebuild()}
           >
             Rebuild
           </Button>

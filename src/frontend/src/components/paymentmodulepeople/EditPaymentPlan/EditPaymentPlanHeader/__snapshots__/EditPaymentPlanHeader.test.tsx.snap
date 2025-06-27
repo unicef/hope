@@ -3,44 +3,44 @@
 exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
 <div>
   <div
-    class="css-14yyz2y"
+    class="css-1x0er1"
     data-cy="page-header-container"
   >
     <div
-      class="css-1dm7nei"
+      class="css-n88ekr"
     >
       <div
-        class="css-4g6ai3"
+        class="css-1djwytu"
         data-cy="arrow_back"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeLarge css-tzssek-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeLarge css-uks7c6-MuiSvgIcon-root"
           data-testid="ArrowBackRoundedIcon"
           focusable="false"
           viewBox="0 0 24 24"
         >
           <path
-            d="M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42a.9959.9959 0 0 0-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1"
+            d="M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42a.996.996 0 0 0-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1"
           />
         </svg>
       </div>
       <div
-        class="css-175cn9v"
+        class="css-ozdmop"
       >
         <div>
           <div
-            class="sc-fAUdSK ctcpKb"
+            class="sc-fLDLck eYYPjF"
             data-cy="breadcrumbs-container"
           >
             <span
-              class="sc-egkSDF gCtgrB"
+              class="sc-dVBluf bNa-dds"
               data-cy="breadcrumbs-element-container"
             >
               <a
-                class="sc-blHHSb ixwyqw"
+                class="sc-FEMpB jOYmrF"
                 data-cy="breadcrumbs-link"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/followup-payment-plans/UGF5bWVudFBsYW5Ob2RlOjU4MmE3ZTYzLTRkZGEtNDQ3Zi1hYWFhLTQzYWJmMzI0ZTViMw=="
               >
                 Payment Module
               </a>
@@ -50,30 +50,30 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
             class="MuiBox-root css-70qvj9"
           >
             <div
-              class="css-1ukvkn"
+              class="css-9dlhcl"
             >
               <h5
-                class="MuiTypography-root MuiTypography-h5 css-ag7rrr-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-h5 css-16xl4zq-MuiTypography-root"
                 data-cy="page-header-title"
               >
                 <div
                   class="MuiBox-root css-70qvj9"
                 >
-                  Payment Plan
+                  Follow-up Payment Plan
                    ID
                    
-                  PP-0060-22-00000001
+                  PP-0060-25-00000007
                   <div
-                    class="sc-ghWlax ekQAiY"
+                    class="sc-gNZgCX ijvZIE"
                   >
                     <div
-                      class="sc-dntaoT gQSLBb"
+                      class="sc-dycHyt gCnfnG"
                     >
                       <div
-                        class="sc-ivxoEo fCtLWH status-box-container"
+                        class="sc-jbAkgO bPQHMx status-box-container"
                         data-cy="status-container"
                       >
-                        LOCKED
+                        ACCEPTED
                       </div>
                     </div>
                   </div>
@@ -87,7 +87,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
           </div>
         </div>
         <div
-          class="css-70qvj9"
+          class="css-yeouz0"
         >
           <div
             class="MuiBox-root css-1jzjbfr"
@@ -96,32 +96,28 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
               class="MuiBox-root css-5hicrt"
             >
               <a
-                class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ=="
+                class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-4ifa8d-MuiButtonBase-root-MuiButton-root"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjU4MmE3ZTYzLTRkZGEtNDQ3Zi1hYWFhLTQzYWJmMzI0ZTViMw=="
+                id=":r0:"
                 tabindex="0"
               >
                 Cancel
-                <span
-                  class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-                />
               </a>
             </div>
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-dl1jos-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-cx92lf-MuiButtonBase-root-MuiButton-root"
+              id=":r1:"
               tabindex="0"
               type="button"
             >
               Save
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
             </button>
           </div>
         </div>
       </div>
     </div>
     <div
-      class="css-l30346"
+      class="css-8hfbf4"
     />
   </div>
 </div>

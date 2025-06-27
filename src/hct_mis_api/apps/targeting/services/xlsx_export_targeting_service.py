@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Dict, List, Union
+from typing import Any, Dict
 
 from django.db.models import Q, QuerySet
 
@@ -10,10 +10,11 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import Document, Individual
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 class XlsxExportTargetingService:
+    # TODO: should we refactor this service to import PaymentPlan?
     INDIVIDUALS_SHEET = "Individuals"
     META_SHEET = "Meta"
     VERSION_CELL_NAME_COORDINATES = "A1"
@@ -21,8 +22,8 @@ class XlsxExportTargetingService:
     VERSION_CELL_NAME = "FILE_TEMPLATE_VERSION"
     VERSION = "1.0"
 
-    def __init__(self, target_population: TargetPopulation) -> None:
-        self.target_population = target_population
+    def __init__(self, payment_plan: PaymentPlan) -> None:
+        self.payment_plan = payment_plan
         self.documents_columns_dict = {}
         self.current_header_column_index = 0
         self.COLUMNS_MAPPING_DICT = {
@@ -33,10 +34,17 @@ class XlsxExportTargetingService:
         }
 
     @cached_property
-    def households(self) -> Union[int, List[int]]:
-        if self.target_population.status == TargetPopulation.STATUS_OPEN:
-            return self.target_population.open_household_list
-        return self.target_population.vulnerability_score_filtered_households
+    def households(self) -> Any:
+        if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
+            return self.payment_plan.household_list
+
+        filters = {}
+        if self.payment_plan.vulnerability_score_max is not None:
+            filters["vulnerability_score__lte"] = self.payment_plan.vulnerability_score_max
+        if self.payment_plan.vulnerability_score_min is not None:
+            filters["vulnerability_score__gte"] = self.payment_plan.vulnerability_score_min
+        hh_ids = list(self.payment_plan.payment_items.filter(**filters).values_list("household_id", flat=True))
+        return self.payment_plan.household_list.filter(id__in=hh_ids)
 
     @cached_property
     def individuals(self) -> QuerySet[Individual]:

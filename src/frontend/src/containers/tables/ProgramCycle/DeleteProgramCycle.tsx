@@ -21,6 +21,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { decodeIdString } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const WhiteDeleteIcon = styled(DeleteIcon)`
   color: #fff;
@@ -31,7 +32,7 @@ interface DeleteProgramCycleProps {
   programCycle: ProgramCycle;
 }
 
-export const DeleteProgramCycle = ({
+const DeleteProgramCycle = ({
   program,
   programCycle,
 }: DeleteProgramCycleProps): ReactElement => {
@@ -62,7 +63,9 @@ export const DeleteProgramCycle = ({
       await mutateAsync();
       showMessage(t('Programme Cycle Deleted'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      if (e.data && Array.isArray(e.data)) {
+        e.data.forEach((message: string) => showMessage(message));
+      }
     }
   };
 
@@ -107,3 +110,5 @@ export const DeleteProgramCycle = ({
     </>
   );
 };
+
+export default withErrorBoundary(DeleteProgramCycle, 'DeleteProgramCycle');

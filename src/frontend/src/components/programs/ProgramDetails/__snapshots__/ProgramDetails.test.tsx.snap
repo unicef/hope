@@ -3,29 +3,30 @@
 exports[`components/ProgramDetails should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
+    style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
   >
     <div
-      class="sc-ixGGxD gVEuoR"
+      class="sc-hRDKVd kCcppZ"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
       >
         Programme Details
       </h6>
     </div>
     <div
-      class="sc-ivxoEo gQJYfN"
+      class="sc-jbAkgO jpddxj"
     >
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-6 css-ipzchf-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               status
@@ -34,14 +35,14 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-status"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 <div
-                  class="sc-ghWlax feyaBO"
+                  class="sc-gNZgCX evOkrm"
                 >
                   <div
-                    class="sc-kLhKbu ujRxK status-box-container"
+                    class="sc-kfeOyU fIiPxI status-box-container"
                     data-cy="status-container"
                   >
                     FINISHED
@@ -52,11 +53,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               START DATE
@@ -65,7 +66,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-START DATE"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 <time
@@ -78,11 +79,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               END DATE
@@ -91,7 +92,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-END DATE"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 <time
@@ -104,11 +105,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Programme Code
@@ -121,11 +122,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Sector
@@ -134,7 +135,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Sector"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 Child Protection
@@ -143,11 +144,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Data Collecting Type
@@ -160,11 +161,28 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
+              color="textSecondary"
+            >
+              Beneficiary Group
+            </span>
+            <div
+              data-cy="label-Beneficiary Group"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
+        >
+          <div>
+            <span
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Frequency of Payment
@@ -173,7 +191,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Frequency of Payment"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 Regular
@@ -182,11 +200,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Administrative Areas of implementation
@@ -195,7 +213,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Administrative Areas of implementation"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 Crime book.
@@ -204,11 +222,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Description
@@ -217,7 +235,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Description"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 Yeah worry might newspaper drive her many.
@@ -226,11 +244,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               CASH+
@@ -239,7 +257,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-CASH+"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 No
@@ -248,11 +266,11 @@ exports[`components/ProgramDetails should render 1`] = `
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Partner Access
@@ -261,7 +279,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Partner Access"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
                 Only Selected Partners within the business area
@@ -271,11 +289,11 @@ exports[`components/ProgramDetails should render 1`] = `
         </div>
       </div>
       <div
-        class="sc-khLCKb UflYU"
+        class="sc-jBIHhB gkyVHI"
       >
         <div>
           <span
-            class="sc-fAUdSK goVbUg"
+            class="sc-fLDLck ivXKQK"
             color="textSecondary"
           >
             Programme size
@@ -284,11 +302,11 @@ exports[`components/ProgramDetails should render 1`] = `
             data-cy="label-Programme size"
           >
             <span
-              class="sc-dntaoT dIDHTF"
+              class="sc-dycHyt kguSQI"
               color="textSecondary"
             >
               <div
-                class="sc-dstKZu cdphKB"
+                class="sc-cMqPwU klAFMV"
               >
                 2
               </div>
@@ -298,42 +316,42 @@ exports[`components/ProgramDetails should render 1`] = `
       </div>
     </div>
     <div
-      class="sc-gtLWhw VFxTS"
+      class="sc-gjcoXW jQCndt"
     >
       <div
-        class="sc-egkSDF cYYMIc"
+        class="sc-dVBluf cFSYVV"
       />
     </div>
     <div
-      class="sc-ixGGxD gVEuoR"
+      class="sc-hRDKVd kCcppZ"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
       >
         Programme Partners
       </h6>
     </div>
     <div
-      class="sc-ivxoEo gQJYfN"
+      class="sc-jbAkgO jpddxj"
     >
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-6 css-ipzchf-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
         >
           <div
-            class="sc-keTIit erJcDl MuiBox-root css-bo4s1r"
+            class="sc-jUkaYT gZUtd MuiBox-root css-bo4s1r"
           >
             <h6
-              class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+              class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
               data-cy="label-partner-name"
             />
             <div
               data-cy="labelized-field-container-area-access-field"
             >
               <span
-                class="sc-fAUdSK goVbUg"
+                class="sc-fLDLck ivXKQK"
                 color="textSecondary"
               >
                 Area Access
@@ -342,7 +360,7 @@ exports[`components/ProgramDetails should render 1`] = `
                 data-cy="label-Area Access"
               >
                 <span
-                  class="sc-dntaoT dIDHTF"
+                  class="sc-dycHyt kguSQI"
                   color="textSecondary"
                 >
                   Business Area

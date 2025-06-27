@@ -18,6 +18,7 @@ export function validate(
   allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
   individualFieldsDict,
   householdFieldsDict,
+  beneficiaryGroup,
 ) {
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
@@ -25,13 +26,15 @@ export function validate(
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold) {
-        errors.selectedHousehold = 'Household is Required';
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
       if (values.individualData?.documents?.length) {
         values.individualData.documents
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.type || !doc.number) {
+            // Handle nested structure: doc.value.{country, key, number} or direct structure
+            const docValue = doc.value || doc;
+            if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualData =
                 'Document type, country and number are required';
             }
@@ -40,14 +43,14 @@ export function validate(
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD) {
       if (!values.selectedHousehold) {
-        errors.selectedHousehold = 'Household is Required';
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
       if (
         // xD
         values.selectedHousehold &&
         !values.householdDataUpdateFields?.[0]?.fieldName
       ) {
-        errors.householdDataUpdateFields = 'Household Data Change is Required';
+        errors.householdDataUpdateFields = `${beneficiaryGroup?.groupLabel} Data Change is Required`;
       }
       if (
         values.householdDataUpdateFields?.length &&
@@ -68,17 +71,17 @@ export function validate(
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
       if (!values.selectedIndividual) {
-        errors.selectedIndividual = 'Individual is Required';
+        errors.selectedIndividual = `${beneficiaryGroup?.memberLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD) {
       if (!values.selectedHousehold) {
-        errors.selectedHousehold = 'Household is Required';
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
       if (!values.selectedIndividual) {
-        errors.selectedIndividual = 'Individual is Required';
+        errors.selectedIndividual = `${beneficiaryGroup?.memberLabel} is Required`;
       }
       if (
         values.selectedIndividual &&
@@ -94,8 +97,7 @@ export function validate(
         !values.individualDataUpdatePaymentChannelsToEdit?.length &&
         !values.individualDataUpdateDeliveryMechanismDataToEdit?.length
       ) {
-        errors.individualDataUpdateFields =
-          'Individual Data Change is Required';
+        errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
       }
       if (values.individualDataUpdateFields?.length) {
         values.individualDataUpdateFields.forEach((el) => {
@@ -120,7 +122,9 @@ export function validate(
         values.individualDataUpdateFieldsDocuments
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.type || !doc.number) {
+            // Handle nested structure: doc.value.{country, key, number}
+            const docValue = doc.value || doc;
+            if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualDataUpdateFieldsDocuments =
                 'Document type, country and number are required';
             }
@@ -130,7 +134,9 @@ export function validate(
         values.individualDataUpdateFieldsDocumentsToEdit
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.type || !doc.number) {
+            // Handle nested structure: doc.value.{country, key, number}
+            const docValue = doc.value || doc;
+            if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualDataUpdateFieldsDocumentsToEdit =
                 'Document type, country and number are required';
             }
@@ -140,7 +146,10 @@ export function validate(
         values.individualDataUpdateFieldsIdentities
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.partner || !doc.number) {
+            // Handle nested structure: doc.value.{country, partner, number}
+            const docValue = doc.value || doc;
+            const partner = docValue.partner || docValue.agency; // For backward compatibility
+            if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentities =
                 'Identity partner, country and number are required';
             }
@@ -150,7 +159,10 @@ export function validate(
         values.individualDataUpdateFieldsIdentitiesToEdit
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.country || !doc.partner || !doc.number) {
+            // Handle nested structure: doc.value.{country, partner, number}
+            const docValue = doc.value || doc;
+            const partner = docValue.partner || docValue.agency; // For backward compatibility
+            if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
             }
@@ -215,7 +227,8 @@ export function validate(
       .filter((el) => el)
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
-          errors.documentation = 'Documentation name and file are required';
+          errors.documentation =
+            'Grievance Supporting Document name and file are required';
         }
       });
   }
@@ -225,7 +238,7 @@ export function validate(
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
           errors.documentationToUpdate =
-            'Documentation name and file are required';
+            'Grievance Supporting Document name and file are required';
         }
       });
   }
@@ -240,6 +253,7 @@ export function validateUsingSteps(
   householdFieldsDict,
   activeStep,
   setValidateData,
+  beneficiaryGroup,
 ) {
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
@@ -270,12 +284,12 @@ export function validateUsingSteps(
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedHousehold = 'Household is Required';
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedHousehold = 'Household is Required';
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
       if (
         // xD
@@ -283,7 +297,7 @@ export function validateUsingSteps(
         !values.householdDataUpdateFields?.[0]?.fieldName &&
         activeStep === GrievanceSteps.Description
       ) {
-        errors.householdDataUpdateFields = 'Household Data Change is Required';
+        errors.householdDataUpdateFields = `${beneficiaryGroup?.groupLabel} Data Change is Required`;
       }
       if (
         values.householdDataUpdateFields?.length &&
@@ -304,12 +318,12 @@ export function validateUsingSteps(
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
       if (!values.selectedIndividual && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedIndividual = 'Individual is Required';
+        errors.selectedIndividual = `${beneficiaryGroup?.memberLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
-        errors.selectedHousehold = 'Household is Required';
+        errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
@@ -328,8 +342,7 @@ export function validateUsingSteps(
         !values.individualDataUpdatePaymentChannelsToEdit?.length &&
         activeStep === GrievanceSteps.Description
       ) {
-        errors.individualDataUpdateFields =
-          'Individual Data Change is Required';
+        errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
       }
       if (values.individualDataUpdateFields?.length) {
         values.individualDataUpdateFields.forEach((el) => {
@@ -353,7 +366,9 @@ export function validateUsingSteps(
       if (values.individualDataUpdateFieldsDocuments?.length) {
         values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
           const doc = values.individualDataUpdateFieldsDocuments[index];
-          if (!doc.country || !doc.key || !doc.number) {
+          // Handle nested structure: doc.value.{country, key, number}
+          const docValue = doc.value || doc;
+          if (!docValue.country || !docValue.key || !docValue.number) {
             errors.individualDataUpdateFieldsDocuments =
               'Document type, country and number are required';
           }
@@ -363,7 +378,8 @@ export function validateUsingSteps(
         values.individualDataUpdateFieldsDocumentsToEdit.forEach(
           (el, index) => {
             const doc = values.individualDataUpdateFieldsDocumentsToEdit[index];
-            if (!doc.country || !doc.key || !doc.number) {
+            const docValue = doc.value || doc;
+            if (!docValue.country || !docValue.key || !docValue.number) {
               errors.individualDataUpdateFieldsDocumentsToEdit =
                 'Document type, country and number are required';
             }
@@ -373,8 +389,9 @@ export function validateUsingSteps(
       if (values.individualDataUpdateFieldsIdentities?.length) {
         values.individualDataUpdateFieldsIdentities.forEach((el, index) => {
           const doc = values.individualDataUpdateFieldsIdentities[index];
-          const partner = doc.partner || doc.partner; // For backward compatibility
-          if (!doc.country || !partner || !doc.number) {
+          const docValue = doc.value || doc;
+          const partner = docValue.partner || docValue.agency;
+          if (!docValue.country || !partner || !docValue.number) {
             errors.individualDataUpdateFieldsIdentities =
               'Identity partner, country and number are required';
           }
@@ -385,8 +402,9 @@ export function validateUsingSteps(
           (el, index) => {
             const doc =
               values.individualDataUpdateFieldsIdentitiesToEdit[index];
-            const partner = doc.partner || doc.partner; // For backward compatibility
-            if (!doc.country || !partner || !doc.number) {
+            const docValue = doc.value || doc;
+            const partner = docValue.partner || docValue.agency;
+            if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
             }
@@ -444,7 +462,8 @@ export function validateUsingSteps(
     if (individualData?.documents?.length) {
       individualData.documents.forEach((_el, index) => {
         const doc = values.individualData.documents[index];
-        if (!doc.country || !doc.key || !doc.number) {
+        const docValue = doc.value || doc;
+        if (!docValue.country || !docValue.key || !docValue.number) {
           errors.individualDataUpdateFieldsDocuments =
             'Document type, country and number are required';
         }
@@ -454,7 +473,9 @@ export function validateUsingSteps(
     if (individualData?.identities?.length) {
       individualData.identities.forEach((_el, index) => {
         const doc = values.individualData.identities[index];
-        if (!doc.country || !doc.partner || !doc.number) {
+        const docValue = doc.value || doc;
+        const partner = docValue.partner || docValue.agency;
+        if (!docValue.country || !partner || !docValue.number) {
           errors.individualDataUpdateFieldsIdentities =
             'Identity partner, country and number are required';
         }
@@ -470,7 +491,7 @@ export function validateUsingSteps(
     !values.selectedHousehold &&
     householdRequiredGrievanceTypes.includes(values.issueType)
   ) {
-    errors.selectedHousehold = 'Household is Required';
+    errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
   }
   if (activeStep === GrievanceSteps.Lookup) {
     const individualRequiredIssueTypes = [
@@ -488,9 +509,9 @@ export function validateUsingSteps(
       values.issueType,
     );
     if (isIndividualRequired && !values.selectedIndividual) {
-      errors.selectedIndividual = 'Individual is Required';
+      errors.selectedIndividual = `${beneficiaryGroup?.memberLabel} is Required`;
     } else if (isHouseholdRequired && !values.selectedHousehold) {
-      errors.selectedHousehold = 'Household is Required';
+      errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
     }
   }
   if (
@@ -526,7 +547,8 @@ export function validateUsingSteps(
       .filter((el) => el)
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
-          errors.documentation = 'Documentation name and file are required';
+          errors.documentation =
+            'Grievance Supporting Document name and file are required';
         }
       });
   }

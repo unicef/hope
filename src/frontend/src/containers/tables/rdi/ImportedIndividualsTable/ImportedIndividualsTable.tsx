@@ -5,12 +5,15 @@ import {
   IndividualRdiMergeStatus,
   useAllIndividualsQuery,
 } from '@generated/graphql';
-import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
+import { useProgramContext } from 'src/programContext';
+import { adjustHeadCells } from '@utils/utils';
 import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface ImportedIndividualsTableProps {
   rdi;
@@ -25,7 +28,7 @@ interface ImportedIndividualsTableProps {
   isMerged: boolean;
 }
 
-export function ImportedIndividualsTable({
+function ImportedIndividualsTable({
   rdi,
   rdiId,
   isOnPaper = false,
@@ -38,6 +41,8 @@ export function ImportedIndividualsTable({
   isMerged,
 }: ImportedIndividualsTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialVariables = {
     rdiId,
@@ -49,11 +54,28 @@ export function ImportedIndividualsTable({
       : IndividualRdiMergeStatus.Pending,
   };
 
+  const replacements = {
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    full_name: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
+    relationship: (_beneficiaryGroup) =>
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
+  };
+
+  const adjustedMergedIndividualsHeadCells = adjustHeadCells(
+    mergedIndividualHeadCells,
+    beneficiaryGroup,
+    replacements,
+  );
+  const adjustedImportedIndividualsHeadCells = adjustHeadCells(
+    importedIndividualHeadCells,
+    beneficiaryGroup,
+    replacements,
+  );
   return (
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
         <Grid container justifyContent="flex-end" spacing={3}>
-          <Grid item>
+          <Grid>
             <Box p={3}>
               <FormControlLabel
                 control={
@@ -69,10 +91,11 @@ export function ImportedIndividualsTable({
           </Grid>
         </Grid>
       )}
+
       {isMerged ? (
         <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
-          headCells={mergedIndividualHeadCells}
+          headCells={adjustedMergedIndividualsHeadCells}
           query={useAllIndividualsQuery}
           queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
@@ -82,7 +105,6 @@ export function ImportedIndividualsTable({
             <ImportedIndividualsTableRow
               choices={choicesData}
               key={row.id}
-              isMerged={isMerged}
               individual={row}
               rdi={rdi}
             />
@@ -91,7 +113,7 @@ export function ImportedIndividualsTable({
       ) : (
         <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
-          headCells={importedIndividualHeadCells}
+          headCells={adjustedImportedIndividualsHeadCells}
           query={useAllIndividualsQuery}
           queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
@@ -101,7 +123,6 @@ export function ImportedIndividualsTable({
             <ImportedIndividualsTableRow
               choices={choicesData}
               key={row.id}
-              isMerged={isMerged}
               individual={row}
               rdi={rdi}
             />
@@ -111,3 +132,8 @@ export function ImportedIndividualsTable({
     </div>
   );
 }
+
+export default withErrorBoundary(
+  ImportedIndividualsTable,
+  'ImportedIndividualsTable',
+);

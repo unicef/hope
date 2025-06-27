@@ -8027,6 +8027,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
+                'hint': 'Filter for targeting by extra RDIs',
+                'isFlexField': False,
+                'labelEn': 'Extra RDIs',
+                'labels': [
+                    {
+                        'label': 'Extra RDIs',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'extra_rdis',
+                'required': False,
+                'type': 'SELECT_MANY'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
                 'hint': '',
                 'isFlexField': False,
                 'labelEn': 'Female child headed Household',
@@ -8572,6 +8589,40 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'sex',
                 'required': True,
                 'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Gender group with other sex',
+                'labels': [
+                    {
+                        'label': 'Gender group with other sex',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'other_sex_group_count',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Gender group with unknown sex',
+                'labels': [
+                    {
+                        'label': 'Gender group with unknown sex',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'unknown_sex_group_count',
+                'required': False,
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -22549,6 +22600,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'fresh_i_f',
                 'required': False,
                 'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': 'Field used to identify collisions',
+                'isFlexField': False,
+                'labelEn': 'Identification key',
+                'labels': [
+                    {
+                        'label': 'Identification key',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'identification_key',
+                'required': False,
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -53170,7 +53238,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SLL'
+                        'value': 'SLE'
                     },
                     {
                         'labelEn': 'Silver (one troy ounce)',
@@ -53758,63 +53826,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'who_answers_phone',
                 'required': False,
                 'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                    {
-                        'labelEn': 'Full individual collected',
-                        'labels': [
-                            {
-                                'label': 'Full individual collected',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '1'
-                    },
-                    {
-                        'labelEn': 'No individual data',
-                        'labels': [
-                            {
-                                'label': 'No individual data',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '0'
-                    },
-                    {
-                        'labelEn': 'Partial individuals collected',
-                        'labels': [
-                            {
-                                'label': 'Partial individuals collected',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': '2'
-                    },
-                    {
-                        'labelEn': 'Unknown',
-                        'labels': [
-                            {
-                                'label': 'Unknown',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': ''
-                    }
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Will you be collecting all member Individual data?',
-                'labels': [
-                    {
-                        'label': 'Will you be collecting all member Individual data?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'collect_individual_data',
-                'required': False,
-                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Household',

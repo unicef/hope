@@ -25,7 +25,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    GenericPayment,
+    Payment,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -62,7 +62,11 @@ class TestPaymentVerificationMutations(APITestCase):
         program = ProgramFactory(business_area=cls.business_area)
         program.admin_areas.set(Area.objects.order_by("?")[:3])
 
-        payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
+        payment_plan = PaymentPlanFactory(
+            program_cycle=program.cycles.first(),
+            business_area=cls.business_area,
+            created_by=cls.user,
+        )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
             payment_plan=payment_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
@@ -74,11 +78,10 @@ class TestPaymentVerificationMutations(APITestCase):
             {
                 "registration_data_import": registration_data_import,
                 "admin_area": Area.objects.order_by("?").first(),
+                "program": program,
             },
             {"registration_data_import": registration_data_import},
         )
-
-        household.programs.add(program)
 
         payment = PaymentFactory(
             parent=payment_plan,
@@ -218,9 +221,13 @@ class TestPaymentVerificationMutations(APITestCase):
             )
 
     def test_edit_payment_verification_plan_mutation(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, business_area=self.business_area)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.FINISHED,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-        PaymentFactory(parent=payment_plan, currency="PLN", status=GenericPayment.STATUS_SUCCESS)
+        PaymentFactory(parent=payment_plan, currency="PLN", status=Payment.STATUS_SUCCESS)
         payment_verification_plan = PaymentVerificationPlanFactory(
             payment_plan=payment_plan,
             status=PaymentVerificationPlan.STATUS_PENDING,

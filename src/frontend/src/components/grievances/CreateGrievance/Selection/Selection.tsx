@@ -1,19 +1,20 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import {
-  GRIEVANCE_CATEGORIES_NAMES,
-  GRIEVANCE_CATEGORY_DESCRIPTIONS,
-  GRIEVANCE_ISSUE_TYPES_NAMES,
-  GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
-} from '@utils/constants';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { useProgramContext } from 'src/programContext';
+import {
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
+  GRIEVANCE_CATEGORIES_NAMES,
+  GRIEVANCE_ISSUE_TYPES_NAMES,
+} from '@utils/constants';
 import { ChangeEvent, ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export interface SelectionProps {
   handleChange: (e: ChangeEvent) => void;
@@ -24,7 +25,7 @@ export interface SelectionProps {
   redirectedFromRelatedTicket: boolean;
 }
 
-export function Selection({
+function Selection({
   handleChange,
   choicesData,
   setFieldValue,
@@ -40,14 +41,40 @@ export function Selection({
     '*',
   );
 
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const dataChangeIssueTypes = [
-    { name: 'Household Data Update', value: '13' },
-    { name: 'Individual Data Update', value: '14' },
+    { name: `${beneficiaryGroup?.groupLabel} Data Update`, value: '13' },
+    { name: `${beneficiaryGroup?.memberLabel} Data Update`, value: '14' },
   ];
+
+  function replaceLabels(choices, _beneficiaryGroup) {
+    if (!choices) return [];
+    return choices.map((choice) => {
+      let newName = choice.name;
+      if (_beneficiaryGroup?.memberLabel) {
+        newName = newName.replace(/Individual/g, _beneficiaryGroup.memberLabel);
+      }
+      if (_beneficiaryGroup?.groupLabel) {
+        newName = newName.replace(/Household/g, _beneficiaryGroup.groupLabel);
+      }
+      return { ...choice, name: newName };
+    });
+  }
+  const updatedChoices = replaceLabels(
+    issueTypeDict[values.category]?.subCategories,
+    beneficiaryGroup,
+  );
+
+  const categoryDescriptions =
+    getGrievanceCategoryDescriptions(beneficiaryGroup);
+  const issueTypeDescriptions =
+    getGrievanceIssueTypeDescriptions(beneficiaryGroup);
 
   const issueTypeChoices = redirectedFromRelatedTicket
     ? dataChangeIssueTypes
-    : issueTypeDict[values.category]?.subCategories;
+    : updatedChoices;
 
   const addDisabledProperty = (choices) => {
     if (!choices) return [];
@@ -55,9 +82,12 @@ export function Selection({
 
     return choices.map((choice) => {
       if (
-        choice.name === 'Add Individual' ||
-        choice.name === 'Household Data Update' ||
-        choice.name === 'Withdraw Household'
+        //Add individual
+        choice.value === '16' ||
+        //HH data update
+        choice.value === '13' ||
+        //Withdraw HH
+        choice.value === '17'
       ) {
         return { ...choice, disabled: true };
       }
@@ -69,17 +99,13 @@ export function Selection({
   );
 
   const categoryDescription =
-    GRIEVANCE_CATEGORY_DESCRIPTIONS[
-      GRIEVANCE_CATEGORIES_NAMES[values.category]
-    ] || '';
+    categoryDescriptions[GRIEVANCE_CATEGORIES_NAMES[values.category]] || '';
   const issueTypeDescription =
-    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-      GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
-    ] || '';
+    issueTypeDescriptions[GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]] || '';
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={6}>
+      <Grid size={{ xs: 6 }}>
         <Field
           name="category"
           label="Category"
@@ -95,7 +121,7 @@ export function Selection({
         />
       </Grid>
       {showIssueType(values) && (
-        <Grid item xs={6}>
+        <Grid size={{ xs: 6 }}>
           <Field
             name="issueType"
             label="Issue Type"
@@ -109,13 +135,13 @@ export function Selection({
       {values.category && (
         <>
           <DividerLine />
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LabelizedField label={t('Category Description')}>
               {categoryDescription}
             </LabelizedField>
           </Grid>
           {issueTypeDescription && (
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
               <LabelizedField label={t('Issue Type Description')}>
                 {issueTypeDescription}
               </LabelizedField>
@@ -126,3 +152,5 @@ export function Selection({
     </Grid>
   );
 }
+
+export default withErrorBoundary(Selection, 'Selection');

@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
@@ -51,7 +51,7 @@ export function CommunicationFilters({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid xs={4} item>
+        <Grid size={{ xs: 4 }} >
           <TargetPopulationAutocomplete
             name="targetPopulation"
             value={filter.targetPopulation}
@@ -62,7 +62,7 @@ export function CommunicationFilters({
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs:2 }}>
           <CreatedByAutocomplete
             label={t('Created by')}
             filter={filter}
@@ -75,8 +75,8 @@ export function CommunicationFilters({
             additionalVariables={{ isMessageCreator: true }}
           />
         </Grid>
-        <Grid container item xs={6} spacing={3} alignItems="flex-end">
-          <Grid item xs={6}>
+        <Grid container size={{ xs: 6 }} spacing={3} alignItems="flex-end">
+          <Grid size={{ xs:6 }}>
             <DatePickerFilter
               topLabel={t('Creation Date')}
               label="From"
@@ -85,7 +85,7 @@ export function CommunicationFilters({
               dataCy="filters-creation-date-from"
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs:6 }}>
             <DatePickerFilter
               label={t('To')}
               onChange={(date) => handleFilterChange('createdAtRangeMax', date)}

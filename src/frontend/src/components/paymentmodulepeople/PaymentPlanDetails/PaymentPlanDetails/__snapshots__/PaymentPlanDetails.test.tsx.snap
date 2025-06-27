@@ -3,35 +3,36 @@
 exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should render 1`] = `
 <div>
   <div
-    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-13i4rnv-MuiGrid-root"
+    class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-egkSDF hyjrzB css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dVBluf ebFzuo css-1gtchvp-MuiPaper-root"
+      style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
-        class="sc-ghWlax hIyGwR"
+        class="sc-gNZgCX kFsGVB"
       >
         <h6
-          class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
         >
           Details
         </h6>
       </div>
       <div
-        class="sc-ivxoEo gQJYfN"
+        class="sc-jbAkgO jpddxj"
       >
         <div
-          class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-1jxwjqx-MuiGrid2-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-6 MuiGrid-grid-xs-9 css-1fpp2xl-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-grid-xs-9 MuiGrid2-spacing-xs-6 css-kel0za-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-fAUdSK goVbUg"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Created By
@@ -40,20 +41,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Created By"
                 >
                   <span
-                    class="sc-dntaoT dIDHTF"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
-                    Matthew Sosa
+                    Root Rootkowski
                   </span>
                 </div>
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-fAUdSK goVbUg"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Programme
@@ -62,25 +63,25 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Programme"
                 >
                   <span
-                    class="sc-dntaoT dIDHTF"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <a
-                      class="sc-blHHSb bcGWHN"
-                      href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/details/UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy"
+                      class="sc-FEMpB gVfMNY"
+                      href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/details/UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw"
                     >
-                      Already attention fear well hit instead person.
+                      Test Program
                     </a>
                   </span>
                 </div>
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-fAUdSK goVbUg"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Target Population
@@ -89,25 +90,25 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Target Population"
                 >
                   <span
-                    class="sc-dntaoT dIDHTF"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <a
-                      class="sc-blHHSb bcGWHN"
-                      href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzlmMjQ0YzEtZGRiMC00ZGZmLWE0MzEtN2JiMDFhMTdiMThm"
+                      class="sc-FEMpB gVfMNY"
+                      href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/target-population/UGF5bWVudFBsYW5Ob2RlOjU4MmE3ZTYzLTRkZGEtNDQ3Zi1hYWFhLTQzYWJmMzI0ZTViMw=="
                     >
-                      Report should property early adult.
+                      Reconciled Payment Plan Follow Up
                     </a>
                   </span>
                 </div>
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-fAUdSK goVbUg"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Currency
@@ -116,20 +117,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Currency"
                 >
                   <span
-                    class="sc-dntaoT dIDHTF"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
-                    PLN
+                    USD
                   </span>
                 </div>
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-fAUdSK goVbUg"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Start Date
@@ -138,24 +139,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Start Date"
                 >
                   <span
-                    class="sc-dntaoT dIDHTF"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
-                    <time
-                      datetime="1603756800000"
-                    >
-                      27 Oct 2020
-                    </time>
+                    -
                   </span>
                 </div>
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-fAUdSK goVbUg"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   End Date
@@ -164,24 +161,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-End Date"
                 >
                   <span
-                    class="sc-dntaoT dIDHTF"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
-                    <time
-                      datetime="1631059200000"
-                    >
-                      8 Sep 2021
-                    </time>
+                    -
                   </span>
                 </div>
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-fAUdSK goVbUg"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Dispersion Start Date
@@ -190,24 +183,24 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Dispersion Start Date"
                 >
                   <span
-                    class="sc-dntaoT dIDHTF"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <time
-                      datetime="1842307200000"
+                      datetime="1737676800000"
                     >
-                      19 May 2028
+                      24 Jan 2025
                     </time>
                   </span>
                 </div>
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div>
                 <span
-                  class="sc-fAUdSK goVbUg"
+                  class="sc-fLDLck ivXKQK"
                   color="textSecondary"
                 >
                   Dispersion End Date
@@ -216,27 +209,27 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   data-cy="label-Dispersion End Date"
                 >
                   <span
-                    class="sc-dntaoT dIDHTF"
+                    class="sc-dycHyt kguSQI"
                     color="textSecondary"
                   >
                     <time
-                      datetime="1880755200000"
+                      datetime="1738108800000"
                     >
-                      7 Aug 2029
+                      29 Jan 2025
                     </time>
                   </span>
                 </div>
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
             >
               <div
                 class="MuiBox-root css-15ro776"
               >
                 <div>
                   <span
-                    class="sc-fAUdSK goVbUg"
+                    class="sc-fLDLck ivXKQK"
                     color="textSecondary"
                   >
                     FX Rate Applied
@@ -244,21 +237,27 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                   <div
                     data-cy="label-FX Rate Applied"
                   >
-                    -
+                    <span
+                      class="sc-dycHyt kguSQI"
+                      color="textSecondary"
+                    >
+                      1
+                    </span>
                   </div>
                 </div>
               </div>
               <button
                 aria-label="exchange-rate"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMedium css-zt49xb-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMedium css-9mgek4-MuiButtonBase-root-MuiIconButton-root"
                 data-cy="info-exchange-rate"
                 data-mui-internal-clone-element="true"
+                id=":r1:"
                 tabindex="0"
                 type="button"
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
                   data-testid="InfoIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -267,25 +266,22 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m1 15h-2v-6h2zm0-8h-2V7h2z"
                   />
                 </svg>
-                <span
-                  class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-                />
               </button>
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-spacing-xs-6 MuiGrid-direction-xs-column MuiGrid-grid-xs-3 css-1ua2l6q-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-column MuiGrid2-grid-xs-3 MuiGrid2-spacing-xs-6 css-gxd0v3-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-12 css-1j0u08r-MuiGrid2-root"
             >
               <div
-                class="sc-kLhKbu clvNaq"
+                class="sc-kfeOyU fMDCaE"
                 color="#84A1CA"
               >
                 <div>
                   <span
-                    class="sc-fAUdSK goVbUg"
+                    class="sc-fLDLck ivXKQK"
                     color="textSecondary"
                   >
                     Related Follow-Up Payment Plans
@@ -294,7 +290,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetails should r
                     data-cy="label-Related Follow-Up Payment Plans"
                   >
                     <span
-                      class="sc-dntaoT dIDHTF"
+                      class="sc-dycHyt kguSQI"
                       color="textSecondary"
                     >
                       <div

@@ -51,7 +51,8 @@ export function TargetPopulationAutocomplete({
         first: 20,
         orderBy: 'name',
         name: debouncedInputText,
-        program: [programId],
+        program: programId,
+        status: ['DRAFT'],
       },
       fetchPolicy: 'cache-and-network',
     });
@@ -62,7 +63,11 @@ export function TargetPopulationAutocomplete({
       if (isMounted.current && businessArea) {
         try {
           await loadData({
-            variables: { businessArea, name: debouncedInputText },
+            variables: {
+              program: programId,
+              businessArea,
+              name: debouncedInputText,
+            },
           });
         } catch (error) {
           console.error(error);
@@ -71,7 +76,7 @@ export function TargetPopulationAutocomplete({
     };
 
     void asyncLoadData();
-  }, [loadData, businessArea, debouncedInputText]);
+  }, [loadData, businessArea, programId, debouncedInputText]);
 
   useEffect(() => {
     isMounted.current = true;

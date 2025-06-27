@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { renderUserName } from '@utils/utils';
@@ -22,6 +22,8 @@ export function FollowUpPaymentPlanDetails({
 }: FollowUpPaymentPlanDetailsProps): ReactElement {
   const { t } = useTranslation();
   const {
+    id,
+    name,
     createdBy,
     program,
     currency,
@@ -33,19 +35,18 @@ export function FollowUpPaymentPlanDetails({
       id: sourcePaymentPlanId,
       unicefId: sourcePaymentPlanUnicefId,
     },
-    targetPopulation,
     exchangeRate,
   } = paymentPlan;
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Main Payment Plan')}>
                 <BlackLink
                   to={`/${baseUrl}/payment-module/payment-plans/${sourcePaymentPlanId}`}
@@ -54,51 +55,49 @@ export function FollowUpPaymentPlanDetails({
                 </BlackLink>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Created By')}>
                 {renderUserName(createdBy)}
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Programme')}>
                 <BlackLink to={`/${baseUrl}/details/${program.id}`}>
                   {program.name}
                 </BlackLink>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Target Population')}>
-                <BlackLink
-                  to={`/${baseUrl}/target-population/${targetPopulation.id}`}
-                >
-                  {targetPopulation.name}
+                <BlackLink to={`/${baseUrl}/target-population/${id}`}>
+                  {name}
                 </BlackLink>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Currency')}>{currency}</LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Start Date')}>
                 <UniversalMoment>{startDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('End Date')}>
                 <UniversalMoment>{endDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Dispersion Start Date')}>
                 <UniversalMoment>{dispersionStartDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <LabelizedField label={t('Dispersion End Date')}>
                 <UniversalMoment>{dispersionEndDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={{ xs: 3 }}>
               <Box display="flex" alignItems="center">
                 <Box mr={1}>
                   <LabelizedField label={t('FX Rate Applied')}>

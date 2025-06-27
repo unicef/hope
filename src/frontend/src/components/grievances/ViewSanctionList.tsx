@@ -54,7 +54,7 @@ export function ViewSanctionList({
         <DialogContent>
           <Box mb={3}>
             <Grid container spacing={3}>
-              <Grid item>
+              <Grid>
                 <SearchTextField
                   label={t('Reference Number')}
                   value={filter.referenceNumber}
@@ -62,7 +62,7 @@ export function ViewSanctionList({
                   data-cy="filters-search"
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <SearchTextField
                   label={t('Full Name')}
                   value={filter.fullName}

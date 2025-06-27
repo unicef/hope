@@ -13,8 +13,8 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +42,8 @@ class MessageCrudServices:
         message.number_of_recipients = result.number_of_recipients
         message.households.set(result.households)
 
-        if target_population_id := input_data.get("target_population"):
-            message.target_population = get_object_or_404(TargetPopulation, id=decode_id_string(target_population_id))
+        if payment_plan_id := input_data.get("payment_plan"):
+            message.payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
         if registration_data_import_id := input_data.get("registration_data_import"):
             message.registration_data_import = get_object_or_404(
@@ -52,7 +52,7 @@ class MessageCrudServices:
 
         if message.number_of_recipients == 0:
             err_msg = "No recipients found for the given criteria"
-            logger.error(err_msg)
+            logger.warning(err_msg)
             raise GraphQLError(err_msg)
 
         message.save()
@@ -70,11 +70,11 @@ class MessageCrudServices:
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )
-        elif target_population_id := input_data.get("target_population"):
-            target_population = TargetPopulation.objects.get(id=decode_id_string(target_population_id))
-            if target_population.status == TargetPopulation.STATUS_OPEN:
+        elif payment_plan_id := input_data.get("payment_plan"):
+            payment_plan = PaymentPlan.objects.get(id=decode_id_string(payment_plan_id))
+            if payment_plan.status == PaymentPlan.Status.TP_OPEN:
                 return Household.objects.none()
-            return Household.objects.filter(selections__target_population=target_population).exclude(
+            return Household.objects.filter(payment__parent=payment_plan).exclude(
                 head_of_household__phone_no_valid=False,
                 head_of_household__phone_no_alternative_valid=False,
             )

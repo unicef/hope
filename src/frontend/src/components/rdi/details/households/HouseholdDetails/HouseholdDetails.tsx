@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -34,6 +34,8 @@ export function HouseholdDetails({
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <ContainerColumnWithBorder>
       <Title>
@@ -41,28 +43,28 @@ export function HouseholdDetails({
       </Title>
       <Overview>
         <Grid container spacing={6}>
-          <Grid item xs={3}>
-            <LabelizedField label={t('Household Size')}>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
               {household.size}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Country')}>
               {household.country}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Residence Status')}>
               {residenceChoicesDict[household.residenceStatus]}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Country of Origin')}>
               {household.countryOrigin}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
-            <LabelizedField label={t('Head of Household')}>
+          <Grid size={{ xs: 3 }}>
+            <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
               <ContentLink
                 href={`/${baseUrl}/registration-data-import/individual/${household.headOfHousehold.id}`}
               >
@@ -70,27 +72,27 @@ export function HouseholdDetails({
               </ContentLink>
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('FEMALE CHILD HEADED HOUSEHOLD')}>
               {household.fchildHoh ? 'Yes' : 'No'}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('CHILD HEADED HOUSEHOLD')}>
               {household.childHoh ? 'Yes' : 'No'}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('ADMINISTRATIVE LEVEL 1')}>
               {household.admin1?.name}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('ADMINISTRATIVE LEVEL 2')}>
               {household.admin2?.name}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <LabelizedField label={t('Data Collecting Type')}>
               {selectedProgram?.dataCollectingType?.label}
             </LabelizedField>

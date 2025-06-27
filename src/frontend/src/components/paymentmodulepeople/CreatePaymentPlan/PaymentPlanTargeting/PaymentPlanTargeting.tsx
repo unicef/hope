@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import styled from 'styled-components';
 import { Field } from 'formik';
 import get from 'lodash/get';
@@ -45,7 +45,7 @@ export function PaymentPlanTargeting({
       <OverviewContainer>
         <StyledBox display="flex" flexDirection="column">
           <Grid container>
-            <Grid item xs={6}>
+            <Grid size={{ xs:6 }}>
               <Field
                 name="targetingId"
                 label={t('Target Population')}

@@ -1,4 +1,4 @@
-import { Box, Collapse, Grid } from '@mui/material';
+import { Box, Collapse, Grid2 as Grid } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { FC, ReactElement, useState } from 'react';
 import styled from 'styled-components';

@@ -1,4 +1,4 @@
-import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
+import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -17,6 +17,7 @@ import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const Name = styled.span`
   font-size: 16px;
@@ -40,10 +41,7 @@ interface MessagesProps {
   canAddMessage: boolean;
 }
 
-export function Messages({
-  messages,
-  canAddMessage,
-}: MessagesProps): ReactElement {
+function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
@@ -63,11 +61,11 @@ export function Messages({
     noteId: string,
   ): ReactElement => (
     <Grid container key={noteId}>
-      <Grid item xs={2}>
+      <Grid size={{ xs: 2 }}>
         <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>
-      <Grid item xs={10}>
-        <Grid item xs={12}>
+      <Grid size={{ xs: 10 }}>
+        <Grid size={{ xs: 12 }}>
           <Box display="flex" justifyContent="space-between">
             <Name>{name}</Name>
             <Date>
@@ -75,7 +73,7 @@ export function Messages({
             </Date>
           </Box>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <DescMargin>
             <p>{description}</p>
           </DescMargin>
@@ -104,7 +102,7 @@ export function Messages({
   const myName = `${meData.me.firstName || meData.me.email}`;
 
   return (
-    <Grid item xs={8}>
+    <Grid size={{ xs: 8 }}>
       <Box p={3}>
         <Formik
           initialValues={initialValues}
@@ -130,16 +128,16 @@ export function Messages({
                 {mappedMessages}
                 {canAddMessage && (
                   <Grid container>
-                    <Grid item xs={2}>
+                    <Grid size={{ xs: 2 }}>
                       <Avatar src={myName} alt={myName} />
                     </Grid>
-                    <Grid item xs={10}>
-                      <Grid item xs={12}>
+                    <Grid size={{ xs: 10 }}>
+                      <Grid size={{ xs: 12 }}>
                         <Box display="flex" justifyContent="space-between">
                           <Name>{renderUserName(meData.me)}</Name>
                         </Box>
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <DescMargin>
                           <Form>
                             <Field
@@ -178,3 +176,5 @@ export function Messages({
     </Grid>
   );
 }
+
+export default withErrorBoundary(Messages, 'Messages');

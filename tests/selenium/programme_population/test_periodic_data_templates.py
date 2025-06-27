@@ -16,7 +16,7 @@ from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -41,7 +41,17 @@ def clear_downloaded_files(download_path: str) -> None:
 @pytest.fixture
 def program() -> Program:
     business_area = create_afghanistan()
-    return ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=business_area)
+    beneficiary_group = BeneficiaryGroupFactory(
+        name="Main Menu",
+        group_label="Items Group",
+        group_label_plural="Items Groups",
+        member_label="Item",
+        member_label_plural="Items",
+        master_detail=True,
+    )
+    return ProgramFactory(
+        name="Test Program", status=Program.ACTIVE, business_area=business_area, beneficiary_group=beneficiary_group
+    )
 
 
 @pytest.fixture
@@ -107,9 +117,9 @@ def create_flexible_attribute(
 
 @pytest.mark.usefixtures("login")
 class TestPeriodicDataTemplates:
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_periodic_data_template_export_and_download(
         self,
+        clear_downloaded_files: None,
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,

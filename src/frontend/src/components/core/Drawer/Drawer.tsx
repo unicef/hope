@@ -20,7 +20,7 @@ import { useProgramContext } from 'src/programContext';
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
   if (window.location.hostname === 'localhost') {
-    return '#FF6600';
+    return '#A1E4B6';
   }
   if (url.includes('trn')) {
     return '#BF360C';

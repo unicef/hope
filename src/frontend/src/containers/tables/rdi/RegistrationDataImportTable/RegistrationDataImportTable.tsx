@@ -1,15 +1,17 @@
-import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { TableWrapper } from '@components/core/TableWrapper';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
   useDeduplicationFlagsQuery,
 } from '@generated/graphql';
-import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { dateToIsoString, decodeIdString } from '@utils/utils';
+import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
@@ -31,7 +33,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export function RegistrationDataImportTable({
+function RegistrationDataImportTable({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -41,6 +43,9 @@ export function RegistrationDataImportTable({
   noTitle,
 }: RegistrationDataImportProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: deduplicationFlags } = useDeduplicationFlagsQuery({
     fetchPolicy: 'cache-and-network',
   });
@@ -64,8 +69,23 @@ export function RegistrationDataImportTable({
     handleChange(id);
   };
 
+  const replacements = {
+    numberOfIndividuals: (_beneficiaryGroup) =>
+      `Num. of ${_beneficiaryGroup?.memberLabelPlural}`,
+    numberOfHouseholds: (_beneficiaryGroup) =>
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
+    household__unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup?.groupLabel} ID`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const prepareHeadCells = () => {
-    let header = headCells.slice();
+    let header = adjustedHeadCells.slice();
     if (deduplicationFlags?.canRunDeduplication) {
       header.splice(4, 0, {
         disablePadding: false,
@@ -118,9 +138,17 @@ export function RegistrationDataImportTable({
       />
     </TableWrapper>
   );
-  return noTableStyling ? (
-    <NoTableStyling>{renderTable()}</NoTableStyling>
-  ) : (
-    renderTable()
+  return (
+    <>
+      {noTableStyling ? (
+        <NoTableStyling>{renderTable()}</NoTableStyling>
+      ) : (
+        renderTable()
+      )}
+    </>
   );
 }
+export default withErrorBoundary(
+  RegistrationDataImportTable,
+  'RegistrationDataImportTable',
+);

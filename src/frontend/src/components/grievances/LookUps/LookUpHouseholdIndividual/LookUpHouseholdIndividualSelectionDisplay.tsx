@@ -1,10 +1,9 @@
-import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { StyledBox, BlueText, DarkGrey } from '../LookUpStyles';
+import { Box, Grid2 as Grid } from '@mui/material';
+import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import styled from 'styled-components';
+import { BlueText, DarkGrey, StyledBox } from '../LookUpStyles';
 
 const Types = { household: 'household', individual: 'individual' };
 
@@ -31,9 +30,10 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   setSelectedHousehold,
   selectedIndividual,
   setSelectedIndividual,
-}: LookUpHouseholdIndividualSelectionDisplayProps): ReactElement => {
-  const { t } = useTranslation();
-  const { isSocialDctType } = useProgramContext();
+}: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
+  const { selectedProgram, isSocialDctType } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const handleRemove = (type): void => {
     if (type === Types.household) {
       onValueChange('selectedHousehold', null);
@@ -49,12 +49,12 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   return (
     <Grid container spacing={5}>
       {!isSocialDctType && (
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           <StyledBox disabled={disableUnselectHousehold}>
             <Grid container alignItems="center" justifyContent="space-between">
-              <Grid item>
+              <Grid>
                 <Box display="flex">
-                  {t('Household ID')}:
+                  {`${beneficiaryGroup?.groupLabel} ID`}:
                   <BlueText>
                     &ensp;
                     {selectedHousehold?.unicefId || '-'}
@@ -62,7 +62,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 </Box>
               </Grid>
               {!disableUnselectHousehold && selectedHousehold?.unicefId && (
-                <Grid item>
+                <Grid>
                   <DarkGrey>
                     <Flex>
                       <DeleteIcon
@@ -78,12 +78,12 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
           </StyledBox>
         </Grid>
       )}
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <StyledBox disabled={disableUnselectIndividual}>
           <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
+            <Grid>
               <Box display="flex">
-                {t('Individual ID')}:
+                {`${beneficiaryGroup?.memberLabel} ID`}:
                 <BlueText>
                   &ensp;
                   {selectedIndividual?.unicefId || '-'}
@@ -91,7 +91,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
               </Box>
             </Grid>
             {!disableUnselectIndividual && selectedIndividual?.unicefId && (
-              <Grid item>
+              <Grid>
                 <DarkGrey>
                   <Flex>
                     <DeleteIcon

@@ -106,7 +106,6 @@ class HouseholdFilter(FilterSet):
             "admin_area": ["exact"],
             "admin1": ["exact"],
             "admin2": ["exact"],
-            "target_populations": ["exact"],
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
             "program": ["exact"],
@@ -120,7 +119,6 @@ class HouseholdFilter(FilterSet):
             "household__id",
             "id",
             "unicef_id",
-            "household_ca_id",
             "size",
             "status_label",
             Lower("head_of_household__full_name"),
@@ -134,7 +132,11 @@ class HouseholdFilter(FilterSet):
     )
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import__pk=decode_id_string(value))
+        rdi_id = decode_id_string(value)
+        extra_households = Household.extra_rdis.through.objects.filter(registrationdataimport=rdi_id).values_list(
+            "household_id", flat=True
+        )
+        return queryset.filter(Q(registration_data_import__pk=decode_id_string(value)) | Q(id__in=extra_households))
 
     def phone_no_valid_filter(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         """
@@ -173,12 +175,18 @@ class HouseholdFilter(FilterSet):
 
     def _get_elasticsearch_query_for_households(self, search: str) -> Dict:
         business_area = self.data["business_area"]
+        encoded_program_id = self.data.get("program")
+        filters = [{"term": {"business_area": business_area}}]
+        if encoded_program_id is not None:
+            program_id = decode_id_string(encoded_program_id)
+            filters.append({"term": {"program_id": program_id}})
         query: Dict[str, Any] = {
             "size": "100",
             "_source": False,
             "query": {
                 "bool": {
                     "minimum_should_match": 1,
+                    "filter": filters,
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.unicef_id": {"query": search}}},
@@ -190,14 +198,12 @@ class HouseholdFilter(FilterSet):
                                 "head_of_household.bank_account_info.bank_account_number": {"query": search}
                             }
                         },
-                        {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"detail_id": {"query": search}}},
                         {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
                     ],
                 }
             },
         }
-        if config.USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH_USE_BUSINESS_AREA:  # pragma: no cover
-            query["query"]["bool"]["filter"] = [{"term": {"business_area": business_area}}]
         return query
 
     def search_filter(self, qs: QuerySet[Household], name: str, value: Any) -> QuerySet[Household]:
@@ -224,12 +230,12 @@ class HouseholdFilter(FilterSet):
                 Q(head_of_household__phone_no__icontains=search)
                 | Q(head_of_household__phone_no_alternative__icontains=search)
             )
-        if search_type == "registration_id":
+        if search_type == "detail_id":
             try:
                 int(search)
             except ValueError:
                 raise SearchException("The search value for a given search type should be a number")
-            return qs.filter(registration_id__istartswith=search)
+            return qs.filter(detail_id__istartswith=search)
         if search_type == "kobo_asset_id":
             inner_query = Q()
             split_values_list = search.split(" ")
@@ -362,12 +368,18 @@ class IndividualFilter(FilterSet):
 
     def _get_elasticsearch_query_for_individuals(self, search: str) -> Dict:
         business_area = self.data["business_area"]
+        encoded_program_id = self.data.get("program")
+        filters = [{"term": {"business_area": business_area}}]
+        if encoded_program_id is not None:
+            program_id = decode_id_string(encoded_program_id)
+            filters.append({"term": {"program_id": program_id}})
+
         return {
-            "size": "100",
+            "size": 100,
             "_source": False,
             "query": {
                 "bool": {
-                    "filter": {"term": {"business_area": business_area}},
+                    "filter": filters,
                     "minimum_should_match": 1,
                     "should": [
                         {"match_phrase_prefix": {"unicef_id": {"query": search}}},
@@ -375,7 +387,7 @@ class IndividualFilter(FilterSet):
                         {"match_phrase_prefix": {"full_name": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
-                        {"match_phrase_prefix": {"registration_id": {"query": search}}},
+                        {"match_phrase_prefix": {"detail_id": {"query": search}}},
                         {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
                         {"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}},
                     ],
@@ -403,12 +415,12 @@ class IndividualFilter(FilterSet):
             return qs.filter(full_name__icontains=search)
         if search_type == "phone_no":
             return qs.filter(Q(phone_no__icontains=search) | Q(phone_no_alternative__icontains=search))
-        if search_type == "registration_id":
+        if search_type == "detail_id":
             try:
                 int(search)
             except ValueError:
                 raise SearchException("The search value for a given search type should be a number")
-            return qs.filter(registration_id__icontains=search)
+            return qs.filter(detail_id__icontains=search)
         if search_type == "bank_account_number":
             return qs.filter(bank_account_info__bank_account_number__icontains=search)
         if DocumentType.objects.filter(key=search_type).exists():
@@ -446,12 +458,21 @@ class IndividualFilter(FilterSet):
             return qs
 
     def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
-        return queryset.filter(registration_data_import__pk=decode_id_string(value))
+        rdi_id = decode_id_string(value)
+        extra_households = Household.extra_rdis.through.objects.filter(registrationdataimport=rdi_id).values_list(
+            "household_id", flat=True
+        )
+        return queryset.filter(
+            Q(registration_data_import__pk=rdi_id) | Q(household__id__in=extra_households)
+        ).distinct()
 
     def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
         if value is True:
             return queryset.filter(
-                Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+                Q(deduplication_golden_record_status=DUPLICATE)
+                | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+                | Q(biometric_deduplication_batch_status=DUPLICATE_IN_BATCH)
+                | Q(biometric_deduplication_golden_record_status=DUPLICATE)
             )
         return queryset
 

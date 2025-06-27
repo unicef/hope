@@ -1,20 +1,26 @@
 from rest_framework import serializers
 
 
-class DashboardHouseholdSerializer(serializers.Serializer):
-    currency = serializers.CharField()
+class DashboardBaseSerializer(serializers.Serializer):
     total_delivered_quantity_usd = serializers.DecimalField(max_digits=12, decimal_places=2)
-    total_delivered_quantity = serializers.DecimalField(max_digits=12, decimal_places=2)
     payments = serializers.IntegerField()
     individuals = serializers.IntegerField()
     households = serializers.IntegerField()
     children_counts = serializers.IntegerField()
-    month = serializers.CharField()
     year = serializers.IntegerField()
-    program = serializers.CharField()
+    program = serializers.CharField(required=False)
     sector = serializers.CharField()
     status = serializers.CharField()
-    admin1 = serializers.CharField()
-    fsp = serializers.CharField()
+    fsp = serializers.CharField(required=False)
     delivery_types = serializers.CharField()
     pwd_counts = serializers.IntegerField()
+    reconciled = serializers.IntegerField()
+    finished_payment_plans = serializers.IntegerField()
+    total_payment_plans = serializers.IntegerField()
+    month = serializers.CharField(required=False)
+    admin1 = serializers.CharField(required=False)
+    currency = serializers.CharField(required=False)
+    total_delivered_quantity = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    country = serializers.CharField(required=False)
+    region = serializers.CharField(required=False)
+    total_planned_usd = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)

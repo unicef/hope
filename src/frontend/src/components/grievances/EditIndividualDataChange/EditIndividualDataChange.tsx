@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -19,6 +19,8 @@ import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
 import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
+import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -32,17 +34,20 @@ export interface EditIndividualDataChangeProps {
   field;
 }
 
-export function EditIndividualDataChange({
+function EditIndividualDataChange({
   values,
   setFieldValue,
 }: EditIndividualDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
   const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } =
-    useAllAddIndividualFieldsQuery();
+    useAllAddIndividualFieldsQuery({ fetchPolicy: 'network-only' });
 
   const [
     getIndividual,
@@ -68,7 +73,11 @@ export function EditIndividualDataChange({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   if (!individual) {
-    return <div>{t('You have to select an individual earlier')}</div>;
+    return (
+      <div>
+        {t(`You have to select a ${beneficiaryGroup?.memberLabel} earlier`)}
+      </div>
+    );
   }
   if (
     addIndividualFieldsLoading ||
@@ -95,21 +104,21 @@ export function EditIndividualDataChange({
               render={(arrayHelpers) => (
                 <>
                   {values.individualDataUpdateFields.map((item, index) => (
-                    <EditIndividualDataChangeFieldRow
-                      // eslint-disable-next-line react/no-array-index-key
-                      key={`${index}-${item?.fieldName}`}
-                      itemValue={item}
-                      index={index}
-                      individual={fullIndividual.individual}
-                      fields={
-                        addIndividualFieldsData.allAddIndividualsFieldsAttributes
-                      }
-                      notAvailableFields={notAvailableItems}
-                      onDelete={() => arrayHelpers.remove(index)}
-                      values={values}
-                    />
+                    <Grid size={{ xs: 12 }} key={`${index}-${item?.fieldName}`}>
+                      <EditIndividualDataChangeFieldRow
+                        itemValue={item}
+                        index={index}
+                        individual={fullIndividual.individual}
+                        fields={
+                          addIndividualFieldsData.allAddIndividualsFieldsAttributes
+                        }
+                        notAvailableFields={notAvailableItems}
+                        onDelete={() => arrayHelpers.remove(index)}
+                        values={values}
+                      />
+                    </Grid>
                   ))}
-                  <Grid item xs={4}>
+                  <Grid size={{ xs: 4 }}>
                     <Button
                       color="primary"
                       onClick={() => {
@@ -131,7 +140,11 @@ export function EditIndividualDataChange({
       <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant="h6">{t('Documents')}</Typography>
+            <Typography variant="h6">
+              {t(
+                'Documents: change/upload of document with other info (country, number etc.): add label beneficiary personal documents',
+              )}
+            </Typography>
           </Title>
           <ExistingDocumentFieldArray
             values={values}
@@ -183,3 +196,8 @@ export function EditIndividualDataChange({
     </>
   );
 }
+
+export default withErrorBoundary(
+  EditIndividualDataChange,
+  'EditIndividualDataChange',
+);

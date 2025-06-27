@@ -27,8 +27,6 @@ from hct_mis_api.apps.program.api.serializers import (
 from hct_mis_api.apps.program.api.views import ProgramCycleViewSet
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from tests.unit.api.base import HOPEApiTestCase
 
 
@@ -175,10 +173,9 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             program=self.program,
             status=ProgramCycle.DRAFT,
         )
-        # create TP and PP
-        tp = TargetPopulationFactory(program_cycle=cycle3, program=self.program)
-        pp = PaymentPlanFactory(program_cycle=cycle3, target_population=tp)
-        self.assertEqual(TargetPopulation.objects.count(), 1)
+        # create PP
+        pp = PaymentPlanFactory(program_cycle=cycle3)
+        self.assertEqual(PaymentPlan.objects.count(), 1)
         self.assertEqual(ProgramCycle.objects.count(), 4)
         self.client.force_authenticate(user=self.user)
         url = reverse(
@@ -189,17 +186,12 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         bad_response = self.client.delete(url)
         self.assertEqual(bad_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Don’t allow to delete Cycle with assigned Target Population", bad_response.data)
-        tp.delete()
-
-        bad_response = self.client.delete(url)
-        self.assertEqual(bad_response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Don’t allow to delete Cycle with assigned Payment Plan", bad_response.data)
         pp.delete()
 
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(ProgramCycle.objects.count(), 3)
-        self.assertEqual(TargetPopulation.objects.count(), 0)
+        self.assertEqual(PaymentPlan.objects.count(), 0)
 
     def test_filter_by_status(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -269,6 +261,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.assertEqual(self.cycle1.status, ProgramCycle.ACTIVE)
 
     def test_finish_program_cycle(self) -> None:
+        PaymentPlanFactory(program_cycle=self.cycle1, status=PaymentPlan.Status.TP_OPEN)
         payment_plan = PaymentPlanFactory(program_cycle=self.cycle1, status=PaymentPlan.Status.IN_REVIEW)
         self.client.force_authenticate(user=self.user)
         self.assertEqual(self.cycle1.status, ProgramCycle.ACTIVE)

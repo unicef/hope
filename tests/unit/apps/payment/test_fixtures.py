@@ -23,7 +23,7 @@ class TestFixtures(TestCase):
             code="full",
             weight=1,
             business_areas=[afg],
-            type=DataCollectingType.Type.SOCIAL.value,
+            type=DataCollectingType.Type.STANDARD.value,
         )
         HouseholdFactory()
         generate_delivery_mechanisms()

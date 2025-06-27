@@ -5,15 +5,13 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q, QuerySet, UniqueConstraint, UUIDField
-from django.db.models.signals import post_save
+from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -99,15 +97,6 @@ class OnlyOriginalManager(models.Manager):
     # TODO: remove after data migration
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_original=True)
-
-
-class GenericPaymentTicket(TimeStampedUUIDModel):
-    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_object_id = UUIDField(null=True)
-    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
-
-    class Meta:
-        abstract = True
 
 
 class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, UnicefIdentifiedModel):
@@ -342,6 +331,52 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         CATEGORY_SYSTEM_FLAGGING: "system_flagging_ticket_details",
     }
 
+    business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
+    programs = models.ManyToManyField("program.Program", related_name="grievance_tickets", blank=True)
+    registration_data_import = models.ForeignKey(
+        "registration_data.RegistrationDataImport",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    partner = models.ForeignKey("account.Partner", null=True, blank=True, on_delete=models.SET_NULL)
+    linked_tickets = models.ManyToManyField(
+        to="self",
+        through="GrievanceTicketThrough",
+        related_name="linked_tickets_related",
+        symmetrical=True,
+    )
+    household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)
+    priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_NOT_SET)
+    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_SET)
+    category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
+    issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
+    description = models.TextField(
+        verbose_name=_("Description"),
+        blank=True,
+        help_text=_("The content of the customers query."),
+    )
+    status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW)
+    area = models.CharField(max_length=250, blank=True)
+    admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
+    language = models.TextField(blank=True)
+    consent = models.BooleanField(default=True)
+    ignored = models.BooleanField(default=False, db_index=True)
+    extras = JSONField(blank=True, default=dict)
+    comments = models.TextField(blank=True, null=True)
+
+    is_original = models.BooleanField(db_index=True, default=False)
+    is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
+    copied_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="copied_to",
+        help_text="If this object was copied from another, this field will contain the object it was copied from.",
+    )
+
     user_modified = models.DateTimeField(
         verbose_name=_("Modified"),
         null=True,
@@ -371,53 +406,6 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         null=True,
         blank=True,
         verbose_name=_("Assigned to"),
-    )
-    status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW)
-    category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
-    issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
-    description = models.TextField(
-        verbose_name=_("Description"),
-        blank=True,
-        help_text=_("The content of the customers query."),
-    )
-    admin2 = models.ForeignKey("geo.Area", null=True, blank=True, on_delete=models.SET_NULL)
-    area = models.CharField(max_length=250, blank=True)
-    language = models.TextField(blank=True)
-    consent = models.BooleanField(default=True)
-    business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
-    linked_tickets = models.ManyToManyField(
-        to="self",
-        through="GrievanceTicketThrough",
-        related_name="linked_tickets_related",
-        symmetrical=True,
-    )
-    registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-    )
-    extras = JSONField(blank=True, default=dict)
-    ignored = models.BooleanField(default=False, db_index=True)
-    household_unicef_id = models.CharField(max_length=250, blank=True, null=True, db_index=True)
-    priority = models.IntegerField(verbose_name=_("Priority"), choices=PRIORITY_CHOICES, default=PRIORITY_NOT_SET)
-    urgency = models.IntegerField(verbose_name=_("Urgency"), choices=URGENCY_CHOICES, default=URGENCY_NOT_SET)
-    partner = models.ForeignKey("account.Partner", null=True, blank=True, on_delete=models.SET_NULL)
-    # will be deprecated and removed after data migrations. use m2m 'programs'
-    # programme = models.ForeignKey("program.Program", null=True, blank=True, on_delete=models.SET_NULL)
-    programs = models.ManyToManyField("program.Program", related_name="grievance_tickets", blank=True)
-    comments = models.TextField(blank=True, null=True)
-
-    is_original = models.BooleanField(db_index=True, default=False)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
-    copied_from = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="copied_to",
-        help_text="If this object was copied from another, this field will contain the object it was copied from.",
     )
 
     objects = GrievanceTicketManager()
@@ -521,7 +509,7 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types  # type: ignore # FIXME: Unsupported right operand type for in ("Optional[Dict[int, str]]")
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
-            logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
+            logger.warning(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -571,14 +559,14 @@ class GrievanceTicketThrough(TimeStampedUUIDModel):
 
 
 class TicketNote(TimeStampedUUIDModel):
-    description = models.TextField(
-        verbose_name=_("Description"),
-        help_text=_("The content of the customers query."),
-    )
     ticket = models.ForeignKey(
         "grievance.GrievanceTicket",
         related_name="ticket_notes",
         on_delete=models.CASCADE,
+    )
+    description = models.TextField(
+        verbose_name=_("Description"),
+        help_text=_("The content of the customers query."),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -628,7 +616,7 @@ FEEDBACK_STATUS_FLOW = {
 }
 
 
-class TicketComplaintDetails(GenericPaymentTicket):  # TODO TP drop GenericPaymentTicket
+class TicketComplaintDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
@@ -648,7 +636,7 @@ class TicketComplaintDetails(GenericPaymentTicket):  # TODO TP drop GenericPayme
         on_delete=models.CASCADE,
         null=True,
     )
-    payment = models.OneToOneField(
+    payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
         null=True,
@@ -659,7 +647,7 @@ class TicketComplaintDetails(GenericPaymentTicket):  # TODO TP drop GenericPayme
         verbose_name_plural = "Ticket Complaint Details"
 
 
-class TicketSensitiveDetails(GenericPaymentTicket):  # TODO TP drop GenericPaymentTicket
+class TicketSensitiveDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
@@ -679,7 +667,7 @@ class TicketSensitiveDetails(GenericPaymentTicket):  # TODO TP drop GenericPayme
         on_delete=models.CASCADE,
         null=True,
     )
-    payment = models.OneToOneField(
+    payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
         null=True,
@@ -702,12 +690,19 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
         "household.Household",
         related_name="household_data_update_ticket_details",
         on_delete=models.CASCADE,
-        null=True,
     )
     household_data = JSONField(null=True)
 
     class Meta:
         verbose_name_plural = "Ticket Household Data Update Details"
+
+
+@receiver(post_delete, sender=TicketHouseholdDataUpdateDetails)
+def delete_grievance_ticket_on_household_details_update_delete(
+    sender: TicketHouseholdDataUpdateDetails, instance: TicketHouseholdDataUpdateDetails, **kwargs: Any
+) -> None:
+    if hasattr(instance, "ticket"):  # pragma: no cover
+        instance.ticket.delete()
 
 
 class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
@@ -722,7 +717,6 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         "household.Individual",
         related_name="individual_data_update_ticket_details",
         on_delete=models.CASCADE,
-        null=True,
     )
     individual_data = JSONField(null=True)
     role_reassign_data = JSONField(default=dict)
@@ -733,6 +727,14 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
 
     class Meta:
         verbose_name_plural = "Ticket Individual Data Update Details"
+
+
+@receiver(post_delete, sender=TicketIndividualDataUpdateDetails)
+def delete_grievance_ticket_on_individual_details_update_delete(
+    sender: TicketIndividualDataUpdateDetails, instance: TicketIndividualDataUpdateDetails, **kwargs: Any
+) -> None:
+    if hasattr(instance, "ticket"):  # pragma: no cover
+        instance.ticket.delete()
 
 
 class TicketAddIndividualDetails(TimeStampedUUIDModel):
@@ -749,8 +751,8 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    individual_data = JSONField(null=True)
     approve_status = models.BooleanField(default=False)
+    individual_data = JSONField(null=True)
 
     class Meta:
         verbose_name_plural = "Ticket Add Individual Details"
@@ -770,8 +772,8 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    role_reassign_data = JSONField(default=dict)
     approve_status = models.BooleanField(default=False)
+    role_reassign_data = JSONField(default=dict)
 
     @property
     def household(self) -> "Household":
@@ -793,8 +795,6 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    role_reassign_data = JSONField(default=dict)
-    approve_status = models.BooleanField(default=False)
     reason_household = models.ForeignKey(
         "household.Household",
         related_name="+",
@@ -803,6 +803,8 @@ class TicketDeleteHouseholdDetails(TimeStampedUUIDModel):
         blank=True,
         default=None,
     )
+    approve_status = models.BooleanField(default=False)
+    role_reassign_data = JSONField(default=dict)
 
     class Meta:
         verbose_name_plural = "Ticket Delete Household Details"
@@ -845,7 +847,6 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         related_name="needs_adjudication_ticket_details",
         on_delete=models.CASCADE,
     )
-    is_multiple_duplicates_version = models.BooleanField(default=False)
     # probably unique Individual
     golden_records_individual = models.ForeignKey(
         "household.Individual", related_name="ticket_golden_records", on_delete=models.CASCADE
@@ -857,11 +858,12 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     # list of duplicate Individuals
     # maybe rename to 'selected_duplicates'
     selected_individuals = models.ManyToManyField("household.Individual", related_name="ticket_selected")
-    role_reassign_data = JSONField(default=dict)
-    extra_data = JSONField(default=dict)
     score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
+    is_multiple_duplicates_version = models.BooleanField(default=False)
     is_cross_area = models.BooleanField(default=False)
+    role_reassign_data = JSONField(default=dict)
+    extra_data = JSONField(default=dict)
 
     # deprecated and will remove soon
     selected_individual = models.ForeignKey(
@@ -1054,13 +1056,13 @@ class GrievanceDocument(UUIDModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=100, null=True)
-    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
     grievance_ticket = models.ForeignKey(
         GrievanceTicket, null=True, related_name="support_documents", on_delete=models.SET_NULL
     )
+    created_by = models.ForeignKey(get_user_model(), null=True, related_name="+", on_delete=models.SET_NULL)
     file = models.FileField(upload_to="", blank=True, null=True)
-    file_size = models.IntegerField(null=True)
     content_type = models.CharField(max_length=100, null=False)
+    file_size = models.IntegerField(null=True)
 
     @property
     def file_name(self) -> str:

@@ -44,11 +44,6 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    DeliveryMechanismDataFactory,
-    generate_delivery_mechanisms,
-)
-from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -57,6 +52,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 @flaky
 class TestCloseDataChangeTickets(APITestCase):
     STATUS_CHANGE_MUTATION = """
@@ -76,7 +72,6 @@ class TestCloseDataChangeTickets(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
-        generate_delivery_mechanisms()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         partner = PartnerFactory(name="Partner")
@@ -113,25 +108,19 @@ class TestCloseDataChangeTickets(APITestCase):
         cls.update_partner_access_to_program(partner, cls.program)
         cls.update_partner_access_to_program(partner, program_one)
 
-        household_one = HouseholdFactory.build(
-            id="07a901ed-d2a5-422a-b962-3570da1d5d07", admin_area=cls.admin_area_1, program=cls.program
-        )
+        household_one = HouseholdFactory.build(admin_area=cls.admin_area_1, program=cls.program)
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
         household_one.program = program_one
-        household_one.programs.add(program_one)
 
-        household_two = HouseholdFactory.build(
-            id="603dfd3f-baca-42d1-aac6-3e1c537ddbef", admin_area=cls.admin_area_1, program=cls.program
-        )
+        household_two = HouseholdFactory.build(admin_area=cls.admin_area_1, program=cls.program)
         household_two.household_collection.save()
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.program = program_one
         household_two.registration_data_import.save()
         household_two.program = program_one
-        household_two.programs.add(program_one)
 
         cls.individuals_to_create = [
             {
@@ -158,6 +147,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "family_name": "Example",
                 "phone_no": "+18773523904",
                 "birth_date": "1965-03-15",
+                "unicef_id": "IND-1111",
             },
             {
                 "id": "cd5ced0f-3777-47d8-92ca-5b3aa22f186d",
@@ -166,6 +156,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "family_name": "Doe",
                 "phone_no": "+12315124125",
                 "birth_date": "1975-07-25",
+                "unicef_id": "IND-2222",
             },
         ]
 
@@ -211,7 +202,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         cls.add_individual_grievance_ticket = GrievanceTicketFactory(
-            id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
             admin2=cls.admin_area_1,
@@ -250,7 +240,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         cls.individual_data_change_grievance_ticket = GrievanceTicketFactory(
-            id="acd57aa1-efd8-4c81-ac19-b8cabebe8089",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
@@ -289,7 +278,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         cls.household_data_change_grievance_ticket = GrievanceTicketFactory(
-            id="72ee7d98-6108-4ef0-85bd-2ef20e1d5410",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
@@ -305,7 +293,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         cls.individual_delete_grievance_ticket = GrievanceTicketFactory(
-            id="a2a15944-f836-4764-8163-30e0c47ce3bb",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
             admin2=cls.admin_area_1,
@@ -329,7 +316,6 @@ class TestCloseDataChangeTickets(APITestCase):
             },
             approve_status=True,
         )
-        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
         rebuild_search_index()
 
@@ -443,7 +429,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         grievance_ticket = GrievanceTicketFactory(
-            id="32c3ae7d-fb39-4d69-8559-9d0fa4284790",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=self.admin_area_1,
@@ -560,7 +545,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         grievance_ticket = GrievanceTicketFactory(
-            id="32c3ae7d-fb39-4d69-8559-9d0fa4284790",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
             admin2=cls.admin_area_1,
@@ -722,53 +706,3 @@ class TestCloseDataChangeTickets(APITestCase):
         bank_account_info = BankAccountInfo.objects.get(individual=individual)
         self.assertEqual(bank_account_info.bank_name, "privatbank")
         self.assertEqual(bank_account_info.bank_account_number, "1111222233334444")
-
-    def test_close_update_individual_delivery_mechanism_data(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
-        )
-        dmd = DeliveryMechanismDataFactory(
-            individual=self.individuals[0],
-            delivery_mechanism=self.dm_atm_card,
-        )
-        self.assertEqual(dmd.data, {})
-        ticket = GrievanceTicketFactory(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        TicketIndividualDataUpdateDetailsFactory(
-            ticket=ticket,
-            individual=self.individuals[0],
-            individual_data={
-                "delivery_mechanism_data_to_edit": [
-                    {
-                        "id": str(dmd.id),
-                        "label": self.dm_atm_card.name,
-                        "approve_status": True,
-                        "data_fields": [
-                            {"name": "name_of_cardholder__atm_card", "value": "Marek"},
-                            {"name": "full_name", "value": "MarekMarek"},
-                        ],
-                    },
-                ],
-            },
-        )
-
-        response = self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={
-                "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
-        )
-        assert "errors" not in response, response["errors"]
-
-        individual = self.individuals[0]
-        individual.refresh_from_db()
-        self.assertEqual(individual.full_name, "MarekMarek")
-        dmd.refresh_from_db()
-        self.assertEqual(dmd.data, {"name_of_cardholder__atm_card": "Marek"})

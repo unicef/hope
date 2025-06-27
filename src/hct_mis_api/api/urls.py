@@ -10,6 +10,11 @@ from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
 from hct_mis_api.api.router import APIRouter
+from hct_mis_api.contrib.aurora.views import (
+    OrganizationListView,
+    ProjectListView,
+    RegistrationListView,
+)
 
 app_name = "api"
 router = APIRouter()
@@ -29,17 +34,23 @@ urlpatterns = [
         "lookups/observeddisability/", endpoints.lookups.ObservedDisability().as_view(), name="observeddisability-list"
     ),
     path("lookups/relationship/", endpoints.lookups.Relationship().as_view(), name="relationship-list"),
-    path(
-        "lookups/datacollectingpolicy/",
-        endpoints.lookups.DataCollectingPolicy().as_view(),
-        name="datacollectingpolicy-list",
-    ),
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
     path("lookups/program-statuses/", endpoints.lookups.ProgramStatuses().as_view(), name="program-statuses-list"),
     path("business_areas/", endpoints.core.BusinessAreaListView.as_view(), name="business-area-list"),
     path("programs/", ProgramGlobalListView.as_view(), name="program-global-list"),
+    path("", include("hct_mis_api.apps.program.api.urls.beneficiary_group", namespace="beneficiary-group")),
     path("dashboard/", include("hct_mis_api.apps.dashboard.urls")),
+    path(
+        "systems/aurora/",
+        include(
+            [
+                path("offices/", OrganizationListView.as_view(), name="organization-list"),
+                path("projects/", ProjectListView.as_view(), name="project-list"),
+                path("registrations/", RegistrationListView.as_view(), name="registration-list"),
+            ]
+        ),
+    ),
     path(
         "<slug:business_area>/",
         include(
@@ -90,7 +101,10 @@ urlpatterns = [
                                 "targeting/",
                                 include("hct_mis_api.apps.targeting.api.urls", namespace="targeting"),
                             ),
-                            path("", include("hct_mis_api.apps.program.api.urls", namespace="programs")),
+                            path(
+                                "",
+                                include("hct_mis_api.apps.program.api.urls.program_related", namespace="programs"),
+                            ),
                         ]
                     ),
                 ),

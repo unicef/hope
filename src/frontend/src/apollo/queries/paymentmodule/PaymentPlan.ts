@@ -4,16 +4,81 @@ export const PAYMENT_PLAN_QUERY = gql`
   query PaymentPlan($id: ID!) {
     paymentPlan(id: $id) {
       id
+      name
       version
       unicefId
       status
+      buildStatus
       canCreateFollowUp
+      failedWalletValidationCollectorsIds
       backgroundActionStatus
       canCreatePaymentVerificationPlan
       availablePaymentRecordsCount
       bankReconciliationSuccess
       bankReconciliationError
       exchangeRate
+      fspCommunicationChannel
+      canExportXlsx
+      canDownloadXlsx
+      canSendXlsxPassword
+      volumeByDeliveryMechanism {
+        deliveryMechanism {
+          id
+          name
+          fsp {
+            id
+            name
+          }
+        }
+        volume
+        volumeUsd
+      }
+      availableFundsCommitments {
+        fundsCommitmentNumber
+        fundsCommitmentItems {
+          id
+          paymentPlan {
+            id
+            name
+          }
+          fundsCommitmentItem
+          recSerialNumber
+        }
+      }
+      fundsCommitments {
+        fundsCommitmentNumber
+        insufficientAmount
+        fundsCommitmentItems {
+          id
+          fundsCommitmentItem
+          recSerialNumber
+          wbsElement
+          grantNumber
+          currencyCode
+          commitmentAmountLocal
+          commitmentAmountUsd
+          totalOpenAmountLocal
+          totalOpenAmountUsd
+          sponsor
+          sponsorName
+          fund
+          fundsCenter
+        }
+      }
+      deliveryMechanism {
+        id
+        name
+        code
+      }
+      financialServiceProvider {
+        id
+        name
+      }
+      programCycle {
+        id
+        title
+      }
+      excludedIds
       createdBy {
         id
         firstName
@@ -23,12 +88,11 @@ export const PAYMENT_PLAN_QUERY = gql`
       program {
         id
         name
-        caId
+        status
+        isSocialWorkerProgram
       }
-      targetPopulation {
-        id
-        name
-      }
+      vulnerabilityScoreMin
+      vulnerabilityScoreMax
       adminUrl
       currency
       currencyName
@@ -133,44 +197,25 @@ export const PAYMENT_PLAN_QUERY = gql`
           name
         }
       }
+      steficonRuleTargeting {
+        id
+        rule {
+          id
+          name
+        }
+      }
       hasPaymentListExportFile
       hasFspDeliveryMechanismXlsxTemplate
+      canCreateXlsxWithFspAuthCode
       importedFileDate
       importedFileName
       totalEntitledQuantityUsd
       paymentsConflictsCount
-      deliveryMechanisms {
-        id
-        name
-        code
-        order
-        sentToPaymentGateway
-        chosenConfiguration
-        fsp {
-          id
-          name
-          communicationChannel
-          isPaymentGateway
-        }
-      }
       canSendToPaymentGateway
       canSplit
       splitChoices {
         name
         value
-      }
-      volumeByDeliveryMechanism {
-        deliveryMechanism {
-          id
-          name
-          order
-          fsp {
-            id
-            name
-          }
-        }
-        volume
-        volumeUsd
       }
       verificationPlans {
         totalCount
@@ -266,6 +311,93 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         title
         file
+      }
+      targetingCriteria {
+        __typename
+        id
+        flagExcludeIfActiveAdjudicationTicket
+        flagExcludeIfOnSanctionList
+        householdIds
+        individualIds
+        rules {
+          __typename
+          id
+          householdIds
+          individualIds
+          individualsFiltersBlocks {
+            __typename
+            individualBlockFilters {
+              __typename
+
+              id
+              fieldName
+              flexFieldClassification
+              roundNumber
+              arguments
+              comparisonMethod
+              fieldAttribute {
+                __typename
+                id
+                name
+                labelEn
+                type
+                choices {
+                  value
+                  labelEn
+                }
+                pduData {
+                  id
+                  subtype
+                  numberOfRounds
+                  roundsNames
+                }
+              }
+            }
+          }
+          collectorsFiltersBlocks {
+            __typename
+            id
+            createdAt
+            updatedAt
+            collectorBlockFilters {
+              __typename
+              id
+              createdAt
+              updatedAt
+              fieldName
+              comparisonMethod
+              flexFieldClassification
+              arguments
+              labelEn
+            }
+          }
+          householdsFiltersBlocks {
+            __typename
+            id
+            fieldName
+            flexFieldClassification
+            roundNumber
+            arguments
+            comparisonMethod
+            fieldAttribute {
+              __typename
+              id
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+              pduData {
+                id
+                subtype
+                numberOfRounds
+                roundsNames
+              }
+            }
+          }
+        }
       }
     }
   }

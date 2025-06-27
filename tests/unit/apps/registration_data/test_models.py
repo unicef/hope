@@ -123,7 +123,6 @@ class TestRegistrationDataImportDatahub(TestCase):
         )
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.rdi = RegistrationDataImportFactory(
-            datahub_id=cls.rdi_datahub.id,
             program=cls.program,
         )
 
@@ -134,10 +133,4 @@ class TestRegistrationDataImportDatahub(TestCase):
         self.assertEqual(
             self.rdi_datahub.business_area,
             self.business_area_slug,
-        )
-
-    def test_linked_rdi(self) -> None:
-        self.assertEqual(
-            self.rdi_datahub.linked_rdi,
-            self.rdi,
         )

@@ -7,15 +7,16 @@
       const result: PossibleTypesResultData = {
   "possibleTypes": {
     "Node": [
+      "AccountsNode",
       "ApprovalProcessNode",
       "AreaNode",
       "AreaTypeNode",
       "BankAccountInfoNode",
+      "BeneficiaryGroupNode",
       "BusinessAreaNode",
       "CommunicationMessageNode",
       "CommunicationMessageRecipientMapNode",
       "DataCollectingTypeNode",
-      "DeliveryMechanismDataNode",
       "DeliveryMechanismNode",
       "DeliveryMechanismPerPaymentPlanNode",
       "DocumentNode",
@@ -23,6 +24,7 @@
       "FeedbackNode",
       "FinancialServiceProviderNode",
       "FinancialServiceProviderXlsxTemplateNode",
+      "FundsCommitmentItemNode",
       "GrievanceDocumentNode",
       "GrievanceTicketNode",
       "HouseholdNode",
@@ -55,7 +57,6 @@
       "SanctionListIndividualNode",
       "SteficonRuleNode",
       "SurveyNode",
-      "TargetPopulationNode",
       "TicketAddIndividualDetailsNode",
       "TicketComplaintDetailsNode",
       "TicketDeleteHouseholdDetailsNode",
@@ -71,8 +72,7 @@
       "TicketSensitiveDetailsNode",
       "TicketSystemFlaggingDetailsNode",
       "UserBusinessAreaNode",
-      "UserNode",
-      "VolumeByDeliveryMechanismNode"
+      "UserNode"
     ]
   }
 };

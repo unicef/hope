@@ -3,7 +3,7 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
-import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import PhotoModal from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
@@ -12,7 +12,7 @@ import {
   GrievancesChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { Box, Grid, GridSize, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, GridSize, Typography } from '@mui/material';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
@@ -23,6 +23,8 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import { replaceLabels } from '../utils/createGrievanceUtils';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -32,7 +34,7 @@ interface GrievancesDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export function GrievancesDetails({
+function GrievancesDetails({
   ticket,
   choicesData,
   baseUrl,
@@ -41,7 +43,9 @@ export function GrievancesDetails({
 }: GrievancesDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -97,46 +101,15 @@ export function GrievancesDetails({
     </Box>
   );
 
-  const renderUrl = (
-    obj,
-    objType: string,
-    href: string,
-    displayedId: string,
-  ): ReactElement => {
-    if (isAllPrograms) {
-      return <>{displayedId}</>;
-    }
-
-    if (obj?.objType === objType) {
-      return <ContentLink href={href}>{displayedId}</ContentLink>;
-    }
-
-    return <>-</>;
-  };
-
-  const getUrl = (objType: string, id: string): string => {
-    switch (objType) {
-      case 'PaymentRecord':
-        return `/${baseUrl}/payment-records/${id}`;
-      case 'Payment':
-        return `/${baseUrl}/payment-module/payments/${id}`;
-      case 'PaymentPlan':
-        return `/${baseUrl}/payment-module/payment-plans/${id}`;
-      case 'CashPlan':
-        return `/${baseUrl}/cashplans/${id}`;
-      default:
-        return '';
-    }
-  };
-
   const renderPaymentUrl = (): ReactElement => {
     const paymentRecord = ticket?.paymentRecord;
     if (paymentRecord) {
-      return renderUrl(
-        paymentRecord,
-        paymentRecord.objType,
-        getUrl(paymentRecord.objType, paymentRecord.id),
-        paymentRecord.caId,
+      return (
+        <ContentLink
+          href={`/${baseUrl}/payment-module/payments/${paymentRecord.id}`}
+        >
+          {paymentRecord.unicefId}
+        </ContentLink>
       );
     }
     return <>-</>;
@@ -145,11 +118,12 @@ export function GrievancesDetails({
   const renderPaymentPlanUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
     if (parent) {
-      return renderUrl(
-        parent,
-        parent.objType,
-        getUrl(parent.objType, parent.id),
-        parent.unicefId,
+      return (
+        <ContentLink
+          href={`/${baseUrl}/payment-module/payment-plans/${parent.id}`}
+        >
+          {parent.unicefId}
+        </ContentLink>
       );
     }
     return <>-</>;
@@ -158,10 +132,8 @@ export function GrievancesDetails({
   const renderPaymentPlanVerificationUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
     if (parent) {
-      const url = `/${baseUrl}/payment-verification/${
-        parent.objType === 'CashPlan' ? 'cash-plan' : 'payment-plan'
-      }/${parent.id}`;
-      return renderUrl(parent, parent.objType, url, parent.unicefId);
+      const url = `/${baseUrl}/payment-verification/payment-plan/${parent.id}`;
+      return <ContentLink href={url}>{parent.unicefId}</ContentLink>;
     }
     return <>-</>;
   };
@@ -185,7 +157,7 @@ export function GrievancesDetails({
   };
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">{t('Details')}</Typography>
@@ -247,11 +219,13 @@ export function GrievancesDetails({
               },
               showIssueType && {
                 label: t('Issue Type'),
-                value: <span>{issueType}</span>,
+                value: (
+                  <span>{replaceLabels(issueType, beneficiaryGroup)}</span>
+                ),
                 size: 3,
               },
               !isAllPrograms && {
-                label: t('Household ID'),
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {ticket.household?.id &&
@@ -275,7 +249,8 @@ export function GrievancesDetails({
                 label:
                   isAllPrograms || isSocialDctType
                     ? t('Target ID')
-                    : t('Individual ID'),
+                    : `${beneficiaryGroup?.memberLabel} ID`,
+
                 value:
                   isAllPrograms || isSocialDctType ? (
                     <div>{ticket?.targetId || '-'}</div>
@@ -354,7 +329,7 @@ export function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Documentation'),
+                label: t('Grievance Supporting Documents'),
                 value: mappedDocumentation(),
                 size: 3,
               },
@@ -377,7 +352,7 @@ export function GrievancesDetails({
                   el.label &&
                   el.value &&
                   el.size && (
-                    <Grid key={el.label} item xs={el.size as GridSize}>
+                    <Grid key={el.label} size={{ xs: el.size as GridSize }}>
                       <LabelizedField label={el.label}>
                         {el.value}
                       </LabelizedField>
@@ -390,3 +365,5 @@ export function GrievancesDetails({
     </Grid>
   );
 }
+
+export default withErrorBoundary(GrievancesDetails, 'GrievancesDetails');

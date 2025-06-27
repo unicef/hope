@@ -7,8 +7,8 @@ from hct_mis_api.apps.accountability.services.sampling import Sampling
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class SurveyCrudServices:
@@ -23,14 +23,14 @@ class SurveyCrudServices:
             body=input_data.get("body", ""),
         )
 
-        if target_population := input_data.get("target_population"):
-            obj = get_object_or_404(TargetPopulation, id=decode_id_string(target_population))
-            households = Household.objects.filter(target_populations=obj)
-            survey.target_population = obj
-            survey.program = obj.program
+        if payment_plan := input_data.get("payment_plan"):
+            obj = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan))
+            households = Household.objects.filter(payment__parent=obj)
+            survey.payment_plan = obj
+            survey.program = obj.program_cycle.program
         elif program := input_data.get("program"):
             obj = get_object_or_404(Program, id=decode_id_string(program))
-            households = obj.households_with_tp_in_program
+            households = obj.households_with_payments_in_program
             survey.program = obj
         else:
             raise ValidationError("Target population or program should be provided.")

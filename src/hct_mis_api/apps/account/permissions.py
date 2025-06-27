@@ -94,6 +94,7 @@ class Permissions(Enum):
     PM_IMPORT_XLSX_WITH_ENTITLEMENTS = auto()
     PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS = auto()
     PM_SPLIT = auto()
+    PM_VIEW_PAYMENT_LIST = auto()
 
     PM_LOCK_AND_UNLOCK = auto()
     PM_LOCK_AND_UNLOCK_FSP = auto()
@@ -109,6 +110,11 @@ class Permissions(Enum):
     PM_EXPORT_PDF_SUMMARY = auto()
     PM_SEND_TO_PAYMENT_GATEWAY = auto()
     PM_VIEW_FSP_AUTH_CODE = auto()
+    PM_DOWNLOAD_FSP_AUTH_CODE = auto()
+    PM_SEND_XLSX_PASSWORD = auto()
+    PM_ASSIGN_FUNDS_COMMITMENTS = auto()
+    PM_SYNC_PAYMENT_PLAN_WITH_PG = auto()
+    PM_SYNC_PAYMENT_WITH_PG = auto()
 
     # PaymentPlanSupportingDocument
     PM_DOWNLOAD_SUPPORTING_DOCUMENT = auto()
@@ -279,6 +285,7 @@ DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER = (
     Permissions.TARGETING_VIEW_DETAILS,
     Permissions.PM_VIEW_LIST,
     Permissions.PM_VIEW_DETAILS,
+    Permissions.PM_VIEW_PAYMENT_LIST,
     Permissions.PAYMENT_VERIFICATION_VIEW_LIST,
     Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
     Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
@@ -378,9 +385,12 @@ class BaseNodePermissionMixin:
             raise PermissionDenied("Permission Denied")
 
     @classmethod
-    def get_node(cls, info: Any, object_id: str) -> Optional[Model]:
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
         try:
-            object_instance = cls._meta.model.objects.get(pk=object_id)
+            if "get_object_queryset" in kwargs:
+                object_instance = kwargs.get("get_object_queryset").get(pk=object_id)
+            else:
+                object_instance = cls.get_queryset(cls._meta.model.objects, info).get(pk=object_id)
             cls.check_node_permission(info, object_instance)
         except cls._meta.model.DoesNotExist:
             object_instance = None

@@ -36,10 +36,10 @@ export function ConfirmationDialogProvider({
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationDialogOptions | null>(null);
 
-  const awaitingPromiseRef = useRef<{
-    resolve: () => void;
-    reject: () => void;
-  }>();
+    const awaitingPromiseRef = useRef<{
+      resolve: () => void;
+      reject: () => void;
+    } | null>(null);
 
   const openConfirmation = ({
     catchOnCancel = false,

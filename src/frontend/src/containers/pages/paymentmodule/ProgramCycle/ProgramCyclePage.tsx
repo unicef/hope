@@ -2,15 +2,17 @@ import React, { ReactElement, useState } from 'react';
 import { PageHeader } from '@core/PageHeader';
 import { useTranslation } from 'react-i18next';
 import { ProgramCyclesFilters } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesFilters';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import { useLocation } from 'react-router-dom';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { PermissionDenied } from '@core/PermissionDenied';
 import { useProgramContext } from '../../../../programContext';
 import { TableWrapper } from '@core/TableWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramCyclesTablePaymentModule } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesTablePaymentModule';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -26,6 +28,8 @@ export const ProgramCyclePage = (): ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
+  const { isAllPrograms } = useBaseUrl();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -34,36 +38,41 @@ export const ProgramCyclePage = (): ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
+  const replacements = {
+    totalHouseholdsCount: (_beneficiaryGroup) =>
+      `Total ${_beneficiaryGroup?.groupLabelPlural} Count`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   if (permissions === null) return null;
   if (!selectedProgram) return null;
-  if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
+  if (isAllPrograms) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ProgramCyclePage.tsx');
-      }}
-      componentName="ProgramCyclePage"
-    >
-      <>
-        <PageHeader title={t('Payment Module')} />
-        <ProgramCyclesFilters
-          filter={filter}
-          setFilter={setFilter}
-          initialFilter={initialFilter}
-          appliedFilter={appliedFilter}
-          setAppliedFilter={setAppliedFilter}
+    <>
+      <PageHeader title={t('Payment Module')} />
+      <ProgramCyclesFilters
+        filter={filter}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
+      <TableWrapper>
+        <ProgramCyclesTablePaymentModule
+          program={selectedProgram}
+          filters={appliedFilter}
+          adjustedHeadCells={adjustedHeadCells}
         />
-        <TableWrapper>
-          <ProgramCyclesTablePaymentModule
-            program={selectedProgram}
-            filters={appliedFilter}
-          />
-        </TableWrapper>
-      </>
-    </UniversalErrorBoundary>
+      </TableWrapper>
+    </>
   );
 };
+export default withErrorBoundary(ProgramCyclePage, 'ProgramCyclePage');

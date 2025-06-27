@@ -1,34 +1,20 @@
 import logging
-from typing import TYPE_CHECKING, Any, List, Union
+from typing import TYPE_CHECKING, Any, List
 
-from django.conf import settings
-from django.contrib.postgres.fields import CICharField
-from django.core.validators import (
-    MaxLengthValidator,
-    MinLengthValidator,
-    ProhibitNullCharactersValidator,
-)
 from django.db import models
 from django.db.models import JSONField, Q
-from django.db.models.constraints import UniqueConstraint
-from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
-from model_utils.models import SoftDeletableModel
 
-from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
-from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
-    Household,
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.steficon.models import Rule, RuleCommit
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCollectorRuleFilterBlockBase,
@@ -37,332 +23,12 @@ from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualRuleFilterBlockBase,
 )
-from hct_mis_api.apps.utils.models import (
-    AdminUrlMixin,
-    ConcurrencyModel,
-    RepresentationManager,
-    TimeStampedUUIDModel,
-)
-from hct_mis_api.apps.utils.validators import (
-    DoubleSpaceValidator,
-    StartEndSpaceValidator,
-)
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
-
-
-class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):
-    """Model for target populations.
-
-    Has N:N association with households.
-    """
-
-    ACTIVITY_LOG_MAPPING = create_mapping_dict(
-        [
-            "name",
-            "ca_id",
-            "ca_hash_id",
-            "created_by",
-            "change_date",
-            "changed_by",
-            "finalized_at",
-            "finalized_by",
-            "status",
-            "child_male_count",
-            "child_female_count",
-            "adult_male_count",
-            "adult_female_count",
-            "total_households_count",
-            "total_individuals_count",
-            "program",
-            "targeting_criteria_string",
-            "sent_to_datahub",
-            "steficon_rule",
-            "exclusion_reason",
-            "excluded_ids",
-        ],
-        {
-            "steficon_rule": "additional_formula",
-            "steficon_applied_date": "additional_formula_applied_date",
-            "vulnerability_score_min": "score_min",
-            "vulnerability_score_max": "score_max",
-        },
-    )
-
-    STATUS_OPEN = "OPEN"
-    STATUS_LOCKED = "LOCKED"
-    STATUS_PROCESSING = "PROCESSING"
-    STATUS_STEFICON_WAIT = "STEFICON_WAIT"
-    STATUS_STEFICON_RUN = "STEFICON_RUN"
-    STATUS_STEFICON_COMPLETED = "STEFICON_COMPLETED"
-    STATUS_STEFICON_ERROR = "STEFICON_ERROR"
-    STATUS_SENDING_TO_CASH_ASSIST = "SENDING_TO_CASH_ASSIST"
-    STATUS_READY_FOR_CASH_ASSIST = "READY_FOR_CASH_ASSIST"
-    STATUS_READY_FOR_PAYMENT_MODULE = "READY_FOR_PAYMENT_MODULE"
-    STATUS_ASSIGNED = "ASSIGNED"
-
-    STATUS_CHOICES = (
-        (STATUS_OPEN, _("Open")),
-        (STATUS_LOCKED, _("Locked")),
-        (STATUS_STEFICON_WAIT, _("Waiting for Rule Engine")),
-        (STATUS_STEFICON_RUN, _("Rule Engine Running")),
-        (STATUS_STEFICON_COMPLETED, _("Rule Engine Completed")),
-        (STATUS_STEFICON_ERROR, _("Rule Engine Errored")),
-        (STATUS_PROCESSING, _("Processing")),
-        (STATUS_SENDING_TO_CASH_ASSIST, _("Sending to Cash Assist")),
-        (STATUS_READY_FOR_CASH_ASSIST, _("Ready for cash assist")),
-        (STATUS_READY_FOR_PAYMENT_MODULE, _("Ready for payment module")),
-        (STATUS_ASSIGNED, _("Assigned")),
-    )
-
-    BUILD_STATUS_PENDING = "PENDING"
-    BUILD_STATUS_BUILDING = "BUILDING"
-    BUILD_STATUS_FAILED = "FAILED"
-    BUILD_STATUS_OK = "OK"
-
-    BUILD_STATUS_CHOICES = (
-        (BUILD_STATUS_PENDING, _("Pending")),
-        (BUILD_STATUS_BUILDING, _("Building")),
-        (BUILD_STATUS_FAILED, _("Failed")),
-        (BUILD_STATUS_OK, _("Ok")),
-    )
-
-    name = CICharField(
-        db_index=True,
-        max_length=255,
-        validators=[
-            MinLengthValidator(3),
-            MaxLengthValidator(255),
-            DoubleSpaceValidator,
-            StartEndSpaceValidator,
-            ProhibitNullCharactersValidator(),
-        ],
-    )
-    ca_id = CICharField(max_length=255, null=True, blank=True)
-    ca_hash_id = CICharField(max_length=255, null=True, blank=True)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        related_name="target_populations",
-        null=True,
-    )
-    change_date = models.DateTimeField(null=True, blank=True)
-    changed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        related_name="changed_target_populations",
-        null=True,
-        blank=True,
-    )
-    finalized_at = models.DateTimeField(null=True, blank=True)
-    finalized_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        related_name="finalized_target_populations",
-        null=True,
-        blank=True,
-    )
-    business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=256, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True)
-    build_status = models.CharField(
-        max_length=256, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
-    )
-    built_at = models.DateTimeField(null=True, blank=True)
-    households = models.ManyToManyField(
-        "household.Household",
-        related_name="target_populations",
-        through="HouseholdSelection",
-    )
-    program = models.ForeignKey(
-        "program.Program",
-        help_text="""Set only when the target population moves from draft to
-            candidate list frozen state (approved)""",
-        on_delete=models.PROTECT,
-    )
-    program_cycle = models.ForeignKey(
-        "program.ProgramCycle", on_delete=models.CASCADE, related_name="target_populations"
-    )
-    targeting_criteria = models.OneToOneField(
-        "TargetingCriteria",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="target_population",
-    )
-    sent_to_datahub = models.BooleanField(
-        default=False,
-        help_text="""
-            Flag set when TP is processed by celery task
-            """,
-        db_index=True,
-    )
-    steficon_rule = models.ForeignKey(
-        RuleCommit,
-        null=True,
-        on_delete=models.PROTECT,
-        related_name="target_populations",
-        blank=True,
-    )
-    steficon_applied_date = models.DateTimeField(blank=True, null=True)
-    vulnerability_score_min = models.DecimalField(
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by a tool such as Corticon.",
-        blank=True,
-    )
-    vulnerability_score_max = models.DecimalField(
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by a tool such as Corticon.",
-        blank=True,
-    )
-
-    excluded_ids = models.TextField(blank=True)
-    exclusion_reason = models.TextField(blank=True)
-
-    total_households_count = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    total_individuals_count = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    child_male_count = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    child_female_count = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    adult_male_count = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-    adult_female_count = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-    )
-
-    storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
-
-    @property
-    def excluded_household_ids(self) -> List:
-        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
-
-    @property
-    def household_list(self) -> "QuerySet":
-        if self.status == TargetPopulation.STATUS_OPEN:
-            return self.households.all()
-        params = {
-            "target_population": self,
-        }
-        if self.vulnerability_score_max is not None:
-            params["vulnerability_score__lte"] = self.vulnerability_score_max
-        if self.vulnerability_score_min is not None:
-            params["vulnerability_score__gte"] = self.vulnerability_score_min
-        return Household.objects.filter(selections__in=HouseholdSelection.objects.filter(**params))
-
-    def get_criteria_string(self) -> str:
-        try:
-            return self.targeting_criteria.get_criteria_string()
-        except Exception:
-            return ""
-
-    @property
-    def targeting_criteria_string(self) -> str:
-        return Truncator(self.get_criteria_string()).chars(390, "...")
-
-    @property
-    def has_empty_criteria(self) -> bool:
-        return self.targeting_criteria is None or self.targeting_criteria.rules.count() == 0
-
-    @property
-    def has_empty_ids_criteria(self) -> bool:
-        # TODO: update
-        return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
-
-    @property
-    def allowed_steficon_rule(self) -> Union[Rule, None]:
-        if not self.program:
-            return None
-        tp = (
-            TargetPopulation.objects.filter(
-                program=self.program,
-                steficon_rule__isnull=False,
-            )
-            .filter(status__in=(TargetPopulation.STATUS_PROCESSING, TargetPopulation.STATUS_READY_FOR_CASH_ASSIST))
-            .order_by("-created_at")
-            .distinct()
-            .first()
-        )
-        if tp is None:
-            return None
-        return tp.steficon_rule.rule
-
-    def set_to_ready_for_cash_assist(self) -> None:
-        self.status = self.STATUS_READY_FOR_CASH_ASSIST
-        self.sent_to_datahub = True
-
-    def is_finalized(self) -> bool:
-        return self.status in (self.STATUS_PROCESSING, self.STATUS_READY_FOR_CASH_ASSIST)
-
-    def is_locked(self) -> bool:
-        return self.status in (
-            self.STATUS_LOCKED,
-            self.STATUS_STEFICON_COMPLETED,
-            self.STATUS_STEFICON_ERROR,
-            self.STATUS_STEFICON_RUN,
-        )
-
-    def is_open(self) -> bool:
-        return self.status in (self.STATUS_OPEN,)
-
-    def __str__(self) -> str:
-        return self.name
-
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=["name", "business_area", "program", "is_removed"],
-                condition=Q(is_removed=False),
-                name="target_population_unique_if_not_removed",
-            )
-        ]
-        verbose_name = "Target Population"
-
-
-class HouseholdSelection(TimeStampedUUIDModel):
-    """
-    M2M table between Households and TargetPopulations
-    """
-
-    household = models.ForeignKey(
-        "household.Household",
-        on_delete=models.CASCADE,
-        related_name="selections",
-    )
-    target_population = models.ForeignKey("TargetPopulation", on_delete=models.CASCADE, related_name="selections")
-    vulnerability_score = models.DecimalField(
-        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
-    )
-    is_original = models.BooleanField(db_index=True, default=False)
-    is_migration_handled = models.BooleanField(default=False)
-
-    objects = RepresentationManager()
-    original_and_repr_objects = models.Manager()
-
-    class Meta:
-        unique_together = ("household", "target_population")
-        verbose_name = "Household Selection"
 
 
 class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
@@ -382,37 +48,21 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         default=False,
         help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
     )
-    # TODO: deprecated and move 'TargetingCriteriaRule'
-    household_ids = models.TextField(blank=True)
-    # TODO: deprecated and move 'TargetingCriteriaRule'
-    individual_ids = models.TextField(blank=True)
 
     def get_rules(self) -> "QuerySet":
         return self.rules.all()
 
-    def get_excluded_household_ids(self) -> List["UUID"]:
-        return self.target_population.excluded_household_ids
+    def get_excluded_household_ids(self) -> List[str]:
+        if not self.payment_plan.excluded_ids:
+            return []
+        hh_ids_list = []
+        hh_ids_list.extend(hh_id.strip() for hh_id in self.payment_plan.excluded_ids.split(",") if hh_id.strip())
+        return hh_ids_list
 
     def get_query(self) -> Q:
         query = super().get_query()
-        if (
-            self.target_population
-            and self.target_population.status != TargetPopulation.STATUS_OPEN
-            and self.target_population.program is not None
-        ):
+        if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
             query &= Q(size__gt=0)
-
-        q_hh_ids = Q(unicef_id__in=self.household_ids.split(", "))
-        q_ind_ids = Q(individuals__unicef_id__in=self.individual_ids.split(", "))
-
-        if self.household_ids and self.individual_ids:
-            query &= Q(q_hh_ids | q_ind_ids)
-            return query
-
-        if self.household_ids:
-            query &= q_hh_ids
-        if self.individual_ids:
-            query &= q_ind_ids
         return query
 
 
@@ -504,7 +154,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     @property
     def is_social_worker_program(self) -> bool:
         try:
-            return self.targeting_criteria_rule.targeting_criteria.target_population.program.is_social_worker_program
+            return (
+                self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
+            )
         except (
             AttributeError,
             TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,
@@ -573,10 +225,6 @@ class TargetingCollectorRuleFilterBlock(
 
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
-    """
-    This is one field like 'bank_account_number__transfer_to_account' - YES, NO
-    """
-
     collector_block_filters = models.ForeignKey(
         "TargetingCollectorRuleFilterBlock",
         related_name="collector_block_filters",
@@ -599,7 +247,9 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     )
 
     def get_query(self) -> Q:
-        program = self.collector_block_filters.targeting_criteria_rule.targeting_criteria.target_population.program
+        program = (
+            self.collector_block_filters.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
+        )
         argument = self.arguments[0] if len(self.arguments) else None
         if argument is None:
             return Q()
@@ -611,16 +261,11 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
         collectors_ind_query = Individual.objects.filter(
             pk__in=list(collector_primary_qs),
         )
-        # If argument is Yes
-        if argument.lower() == "yes":
-            individuals_with_field_query = collectors_ind_query.filter(
-                delivery_mechanisms_data__data__has_key=self.field_name,
-                delivery_mechanisms_data__is_valid=True,
-            )
-        # If argument is No
-        else:
-            individuals_with_field_query = collectors_ind_query.exclude(
-                delivery_mechanisms_data__data__has_key=self.field_name,
-                delivery_mechanisms_data__is_valid=True,
-            )
+
+        account_type, field_name = self.field_name.split("__")
+        query_method = collectors_ind_query.filter if argument is True else collectors_ind_query.exclude
+        individuals_with_field_query = query_method(
+            accounts__data__has_key=field_name,
+            accounts__account_type__key=account_type,
+        )
         return Q(pk__in=list(individuals_with_field_query.values_list("household_id", flat=True)))

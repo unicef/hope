@@ -8,20 +8,22 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
-import { PaymentVerificationFilters } from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import PaymentVerificationFilters from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
+import { PaymentPlanStatus } from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import PaymentVerificationTable from '@containers/tables/payments/PaymentVerificationTable/PaymentVerificationTable';
 
 const initialFilter = {
+  status: [PaymentPlanStatus.Finished, PaymentPlanStatus.Accepted],
   search: '',
   verificationStatus: [],
   serviceProvider: '',
-  deliveryType: [],
+  deliveryTypes: [],
   startDate: '',
   endDate: '',
 };
 
-export function PaymentVerificationPage(): ReactElement {
+function PaymentVerificationPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -39,14 +41,7 @@ export function PaymentVerificationPage(): ReactElement {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PaymentVerificationPage.tsx');
-      }}
-      componentName="PaymentVerificationPage"
-    >
+    <>
       <PageHeader title={t('Payment Verification')} />
       <PaymentVerificationFilters
         filter={filter}
@@ -65,6 +60,10 @@ export function PaymentVerificationPage(): ReactElement {
           )}
         />
       </TableWrapper>
-    </UniversalErrorBoundary>
+    </>
   );
 }
+export default withErrorBoundary(
+  PaymentVerificationPage,
+  'PaymentVerificationPage',
+);

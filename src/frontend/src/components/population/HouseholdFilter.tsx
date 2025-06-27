@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
@@ -7,14 +7,15 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery, ProgramNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { householdTableOrderOptions } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { DocumentSearchField } from '@core/DocumentSearchField';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { generateTableOrderOptionsGroup } from '@utils/constants';
 
 interface HouseholdFiltersProps {
   filter;
@@ -38,6 +39,8 @@ export function HouseholdFilters({
   isOnPaper = true,
 }: HouseholdFiltersProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
@@ -59,6 +62,9 @@ export function HouseholdFilters({
     clearFilter();
   };
 
+  const householdTableOrderOptions =
+    generateTableOrderOptionsGroup(beneficiaryGroup);
+
   return (
     <FiltersSection
       clearHandler={handleClearFilter}
@@ -66,7 +72,7 @@ export function HouseholdFilters({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
@@ -81,7 +87,7 @@ export function HouseholdFilters({
           choices={choicesData?.documentTypeChoices}
         />
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -90,7 +96,7 @@ export function HouseholdFilters({
               icon={<FlashOnIcon />}
               data-cy="hh-filters-program"
             >
-              {programs.map((program) => (
+              {programs?.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
                   {program.name}
                 </MenuItem>
@@ -98,7 +104,7 @@ export function HouseholdFilters({
             </SelectFilter>
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('residenceStatus', e.target.value)
@@ -116,9 +122,9 @@ export function HouseholdFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
-            topLabel={t('Household Size')}
+            topLabel={`${beneficiaryGroup?.groupLabel} ${t('Size')}`}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
@@ -129,7 +135,7 @@ export function HouseholdFilters({
             data-cy="hh-filters-household-size-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             value={filter.householdSizeMax}
             placeholder={t('To')}
@@ -141,7 +147,7 @@ export function HouseholdFilters({
             data-cy="hh-filters-household-size-to"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
@@ -149,14 +155,14 @@ export function HouseholdFilters({
             data-cy="hh-filters-order-by"
             disableClearable
           >
-            {householdTableOrderOptions.map((order) => (
+            {householdTableOrderOptions?.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}
@@ -175,7 +181,7 @@ export function HouseholdFilters({
           </SelectFilter>
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid size={{ xs: 3 }}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -191,7 +197,7 @@ export function HouseholdFilters({
             </SelectFilter>
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <AdminAreaAutocomplete
             name="admin1"
             level={1}
@@ -205,7 +211,7 @@ export function HouseholdFilters({
             dataCy="hh-filters-admin1"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <AdminAreaAutocomplete
             name="admin2"
             level={2}

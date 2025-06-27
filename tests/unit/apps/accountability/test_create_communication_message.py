@@ -8,10 +8,10 @@ from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestCreateCommunicationMessage(APITestCase):
@@ -32,8 +32,8 @@ mutation CreateAccountabilityCommunicationMessage (
       households {
         totalCount
       }
-      targetPopulation {
-        totalFamilySize
+      paymentPlan {
+        name
       }
       registrationDataImport {
         name
@@ -55,13 +55,20 @@ mutation CreateAccountabilityCommunicationMessage (
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.update_partner_access_to_program(partner, cls.program)
-        cls.target_population = TargetPopulationFactory(
+        cls.payment_plan = PaymentPlanFactory(
+            name="Test Message Payment Plan",
             business_area=cls.business_area,
-            status=TargetPopulation.STATUS_PROCESSING,
+            status=PaymentPlan.Status.TP_PROCESSING,
+            created_by=cls.user,
+            program_cycle=cls.program.cycles.first(),
         )
 
         cls.households = [create_household()[0] for _ in range(14)]
-        cls.target_population.households.set(cls.households)
+        for hh in cls.households:
+            PaymentFactory(
+                parent=cls.payment_plan,
+                household=hh,
+            )
 
         cls.sampling_data = {
             Survey.SAMPLING_FULL_LIST: {
@@ -96,7 +103,7 @@ mutation CreateAccountabilityCommunicationMessage (
                 "input": {
                     "title": "Test message",
                     "body": "Test body",
-                    "targetPopulation": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
+                    "paymentPlan": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),
                     "samplingType": Survey.SAMPLING_FULL_LIST,
                     **self.sampling_data[Survey.SAMPLING_FULL_LIST],
                 },
@@ -131,7 +138,7 @@ mutation CreateAccountabilityCommunicationMessage (
                     "input": {
                         "title": "Test message",
                         "body": "Test body",
-                        "targetPopulation": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
+                        "paymentPlan": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),
                         "samplingType": sampling_type,
                         **self.sampling_data[sampling_type],
                     },
@@ -139,7 +146,7 @@ mutation CreateAccountabilityCommunicationMessage (
             )
             self.assertEqual(broadcast_message_mock.call_count, 1)
             if sampling_type == Survey.SAMPLING_FULL_LIST:
-                self.assertEqual(len(broadcast_message_mock.call_args[0][0]), self.target_population.households.count())
+                self.assertEqual(len(broadcast_message_mock.call_args[0][0]), self.payment_plan.payment_items.count())
             self.assertEqual(broadcast_message_mock.call_args[0][1], "Test body")
 
     @parameterized.expand(

@@ -17,12 +17,12 @@ import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
 import { PeopleFilter } from '@components/people/PeopleFilter';
 import { Box, Tabs, Tab, Fade, Tooltip } from '@mui/material';
 import { useProgramContext } from 'src/programContext';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const PeoplePage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { programHasPdu } = useProgramContext();
+  const { programHasPdu = false } = useProgramContext();
   const { businessArea } = useBaseUrl();
   const isNewTemplateJustCreated =
     location.state?.isNewTemplateJustCreated || false;
@@ -72,14 +72,7 @@ export const PeoplePage = (): ReactElement => {
     return <PermissionDenied />;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PeoplePage.tsx');
-      }}
-      componentName="PeoplePage"
-    >
+    <>
       <PageHeader
         title={t('People')}
         tabs={
@@ -146,6 +139,8 @@ export const PeoplePage = (): ReactElement => {
           )}
         </Box>
       </Fade>
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(PeoplePage, 'PeoplePage');

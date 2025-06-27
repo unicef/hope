@@ -1,41 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Edit FSP 1`] = `
+exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render FSP 1`] = `
 <div>
   <div
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
+      style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
         class="MuiBox-root css-tdpf08"
       >
         <h6
-          class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
         >
           FSPs
         </h6>
-        <a
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-dl1jos-MuiButtonBase-root-MuiButton-root"
-          href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/undefined/setup-fsp/edit"
-          tabindex="0"
-        >
-          Edit FSP
-          <span
-            class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-          />
-        </a>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
           <div>
             <span
-              class="sc-fAUdSK goVbUg"
+              class="sc-fLDLck ivXKQK"
               color="textSecondary"
             >
               Cash
@@ -44,161 +35,63 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Cash"
             >
               <span
-                class="sc-dntaoT dIDHTF"
+                class="sc-dycHyt kguSQI"
                 color="textSecondary"
               >
-                Miranda Ltd
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
-        >
-          <div>
-            <span
-              class="sc-fAUdSK goVbUg"
-              color="textSecondary"
-            >
-              In Kind
-            </span>
-            <div
-              data-cy="label-In Kind"
-            >
-              <span
-                class="sc-dntaoT dIDHTF"
-                color="textSecondary"
-              >
-                Frazier-Watson
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
-        >
-          <div>
-            <span
-              class="sc-fAUdSK goVbUg"
-              color="textSecondary"
-            >
-              Transfer
-            </span>
-            <div
-              data-cy="label-Transfer"
-            >
-              <span
-                class="sc-dntaoT dIDHTF"
-                color="textSecondary"
-              >
-                Bray Group
+                Test FSP 1
               </span>
             </div>
           </div>
         </div>
       </div>
       <div
-        class="sc-gtLWhw VFxTS"
+        class="sc-gjcoXW jQCndt"
       >
         <div
-          class="sc-egkSDF cYYMIc"
+          class="sc-dVBluf cFSYVV"
         />
       </div>
       <div
         class="MuiBox-root css-j7qwjs"
       >
         <div
-          class="sc-ghWlax bzkNxN"
+          class="sc-gNZgCX lhjjcp"
         >
           <h6
-            class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
           >
             Volume by Delivery Mechanism
           </h6>
            
         </div>
         <div
-          class="sc-kLhKbu iAQbEA"
+          class="sc-kfeOyU bQxXsK"
         >
           <div
-            class="MuiGrid-root MuiGrid-container css-1bzpx2o-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
             >
               <div
-                class="sc-ivxoEo dPHKrZ"
+                class="sc-jbAkgO iOCnQX"
                 color="#D8E1EE"
               >
                 <div>
                   <span
-                    class="sc-fAUdSK goVbUg"
+                    class="sc-fLDLck ivXKQK"
                     color="textSecondary"
                   >
-                    Cash (Miranda Ltd)
+                    Cash (Test FSP 1)
                   </span>
                   <div
-                    data-cy="label-Cash (Miranda Ltd)"
+                    data-cy="label-Cash (Test FSP 1)"
                   >
                     <span
-                      class="sc-dntaoT dIDHTF"
+                      class="sc-dycHyt kguSQI"
                       color="textSecondary"
                     >
-                      0 PLN (0 USD)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
-            >
-              <div
-                class="sc-ivxoEo bA-DRh"
-                color=" #d8d8d8"
-              >
-                <div>
-                  <span
-                    class="sc-fAUdSK goVbUg"
-                    color="textSecondary"
-                  >
-                    In Kind (Frazier-Watson)
-                  </span>
-                  <div
-                    data-cy="label-In Kind (Frazier-Watson)"
-                  >
-                    <span
-                      class="sc-dntaoT dIDHTF"
-                      color="textSecondary"
-                    >
-                      0 PLN (0 USD)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
-            >
-              <div
-                class="sc-ivxoEo eiTvYj"
-                color="#003C8F"
-              >
-                <div>
-                  <span
-                    class="sc-fAUdSK goVbUg"
-                    color="textSecondary"
-                  >
-                    Transfer (Bray Group)
-                  </span>
-                  <div
-                    data-cy="label-Transfer (Bray Group)"
-                  >
-                    <span
-                      class="sc-dntaoT dIDHTF"
-                      color="textSecondary"
-                    >
-                      0 PLN (0 USD)
+                      424 USD (424 USD)
                     </span>
                   </div>
                 </div>
@@ -206,13 +99,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-xg0rmm-MuiGrid2-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
             >
               <div
-                class="sc-ixGGxD cHDLrf"
+                class="sc-hRDKVd bCxRDr"
               >
                 <canvas
                   height="0"
@@ -230,33 +123,123 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
 </div>
 `;
 
-exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Set Up FSP 1`] = `
+exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render not setup FSP 1`] = `
 <div>
   <div
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-FEMpB iyPpzz css-1gtchvp-MuiPaper-root"
+      style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
     >
       <div
         class="MuiBox-root css-tdpf08"
       >
         <h6
-          class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
         >
           FSPs
         </h6>
-        <a
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-dl1jos-MuiButtonBase-root-MuiButton-root"
-          data-cy="button-set-up-fsp"
-          href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/undefined/setup-fsp/create"
-          tabindex="0"
+      </div>
+      <div
+        class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row MuiGrid2-spacing-xs-3 css-17oen6o-MuiGrid2-root"
+      >
+        <div
+          class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-3 css-hxbzlh-MuiGrid2-root"
         >
-          Set up FSP
-          <span
-            class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-          />
-        </a>
+          <div>
+            <span
+              class="sc-fLDLck ivXKQK"
+              color="textSecondary"
+            >
+              -
+            </span>
+            <div
+              data-cy="label--"
+            >
+              <span
+                class="sc-dycHyt kguSQI"
+                color="textSecondary"
+              >
+                Test FSP 1
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="sc-gjcoXW jQCndt"
+      >
+        <div
+          class="sc-dVBluf cFSYVV"
+        />
+      </div>
+      <div
+        class="MuiBox-root css-j7qwjs"
+      >
+        <div
+          class="sc-gNZgCX lhjjcp"
+        >
+          <h6
+            class="MuiTypography-root MuiTypography-h6 css-66ugg1-MuiTypography-root"
+          >
+            Volume by Delivery Mechanism
+          </h6>
+           
+        </div>
+        <div
+          class="sc-kfeOyU bQxXsK"
+        >
+          <div
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-188izze-MuiGrid2-root"
+          >
+            <div
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-6 css-ticvdu-MuiGrid2-root"
+            >
+              <div
+                class="sc-jbAkgO iOCnQX"
+                color="#D8E1EE"
+              >
+                <div>
+                  <span
+                    class="sc-fLDLck ivXKQK"
+                    color="textSecondary"
+                  >
+                    Cash (Test FSP 1)
+                  </span>
+                  <div
+                    data-cy="label-Cash (Test FSP 1)"
+                  >
+                    <span
+                      class="sc-dycHyt kguSQI"
+                      color="textSecondary"
+                    >
+                      424 USD (424 USD)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row css-xg0rmm-MuiGrid2-root"
+          >
+            <div
+              class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-4 css-17yh78r-MuiGrid2-root"
+            >
+              <div
+                class="sc-hRDKVd bCxRDr"
+              >
+                <canvas
+                  height="0"
+                  role="img"
+                  style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
+                  width="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -19,8 +19,8 @@ from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     get_program_id_from_headers,
 )
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class ProgramFilter(FilterSet):
@@ -38,6 +38,7 @@ class ProgramFilter(FilterSet):
     data_collecting_type = CharFilter(field_name="data_collecting_type__code", lookup_expr="exact")
     name = CharFilter(field_name="name", lookup_expr="istartswith")
     compatible_dct = BooleanFilter(method="compatible_dct_filter")
+    beneficiary_group_match = BooleanFilter(method="beneficiary_group_match_filter", required=True)
 
     class Meta:
         fields = (
@@ -50,6 +51,7 @@ class ProgramFilter(FilterSet):
             "start_date",
             "end_date",
             "name",
+            "beneficiary_group_match",
         )
         model = Program
 
@@ -69,8 +71,8 @@ class ProgramFilter(FilterSet):
     def filter_number_of_households_with_tp_in_program(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:
         queryset = queryset.annotate(
             total_hh_count=Count(
-                "targetpopulation__households",
-                filter=~Q(targetpopulation__status=TargetPopulation.STATUS_OPEN),
+                "household_count",
+                filter=~Q(cycles__payment_plans__status=PaymentPlan.Status.TP_OPEN),
                 distinct=True,
             ),
         )
@@ -96,6 +98,13 @@ class ProgramFilter(FilterSet):
             return qs.filter(data_collecting_type__compatible_types=current_program.data_collecting_type).exclude(
                 id=program_id
             )
+        return qs
+
+    def beneficiary_group_match_filter(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
+        program_id = get_program_id_from_headers(self.request.headers)
+        if value and program_id:
+            current_program = Program.objects.get(id=program_id)
+            return qs.filter(beneficiary_group=current_program.beneficiary_group).exclude(id=program_id)
         return qs
 
 

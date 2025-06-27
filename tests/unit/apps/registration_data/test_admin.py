@@ -21,21 +21,19 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.admin import RegistrationDataImportAdmin
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.fixtures import (
-    HouseholdSelectionFactory,
-    TargetPopulationFactory,
-)
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class RegistrationDataImportAdminDeleteTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -97,6 +95,7 @@ class RegistrationDataImportAdminDeleteTest(TestCase):
         self.assertEqual(PendingDocument.objects.count(), 0)
 
 
+@pytest.mark.elasticsearch
 class RegistrationDataImportAdminDeleteMergedTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -147,17 +146,15 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
             individual=cls.individuals[0],
         )
 
-        cls.target_population = TargetPopulationFactory(business_area=afghanistan, program=program)
-        cls.household_selection = HouseholdSelectionFactory(
-            household=cls.household, target_population=cls.target_population
-        )
+        cls.payment_plan = PaymentPlanFactory(business_area=afghanistan, program_cycle=program.cycles.first())
+        cls.payment = PaymentFactory(household=cls.household, parent=cls.payment_plan)
         rebuild_search_index()
 
     def test_delete_merged_rdi(self) -> None:
         self.assertEqual(GrievanceTicket.objects.count(), 2)
         self.assertEqual(TicketIndividualDataUpdateDetails.objects.count(), 1)
         self.assertEqual(TicketComplaintDetails.objects.count(), 1)
-        self.assertEqual(HouseholdSelection.objects.count(), 1)
+        self.assertEqual(Payment.objects.count(), 1)
 
         self.assertEqual(RegistrationDataImport.objects.count(), 1)
 
@@ -177,8 +174,8 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
         self.assertEqual(TicketComplaintDetails.objects.count(), 0)
         self.assertIsNone(TicketComplaintDetails.objects.filter(ticket=self.grievance_ticket1).first())
 
-        self.assertEqual(HouseholdSelection.objects.count(), 0)
-        self.assertIsNone(HouseholdSelection.objects.filter(household=self.household).first())
+        self.assertEqual(Payment.objects.count(), 0)
+        self.assertIsNone(Payment.objects.filter(household=self.household).first())
 
         self.assertEqual(RegistrationDataImport.objects.count(), 0)
         self.assertIsNone(RegistrationDataImport.objects.filter(id=self.rdi.id).first())

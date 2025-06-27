@@ -13,7 +13,6 @@ export const AllIndividualsForPopulationTable = gql`
     $search: String
     $documentType: String
     $documentNumber: String
-    $programs: [ID]
     $status: [String]
     $lastRegistrationDate: String
     $householdId: UUID
@@ -41,7 +40,6 @@ export const AllIndividualsForPopulationTable = gql`
       search: $search
       documentType: $documentType
       documentNumber: $documentNumber
-      programs: $programs
       status: $status
       lastRegistrationDate: $lastRegistrationDate
       household_Id: $householdId
@@ -70,6 +68,7 @@ export const AllIndividualsForPopulationTable = gql`
           sanctionListPossibleMatch
           sanctionListConfirmedMatch
           deduplicationGoldenRecordStatus
+          deduplicationBatchStatus
           status
           sanctionListLastCheck
           fullName

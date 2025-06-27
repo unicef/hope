@@ -11,13 +11,14 @@ import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';
 import { CommunicationTableRow } from './CommunicationTableRow';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface CommunicationTableProps {
   filter;
   canViewDetails: boolean;
 }
 
-export function CommunicationTable({
+function CommunicationTable({
   filter,
   canViewDetails,
 }: CommunicationTableProps): ReactElement {
@@ -30,14 +31,14 @@ export function CommunicationTable({
         max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
       }),
       program: programId,
-      targetPopulation: filter.targetPopulation,
+      paymentPlan: filter.targetPopulation,
       createdBy: filter.createdBy || '',
     };
   return (
     <TableWrapper>
       <UniversalTable<
-      CommunicationMessageNode,
-      AllAccountabilityCommunicationMessagesQueryVariables
+        CommunicationMessageNode,
+        AllAccountabilityCommunicationMessagesQueryVariables
       >
         title={t('Messages List')}
         headCells={headCells}
@@ -58,3 +59,5 @@ export function CommunicationTable({
     </TableWrapper>
   );
 }
+
+export default withErrorBoundary(CommunicationTable, 'CommunicationTable');

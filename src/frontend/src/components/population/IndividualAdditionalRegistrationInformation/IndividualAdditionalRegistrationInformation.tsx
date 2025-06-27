@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Paper from '@mui/material/Paper';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -93,7 +93,7 @@ export const IndividualAdditionalRegistrationInformation = ({
       <Grid container spacing={6}>
         {fields.map((field, i) => (
           /* eslint-disable-next-line react/no-array-index-key */
-          <Grid key={i} item xs={4}>
+          <Grid key={i} size={{ xs:4 }}>
             {field}
           </Grid>
         ))}

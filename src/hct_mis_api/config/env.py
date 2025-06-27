@@ -1,10 +1,30 @@
 from smart_env import SmartEnv
 
 DEFAULTS = {
+    "ALLOWED_IFRAME_DOMAINS": (
+        list,
+        [
+            "https://localhost:3000",
+            "https://dev-hope.unitst.org",
+            "https://trn-hope.unitst.org",
+            "https://stg-hope.unitst.org",
+            "https://hope.unitst.org",
+        ],
+        "",
+        "",
+        "List of sites where iframe is allowed",
+    ),
     "AURORA_SERVER": (str, ""),
     "AURORA_TOKEN": (str, ""),
     "AURORA_USER": (str, ""),
     "DATABASE_URL": (
+        str,
+        "sqlite://",
+        "",
+        "",
+        "https://django-environ.readthedocs.io/en/latest/types.html#environ-env-db-url",
+    ),
+    "REP_DATABASE_URL": (
         str,
         "sqlite://",
         "",
@@ -32,8 +52,7 @@ DEFAULTS = {
     "MAILJET_SECRET_KEY": (str, ""),
     "CATCH_ALL_EMAIL": (list, []),
     "DEFAULT_EMAIL_DISPLAY": (str, ""),
-    "KOBO_KF_URL": (str, "https://kf-hope.unitst.org"),
-    "KOBO_KC_URL": (str, "https://kc-hope.unitst.org"),
+    "KOBO_URL": (str, "https://kobo-hope-trn.unitst.org"),
     "KOBO_MASTER_API_TOKEN": (str, "KOBO_TOKEN"),
     "KOBO_PROJECT_VIEWS_ID": (str, ""),
     "AZURE_CLIENT_ID": (str, ""),
@@ -43,10 +62,8 @@ DEFAULTS = {
     "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
     "ELASTICSEARCH_HOST": (str, "http://elasticsearch:9200"),
     "ELASTICSEARCH_INDEX_PREFIX": (str, ""),
+    "ELASTICSEARCH_SYNONYMS_FILE": (str, "/app/data/synonyms.txt"),
     "RAPID_PRO_URL": (str, "https://rapidpro.io"),
-    "DATAMART_USER": (str, ""),
-    "DATAMART_URL": (str, "https://datamart-dev.unicef.io"),
-    "DATAMART_PASSWORD": (str, ""),
     "POWER_QUERY_DB_ALIAS": (str, "read_only"),
     "ROOT_ACCESS_TOKEN": (str, ""),
     "SENTRY_DSN": (str, ""),
@@ -128,12 +145,10 @@ DEFAULTS = {
     ),
     "SOCIAL_AUTH_REDIRECT_IS_HTTPS": (bool, True),
     "LOG_LEVEL": (str, "ERROR"),
-    "POSTGRES_SSL": (bool, False),
     "GIT_VERSION": (str, "UNKNOWN"),
     "EXCHANGE_RATE_CACHE_EXPIRY": (int, 60 * 60 * 24),
     "USE_DUMMY_EXCHANGE_RATES": (str, "no"),
     "PROFILING": (str, "off"),
-    "LIBRARY_PATHS": (bool, False),
     "STATIC_URL": (str, "/static/"),
     "MEDIA_URL": (str, "/media/"),
     "FILE_STORAGE_STATIC": (
@@ -154,6 +169,8 @@ DEFAULTS = {
     "MEDIA_LOCATION": (str, "media"),
     "AZURE_ACCOUNT_NAME": (str, ""),
     "AZURE_ACCOUNT_KEY": (str, ""),
+    "GDAL_LIBRARY_PATH": (str, None),
+    "GEOS_LIBRARY_PATH": (str, None),
 }
 
 env = SmartEnv(**DEFAULTS)

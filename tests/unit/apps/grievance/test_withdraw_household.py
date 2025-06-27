@@ -58,16 +58,14 @@ class TestWithdrawHousehold(APITestCase):
             self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
 
-        household = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", program=self.program_one)
+        household = HouseholdFactory.build(program=self.program_one)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.program = self.program_one
         household.registration_data_import.save()
         household.program = self.program_one
-        household.programs.add(self.program_one)
 
         individual_data = {
-            "id": "257f6f84-313c-43bd-8f0e-89b96c41a7d5",
             "full_name": "Test Example",
             "given_name": "Test",
             "family_name": "Example",
@@ -83,7 +81,6 @@ class TestWithdrawHousehold(APITestCase):
         household.save()
 
         ticket = GrievanceTicketFactory(
-            id="a2a15944-f836-4764-8163-30e0c47ce3bb",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
             admin2=self.admin_area_1,

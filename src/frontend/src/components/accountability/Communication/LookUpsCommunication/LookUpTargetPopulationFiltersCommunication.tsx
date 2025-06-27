@@ -1,11 +1,11 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TargetPopulationStatus } from '@generated/graphql';
+import { PaymentPlanStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
-  targetPopulationStatusMapping,
+  paymentPlanStatusMapping,
 } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -52,8 +52,8 @@ export function LookUpTargetPopulationFiltersCommunication({
   };
 
   const preparedStatusChoices = isAccountability
-    ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
-    : Object.values(TargetPopulationStatus);
+    ? Object.values(PaymentPlanStatus).filter((key) => key !== 'OPEN')
+    : Object.values(PaymentPlanStatus);
 
   return (
     <FiltersSection
@@ -62,7 +62,7 @@ export function LookUpTargetPopulationFiltersCommunication({
       isOnPaper={false}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
@@ -71,7 +71,7 @@ export function LookUpTargetPopulationFiltersCommunication({
             fullWidth
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
@@ -82,12 +82,12 @@ export function LookUpTargetPopulationFiltersCommunication({
           >
             {preparedStatusChoices.sort().map((key) => (
               <MenuItem key={key} value={key}>
-                {targetPopulationStatusMapping(key)}
+                {paymentPlanStatusMapping(key)}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             topLabel={t('Num. of Recipients')}
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
@@ -102,7 +102,7 @@ export function LookUpTargetPopulationFiltersCommunication({
             data-cy="filters-total-households-count-min"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <NumberTextField
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
             placeholder={t('To')}
@@ -116,7 +116,7 @@ export function LookUpTargetPopulationFiltersCommunication({
             data-cy="filters-total-households-count-max"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             topLabel={t('Date Created')}
             placeholder={t('From')}
@@ -124,7 +124,7 @@ export function LookUpTargetPopulationFiltersCommunication({
             value={filter.createdAtRangeMin}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}

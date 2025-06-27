@@ -35,9 +35,9 @@ class PaymentModuleDetails(BaseComponents):
     labelMaleChildren = 'div[data-cy="label-Male Children"]'
     labelMaleAdults = 'div[data-cy="label-Male Adults"]'
     chartContainer = 'div[data-cy="chart-container"]'
-    labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
+    labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Items Groups"]'
     labelTotalNumberOfPeople = 'div[data-cy="label-Total Number of People"]'
-    labelTargetedIndividuals = 'div[data-cy="label-Targeted Individuals"]'
+    labelTargetedIndividuals = 'div[data-cy="label-Targeted Items"]'
     tableTitle = 'h6[data-cy="table-title"]'
     buttonImport = 'button[data-cy="button-import"]'
     tableLabel = 'span[data-cy="table-label"]'
@@ -136,9 +136,6 @@ class PaymentModuleDetails(BaseComponents):
 
     def getLabelRelatedFollowUpPaymentPlans(self) -> WebElement:
         return self.wait_for(self.labelRelatedFollowUpPaymentPlans)
-
-    def getButtonSetUpFsp(self) -> WebElement:
-        return self.wait_for(self.buttonSetUpFsp)
 
     def getButtonCreateExclusions(self) -> WebElement:
         return self.wait_for(self.buttonCreateExclusions)

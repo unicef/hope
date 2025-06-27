@@ -22,7 +22,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, GenericPayment, Payment
+from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -244,7 +244,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_cash,
                 delivered_quantity=10 + num,
                 delivered_quantity_usd=10 + num,
-                status=GenericPayment.STATUS_SUCCESS,
+                status=Payment.STATUS_SUCCESS,
                 business_area=business_area,
                 currency="PLN",
             )
@@ -255,7 +255,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_voucher,
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
-                status=GenericPayment.STATUS_SUCCESS,
+                status=Payment.STATUS_SUCCESS,
                 business_area=business_area,
                 currency="PLN",
             )
@@ -266,7 +266,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_voucher,
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
-                status=GenericPayment.STATUS_SUCCESS,
+                status=Payment.STATUS_SUCCESS,
                 business_area=business_area,
                 currency="PLN",
             )
@@ -277,7 +277,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_cash,
                 delivered_quantity=30 + num,
                 delivered_quantity_usd=30 + num,
-                status=GenericPayment.STATUS_ERROR,
+                status=Payment.STATUS_ERROR,
                 business_area=business_area,
                 currency="PLN",
             )
@@ -288,7 +288,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_voucher,
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
-                status=GenericPayment.STATUS_SUCCESS,
+                status=Payment.STATUS_SUCCESS,
                 business_area=business_area,
                 currency="PLN",
             )
@@ -299,7 +299,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_voucher,
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
-                status=GenericPayment.STATUS_SUCCESS,
+                status=Payment.STATUS_SUCCESS,
                 business_area=business_area,
                 currency="PLN",
             )
@@ -311,7 +311,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_cash,
                 delivered_quantity=10 + num,
                 delivered_quantity_usd=10 + num,
-                status=GenericPayment.STATUS_SUCCESS,
+                status=Payment.STATUS_SUCCESS,
                 business_area=business_area,
                 household=household2_admin1,
                 currency="PLN",
@@ -323,7 +323,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_voucher,
                 delivered_quantity=20 + num,
                 delivered_quantity_usd=20 + num,
-                status=GenericPayment.STATUS_SUCCESS,
+                status=Payment.STATUS_SUCCESS,
                 business_area=business_area,
                 household=household2_admin2,
                 currency="PLN",
@@ -335,7 +335,7 @@ class TestDashboardQueries(APITestCase):
                 delivery_type=cls.dm_cash,
                 delivered_quantity=30 + num,
                 delivered_quantity_usd=30 + num,
-                status=GenericPayment.STATUS_ERROR,
+                status=Payment.STATUS_ERROR,
                 business_area=business_area,
                 household=household2_admin3,
                 currency="PLN",

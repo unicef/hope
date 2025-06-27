@@ -1,5 +1,4 @@
 from typing import Any
-from unittest.mock import patch
 
 from django.conf import settings
 from django.test import TestCase
@@ -10,7 +9,6 @@ from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -31,7 +29,7 @@ class TestGenerateReportService(TestCase):
 
     @classmethod
     def setUpTestData(self) -> None:
-        create_afghanistan()
+        self.business_area = create_afghanistan()
         PartnerFactory(name="UNICEF")
         from hct_mis_api.apps.reporting.services.generate_report_service import (
             GenerateReportService,
@@ -39,7 +37,6 @@ class TestGenerateReportService(TestCase):
 
         self.GenerateReportService = GenerateReportService
 
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.partner = PartnerFactory(name="Test1")
         self.user = UserFactory.create(partner=self.partner)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
@@ -70,6 +67,7 @@ class TestGenerateReportService(TestCase):
                     "business_area": self.business_area,
                     "last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1],
                     "admin_area": None if index % 2 else self.admin_area_1,
+                    "program": self.program_1 if index % 2 else self.program_2,
                 },
                 [
                     {"last_registration_date": last_registration_dates[0] if index % 2 else last_registration_dates[1]},
@@ -78,28 +76,24 @@ class TestGenerateReportService(TestCase):
             )
             self.households.append(household)
             self.individuals.extend(individuals)
-            if index % 2:
-                household.programs.add(self.program_1)
-            else:
-                household.programs.add(self.program_2)
 
         self.payment_plan_1 = PaymentPlanFactory(
             business_area=self.business_area,
             program_cycle=self.program_1.cycles.first(),
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
+            created_by=self.user,
         )
         self.payment_plan_2 = PaymentPlanFactory(
             business_area=self.business_area,
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
+            created_by=self.user,
         )
         self.payment_plan_3 = PaymentPlanFactory(
             business_area=self.business_area,
             program_cycle=self.program_1.cycles.first(),
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
+            created_by=self.user,
         )
         self.payment_plan_4 = PaymentPlanFactory(
             business_area=self.business_area,
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
+            created_by=self.user,
         )
         PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_1)
         PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_2)
@@ -174,12 +168,13 @@ class TestGenerateReportService(TestCase):
             ("payments_filter_admin_area", Report.PAYMENTS, True, False, 1),
             ("payment_verifications_no_filter", Report.PAYMENT_VERIFICATION, False, False, 2),
             ("payment_verifications_program", Report.PAYMENT_VERIFICATION, False, True, 1),
-            ("cash_plans_no_filter", Report.CASH_PLAN, False, False, 2),
-            ("cash_plans_program", Report.CASH_PLAN, False, True, 1),
+            ("cash_plans_no_filter", Report.PAYMENT_PLAN, False, False, 2),
+            ("cash_plans_program", Report.PAYMENT_PLAN, False, True, 1),
             ("individuals_payments_no_filter", Report.INDIVIDUALS_AND_PAYMENT, False, False, 4),
             ("individuals_payments_admin_area", Report.INDIVIDUALS_AND_PAYMENT, True, False, 2),
             ("individuals_payments_program", Report.INDIVIDUALS_AND_PAYMENT, False, True, 2),
             ("individuals_payments_admin_area_and_program", Report.INDIVIDUALS_AND_PAYMENT, True, True, 2),
+            ("cash_plan_verification", Report.CASH_PLAN_VERIFICATION, True, True, 2),
         ]
     )
     def test_report_types(
@@ -203,17 +198,17 @@ class TestGenerateReportService(TestCase):
             report.save()
 
         report_service = self.GenerateReportService(report)
-        with (
-            patch(
-                "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.save_wb_file_in_db"
-            ) as mock_save_wb_file_in_db,
-            patch(
-                "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.generate_workbook"
-            ) as mock_generate_workbook,
-        ):
-            report_service.generate_report()
-            assert mock_generate_workbook.called
-            assert mock_save_wb_file_in_db.called
+        # with (
+        #     # patch(
+        #     #     "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.save_wb_file_in_db"
+        #     # ) as mock_save_wb_file_in_db,
+        #     # patch(
+        #     #     "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.generate_workbook"
+        #     # ) as mock_generate_workbook,
+        # ):
+        report_service.generate_report()
+        # assert mock_generate_workbook.called
+        # assert mock_save_wb_file_in_db.called
         report.refresh_from_db()
         self.assertEqual(report.status, Report.COMPLETED)
         # self.assertEqual(report.number_of_records, number_of_records) # when mocking generating workbook, this is not set

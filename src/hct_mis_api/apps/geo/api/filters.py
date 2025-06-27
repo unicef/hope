@@ -12,6 +12,7 @@ class AreaFilter(UpdatedAtFilter):
         field_name="name",
         lookup_expr="startswith",
     )
+    updated_at = filters.DateTimeFilter()
 
     class Meta:
         model = Area

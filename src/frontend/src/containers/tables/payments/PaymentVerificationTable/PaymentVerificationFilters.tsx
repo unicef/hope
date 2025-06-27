@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid2 as Grid, MenuItem } from '@mui/material';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
@@ -8,6 +8,7 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface PaymentVerificationFiltersProps {
   filter;
@@ -16,7 +17,7 @@ interface PaymentVerificationFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const PaymentVerificationFilters = ({
+const PaymentVerificationFilters = ({
   filter,
   setFilter,
   initialFilter,
@@ -56,7 +57,7 @@ export const PaymentVerificationFilters = ({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="flex-start" spacing={3}>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             value={filter.search}
             data-cy="filter-search"
@@ -65,7 +66,7 @@ export const PaymentVerificationFilters = ({
             fullWidth
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('verificationStatus', e.target.value)
@@ -83,7 +84,7 @@ export const PaymentVerificationFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SearchTextField
             value={filter.serviceProvider}
             data-cy="filter-fsp"
@@ -94,13 +95,15 @@ export const PaymentVerificationFilters = ({
             }
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('deliveryTypes', e.target.value)
+            }
             label="Delivery Mechanism"
             data-cy="filter-Modality"
             multiple
-            value={filter.deliveryType}
+            value={filter.deliveryTypes}
             fullWidth
             icon={<MonetizationOnIcon />}
           >
@@ -111,7 +114,7 @@ export const PaymentVerificationFilters = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             label="Start Date"
             fullWidth
@@ -120,7 +123,7 @@ export const PaymentVerificationFilters = ({
             value={filter.startDate}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <DatePickerFilter
             label="End Date"
             fullWidth
@@ -133,3 +136,8 @@ export const PaymentVerificationFilters = ({
     </FiltersSection>
   );
 };
+
+export default withErrorBoundary(
+  PaymentVerificationFilters,
+  'PaymentVerificationFilters',
+);

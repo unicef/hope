@@ -17,6 +17,17 @@ export const AllPaymentPlansForTable = gql`
     $isFollowUp: Boolean
     $program: String
     $programCycle: String
+    $totalHouseholdsCountWithValidPhoneNoMin: Int
+    $totalHouseholdsCountWithValidPhoneNoMax: Int
+    $createdAtRange: String
+    $statusNot: String
+    $isPaymentPlan: Boolean
+    $isTargetPopulation: Boolean
+    $verificationStatus: [String]
+    $serviceProvider: String
+    $deliveryTypes: [String]
+    $startDate: Date
+    $endDate: Date
   ) {
     allPaymentPlans(
       after: $after
@@ -34,6 +45,17 @@ export const AllPaymentPlansForTable = gql`
       isFollowUp: $isFollowUp
       program: $program
       programCycle: $programCycle
+      totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin
+      totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax
+      createdAtRange: $createdAtRange
+      statusNot: $statusNot
+      isPaymentPlan: $isPaymentPlan
+      isTargetPopulation: $isTargetPopulation
+      verificationStatus: $verificationStatus
+      serviceProvider: $serviceProvider
+      deliveryTypes: $deliveryTypes
+      startDate: $startDate
+      endDate: $endDate
     ) {
       pageInfo {
         hasNextPage
@@ -61,6 +83,9 @@ export const AllPaymentPlansForTable = gql`
             }
           }
           status
+          paymentVerificationSummary {
+            status
+          }
           createdBy {
             id
             firstName
@@ -68,10 +93,6 @@ export const AllPaymentPlansForTable = gql`
             email
           }
           program {
-            id
-            name
-          }
-          targetPopulation {
             id
             name
           }

@@ -1,8 +1,8 @@
-import { Box, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import { useTranslation } from 'react-i18next';
-import { StyledBox, BlueText, LightGrey } from '../LookUpStyles';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { ReactElement } from 'react';
+import { useProgramContext } from 'src/programContext';
+import { BlueText, LightGrey, StyledBox } from '../LookUpStyles';
 
 export function LookUpReassignRoleDisplay({
   selectedHousehold,
@@ -15,26 +15,28 @@ export function LookUpReassignRoleDisplay({
   setLookUpDialogOpen;
   disabled?: boolean;
 }): ReactElement {
-  const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <StyledBox>
       <Grid container>
-        <Grid item>
+        <Grid>
           <Box display="flex" flexDirection="column">
             <span>
-              {t('Household ID')}:
+              {`${beneficiaryGroup?.groupLabel} ID`}:
               <BlueText> {selectedHousehold?.unicefId || '-'}</BlueText>
             </span>
             <span>
-              {t('Individual ID')}:
+              {`${beneficiaryGroup?.memberLabel} ID`}:
               <BlueText>{selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
         </Grid>
-        <Grid item>
+        <Grid>
           <Box p={2}>
             <Grid container justifyContent="center" alignItems="center">
-              <Grid item>
+              <Grid>
                 {disabled ? null : (
                   <LightGrey>
                     <EditIcon

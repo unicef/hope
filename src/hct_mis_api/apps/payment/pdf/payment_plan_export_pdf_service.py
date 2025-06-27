@@ -6,7 +6,7 @@ from django.db.models import Count, Q, Sum
 from django.urls import reverse
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import Approval, GenericPayment, PaymentPlan
+from hct_mis_api.apps.payment.models import Approval, Payment, PaymentPlan
 from hct_mis_api.apps.utils.pdf_generator import generate_pdf_from_html
 
 if TYPE_CHECKING:
@@ -64,10 +64,8 @@ class PaymentPlanPDFExportService:
         else:
             template_name = "payment/payment_plan_summary_pdf_template.html"
         filename = f"PaymentPlanSummary-{self.payment_plan.unicef_id}.pdf"
-        delivery_mechanism_per_payment_plan = self.payment_plan.delivery_mechanisms.select_related(
-            "financial_service_provider"
-        ).first()
-        fsp = delivery_mechanism_per_payment_plan.financial_service_provider
+        fsp = self.payment_plan.financial_service_provider
+        delivery_mechanism = self.payment_plan.delivery_mechanism
 
         approval_process = self.payment_plan.approval_process.first()
         approval = approval_process.approvals.filter(type=Approval.APPROVAL).first()
@@ -75,19 +73,19 @@ class PaymentPlanPDFExportService:
         release = approval_process.approvals.filter(type=Approval.FINANCE_RELEASE).first()
 
         reconciliation_qs = self.payment_plan.eligible_payments.aggregate(
-            pending=Count("id", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
-            pending_usd=Sum("entitlement_quantity_usd", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
-            pending_local=Sum("entitlement_quantity", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
-            reconciled=Count("id", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
-            reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
-            reconciled_local=Sum("delivered_quantity", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
+            pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
+            pending_usd=Sum("entitlement_quantity_usd", filter=Q(status__in=Payment.PENDING_STATUSES)),
+            pending_local=Sum("entitlement_quantity", filter=Q(status__in=Payment.PENDING_STATUSES)),
+            reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
+            reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status__in=Payment.PENDING_STATUSES)),
+            reconciled_local=Sum("delivered_quantity", filter=~Q(status__in=Payment.PENDING_STATUSES)),
         )
 
         pdf_context_data = {
             "title": self.payment_plan.unicef_id,
             "payment_plan": self.payment_plan,
             "fsp": fsp,
-            "delivery_mechanism_per_payment_plan": delivery_mechanism_per_payment_plan.delivery_mechanism,
+            "delivery_mechanism_per_payment_plan": delivery_mechanism,
             "approval_process": self.payment_plan.approval_process.first(),
             "payment_plan_link": self.payment_plan_link,
             "approval": approval,

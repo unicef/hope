@@ -9,6 +9,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
@@ -23,9 +24,6 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
-)
-from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
-    create_payment_plan_snapshot_data,
 )
 from hct_mis_api.apps.payment.utils import generate_cache_key, get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
@@ -140,7 +138,9 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: str, user_id: str) -> None:
+def create_payment_plan_payment_list_xlsx_per_fsp(
+    self: Any, payment_plan_id: str, user_id: str, fsp_xlsx_template_id: Optional[str] = None
+) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
@@ -153,13 +153,15 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
         try:
             with transaction.atomic():
                 # regenerate always xlsx
-                service = XlsxPaymentPlanExportPerFspService(payment_plan)
+                service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
                 service.export_per_fsp(user)
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
                 if payment_plan.business_area.enable_email_notification:
                     send_email_notification_on_commit(service, user)
+                    if fsp_xlsx_template_id:
+                        service.send_email_with_passwords(user, payment_plan)
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -169,6 +171,30 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
 
     except Exception as e:
         logger.exception("Create Payment Plan List XLSX Per FSP Error")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def send_payment_plan_payment_list_xlsx_per_fsp_password(
+    self: Any,
+    payment_plan_id: str,
+    user_id: str,
+) -> None:
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+            XlsxPaymentPlanExportPerFspService,
+        )
+
+        user: User = get_user_model().objects.get(pk=user_id)
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        XlsxPaymentPlanExportPerFspService.send_email_with_passwords(user, payment_plan)
+
+    except Exception as e:
+        logger.exception("Send Payment Plan List XLSX Per FSP Password Error")
         raise self.retry(exc=e)
 
 
@@ -262,10 +288,10 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     from hct_mis_api.apps.payment.models import Payment, PaymentPlan
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
-    payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
     set_sentry_business_area_tag(payment_plan.business_area.name)
-    engine_rule = Rule.objects.get(id=engine_rule_id)
-    rule: RuleCommit = engine_rule.latest
+    engine_rule = get_object_or_404(Rule, id=engine_rule_id)
+    rule: Optional["RuleCommit"] = engine_rule.latest
     if rule.id != payment_plan.steficon_rule_id:
         payment_plan.steficon_rule = rule
         payment_plan.save()
@@ -331,6 +357,11 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @log_start_and_end
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
+    from hct_mis_api.apps.payment.models import PaymentPlan
+    from hct_mis_api.apps.payment.services.payment_plan_services import (
+        PaymentPlanService,
+    )
+
     cache_key = generate_cache_key(
         {
             "task_name": "prepare_payment_plan_task",
@@ -341,29 +372,27 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
         logger.info(f"Task prepare_payment_plan_task with payment_plan_id {payment_plan_id} already running.")
         return False
 
-    # 2 hours timeout
-    cache.set(cache_key, True, timeout=60 * 60 * 2)
+    # 10 hours timeout
+    cache.set(cache_key, True, timeout=60 * 60 * 10)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+
     try:
+        # double check Payment Plan status
+        if payment_plan.status != PaymentPlan.Status.TP_OPEN:
+            logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}.")
+            return False
         with transaction.atomic():
-            from hct_mis_api.apps.payment.models import PaymentPlan
-            from hct_mis_api.apps.payment.services.payment_plan_services import (
-                PaymentPlanService,
-            )
-
-            payment_plan = PaymentPlan.objects.select_related("target_population").get(id=payment_plan_id)
+            payment_plan.build_status_building()
+            payment_plan.save(update_fields=("build_status", "built_at"))
             set_sentry_business_area_tag(payment_plan.business_area.name)
-
-            # double check Payment Plan status
-            if payment_plan.status != PaymentPlan.Status.PREPARING:
-                logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.PREPARING}.")
-                return False
 
             PaymentPlanService.create_payments(payment_plan)
             payment_plan.update_population_count_fields()
-            payment_plan.update_money_fields()
-            payment_plan.status_open()
-            payment_plan.save(update_fields=("status",))
+            payment_plan.build_status_ok()
+            payment_plan.save(update_fields=("build_status", "built_at"))
     except Exception as e:
+        payment_plan.build_status_failed()
+        payment_plan.save(update_fields=("build_status", "built_at"))
         logger.exception("Prepare Payment Plan Error")
         raise self.retry(exc=e) from e
 
@@ -385,13 +414,11 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
+
         PaymentPlanService(payment_plan=payment_plan).create_follow_up_payments()
         payment_plan.refresh_from_db()
-        create_payment_plan_snapshot_data(payment_plan)
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
-        payment_plan.status_open()
-        payment_plan.save(update_fields=("status",))
     except Exception as e:
         logger.exception("Prepare Follow Up Payment Plan Error")
         raise self.retry(exc=e) from e
@@ -537,7 +564,7 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def periodic_sync_payment_gateway_fsp(self: Any) -> None:
+def periodic_sync_payment_gateway_fsp(self: Any) -> None:  # pragma: no cover
     from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
 
     try:
@@ -546,6 +573,25 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:
         )
 
         PaymentGatewayService().sync_fsps()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_account_types(self: Any) -> None:  # pragma: no cover
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_account_types()
     except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
         return
     except Exception as e:
@@ -632,3 +678,99 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
+
+
+@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
+    from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+    from hct_mis_api.apps.steficon.models import Rule, RuleCommit
+
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+    set_sentry_business_area_tag(payment_plan.business_area.name)
+    engine_rule = get_object_or_404(Rule, id=engine_rule_id)
+    rule: Optional["RuleCommit"] = engine_rule.latest
+    if rule and rule.id != payment_plan.steficon_rule_targeting_id:
+        payment_plan.steficon_rule_targeting = rule
+        payment_plan.save(update_fields=["steficon_rule_targeting"])
+    try:
+        payment_plan.status = PaymentPlan.Status.TP_STEFICON_RUN
+        payment_plan.steficon_targeting_applied_date = timezone.now()
+        payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
+        updates = []
+        with transaction.atomic():
+            payment: Payment
+            for payment in payment_plan.payment_items.all():
+                result = rule.execute(
+                    {
+                        "household": payment.household,
+                        "payment_plan": payment_plan,
+                    }
+                )
+                payment.vulnerability_score = result.value
+                updates.append(payment)
+            Payment.objects.bulk_update(updates, ["vulnerability_score"])
+        payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED
+        payment_plan.steficon_targeting_applied_date = timezone.now()
+        with disable_concurrency(payment_plan):
+            payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
+    except Exception as e:
+        logger.exception(e)
+        payment_plan.steficon_targeting_applied_date = timezone.now()
+        payment_plan.status = PaymentPlan.Status.TP_STEFICON_ERROR
+        payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
+    with cache.lock(
+        f"payment_plan_rebuild_stats_{payment_plan_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        payment_plan.build_status_building()
+        payment_plan.save(update_fields=("build_status", "built_at"))
+        try:
+            with transaction.atomic():
+                payment_plan.update_population_count_fields()
+                payment_plan.update_money_fields()
+                payment_plan.build_status_ok()
+                payment_plan.save(update_fields=("build_status", "built_at"))
+        except Exception as e:
+            logger.exception(e)
+            raise self.retry(exc=e)
+
+
+@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
+    from hct_mis_api.apps.payment.services.payment_plan_services import (
+        PaymentPlanService,
+    )
+
+    with cache.lock(
+        f"payment_plan_full_rebuild_{payment_plan_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        payment_plan.build_status_building()
+        payment_plan.save(update_fields=("build_status", "built_at"))
+        try:
+            with transaction.atomic():
+                PaymentPlanService(payment_plan).full_rebuild()
+                payment_plan.build_status_ok()
+                payment_plan.save(update_fields=("build_status", "built_at"))
+        except Exception as e:
+            logger.exception(e)
+            payment_plan.build_status_failed()
+            payment_plan.save(update_fields=("build_status", "built_at"))
+            raise self.retry(exc=e)

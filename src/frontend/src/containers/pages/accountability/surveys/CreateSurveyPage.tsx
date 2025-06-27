@@ -3,7 +3,7 @@ import {
   Button,
   FormControlLabel,
   FormHelperText,
-  Grid,
+  Grid2 as Grid,
   Radio,
   RadioGroup,
   Step,
@@ -20,7 +20,7 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -54,7 +54,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { SurveySteps, SurveyTabsValues } from '@utils/constants';
 import { getPercentage } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -69,7 +69,7 @@ function prepareVariables(
 ): AccountabilitySampleSizeQueryVariables {
   return {
     input: {
-      targetPopulation: values.targetPopulation,
+      paymentPlan: values.targetPopulation,
       program: values.program,
       samplingType: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
@@ -96,7 +96,7 @@ function prepareVariables(
   };
 }
 
-export const CreateSurveyPage = (): ReactElement => {
+const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
@@ -104,7 +104,6 @@ export const CreateSurveyPage = (): ReactElement => {
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
-  const location = useLocation();
   const { pathname } = location;
   const parts = pathname.split('/');
   const categoryIndex = parts.indexOf('create') + 1;
@@ -294,7 +293,7 @@ export const CreateSurveyPage = (): ReactElement => {
       title: matchTitle(values),
       body: values.body,
       category: values.category,
-      targetPopulation: values.targetPopulation,
+      paymentPlan: values.targetPopulation,
       program: values.program,
       samplingType:
         selectedSampleSizeType === 0
@@ -343,14 +342,7 @@ export const CreateSurveyPage = (): ReactElement => {
   };
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'CreateSurveyPage.tsx');
-      }}
-      componentName="CreateSurveyPage"
-    >
+    <>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -400,7 +392,7 @@ export const CreateSurveyPage = (): ReactElement => {
               }
             />
             <PaperContainer>
-              <Grid xs={12} item>
+              <Grid size={{ xs: 12 }} >
                 <Stepper activeStep={activeStep}>
                   {steps.map((label) => {
                     const stepProps: { completed?: boolean } = {};
@@ -543,9 +535,9 @@ export const CreateSurveyPage = (): ReactElement => {
 
                           <Grid container>
                             {values.ageCheckbox && (
-                              <Grid item xs={12}>
+                              <Grid size={{ xs: 12 }}>
                                 <Grid container>
-                                  <Grid item xs={4}>
+                                  <Grid size={{ xs: 4 }}>
                                     <Field
                                       name="filterAgeMin"
                                       label={t('Minimum Age')}
@@ -554,7 +546,7 @@ export const CreateSurveyPage = (): ReactElement => {
                                       component={FormikTextField}
                                     />
                                   </Grid>
-                                  <Grid item xs={4}>
+                                  <Grid size={{ xs: 4 }}>
                                     <Field
                                       name="filterAgeMax"
                                       label={t('Maximum Age')}
@@ -567,7 +559,7 @@ export const CreateSurveyPage = (): ReactElement => {
                               </Grid>
                             )}
                             {values.sexCheckbox && (
-                              <Grid item xs={5}>
+                              <Grid size={{ xs:5 }}>
                                 <Field
                                   name="filterSex"
                                   label={t('Gender')}
@@ -576,8 +568,14 @@ export const CreateSurveyPage = (): ReactElement => {
                                     { value: 'FEMALE', name: t('Female') },
                                     { value: 'MALE', name: t('Male') },
                                     { value: 'OTHER', name: t('Other') },
-                                    { value: 'NOT_COLLECTED', name: t('Not Collected') },
-                                    { value: 'NOT_ANSWERED', name: t('Not Answered') },
+                                    {
+                                      value: 'NOT_COLLECTED',
+                                      name: t('Not Collected'),
+                                    },
+                                    {
+                                      value: 'NOT_ANSWERED',
+                                      name: t('Not Answered'),
+                                    },
                                   ]}
                                   component={FormikSelectField}
                                 />
@@ -611,7 +609,7 @@ export const CreateSurveyPage = (): ReactElement => {
                   <>
                     <Border />
                     <Box my={3}>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         {category === SurveyCategory.RapidPro ? (
                           <Field
                             name="title"
@@ -637,7 +635,7 @@ export const CreateSurveyPage = (): ReactElement => {
                     </Box>
                     {category === SurveyCategory.Sms && (
                       <Box my={3}>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Field
                             name="body"
                             required
@@ -651,7 +649,7 @@ export const CreateSurveyPage = (): ReactElement => {
                         </Grid>
                       </Box>
                     )}
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <Box
                         pb={3}
                         pt={3}
@@ -707,6 +705,8 @@ export const CreateSurveyPage = (): ReactElement => {
           </>
         )}
       </Formik>
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(CreateSurveyPage, 'CreateSurveyPage');

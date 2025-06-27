@@ -1,7 +1,7 @@
 import os
 import time
 from time import sleep
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 from django.conf import settings
 
@@ -153,7 +153,7 @@ class Common:
             selectOption = f'li[data-cy="select-option-{optionName}"]'
             self.wait_for(selectOption).click()
         actions = ActionChains(self.driver)
-        actions.send_keys(Keys.ESCAPE).perform()  # type: ignore
+        actions.send_keys(Keys.ESCAPE).perform()
         try:
             self.wait_for_disappear(selectOption)
         except BaseException:
@@ -174,16 +174,18 @@ class Common:
         return element.find_elements(element_type, locator)
 
     def screenshot(
-        self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: float = 1
+        self, file_name: str = "test", file_type: str = "png", file_path: Optional[str] = None, delay_sec: float = 1
     ) -> None:
         if file_path is None:
             file_path = settings.SCREENSHOT_DIRECTORY
         sleep(delay_sec)
-        self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
+        full_filename = os.path.join(f"{file_path}", f"{file_name}.{file_type}")
+        print("Saving screenshot to:", full_filename)
+        self.driver.get_screenshot_as_file(full_filename)
 
     def scroll(self, scroll_by: int = 600, wait_after_start_scrolling: int = 2, execute: int = 1) -> None:
         for _ in range(execute):
-            self.driver.execute_script(  # type: ignore
+            self.driver.execute_script(
                 f"""
                 container = document.querySelector("div[data-cy='main-content']")
                 container.scrollBy(0,{scroll_by})
@@ -196,12 +198,12 @@ class Common:
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")
         for ii in ids:
             try:
-                print(f"{ii.text}: {ii.get_attribute(attribute)}")  # type: ignore
+                print(f"{ii.text}: {ii.get_attribute(attribute)}")
             except BaseException:
-                print(f"No text: {ii.get_attribute(attribute)}")  # type: ignore
+                print(f"No text: {ii.get_attribute(attribute)}")
 
     def mouse_on_element(self, element: WebElement) -> None:
-        hover = ActionChains(self.driver).move_to_element(element)  # type: ignore
+        hover = ActionChains(self.driver).move_to_element(element)
         hover.perform()
 
     def wait_for_element_clickable(self, locator: str) -> bool:

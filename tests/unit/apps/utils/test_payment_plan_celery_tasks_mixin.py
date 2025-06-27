@@ -31,7 +31,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         cls.user.is_active = True
         cls.user.save()
 
-        cls.payment_plan = PaymentPlanFactory(program_cycle=cls.program.cycles.first())
+        cls.payment_plan = PaymentPlanFactory(
+            program_cycle=cls.program.cycles.first(),
+            created_by=cls.user,
+        )
 
     def setUp(self) -> None:
         self.url = reverse("admin:payment_paymentplan_change", args=[self.payment_plan.id])
@@ -78,8 +81,9 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
     def test_restart_prepare_payment_plan_task_success(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
-            status=PaymentPlan.Status.PREPARING,
+            status=PaymentPlan.Status.OPEN,
             program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
@@ -97,8 +101,9 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
     def test_restart_prepare_payment_plan_task_incorrect_status(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentPlan.Status.LOCKED,
             program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
@@ -109,15 +114,16 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
 
         self.assertEqual(
             list(messages.get_messages(response.wsgi_request))[0].message,
-            f"The Payment Plan must has the status {PaymentPlan.Status.PREPARING}",
+            f"The Payment Plan must has the status {PaymentPlan.Status.OPEN}",
         )
 
     @override_settings(ROOT_TOKEN="test-token123")
     def test_restart_prepare_payment_plan_task_already_running(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
-            status=PaymentPlan.Status.PREPARING,
+            status=PaymentPlan.Status.OPEN,
             program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         payment_plan.refresh_from_db()
         # set the cache to simulate an already running task

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
-import { choicesToDict } from '@utils/utils';
+import { adjustHeadCells, choicesToDict } from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -14,6 +14,7 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Bold } from '@components/core/Bold';
 import { BlackLink } from '@components/core/BlackLink';
+import { useProgramContext } from 'src/programContext';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -53,6 +54,20 @@ export const CollectorsTable = ({
   const handleClick = (row): void => {
     navigate(`/${baseUrl}/population/individuals/${row.id}`);
   };
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const replacements = {
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
+    relationship: (_beneficiaryGroup) =>
+      `Relationship to ${_beneficiaryGroup?.groupLabel}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
 
   const roleChoicesDict = choicesToDict(choicesData?.roleChoices);
   const relationshipChoicesDict = choicesToDict(
@@ -142,7 +157,7 @@ export const CollectorsTable = ({
           </ClickableTableRow>
         );
       }}
-      headCells={headCells}
+      headCells={adjustedHeadCells}
       rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
       rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}
       page={page}

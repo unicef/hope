@@ -23,7 +23,7 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
 )
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
@@ -51,6 +51,9 @@ class TestCreateProgram(APITestCase):
             description
             active
             individualFiltersAvailable
+          }
+          beneficiaryGroup {
+            name
           }
           partners {
             name
@@ -88,8 +91,10 @@ class TestCreateProgram(APITestCase):
             description="Partial individuals collected",
             active=True,
             individual_filters_available=True,
+            type=DataCollectingType.Type.STANDARD,
         )
         cls.data_collecting_type.limit_to.add(cls.business_area)
+        cls.beneficiary_group = BeneficiaryGroupFactory(name="School", master_detail=True)
         cls.program_data = {
             "programData": {
                 "name": "Test",
@@ -105,6 +110,7 @@ class TestCreateProgram(APITestCase):
                 "businessAreaSlug": cls.business_area.slug,
                 "dataCollectingTypeCode": cls.data_collecting_type.code,
                 "partnerAccess": Program.NONE_PARTNERS_ACCESS,
+                "beneficiaryGroup": str(cls.beneficiary_group.id),
             }
         }
 
@@ -169,6 +175,45 @@ class TestCreateProgram(APITestCase):
 
         program_data = self.program_data
         program_data["programData"]["dataCollectingTypeCode"] = None
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+        )
+
+    def test_create_program_without_beneficiary_group(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+
+        program_data = self.program_data
+        program_data["programData"]["beneficiaryGroup"] = None
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+        )
+
+    def test_create_program_with_dct_social_not_compatible_with_beneficiary_group(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+
+        data_collecting_type = DataCollectingType.objects.create(
+            code="dct_sw",
+            label="DCT SW",
+            description="DCT SW",
+            active=True,
+            type=DataCollectingType.Type.SOCIAL,
+        )
+
+        program_data = self.program_data
+        program_data["programData"]["dataCollectingTypeCode"] = data_collecting_type.code
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+        )
+
+    def test_create_program_with_dct_standard_not_compatible_with_beneficiary_group(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+
+        program_data = self.program_data
+        program_data["programData"]["beneficiaryGroup"] = str(beneficiary_group.id)
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data

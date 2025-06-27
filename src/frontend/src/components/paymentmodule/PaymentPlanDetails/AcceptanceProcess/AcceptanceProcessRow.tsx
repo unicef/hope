@@ -1,4 +1,4 @@
-import { Box, Grid } from '@mui/material';
+import { Box, Grid2 as Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentPlanQuery } from '@generated/graphql';
@@ -53,8 +53,8 @@ export function AcceptanceProcessRow({
     <StyledBox m={5}>
       <AcceptanceProcessStepper acceptanceProcess={acceptanceProcess} />
       <Grid container>
-        <Grid item xs={4}>
-          {actions.approval.length > 0 && (
+        <Grid size={{ xs: 4 }}>
+          {actions?.approval?.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for approval by ${renderUserName(
                 sentForApprovalBy,
@@ -64,7 +64,7 @@ export function AcceptanceProcessRow({
             />
           )}
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           {actions.authorization.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for authorization by ${renderUserName(
@@ -75,7 +75,7 @@ export function AcceptanceProcessRow({
             />
           )}
         </Grid>
-        <Grid item xs={4}>
+        <Grid size={{ xs: 4 }}>
           {actions.financeRelease.length > 0 && (
             <GreyInfoCard
               topMessage={`Sent for review by ${renderUserName(
@@ -88,7 +88,7 @@ export function AcceptanceProcessRow({
         </Grid>
         {actions.reject.length > 0 && (
           <Grid container>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               {rejectedOn === 'IN_APPROVAL' && (
                 <GreyInfoCard
                   topMessage={getRejectedOnString(rejectedOn)}
@@ -97,7 +97,7 @@ export function AcceptanceProcessRow({
                 />
               )}
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               {rejectedOn === 'IN_AUTHORIZATION' && (
                 <GreyInfoCard
                   topMessage={getRejectedOnString(rejectedOn)}
@@ -106,7 +106,7 @@ export function AcceptanceProcessRow({
                 />
               )}
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               {rejectedOn === 'IN_REVIEW' && (
                 <GreyInfoCard
                   topMessage={getRejectedOnString(rejectedOn)}

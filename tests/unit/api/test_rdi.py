@@ -10,13 +10,17 @@ from rest_framework.reverse import reverse
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
     ROLE_PRIMARY,
     DocumentType,
     PendingHousehold,
+)
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
 )
 from hct_mis_api.apps.program.fixtures import (
     ProgramFactory,
@@ -66,6 +70,9 @@ class PushToRDITests(HOPEApiTestCase):
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
+        cls.fi = FinancialInstitution.objects.create(
+            name="mbank", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
@@ -74,6 +81,7 @@ class PushToRDITests(HOPEApiTestCase):
             status=RegistrationDataImport.LOADING,
             program=cls.program,
         )
+        AccountType.objects.get_or_create(key="bank", defaults=dict(label="Bank", unique_fields=["number"]))
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
     def test_push(self) -> None:
@@ -90,6 +98,7 @@ class PushToRDITests(HOPEApiTestCase):
                         "full_name": "James Head #1",
                         "birth_date": "2000-01-01",
                         "sex": "MALE",
+                        "photo": base64_encoded_data,
                         "role": "",
                         "documents": [
                             {
@@ -97,6 +106,14 @@ class PushToRDITests(HOPEApiTestCase):
                                 "image": base64_encoded_data,
                                 "country": "AF",
                                 "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
+                            }
+                        ],
+                        "accounts": [
+                            {
+                                "account_type": "bank",
+                                "number": "123",
+                                "financial_institution": self.fi.id,
+                                "data": {"field_name": "field_value"},
                             }
                         ],
                     },
@@ -108,7 +125,6 @@ class PushToRDITests(HOPEApiTestCase):
                         "sex": "FEMALE",
                     },
                 ],
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "size": 1,
             }
         ]
@@ -124,11 +140,17 @@ class PushToRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.head_of_household)
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNone(hh.alternate_collector)
-        self.assertEqual(hh.collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(hh.program_id, self.program.id)
 
         self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
+        self.assertIsNotNone(hh.head_of_household.photo)
+        account = PendingAccount.objects.filter(individual=hh.head_of_household).first()
+        self.assertIsNotNone(account)
+        self.assertEqual(account.account_type.key, "bank")
+        self.assertEqual(account.financial_institution.id, self.fi.id)
+        self.assertEqual(account.number, "123")
+        self.assertEqual(account.data, {"field_name": "field_value"})
 
         self.assertEqual(hh.primary_collector.program_id, self.program.id)
         self.assertEqual(hh.head_of_household.program_id, self.program.id)

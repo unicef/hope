@@ -1,16 +1,25 @@
-import { Grid, Typography } from '@mui/material';
-import { Pie } from 'react-chartjs-2';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+  List,
+  ListItem,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  TargetPopulationBuildStatus,
-  TargetPopulationQuery,
-} from '@generated/graphql';
+import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
 import { MiśTheme } from '../../theme';
 import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
-import { ReactElement } from 'react';
+import { useProgramContext } from 'src/programContext';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ReactElement, useState } from 'react';
+import { Pointer } from '@components/core/Pointer';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -43,23 +52,28 @@ const SummaryValue = styled.div`
   margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
-const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
-  margin: 0 auto;
-`;
-
 interface ResultsProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
-export function ResultsForHouseholds({
+function ResultsForHouseholds({
   targetPopulation,
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
-  if (targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok) {
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleOpen = () => {
+    if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
+      setOpenDialog(true);
+    }
+  };
+  const handleClose = () => setOpenDialog(false);
+
+  if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
+
   return (
     <div>
       <PaperContainer>
@@ -68,50 +82,90 @@ export function ResultsForHouseholds({
         </Title>
         <ContentWrapper>
           <Grid container>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-start">
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
-                      value={targetPopulation.childFemaleCount}
+                      value={targetPopulation.femaleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
-                      value={targetPopulation.adultFemaleCount}
+                      value={targetPopulation.femaleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
-                      value={targetPopulation.childMaleCount}
+                      value={targetPopulation.maleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
-                      value={targetPopulation.adultMaleCount}
+                      value={targetPopulation.maleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid
                 container
                 spacing={0}
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid item xs={4}>
+                <Grid size={{ xs: 6 }}>
+                  <SummaryBorder>
+                    <>
+                      <LabelizedField
+                        label={t(
+                          'Collectors failed payment channel validation',
+                        )}
+                      >
+                        <SummaryValue
+                          onClick={() => handleOpen()}
+                          data-cy="total-collectors-failed-count"
+                        >
+                          <Pointer>
+                            {targetPopulation
+                              ?.failedWalletValidationCollectorsIds?.length ||
+                              '-'}
+                          </Pointer>
+                        </SummaryValue>
+                      </LabelizedField>
+                      <Dialog open={openDialog} onClose={handleClose}>
+                        <DialogTitle>View IDs</DialogTitle>
+                        <DialogContent>
+                          <List>
+                            {targetPopulation?.failedWalletValidationCollectorsIds?.map(
+                              (id, index) => (
+                                <ListItem key={index}>{id}</ListItem>
+                              ),
+                            )}
+                          </List>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose} color="primary">
+                            Close
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </>
+                  </SummaryBorder>
+                </Grid>
+
+                {/* <Grid item xs={4}>
                   <ChartContainer>
                     <Pie
                       width={100}
@@ -133,10 +187,10 @@ export function ResultsForHouseholds({
                         datasets: [
                           {
                             data: [
-                              targetPopulation.childFemaleCount,
-                              targetPopulation.adultFemaleCount,
-                              targetPopulation.childMaleCount,
-                              targetPopulation.adultMaleCount,
+                              targetPopulation.femaleChildrenCount,
+                              targetPopulation.femaleAdultsCount,
+                              targetPopulation.maleChildrenCount,
+                              targetPopulation.maleAdultsCount,
                             ],
                             backgroundColor: [
                               colors.femaleChildren,
@@ -149,23 +203,27 @@ export function ResultsForHouseholds({
                       }}
                     />
                   </ChartContainer>
-                </Grid>
+                </Grid> */}
               </Grid>
             </Grid>
-            <Grid item xs={4}>
+            <Grid size={{ xs: 4 }}>
               <Grid container spacing={0} justifyContent="flex-end">
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
-                    <LabelizedField label={t('Total Number of Households')}>
+                    <LabelizedField
+                      label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
+                    >
                       <SummaryValue data-cy="total-number-of-households-count">
                         {targetPopulation.totalHouseholdsCount || '0'}
                       </SummaryValue>
                     </LabelizedField>
                   </SummaryBorder>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={{ xs: 6 }}>
                   <SummaryBorder>
-                    <LabelizedField label={t('Targeted Individuals')}>
+                    <LabelizedField
+                      label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
+                    >
                       <SummaryValue>
                         {targetPopulation.totalIndividualsCount || '0'}
                       </SummaryValue>
@@ -180,3 +238,5 @@ export function ResultsForHouseholds({
     </div>
   );
 }
+
+export default withErrorBoundary(ResultsForHouseholds, 'ResultsForHouseholds');

@@ -3,8 +3,6 @@ from typing import Any
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 
-from hct_mis_api.apps.core.models import MigrationStatus
-
 
 class DisableTrafficDuringMigrationsMiddleware:
     def __init__(self, get_response: Any) -> None:
@@ -16,9 +14,7 @@ class DisableTrafficDuringMigrationsMiddleware:
             "/_health",
             "/api/_health",
         ]
-        if MigrationStatus.objects.filter(is_running=True).exists() and not any(
-            request.path.startswith(path) for path in allowed_paths_beginnings
-        ):
+        if not any(request.path.startswith(path) for path in allowed_paths_beginnings):
             return JsonResponse(
                 {"message": "Migrations are running, please try again later"},
                 status=403,

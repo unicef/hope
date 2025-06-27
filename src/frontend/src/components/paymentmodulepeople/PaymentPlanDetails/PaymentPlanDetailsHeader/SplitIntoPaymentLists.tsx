@@ -16,7 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
+  Grid2 as Grid,
 } from '@mui/material';
 import ReorderIcon from '@mui/icons-material/Reorder';
 
@@ -115,7 +115,7 @@ export const SplitIntoPaymentLists = ({
             <DialogContent>
               <DialogContainer>
                 <Grid container spacing={3}>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     <Field
                       name="splitType"
                       label="Split Type"
@@ -123,7 +123,7 @@ export const SplitIntoPaymentLists = ({
                       component={FormikSelectField}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid size={{ xs: 12 }}>
                     {values.splitType === 'BY_RECORDS' && (
                       <Field
                         name="paymentsNo"

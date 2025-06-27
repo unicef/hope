@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.http import QueryDict
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -87,10 +88,7 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
 
     def test_admin_form_clean(self) -> None:
-        fsp_xls_template = FinancialServiceProviderXlsxTemplateFactory(
-            core_fields=["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"]
-        )
-
+        fsp_xls_template = FinancialServiceProviderXlsxTemplateFactory()
         fsp = FinancialServiceProviderFactory(
             name="Test FSP",
             vision_vendor_number="123",
@@ -104,7 +102,11 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
             "delivery_mechanism": self.dm_transfer_to_account.id,
             "xlsx_template": fsp_xls_template.id,
         }
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone)
+        form_data_standalone_query_dict = QueryDict(mutable=True)
+        for key, value in form_data_standalone.items():
+            form_data_standalone_query_dict[key] = value
+
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone_query_dict)
         self.assertTrue(form.is_valid())
         form.clean()
 
@@ -115,28 +117,21 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
             "xlsx_template": fsp_xls_template.id,
             "delivery_mechanisms": [str(self.dm_transfer_to_account.id)],
         }
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline)
+
+        form_data_inline_query_dict = QueryDict(mutable=True)
+        for key, value in form_data_inline.items():
+            if isinstance(value, list):
+                form_data_inline_query_dict.setlist(key, value)
+                continue
+            form_data_inline_query_dict[key] = value
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
+        print(form.errors)
         self.assertTrue(form.is_valid())
         form.clean()
 
-        # test missing required core fields
-        fsp_xls_template.core_fields = []
-        fsp_xls_template.save()
-
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone)
-        self.assertFalse(form.is_valid())
-        with self.assertRaisesMessage(
-            ValidationError,
-            "[\"['bank_name__transfer_to_account', 'bank_account_number__transfer_to_account'] fields are required by delivery mechanism Transfer to Account and must be present in the template core fields\"]",
-        ):
-            form.clean()
-
-        fsp_xls_template.core_fields = ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"]
-        fsp_xls_template.save()
-
         # test delivery mechanism not supported
         fsp.delivery_mechanisms.remove(self.dm_transfer_to_account)
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone)
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone_query_dict)
         self.assertFalse(form.is_valid())
         with self.assertRaisesMessage(
             ValidationError,
@@ -151,7 +146,10 @@ class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
             "xlsx_template": fsp_xls_template.id,
             "delivery_mechanisms": ["12313213123"],
         }
-        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline)
+        form_data_inline_query_dict = QueryDict(mutable=True)
+        for key, value in form_data_inline.items():
+            form_data_inline_query_dict[key] = value
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline_query_dict)
         self.assertFalse(form.is_valid())
         with self.assertRaisesMessage(
             ValidationError,

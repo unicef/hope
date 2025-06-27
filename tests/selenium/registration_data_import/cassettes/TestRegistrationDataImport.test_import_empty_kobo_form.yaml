@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: GET
-    uri: https://kf-hope.unitst.org/api/v2/assets/?format=json&limit=30000
+    uri: https://kobo-hope-trn.unitst.org/api/v2/assets/?format=json&limit=30000
   response:
     body:
       string: !!binary |
@@ -194,7 +194,7 @@ interactions:
       User-Agent:
       - python-requests/2.32.3
     method: GET
-    uri: https://kf-hope.unitst.org/api/v2/assets/aT5ULWyZAAkSSrR9ss2x5T/data/?format=json&limit=30000&query=%7B%22_validation_status.uid%22:%22validation_status_approved%22%7D
+    uri: https://kobo-hope-trn.unitst.org/api/v2/assets/aT5ULWyZAAkSSrR9ss2x5T/data/?format=json&limit=30000&query=%7B%22_validation_status.uid%22:%22validation_status_approved%22%7D
   response:
     body:
       string: '{"count":0,"next":null,"previous":null,"results":[]}'

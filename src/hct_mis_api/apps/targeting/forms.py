@@ -1,12 +1,12 @@
 from django import forms
 
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TargetPopulationForm(forms.ModelForm):
     class Meta:
-        model = TargetPopulation
+        model = PaymentPlan
         exclude = ["id"]
 
     def clean_program(self) -> Program:

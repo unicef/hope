@@ -1,22 +1,22 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
-  CashPlanAndPaymentPlanNode,
+  PaymentPlanNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '@generated/graphql';
-import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import TableCell from '@mui/material/TableCell';
 import {
   formatCurrencyWithSymbol,
   paymentVerificationStatusToColor,
 } from '@utils/utils';
-import { StatusBox } from '@components/core/StatusBox';
-import { UniversalMoment } from '@components/core/UniversalMoment';
-import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface PaymentVerificationTableRowProps {
-  plan: CashPlanAndPaymentPlanNode;
+  plan: PaymentPlanNode;
   canViewDetails: boolean;
 }
 
@@ -26,9 +26,7 @@ export function PaymentVerificationTableRow({
 }: PaymentVerificationTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
-  const planVerificationPath = `/${baseUrl}/payment-verification/${
-    plan.objType === 'CashPlan' ? 'cash-plan' : 'payment-plan'
-  }/${plan.id}`;
+  const planVerificationPath = `/${baseUrl}/payment-verification/payment-plan/${plan.id}`;
   const handleClick = (): void => {
     navigate(planVerificationPath);
   };
@@ -54,7 +52,7 @@ export function PaymentVerificationTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
-          status={plan.verificationStatus}
+          status={plan?.paymentVerificationSummary?.status}
           statusToColor={paymentVerificationStatusToColor}
         />
       </TableCell>

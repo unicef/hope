@@ -101,7 +101,7 @@ class RestartCreateReport(PermissionMutation):
         delta30 = timezone.now() - datetime.timedelta(minutes=30)
         if report.status is not Report.IN_PROGRESS and report.updated_at > delta30:
             msg = "Impossible restart now. Status must be 'Processing' and more than 30 mins after last running."
-            logger.error(msg)
+            logger.warning(msg)
             raise GraphQLError(msg)
         else:
             report_export_task.delay(report_id=str(report.id))

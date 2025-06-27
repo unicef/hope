@@ -63,9 +63,6 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
       $approvedPaymentChannelsToCreate: [Int],
       $approvedPaymentChannelsToEdit: [Int],
       $approvedPaymentChannelsToRemove: [Int],
-      $approvedDeliveryMechanismDataToCreate: [Int],
-      $approvedDeliveryMechanismDataToEdit: [Int],
-      $approvedDeliveryMechanismDataToRemove: [Int]
     ) {
       approveIndividualDataChange(
         grievanceTicketId: $grievanceTicketId,
@@ -80,9 +77,6 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate,
         approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit,
         approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove,
-        approvedDeliveryMechanismDataToCreate: $approvedDeliveryMechanismDataToCreate,
-        approvedDeliveryMechanismDataToEdit: $approvedDeliveryMechanismDataToEdit,
-        approvedDeliveryMechanismDataToRemove: $approvedDeliveryMechanismDataToRemove
       ) {
         grievanceTicket {
           id
@@ -139,14 +133,12 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         )
 
         household_one = HouseholdFactory.build(
-            id="07a901ed-d2a5-422a-b962-3570da1d5d07",
             program=program_one,
         )
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
-        household_one.programs.add(program_one)
 
         cls.individuals_to_create = [
             {
@@ -346,9 +338,6 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "approvedPaymentChannelsToCreate": [],
                 "approvedPaymentChannelsToEdit": [],
                 "approvedPaymentChannelsToRemove": [],
-                "approvedDeliveryMechanismDataToCreate": [],
-                "approvedDeliveryMechanismDataToEdit": [],
-                "approvedDeliveryMechanismDataToRemove": [],
                 "flexFieldsApproveData": json.dumps({}),
             },
         )

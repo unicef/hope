@@ -12,7 +12,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
@@ -25,15 +25,19 @@ from hct_mis_api.apps.account.api.permissions import (
 )
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.api.caches import ProgramCycleKeyConstructor
+from hct_mis_api.apps.program.api.caches import (
+    BeneficiaryGroupKeyConstructor,
+    ProgramCycleKeyConstructor,
+)
 from hct_mis_api.apps.program.api.filters import ProgramCycleFilter
 from hct_mis_api.apps.program.api.serializers import (
+    BeneficiaryGroupSerializer,
     ProgramCycleCreateSerializer,
     ProgramCycleDeleteSerializer,
     ProgramCycleListSerializer,
     ProgramCycleUpdateSerializer,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +45,7 @@ logger = logging.getLogger(__name__)
 class ProgramCycleViewSet(
     ActionMixin,
     BusinessAreaProgramMixin,
-    mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.ListModelMixin,
-    GenericViewSet,
+    ModelViewSet,
 ):
     serializer_classes_by_action = {
         "list": ProgramCycleListSerializer,
@@ -100,11 +99,8 @@ class ProgramCycleViewSet(
         if program_cycle.program.cycles.count() == 1:
             raise ValidationError("Don’t allow to delete last Cycle.")
 
-        if program_cycle.target_populations.exists():
-            raise ValidationError("Don’t allow to delete Cycle with assigned Target Population")
-
         if program_cycle.payment_plans.exists():
-            raise ValidationError("Don’t allow to delete Cycle with assigned Payment Plan")
+            raise ValidationError("Don’t allow to delete Cycle with assigned Target Population")
 
         program_cycle.delete()
 
@@ -119,3 +115,16 @@ class ProgramCycleViewSet(
         program_cycle = self.get_object()
         program_cycle.set_active()
         return Response(status=status.HTTP_200_OK, data={"message": "Programme Cycle Reactivated"})
+
+
+class BeneficiaryGroupViewSet(
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
+    queryset = BeneficiaryGroup.objects.all()
+    serializer_class = BeneficiaryGroupSerializer
+
+    @etag_decorator(BeneficiaryGroupKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=BeneficiaryGroupKeyConstructor())
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)

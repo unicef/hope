@@ -38,6 +38,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
@@ -76,15 +77,12 @@ class TestCloseGrievanceTicketAndDisableDeduplication(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(
-            id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example", program=program_one
-        )
+        household_one = HouseholdFactory.build(size=2, village="Example", program=program_one)
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
         household_one.program = program_one
-        household_one.programs.add(program_one)
 
         cls.individual = IndividualFactory(household=household_one, program=program_one)
         national_id_type = DocumentType.objects.get(

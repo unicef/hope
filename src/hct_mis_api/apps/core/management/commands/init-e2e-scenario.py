@@ -19,6 +19,7 @@ from hct_mis_api.apps.household.models import (
     IndividualCollection,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -29,9 +30,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
 )
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 faker = Faker()
@@ -67,6 +66,7 @@ def create_household_with_individual(address: str) -> Tuple[Household, Individua
         last_registration_date=now,
         business_area=afghanistan,
         sex=MALE,
+        registration_data_import=rdi,
         full_name=faker.name(),
         individual_collection=IndividualCollection.objects.create(),
         rdi_merge_status=MergeStatusModel.MERGED,
@@ -141,17 +141,14 @@ def init_payment_plan(seed: str) -> None:
         arguments=[addresses[2]],
     )
 
-    target_population = TargetPopulation.objects.create(
+    PaymentPlan.objects.create(
         name=f"PaymentPlanTargetPopulation-{seed}",
         targeting_criteria=targeting_criteria,
-        status=TargetPopulation.STATUS_OPEN,
+        status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
-        program=program,
+        program_cycle=program.cycles.first(),
         created_by=root,
     )
-    full_rebuild(target_population)
-    target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-    target_population.save()
 
     rule = RuleFactory(name=f"Rule-{seed}", type=Rule.TYPE_PAYMENT_PLAN)
     RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule)

@@ -1,22 +1,23 @@
-import { Box } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import { useHouseholdChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HouseholdFilters } from '@components/population/HouseholdFilter';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useHouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Box } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
-export function PopulationHouseholdPage(): ReactElement {
-  const { t } = useTranslation();
+function PopulationHouseholdPage(): ReactElement {
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery({
       fetchPolicy: 'cache-first',
@@ -53,40 +54,35 @@ export function PopulationHouseholdPage(): ReactElement {
   if (!choicesData) return null;
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'PopulationHouseholdPage.tsx');
-      }}
-      componentName="PopulationHouseholdPage"
-    >
-      <>
-        <PageHeader title={t('Households')} />
-        <HouseholdFilters
-          filter={filter}
+    <>
+      <PageHeader title={beneficiaryGroup?.groupLabelPlural} />
+      <HouseholdFilters
+        filter={filter}
+        choicesData={choicesData}
+        setFilter={setFilter}
+        initialFilter={initialFilter}
+        appliedFilter={appliedFilter}
+        setAppliedFilter={setAppliedFilter}
+      />
+      <Box
+        display="flex"
+        flexDirection="column"
+        data-cy="page-details-container"
+      >
+        <HouseholdTable
+          filter={appliedFilter}
+          businessArea={businessArea}
           choicesData={choicesData}
-          setFilter={setFilter}
-          initialFilter={initialFilter}
-          appliedFilter={appliedFilter}
-          setAppliedFilter={setAppliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            permissions,
+          )}
         />
-        <Box
-          display="flex"
-          flexDirection="column"
-          data-cy="page-details-container"
-        >
-          <HouseholdTable
-            filter={appliedFilter}
-            businessArea={businessArea}
-            choicesData={choicesData}
-            canViewDetails={hasPermissions(
-              PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-              permissions,
-            )}
-          />
-        </Box>
-      </>
-    </UniversalErrorBoundary>
+      </Box>
+    </>
   );
 }
+export default withErrorBoundary(
+  PopulationHouseholdPage,
+  'PopulationHouseholdPage',
+);

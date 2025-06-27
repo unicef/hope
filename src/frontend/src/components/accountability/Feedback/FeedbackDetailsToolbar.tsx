@@ -10,13 +10,14 @@ import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
 import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface FeedbackDetailsToolbarProps {
   feedback: FeedbackQuery['feedback'];
   canEdit: boolean;
 }
 
-export function FeedbackDetailsToolbar({
+function FeedbackDetailsToolbar({
   feedback,
   canEdit,
 }: FeedbackDetailsToolbarProps): ReactElement {
@@ -90,3 +91,8 @@ export function FeedbackDetailsToolbar({
     </PageHeader>
   );
 }
+
+export default withErrorBoundary(
+  FeedbackDetailsToolbar,
+  'FeedbackDetailsToolbar',
+);

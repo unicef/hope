@@ -1,24 +1,24 @@
-import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
+import ProgramCyclesTableProgramDetails from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
 import {
   ProgramStatus,
   useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '@generated/graphql';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
-import { ProgramCyclesTableProgramDetails } from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-import { ReactElement } from 'react';
 
 const Container = styled.div`
   && {
@@ -45,9 +45,8 @@ const NoCashPlansTitle = styled.div`
   text-align: center;
 `;
 
-export function ProgramDetailsPage(): ReactElement {
+function ProgramDetailsPage(): ReactElement {
   const { t } = useTranslation();
-  const location = useLocation();
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
     variables: { id },
@@ -67,19 +66,13 @@ export function ProgramDetailsPage(): ReactElement {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!choices || !businessAreaData || permissions === null) return null;
+  if (!choices || !businessAreaData || permissions === null || !data)
+    return null;
 
   const { program } = data;
   const canFinish = hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'ProgramDetailsPage.tsx');
-      }}
-      componentName="ProgramDetailsPage"
-    >
+    <>
       <ProgramDetailsPageHeader
         program={program}
         canActivate={hasPermissions(
@@ -93,9 +86,6 @@ export function ProgramDetailsPage(): ReactElement {
           PERMISSIONS.PROGRAMME_DUPLICATE,
           permissions,
         )}
-        isPaymentPlanApplicable={
-          businessAreaData.businessArea.isPaymentPlanApplicable
-        }
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
@@ -114,6 +104,8 @@ export function ProgramDetailsPage(): ReactElement {
           <UniversalActivityLogTable objectId={program.id} />
         )}
       </Container>
-    </UniversalErrorBoundary>
+    </>
   );
 }
+
+export default withErrorBoundary(ProgramDetailsPage, 'ProgramDetailsPage');

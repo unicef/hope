@@ -2,13 +2,21 @@ import hashlib
 import json
 import re
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+from django.db.models import Q, QuerySet
+from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.kobo.common import get_field_name
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.program.models import Program
 
 
 def post_process_dedupe_results(record: Any) -> None:
-    # TODO: record: ImportedIndividual but circular import
     max_score = 0
     min_score = sys.maxsize
     for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
@@ -73,3 +81,61 @@ def calculate_hash_for_kobo_submission(submission: Dict) -> str:
     hash_object = hashlib.sha256(d_bytes)
     hex_dig = hash_object.hexdigest()
     return hex_dig
+
+
+def get_rdi_program_population(
+    import_from_program_id: str, import_to_program_id: str, import_from_ids: Optional[str]
+) -> Tuple[QuerySet[Household], QuerySet[Individual]]:
+    program = get_object_or_404(Program, pk=import_to_program_id)
+
+    # filter by rdi.import_from_ids HH or Ins ids based on Program.DCT
+    list_of_ids = [item.strip() for item in import_from_ids.split(",")] if import_from_ids else []
+    if list_of_ids:
+        # add Individuals who can have any role in household
+        ind_ids_with_role = list(
+            IndividualRoleInHousehold.objects.filter(household__unicef_id__in=list_of_ids)
+            .exclude(Q(individual__withdrawn=True) | Q(individual__duplicate=True))
+            .values_list("individual__unicef_id", flat=True)
+        )
+
+        individual_ids_q = (
+            Q(unicef_id__in=list_of_ids + ind_ids_with_role)
+            if program.is_social_worker_program
+            else Q(Q(household__unicef_id__in=list_of_ids) | Q(unicef_id__in=ind_ids_with_role))
+        )
+        household_ids_q = (
+            Q(unicef_id__in=list_of_ids)
+            if not program.is_social_worker_program
+            else Q(individuals__unicef_id__in=list_of_ids)
+        )
+    else:
+        individual_ids_q = Q()
+        household_ids_q = Q()
+
+    households_to_exclude = Household.all_merge_status_objects.filter(
+        program=import_to_program_id,
+    ).values_list("unicef_id", flat=True)
+    households = (
+        Household.objects.filter(
+            household_ids_q,
+            program_id=import_from_program_id,
+            withdrawn=False,
+        )
+        .exclude(unicef_id__in=households_to_exclude)
+        .distinct()
+    )
+    individuals_to_exclude = Individual.all_merge_status_objects.filter(
+        program=import_to_program_id,
+    ).values_list("unicef_id", flat=True)
+    individuals = (
+        Individual.objects.filter(
+            individual_ids_q,
+            program_id=import_from_program_id,
+            withdrawn=False,
+            duplicate=False,
+        )
+        .exclude(unicef_id__in=individuals_to_exclude)
+        .distinct()
+        .order_by("first_registration_date")
+    )
+    return households, individuals

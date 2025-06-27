@@ -10,9 +10,12 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
+from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+from hct_mis_api.apps.household.models import Individual
 
 
 class DeduplicationResultNode(graphene.ObjectType):
+    unicef_id = graphene.String()
     hit_id = graphene.ID()
     full_name = graphene.String()
     score = graphene.Float()
@@ -38,18 +41,30 @@ class DeduplicationResultNode(graphene.ObjectType):
     def resolve_distinct(self, info: Any) -> bool:
         return self.get("distinct", False)
 
+    def resolve_unicef_id(self, info: Any) -> str:
+        individual = Individual.all_objects.get(id=decode_id_string(self.get("hit_id")))
+        return str(individual.unicef_id)
+
 
 class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
+    id = graphene.String()
     photo = graphene.String()
     full_name = graphene.String()
     unicef_id = graphene.String()
+    # optional for RDI population view duplicates modal:
+    similarity_score = graphene.Float()
+    age = graphene.Int()
+    location = graphene.String()
 
     @staticmethod
     def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
-        from hct_mis_api.apps.household.models import Individual
+        # photo url serialization storage timeout
+        individual = Individual.all_objects.filter(id=parent.get("id") or None).first()
+        return individual.photo.url if individual and individual.photo else None
 
-        individual = Individual.objects.get(id=parent.get("id"))
-        return individual.photo.url if individual.photo else None
+    @staticmethod
+    def resolve_id(parent: Any, info: Any) -> Optional[str]:
+        return encode_id_base64(parent.get("id"), "Individual")
 
 
 class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.ObjectType):
@@ -58,3 +73,4 @@ class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.Ob
     individual1 = graphene.Field(DeduplicationEngineSimilarityPairIndividualNode)
     individual2 = graphene.Field(DeduplicationEngineSimilarityPairIndividualNode)
     similarity_score = graphene.String()
+    status_code = graphene.String()

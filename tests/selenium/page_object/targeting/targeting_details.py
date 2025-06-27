@@ -21,6 +21,7 @@ class TargetingDetails(BaseComponents):
     inputName = 'input[data-cy="input-name"]'
     buttonDelete = 'button[data-cy="button-delete"]'
     buttonEdit = 'a[data-cy="button-edit"]'
+    buttonSave = 'button[data-cy="button-save"]'
     buttonIconEdit = 'button[data-cy="button-edit"]'
     buttonRebuild = 'button[data-cy="button-rebuild"]'
     buttonTargetPopulationLock = 'button[data-cy="button-target-population-lock"]'
@@ -51,8 +52,8 @@ class TargetingDetails(BaseComponents):
     labelFemaleAdults = 'div[data-cy="label-Female Adults"]'
     labelMaleChildren = 'div[data-cy="label-Male Children"]'
     labelMaleAdults = 'div[data-cy="label-Male Adults"]'
-    labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
-    labelTargetedIndividuals = 'div[data-cy="label-Targeted Individuals"]'
+    labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Items Groups"]'
+    labelTargetedIndividuals = 'div[data-cy="label-Targeted Items"]'
     tableTitle = 'h6[data-cy="table-title"]'
     tableLabel = 'span[data-cy="table-label"]'
     tablePagination = 'div[data-cy="table-pagination"]'
@@ -60,6 +61,7 @@ class TargetingDetails(BaseComponents):
     householdSizeFrom = 'input[data-cy="input-householdsFiltersBlocks[0].value.from"]'
     householdSizeTo = 'input[data-cy="input-householdsFiltersBlocks[0].value.to"]'
     dialogBox = 'div[role="dialog"]'
+    buttonTargetPopulationAddCriteria = 'div[data-cy="button-target-population-add-criteria"]'
 
     # Texts
     # Elements
@@ -85,6 +87,9 @@ class TargetingDetails(BaseComponents):
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
 
+    def getButtonSave(self) -> WebElement:
+        return self.wait_for(self.buttonSave)
+
     def getButtonIconEdit(self) -> WebElement:
         return self.wait_for(self.buttonIconEdit)
 
@@ -104,7 +109,7 @@ class TargetingDetails(BaseComponents):
         return self.wait_for(self.labelStatus)
 
     def waitForLabelStatus(self, status: str) -> WebElement:
-        for _ in range(10):
+        for _ in range(20):
             sleep(1)
             if status.upper() in self.getLabelStatus().text:
                 return self.wait_for(self.labelStatus)
@@ -186,7 +191,7 @@ class TargetingDetails(BaseComponents):
     def getTableTitle(self) -> WebElement:
         return self.wait_for(self.tableTitle)
 
-    def getTableLabel(self) -> WebElement:
+    def getTableLabel(self) -> [WebElement]:
         return self.get_elements(self.tableLabel)
 
     def getTablePagination(self) -> WebElement:
@@ -227,3 +232,6 @@ class TargetingDetails(BaseComponents):
 
     def getDialogBox(self) -> WebElement:
         return self.wait_for(self.dialogBox)
+
+    def getButtonTargetPopulationAddCriteria(self) -> WebElement:
+        return self.wait_for(self.buttonTargetPopulationAddCriteria)

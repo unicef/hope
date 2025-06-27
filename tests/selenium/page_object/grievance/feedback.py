@@ -34,7 +34,7 @@ class Feedback(BaseComponents):
     textTableTitle = "Feedbacks List"
     textFeedbackID = "Feedback ID"
     textIssueType = "Issue Type"
-    textHouseholdID = "Household ID"
+    textHouseholdID = "Group ID"
     textLinkedGrievance = "Linked Grievance"
     textCreatedBy = "Created by"
     textCreationDate = "Creation Date"

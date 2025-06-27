@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@mui/material';
+import { Box, Grid2 as Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import Close from '@mui/icons-material/Close';
@@ -80,7 +80,7 @@ export function EditIdentityRow({
     </Grid>
   ) : (
     <Grid container alignItems="center" spacing={3} key={identity.node.id}>
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID AGENCY1')}
@@ -88,20 +88,20 @@ export function EditIdentityRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('Country')} value={identity.node.country} />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={3}>
+      <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField label={t('ID Number')} value={identity.node.number} />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={1}>
+      <Grid size={{ xs: 1 }}>
         {!removed ? (
           !isEditTicket && (
-            <Box display="flex" align-items="center">
+            <Box display="flex" alignItems="center">
               <IconButton
                 onClick={() => {
                   setFieldValue(

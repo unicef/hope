@@ -1,26 +1,25 @@
-import { ReactElement, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore';
-import { TargetPopulationDetails } from '@components/targeting/TargetPopulationDetails';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '@hooks/usePermissions';
-import { isPermissionDeniedError } from '@utils/utils';
+import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
 import {
-  TargetPopulationBuildStatus,
+  PaymentPlanBuildStatus,
   useBusinessAreaDataQuery,
   useTargetPopulationQuery,
 } from '@generated/graphql';
-import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { isPermissionDeniedError } from '@utils/utils';
+import { ReactElement, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { isStandardDctType, isSocialDctType } = useProgramContext();
-  const location = useLocation();
   const permissions = usePermissions();
   const { data, loading, error, startPolling, stopPolling } =
     useTargetPopulationQuery({
@@ -33,12 +32,12 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
     variables: { businessAreaSlug: businessArea },
   });
 
-  const buildStatus = data?.targetPopulation?.buildStatus;
+  const buildStatus = data?.paymentPlan?.buildStatus;
   useEffect(() => {
     if (
       [
-        TargetPopulationBuildStatus.Building,
-        TargetPopulationBuildStatus.Pending,
+        PaymentPlanBuildStatus.Building,
+        PaymentPlanBuildStatus.Pending,
       ].includes(buildStatus)
     ) {
       startPolling(3000);
@@ -54,23 +53,16 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   if (!data || permissions === null || !businessAreaData) return null;
 
-  const { targetPopulation } = data;
+  const { paymentPlan } = data;
 
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
-    Boolean(targetPopulation.targetingCriteria);
+    Boolean(paymentPlan.targetingCriteria);
 
   return (
-    <UniversalErrorBoundary
-      location={location}
-      beforeCapture={(scope) => {
-        scope.setTag('location', location.pathname);
-        scope.setTag('component', 'TargetPopulationDetailsPage.tsx');
-      }}
-      componentName="TargetPopulationDetailsPage"
-    >
+    <>
       <TargetPopulationPageHeader
-        targetPopulation={targetPopulation}
+        paymentPlan={paymentPlan}
         canEdit={hasPermissions(PERMISSIONS.TARGETING_UPDATE, permissions)}
         canRemove={hasPermissions(PERMISSIONS.TARGETING_REMOVE, permissions)}
         canDuplicate={canDuplicate}
@@ -78,15 +70,20 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         canUnlock={hasPermissions(PERMISSIONS.TARGETING_UNLOCK, permissions)}
         canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
       />
-      <TargetPopulationDetails targetPopulation={targetPopulation} />
+      <TargetPopulationDetails targetPopulation={paymentPlan} />
       <TargetPopulationCore
-        id={targetPopulation.id}
-        targetPopulation={targetPopulation}
+        id={paymentPlan?.id}
+        targetPopulation={paymentPlan}
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
         permissions={permissions}
         screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />
-    </UniversalErrorBoundary>
+    </>
   );
 };
+
+export default withErrorBoundary(
+  TargetPopulationDetailsPage,
+  'TargetPopulationDetailsPage',
+);

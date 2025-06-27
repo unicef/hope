@@ -34,7 +34,7 @@ def calculate_age_at_registration_field(batch_size: int = 10_000) -> None:
                 individuals_to_update.append(individual)
             Individual.objects.bulk_update(individuals_to_update, ["age_at_registration"])
     except Exception:
-        logger.error("Migration of age_at_registration field failed")
+        logger.warning("Migration of age_at_registration field failed")
         raise
 
     logger.info("Migration of age_at_registration went successfully")

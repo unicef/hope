@@ -19,9 +19,7 @@ from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
-    COLLECT_TYPE_NONE,
-    COLLECT_TYPE_PARTIAL,
+    DATA_SHARING_CHOICES,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
     NON_BENEFICIARY,
@@ -32,6 +30,11 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -39,7 +42,6 @@ if TYPE_CHECKING:
     from rest_framework.request import Request
 
     from hct_mis_api.apps.core.models import BusinessArea
-
 
 logger = logging.getLogger(__name__)
 
@@ -100,20 +102,17 @@ class DocumentSerializer(serializers.ModelSerializer):
         ]
 
 
-class CollectDataMixin(serializers.Serializer):
-    collect_individual_data = serializers.CharField(required=True)
+class AccountSerializer(serializers.ModelSerializer):
+    account_type = serializers.SlugRelatedField(slug_field="key", required=True, queryset=AccountType.objects.all())
+    number = serializers.CharField(allow_blank=True, required=False)
+    financial_institution = serializers.PrimaryKeyRelatedField(
+        required=False, queryset=FinancialInstitution.objects.all()
+    )
+    data = serializers.JSONField(required=False, default=dict)  # type: ignore
 
-    def validate_collect_individual_data(self, value: str) -> str:
-        v = value.upper()
-        if v in [COLLECT_TYPE_FULL, "FULL", "F"]:
-            return COLLECT_TYPE_FULL
-        if v in [COLLECT_TYPE_PARTIAL, "PARTIAL", "P"]:
-            return COLLECT_TYPE_PARTIAL
-        if v in [COLLECT_TYPE_NONE, "NO", "N", "NONE"]:
-            return COLLECT_TYPE_NONE
-        raise ValidationError(
-            "Invalid value %s. " "Check values at %s" % (value, reverse("api:datacollectingpolicy-list"))
-        )
+    class Meta:
+        model = PendingAccount
+        exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
 
 
 class IndividualSerializer(serializers.ModelSerializer):
@@ -126,6 +125,8 @@ class IndividualSerializer(serializers.ModelSerializer):
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
+    accounts = AccountSerializer(many=True, required=False)
+    photo = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
         model = PendingIndividual
@@ -140,6 +141,8 @@ class IndividualSerializer(serializers.ModelSerializer):
             "updated_at",
             "version",
             "vector_column",
+            "unicef_id",
+            "program",
         ]
 
     def validate_role(self, value: str) -> Optional[str]:
@@ -154,13 +157,14 @@ class IndividualSerializer(serializers.ModelSerializer):
         raise ValidationError("Invalid value %s. " "Check values at %s" % (value, reverse("api:role-list")))
 
 
-class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
+class HouseholdSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     members = IndividualSerializer(many=True, required=True)
     country = serializers.ChoiceField(choices=Countries())
     country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     size = serializers.IntegerField(required=False, allow_null=True)
+    consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
 
     class Meta:
         model = PendingHousehold
@@ -172,9 +176,11 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
             "program",
             "kobo_submission_uuid",
             "kobo_submission_time",
-            "geopoint",
+            "latitude",
+            "longitude",
             "detail_id",
             "version",
+            "unicef_id",
         ]
         validators = [HouseholdValidator()]
 
@@ -187,15 +193,16 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
         def get_related() -> int:
             return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
 
-        ctype = attrs.get("collect_individual_data", "")
-        if ctype == COLLECT_TYPE_NONE:
-            if not attrs.get("size", 0) > 0:
-                raise ValidationError({"size": ["This field is required 2"]})
-        elif ctype == COLLECT_TYPE_PARTIAL:
-            if not attrs.get("size", 0) > get_related():
-                raise ValidationError({"size": ["Households size must be greater than provided details"]})
-        else:
-            attrs["size"] = get_related()
+        # TODO  - 221086 how to check this? Data collecting type in the program does not store information if individual data is collected
+        # ctype = attrs.get("collect_individual_data", "")
+        # if ctype == COLLECT_TYPE_NONE:
+        #     if not attrs.get("size", 0) > 0:
+        #         raise ValidationError({"size": ["This field is required 2"]})
+        # elif ctype == COLLECT_TYPE_PARTIAL:
+        #     if not attrs.get("size", 0) > get_related():
+        #         raise ValidationError({"size": ["Households size must be greater than provided details"]})
+        # else:
+        #     attrs["size"] = get_related()
         return attrs
 
 

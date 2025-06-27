@@ -110,8 +110,8 @@ class Command(BaseCommand):
         if not options["skip_drop"]:
             self.stdout.write("Dropping existing databases...")
             call_command("dropalldb")
-            self.stdout.write("Migrating databases...")
-            call_command("migratealldb")
+            self.stdout.write("Migrating database...")
+            call_command("migrate")
 
         # Flush databases
         self.stdout.write("Flushing databases...")
@@ -140,7 +140,7 @@ class Command(BaseCommand):
             self.stdout.write("Rebuilding search index...")
             call_command("search_index", "--rebuild", "-f")
         except elasticsearch.exceptions.RequestError as e:
-            logger.error(f"Elasticsearch RequestError: {e}")
+            logger.warning(f"Elasticsearch RequestError: {e}")
 
         # Generate additional data
         self.stdout.write("Generating delivery mechanisms...")
@@ -208,8 +208,7 @@ class Command(BaseCommand):
                         user.save()
                         self.stdout.write(self.style.SUCCESS(f"Created user: {email}"))
                     except Exception as e:
-                        logger.error(f"Failed to create user {email}: {e}")
-                        self.stderr.write(self.style.ERROR(f"Failed to create user {email}: {e}"))
+                        logger.warning(f"Failed to create user {email}: {e}")
         else:
             self.stdout.write("No email lists provided. Skipping user creation.")
 

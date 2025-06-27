@@ -1,17 +1,12 @@
 import contextlib
 import logging
-from typing import Tuple
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import QuerySet
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.grievance.models import (
-    GrievanceTicket,
-    TicketIndividualDataUpdateDetails,
-)
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
@@ -30,10 +25,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanismData,
-    PendingDeliveryMechanismData,
-)
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
@@ -58,178 +50,6 @@ logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
-    HOUSEHOLD_FIELDS = (
-        "consent_sign",
-        "consent",
-        "consent_sharing",
-        "residence_status",
-        "country_origin",
-        "zip_code",
-        "size",
-        "address",
-        "country",
-        "female_age_group_0_5_count",
-        "female_age_group_6_11_count",
-        "female_age_group_12_17_count",
-        "female_age_group_18_59_count",
-        "female_age_group_60_count",
-        "pregnant_count",
-        "male_age_group_0_5_count",
-        "male_age_group_6_11_count",
-        "male_age_group_12_17_count",
-        "male_age_group_18_59_count",
-        "male_age_group_60_count",
-        "female_age_group_0_5_disabled_count",
-        "female_age_group_6_11_disabled_count",
-        "female_age_group_12_17_disabled_count",
-        "female_age_group_18_59_disabled_count",
-        "female_age_group_60_disabled_count",
-        "male_age_group_0_5_disabled_count",
-        "male_age_group_6_11_disabled_count",
-        "male_age_group_12_17_disabled_count",
-        "male_age_group_18_59_disabled_count",
-        "male_age_group_60_disabled_count",
-        "first_registration_date",
-        "last_registration_date",
-        "flex_fields",
-        "start",
-        "deviceid",
-        "name_enumerator",
-        "org_enumerator",
-        "org_name_enumerator",
-        "village",
-        "registration_method",
-        "collect_individual_data",
-        "currency",
-        "unhcr_id",
-        "geopoint",
-        "returnee",
-        "fchild_hoh",
-        "child_hoh",
-        "detail_id",
-        "collect_type",
-    )
-
-    INDIVIDUAL_FIELDS = (
-        "id",
-        "photo",
-        "full_name",
-        "given_name",
-        "middle_name",
-        "family_name",
-        "relationship",
-        "sex",
-        "birth_date",
-        "estimated_birth_date",
-        "marital_status",
-        "phone_no",
-        "phone_no_alternative",
-        "email",
-        "disability",
-        "flex_fields",
-        "first_registration_date",
-        "last_registration_date",
-        "deduplication_batch_status",
-        "deduplication_batch_results",
-        "observed_disability",
-        "seeing_disability",
-        "hearing_disability",
-        "physical_disability",
-        "memory_disability",
-        "selfcare_disability",
-        "comms_disability",
-        "who_answers_phone",
-        "who_answers_alt_phone",
-        "pregnant",
-        "work_status",
-        "detail_id",
-        "disability_certificate_picture",
-        "preferred_language",
-        "age_at_registration",
-        "payment_delivery_phone_no",
-        "wallet_name",
-        "blockchain_name",
-        "wallet_address",
-    )
-
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if record := imported_household.flex_registrations_record:
-    #             household_data["registration_id"] = str(record.registration)
-
-    # TODO DATAHUB DELETE Fix for flex registration
-    #         if enumerator_rec_id := imported_household.enumerator_rec_id:
-    #             household_data["enumerator_rec_id"] = enumerator_rec_id
-
-    def _create_grievance_ticket_for_delivery_mechanisms_errors(
-        self, delivery_mechanism_data: DeliveryMechanismData, obj_hct: RegistrationDataImport, description: str
-    ) -> Tuple[GrievanceTicket, TicketIndividualDataUpdateDetails]:
-        comments = f"This is a system generated ticket for RDI {obj_hct}"
-        grievance_ticket = GrievanceTicket(
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=delivery_mechanism_data.individual.household.admin2,
-            business_area=obj_hct.business_area,
-            registration_data_import=obj_hct,
-            description=description,
-            comments=comments,
-        )
-        individual_data_with_approve_status = delivery_mechanism_data.get_grievance_ticket_payload_for_errors()
-        individual_data_update_ticket = TicketIndividualDataUpdateDetails(
-            individual_data={"delivery_mechanism_data_to_edit": [individual_data_with_approve_status]},
-            individual=delivery_mechanism_data.individual,
-            ticket=grievance_ticket,
-        )
-
-        return grievance_ticket, individual_data_update_ticket
-
-    def _create_grievance_tickets_for_delivery_mechanisms_errors(
-        self, delivery_mechanisms_data: QuerySet[PendingDeliveryMechanismData], obj_hct: RegistrationDataImport
-    ) -> None:
-        grievance_tickets_to_create = []
-        individual_data_update_tickets_to_create = []
-        for delivery_mechanism_data in delivery_mechanisms_data:
-            delivery_mechanism_data.validate()
-            if not delivery_mechanism_data.is_valid:
-                description = (
-                    f"Missing required fields {list(delivery_mechanism_data.validation_errors.keys())}"
-                    f" values for delivery mechanism {delivery_mechanism_data.delivery_mechanism}"
-                )
-                (
-                    grievance_ticket,
-                    individual_data_update_ticket,
-                ) = self._create_grievance_ticket_for_delivery_mechanisms_errors(
-                    delivery_mechanism_data, obj_hct, description
-                )
-                grievance_tickets_to_create.append(grievance_ticket)
-                individual_data_update_tickets_to_create.append(individual_data_update_ticket)
-
-            else:
-                delivery_mechanism_data.update_unique_field()
-                if not delivery_mechanism_data.is_valid:
-                    description = (
-                        f"Fields not unique {list(delivery_mechanism_data.validation_errors.keys())} across program"
-                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism.name}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
-                    )
-                    (
-                        grievance_ticket,
-                        individual_data_update_ticket,
-                    ) = self._create_grievance_ticket_for_delivery_mechanisms_errors(
-                        delivery_mechanism_data, obj_hct, description
-                    )
-                    grievance_tickets_to_create.append(grievance_ticket)
-                    individual_data_update_tickets_to_create.append(individual_data_update_ticket)
-            delivery_mechanism_data.save()
-
-        if grievance_tickets_to_create:
-            GrievanceTicket.objects.bulk_create(grievance_tickets_to_create)
-            TicketIndividualDataUpdateDetails.objects.bulk_create(individual_data_update_tickets_to_create)
-            for grievance_ticket in grievance_tickets_to_create:
-                grievance_ticket.programs.add(obj_hct.program)
-
-            logger.info(
-                f"RDI:{obj_hct} Created {len(grievance_tickets_to_create)} delivery mechanisms error grievance tickets"
-            )
-
     def execute(self, registration_data_import_id: str) -> None:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
@@ -239,6 +59,23 @@ class RdiMergeTask:
             )
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
+            household_ids_from_extra_rdis = list(
+                Household.extra_rdis.through.objects.filter(registrationdataimport=obj_hct).values_list(
+                    "household_id", flat=True
+                )
+            )
+            household_ids_from_extra_rdis = list(
+                PendingHousehold.objects.filter(
+                    id__in=household_ids_from_extra_rdis, rdi_merge_status=PendingHousehold.PENDING
+                ).values_list("id", flat=True)
+            )
+            individuals_from_extra_rdis = list(
+                PendingIndividual.objects.filter(
+                    household__in=household_ids_from_extra_rdis, rdi_merge_status=PendingIndividual.PENDING
+                ).values_list("id", flat=True)
+            )
+            individual_ids.extend(individuals_from_extra_rdis)
+            household_ids.extend(household_ids_from_extra_rdis)
             try:
                 with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
@@ -248,7 +85,7 @@ class RdiMergeTask:
                         f"RDI:{registration_data_import_id} Recalculated population fields for {len(household_ids)} households"
                     )
                     kobo_submissions = []
-                    for household in households:
+                    for household in households.only("kobo_submission_uuid", "detail_id", "kobo_submission_time"):
                         kobo_submission_uuid = household.kobo_submission_uuid
                         kobo_asset_id = household.detail_id
                         kobo_submission_time = household.kobo_submission_time
@@ -264,21 +101,15 @@ class RdiMergeTask:
                     if kobo_submissions:
                         KoboImportedSubmission.objects.bulk_create(kobo_submissions)
                     logger.info(f"RDI:{registration_data_import_id} Created {len(kobo_submissions)} kobo submissions")
-
-                    # DEDUPLICATION
-
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
 
-                    imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
+                    dmds = PendingAccount.objects.filter(
                         individual_id__in=individual_ids,
                     )
-                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
-                        imported_delivery_mechanism_data, obj_hct
-                    )
-
-                    imported_delivery_mechanism_data.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingAccount.validate_uniqueness(dmds)
+                    dmds.update(rdi_merge_status=MergeStatusModel.MERGED)
                     PendingIndividualRoleInHousehold.objects.filter(
                         household_id__in=household_ids, individual_id__in=individual_ids
                     ).update(rdi_merge_status=MergeStatusModel.MERGED)
@@ -297,6 +128,9 @@ class RdiMergeTask:
                     PendingIndividual.objects.filter(id__in=individual_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
+                    self._update_rdi_id_for_extra_rdi(
+                        obj_hct.id, household_ids_from_extra_rdis, individuals_from_extra_rdis
+                    )
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
                         get_individual_doc(obj_hct.business_area.slug),
@@ -310,6 +144,7 @@ class RdiMergeTask:
                     )
 
                     if not obj_hct.business_area.postpone_deduplication:
+                        # DEDUPLICATION
                         DeduplicateTask(
                             obj_hct.business_area.slug, obj_hct.program.id
                         ).deduplicate_individuals_against_population(individuals)
@@ -367,7 +202,6 @@ class RdiMergeTask:
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
                     obj_hct.update_duplicates_against_population_statistics()
-
                     # create household and individual collections - only for Program Population Import
                     if obj_hct.data_source == RegistrationDataImport.PROGRAM_POPULATION:
                         self._update_household_collections(households, obj_hct)
@@ -410,7 +244,7 @@ class RdiMergeTask:
                         cache.delete(key)
 
         except Exception as e:
-            logger.error(e)
+            logger.warning(e)
             raise
 
     def _update_household_collections(self, households: list, rdi: RegistrationDataImport) -> None:
@@ -461,3 +295,28 @@ class RdiMergeTask:
                     individuals_to_update.append(individual_from_collection)
                     individuals_to_update.append(individual)
         Individual.all_objects.bulk_update(individuals_to_update, ["individual_collection"])
+
+    def _update_rdi_id_for_extra_rdi(
+        self, rdi_id: str, household_ids_from_extra_rdis: list, individuals_from_extra_rdis: list
+    ) -> None:
+        """
+        This function replace registration_data_import_id for households that were created from extra RDI.
+        (if rdi with extra_rdi_was the one merged as first)
+        """
+        if not household_ids_from_extra_rdis:
+            return
+        old_rdi_ids = Household.all_objects.filter(id__in=household_ids_from_extra_rdis).values_list(
+            "id", "registration_data_import_id"
+        )
+        extra_rdis_to_create = []
+        for household_id, old_rdi_id in old_rdi_ids:
+            extra_rdis_to_create.append(
+                Household.extra_rdis.through(household_id=household_id, registrationdataimport_id=old_rdi_id)
+            )
+        Household.extra_rdis.through.objects.bulk_create(extra_rdis_to_create)
+        Household.all_objects.filter(id__in=household_ids_from_extra_rdis).update(registration_data_import_id=rdi_id)
+        Individual.all_objects.filter(id__in=individuals_from_extra_rdis).update(registration_data_import_id=rdi_id)
+
+        Household.extra_rdis.through.objects.filter(
+            registrationdataimport_id=rdi_id, household_id__in=household_ids_from_extra_rdis
+        ).delete()

@@ -35,7 +35,6 @@ export const registrationDetailed = gql`
   fragment registrationDetailed on RegistrationDataImportNode {
     ...registrationMinimal
     numberOfIndividuals
-    datahubId
     errorMessage
     batchDuplicatesCountAndPercentage {
       count

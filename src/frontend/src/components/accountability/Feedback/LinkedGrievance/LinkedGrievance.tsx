@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { FeedbackQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
@@ -9,14 +9,13 @@ import { Title } from '@core/Title';
 import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievanceUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
 }
 
-export function LinkedGrievance({
-  feedback,
-}: LinkedGrievanceProps): ReactElement {
+function LinkedGrievance({ feedback }: LinkedGrievanceProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const grievanceDetailsPath = getGrievanceDetailsPath(
@@ -25,7 +24,7 @@ export function LinkedGrievance({
     baseUrl,
   );
   return (
-    <Grid item xs={4}>
+    <Grid size={{ xs: 4 }}>
       {feedback.linkedGrievance ? (
         <Box p={3}>
           <ContainerColumnWithBorder>
@@ -45,3 +44,4 @@ export function LinkedGrievance({
     </Grid>
   );
 }
+export default withErrorBoundary(LinkedGrievance, 'LinkedGrievance');

@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -57,11 +57,10 @@ export const VolumeByDeliveryMechanismSection: FC<
   const { t } = useTranslation();
   const { volumeByDeliveryMechanism } = paymentPlan;
 
-  const mappedDeliveryMechanism = volumeByDeliveryMechanism.map(
+  const mappedDeliveryMechanism = volumeByDeliveryMechanism?.map(
     (vdm, index) => (
       <Grid
-        item
-        xs={6}
+        size={{ xs: 6 }}
         /* eslint-disable-next-line react/no-array-index-key */
         key={`${vdm.deliveryMechanism.id}-${index}`}
       >
@@ -124,7 +123,7 @@ export const VolumeByDeliveryMechanismSection: FC<
           justifyContent="flex-start"
           alignItems="center"
         >
-          <Grid item xs={4}>
+          <Grid size={{ xs: 4 }}>
             <ChartContainer>
               <Pie data={data} options={options} />
             </ChartContainer>

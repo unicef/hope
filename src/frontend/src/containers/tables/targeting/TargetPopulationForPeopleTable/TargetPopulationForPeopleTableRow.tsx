@@ -5,13 +5,16 @@ import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { targetPopulationStatusToColor } from '@utils/utils';
-import { TargetPopulationNode } from '@generated/graphql';
+import {
+  paymentPlanStatusToColor,
+  targetPopulationStatusDisplayMap,
+} from '@utils/utils';
+import { PaymentPlanNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
 interface TargetPopulationTableRowProps {
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: PaymentPlanNode;
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;
@@ -66,7 +69,8 @@ export function TargetPopulationForPeopleTableRow({
       <TableCell align="left">
         <StatusBox
           status={targetPopulation.status}
-          statusToColor={targetPopulationStatusToColor}
+          statusToColor={paymentPlanStatusToColor}
+          statusNameMapping={targetPopulationStatusDisplayMap}
         />
       </TableCell>
       <TableCell align="left">

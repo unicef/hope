@@ -1,5 +1,6 @@
+from django.contrib.gis.geos import Point
 from django.core.management import call_command
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -7,7 +8,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
+from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
@@ -15,13 +21,9 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
     Household,
-    Individual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    copy_individual_fast,
-)
 
 
 class TestHousehold(TestCase):
@@ -30,6 +32,7 @@ class TestHousehold(TestCase):
         super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory(business_area=cls.business_area)
 
         area_type_level_1 = AreaTypeFactory(
             name="State1",
@@ -114,15 +117,30 @@ class TestHousehold(TestCase):
         household2.delete(soft=False)
         self.assertIsNone(Household.all_objects.filter(unicef_id="HH-9191").first())
 
+    def test_unique_unicef_id_per_program_constraint(self) -> None:
+        HouseholdFactory(unicef_id="HH-123", program=self.program)
+        HouseholdFactory(unicef_id="HH-000", program=self.program)
+        with self.assertRaises(IntegrityError):
+            HouseholdFactory(unicef_id="HH-123", program=self.program)
+
+    def test_geopoint(self) -> None:
+        household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
+        household.geopoint = Point(1.2, 0.5)  # type: ignore
+        self.assertEqual(household.longitude, 1.2)
+        self.assertEqual(household.latitude, 0.5)
+        household.geopoint = None
+        self.assertIsNone(household.longitude)
+        self.assertIsNone(household.latitude)
+
 
 class TestDocument(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         call_command("loadcountries")
-        business_area = create_afghanistan()
+        cls.business_area = create_afghanistan()
         afghanistan = Country.objects.get(name="Afghanistan")
-        _, (individual,) = create_household(household_args={"size": 1, "business_area": business_area})
+        _, (individual,) = create_household(household_args={"size": 1, "business_area": cls.business_area})
 
         cls.country = afghanistan
         cls.individual = individual
@@ -157,92 +175,6 @@ class TestDocument(TestCase):
                 program=self.program,
                 rdi_merge_status=MergeStatusModel.MERGED,
             )
-
-    def test_create_representation_with_the_same_number(self) -> None:
-        document_type, _ = DocumentType.objects.update_or_create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
-            defaults=dict(
-                label="Other",
-                unique_for_individual=False,
-            ),
-        )
-
-        original_document = Document.objects.create(
-            document_number="213123",
-            individual=self.individual,
-            country=self.country,
-            type=document_type,
-            status=Document.STATUS_VALID,
-            program=self.program,
-            is_original=True,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-
-        # allow to create representations with the same document number within different programs
-        self.individual.is_original = True
-        self.individual.save()
-
-        program_1 = self.individual.program
-        program_2 = ProgramFactory()
-        program_3 = ProgramFactory()
-        program_4 = ProgramFactory()
-
-        for _program in [program_1, program_2]:
-            (individual_to_create, documents_to_create, _, _) = copy_individual_fast(self.individual, _program)
-            Individual.objects.bulk_create([individual_to_create])
-            Document.objects.bulk_create(documents_to_create)
-
-        # test regular create
-        for _program in [program_3, program_4]:
-            (individual_to_create, _, _, _) = copy_individual_fast(self.individual, _program)
-            (created_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
-            Document.objects.create(
-                document_number="213123",
-                individual=created_individual_representation,
-                country=self.country,
-                type=document_type,
-                status=Document.STATUS_VALID,
-                program=created_individual_representation.program,
-                is_original=False,
-                copied_from=original_document,
-                rdi_merge_status=MergeStatusModel.MERGED,
-            )
-
-        # don't allow to create representations with the same document number and programs
-        (individual_to_create, _, _, _) = copy_individual_fast(self.individual, _program)
-        (created_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                # bulk create
-                Document.objects.bulk_create(
-                    [
-                        Document(
-                            document_number="213123",
-                            individual=created_individual_representation,
-                            country=self.country,
-                            type=document_type,
-                            status=Document.STATUS_VALID,
-                            program=self.individual.program,
-                            is_original=False,
-                            copied_from=original_document,
-                            rdi_merge_status=MergeStatusModel.MERGED,
-                        ),
-                    ]
-                )
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                # regular create
-                Document.objects.create(
-                    document_number="213123",
-                    individual=created_individual_representation,
-                    country=self.country,
-                    type=document_type,
-                    status=Document.STATUS_VALID,
-                    program=self.individual.program,
-                    is_original=False,
-                    copied_from=original_document,
-                    rdi_merge_status=MergeStatusModel.MERGED,
-                ),
 
     def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
@@ -396,75 +328,6 @@ class TestDocument(TestCase):
                 rdi_merge_status=MergeStatusModel.MERGED,
             )
 
-    def test_create_representations_duplicated_documents_with_different_numbers_and_unique_for_individual(
-        self,
-    ) -> None:
-        document_type, _ = DocumentType.objects.update_or_create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-            defaults=dict(
-                label="National Passport",
-                unique_for_individual=True,
-            ),
-        )
-
-        original_document = Document.objects.create(
-            document_number="123",
-            individual=self.individual,
-            country=self.country,
-            type=document_type,
-            status=Document.STATUS_VALID,
-            program=self.program,
-            is_original=True,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-
-        # allow to create representations with the same document number within different programs
-        self.individual.is_original = True
-        self.individual.save()
-
-        program_1 = self.individual.program
-        program_2 = ProgramFactory()
-        program_3 = ProgramFactory()
-
-        # make representations with the same number
-        for _program in [program_1, program_2]:
-            (individual_to_create, documents_to_create, _, _) = copy_individual_fast(self.individual, _program)
-            Individual.objects.bulk_create([individual_to_create])
-            Document.objects.bulk_create(documents_to_create)
-
-        # make representation with different number
-        program_3_individual_representation = (individual_to_create, _, _, _) = copy_individual_fast(
-            self.individual, program_3
-        )
-        (program_3_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
-        Document.objects.create(
-            document_number="456",
-            individual=program_3_individual_representation,
-            country=self.country,
-            type=document_type,
-            status=Document.STATUS_VALID,
-            program=program_3,
-            is_original=False,
-            copied_from=original_document,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        ),
-
-        # don't allow to create more than 1 representation within the same program and individual
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                # regular create
-                Document.objects.create(
-                    document_number="789",
-                    individual=program_3_individual_representation,
-                    country=self.country,
-                    type=document_type,
-                    status=Document.STATUS_VALID,
-                    program=program_3,
-                    is_original=False,
-                    copied_from=original_document,
-                    rdi_merge_status=MergeStatusModel.MERGED,
-                ),
-
     def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
@@ -509,8 +372,8 @@ class TestIndividualModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
-        ProgramFactory()
+        business_area = create_afghanistan()
+        cls.program = ProgramFactory(business_area=business_area)
 
     def test_bank_name(self) -> None:
         individual = create_household({"size": 1})[1][0]
@@ -531,3 +394,9 @@ class TestIndividualModel(TestCase):
         individual = create_household({"size": 1})[1][0]
         bank_account_info = BankAccountInfoFactory(individual=individual)
         self.assertEqual(individual.bank_branch_name, bank_account_info.bank_branch_name)
+
+    def test_unique_unicef_id_per_program_constraint(self) -> None:
+        IndividualFactory(unicef_id="IND-123", program=self.program)
+        IndividualFactory(unicef_id="IND-000", program=self.program)
+        with self.assertRaises(IntegrityError):
+            IndividualFactory(unicef_id="IND-123", program=self.program)

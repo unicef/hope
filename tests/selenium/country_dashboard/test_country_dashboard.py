@@ -13,6 +13,7 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import BeneficiaryGroup
 from tests.selenium.page_object.country_dashboard.country_dashboard import (
     CountryDashboard,
 )
@@ -36,9 +37,10 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
     """
     Fixture to create a household and associated payments within the same BusinessArea as the dashboard.
     """
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     household_args = {
         "business_area": business_area,
-        "program": ProgramFactory(business_area=business_area, status="Active"),
+        "program": ProgramFactory(business_area=business_area, status="Active", beneficiary_group=beneficiary_group),
         "size": 5,
         "children_count": 2,
         "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
@@ -65,6 +67,15 @@ class TestSmokeCountryDashboard:
         DashboardDataCache.refresh_data(business_area.slug)
         pageCountryDashboard.getNavCountryDashboard().click()
         pageCountryDashboard.switch_to_dashboard_iframe()
+
+        from selenium.webdriver.support.ui import WebDriverWait
+
+        wait = WebDriverWait(pageCountryDashboard.driver, 20)
+        wait.until(
+            lambda driver: pageCountryDashboard.get_total_amount_paid().text != ""
+            and pageCountryDashboard.get_total_amount_paid().text != "0.00 USD"
+        )
+
         assert pageCountryDashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."
         assert (
             pageCountryDashboard.get_total_amount_paid_local().text != ""

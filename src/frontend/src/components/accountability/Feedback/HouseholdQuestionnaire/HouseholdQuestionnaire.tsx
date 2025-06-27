@@ -1,27 +1,32 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 interface HouseholdQuestionnaireProps {
   values;
 }
 
-export function HouseholdQuestionnaire({
+function HouseholdQuestionnaire({
   values,
 }: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const selectedHouseholdData = values.selectedHousehold;
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Grid container spacing={6}>
       {[
         {
           name: 'questionnaire_size',
-          label: t('Household Size'),
+          label: `${beneficiaryGroup?.groupLabel} Size`,
           value: selectedHouseholdData.size,
           size: 3,
         },
@@ -45,7 +50,7 @@ export function HouseholdQuestionnaire({
         },
         {
           name: 'questionnaire_headOfHousehold',
-          label: t('Head of Household'),
+          label: `Head of ${beneficiaryGroup?.groupLabel}`,
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold?.id}`}
@@ -104,7 +109,7 @@ export function HouseholdQuestionnaire({
           size: 3,
         },
       ].map((el) => (
-        <Grid key={el.name} item xs={3}>
+        <Grid key={el.name} size={{ xs: 3 }}>
           <Field
             data-cy={`input-${el.name}`}
             name={el.name}
@@ -118,3 +123,8 @@ export function HouseholdQuestionnaire({
     </Grid>
   );
 }
+
+export default withErrorBoundary(
+  HouseholdQuestionnaire,
+  'HouseholdQuestionnaire',
+);

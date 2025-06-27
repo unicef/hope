@@ -97,7 +97,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
 
   return (
     <>
-      {canUploadReconciliation && (
+      {canUploadReconciliation && paymentPlan.canSendToPaymentGateway && (
         <Box key="import">
           <Button
             startIcon={

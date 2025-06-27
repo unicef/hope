@@ -73,7 +73,7 @@ export const PaymentPlanTableRow = ({
           statusToColor={paymentPlanStatusToColor}
         />
       </TableCell>
-      <TableCell align="left">{plan.targetPopulation.name}</TableCell>
+      <TableCell align="left">{plan.name}</TableCell>
       <TableCell align="left">{plan.totalHouseholdsCount || '-'}</TableCell>
       <TableCell align="left">{plan.currencyName}</TableCell>
       <TableCell align="right">

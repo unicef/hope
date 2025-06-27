@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { useTranslation } from 'react-i18next';
 import { formatCurrencyWithSymbol } from '@utils/utils';
@@ -23,16 +23,16 @@ export function TotalAmountTransferredSection({
   return (
     <DashboardCard color="#1E877D">
       <Grid container justifyContent="space-between" alignItems="center">
-        <Grid item>
+        <Grid>
           <CardTitle>{t('TOTAL AMOUNT TRANSFERRED')}</CardTitle>
           <CardTextLight>{t('IN USD')}</CardTextLight>
         </Grid>
-        <Grid item data-cy="total-amount-transferred">
+        <Grid data-cy="total-amount-transferred">
           <Grid container spacing={3} alignItems="center">
-            <Grid item>
+            <Grid>
               <CardAmount>{formatCurrencyWithSymbol(data?.total)}</CardAmount>
             </Grid>
-            <Grid item>
+            <Grid>
               <IconContainer bg="#d9eceb" color="#03867b">
                 <AccountBalanceWalletIcon fontSize="inherit" />
               </IconContainer>

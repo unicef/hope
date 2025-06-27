@@ -17,6 +17,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
@@ -26,7 +27,7 @@ interface AcceptanceProcessProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function AcceptanceProcess({
+function AcceptanceProcess({
   paymentPlan,
 }: AcceptanceProcessProps): ReactElement {
   const { t } = useTranslation();
@@ -61,10 +62,15 @@ export function AcceptanceProcess({
     }
   };
 
-  const canExportPdf =
-    hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Accepted ||
-      paymentPlan.status === PaymentPlanStatus.Finished);
+  const exportPdfAllowedStatuses = [
+  PaymentPlanStatus.InReview,
+  PaymentPlanStatus.Accepted,
+  PaymentPlanStatus.Finished,
+];
+
+const canExportPdf =
+  hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
+  exportPdfAllowedStatuses.includes(paymentPlan.status);
 
   return (
     <Box m={5}>
@@ -108,3 +114,5 @@ export function AcceptanceProcess({
     </Box>
   );
 }
+
+export default withErrorBoundary(AcceptanceProcess, 'AcceptanceProcess');

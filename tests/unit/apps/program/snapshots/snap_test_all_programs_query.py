@@ -47,6 +47,66 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_1_without_permission 1'
     ]
 }
 
+snapshots['TestAllProgramsQuery::test_all_programs_query_filter_beneficiary_group 1'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Other Program Beneficiary Group 1'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_all_programs_query_filter_beneficiary_group 2'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Other Program Beneficiary Group 1'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program Beneficiary Group 1'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program Beneficiary Group 2'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with all partners access'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with none partner access'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program with partner access'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Program without partner access'
+                    }
+                }
+            ],
+            'totalCount': 7
+        }
+    }
+}
+
 snapshots['TestAllProgramsQuery::test_all_programs_query_filter_dct 1'] = {
     'data': {
         'allPrograms': {
@@ -120,6 +180,26 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_user_not_authenticated 
                 }
             ],
             'message': 'Permission Denied: User is not authenticated.',
+            'path': [
+                'allPrograms'
+            ]
+        }
+    ]
+}
+
+snapshots['TestAllProgramsQuery::test_all_programs_query_without_ba_header 1'] = {
+    'data': {
+        'allPrograms': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Not found header Business-Area',
             'path': [
                 'allPrograms'
             ]
@@ -289,7 +369,6 @@ snapshots['TestAllProgramsQuery::test_program_can_run_deduplication_and_is_dedup
         'isDeduplicationDisabled': False
     }
 }
-
 
 snapshots['TestAllProgramsQuery::test_program_can_run_deduplication_and_is_deduplication_disabled 3'] = {
     'data': {

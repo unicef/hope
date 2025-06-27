@@ -1,4 +1,32 @@
 [
+    {
+        "model": "program.beneficiarygroup",
+        "pk": "09343484-199b-4374-b6e8-9b0c6eae6bda",
+        "fields": {
+            "created_at": "2024-10-23T19:28:21.649Z",
+            "updated_at": "2024-10-23T19:28:21.649Z",
+            "name": "Household",
+            "group_label": "Household",
+            "group_label_plural": "Households",
+            "member_label": "Individual",
+            "member_label_plural": "Individuals",
+            "master_detail": true
+        }
+    },
+    {
+        "model": "program.beneficiarygroup",
+        "pk": "76d5e0ce-38b7-4122-9f05-56ba0607f670",
+        "fields": {
+            "created_at": "2024-10-23T19:28:21.649Z",
+            "updated_at": "2024-10-23T19:28:21.649Z",
+            "name": "Social Workers",
+            "group_label": "Household",
+            "group_label_plural": "Households",
+            "member_label": "Individual",
+            "member_label_plural": "Individuals",
+            "master_detail": false
+        }
+    },
 {
     "model": "program.program",
     "pk": "939ff91b-7f89-4e3c-9519-26ed62f51718",
@@ -13,8 +41,6 @@
         "start_date": "2023-06-19",
         "end_date": "2029-12-24",
         "description": "qwerty",
-        "ca_id": null,
-        "ca_hash_id": null,
         "business_area": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
         "budget": "100000.00",
         "frequency_of_payments": "REGULAR",
@@ -25,7 +51,8 @@
         "administrative_areas_of_implementation": "",
         "admin_areas": [],
         "data_collecting_type": 2,
-        "programme_code": "ABC1"
+        "programme_code": "ABC1",
+        "beneficiary_group": "76d5e0ce-38b7-4122-9f05-56ba0607f670"
     }
 },
 {
@@ -42,5 +69,5 @@
         "end_date": "2023-12-24",
         "program": "939ff91b-7f89-4e3c-9519-26ed62f51718"
     }
-}
+  }
 ]

@@ -1,9 +1,10 @@
 from typing import Optional
 
 from django.contrib import admin
+from django.db.models.query import QuerySet
 from django.http import HttpRequest
 
-from adminfilters.autocomplete import LinkedAutoCompleteFilter
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 
 from hct_mis_api.apps.periodic_data_update.models import (
@@ -27,16 +28,34 @@ class PeriodicDataUpdateUploadInline(admin.TabularInline):
 
 @admin.register(PeriodicDataUpdateTemplate)
 class PeriodicDataUpdateTemplateAdmin(HOPEModelAdminBase):
-    list_display = ("id", "status", "program", "created_by", "created_at")
+    list_display = ("id", "status", "business_area", "program", "created_by", "created_at")
     list_filter = (
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
         ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("status", ChoicesFieldComboFilter),
+        ("created_by", AutoCompleteFilter),
     )
+    raw_id_fields = ("file", "program", "business_area", "created_by")
     inlines = [PeriodicDataUpdateUploadInline]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).select_related("created_by", "program", "business_area")
 
 
 @admin.register(PeriodicDataUpdateUpload)
 class PeriodicDataUpdateUploadAdmin(HOPEModelAdminBase):
     list_display = ("id", "status", "template", "created_by", "created_at")
-    list_filter = (("status", ChoicesFieldComboFilter),)
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("created_by", AutoCompleteFilter),
+    )
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "created_by",
+                "template",
+            )
+        )

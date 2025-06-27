@@ -1,7 +1,9 @@
 from django_filters import CharFilter, DateTimeFromToRangeFilter, NumberFilter
+from django_filters.rest_framework import FilterSet
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from hct_mis_api.contrib.aurora.models import Project, Registration
 
 
 class CountryFilter(UpdatedAtFilter):
@@ -48,3 +50,22 @@ class AreaTypeFilter(UpdatedAtFilter):
             "area_level",
             "parent_area_level",
         )
+
+
+class ProjectFilter(FilterSet):
+    org_slug = CharFilter(field_name="organization__slug", lookup_expr="exact")
+    org_pk = CharFilter(field_name="organization__pk", lookup_expr="exact")
+
+    class Meta:
+        model = Project
+        fields = ("org_slug", "org_pk")
+
+
+class RegistrationFilter(FilterSet):
+    org_slug = CharFilter(field_name="project__organization__slug", lookup_expr="exact")
+    org_pk = CharFilter(field_name="project__organization__pk", lookup_expr="exact")
+    programme_pk = CharFilter(field_name="project__programme__pk", lookup_expr="exact")
+
+    class Meta:
+        model = Registration
+        fields = ("org_slug", "org_pk", "programme_pk")

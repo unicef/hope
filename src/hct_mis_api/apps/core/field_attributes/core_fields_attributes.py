@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set
 
 from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
+    extra_rdis_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
     get_drivers_license_document_number_query,
@@ -32,7 +33,6 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.field_attributes.fields_types import (
-    _DELIVERY_MECHANISM_DATA,
     _HOUSEHOLD,
     _INDIVIDUAL,
     TEMPLATE_HOH,
@@ -92,10 +92,7 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.registration_data.models import (
-    COLLECT_TYPES,
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 logger = logging.getLogger(__name__)
 
@@ -713,19 +710,6 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.XLSX_PEOPLE,
             Scope.PEOPLE_UPDATE,
         ],
-    },
-    {
-        "id": "d9eea60c-5747-4d26-9f4b-f99a2165e913",
-        "type": TYPE_SELECT_ONE,
-        "name": "collect_individual_data",
-        "lookup": "collect_individual_data",
-        "required": False,
-        "label": {"English(EN)": f"Will you be collecting all member {TEMPLATE_INDIVIDUAL} data?"},
-        "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in COLLECT_TYPES],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "collect_individual_data_h_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE, Scope.XLSX],
     },
     {
         "id": "1c2e3c42-8b32-4198-bd4f-06a61e2ecf0e",
@@ -1462,6 +1446,32 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
     },
     {
+        "id": "c780a74c-0242-4412-b735-768f7715dfbf",
+        "type": TYPE_INTEGER,
+        "name": "other_sex_group_count",
+        "lookup": "other_sex_group_count",
+        "required": False,
+        "label": {"English(EN)": "Gender group with other sex"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "other_sex_group_h_c",
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+    },
+    {
+        "id": "355ab713-c94f-4083-9cb8-8da4d6e6ba48",
+        "type": TYPE_INTEGER,
+        "name": "unknown_sex_group_count",
+        "lookup": "unknown_sex_group_count",
+        "required": False,
+        "label": {"English(EN)": "Gender group with unknown sex"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "unknown_sex_group_h_c",
+        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.HOUSEHOLD_UPDATE],
+    },
+    {
         "id": "b2593385-5a81-452e-ae9a-28292e35714b",
         "type": TYPE_BOOL,
         "name": "pregnant",
@@ -1975,7 +1985,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "admin_area_h_c",
-        "scope": [Scope.HOUSEHOLD_UPDATE],
+        "scope": [Scope.HOUSEHOLD_UPDATE, Scope.PEOPLE_UPDATE],
         "snapshot_field": "admin_area_id__p_code",
     },
     {
@@ -2170,13 +2180,44 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "program_registration_id_h_c",
         "scope": [Scope.KOBO_IMPORT],
     },
+    {
+        "id": "7003a190-f71f-4ba1-b0f5-fd805097b33c",
+        "type": TYPE_STRING,
+        "name": "identification_key",
+        "lookup": "identification_key",
+        "required": False,
+        "label": {"English(EN)": "Identification key"},
+        "hint": "Field used to identify collisions",
+        "choices": [],
+        "associated_with": _HOUSEHOLD,
+        "xlsx_field": "identification_key_h_c",
+        "scope": [
+            Scope.GLOBAL,
+            Scope.TARGETING,
+            Scope.INDIVIDUAL_UPDATE,
+            Scope.XLSX_PEOPLE,
+            Scope.PEOPLE_UPDATE,
+        ],
+    },
+    {
+        "id": "730295f6-a6a3-48cf-abe3-7b304b40c886",
+        "type": TYPE_SELECT_MANY,
+        "name": "extra_rdis",
+        "lookup": "extra_rdis",
+        "get_query": extra_rdis_query,
+        "required": False,
+        "label": {"English(EN)": "Extra RDIs"},
+        "hint": "Filter for targeting by extra RDIs",
+        "_choices": lambda *args, **kwargs: RegistrationDataImport.get_choices(*args, **kwargs),
+        "associated_with": _HOUSEHOLD,
+        "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
+        "xlsx_field": "extra_rdis_",
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
 def get_core_fields_attributes() -> List[Dict[str, Any]]:
-    from hct_mis_api.apps.payment.models import DeliveryMechanism
-
-    return CORE_FIELDS_ATTRIBUTES + DeliveryMechanism.get_all_core_fields_definitions()
+    return CORE_FIELDS_ATTRIBUTES
 
 
 class FieldFactory(list):
@@ -2204,7 +2245,11 @@ class FieldFactory(list):
         label_with_template = field["label"].get(language)
         if not label_with_template:
             return None
-        mapping_dict = TEMPLATE_MAPPING_NORMAL if Scope.XLSX_PEOPLE not in self.scopes else TEMPLATE_MAPPING_PEOPLE
+        mapping_dict = (
+            TEMPLATE_MAPPING_PEOPLE
+            if Scope.XLSX_PEOPLE in self.scopes or Scope.PEOPLE_UPDATE in self.scopes
+            else TEMPLATE_MAPPING_NORMAL
+        )
         for mapping in mapping_dict.items():
             label_with_template = label_with_template.replace(mapping[0], mapping[1])
         field["label"][language] = label_with_template
@@ -2270,9 +2315,6 @@ class FieldFactory(list):
 
     def associated_with_individual(self) -> "FieldFactory":
         return self._associated_with([_INDIVIDUAL])
-
-    def associated_with_individual_with_delivery_mechanism_data(self) -> "FieldFactory":
-        return self._associated_with([_INDIVIDUAL, _DELIVERY_MECHANISM_DATA])
 
     def associated_with_household(self) -> "FieldFactory":
         return self._associated_with([_HOUSEHOLD])

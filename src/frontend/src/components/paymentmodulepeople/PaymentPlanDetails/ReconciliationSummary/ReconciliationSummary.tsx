@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -85,17 +85,17 @@ export function ReconciliationSummary({
       </Title>
       <ContentWrapper>
         <Grid container>
-          <Grid item xs={12}>
-            <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
+            <Grid size={{ xs: 12 }}>
               <Grid container spacing={0} justifyContent="flex-start">
                 {datasets.map(({ color, label, value }) => (
-                  <Grid item xs={2} key={label}>
+                  <Grid size={{ xs:2 }} key={label}>
                     <FieldBorder color={color}>
                       <LabelizedField label={label} value={value} />
                     </FieldBorder>
                   </Grid>
                 ))}
-                <Grid item xs={2}>
+                <Grid size={{ xs:2 }}>
                   <ChartContainer data-cy="chart-container">
                     <Pie
                       width={100}
@@ -124,9 +124,9 @@ export function ReconciliationSummary({
               </Grid>
             </Grid>
             <ReconciliationWrapUp>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Grid container spacing={0} justifyContent="flex-start">
-                  <Grid item xs={2}>
+                  <Grid size={{ xs:2 }}>
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Number of payments')}
@@ -134,7 +134,7 @@ export function ReconciliationSummary({
                       />
                     </FieldBorder>
                   </Grid>
-                  <Grid item xs={2}>
+                  <Grid size={{ xs:2 }}>
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Reconciled')}

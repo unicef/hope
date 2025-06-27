@@ -92,7 +92,6 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     org_name_enumerator = graphene.String()
     village = graphene.String()
     registration_method = graphene.String()
-    collect_individual_data = graphene.String()
     currency = graphene.String()
     unhcr_id = graphene.String()
     flex_fields = Arg()
@@ -145,25 +144,6 @@ class EditBankTransferObjectType(graphene.InputObjectType):
     account_holder_name = graphene.String(required=True)
 
 
-class DeliveryMechanismDataPayloadFieldObjectType(graphene.InputObjectType):
-    name = graphene.String(required=True)
-    value = graphene.String(required=True)
-    previous_value = graphene.String(required=False)
-
-
-class DeliveryMechanismDataObjectType(graphene.InputObjectType):
-    label = graphene.String(required=True)
-    approve_status = graphene.Boolean(required=True)
-    data_fields = graphene.List(DeliveryMechanismDataPayloadFieldObjectType, required=True)
-
-
-class EditDeliveryMechanismDataObjectType(graphene.InputObjectType):
-    id = graphene.Field(graphene.ID, required=True)
-    label = graphene.String(required=True)
-    approve_status = graphene.Boolean(required=True)
-    data_fields = graphene.List(DeliveryMechanismDataPayloadFieldObjectType, required=True)
-
-
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
     status = graphene.String()
     full_name = graphene.String()
@@ -181,7 +161,6 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     disability = graphene.String()
     work_status = graphene.String()
     enrolled_in_nutrition_programme = graphene.Boolean()
-    administration_of_rutf = graphene.Boolean()
     pregnant = graphene.Boolean()
     observed_disability = graphene.List(graphene.String)
     seeing_disability = graphene.String()
@@ -208,9 +187,6 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     blockchain_name = graphene.String()
     wallet_address = graphene.String()
     wallet_name = graphene.String()
-    delivery_mechanism_data = graphene.List(DeliveryMechanismDataObjectType)
-    delivery_mechanism_data_to_edit = graphene.List(EditDeliveryMechanismDataObjectType)
-    delivery_mechanism_data_to_remove = graphene.List(graphene.ID)
     # people fields
     consent = graphene.Boolean(description="People update")
     residence_status = graphene.String(description="People update")
@@ -224,6 +200,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     org_enumerator = graphene.String(description="People update")
     org_name_enumerator = graphene.String(description="People update")
     registration_method = graphene.String(description="People update")
+    admin_area_title = graphene.String(description="People update")
 
 
 class AddIndividualDataObjectType(graphene.InputObjectType):
@@ -242,7 +219,6 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     disability = graphene.String()
     work_status = graphene.String()
     enrolled_in_nutrition_programme = graphene.Boolean()
-    administration_of_rutf = graphene.Boolean()
     pregnant = graphene.Boolean()
     observed_disability = graphene.List(graphene.String)
     seeing_disability = graphene.String()

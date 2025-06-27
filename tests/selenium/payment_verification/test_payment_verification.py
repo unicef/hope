@@ -14,17 +14,19 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
+    generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
@@ -50,8 +52,8 @@ def active_program() -> Program:
 def get_program_with_dct_type_and_name(
     name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
         programme_code=programme_code,
@@ -59,13 +61,18 @@ def get_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        beneficiary_group=beneficiary_group,
     )
     return program
 
 
-def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+def create_program(
+    name: str = "Test Program",
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    beneficiary_group_name: str = "Main Menu",
+) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     yield ProgramFactory(
         name=name,
         programme_code="1234",
@@ -77,12 +84,13 @@ def create_program(name: str = "Test Program", dct_type: str = DataCollectingTyp
         cycle__status=ProgramCycle.DRAFT,
         cycle__start_date=datetime.now() - relativedelta(days=5),
         cycle__end_date=datetime.now() + relativedelta(days=5),
+        beneficiary_group=beneficiary_group,
     )
 
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program(dct_type=DataCollectingType.Type.SOCIAL)
+    yield create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
 
 
 @pytest.fixture
@@ -123,7 +131,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
                 entitlement_quantity=Decimal(21.36),
                 delivered_quantity=Decimal(21.36),
                 currency="PLN",
-                status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
             )
         )
 
@@ -170,7 +178,7 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         entitlement_quantity=Decimal(21.36),
         delivered_quantity=Decimal(21.36),
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     PaymentVerificationSummaryFactory(payment_plan=payment_plan)
 
@@ -186,9 +194,10 @@ def add_payment_verification_xlsx() -> PV:
 
 
 def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL) -> PV:
-    registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
-    )
+    generate_delivery_mechanisms()
+    user = User.objects.first()
+    business_area = BusinessArea.objects.first()
+    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
     program = Program.objects.filter(name="Active Program").first()
     household, individuals = create_household(
         {
@@ -199,13 +208,20 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         {"registration_data_import": registration_data_import},
     )
 
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
+    fsp = FinancialServiceProviderFactory()
+    fsp.delivery_mechanisms.set([dm_cash])
+
     payment_plan = PaymentPlanFactory(
         name="TEST",
         status=PaymentPlan.Status.FINISHED,
         program_cycle=program.cycles.first(),
-        business_area=BusinessArea.objects.first(),
+        business_area=business_area,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
+        created_by=user,
+        financial_service_provider=fsp,
+        delivery_mechanism=dm_cash,
     )
 
     payment_plan.unicef_id = "PP-0000-00-1122334"
@@ -221,7 +237,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=payment_plan,
@@ -353,9 +369,9 @@ class TestSmokePaymentVerification:
         assert "DELIVERED FULLY" in pagePaymentRecord.getLabelStatus()[0].text
         assert "DELIVERED FULLY" in pagePaymentRecord.getStatusContainer().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHousehold().text
-        assert payment_record.parent.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
+        assert payment_record.parent.name in pagePaymentRecord.getLabelTargetPopulation().text
         assert payment_record.parent.unicef_id in pagePaymentRecord.getLabelDistributionModality().text
-        assert payment_record.payment_verification.status in pagePaymentRecord.getLabelStatus()[1].text
+        assert payment_record.payment_verifications.first().status in pagePaymentRecord.getLabelStatus()[1].text
         assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHouseholdId().text
         assert "21.36" in pagePaymentRecord.getLabelEntitlementQuantity().text
@@ -447,7 +463,7 @@ class TestPaymentVerification:
         assert "0" in pagePaymentVerificationDetails.getLabelSampleSize().text
         assert "1" in pagePaymentVerificationDetails.getLabelNumberOfVerificationPlans().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_payment_verification_records(
         self,
         active_program: Program,
