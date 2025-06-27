@@ -199,7 +199,6 @@ type AreaNode implements Node {
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
 }
 
@@ -384,7 +383,6 @@ type BusinessAreaNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   tickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
@@ -680,20 +678,6 @@ input CreateProgramInput {
   pduFields: [PDUFieldInput]
 }
 
-type CreateReport {
-  report: ReportNode
-}
-
-input CreateReportInput {
-  reportType: Int!
-  businessAreaSlug: String!
-  dateFrom: Date!
-  dateTo: Date!
-  program: ID
-  adminArea1: ID
-  adminArea2: [ID]
-}
-
 input CreateSurveyInput {
   title: String!
   body: String
@@ -866,6 +850,8 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   internalData: JSONString!
   businessArea: UserBusinessAreaNode!
   programCycle: ProgramCycleNode!
+  deliveryMechanism: DeliveryMechanismNode
+  financialServiceProvider: FinancialServiceProviderNode
   steficonRule: RuleCommitNode
   steficonRuleTargeting: RuleCommitNode
   createdBy: UserNode!
@@ -907,8 +893,6 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   excludeHouseholdError: String
   statusDate: DateTime!
   isCashAssist: Boolean!
-  deliveryMechanism: DeliveryMechanismNode
-  financialServiceProvider: FinancialServiceProviderNode
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -1590,6 +1574,9 @@ type HouseholdNode implements Node {
   koboSubmissionTime: DateTime
   enumeratorRecId: Int
   flexRegistrationsRecordId: Int
+  extraRdis(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+  identificationKey: String
+  collisionFlag: Boolean!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, rdiId: String, duplicatesOnly: Boolean, rdiMergeStatus: String, orderBy: String): IndividualNodeConnection
@@ -2246,8 +2233,6 @@ type Mutations {
   createFeedbackMessage(input: CreateFeedbackMessageInput!): CreateFeedbackMessageMutation
   createSurvey(input: CreateSurveyInput!): CreateSurveyMutation
   exportSurveySample(surveyId: ID!): ExportSurveySampleMutationMutation
-  createReport(reportData: CreateReportInput!): CreateReport
-  restartCreateReport(reportData: RestartCreateReportInput!): RestartCreateReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
@@ -2699,6 +2684,8 @@ type PaymentPlanNode implements Node {
   internalData: JSONString!
   businessArea: UserBusinessAreaNode!
   programCycle: ProgramCycleNode!
+  deliveryMechanism: DeliveryMechanismNode
+  financialServiceProvider: FinancialServiceProviderNode
   steficonRule: RuleCommitNode
   steficonRuleTargeting: RuleCommitNode
   createdBy: UserNode!
@@ -2740,8 +2727,6 @@ type PaymentPlanNode implements Node {
   excludeHouseholdError: String
   statusDate: DateTime!
   isCashAssist: Boolean!
-  deliveryMechanism: DeliveryMechanismNode
-  financialServiceProvider: FinancialServiceProviderNode
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -3030,6 +3015,10 @@ input PositiveFeedbackTicketExtras {
   individual: ID
 }
 
+enum ProgramCollisionDetector {
+  HCT_MIS_API_APPS_PROGRAM_COLLISION_DETECTORS_IDENTIFICATIONKEYCOLLISIONDETECTOR
+}
+
 type ProgramCycleNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -3097,6 +3086,8 @@ type ProgramNode implements Node {
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
   biometricDeduplicationEnabled: Boolean!
+  collisionDetectionEnabled: Boolean!
+  collisionDetector: ProgramCollisionDetector
   isVisible: Boolean!
   householdCount: Int!
   individualCount: Int!
@@ -3108,7 +3099,6 @@ type ProgramNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   grievanceTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   cycles(offset: Int, before: String, after: String, first: Int, last: Int, search: String, status: [String], startDate: Date, endDate: Date, totalDeliveredQuantityUsdFrom: Float, totalDeliveredQuantityUsdTo: Float, orderBy: String): ProgramCycleNodeConnection
-  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   activityLogs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
@@ -3188,12 +3178,6 @@ type Query {
   allAreasTree(businessArea: String!): [AreaTreeNode]
   allLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, programId: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
-  report(id: ID!): ReportNode
-  allReports(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: DateTime, createdTo: DateTime, orderBy: String): ReportNodeConnection
-  reportTypesChoices: [ChoiceObject]
-  reportStatusChoices: [ChoiceObject]
-  dashboardReportTypesChoices(businessAreaSlug: String!): [ChoiceObject]
-  dashboardYearsChoices(businessAreaSlug: String!): [String]
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
   ticketsByType(businessAreaSlug: String!): TicketByType
@@ -3484,6 +3468,7 @@ type RegistrationDataImportNode implements Node {
   dedupEngineBatchDuplicates: Int!
   dedupEngineGoldenRecordDuplicates: Int!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  extraHhRdis(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
@@ -3566,46 +3551,6 @@ input RegistrationXlsxImportMutationInput {
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean
-}
-
-type ReportNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  businessArea: UserBusinessAreaNode!
-  file: String
-  createdBy: UserNode!
-  status: Int!
-  reportType: Int!
-  dateFrom: Date!
-  dateTo: Date!
-  numberOfRecords: Int
-  program: ProgramNode
-  adminArea(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection!
-  fileUrl: String
-  adminArea1(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
-  adminArea2(offset: Int, before: String, after: String, first: Int, last: Int, name: String): AreaNodeConnection
-}
-
-type ReportNodeConnection {
-  pageInfo: PageInfo!
-  edges: [ReportNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type ReportNodeEdge {
-  node: ReportNode
-  cursor: String!
-}
-
-type RestartCreateReport {
-  report: ReportNode
-}
-
-input RestartCreateReportInput {
-  reportId: ID!
-  businessAreaSlug: String!
 }
 
 type RevertMarkPaymentAsFailedMutation {
@@ -4627,7 +4572,6 @@ type UserBusinessAreaNode implements Node {
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   tickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   programSet(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
-  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messageSet(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbackSet(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
@@ -4675,7 +4619,6 @@ type UserNode implements Node {
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
-  reports(offset: Int, before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logs(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   feedbacks(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
