@@ -96,12 +96,12 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_partner_roles(user: User) -> ReturnDict:
-        role_assignments = user.partner.role_assignments.order_by("business_area__slug")
+        role_assignments = user.partner.role_assignments.order_by("business_area__slug", "role__name")
         return RoleAssignmentSerializer(role_assignments, many=True).data
 
     @staticmethod
     def get_user_roles(user: User) -> ReturnDict:
-        role_assignments = user.role_assignments.order_by("business_area__slug")
+        role_assignments = user.role_assignments.order_by("business_area__slug", "role__name")
         return RoleAssignmentSerializer(role_assignments, many=True).data
 
     @staticmethod
