@@ -17,6 +17,7 @@ from django_filters import (
 )
 from django_filters import rest_framework as filters
 
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.exceptions import SearchException
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
@@ -76,7 +77,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
     return code
 
 
-class HouseholdFilter(FilterSet):
+class HouseholdFilter(UpdatedAtFilter):
     rdi_id = CharFilter(method="filter_rdi_id")
     size = filters.RangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
@@ -292,7 +293,7 @@ class HouseholdFilter(FilterSet):
         return queryset.filter(head_of_household_id=value)
 
 
-class IndividualFilter(FilterSet):
+class IndividualFilter(UpdatedAtFilter):
     age = filters.RangeFilter(method="filter_by_age")
     full_name = CharFilter(field_name="full_name", lookup_expr="contains")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
