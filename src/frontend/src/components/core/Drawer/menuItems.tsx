@@ -20,6 +20,7 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import SupervisedUserCircle from '@mui/icons-material/SupervisedUserCircle';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import { PERMISSIONS } from '../../../config/permissions';
 import React from 'react';
 
@@ -270,6 +271,11 @@ export const menuItems: MenuItem[] = [
 ];
 
 export const resourcesItems = [
+    {
+    name: 'Reporting',
+    href: 'https://reporting.hope.unicef.org/',
+    icon: <TrendingUpRoundedIcon />,
+  },
   {
     name: 'Knowledge Base',
     href: 'https://unicef.service-now.com/cc?id=kb_search&kb_knowledge_base=be5501f9db003850d180f264f39619ee',
