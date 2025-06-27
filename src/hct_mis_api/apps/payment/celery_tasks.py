@@ -680,7 +680,7 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
         raise self.retry(exc=e)
 
 
-@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
@@ -723,7 +723,7 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
         raise self.retry(exc=e)
 
 
-@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
@@ -747,7 +747,7 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
             raise self.retry(exc=e)
 
 
-@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:

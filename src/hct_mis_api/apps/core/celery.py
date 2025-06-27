@@ -4,7 +4,6 @@ from celery import Celery
 from kombu import Exchange, Queue
 
 CELERY_QUEUE_DEFAULT = "default"
-CELERY_QUEUE_OTHER = "priority"
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hct_mis_api.config.settings")
@@ -17,11 +16,6 @@ app.conf["task_queues"] = (
         CELERY_QUEUE_DEFAULT,
         Exchange(CELERY_QUEUE_DEFAULT),
         routing_key=CELERY_QUEUE_DEFAULT,
-    ),
-    Queue(
-        CELERY_QUEUE_OTHER,
-        Exchange(CELERY_QUEUE_OTHER),
-        routing_key=CELERY_QUEUE_OTHER,
     ),
 )
 app.conf["worker_prefetch_multiplier"] = 1

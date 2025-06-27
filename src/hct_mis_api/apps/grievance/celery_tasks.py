@@ -14,7 +14,7 @@ from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_
 logger = logging.getLogger(__name__)
 
 
-@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
 def deduplicate_and_check_against_sanctions_list_task_single_individual(
