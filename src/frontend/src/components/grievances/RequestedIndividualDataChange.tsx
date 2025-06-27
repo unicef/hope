@@ -57,10 +57,6 @@ export function RequestedIndividualDataChange({
   const identities = individualData?.identities || [];
   const identitiesToRemove = individualData.identities_to_remove || [];
   const identitiesToEdit = individualData.identities_to_edit || [];
-  const paymentChannels = individualData?.payment_channels || [];
-  const paymentChannelsToRemove =
-    individualData.payment_channels_to_remove || [];
-  const paymentChannelsToEdit = individualData.payment_channels_to_edit || [];
   const flexFields = individualData.flex_fields || {};
 
   delete individualData.flex_fields;
@@ -89,13 +85,6 @@ export function RequestedIndividualDataChange({
     (el) => el.approve_status,
   ).length;
   allApprovedCount += identitiesToEdit.filter((el) => el.approve_status).length;
-  allApprovedCount += paymentChannels.filter((el) => el.approve_status).length;
-  allApprovedCount += paymentChannelsToRemove.filter(
-    (el) => el.approve_status,
-  ).length;
-  allApprovedCount += paymentChannelsToEdit.filter(
-    (el) => el.approve_status,
-  ).length;
   allApprovedCount += entries.filter(
     ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
@@ -152,28 +141,6 @@ export function RequestedIndividualDataChange({
     }
   }
 
-  const selectedPaymentChannels = [];
-  const selectedPaymentChannelsToRemove = [];
-  const selectedPaymentChannelsToEdit = [];
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < paymentChannels?.length; i++) {
-    if (paymentChannels[i]?.approve_status) {
-      selectedPaymentChannels.push(i);
-    }
-  }
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < paymentChannelsToRemove?.length; i++) {
-    if (paymentChannelsToRemove[i]?.approve_status) {
-      selectedPaymentChannelsToRemove.push(i);
-    }
-  }
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < paymentChannelsToEdit?.length; i++) {
-    if (paymentChannelsToEdit[i]?.approve_status) {
-      selectedPaymentChannelsToEdit.push(i);
-    }
-  }
-
   const isHeadOfHousehold =
     ticket.individual?.id === ticket.household?.headOfHousehold?.id;
 
@@ -209,10 +176,7 @@ export function RequestedIndividualDataChange({
       documentsToEdit.length +
       identities.length +
       identitiesToRemove.length +
-      identitiesToEdit.length +
-      paymentChannels.length +
-      paymentChannelsToRemove.length +
-      paymentChannelsToEdit.length;
+      identitiesToEdit.length;
 
     return allSelected === countAll;
   };
@@ -278,9 +242,6 @@ export function RequestedIndividualDataChange({
         selectedIdentities,
         selectedIdentitiesToEdit,
         selectedIdentitiesToRemove,
-        selectedPaymentChannels,
-        selectedPaymentChannelsToEdit,
-        selectedPaymentChannelsToRemove,
       }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
@@ -294,11 +255,6 @@ export function RequestedIndividualDataChange({
         const approvedIdentitiesToCreate = values.selectedIdentities;
         const approvedIdentitiesToRemove = values.selectedIdentitiesToRemove;
         const approvedIdentitiesToEdit = values.selectedIdentitiesToEdit;
-        const approvedPaymentChannelsToCreate = values.selectedPaymentChannels;
-        const approvedPaymentChannelsToRemove =
-          values.selectedPaymentChannelsToRemove;
-        const approvedPaymentChannelsToEdit =
-          values.selectedPaymentChannelsToEdit;
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -318,9 +274,6 @@ export function RequestedIndividualDataChange({
               approvedIdentitiesToCreate,
               approvedIdentitiesToRemove,
               approvedIdentitiesToEdit,
-              approvedPaymentChannelsToCreate,
-              approvedPaymentChannelsToRemove,
-              approvedPaymentChannelsToEdit,
               flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
           });

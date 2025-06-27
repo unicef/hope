@@ -17,7 +17,6 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     PRIVATE_PARTNER,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -109,11 +108,6 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         primary_carer_info = [
             {
-                "bank_account_h_f": "y",
-                "bank_account_number": "CZ6003000000000306979952",
-                "bank_account_number_h_f": "CZ6003000000000306979952",
-                "account_holder_name_i_c": "Test Holder Name CZ",
-                "bank_branch_name_i_c": "Branch Name CZ",
                 "birth_date_i_c": "1995-08-01",
                 "confirm_phone_number": "+420774844183",
                 "country_origin_h_c": "ukr",
@@ -259,7 +253,6 @@ class TestCzechRepublicRegistrationService(TestCase):
         primary_role = PendingIndividualRoleInHousehold.objects.first()
         self.assertEqual(primary_role.individual, primary_collector)
         self.assertEqual(primary_role.household, household)
-        self.assertEqual(PendingBankAccountInfo.objects.count(), 1)
 
         first_child = PendingIndividual.objects.get(given_name="John")
         self.assertEqual(first_child.sex, MALE)
@@ -272,12 +265,6 @@ class TestCzechRepublicRegistrationService(TestCase):
         self.assertEqual(str(second_child.birth_date), "2023-04-30")
         self.assertEqual(second_child.disability, DISABLED)
         self.assertEqual(second_child.rdi_merge_status, "PENDING")
-
-        bank_account_info = PendingBankAccountInfo.objects.first()
-        self.assertEqual(bank_account_info.bank_account_number, "CZ6003000000000306979952")
-        self.assertEqual(bank_account_info.bank_branch_name, "Branch Name CZ")
-        self.assertEqual(bank_account_info.account_holder_name, "Test Holder Name CZ")
-        self.assertEqual(bank_account_info.rdi_merge_status, "PENDING")
 
         birth_certificate = PendingDocument.objects.filter(type__key="birth_certificate").first()
         self.assertEqual(birth_certificate.document_number, "262873")

@@ -1376,10 +1376,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             if main_key in {"primary_collector", "alternate_collector"}:
                 return household_data.get(main_key, {}).get("id")
 
-            if main_key == "bank_account_info":
-                bank_account_info_lookup = snapshot_field_path_split[1]
-                return collector_data.get("bank_account_info", {}).get(bank_account_info_lookup)
-
             if main_key == "documents":
                 doc_type, doc_lookup = snapshot_field_path_split[1], snapshot_field_path_split[2]
                 documents_list = collector_data.get("documents", [])
@@ -1930,8 +1926,6 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
     account_type = models.ForeignKey(
         "payment.AccountType",
         on_delete=models.PROTECT,
-        null=True,  # TODO MB make not nullable after migrations
-        blank=True,
     )
     financial_institution = models.ForeignKey(
         "payment.FinancialInstitution",
@@ -1964,6 +1958,15 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
 
     def __str__(self) -> str:
         return f"{self.individual} - {self.account_type}"
+
+    @property
+    def account_data(self) -> dict:
+        data = self.data.copy()
+        if self.number:
+            data["number"] = self.number
+        if self.financial_institution:
+            data["financial_institution"] = str(self.financial_institution.id)
+        return data
 
     @cached_property
     def unique_delivery_data_for_account_type(self) -> Dict:
@@ -2025,7 +2028,7 @@ class PaymentDataCollector(Account):
         associated_objects = {
             FspNameMapping.SourceModel.INDIVIDUAL.value: collector,
             FspNameMapping.SourceModel.HOUSEHOLD.value: collector.household,
-            FspNameMapping.SourceModel.ACCOUNT.value: account.data if account else {},
+            FspNameMapping.SourceModel.ACCOUNT.value: account.account_data if account else {},
         }
         return associated_objects.get(associated_with)
 
@@ -2046,7 +2049,7 @@ class PaymentDataCollector(Account):
         else:
             dm_config = dm_configs.first()
         if not dm_config:
-            return account.data if account else {}
+            return account.account_data if account else {}
 
         fsp_names_mappings = {x.external_name: x for x in fsp.names_mappings.all()}
 
@@ -2056,7 +2059,7 @@ class PaymentDataCollector(Account):
                 associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
             else:
                 internal_field = field
-                associated_object = account.data if account else {}
+                associated_object = account.account_data if account else {}
             if isinstance(associated_object, dict):
                 value = associated_object.get(internal_field, None)
                 delivery_data[field] = value and str(value)
@@ -2096,7 +2099,7 @@ class PaymentDataCollector(Account):
                 field = fsp_name_mapping.hope_name
                 associated_object = cls.get_associated_object(fsp_name_mapping.source, collector, account)
             else:
-                associated_object = account.data if account else {}
+                associated_object = account.account_data if account else {}
             if isinstance(associated_object, dict):
                 value = associated_object.get(field, None)
             else:

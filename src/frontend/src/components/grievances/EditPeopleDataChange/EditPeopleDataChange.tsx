@@ -15,8 +15,6 @@ import { Title } from '@core/Title';
 import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
-import { ExistingPaymentChannelFieldArray } from '../EditIndividualDataChange/ExistingPaymentChannelFieldArray';
-import { NewPaymentChannelFieldArray } from '../EditIndividualDataChange/NewPaymentChannelFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`
@@ -145,19 +143,6 @@ function EditPeopleDataChange({
               setFieldValue={setFieldValue}
             />
           )}
-        </Box>
-      </BoxWithBorders>
-      <BoxWithBorders>
-        <Box mt={3}>
-          <Title>
-            <Typography variant="h6">{t('Payment Channels')}</Typography>
-          </Title>
-          <ExistingPaymentChannelFieldArray
-            values={values}
-            setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
-          />
-          {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
         </Box>
       </BoxWithBorders>
     </>

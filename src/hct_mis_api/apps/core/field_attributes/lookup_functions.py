@@ -102,14 +102,3 @@ def get_scope_id_issuer(individual: Individual) -> str:
     if identity := individual.identities.filter(partner__name=WFP).first():
         return getattr(identity.country, "iso_code3", "")
     return ""
-
-
-def get_debit_card_number(individual: Individual) -> str:
-    if bank_account_info := individual.bank_account_info.first():
-        return bank_account_info.debit_card_number
-    else:
-        return ""
-
-
-def get_debit_card_issuer(individual: Individual) -> str:
-    return individual.full_name if individual.bank_account_info.first() else ""

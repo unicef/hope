@@ -39,7 +39,6 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -519,15 +518,6 @@ class TestRdiXlsxCreateTask(TestCase):
         individuals = PendingIndividual.objects.all()
         for individual in individuals:
             self.assertTrue(int(individual.detail_id) in [3, 4, 5, 7, 8, 9])
-
-    def test_create_bank_account(self) -> None:
-        task = self.RdiXlsxCreateTask()
-        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
-
-        bank_account_info = PendingBankAccountInfo.objects.get(individual__detail_id=7)
-        self.assertEqual(bank_account_info.bank_name, "Bank testowy")
-        self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
-        self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
 
     def test_create_tax_id_document(self) -> None:
         task = self.RdiXlsxCreateTask()

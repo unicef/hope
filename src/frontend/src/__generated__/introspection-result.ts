@@ -11,7 +11,6 @@
       "ApprovalProcessNode",
       "AreaNode",
       "AreaTypeNode",
-      "BankAccountInfoNode",
       "BeneficiaryGroupNode",
       "BusinessAreaNode",
       "CommunicationMessageNode",

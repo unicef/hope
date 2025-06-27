@@ -120,13 +120,6 @@ export const individualDetailed = gql`
     disability
     photo
     workStatus
-    paymentChannels {
-      id
-      bankName
-      bankAccountNumber
-      accountHolderName
-      bankBranchName
-    }
     accounts {
       name
       individualTabData
@@ -194,12 +187,6 @@ export const individualDetailed = gql`
         id
         unicefId
       }
-    }
-    bankAccountInfo {
-      bankName
-      bankAccountNumber
-      accountHolderName
-      bankBranchName
     }
     preferredLanguage
     paymentDeliveryPhoneNo

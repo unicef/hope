@@ -34,7 +34,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -74,7 +73,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.household_identities = {}
         self.individuals = []
         self.collectors = defaultdict(list)
-        self.bank_accounts = defaultdict(dict)
         self.program = None
         self.pdu_flexible_attributes: Optional[QuerySet[FlexibleAttribute]] = None
         self.households_to_ignore = []  # household ids (excel ids) to ignore when creating individuals
@@ -88,23 +86,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_value")
             list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_collection_date")
         return list_of_pdu_column_names
-
-    def _handle_bank_account_fields(
-        self,
-        value: Any,
-        header: str,
-        row_num: int,
-        individual: PendingIndividual,
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
-        if value is None:
-            return
-
-        name = header.replace("_i_c", "").replace("pp_", "")
-
-        self.bank_accounts[f"individual_{row_num}"]["individual"] = individual
-        self.bank_accounts[f"individual_{row_num}"][name] = value
 
     def _handle_document_fields(
         self,
@@ -377,13 +358,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
             self.collectors[hh_id].append(PendingIndividualRoleInHousehold(individual=individual, role=role))
 
-    def _create_bank_accounts_infos(self) -> None:
-        bank_accounts_infos_to_create = [
-            PendingBankAccountInfo(**bank_account_info) for bank_account_info in self.bank_accounts.values()
-        ]
-
-        PendingBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
-
     def _create_documents(self) -> None:
         from hct_mis_api.apps.geo.models import Country as GeoCountry
 
@@ -495,11 +469,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "pregnant_i_c": self._handle_bool_field,
                 "fchild_hoh_i_c": self._handle_bool_field,
                 "child_hoh_i_c": self._handle_bool_field,
-                "bank_name_i_c": self._handle_bank_account_fields,
-                "bank_account_number_i_c": self._handle_bank_account_fields,
-                "debit_card_number_i_c": self._handle_bank_account_fields,
-                "account_holder_name_i_c": self._handle_bank_account_fields,
-                "bank_branch_name_i_c": self._handle_bank_account_fields,
                 "first_registration_date_i_c": self._handle_datetime,
                 "unhcr_id_no_i_c": self._handle_identity_fields,
                 "unhcr_id_photo_i_c": self._handle_identity_photo,
@@ -723,7 +692,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_documents()
             self._create_identities()
             self._create_collectors()
-            self._create_bank_accounts_infos()
             self._create_accounts()
             rdi.bulk_update_household_size()
             # Assign extra rdis for colided households which already exist inside system

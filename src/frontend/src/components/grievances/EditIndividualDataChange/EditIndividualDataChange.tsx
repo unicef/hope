@@ -17,8 +17,6 @@ import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
-import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
-import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
@@ -178,19 +176,6 @@ function EditIndividualDataChange({
               addIndividualFieldsData={addIndividualFieldsData}
             />
           )}
-        </Box>
-      </BoxWithBorders>
-      <BoxWithBorders>
-        <Box mt={3}>
-          <Title>
-            <Typography variant="h6">{t('Payment Channels')}</Typography>
-          </Title>
-          <ExistingPaymentChannelFieldArray
-            values={values}
-            setFieldValue={setFieldValue}
-            individual={fullIndividual.individual}
-          />
-          {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
         </Box>
       </BoxWithBorders>
     </>

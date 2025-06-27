@@ -159,31 +159,13 @@ class TestAttributesGetQueries(APITestCase):
         self.assertEqual(q, Q(documents__type__key="other", documents__document_number="QRST"))
 
     def test_get_has_bank_account_number_query_true(self) -> None:
-        # Test for individuals who have a bank account number
-        expected_query = Q(bank_account_info__isnull=False) & ~Q(bank_account_info__bank_account_number="")
+        expected_query = Q(**{"accounts__account_type__key": "bank"})
         result = get_has_bank_account_number_query(None, [True])
         self.assertEqual(result, expected_query)
 
     def test_get_has_bank_account_number_query_false(self) -> None:
-        # Test for individuals who do not have a bank account number
-        expected_query = Q(bank_account_info__isnull=True) | Q(bank_account_info__bank_account_number="")
+        expected_query = ~Q(**{"accounts__account_type__key": "bank"})
         result = get_has_bank_account_number_query(None, [False])
-        self.assertEqual(result, expected_query)
-
-    def test_get_has_bank_account_number_query_social_worker_true(self) -> None:
-        # Test with social worker prefix for individuals who have a bank account number
-        expected_query = Q(individuals__bank_account_info__isnull=False) & ~Q(
-            individuals__bank_account_info__bank_account_number=""
-        )
-        result = get_has_bank_account_number_query(None, [True], is_social_worker_query=True)
-        self.assertEqual(result, expected_query)
-
-    def test_get_has_bank_account_number_query_social_worker_false(self) -> None:
-        # Test with social worker prefix for individuals who do not have a bank account number
-        expected_query = Q(individuals__bank_account_info__isnull=True) | Q(
-            individuals__bank_account_info__bank_account_number=""
-        )
-        result = get_has_bank_account_number_query(None, [False], is_social_worker_query=True)
         self.assertEqual(result, expected_query)
 
     def test_get_has_tax_id_query_true(self) -> None:
