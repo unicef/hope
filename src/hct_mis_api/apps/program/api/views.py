@@ -32,6 +32,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
 )
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     BaseViewSet,
     BusinessAreaMixin,
@@ -469,6 +470,8 @@ class BeneficiaryGroupViewSet(
     permission_classes = [IsAuthenticated]
     queryset = BeneficiaryGroup.objects.all()
     serializer_class = BeneficiaryGroupSerializer
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
 
     @etag_decorator(BeneficiaryGroupKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=BeneficiaryGroupKeyConstructor())
