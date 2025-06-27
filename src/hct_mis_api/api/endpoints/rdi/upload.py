@@ -92,6 +92,8 @@ class DocumentSerializer(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
     document_number = serializers.CharField(required=True)
+    issuance_date = serializers.DateField(required=True)
+    expiry_date = serializers.DateField(required=True)
 
     class Meta:
         model = PendingDocument
@@ -109,10 +111,11 @@ class AccountSerializer(serializers.ModelSerializer):
         required=False, queryset=FinancialInstitution.objects.all()
     )
     data = serializers.JSONField(required=False, default=dict)  # type: ignore
+    unique_key = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
         model = PendingAccount
-        exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
+        exclude = ["individual", "is_unique", "signature_hash"]
 
 
 class IndividualSerializer(serializers.ModelSerializer):

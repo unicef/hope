@@ -14,7 +14,11 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
 from hct_mis_api.api.endpoints.rdi.mixin import get_photo_from_stream
-from hct_mis_api.api.endpoints.rdi.upload import BirthDateValidator, DocumentSerializer
+from hct_mis_api.api.endpoints.rdi.upload import (
+    AccountSerializer,
+    BirthDateValidator,
+    DocumentSerializer,
+)
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
@@ -29,6 +33,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -44,6 +49,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
     observed_disability = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
+    accounts = AccountSerializer(many=True, required=False)
     birth_date = serializers.DateField(validators=[BirthDateValidator()])
     photo = serializers.CharField(allow_blank=True, required=False)
 
@@ -94,9 +100,10 @@ class PeopleUploadMixin:
         people_ids = []
         for person_data in people_data:
             documents = person_data.pop("documents", [])
+            accounts = person_data.pop("accounts", [])
 
             hh = self._create_household(person_data, rdi)
-            ind = self._create_individual(documents, hh, person_data, rdi)
+            ind = self._create_individual(documents, accounts, hh, person_data, rdi)
             people_ids.append(ind.id)
         return people_ids
 
@@ -136,6 +143,7 @@ class PeopleUploadMixin:
     def _create_individual(
         self,
         documents: List[Dict],
+        accounts: List[Dict],
         hh: Optional[PendingHousehold],
         person_data: Dict,
         rdi: RegistrationDataImport,
@@ -174,6 +182,9 @@ class PeopleUploadMixin:
 
         for doc in documents:
             self._create_document(ind, doc)
+
+        for account in accounts:
+            self._create_account(ind, account)
         return ind
 
     def _create_document(self, member: PendingIndividual, doc: Dict) -> None:
@@ -185,6 +196,9 @@ class PeopleUploadMixin:
             type=DocumentType.objects.get(key=doc["type"]),
             program=member.program,
         )
+
+    def _create_account(self, member: PendingIndividual, account: Dict) -> None:
+        PendingAccount.objects.create(individual=member, **account)
 
 
 class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIView):
