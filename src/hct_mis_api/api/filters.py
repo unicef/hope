@@ -1,8 +1,14 @@
-from django_filters import CharFilter, DateTimeFromToRangeFilter, NumberFilter
+from django_filters import (
+    CharFilter,
+    ChoiceFilter,
+    DateTimeFromToRangeFilter,
+    NumberFilter,
+)
 from django_filters.rest_framework import FilterSet
 
 from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from hct_mis_api.apps.payment.models import FinancialInstitution
 from hct_mis_api.contrib.aurora.models import Project, Registration
 
 
@@ -69,3 +75,11 @@ class RegistrationFilter(FilterSet):
     class Meta:
         model = Registration
         fields = ("org_slug", "org_pk", "programme_pk")
+
+
+class FinancialInstitutionFilter(UpdatedAtFilter):
+    type = ChoiceFilter(choices=FinancialInstitution.FinancialInstitutionType.choices)
+
+    class Meta:
+        model = FinancialInstitution
+        fields = ("type",)
