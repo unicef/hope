@@ -8,7 +8,7 @@ export type CreateGrievanceTicket = {
     description: string;
     assignedTo?: string;
     category: number;
-    issueType: number;
+    issueType?: number;
     admin?: string | null;
     area?: string;
     language: string;

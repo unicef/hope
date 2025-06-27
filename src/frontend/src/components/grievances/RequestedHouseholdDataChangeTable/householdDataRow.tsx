@@ -42,9 +42,11 @@ export const householdDataRow = (
       ? countriesDict[valueDetails.previousValue]
       : valueDetails.previousValue;
 
+  console.log('field', field);
+
   const householdValue = field.isFlexField
-    ? ticket.householdDataUpdateTicketDetails.household.flexFields[fieldName]
-    : ticket.householdDataUpdateTicketDetails.household[camelCase(fieldName)];
+    ? ticket.ticketDetails.household.flexFields[fieldName]
+    : ticket.ticketDetails.household[camelCase(fieldName)];
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? previousValue

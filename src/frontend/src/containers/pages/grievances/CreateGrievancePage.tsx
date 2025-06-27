@@ -215,6 +215,12 @@ const CreateGrievancePage = (): ReactElement => {
     '*',
   );
 
+  const issueTypeDict = useArrayToDict(
+    choicesData?.grievanceTicketIssueTypeChoices,
+    'category',
+    '*',
+  );
+
   const individualFieldsDictForValidation = isSocialDctType
     ? peopleFieldsDict
     : individualFieldsDict;
@@ -361,11 +367,12 @@ const CreateGrievancePage = (): ReactElement => {
           EmptyComponent,
         );
 
-        const issueTypeToDisplay = (): string =>
-          selectedIssueType(
-            values,
-            choicesData.grievanceTicketIssueTypeChoices,
-          );
+        const getIssueTypeToDisplay = (): string => {
+          if (!values.issueType) return '';
+          return selectedIssueType(values, issueTypeDict);
+        };
+
+        const issueTypeToDisplay = getIssueTypeToDisplay();
 
         const disableNextOnFirstStep = (): boolean => {
           if (!values.category) return true;
@@ -433,7 +440,7 @@ const CreateGrievancePage = (): ReactElement => {
                           <Description
                             values={values}
                             showIssueType={showIssueType}
-                            selectedIssueType={issueTypeToDisplay}
+                            issueTypeToDisplay={issueTypeToDisplay}
                             baseUrl={baseUrl}
                             choicesData={choicesData}
                             programsData={programsData}

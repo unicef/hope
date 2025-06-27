@@ -49,7 +49,7 @@ const BoxWithBorderBottom = styled.div`
 export interface DescriptionProps {
   values;
   showIssueType: (values) => boolean;
-  selectedIssueType: (values) => string;
+  issueTypeToDisplay: string;
   baseUrl: string;
   choicesData: GrievanceChoices;
   programsData: PaginatedProgramListList;
@@ -61,7 +61,7 @@ export interface DescriptionProps {
 function Description({
   values,
   showIssueType,
-  selectedIssueType,
+  issueTypeToDisplay,
   baseUrl,
   choicesData,
   programsData,
@@ -133,7 +133,7 @@ function Description({
                 label: t('Issue Type'),
                 value: (
                   <span>
-                    {replaceLabels(selectedIssueType(values), beneficiaryGroup)}
+                    {replaceLabels(issueTypeToDisplay, beneficiaryGroup)}
                   </span>
                 ),
                 size: 8,

@@ -4,6 +4,6 @@
 /* eslint-disable */
 export type CheckAgainstSanctionList = {
     ok: boolean;
-    errors?: Array<string>;
+    errors?: Array<Record<string, any>>;
 };
 

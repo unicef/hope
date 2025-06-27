@@ -1,9 +1,13 @@
-import camelCase from 'lodash/camelCase';
-import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
-import { thingForSpecificGrievanceType } from '@utils/utils';
-import { removeIdPropertyFromObjects } from './helpers';
-import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
 import { CategoryEnum } from '@restgenerated/models/CategoryEnum';
+import { CreateGrievanceTicket } from '@restgenerated/models/CreateGrievanceTicket';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_ISSUE_TYPES_NAMES,
+} from '@utils/constants';
+import { thingForSpecificGrievanceType } from '@utils/utils';
+import camelCase from 'lodash/camelCase';
+import { removeIdPropertyFromObjects } from './helpers';
 
 export const replaceLabels = (text, _beneficiaryGroup) => {
   if (!_beneficiaryGroup || !text) {
@@ -26,18 +30,33 @@ export function isShowIssueType(category: string | CategoryEnum): boolean {
     cat === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   );
 }
+export const getIssueTypeToDisplay = (issueType: number): string =>
+  (issueType &&
+    GRIEVANCE_ISSUE_TYPES_NAMES[issueType]
+      ?.toLowerCase()
+      ?.replace(/_/g, ' ')
+      ?.replace(/\b\w/g, (char) => char.toUpperCase())) ||
+  '';
 
-export const selectedIssueType = (
-  formValues,
-  grievanceTicketIssueTypeChoices,
-): string =>
-  formValues.issueType
-    ? grievanceTicketIssueTypeChoices
-        .filter((el) => el.category === formValues.category.toString())[0]
-        ?.subCategories.filter(
-          (el) => el.value === formValues.issueType.toString(),
-        )[0].name
-    : '-';
+export const selectedIssueType = (formValues, issueTypeDict): string => {
+  const subCategoriesObj =
+    issueTypeDict[formValues.category]?.subCategories || [];
+
+  const subcategories = Object.entries(subCategoriesObj).map(
+    ([value, name]) => ({
+      name,
+      value,
+    }),
+  );
+  const issueType = formValues.issueType.toString();
+  return (
+    (
+      subcategories.find((el) => el.value === issueType) as
+        | { name: string; value: string }
+        | undefined
+    )?.name || '-'
+  );
+};
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function preparePositiveFeedbackVariables(requiredVariables, values) {

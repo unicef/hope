@@ -12319,6 +12319,178 @@ export class RestService {
         });
     }
     /**
+     * @returns PaginatedSanctionListIndividualList
+     * @throws ApiError
+     */
+    public static restBusinessAreasSanctionListList({
+        businessAreaSlug,
+        fullName,
+        fullNameStartswith,
+        id,
+        limit,
+        offset,
+        orderBy,
+        ordering,
+        referenceNumber,
+        search,
+    }: {
+        businessAreaSlug: string,
+        fullName?: string,
+        fullNameStartswith?: string,
+        id?: string,
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `reference_number` - Reference number
+         * * `-reference_number` - Reference number (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `listed_on` - Listed on
+         * * `-listed_on` - Listed on (descending)
+         */
+        orderBy?: Array<'-full_name' | '-id' | '-listed_on' | '-reference_number' | 'full_name' | 'id' | 'listed_on' | 'reference_number'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        referenceNumber?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<PaginatedSanctionListIndividualList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/sanction-list/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'full_name': fullName,
+                'full_name__startswith': fullNameStartswith,
+                'id': id,
+                'limit': limit,
+                'offset': offset,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'reference_number': referenceNumber,
+                'search': search,
+            },
+        });
+    }
+    /**
+     * @returns SanctionListIndividual
+     * @throws ApiError
+     */
+    public static restBusinessAreasSanctionListRetrieve({
+        businessAreaSlug,
+        id,
+    }: {
+        businessAreaSlug: string,
+        /**
+         * A UUID string identifying this sanction list individual.
+         */
+        id: string,
+    }): CancelablePromise<SanctionListIndividual> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/sanction-list/{id}/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+                'id': id,
+            },
+        });
+    }
+    /**
+     * @returns CheckAgainstSanctionList
+     * @throws ApiError
+     */
+    public static restBusinessAreasSanctionListCheckAgainstSanctionListCreate({
+        businessAreaSlug,
+        requestBody,
+    }: {
+        businessAreaSlug: string,
+        requestBody: CheckAgainstSanctionListCreate,
+    }): CancelablePromise<CheckAgainstSanctionList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/rest/business-areas/{business_area_slug}/sanction-list/check-against-sanction-list/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+    /**
+     * @returns CountResponse
+     * @throws ApiError
+     */
+    public static restBusinessAreasSanctionListCountRetrieve({
+        businessAreaSlug,
+        fullName,
+        fullNameStartswith,
+        id,
+        orderBy,
+        ordering,
+        referenceNumber,
+        search,
+    }: {
+        businessAreaSlug: string,
+        fullName?: string,
+        fullNameStartswith?: string,
+        id?: string,
+        /**
+         * Ordering
+         *
+         * * `id` - Id
+         * * `-id` - Id (descending)
+         * * `reference_number` - Reference number
+         * * `-reference_number` - Reference number (descending)
+         * * `full_name` - Full name
+         * * `-full_name` - Full name (descending)
+         * * `listed_on` - Listed on
+         * * `-listed_on` - Listed on (descending)
+         */
+        orderBy?: Array<'-full_name' | '-id' | '-listed_on' | '-reference_number' | 'full_name' | 'id' | 'listed_on' | 'reference_number'>,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        referenceNumber?: string,
+        /**
+         * A search term.
+         */
+        search?: string,
+    }): CancelablePromise<CountResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/business-areas/{business_area_slug}/sanction-list/count/',
+            path: {
+                'business_area_slug': businessAreaSlug,
+            },
+            query: {
+                'full_name': fullName,
+                'full_name__startswith': fullNameStartswith,
+                'id': id,
+                'order_by': orderBy,
+                'ordering': ordering,
+                'reference_number': referenceNumber,
+                'search': search,
+            },
+        });
+    }
+    /**
      * @returns PaginatedUserList
      * @throws ApiError
      */
@@ -13074,160 +13246,6 @@ export class RestService {
                 'status': status,
                 'updated_at_after': updatedAtAfter,
                 'updated_at_before': updatedAtBefore,
-            },
-        });
-    }
-    /**
-     * @returns PaginatedSanctionListIndividualList
-     * @throws ApiError
-     */
-    public static restSanctionListList({
-        fullName,
-        fullNameStartswith,
-        id,
-        limit,
-        offset,
-        orderBy,
-        ordering,
-        referenceNumber,
-        search,
-    }: {
-        fullName?: string,
-        fullNameStartswith?: string,
-        id?: string,
-        /**
-         * Number of results to return per page.
-         */
-        limit?: number,
-        /**
-         * The initial index from which to return the results.
-         */
-        offset?: number,
-        /**
-         * Ordering
-         *
-         * * `id` - Id
-         * * `-id` - Id (descending)
-         * * `reference_number` - Reference number
-         * * `-reference_number` - Reference number (descending)
-         * * `full_name` - Full name
-         * * `-full_name` - Full name (descending)
-         * * `listed_on` - Listed on
-         * * `-listed_on` - Listed on (descending)
-         */
-        orderBy?: Array<'-full_name' | '-id' | '-listed_on' | '-reference_number' | 'full_name' | 'id' | 'listed_on' | 'reference_number'>,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        referenceNumber?: string,
-        /**
-         * A search term.
-         */
-        search?: string,
-    }): CancelablePromise<PaginatedSanctionListIndividualList> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/sanction-list/',
-            query: {
-                'full_name': fullName,
-                'full_name__startswith': fullNameStartswith,
-                'id': id,
-                'limit': limit,
-                'offset': offset,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'reference_number': referenceNumber,
-                'search': search,
-            },
-        });
-    }
-    /**
-     * @returns SanctionListIndividual
-     * @throws ApiError
-     */
-    public static restSanctionListRetrieve({
-        id,
-    }: {
-        /**
-         * A UUID string identifying this sanction list individual.
-         */
-        id: string,
-    }): CancelablePromise<SanctionListIndividual> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/sanction-list/{id}/',
-            path: {
-                'id': id,
-            },
-        });
-    }
-    /**
-     * @returns CheckAgainstSanctionList
-     * @throws ApiError
-     */
-    public static restSanctionListCheckAgainstSanctionListCreate({
-        requestBody,
-    }: {
-        requestBody: CheckAgainstSanctionListCreate,
-    }): CancelablePromise<CheckAgainstSanctionList> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/rest/sanction-list/check-against-sanction-list/',
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-    /**
-     * @returns CountResponse
-     * @throws ApiError
-     */
-    public static restSanctionListCountRetrieve({
-        fullName,
-        fullNameStartswith,
-        id,
-        orderBy,
-        ordering,
-        referenceNumber,
-        search,
-    }: {
-        fullName?: string,
-        fullNameStartswith?: string,
-        id?: string,
-        /**
-         * Ordering
-         *
-         * * `id` - Id
-         * * `-id` - Id (descending)
-         * * `reference_number` - Reference number
-         * * `-reference_number` - Reference number (descending)
-         * * `full_name` - Full name
-         * * `-full_name` - Full name (descending)
-         * * `listed_on` - Listed on
-         * * `-listed_on` - Listed on (descending)
-         */
-        orderBy?: Array<'-full_name' | '-id' | '-listed_on' | '-reference_number' | 'full_name' | 'id' | 'listed_on' | 'reference_number'>,
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string,
-        referenceNumber?: string,
-        /**
-         * A search term.
-         */
-        search?: string,
-    }): CancelablePromise<CountResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/rest/sanction-list/count/',
-            query: {
-                'full_name': fullName,
-                'full_name__startswith': fullNameStartswith,
-                'id': id,
-                'order_by': orderBy,
-                'ordering': ordering,
-                'reference_number': referenceNumber,
-                'search': search,
             },
         });
     }
