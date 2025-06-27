@@ -131,8 +131,8 @@ class TestUserProfile:
         assert profile_data["partner_roles"] == [
             {
                 "business_area": self.afghanistan.slug,
-                "program": self.program2.name,
-                "role": get_role_data(self.role_p3),
+                "program": None,
+                "role": get_role_data(self.role_p1),
             },
             {
                 "business_area": self.afghanistan.slug,
@@ -141,8 +141,8 @@ class TestUserProfile:
             },
             {
                 "business_area": self.afghanistan.slug,
-                "program": None,
-                "role": get_role_data(self.role_p1),
+                "program": self.program2.name,
+                "role": get_role_data(self.role_p3),
             },
             {
                 "business_area": self.ukraine.slug,
@@ -154,13 +154,8 @@ class TestUserProfile:
         assert profile_data["user_roles"] == [
             {
                 "business_area": self.afghanistan.slug,
-                "program": self.program3.name,
-                "role": get_role_data(self.role4),
-            },
-            {
-                "business_area": self.afghanistan.slug,
-                "program": self.program2.name,
-                "role": get_role_data(self.role3),
+                "program": None,
+                "role": get_role_data(self.role1),
             },
             {
                 "business_area": self.afghanistan.slug,
@@ -169,8 +164,13 @@ class TestUserProfile:
             },
             {
                 "business_area": self.afghanistan.slug,
-                "program": None,
-                "role": get_role_data(self.role1),
+                "program": self.program2.name,
+                "role": get_role_data(self.role3),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program3.name,
+                "role": get_role_data(self.role4),
             },
             {
                 "business_area": self.ukraine.slug,
@@ -242,8 +242,8 @@ class TestUserProfile:
         assert profile_data["partner_roles"] == [
             {
                 "business_area": self.afghanistan.slug,
-                "program": self.program2.name,
-                "role": get_role_data(self.role_p3),
+                "program": None,
+                "role": get_role_data(self.role_p1),
             },
             {
                 "business_area": self.afghanistan.slug,
@@ -252,8 +252,8 @@ class TestUserProfile:
             },
             {
                 "business_area": self.afghanistan.slug,
-                "program": None,
-                "role": get_role_data(self.role_p1),
+                "program": self.program2.name,
+                "role": get_role_data(self.role_p3),
             },
             {
                 "business_area": self.ukraine.slug,
@@ -265,13 +265,8 @@ class TestUserProfile:
         assert profile_data["user_roles"] == [
             {
                 "business_area": self.afghanistan.slug,
-                "program": self.program3.name,
-                "role": get_role_data(self.role4),
-            },
-            {
-                "business_area": self.afghanistan.slug,
-                "program": self.program2.name,
-                "role": get_role_data(self.role3),
+                "program": None,
+                "role": get_role_data(self.role1),
             },
             {
                 "business_area": self.afghanistan.slug,
@@ -280,8 +275,13 @@ class TestUserProfile:
             },
             {
                 "business_area": self.afghanistan.slug,
-                "program": None,
-                "role": get_role_data(self.role1),
+                "program": self.program2.name,
+                "role": get_role_data(self.role3),
+            },
+            {
+                "business_area": self.afghanistan.slug,
+                "program": self.program3.name,
+                "role": get_role_data(self.role4),
             },
             {
                 "business_area": self.ukraine.slug,
