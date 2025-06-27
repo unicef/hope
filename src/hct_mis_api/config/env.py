@@ -54,6 +54,7 @@ DEFAULTS = {
     "DEFAULT_EMAIL_DISPLAY": (str, ""),
     "KOBO_URL": (str, "https://kobo-hope-trn.unitst.org"),
     "KOBO_MASTER_API_TOKEN": (str, "KOBO_TOKEN"),
+    "KOBO_PROJECT_VIEWS_ID": (str, ""),
     "AZURE_CLIENT_ID": (str, ""),
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_KEY": (str, ""),

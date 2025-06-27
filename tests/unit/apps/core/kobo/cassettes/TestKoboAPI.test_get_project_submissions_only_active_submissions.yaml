@@ -1,0 +1,48 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br
+      Authorization:
+      - token test-token
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.31.0
+    method: GET
+    uri: https://kf.hope.unicef.org/api/v2/assets/aWnA2d5YBBDgQ5WZXpbaRe/data/?format=json&limit=10&query=%7B%22_validation_status.uid%22:%22validation_status_approved%22%7D
+  response:
+    body:
+      string: '{"count":0,"next":null,"previous":null,"results":[]}'
+    headers:
+      Allow:
+      - GET, HEAD, OPTIONS
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en
+      Content-Length:
+      - '52'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 16 May 2024 13:43:25 GMT
+      Referrer-Policy:
+      - same-origin
+      Server:
+      - nginx/1.23.0
+      Vary:
+      - Accept, Accept-Language, Cookie, Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      X-KoBoNaUt:
+      - afg_admin
+    status:
+      code: 200
+      message: OK
+version: 1

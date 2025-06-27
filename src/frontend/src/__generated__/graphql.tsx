@@ -2168,6 +2168,7 @@ export type HouseholdNode = Node & {
   childrenCount?: Maybe<Scalars['Int']['output']>;
   childrenDisabledCount?: Maybe<Scalars['Int']['output']>;
   collectType: HouseholdCollectType;
+  collisionFlag: Scalars['Boolean']['output'];
   complaintTicketDetails: TicketComplaintDetailsNodeConnection;
   consent?: Maybe<Scalars['Boolean']['output']>;
   consentSharing?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -2183,6 +2184,7 @@ export type HouseholdNode = Node & {
   detailId?: Maybe<Scalars['String']['output']>;
   deviceid: Scalars['String']['output'];
   enumeratorRecId?: Maybe<Scalars['Int']['output']>;
+  extraRdis: RegistrationDataImportNodeConnection;
   familyId?: Maybe<Scalars['String']['output']>;
   fchildHoh?: Maybe<Scalars['Boolean']['output']>;
   feedbacks: FeedbackNodeConnection;
@@ -2207,6 +2209,7 @@ export type HouseholdNode = Node & {
   headOfHousehold?: Maybe<IndividualNode>;
   householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNodeConnection;
   id: Scalars['ID']['output'];
+  identificationKey?: Maybe<Scalars['String']['output']>;
   importId?: Maybe<Scalars['String']['output']>;
   individuals?: Maybe<IndividualNodeConnection>;
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>;
@@ -2302,6 +2305,15 @@ export type HouseholdNodeCopiedToArgs = {
 
 
 export type HouseholdNodeDeleteHouseholdTicketDetailsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type HouseholdNodeExtraRdisArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -4810,6 +4822,10 @@ export type PositiveFeedbackTicketExtras = {
   individual?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export enum ProgramCollisionDetector {
+  HctMisApiAppsProgramCollisionDetectorsIdentificationkeycollisiondetector = 'HCT_MIS_API_APPS_PROGRAM_COLLISION_DETECTORS_IDENTIFICATIONKEYCOLLISIONDETECTOR'
+}
+
 export type ProgramCycleNode = Node & {
   __typename?: 'ProgramCycleNode';
   createdAt: Scalars['DateTime']['output'];
@@ -4874,6 +4890,8 @@ export type ProgramNode = Node & {
   businessArea: UserBusinessAreaNode;
   canFinish?: Maybe<Scalars['Boolean']['output']>;
   cashPlus: Scalars['Boolean']['output'];
+  collisionDetectionEnabled: Scalars['Boolean']['output'];
+  collisionDetector?: Maybe<ProgramCollisionDetector>;
   createdAt: Scalars['DateTime']['output'];
   cycles?: Maybe<ProgramCycleNodeConnection>;
   dataCollectingType?: Maybe<DataCollectingTypeNode>;
@@ -6307,6 +6325,7 @@ export type RegistrationDataImportNode = Node & {
   erased: Scalars['Boolean']['output'];
   errorMessage: Scalars['String']['output'];
   excluded: Scalars['Boolean']['output'];
+  extraHhRdis: HouseholdNodeConnection;
   goldenRecordDuplicates: Scalars['Int']['output'];
   goldenRecordDuplicatesCountAndPercentage?: Maybe<Array<Maybe<CountAndPercentageNode>>>;
   goldenRecordPossibleDuplicates: Scalars['Int']['output'];
@@ -6334,6 +6353,15 @@ export type RegistrationDataImportNode = Node & {
   totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   version: Scalars['BigInt']['output'];
+};
+
+
+export type RegistrationDataImportNodeExtraHhRdisArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -21740,6 +21768,7 @@ export type ResolversTypes = {
   PeriodicFieldDataSubtype: PeriodicFieldDataSubtype;
   PeriodicFieldNode: ResolverTypeWrapper<PeriodicFieldNode>;
   PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
+  ProgramCollisionDetector: ProgramCollisionDetector;
   ProgramCycleNode: ResolverTypeWrapper<ProgramCycleNode>;
   ProgramCycleNodeConnection: ResolverTypeWrapper<ProgramCycleNodeConnection>;
   ProgramCycleNodeEdge: ResolverTypeWrapper<ProgramCycleNodeEdge>;
@@ -23597,6 +23626,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   childrenCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   childrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   collectType?: Resolver<ResolversTypes['HouseholdCollectType'], ParentType, ContextType>;
+  collisionFlag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeComplaintTicketDetailsArgs>>;
   consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   consentSharing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
@@ -23612,6 +23642,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   detailId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   enumeratorRecId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  extraRdis?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeExtraRdisArgs>>;
   familyId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   fchildHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeFeedbacksArgs>>;
@@ -23636,6 +23667,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
   householdDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeHouseholdDataUpdateTicketDetailsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identificationKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   individuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, Partial<HouseholdNodeIndividualsArgs>>;
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>;
@@ -24656,6 +24688,8 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
   canFinish?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  collisionDetectionEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  collisionDetector?: Resolver<Maybe<ResolversTypes['ProgramCollisionDetector']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   cycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, Partial<ProgramNodeCyclesArgs>>;
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>;
@@ -24982,6 +25016,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  extraHhRdis?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeExtraHhRdisArgs>>;
   goldenRecordDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   goldenRecordDuplicatesCountAndPercentage?: Resolver<Maybe<Array<Maybe<ResolversTypes['CountAndPercentageNode']>>>, ParentType, ContextType>;
   goldenRecordPossibleDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
