@@ -18,40 +18,46 @@ export function CurrentValue({
   value,
 }: CurrentValueProps): ReactElement {
   let displayValue;
+  const actualValue = value?.value;
+
   if (
     field?.name === 'country' ||
     field?.name === 'country_origin' ||
     field?.name === 'admin_area_title'
   ) {
-    displayValue = value || '-';
+    displayValue = actualValue || '-';
   } else {
     switch (field?.type) {
       case 'SELECT_ONE':
         displayValue =
-          field.choices.find((item) => item.value === value)?.labelEn || '-';
+          field.choices.find((item) => item.value === actualValue)?.labelEn ||
+          '-';
         break;
       case 'SELECT_MANY':
-        displayValue =
-          field.choices.find((item) => item.value === value)?.labelEn || '-';
-        if (value instanceof Array) {
-          displayValue = value
+        if (actualValue instanceof Array) {
+          displayValue = actualValue
             .map(
               (choice) =>
                 field.choices.find((item) => item.value === choice)?.labelEn ||
                 '-',
             )
             .join(', ');
+        } else {
+          displayValue = '-';
         }
         break;
       case 'BOOL':
         /* eslint-disable-next-line no-nested-ternary */
-        displayValue = value === null ? '-' : value ? 'Yes' : 'No';
+        displayValue = actualValue === null ? '-' : actualValue ? 'Yes' : 'No';
         break;
       case 'IMAGE':
         displayValue = <GrievanceFlexFieldPhotoModal field={field} isCurrent />;
         break;
       default:
-        displayValue = value;
+        displayValue =
+          typeof actualValue === 'object'
+            ? JSON.stringify(actualValue)
+            : actualValue;
     }
   }
   return <>{displayValue || '-'}</>;

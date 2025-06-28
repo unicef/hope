@@ -54,13 +54,13 @@ function RequestedHouseholdDataChangeTable({
 
   const selectedBioData = values.selected;
   const { selectedFlexFields } = values;
-  const householdData = {
-    ...ticket.ticketDetails.householdData,
+  const { householdData } = {
+    ...ticket.ticketDetails,
   };
   const flexFields = householdData.flexFields || {};
   delete householdData.flexFields;
-  const entries = Object.entries(householdData);
-  const entriesFlexFields = Object.entries(flexFields);
+  const entriesHouseholdData = Object.entries(householdData);
+  const entriesHouseholdDataFlexFields = Object.entries(flexFields);
   //@ts-ignore
   const fieldsDict = useArrayToDict(householdFieldsData, 'name', '*');
   const countriesDict = useArrayToDict(countriesData, 'isoCode2', 'name');
@@ -84,6 +84,7 @@ function RequestedHouseholdDataChangeTable({
   const isSelected = (name: string): boolean => selectedBioData.includes(name);
   const isSelectedFlexfields = (name: string): boolean =>
     selectedFlexFields.includes(name);
+
   return (
     <StyledTable>
       <TableHead>
@@ -104,7 +105,7 @@ function RequestedHouseholdDataChangeTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) =>
+        {entriesHouseholdData.map((row, index) =>
           householdDataRow(
             row,
             fieldsDict,
@@ -116,7 +117,7 @@ function RequestedHouseholdDataChangeTable({
             handleSelectBioData,
           ),
         )}
-        {entriesFlexFields.map((row, index) =>
+        {entriesHouseholdDataFlexFields.map((row, index) =>
           householdDataRow(
             row,
             fieldsDict,
