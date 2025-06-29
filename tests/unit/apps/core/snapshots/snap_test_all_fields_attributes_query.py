@@ -47639,16 +47639,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'ALTERNATE'
                     },
                     {
-                        'labelEn': 'None',
-                        'labels': [
-                            {
-                                'label': 'None',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NO_ROLE'
-                    },
-                    {
                         'labelEn': 'Primary collector',
                         'labels': [
                             {

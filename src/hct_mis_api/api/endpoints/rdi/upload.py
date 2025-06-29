@@ -24,7 +24,6 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
-    ROLE_NO_ROLE,
     ROLE_PRIMARY,
     PendingDocument,
     PendingHousehold,
@@ -146,10 +145,10 @@ class IndividualSerializer(serializers.ModelSerializer):
         ]
 
     def validate_role(self, value: str) -> Optional[str]:
-        if value in (ROLE_NO_ROLE, ROLE_PRIMARY, ROLE_ALTERNATE):
+        if value in (ROLE_PRIMARY, ROLE_ALTERNATE):
             return value
-        if not value:
-            return ROLE_NO_ROLE
+        elif not value:
+            return None
         elif value.upper()[0] == "P":
             return ROLE_PRIMARY
         elif value.upper()[0] == "A":

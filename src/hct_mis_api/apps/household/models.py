@@ -183,9 +183,8 @@ WORK_STATUS_CHOICE = (
 )
 ROLE_PRIMARY = "PRIMARY"
 ROLE_ALTERNATE = "ALTERNATE"
-ROLE_NO_ROLE = "NO_ROLE"
+ROLE_NO_ROLE = "NO_ROLE"  # we keep this to swap between primary and alternate
 ROLE_CHOICE = (
-    (ROLE_NO_ROLE, "None"),
     (ROLE_ALTERNATE, "Alternate collector"),
     (ROLE_PRIMARY, "Primary collector"),
 )
@@ -993,11 +992,7 @@ class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, Tim
         on_delete=models.CASCADE,
         related_name="individuals_and_roles",
     )
-    role = models.CharField(
-        max_length=255,
-        blank=True,
-        choices=ROLE_CHOICE,
-    )
+    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
@@ -1310,8 +1305,7 @@ class Individual(
 
     @property
     def role(self) -> str:
-        role = self.households_and_roles.first()
-        return role.role if role is not None else ROLE_NO_ROLE
+        return self.households_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).first()
 
     @property
     def get_hash_key(self) -> str:
@@ -1445,7 +1439,7 @@ class Individual(
         return self, update_fields
 
     def count_all_roles(self) -> int:
-        return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
+        return self.households_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).count()
 
     def count_primary_roles(self) -> int:
         return self.households_and_roles.filter(role=ROLE_PRIMARY).count()
