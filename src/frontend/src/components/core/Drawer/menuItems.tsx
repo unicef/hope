@@ -20,7 +20,6 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import SupervisedUserCircle from '@mui/icons-material/SupervisedUserCircle';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
-import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import { PERMISSIONS } from '../../../config/permissions';
 import React from 'react';
 
@@ -243,14 +242,6 @@ export const menuItems: MenuItem[] = [
         scopes: [SCOPE_PROGRAM],
       },
     ],
-  },
-  {
-    name: 'Reporting',
-    href: '/reporting',
-    selectedRegexp: /^\/reporting.*$/,
-    icon: <TrendingUpRoundedIcon />,
-    permissions: [PERMISSIONS.REPORTING_EXPORT],
-    scopes: [SCOPE_ALL_PROGRAMS],
   },
   {
     name: 'Programme Users',
