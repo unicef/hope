@@ -140,7 +140,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         elif field_data_dict["name"] in ["admin1", "admin2", "admin3", "admin4"]:
             # TODO remove later, fix for DRC program Paiement des ASC et IT
             # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/260434/
-            if self.registration_data_import.program_id == "f5a67047-714f-459a-8ead-911d21f7925c":
+            if str(self.registration_data_import.program_id) == "f5a67047-714f-459a-8ead-911d21f7925c":
                 value = self._get_drc_mapped_admin_pcode_value(field_data_dict["name"], value)  # type: ignore
             correct_value = Area.objects.get(p_code=value)
         elif field_data_dict["name"] in ["country", "country_origin"]:
