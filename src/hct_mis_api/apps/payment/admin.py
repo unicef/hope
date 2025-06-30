@@ -660,22 +660,30 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Account)
-class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
-    list_display = ("individual", "get_business_area", "get_program", "account_type", "is_unique")
+class AccountAdmin(HOPEModelAdminBase):
+    list_display = ("individual", "number", "get_business_area", "get_program", "account_type", "is_unique")
 
     raw_id_fields = ("account_type", "individual")
     readonly_fields = ("unique_key", "signature_hash")
-    search_fields = ("individual__unicef_id",)
+    search_fields = (
+        "number",
+        "individual__unicef_id",
+    )
     list_filter = (
         ("individual__program__business_area", AutoCompleteFilter),
         ("individual__program", AutoCompleteFilter),
         ("individual", AutoCompleteFilter),
+        ("financial_institution", AutoCompleteFilter),
         ("account_type", AutoCompleteFilter),
         "is_unique",
     )
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).select_related("individual__program__business_area")
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("individual__program__business_area", "financial_institution", "account_type")
+        )
 
     def get_business_area(self, obj: Account) -> BusinessArea:
         return obj.individual.program.business_area

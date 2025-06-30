@@ -12,11 +12,7 @@ import { UniversalRestTable } from '@components/rest/UniversalRestTable/Universa
 import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  finishProgramCycle,
-  ProgramCyclesQuery,
-  reactivateProgramCycle,
-} from '@api/programCycleApi';
+import { finishProgramCycle, ProgramCyclesQuery } from '@api/programCycleApi';
 import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
 import { RestService } from '@restgenerated/services/RestService';
 import { createApiParams } from '@utils/apiUtils';
@@ -44,7 +40,7 @@ const ProgramCyclesTablePaymentModule = ({
     ...filters,
   });
 
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -79,9 +75,20 @@ const ProgramCyclesTablePaymentModule = ({
 
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
     useMutation({
-      mutationFn: async ({ programCycleId }: { programCycleId: string }) => {
-        return reactivateProgramCycle(businessArea, program.id, programCycleId);
-      },
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsCyclesReactivateCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['programCycles', businessArea, program.id],
@@ -112,7 +119,12 @@ const ProgramCyclesTablePaymentModule = ({
   const reactivateAction = async (programCycle: ProgramCycleList) => {
     try {
       const decodedProgramCycleId = decodeIdString(programCycle.id);
-      await reactivateMutation({ programCycleId: decodedProgramCycleId });
+      await reactivateMutation({
+        businessAreaSlug: businessArea,
+        id: decodedProgramCycleId,
+        programSlug: programId,
+      });
+      showMessage(t('Programme Cycle Reactivated'));
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
       if (e.data && Array.isArray(e.data)) {

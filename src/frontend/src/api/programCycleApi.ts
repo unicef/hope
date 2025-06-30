@@ -125,19 +125,3 @@ export const finishProgramCycle = async (
     handleMutationError(error, 'finish program cycle');
   }
 };
-
-export const reactivateProgramCycle = async (
-  businessArea: string,
-  programId: string,
-  programCycleId: string,
-): Promise<any> => {
-  try {
-    const response = await api.post(
-      `${businessArea}/programs/${programId}/cycles/${programCycleId}/reactivate/`,
-      {},
-    );
-    return response.data;
-  } catch (error) {
-    handleMutationError(error, 'reactivate program cycle');
-  }
-};
