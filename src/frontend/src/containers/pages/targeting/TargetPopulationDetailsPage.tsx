@@ -5,6 +5,7 @@ import TargetPopulationDetails from '@components/targeting/TargetPopulationDetai
 import {
   PaymentPlanBuildStatus,
   useBusinessAreaDataQuery,
+  useProgramQuery,
   useTargetPopulationQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -27,7 +28,10 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
       fetchPolicy: 'cache-and-network',
     });
 
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
+  const { data: programData } = useProgramQuery({
+    variables: { id: programId },
+  });
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
   });
@@ -51,7 +55,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null || !businessAreaData) return null;
+  if (!data || permissions === null || !businessAreaData || !programData) return null;
 
   const { paymentPlan } = data;
 
@@ -77,7 +81,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
         permissions={permissions}
-        screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
+        screenBeneficiary={programData?.program?.screenBeneficiary}
       />
     </>
   );

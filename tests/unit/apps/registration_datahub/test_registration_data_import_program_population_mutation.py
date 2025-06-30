@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHous
 from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from tests.extras.test_utils.factories.sanction_list import SanctionListFactory
 
 
 class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
@@ -245,8 +246,9 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
             individuals_data=[{}, {}],
         )
         if sanction_list:
-            self.afghanistan.screen_beneficiary = True
-            self.afghanistan.save()
+            sanction_list = SanctionListFactory()
+            sanction_list.save()
+            self.import_to_program.sanction_lists.add(sanction_list)
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,

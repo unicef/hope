@@ -2,13 +2,11 @@ import { ReactElement, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   PaymentPlanBuildStatus,
-  useBusinessAreaDataQuery,
   usePaymentPlanQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -22,11 +20,6 @@ const EditTargetPopulationPage = (): ReactElement => {
       variables: { id },
       fetchPolicy: 'cache-and-network',
     });
-  const { businessArea } = useBaseUrl();
-
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
   const buildStatus = data?.paymentPlan?.buildStatus;
   useEffect(() => {
     if (
@@ -46,14 +39,14 @@ const EditTargetPopulationPage = (): ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null || !businessAreaData) return null;
+  if (!data || permissions === null) return null;
 
   const { paymentPlan } = data;
 
   return (
     <EditTargetPopulation
       paymentPlan={paymentPlan}
-      screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
+      screenBeneficiary={paymentPlan?.program?.screenBeneficiary}
     />
   );
 };

@@ -23,7 +23,6 @@ import hct_mis_api.apps.registration_datahub.mutations
 import hct_mis_api.apps.registration_datahub.schema
 import hct_mis_api.apps.reporting.mutations
 import hct_mis_api.apps.reporting.schema
-import hct_mis_api.apps.sanction_list.mutations
 import hct_mis_api.apps.sanction_list.schema
 import hct_mis_api.apps.steficon.schema
 
@@ -50,7 +49,6 @@ class Query(
 
 
 class Mutations(
-    hct_mis_api.apps.sanction_list.mutations.Mutations,
     hct_mis_api.apps.registration_datahub.mutations.Mutations,
     hct_mis_api.apps.program.mutations.Mutations,
     hct_mis_api.apps.payment.mutations.Mutations,

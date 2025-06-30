@@ -111,6 +111,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     target_populations_count = graphene.Int()
     cycles = DjangoFilterConnectionField(ProgramCycleNode, filterset_class=ProgramCycleFilter)
     can_finish = graphene.Boolean()
+    screen_beneficiary = graphene.Boolean()
 
     class Meta:
         model = Program
@@ -119,6 +120,10 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         ]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    @staticmethod
+    def resolve_screen_beneficiary(program: Program, info: Any, **kwargs: Any) -> bool:
+        return program.sanction_lists.exists()
 
     @staticmethod
     def resolve_total_number_of_households(program: Program, info: Any, **kwargs: Any) -> int:
