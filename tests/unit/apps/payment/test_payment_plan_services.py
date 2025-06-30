@@ -760,7 +760,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.payment_items.count(), 2)
 
         old_payment_ids = list(pp.payment_items.values_list("id", flat=True))
-        old_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
+        # old_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
 
         # check rebuild
         pp_service = PaymentPlanService(payment_plan=pp)
