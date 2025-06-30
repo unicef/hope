@@ -146,8 +146,9 @@ class EUSanctionList(BaseSanctionList):
                     logger.error(f"Unknown country: '{nationality['iso_code2']}'")
 
         try:
+            cls_eu = self.__class__
             programs = Program.objects.filter(
-                sanction_lists__strategy=self.__class__.__qualname__
+                sanction_lists__strategy=f"{cls_eu.__module__}.{cls_eu.__qualname__}"
             )  # get programs which use sanction list which is using this strategy
             for program in programs:
                 check_against_sanction_list_pre_merge(program_id=program.id)
