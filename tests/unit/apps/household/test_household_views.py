@@ -1400,7 +1400,7 @@ class TestHouseholdFilter:
 
     def test_filter_by_first_registration_date(self) -> None:
         self._test_filter_households_in_list(
-            filters={"first_registration_date": "2022-12-31"},
+            filters={"first_registration_date": "2022-12-31 00:00:00"},
             household1_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 31))},
             household2_data={"first_registration_date": timezone.make_aware(timezone.datetime(2022, 12, 30))},
         )
