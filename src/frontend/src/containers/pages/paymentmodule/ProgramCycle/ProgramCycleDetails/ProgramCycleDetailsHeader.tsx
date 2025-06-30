@@ -1,7 +1,3 @@
-import {
-  finishProgramCycle,
-  reactivateProgramCycle,
-} from '@api/programCycleApi';
 import { AdminButton } from '@core/AdminButton';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
@@ -16,6 +12,8 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
+import { RestService } from '@restgenerated/index';
+import { decodeIdString } from '@utils/utils';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycleList;
@@ -32,9 +30,20 @@ export const ProgramCycleDetailsHeader = ({
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
-      mutationFn: async () => {
-        return finishProgramCycle(businessArea, programId, programCycle.id);
-      },
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsCyclesFinishCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: [
@@ -44,14 +53,30 @@ export const ProgramCycleDetailsHeader = ({
             programCycle.id,
           ],
         });
+        showMessage(t('Programme Cycle Finished'));
+      },
+      onError: (error) => {
+        showMessage(t('Failed to finish the programme cycle.'));
+        console.error(error);
       },
     });
 
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
     useMutation({
-      mutationFn: async () => {
-        return reactivateProgramCycle(businessArea, programId, programCycle.id);
-      },
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsCyclesReactivateCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: [
@@ -77,7 +102,12 @@ export const ProgramCycleDetailsHeader = ({
 
   const finishAction = async () => {
     try {
-      await finishMutation();
+      const decodedProgramCycleId = decodeIdString(programCycle.id);
+      await finishMutation({
+        businessAreaSlug: businessArea,
+        id: decodedProgramCycleId,
+        programSlug: programId,
+      });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
       if (e.data && Array.isArray(e.data)) {
@@ -88,7 +118,11 @@ export const ProgramCycleDetailsHeader = ({
 
   const reactivateAction = async () => {
     try {
-      await reactivateMutation();
+      await reactivateMutation({
+        businessAreaSlug: businessArea,
+        id: programCycle.id,
+        programSlug: programId,
+      });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
       if (e.data && Array.isArray(e.data)) {

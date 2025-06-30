@@ -128,8 +128,7 @@ function EditIndividualDataChange({
   }
 
   const combinedData = {
-    results: addIndividualFieldsData?.results || [],
-    allAddIndividualsFieldsAttributes: addIndividualFieldsData?.results || [],
+    allAddIndividualsFieldsAttributes: addIndividualFieldsData || [],
     countriesChoices: countriesData || [],
     documentTypeChoices: choicesData?.documentTypeChoices || [],
     identityTypeChoices: individualChoicesData?.identityTypeChoices || [],
