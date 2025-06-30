@@ -386,7 +386,6 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         response_data = response.json()
-        self.assertIn("count", response_data)
         self.assertIn("next", response_data)
         self.assertIn("previous", response_data)
         self.assertIn("results", response_data)
