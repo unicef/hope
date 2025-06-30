@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Field } from 'formik';
-import { useBusinessAreaDataQuery, useProgramQuery } from '@generated/graphql';
+import { useProgramQuery } from '@generated/graphql';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
