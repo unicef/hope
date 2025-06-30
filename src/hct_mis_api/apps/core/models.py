@@ -86,6 +86,10 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         to="account.Partner", through=BusinessAreaPartnerThrough, related_name="business_areas"
     )
     countries = models.ManyToManyField("geo.Country", related_name="business_areas")
+    office_country = models.ForeignKey(
+        "geo.Country", related_name="business_area", null=True, blank=True, on_delete=models.SET_NULL
+    )
+    payment_countries = models.ManyToManyField("geo.Country", related_name="payment_business_areas")
 
     is_split = models.BooleanField(default=False)
     region_code = models.CharField(max_length=8)
