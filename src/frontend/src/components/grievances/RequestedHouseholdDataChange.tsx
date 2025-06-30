@@ -14,6 +14,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/GrievanceHouseholdDataChangeApprove';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { camelCase } from 'lodash';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -85,10 +86,10 @@ export function RequestedHouseholdDataChange({
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
   ).length;
   allApprovedCount += flexFieldsEntries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
@@ -151,14 +152,12 @@ export function RequestedHouseholdDataChange({
       initialValues={{
         selected: entries
           .filter(
-            (row: [string, { approve_status: boolean }]) =>
-              row[1].approve_status,
+            (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
           )
-          .map((row) => row[0]),
+          .map((row) => camelCase(row[0])),
         selectedFlexFields: flexFieldsEntries
           .filter(
-            (row: [string, { approve_status: boolean }]) =>
-              row[1].approve_status,
+            (row: [string, { approveStatus: boolean }]) => row[1].approveStatus,
           )
           .map((row) => row[0]),
       }}
