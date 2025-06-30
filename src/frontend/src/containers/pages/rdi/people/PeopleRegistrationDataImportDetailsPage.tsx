@@ -99,7 +99,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
 
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const status = data?.status;
+  // const status = data?.status;
   const isMerged = RegistrationDataImportStatusEnum.MERGED === data?.status;
 
   if (loading || choicesLoading) return <LoadingComponent />;

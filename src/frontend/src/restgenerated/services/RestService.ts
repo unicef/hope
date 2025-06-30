@@ -53,6 +53,7 @@ import type { PaginatedCountryList } from '../models/PaginatedCountryList';
 import type { PaginatedFeedbackListList } from '../models/PaginatedFeedbackListList';
 import type { PaginatedFieldAttributeList } from '../models/PaginatedFieldAttributeList';
 import type { PaginatedFieldAttributeSimpleList } from '../models/PaginatedFieldAttributeSimpleList';
+import type { PaginatedFinancialInstitutionListList } from '../models/PaginatedFinancialInstitutionListList';
 import type { PaginatedFSPXlsxTemplateList } from '../models/PaginatedFSPXlsxTemplateList';
 import type { PaginatedGrievanceTicketDetailList } from '../models/PaginatedGrievanceTicketDetailList';
 import type { PaginatedGrievanceTicketListList } from '../models/PaginatedGrievanceTicketListList';
@@ -562,6 +563,9 @@ export class RestService {
     public static restBeneficiaryGroupsList({
         limit,
         offset,
+        ordering,
+        updatedAtAfter,
+        updatedAtBefore,
     }: {
         /**
          * Number of results to return per page.
@@ -571,6 +575,12 @@ export class RestService {
          * The initial index from which to return the results.
          */
         offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
     }): CancelablePromise<PaginatedBeneficiaryGroupList> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -578,6 +588,9 @@ export class RestService {
             query: {
                 'limit': limit,
                 'offset': offset,
+                'ordering': ordering,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
             },
         });
     }
@@ -3799,6 +3812,8 @@ export class RestService {
         sizeMin,
         survey,
         unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -3900,6 +3915,8 @@ export class RestService {
         sizeMin?: number | null,
         survey?: string,
         unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -3942,6 +3959,8 @@ export class RestService {
                 'size_min': sizeMin,
                 'survey': survey,
                 'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -4000,6 +4019,8 @@ export class RestService {
         sizeMin,
         survey,
         unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4093,6 +4114,8 @@ export class RestService {
         sizeMin?: number | null,
         survey?: string,
         unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
@@ -4133,6 +4156,8 @@ export class RestService {
                 'size_min': sizeMin,
                 'survey': survey,
                 'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -4168,6 +4193,8 @@ export class RestService {
         search,
         sex,
         status,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4255,6 +4282,8 @@ export class RestService {
          * * `WITHDRAWN` - Withdrawn
          */
         status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedIndividualListList> {
         return __request(OpenAPI, {
@@ -4289,6 +4318,8 @@ export class RestService {
                 'search': search,
                 'sex': sex,
                 'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -4339,6 +4370,8 @@ export class RestService {
         search,
         sex,
         status,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -4418,6 +4451,8 @@ export class RestService {
          * * `WITHDRAWN` - Withdrawn
          */
         status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
@@ -4450,6 +4485,8 @@ export class RestService {
                 'search': search,
                 'sex': sex,
                 'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -6015,6 +6052,8 @@ export class RestService {
         sizeMin,
         survey,
         unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -6117,6 +6156,8 @@ export class RestService {
         sizeMin?: number | null,
         survey?: string,
         unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedHouseholdListList> {
         return __request(OpenAPI, {
@@ -6160,6 +6201,8 @@ export class RestService {
                 'size_min': sizeMin,
                 'survey': survey,
                 'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -6271,6 +6314,8 @@ export class RestService {
         sizeMin,
         survey,
         unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -6377,6 +6422,8 @@ export class RestService {
         sizeMin?: number | null,
         survey?: string,
         unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedPaymentListList> {
         return __request(OpenAPI, {
@@ -6421,6 +6468,8 @@ export class RestService {
                 'size_min': sizeMin,
                 'survey': survey,
                 'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -6491,6 +6540,8 @@ export class RestService {
         sizeMin,
         survey,
         unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -6593,6 +6644,8 @@ export class RestService {
         sizeMin?: number | null,
         survey?: string,
         unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedRecipientList> {
         return __request(OpenAPI, {
@@ -6636,6 +6689,8 @@ export class RestService {
                 'size_min': sizeMin,
                 'survey': survey,
                 'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -6680,6 +6735,8 @@ export class RestService {
         sizeMin,
         survey,
         unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -6782,6 +6839,8 @@ export class RestService {
         sizeMin?: number | null,
         survey?: string,
         unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedFieldAttributeList> {
         return __request(OpenAPI, {
@@ -6825,6 +6884,8 @@ export class RestService {
                 'size_min': sizeMin,
                 'survey': survey,
                 'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -6867,6 +6928,8 @@ export class RestService {
         sizeMin,
         survey,
         unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -6961,6 +7024,8 @@ export class RestService {
         sizeMin?: number | null,
         survey?: string,
         unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
@@ -7002,6 +7067,8 @@ export class RestService {
                 'size_min': sizeMin,
                 'survey': survey,
                 'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -7046,6 +7113,8 @@ export class RestService {
         sizeMin,
         survey,
         unicefId,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -7148,6 +7217,8 @@ export class RestService {
         sizeMin?: number | null,
         survey?: string,
         unicefId?: string,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedRecipientList> {
         return __request(OpenAPI, {
@@ -7191,6 +7262,8 @@ export class RestService {
                 'size_min': sizeMin,
                 'survey': survey,
                 'unicef_id': unicefId,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -7227,6 +7300,8 @@ export class RestService {
         search,
         sex,
         status,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -7315,6 +7390,8 @@ export class RestService {
          * * `WITHDRAWN` - Withdrawn
          */
         status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedIndividualListList> {
         return __request(OpenAPI, {
@@ -7350,6 +7427,8 @@ export class RestService {
                 'search': search,
                 'sex': sex,
                 'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -7438,6 +7517,8 @@ export class RestService {
         search,
         sex,
         status,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -7526,6 +7607,8 @@ export class RestService {
          * * `WITHDRAWN` - Withdrawn
          */
         status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<PaginatedFieldAttributeList> {
         return __request(OpenAPI, {
@@ -7561,6 +7644,8 @@ export class RestService {
                 'search': search,
                 'sex': sex,
                 'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -7595,6 +7680,8 @@ export class RestService {
         search,
         sex,
         status,
+        updatedAtAfter,
+        updatedAtBefore,
         withdrawn,
     }: {
         businessAreaSlug: string,
@@ -7675,6 +7762,8 @@ export class RestService {
          * * `WITHDRAWN` - Withdrawn
          */
         status?: Array<'ACTIVE' | 'DUPLICATE' | 'WITHDRAWN'>,
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
         withdrawn?: boolean,
     }): CancelablePromise<CountResponse> {
         return __request(OpenAPI, {
@@ -7708,6 +7797,8 @@ export class RestService {
                 'search': search,
                 'sex': sex,
                 'status': status,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
                 'withdrawn': withdrawn,
             },
         });
@@ -13123,6 +13214,52 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/lookups/document/',
+        });
+    }
+    /**
+     * @returns PaginatedFinancialInstitutionListList
+     * @throws ApiError
+     */
+    public static restLookupsFinancialInstitutionList({
+        limit,
+        offset,
+        ordering,
+        type,
+        updatedAtAfter,
+        updatedAtBefore,
+    }: {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number,
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number,
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string,
+        /**
+         * * `bank` - Bank
+         * * `telco` - Telco
+         * * `other` - Other
+         */
+        type?: 'bank' | 'other' | 'telco',
+        updatedAtAfter?: string,
+        updatedAtBefore?: string,
+    }): CancelablePromise<PaginatedFinancialInstitutionListList> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/lookups/financial-institution/',
+            query: {
+                'limit': limit,
+                'offset': offset,
+                'ordering': ordering,
+                'type': type,
+                'updated_at_after': updatedAtAfter,
+                'updated_at_before': updatedAtBefore,
+            },
         });
     }
     /**
