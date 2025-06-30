@@ -67,7 +67,6 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
-    ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     STATUS_ACTIVE,
@@ -299,10 +298,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         return None
 
     def resolve_role(parent, info: Any) -> str:
-        role = parent.households_and_roles(manager="all_merge_status_objects").first()
-        if role is not None:
-            return role.role
-        return ROLE_NO_ROLE
+        return parent.households_and_roles(manager="all_merge_status_objects").first()
 
     def resolve_deduplication_golden_record_results(parent, info: Any) -> List[Dict]:
         key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"

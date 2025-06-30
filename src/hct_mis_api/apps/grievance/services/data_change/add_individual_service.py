@@ -34,7 +34,6 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
-    ROLE_NO_ROLE,
     BankAccountInfo,
     Document,
     Household,
@@ -108,7 +107,7 @@ class AddIndividualService(DataChangeService):
         documents = individual_data.pop("documents", [])
         identities = individual_data.pop("identities", [])
         payment_channels = individual_data.pop("payment_channels", [])
-        role = individual_data.pop("role", ROLE_NO_ROLE)
+        role = individual_data.pop("role", None)
         individual_data["flex_fields"] = populate_pdu_with_null_values(
             household.program, individual_data.get("flex_fields", None)
         )
@@ -144,7 +143,8 @@ class AddIndividualService(DataChangeService):
         else:
             individual.relationship = NON_BENEFICIARY
             individual.save()
-        handle_role(role, household, individual)
+        if role:
+            handle_role(role, household, individual)
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(identities_to_create)
         BankAccountInfo.objects.bulk_create(payment_channels_to_create)
