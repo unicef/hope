@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.contrib.auth.models import AbstractUser
+from django.db import transaction
 from django.db.models import Case, DateField, F, QuerySet, When
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -311,6 +312,7 @@ class GrievanceTicketGlobalViewSet(
     def choices(self, request: Any, *args: Any, **kwargs: Any) -> Any:
         return Response(data=self.get_serializer(instance={}).data)
 
+    @transaction.atomic
     @extend_schema(responses={201: GrievanceTicketDetailSerializer(many=True)})
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
@@ -355,6 +357,7 @@ class GrievanceTicketGlobalViewSet(
         headers = self.get_success_headers(resp.data)
         return Response(resp.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @transaction.atomic
     @extend_schema(responses={200: GrievanceTicketDetailSerializer})
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         grievance_ticket = self.get_object()
@@ -408,6 +411,7 @@ class GrievanceTicketGlobalViewSet(
         resp = GrievanceTicketDetailSerializer(grievance_ticket)
         return Response(resp.data, status.HTTP_200_OK)
 
+    @transaction.atomic
     @extend_schema(request=GrievanceStatusChangeSerializer, responses={202: GrievanceTicketDetailSerializer})
     @action(detail=True, methods=["post"], url_path="status-change")
     def status_change(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -505,6 +509,7 @@ class GrievanceTicketGlobalViewSet(
             status=status.HTTP_202_ACCEPTED,
         )
 
+    @transaction.atomic
     @extend_schema(request=GrievanceCreateNoteSerializer, responses={201: TicketNoteSerializer})
     @action(detail=True, methods=["post"], url_path="create-note")
     def create_note(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -538,6 +543,7 @@ class GrievanceTicketGlobalViewSet(
 
         return Response(TicketNoteSerializer(ticket_note).data, status=status.HTTP_201_CREATED)
 
+    @transaction.atomic
     @extend_schema(
         request=GrievanceIndividualDataChangeApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
     )
@@ -606,6 +612,7 @@ class GrievanceTicketGlobalViewSet(
 
         return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
 
+    @transaction.atomic
     @extend_schema(
         request=GrievanceHouseholdDataChangeApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
     )
@@ -655,6 +662,7 @@ class GrievanceTicketGlobalViewSet(
 
         return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
 
+    @transaction.atomic
     @extend_schema(request=GrievanceUpdateApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer})
     @action(detail=True, methods=["post"], url_path="approve-status-update")
     def approve_status_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -700,6 +708,7 @@ class GrievanceTicketGlobalViewSet(
 
         return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
 
+    @transaction.atomic
     @extend_schema(
         request=GrievanceDeleteHouseholdApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer}
     )
@@ -747,6 +756,7 @@ class GrievanceTicketGlobalViewSet(
 
         return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
 
+    @transaction.atomic
     @extend_schema(
         request=GrievanceNeedsAdjudicationApproveSerializer, responses={202: GrievanceTicketDetailSerializer}
     )
@@ -826,6 +836,7 @@ class GrievanceTicketGlobalViewSet(
             status=status.HTTP_202_ACCEPTED,
         )
 
+    @transaction.atomic
     @extend_schema(request=GrievanceUpdateApproveStatusSerializer, responses={202: GrievanceTicketDetailSerializer})
     @action(detail=True, methods=["post"], url_path="approve-payment-details")
     def approve_payment_details(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -856,6 +867,7 @@ class GrievanceTicketGlobalViewSet(
         grievance_ticket.refresh_from_db()
         return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
 
+    @transaction.atomic
     @extend_schema(request=GrievanceReassignRoleSerializer, responses={202: GrievanceTicketDetailSerializer})
     @action(detail=True, methods=["post"], url_path="reassign-role")
     def reassign_role(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -913,6 +925,7 @@ class GrievanceTicketGlobalViewSet(
             status=status.HTTP_202_ACCEPTED,
         )
 
+    @transaction.atomic
     @extend_schema(
         request=BulkUpdateGrievanceTicketsAssigneesSerializer,
         responses={202: GrievanceTicketDetailSerializer(many=True)},
@@ -931,6 +944,7 @@ class GrievanceTicketGlobalViewSet(
             status=status.HTTP_202_ACCEPTED,
         )
 
+    @transaction.atomic
     @extend_schema(
         request=BulkUpdateGrievanceTicketsPrioritySerializer,
         responses={202: GrievanceTicketDetailSerializer(many=True)},
@@ -949,6 +963,7 @@ class GrievanceTicketGlobalViewSet(
             status=status.HTTP_202_ACCEPTED,
         )
 
+    @transaction.atomic
     @extend_schema(
         request=BulkUpdateGrievanceTicketsUrgencySerializer,
         responses={202: GrievanceTicketDetailSerializer(many=True)},
@@ -967,6 +982,7 @@ class GrievanceTicketGlobalViewSet(
             status=status.HTTP_202_ACCEPTED,
         )
 
+    @transaction.atomic
     @extend_schema(
         request=BulkGrievanceTicketsAddNoteSerializer,
         responses={202: GrievanceTicketDetailSerializer(many=True)},
