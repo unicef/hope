@@ -767,6 +767,7 @@ class TestPaymentPlanServices(APITestCase):
         pp_service.full_rebuild()
 
         pp.refresh_from_db()
+
         # all Payments (removed and new)
         self.assertEqual(Payment.all_objects.filter(parent=pp).count(), 2)
 
