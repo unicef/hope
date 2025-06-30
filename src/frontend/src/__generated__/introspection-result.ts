@@ -47,7 +47,6 @@
       "RecipientNode",
       "RegistrationDataImportDatahubNode",
       "RegistrationDataImportNode",
-      "ReportNode",
       "RuleCommitNode",
       "SanctionListIndividualAliasNameNode",
       "SanctionListIndividualCountriesNode",
