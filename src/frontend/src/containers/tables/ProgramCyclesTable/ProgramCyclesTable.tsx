@@ -13,17 +13,19 @@ import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/He
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  fetchProgramCycles,
   finishProgramCycle,
-  ProgramCycle,
   ProgramCyclesQuery,
   reactivateProgramCycle,
 } from '@api/programCycleApi';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { createApiParams } from '@utils/apiUtils';
 import { BlackLink } from '@core/BlackLink';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -46,12 +48,22 @@ const ProgramCyclesTablePaymentModule = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { data, refetch, error, isLoading } = useQuery({
-    queryKey: ['programCycles', businessArea, program.id, queryVariables],
-    queryFn: async () => {
-      return fetchProgramCycles(businessArea, program.id, queryVariables);
-    },
-  });
+  const { data, refetch, error, isLoading } =
+    useQuery<PaginatedProgramCycleListList>({
+      queryKey: ['programCycles', businessArea, program.id, queryVariables],
+      queryFn: () => {
+        return RestService.restBusinessAreasProgramsCyclesList(
+          createApiParams(
+            {
+              businessAreaSlug: businessArea,
+              programSlug: program.id,
+            },
+            queryVariables,
+            { withPagination: true },
+          ),
+        );
+      },
+    });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
@@ -85,7 +97,7 @@ const ProgramCyclesTablePaymentModule = ({
     void refetch();
   }, [queryVariables, refetch]);
 
-  const finishAction = async (programCycle: ProgramCycle) => {
+  const finishAction = async (programCycle: ProgramCycleList) => {
     try {
       const decodedProgramCycleId = decodeIdString(programCycle.id);
       await finishMutation({ programCycleId: decodedProgramCycleId });
@@ -97,7 +109,7 @@ const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const reactivateAction = async (programCycle: ProgramCycle) => {
+  const reactivateAction = async (programCycle: ProgramCycleList) => {
     try {
       const decodedProgramCycleId = decodeIdString(programCycle.id);
       await reactivateMutation({ programCycleId: decodedProgramCycleId });
@@ -109,7 +121,7 @@ const ProgramCyclesTablePaymentModule = ({
     }
   };
 
-  const renderRow = (row: ProgramCycle): ReactElement => (
+  const renderRow = (row: ProgramCycleList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
       <TableCell data-cy="program-cycle-title">
         <BlackLink to={`./${row.id}`}>{row.title}</BlackLink>
@@ -124,13 +136,13 @@ const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {formatCurrencyWithSymbol(row.total_entitled_quantity_usd)}
+        {formatCurrencyWithSymbol(row.totalEntitledQuantityUsd)}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
-        <UniversalMoment>{row.start_date}</UniversalMoment>
+        <UniversalMoment>{row.startDate}</UniversalMoment>
       </TableCell>
       <TableCell data-cy="program-cycle-end-date">
-        <UniversalMoment>{row.end_date}</UniversalMoment>
+        <UniversalMoment>{row.endDate}</UniversalMoment>
       </TableCell>
       <TableCell data-cy="program-cycle-details-btn">
         {row.status === 'Finished' && (

@@ -2,61 +2,64 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSection';
+import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 import { PaymentPlanDetailsHeader } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
+import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
+import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
 import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
+import { PaymentPlanDetails } from '@components/paymentmodulepeople/PaymentPlanDetails/PaymentPlanDetails';
 import { PeoplePaymentPlanDetailsResults } from '@components/paymentmodulepeople/PaymentPlanDetails/PeoplePaymentPlanDetailsResults';
-import {
-  PaymentPlanBackgroundActionStatus,
-  PaymentPlanStatus,
-  usePaymentPlanQuery,
-} from '@generated/graphql';
+import PeoplePaymentsTable from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable/PeoplePaymentsTable';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import PeoplePaymentsTable from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable/PeoplePaymentsTable';
-import { AcceptanceProcess } from '@components/paymentmodulepeople/PaymentPlanDetails/AcceptanceProcess';
-import { PaymentPlanDetails } from '@components/paymentmodulepeople/PaymentPlanDetails/PaymentPlanDetails';
-import { Entitlement } from '@components/paymentmodulepeople/PaymentPlanDetails/Entitlement';
-import FundsCommitmentSection from '@components/paymentmodule/PaymentPlanDetails/FundsCommitment/FundsCommitmentSection';
 
 export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
-  const { baseUrl, businessArea } = useBaseUrl();
-  const { data, loading, startPolling, stopPolling, error } =
-    usePaymentPlanQuery({
-      variables: {
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const {
+    data: paymentPlan,
+    isLoading,
+    error,
+  } = useQuery<PaymentPlanDetail>({
+    queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPaymentPlansRetrieve({
+        businessAreaSlug: businessArea,
         id: paymentPlanId,
-      },
-      fetchPolicy: 'cache-and-network',
-    });
+        programSlug: programId,
+      }),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (
+        data?.status === PaymentPlanStatusEnum.PREPARING ||
+        (data?.backgroundActionStatus !== null &&
+          data?.backgroundActionStatus !==
+            PaymentPlanBackgroundActionStatusEnum.EXCLUDE_BENEFICIARIES_ERROR)
+      ) {
+        return 3000;
+      }
 
-  const status = data?.paymentPlan?.status;
-  const backgroundActionStatus = data?.paymentPlan?.backgroundActionStatus;
+      return false;
+    },
+    refetchIntervalInBackground: true,
+  });
 
-  useEffect(() => {
-    if (
-      PaymentPlanStatus.Preparing === status ||
-      (backgroundActionStatus !== null &&
-        backgroundActionStatus !==
-          PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
-    ) {
-      startPolling(3000);
-    } else {
-      stopPolling();
-    }
-    return stopPolling;
-  }, [status, backgroundActionStatus, startPolling, stopPolling]);
-
-  if (loading && !data) return <LoadingComponent />;
-  if (permissions === null || !data) return null;
+  if (isLoading && !paymentPlan) return <LoadingComponent />;
+  if (permissions === null || !paymentPlan) return null;
 
   if (
     !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
@@ -64,20 +67,22 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
   )
     return <PermissionDenied />;
 
-  const shouldDisplayEntitlement =
-    status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
+  const { status } = paymentPlan;
 
-  const shouldDisplayFsp = status !== PaymentPlanStatus.Open;
+  const shouldDisplayEntitlement =
+    status !== PaymentPlanStatusEnum.OPEN &&
+    status !== PaymentPlanStatusEnum.ACCEPTED;
+
+  const shouldDisplayFsp = status !== PaymentPlanStatusEnum.OPEN;
   const shouldDisplayReconciliationSummary =
-    status === PaymentPlanStatus.Accepted ||
-    status === PaymentPlanStatus.Finished;
+    status === PaymentPlanStatusEnum.ACCEPTED ||
+    status === PaymentPlanStatusEnum.FINISHED;
 
   const shouldDisplayFundsCommitment =
-    status === PaymentPlanStatus.InReview ||
-    status === PaymentPlanStatus.Accepted ||
-    status === PaymentPlanStatus.Finished;
+    status === PaymentPlanStatusEnum.IN_REVIEW ||
+    status === PaymentPlanStatusEnum.ACCEPTED ||
+    status === PaymentPlanStatusEnum.FINISHED;
 
-  const { paymentPlan } = data;
   if (!paymentPlan) return null;
 
   return (
@@ -88,7 +93,7 @@ export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
         permissions={permissions}
       />
       <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      {status !== PaymentPlanStatus.Preparing && (
+      {status !== PaymentPlanStatusEnum.PREPARING && (
         <>
           <AcceptanceProcess paymentPlan={paymentPlan} />
           {shouldDisplayFundsCommitment && (

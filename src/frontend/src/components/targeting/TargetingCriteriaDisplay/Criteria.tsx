@@ -18,10 +18,6 @@ import { Delete, Edit } from '@mui/icons-material';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
-import {
-  TargetingCriteriaRuleObjectType,
-  useAvailableFspsForDeliveryMechanismsQuery,
-} from '@generated/graphql';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { ReactElement, useEffect, useState } from 'react';
@@ -30,6 +26,11 @@ import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { LabelizedField } from '@components/core/LabelizedField';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { FspChoices } from '@restgenerated/models/FspChoices';
+import { fieldNameToLabel } from '@utils/utils';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -115,15 +116,20 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
-          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          : <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          :{' '}
           <span>
             {displayValueOrEmpty(field.arguments?.[0])} -{' '}
             {displayValueOrEmpty(field.arguments?.[1])}
@@ -134,7 +140,10 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          :{' '}
           {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
             <BlueText>{t('Empty')}</BlueText>
           ) : typeof field.arguments?.[0] === 'boolean' ? (
@@ -170,8 +179,10 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
 
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
-          {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          : {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
           <span>{displayValueOrEmpty(displayValue)}</span>
         </p>
       );
@@ -180,7 +191,10 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'CONTAINS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          :{' '}
           {field.__typename === 'TargetingCollectorBlockRuleFilterNode'
             ? field.arguments?.map((argument, index) => (
                 <Fragment key={index}>
@@ -210,8 +224,10 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     default:
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn}:{' '}
-          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
+          {field.fieldAttribute?.labelEn ||
+            field.labelEn ||
+            fieldNameToLabel(field.fieldName)}
+          : <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
@@ -245,7 +261,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
 };
 
 interface CriteriaProps {
-  rules: [TargetingCriteriaRuleObjectType];
+  rules: [any];
   individualsFiltersBlocks;
   collectorsFiltersBlocks;
   removeFunction?;
@@ -281,12 +297,23 @@ export function Criteria({
   criteriaIndex,
   criteria,
 }: CriteriaProps): ReactElement {
+  const { businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const [deliveryMechanismToDisplay, setDeliveryMechanismToDisplay] =
     useState('');
   const [fspToDisplay, setFspToDisplay] = useState('');
-  const { data: availableFspsForDeliveryMechanismData } =
-    useAvailableFspsForDeliveryMechanismsQuery();
+  const { data: availableFspsForDeliveryMechanismData } = useQuery<
+    FspChoices[]
+  >({
+    queryKey: [
+      'businessAreasAvailableFspsForDeliveryMechanismsList',
+      businessArea,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
+        businessAreaSlug: businessArea,
+      }),
+  });
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openHH, setOpenHH] = useState(false);
   const [openIND, setOpenIND] = useState(false);
@@ -300,13 +327,12 @@ export function Criteria({
   const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
 
   useEffect(() => {
-    const mappedDeliveryMechanisms =
-      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms?.map(
-        (el) => ({
-          name: el.deliveryMechanism.name,
-          value: el.deliveryMechanism.code,
-        }),
-      );
+    const mappedDeliveryMechanisms = availableFspsForDeliveryMechanismData?.map(
+      (el) => ({
+        name: el.deliveryMechanism.name,
+        value: el.deliveryMechanism.code,
+      }),
+    );
 
     const deliveryMechanismName =
       deliveryMechanism?.name ||
@@ -315,7 +341,7 @@ export function Criteria({
       )?.name;
 
     const mappedFsps =
-      availableFspsForDeliveryMechanismData?.availableFspsForDeliveryMechanisms
+      availableFspsForDeliveryMechanismData
         ?.find(
           (el) =>
             el.deliveryMechanism.code === deliveryMechanism ||

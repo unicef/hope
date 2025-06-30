@@ -1,27 +1,29 @@
-import { fetchPeriodicDataUpdateTemplates } from '@api/periodicDataUpdateApi';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { StatusBox } from '@core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { IconButton, TableCell, Tooltip } from '@mui/material';
+import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ReactElement, useEffect, useState } from 'react';
+import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
+import { createApiParams } from '@utils/apiUtils';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
 import {
   useExportPeriodicDataUpdateTemplate,
 } from './PeriodicDataUpdatesTemplatesListActions';
-import { StatusBox } from '@core/StatusBox';
-import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useTranslation } from 'react-i18next';
-import { ButtonTooltip } from '@components/core/ButtonTooltip';
-import { usePermissions } from '@hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   {
@@ -116,31 +118,40 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     setSelectedTemplateId(null);
   };
 
-  const initialQueryVariables = {
-    page: 1,
-    page_size: 10,
-    ordering: 'created_at',
-  };
+  const initialQueryVariables = useMemo(
+    () => ({
+      ordering: 'created_at',
+      businessAreaSlug,
+      programSlug: programId,
+    }),
+    [businessAreaSlug, programId],
+  );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const {
     data: templatesData,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<PaginatedPeriodicDataUpdateTemplateListList>({
     queryKey: [
       'periodicDataUpdateTemplates',
+      queryVariables,
       businessAreaSlug,
       programId,
-      queryVariables,
     ],
-    queryFn: () =>
-      fetchPeriodicDataUpdateTemplates(
-        businessAreaSlug,
-        programId,
-        queryVariables,
-      ),
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesList(
+        createApiParams(
+          { businessAreaSlug, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
   });
 
   const selectedTemplate = templatesData?.results?.find(
@@ -158,13 +169,13 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
       <TableCell data-cy={`template-records-${row.id}`} align="right">
-        {row.number_of_records}
+        {row.numberOfRecords}
       </TableCell>
       <TableCell data-cy={`template-created-at-${row.id}`}>
-        <UniversalMoment>{row.created_at}</UniversalMoment>
+        <UniversalMoment>{row.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell data-cy={`template-created-by-${row.id}`}>
-        {row.created_by}
+        {row.createdBy}
       </TableCell>
       <TableCell data-cy={`template-details-btn-${row.id}`}>
         <IconButton color="primary" onClick={() => handleDialogOpen(row)}>
@@ -181,7 +192,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
         {row.status === 'EXPORTED' ? (
           <Tooltip
             title={
-              row?.number_of_records === 0
+              row?.numberOfRecords === 0
                 ? t('There are no records available')
                 : ''
             }
@@ -194,14 +205,14 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
                 data-cy={`download-btn-${row.id}`}
                 href={`/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${row.id}/download/`}
                 disabled={
-                  row?.number_of_records === 0 || !canExportOrDownloadTemplate
+                  row?.numberOfRecords === 0 || !canExportOrDownloadTemplate
                 }
               >
                 Download
               </ButtonTooltip>
             </span>
           </Tooltip>
-        ) : row.can_export ? (
+        ) : row.canExport ? (
           <ButtonTooltip
             variant="contained"
             color="primary"

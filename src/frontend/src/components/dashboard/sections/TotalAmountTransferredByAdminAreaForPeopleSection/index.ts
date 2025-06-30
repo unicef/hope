@@ -1,1 +1,0 @@
-export { TotalAmountTransferredSectionByAdminAreaForPeopleSection } from './TotalAmountTransferredByAdminAreaForPeopleSection';

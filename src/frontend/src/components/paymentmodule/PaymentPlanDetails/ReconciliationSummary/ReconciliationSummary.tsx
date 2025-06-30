@@ -2,11 +2,11 @@ import { Grid2 as Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -27,7 +27,7 @@ const ReconciliationWrapUp = styled.div`
 `;
 
 interface ReconciliationSummaryProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function ReconciliationSummary({
@@ -89,13 +89,13 @@ export function ReconciliationSummary({
             <Grid size={{ xs: 12 }}>
               <Grid container spacing={0} justifyContent="flex-start">
                 {datasets.map(({ color, label, value }) => (
-                  <Grid size={{ xs:2 }} key={label}>
+                  <Grid size={{ xs: 2 }} key={label}>
                     <FieldBorder color={color}>
                       <LabelizedField label={label} value={value} />
                     </FieldBorder>
                   </Grid>
                 ))}
-                <Grid size={{ xs:2 }}>
+                <Grid size={{ xs: 2 }}>
                   <ChartContainer data-cy="chart-container">
                     <Pie
                       width={100}
@@ -126,7 +126,7 @@ export function ReconciliationSummary({
             <ReconciliationWrapUp>
               <Grid size={{ xs: 12 }}>
                 <Grid container spacing={0} justifyContent="flex-start">
-                  <Grid size={{ xs:2 }}>
+                  <Grid size={{ xs: 2 }}>
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Number of payments')}
@@ -134,7 +134,7 @@ export function ReconciliationSummary({
                       />
                     </FieldBorder>
                   </Grid>
-                  <Grid size={{ xs:2 }}>
+                  <Grid size={{ xs: 2 }}>
                     <FieldBorder color="#4E606A">
                       <LabelizedField
                         label={t('Reconciled')}

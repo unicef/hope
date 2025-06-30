@@ -1,9 +1,5 @@
 import { ReactElement } from 'react';
 import { useArrayToDict } from '@hooks/useArrayToDict';
-import {
-  GrievanceTicketQuery,
-  useAllAddIndividualFieldsQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { DocumentsTable } from './DocumentsTable';
 import { DocumentsToEditTable } from './DocumentsToEditTable';
@@ -15,9 +11,13 @@ import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { PaymentChannelsTable } from './PaymentChannelsTable';
 import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
 import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface RequestedIndividualDataChangeTableProps {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   setFieldValue;
   values;
   isEdit;
@@ -29,9 +29,34 @@ export function RequestedIndividualDataChangeTable({
   values,
   isEdit,
 }: RequestedIndividualDataChangeTableProps): ReactElement {
-  const { data, loading } = useAllAddIndividualFieldsQuery();
+  const { businessAreaSlug } = useBaseUrl();
+
+  const { data: addIndividualFieldsData, isLoading: loading } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug,
+        },
+      ),
+  });
+
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery({
+      queryKey: ['individualChoices', businessAreaSlug],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug,
+        }),
+    });
+
+  const { data: countriesData, isLoading: countriesLoading } = useQuery({
+    queryKey: ['countriesList'],
+    queryFn: () => RestService.restLookupsCountryList({}),
+  });
+
   const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
+    ...ticket.ticketDetails.individualData,
   };
   const {
     documents,
@@ -52,24 +77,30 @@ export function RequestedIndividualDataChangeTable({
   const entries = restIndividualData && Object.entries(restIndividualData);
   const entriesFlexFields = flexFields && Object.entries(flexFields);
   const fieldsDict = useArrayToDict(
-    data?.allAddIndividualsFieldsAttributes,
+    addIndividualFieldsData?.results,
     'name',
     '*',
   );
-  const countriesDict = useArrayToDict(data?.countriesChoices, 'value', 'name');
+  const countriesDict = useArrayToDict(
+    countriesData?.results,
+    'isoCode2',
+    'name',
+  );
   const documentTypeDict = useArrayToDict(
-    data?.documentTypeChoices,
+    individualChoicesData?.documentTypeChoices,
     'value',
     'name',
   );
   const identityTypeDict = useArrayToDict(
-    data?.identityTypeChoices,
+    individualChoicesData?.identityTypeChoices,
     'value',
     'name',
   );
 
   if (
     loading ||
+    individualChoicesLoading ||
+    countriesLoading ||
     !fieldsDict ||
     !countriesDict ||
     !documentTypeDict ||

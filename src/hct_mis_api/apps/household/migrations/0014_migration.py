@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 
+
 def migrate_registration_id_to_detail_id(apps, schema_editor):
     PendingHousehold = apps.get_model("household", "PendingHousehold")
     PendingIndividual = apps.get_model("household", "PendingIndividual")

@@ -6,9 +6,9 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
+import { createApiParams } from '@utils/apiUtils';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
-import get from 'lodash/get';
 import moment from 'moment';
 import { forwardRef, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,8 +23,8 @@ import { FormikAdminAreaAutocompleteMultiple } from '@shared/Formik/FormikAdminA
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { REPORT_TYPES } from '@utils/constants';
+// TODO: Replace with REST API when available
 import {
-  useAllProgramsQuery,
   useCreateReportMutation,
   useReportChoiceDataQuery,
 } from '@generated/graphql';
@@ -35,13 +35,16 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 const NewReportForm = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { businessArea, baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl, programId } = useBaseUrl();
   const validationSchema = Yup.object().shape({
     reportType: Yup.string().required(t('Report type is required')),
     dateFrom: Yup.date().required(t('Date From is required')),
@@ -59,20 +62,40 @@ const NewReportForm = (): ReactElement => {
       ),
   });
 
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsQuery({
-      variables: { businessArea, status: ['ACTIVE'] },
-      fetchPolicy: 'cache-and-network',
+  const queryVariables = {
+    status: ['ACTIVE'] as Array<'ACTIVE' | 'DRAFT' | 'FINISHED'>,
+    beneficiaryGroupMatch: programId,
+    compatibleDct: programId,
+  };
+
+  const { data: allProgramsData, isLoading: loadingPrograms } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: [
+        'businessAreasProgramsList',
+        queryVariables,
+        businessArea,
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programSlug: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
+        ),
     });
+  // TODO: Replace with REST API query when available
   const { data: choicesData, loading: choicesLoading } =
     useReportChoiceDataQuery();
+
+  // TODO: Replace with REST API mutation when available
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
-  const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node.name,
-    value: edge.node.id,
+  const mappedPrograms = allProgramsData?.results?.map((program) => ({
+    name: program.name,
+    value: program.id,
   }));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -132,6 +155,7 @@ const NewReportForm = (): ReactElement => {
     return variables || basicVariables;
   };
 
+  // TODO: Replace with REST API call when available
   const submitFormHandler = async (values): Promise<void> => {
     const response = await mutate({
       variables: {
@@ -277,7 +301,7 @@ const NewReportForm = (): ReactElement => {
                       </FieldLabel>
 
                       <Grid container spacing={3}>
-                        <Grid size={{ xs:6 }}>
+                        <Grid size={{ xs: 6 }}>
                           <Field
                             name="dateFrom"
                             label={t('From Date')}
@@ -289,7 +313,7 @@ const NewReportForm = (): ReactElement => {
                             }
                           />
                         </Grid>
-                        <Grid size={{ xs:6 }}>
+                        <Grid size={{ xs: 6 }}>
                           <Field
                             name="dateTo"
                             label={t('To Date')}

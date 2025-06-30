@@ -1,9 +1,9 @@
 import { Box } from '@mui/material';
 import styled from 'styled-components';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { MessageDialog } from './MessageDialog';
 import { ReactElement } from 'react';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 
 const GreyText = styled.div`
   color: #9e9e9e;
@@ -27,7 +27,7 @@ const GreyBox = styled(Box)`
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  approvals: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][number]['node']['actions']['approval'];
+  approvals: PaymentPlanDetail['approvalProcess'][number]['actions'];
 }
 
 export function GreyInfoCard({
@@ -36,22 +36,22 @@ export function GreyInfoCard({
   approvals,
 }: GreyInfoCardProps): ReactElement {
   const mappedApprovals = approvals?.map((action) => {
-    const { info, createdAt, comment, createdBy } = action;
+    const { info, created_at, comment, created_by } = action;
     return (
       info && (
-        <Box alignItems="center" display="flex" key={createdAt}>
+        <Box alignItems="center" display="flex" key={created_at}>
           {info}
           <Box ml={1}>
             <GreyText>
-              on <UniversalMoment>{createdAt}</UniversalMoment>
+              on <UniversalMoment>{created_at}</UniversalMoment>
             </GreyText>
           </Box>
           <Box p={1} ml={1}>
             {comment ? (
               <MessageDialog
                 comment={comment}
-                author={createdBy}
-                date={createdAt}
+                author={created_by}
+                date={created_at}
               />
             ) : (
               <IconPlaceholder />

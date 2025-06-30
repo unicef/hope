@@ -1,1 +1,0 @@
-export { TotalNumberOfIndividualsReachedSection } from './TotalNumberOfIndividualsReachedSection';

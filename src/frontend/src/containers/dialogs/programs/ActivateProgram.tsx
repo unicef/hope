@@ -1,58 +1,51 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  ProgramQuery,
-  ProgramStatus,
-  useUpdateProgramMutation,
-} from '@generated/graphql';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from '../../../programContext';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useProgramContext } from '../../../programContext';
-import { useNavigate } from 'react-router-dom';
 
 interface ActivateProgramProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
 }
 
 export const ActivateProgram = ({
   program,
 }: ActivateProgramProps): ReactElement => {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
 
-  const [mutate, { loading }] = useUpdateProgramMutation();
+  const { mutateAsync: activateProgram, isPending: loading } = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsActivateCreate({
+        businessAreaSlug: businessArea,
+        slug: program.slug,
+      }),
+  });
 
-  const activateProgram = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.Active,
-        },
-        version: program.version,
-      },
-    });
-
-    if (!response.errors && response.data.updateProgram) {
+  const handleActivateProgram = async (): Promise<void> => {
+    try {
+      await activateProgram();
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Active,
+        status: ProgramStatus.ACTIVE,
       });
 
       showMessage(t('Programme activated.'));
-      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
       setOpen(false);
-    } else {
+    } catch (error) {
       showMessage(t('Programme activate action failed.'));
     }
   };
@@ -94,7 +87,7 @@ export const ActivateProgram = ({
               type="submit"
               color="primary"
               variant="contained"
-              onClick={activateProgram}
+              onClick={handleActivateProgram}
               data-cy="button-activate-program-modal"
             >
               {t('ACTIVATE')}

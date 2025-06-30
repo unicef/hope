@@ -22,7 +22,7 @@ from hct_mis_api.apps.payment.services.dashboard_service import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 class TestPaymentVerificationChartQuery:

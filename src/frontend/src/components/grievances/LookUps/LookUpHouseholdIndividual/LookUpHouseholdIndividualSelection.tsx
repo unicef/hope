@@ -64,7 +64,7 @@ export function LookUpHouseholdIndividualSelection({
         />
         {isInvalid('selectedIndividual', errors, touched) && (
           <Grid container spacing={4}>
-            {!isSocialDctType && <Grid size={{ xs:4 }} />}
+            {!isSocialDctType && <Grid size={{ xs: 4 }} />}
             <Grid size={{ xs: 4 }}>
               {!selectedIndividual && (
                 <FormHelperText error>

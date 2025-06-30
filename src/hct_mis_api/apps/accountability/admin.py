@@ -8,7 +8,7 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.accountability.models import Feedback, Message, Survey
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, IsOriginalAdminMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 class MessageRecipientMapInline(admin.TabularInline):
@@ -37,11 +37,11 @@ class MessageCopiedToInline(admin.TabularInline):
     verbose_name_plural = "Message representations"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return Message.original_and_repr_objects.all()
+        return Message.objects.all()  # pragma: no cover
 
 
 @admin.register(Message)
-class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdminMixin):
+class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     exclude = (
         "number_of_recipients",
         "unicef_id",
@@ -63,7 +63,6 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
         "sample_size",
         "created_by",
         "copied_from",
-        "is_original",
     )
     list_display = (
         "unicef_id",
@@ -80,7 +79,7 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
     search_fields = ("unicef_id",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return self.model.original_and_repr_objects.get_queryset()
+        return self.model.objects.get_queryset()
 
 
 @admin.register(Survey)

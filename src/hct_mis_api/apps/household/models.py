@@ -46,10 +46,8 @@ from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     InternalDataFieldModel,
     MergeStatusModel,
-    RepresentationManager,
-    SoftDeletableRepresentationMergeStatusModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
-    SoftDeletableRepresentationPendingManager,
+    PendingManager,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -332,7 +330,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
 class Household(
     InternalDataFieldModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
@@ -869,7 +867,7 @@ class DocumentType(TimeStampedUUIDModel):
         return list(cls.objects.all().only("key").values_list("key", flat=True))
 
 
-class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -893,8 +891,6 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
-
-    is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -915,8 +911,6 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
     class Meta:
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual
-            # is_original = True -> 1 original instance of document
-            # is_original = False -> 1 representation of document per program
             UniqueConstraint(
                 fields=["individual", "type", "country", "program"],
                 condition=Q(
@@ -933,7 +927,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
             ),
             # document_number must be unique across all documents of the same type
             UniqueConstraint(
-                fields=["document_number", "type", "country", "program", "is_original"],
+                fields=["document_number", "type", "country", "program"],
                 condition=Q(Q(is_removed=False) & Q(status="VALID") & Q(rdi_merge_status=MergeStatusModel.MERGED)),
                 name="unique_if_not_removed_and_valid_for_representations",
             ),
@@ -955,7 +949,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         self.save()
 
 
-class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
+class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     partner = models.ForeignKey(
         "account.Partner",
@@ -965,7 +959,6 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
     number = models.CharField(max_length=255)
-    is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -982,7 +975,7 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
+class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -998,8 +991,6 @@ class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, Tim
         blank=True,
         choices=ROLE_CHOICE,
     )
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -1031,7 +1022,7 @@ class IndividualCollection(UnicefIdentifiedModel):
 
 class Individual(
     InternalDataFieldModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
@@ -1524,10 +1515,6 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    is_original = models.BooleanField(db_index=True, default=False)
-
-    objects = RepresentationManager()
-    original_and_repr_objects = models.Manager()
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):
@@ -1539,7 +1526,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
-class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
+class BankAccountInfo(SoftDeletableMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="bank_account_info",
@@ -1571,7 +1558,7 @@ class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeS
 
 
 class PendingHousehold(Household):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     @property
     def individuals(self) -> QuerySet:
@@ -1600,7 +1587,7 @@ class PendingHousehold(Household):
 
 
 class PendingIndividual(Individual):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     @property
     def households_and_roles(self) -> QuerySet:
@@ -1629,7 +1616,7 @@ class PendingIndividual(Individual):
 
 
 class PendingIndividualIdentity(IndividualIdentity):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True
@@ -1638,7 +1625,7 @@ class PendingIndividualIdentity(IndividualIdentity):
 
 
 class PendingDocument(Document):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True
@@ -1647,7 +1634,7 @@ class PendingDocument(Document):
 
 
 class PendingBankAccountInfo(BankAccountInfo):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True
@@ -1656,7 +1643,7 @@ class PendingBankAccountInfo(BankAccountInfo):
 
 
 class PendingIndividualRoleInHousehold(IndividualRoleInHousehold):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True

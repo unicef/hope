@@ -1,31 +1,31 @@
+import { TableWrapper } from '@components/core/TableWrapper';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box, Paper, Typography } from '@mui/material';
+import { createApiParams } from '@utils/apiUtils';
+import { PaginatedPaymentListList } from '@restgenerated/models/PaginatedPaymentListList';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { TableWrapper } from '@components/core/TableWrapper';
-import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
-import {
-  AllPaymentsForTableQuery,
-  AllPaymentsForTableQueryVariables,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useAllPaymentsForTableQuery,
-} from '@generated/graphql';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentsTableHeadCells';
 import { PaymentsTableRow } from './PaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from 'src/programContext';
-import { adjustHeadCells } from '@utils/utils';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
 `;
 interface PaymentsTableProps {
   businessArea: string;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
   permissions: string[];
   canViewDetails?: boolean;
 }
@@ -36,18 +36,45 @@ function PaymentsTable({
   permissions,
   canViewDetails = false,
 }: PaymentsTableProps): ReactElement {
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const [dialogPayment, setDialogPayment] = useState<
-    AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
-  >();
-  const initialVariables: AllPaymentsForTableQueryVariables = {
-    businessArea,
+  const [dialogPayment, setDialogPayment] = useState<PaymentList | null>(null);
+  const initialQueryVariables = {
+    businessAreaSlug: businessArea,
+    programSlug: programId,
     paymentPlanId: paymentPlan.id,
   };
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useQuery<PaginatedPaymentListList>({
+    queryKey: [
+      'businessAreasProgramsPaymentPlansPaymentsList',
+      queryVariables,
+      businessArea,
+      programId,
+      paymentPlan.id,
+    ],
+    queryFn: () => {
+      return RestService.restBusinessAreasProgramsPaymentPlansPaymentsList(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: programId,
+            paymentPlanId: paymentPlan.id,
+          },
+          queryVariables,
+          { withPagination: true },
+        ),
+      );
+    },
+  });
 
   const replacements = {
     household__unicef_id: (_beneficiaryGroup) =>
@@ -70,27 +97,26 @@ function PaymentsTable({
             <Typography data-cy="table-title" variant="h6">
               {t('Payee List')}
             </Typography>
-            {(paymentPlan.status === PaymentPlanStatus.Accepted ||
-              paymentPlan.status === PaymentPlanStatus.Finished) && (
+            {(paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
+              paymentPlan.status === PaymentPlanStatusEnum.FINISHED) && (
               <ImportXlsxPaymentPlanPaymentListPerFsp
                 paymentPlan={paymentPlan}
                 permissions={permissions}
               />
             )}
           </StyledBox>
-          <UniversalTable<
-            AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
-            AllPaymentsForTableQueryVariables
-          >
+          <UniversalRestTable
             isOnPaper={false}
             headCells={adjustedHeadCells}
-            query={useAllPaymentsForTableQuery}
             rowsPerPageOptions={[10, 25, 50]}
-            queriedObjectName="allPayments"
-            initialVariables={initialVariables}
             defaultOrderBy="createdAt"
             defaultOrderDirection="desc"
-            renderRow={(row) => (
+            isLoading={isLoading}
+            error={error}
+            queryVariables={queryVariables}
+            setQueryVariables={setQueryVariables}
+            data={paymentsData}
+            renderRow={(row: PaymentList) => (
               <PaymentsTableRow
                 key={row.id}
                 payment={row}

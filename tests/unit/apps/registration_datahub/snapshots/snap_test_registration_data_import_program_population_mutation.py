@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_create_0_with_permission 1'] = {
@@ -103,7 +102,7 @@ snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registrati
                     'line': 5
                 }
             ],
-            'message': "['In order to proceed this action, program status must not be finished.']",
+            'message': "['In order to perform this action, program status must not be finished.']",
             'path': [
                 'registrationProgramPopulationImport'
             ]

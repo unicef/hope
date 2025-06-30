@@ -21,7 +21,7 @@ const RefuseRdiForm = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { id, name } = registration;
+  const { name } = registration;
   const initialValues = {
     refuseReason: '',
   };
@@ -40,15 +40,12 @@ const RefuseRdiForm = ({
       onSubmit={async (values) => {
         try {
           await refuseMutate({
-            variables: {
-              id,
-              refuseReason: values.refuseReason,
-            },
+            reason: values.refuseReason,
           });
           onClose();
           showMessage('RDI refused');
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          showMessage(e.message || 'Failed to refuse RDI');
         }
       }}
     >

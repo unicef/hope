@@ -71,20 +71,18 @@ export function FormikTextField({
       type={type}
       helperText={isInvalid && get(form.errors, field.name)}
       label={otherProps.label} // pass the label directly to the StyledTextField
-      InputProps={{
-        onKeyPress: handleKeyPress,
-        startAdornment: decoratorStart && (
-          <InputAdornment position="start">{decoratorStart}</InputAdornment>
-        ),
-        endAdornment: decoratorEnd && (
-          <InputAdornment position="end">{decoratorEnd}</InputAdornment>
-        ),
-      }}
-      // https://github.com/mui-org/material-ui/issues/12805
-      // eslint-disable-next-line react/jsx-no-duplicate-props
-      inputProps={{
-        'data-cy': `input-${field.name}`,
-        maxLength: maxLength || undefined,
+      slotProps={{
+        input: {
+          onKeyPress: handleKeyPress,
+          startAdornment: decoratorStart && (
+            <InputAdornment position="start">{decoratorStart}</InputAdornment>
+          ),
+          endAdornment: decoratorEnd && (
+            <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+          ),
+          'data-cy': `input-${field.name}`,
+          maxLength: maxLength || undefined,
+        },
       }}
     />
   );

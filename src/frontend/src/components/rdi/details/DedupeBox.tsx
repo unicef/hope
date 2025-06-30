@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { Box, Grid2 as Grid } from '@mui/material';
 import { MiśTheme } from '../../../theme';
-import { CountAndPercentageNode } from '@generated/graphql';
 import { ReactElement } from 'react';
 
 const GreyBox = styled.div`
@@ -32,7 +31,7 @@ const Label = styled.span`
 
 export interface OptionType {
   name: string;
-  options: CountAndPercentageNode[];
+  options: any[];
 }
 
 export interface DedupeBoxProps {
@@ -69,12 +68,12 @@ export const DedupeBox = ({ label, options }: DedupeBoxProps): ReactElement => {
                     size={{ xs: 4 }}
                     spacing={4}
                   >
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <Bold data-cy={`percentage-${option.name}`}>
                         {item.percentage.toFixed(2)}%
                       </Bold>
                     </Grid>
-                    <Grid size={{ xs:6 }}>
+                    <Grid size={{ xs: 6 }}>
                       <BoldGrey data-cy={`value-${option.name}`}>
                         ({item.count})
                       </BoldGrey>

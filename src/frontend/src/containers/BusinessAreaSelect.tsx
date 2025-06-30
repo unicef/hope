@@ -1,10 +1,17 @@
 import { MenuItem, Select } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useCachedMe } from '@hooks/useCachedMe';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useApolloClient } from '@apollo/client';
-import { ReactElement } from 'react';
+import {
+  ReactElement,
+  useMemo,
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
+import { RestService } from '@restgenerated/index';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const CountrySelect = styled(Select)`
   && {
@@ -44,26 +51,68 @@ const CountrySelect = styled(Select)`
 `;
 
 export function BusinessAreaSelect(): ReactElement {
-  const { data } = useCachedMe();
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+
+  const [selectedBusinessArea, setSelectedBusinessArea] = useState<string>(
+    businessAreaSlug || '',
+  );
+
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (businessAreaSlug && businessAreaSlug !== selectedBusinessArea) {
+      setSelectedBusinessArea(businessAreaSlug);
+    }
+  }, [businessAreaSlug, selectedBusinessArea]);
+
+  const { data } = useQuery({
+    queryKey: ['businessAreasProfile', businessAreaSlug, programSlug],
+    queryFn: () => {
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug,
+        program: programSlug === 'all' ? undefined : programSlug,
+      });
+    },
+    staleTime: 15 * 60 * 1000, // Data is considered fresh for 15 minutes (business areas don't change often)
+    gcTime: 60 * 60 * 1000, // Keep unused data in cache for 1 hour
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+  });
+
   const navigate = useNavigate();
-  const client = useApolloClient();
+  const queryClient = useQueryClient();
 
-  const onChange = async (e): Promise<void> => {
-    await client.cache.reset();
-    navigate(`/${e.target.value}/programs/all/list`);
-  };
+  const onChange = useCallback(
+    (e): void => {
+      const newBusinessArea = e.target.value;
+      setSelectedBusinessArea(newBusinessArea);
+      queryClient.clear();
+      navigate(`/${newBusinessArea}/programs/all/list`);
+    },
+    [queryClient, navigate],
+  );
 
-  if (!data) {
-    return null;
-  }
+  const businessAreaOptions = useMemo(() => {
+    if (!data?.businessAreas) return [];
+
+    return data.businessAreas.map((each) => (
+      <MenuItem key={each.slug} value={each.slug}>
+        {each.name}
+      </MenuItem>
+    ));
+  }, [data?.businessAreas]);
+
   return (
-    <CountrySelect variant="filled" value={businessArea} onChange={onChange}>
-      {data.me.businessAreas.edges.map((each) => (
-        <MenuItem key={each.node.slug} value={each.node.slug}>
-          {each.node.name}
-        </MenuItem>
-      ))}
+    <CountrySelect
+      variant="filled"
+      value={selectedBusinessArea}
+      onChange={onChange}
+    >
+      {businessAreaOptions}
     </CountrySelect>
   );
 }

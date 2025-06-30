@@ -4,7 +4,7 @@ import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
-import { LogEntryNode } from '@generated/graphql';
+import { ActivityLogEntry } from './types';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
 
@@ -28,7 +28,7 @@ const StyledIconButton = styled(IconButton)<{ expanded: boolean }>`
 `;
 
 interface LogRowProps {
-  logEntry: LogEntryNode;
+  logEntry: ActivityLogEntry;
 }
 
 const formatted = (value): string => {
@@ -54,9 +54,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
-          {logEntry.user
-            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : null}
+          {logEntry.userDisplayName || logEntry.user || null}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="change-key-cell">
           {keys[0]}
@@ -82,9 +80,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight} data-cy="user-cell">
-          {logEntry.user
-            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : null}
+          {logEntry.userDisplayName || logEntry.user || null}
         </Cell>
         <Cell weight={headCells[2].weight} data-cy="change-type-cell">
           Multiple

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { BlueText, DarkGrey, StyledBox } from '../LookUpStyles';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const Types = { household: 'household', individual: 'individual' };
 
@@ -16,7 +17,7 @@ interface LookUpHouseholdIndividualSelectionDisplayProps {
   onValueChange;
   disableUnselectIndividual: boolean;
   disableUnselectHousehold: boolean;
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   setSelectedHousehold: (value) => void;
   selectedIndividual;
   setSelectedIndividual: (value) => void;

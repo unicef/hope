@@ -4,13 +4,11 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
-from hct_mis_api.api.utils import EncodedIdSerializerMixin
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
@@ -56,10 +54,11 @@ class PeriodicDataUpdateTemplateCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data: Dict[str, Any]) -> PeriodicDataUpdateTemplate:
         validated_data["created_by"] = self.context["request"].user
-        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area"]
-        program_id = self.context["request"].parser_context["kwargs"]["program_id"]
-        validated_data["business_area"] = get_object_or_404(BusinessArea, slug=business_area_slug)
-        validated_data["program"] = get_object_or_404(Program, id=decode_id_string(program_id))
+        business_area_slug = self.context["request"].parser_context["kwargs"]["business_area_slug"]
+        program_slug = self.context["request"].parser_context["kwargs"]["program_slug"]
+        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        validated_data["business_area"] = business_area
+        validated_data["program"] = get_object_or_404(Program, slug=program_slug, business_area=business_area)
         return super().create(validated_data)
 
 
@@ -120,7 +119,7 @@ class PeriodicFieldDataSerializer(serializers.ModelSerializer):
         fields = ("subtype", "number_of_rounds", "rounds_names")
 
 
-class PeriodicFieldSerializer(EncodedIdSerializerMixin):
+class PeriodicFieldSerializer(serializers.ModelSerializer):
     pdu_data = PeriodicFieldDataSerializer()
     label = serializers.SerializerMethodField()  # type: ignore
 

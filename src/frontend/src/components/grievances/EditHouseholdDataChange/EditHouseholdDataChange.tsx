@@ -4,16 +4,15 @@ import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  AllHouseholdsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useHouseholdLazyQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -25,17 +24,30 @@ function EditHouseholdDataChange({
 }: EditHouseholdDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-
   const isEditTicket = location.pathname.includes('edit-ticket');
-  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
-    values.selectedHousehold;
-  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
-    useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const household: HouseholdDetail = values.selectedHousehold;
+
+  const {
+    data: fullHousehold,
+    isLoading: fullHouseholdLoading,
+    refetch: refetchHousehold,
+  } = useQuery<HouseholdDetail>({
+    queryKey: ['household', businessArea, household.id, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsHouseholdsRetrieve({
+        businessAreaSlug: businessArea,
+        id: household.id,
+        programSlug: programId,
+      }),
+    enabled: Boolean(programId && businessArea),
+  });
+
   useEffect(() => {
     if (values.selectedHousehold) {
-      getHousehold();
+      refetchHousehold();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.selectedHousehold]);
@@ -50,11 +62,19 @@ function EditHouseholdDataChange({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery({ fetchPolicy: 'network-only' });
 
-  const householdFieldsDict =
-    householdFieldsData?.allEditHouseholdFieldsAttributes;
+  const { data: householdFieldsData, isLoading: householdFieldsLoading } =
+    useQuery({
+      queryKey: ['householdFieldsAttributes', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
+          {
+            businessAreaSlug: businessArea,
+          },
+        ),
+    });
+
+  const householdFieldsDict = householdFieldsData;
 
   if (!household) {
     return (
@@ -84,13 +104,14 @@ function EditHouseholdDataChange({
                     key={`${index}-${item.fieldName}`}
                     itemValue={item}
                     index={index}
-                    household={fullHousehold.household}
+                    household={fullHousehold}
                     fields={householdFieldsDict}
                     notAvailableFields={notAvailableItems}
                     onDelete={() => arrayHelpers.remove(index)}
                     values={values}
                   />
                 ))}
+
                 <Grid size={{ xs: 4 }}>
                   <Button
                     color="primary"

@@ -13,11 +13,9 @@ import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { DATE_FORMAT } from '../../config';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  useApproveSystemFlaggingMutation,
-} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { FlagTooltip } from '@core/FlagTooltip';
 import { Title } from '@core/Title';
@@ -25,6 +23,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -34,25 +33,42 @@ export const FlagDetails = ({
   ticket,
   canApproveFlag,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveFlag: boolean;
 }): ReactElement => {
   const { t } = useTranslation();
   const confirm = useConfirmation();
+  const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
 
-  const [approve] = useApproveSystemFlaggingMutation({
-    refetchQueries: () => [
-      {
-        query: GrievanceTicketDocument,
-        variables: { id: ticket.id },
-      },
-    ],
+  const mutation = useMutation({
+    mutationFn: ({
+      grievanceTicketId,
+      approveStatus,
+    }: {
+      grievanceTicketId: string;
+      approveStatus: boolean;
+    }) =>
+      RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
+        businessAreaSlug: businessArea,
+        id: grievanceTicketId,
+        requestBody: {
+          approveStatus,
+        },
+      }),
+    onSuccess: () => {
+      // Invalidate and refetch the grievance ticket details
+      queryClient.invalidateQueries({
+        queryKey: ['grievanceTicket', ticket.id],
+      });
+    },
   });
+
   const confirmationText = t(
     'Are you sure you want to confirm flag (sanction list match) ?',
   );
   const removalText = t('Are you sure you want to remove the flag ?');
-  const details = ticket.systemFlaggingTicketDetails;
+  const details = ticket.ticketDetails;
   const isFlagConfirmed = details.approveStatus;
   return (
     <ApproveBox>
@@ -72,11 +88,9 @@ export const FlagDetails = ({
                   confirm({
                     content: isFlagConfirmed ? removalText : confirmationText,
                   }).then(() =>
-                    approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !details.approveStatus,
-                      },
+                    mutation.mutateAsync({
+                      grievanceTicketId: ticket.id,
+                      approveStatus: !details.approveStatus,
                     }),
                   )
                 }

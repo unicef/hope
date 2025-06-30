@@ -1,11 +1,8 @@
 import { ReactElement, useState } from 'react';
 import { ActivityLogTablePaymentVerification } from '@components/core/ActivityLogTablePaymentVerification/ActivityLogTablePaymentVerification';
-import { decodeIdString } from '@utils/utils';
-import {
-  PaymentVerificationLogEntryNode,
-  useAllPaymentVerificationLogEntriesQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { RestService } from '@restgenerated/index';
+import { useQuery } from '@tanstack/react-query';
 
 interface UniversalActivityLogTablePaymentVerificationProps {
   objectId: string;
@@ -14,62 +11,48 @@ export function UniversalActivityLogTablePaymentVerification({
   objectId,
 }: UniversalActivityLogTablePaymentVerificationProps): ReactElement {
   const [page, setPage] = useState(0);
-  const { businessArea } = useBaseUrl();
+  const { businessAreaSlug } = useBaseUrl();
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { data, refetch } = useAllPaymentVerificationLogEntriesQuery({
-    variables: {
-      businessArea,
-      objectId: decodeIdString(objectId),
-      first: rowsPerPage,
-    },
-    fetchPolicy: 'network-only',
+
+  const { data: logData } = useQuery({
+    queryKey: ['activityLogs', businessAreaSlug, objectId, page, rowsPerPage],
+    queryFn: () =>
+      RestService.restBusinessAreasActivityLogsList({
+        businessAreaSlug,
+        objectId: objectId,
+        limit: rowsPerPage,
+        offset: page * rowsPerPage,
+      }),
+    enabled: !!(businessAreaSlug && objectId),
   });
 
-  if (!data) {
+  const { data: countData } = useQuery({
+    queryKey: ['activityLogsCount', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasActivityLogsCountRetrieve({
+        businessAreaSlug,
+      }),
+    enabled: !!businessAreaSlug,
+  });
+
+  if (!logData || !countData) {
     return null;
   }
-  const { edges } = data.allPaymentVerificationLogEntries;
-  const logEntries = edges.map(
-    (edge) => edge.node as PaymentVerificationLogEntryNode,
-  );
+  const logEntries = logData?.results;
+  const totalCount = countData.count;
   return (
     <ActivityLogTablePaymentVerification
-      totalCount={data.allPaymentVerificationLogEntries.totalCount}
+      totalCount={totalCount}
       rowsPerPage={rowsPerPage}
       logEntries={logEntries}
       page={page}
-      onChangePage={(event, newPage) => {
-        const variables = {
-          objectId: decodeIdString(objectId),
-          businessArea,
-          first: undefined,
-          last: undefined,
-          after: undefined,
-          before: undefined,
-        };
-        if (newPage < page) {
-          variables.last = rowsPerPage;
-          variables.before = edges[0].cursor;
-        } else {
-          variables.after = edges[edges.length - 1].cursor;
-          variables.first = rowsPerPage;
-        }
+      onChangePage={(_, newPage) => {
         setPage(newPage);
-        refetch(variables);
       }}
       onChangeRowsPerPage={(event) => {
         const value = parseInt(event.target.value, 10);
         setRowsPerPage(value);
         setPage(0);
-        const variables = {
-          objectId: decodeIdString(objectId),
-          businessArea,
-          first: rowsPerPage,
-          after: undefined,
-          last: undefined,
-          before: undefined,
-        };
-        refetch(variables);
       }}
     />
   );

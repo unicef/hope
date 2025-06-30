@@ -7,20 +7,17 @@ import {
   DialogActions,
   Button,
 } from '@mui/material';
-import { fetchPeriodicDataUpdateUploadDetails } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { RestService } from '@restgenerated/services/RestService';
+import { PeriodicDataUpdateUploadDetail } from '@restgenerated/models/PeriodicDataUpdateUploadDetail';
 
 interface PeriodicDataUpdatesUploadDetailsDialogProps {
   open: boolean;
   onClose: () => void;
   uploadId: number;
 }
-
-// const StyledError = styled.p`
-//   color: red;
-// `;
 
 const FormErrorDisplay = ({ formErrors }) => {
   if (!formErrors || !formErrors.length) {
@@ -72,28 +69,30 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
 > = ({ open, onClose, uploadId }) => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { data: uploadDetailsData, isLoading } = useQuery({
-    queryKey: [
-      'periodicDataUpdateUploadDetails',
-      businessArea,
-      programId,
-      uploadId,
-    ],
-    queryFn: () =>
-      fetchPeriodicDataUpdateUploadDetails(businessArea, programId, uploadId),
-  });
+  const { data: uploadDetailsData, isLoading } =
+    useQuery<PeriodicDataUpdateUploadDetail>({
+      queryKey: [
+        'periodicDataUpdateUploadDetails',
+        businessArea,
+        programId,
+        uploadId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
+          businessAreaSlug: businessArea,
+          id: uploadId,
+          programSlug: programId,
+        }),
+    });
 
   if (isLoading) return <LoadingComponent />;
   return (
     <Dialog open={open} onClose={onClose} scroll="paper">
       <DialogTitle>{t('Periodic Data Updates Errors')}</DialogTitle>
       <DialogContent>
-        <NonFormErrorDisplay
-          nonFormErrors={uploadDetailsData?.errors_info?.non_form_errors}
-        />
-        <FormErrorDisplay
-          formErrors={uploadDetailsData?.errors_info?.form_errors}
-        />
+        {/* //TODO: check if it is just errorsInfo */}
+        <NonFormErrorDisplay nonFormErrors={uploadDetailsData?.errorsInfo} />
+        <FormErrorDisplay formErrors={uploadDetailsData?.errorsInfo} />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('Close')}</Button>

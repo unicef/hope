@@ -1,7 +1,4 @@
-import {
-  createPeriodicDataUpdateTemplate,
-  fetchPeriodicFields,
-} from '@api/periodicDataUpdateApi';
+import { createPeriodicDataUpdateTemplate } from '@api/periodicDataUpdateApi';
 import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -13,6 +10,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
 import moment from 'moment';
@@ -82,8 +80,12 @@ export const NewTemplatePage = (): ReactElement => {
 
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
-      queryKey: ['periodicFields', businessArea, programId],
-      queryFn: () => fetchPeriodicFields(businessArea, programId),
+      queryKey: ['periodicFields', businessArea, programId, programId],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        }),
     });
 
   if (periodicFieldsLoading) {
@@ -99,18 +101,18 @@ export const NewTemplatePage = (): ReactElement => {
       return [];
     }
     return data.results.map((item) => {
-      const { name, pdu_data, label } = item;
-      const { rounds_names } = pdu_data;
+      const { name, pduData, label } = item;
+      const { roundsNames } = pduData;
       return {
         field: name,
         label,
-        rounds: rounds_names.map((_, roundIndex) => ({
+        rounds: roundsNames.map((_, roundIndex) => ({
           round: roundIndex + 1,
-          round_name: rounds_names[roundIndex],
+          roundName: roundsNames[roundIndex],
         })),
-        numberOfRounds: rounds_names.length,
+        numberOfRounds: roundsNames.length,
         roundNumber: 1,
-        roundName: rounds_names[0],
+        roundName: roundsNames[0],
       };
     });
   };

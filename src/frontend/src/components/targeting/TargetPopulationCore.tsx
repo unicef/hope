@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { PaymentPlanBuildStatus } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
 import ResultsForHouseholds from './ResultsForHouseholds';
 import TargetingHouseholds from './TargetingHouseholds';
@@ -63,7 +62,7 @@ export const TargetPopulationCore = ({
   );
 
   const recordInfo =
-    targetPopulation.buildStatus === PaymentPlanBuildStatus.Ok ? (
+    targetPopulation.backgroundActionStatus === 'OK' ? (
       recordsTable
     ) : (
       <PaperContainer>
@@ -104,16 +103,12 @@ export const TargetPopulationCore = ({
           </Typography>
           <Box mt={2}>
             <Grid container>
-              <Grid size={{ xs:6 }}>
-                {targetPopulation?.excludedIds}
-              </Grid>
+              <Grid size={{ xs: 6 }}>{targetPopulation?.excludedIds}</Grid>
             </Grid>
           </Box>
           <Box mt={2}>
             <Grid container>
-              <Grid size={{ xs:6 }}>
-                {targetPopulation?.exclusionReason}
-              </Grid>
+              <Grid size={{ xs: 6 }}>{targetPopulation?.exclusionReason}</Grid>
             </Grid>
           </Box>
         </PaperContainer>
