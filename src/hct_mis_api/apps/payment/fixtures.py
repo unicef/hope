@@ -17,6 +17,7 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import (
     EntitlementCardFactory,
@@ -35,6 +36,7 @@ from hct_mis_api.apps.payment.models import (
     ApprovalProcess,
     DeliveryMechanism,
     DeliveryMechanismConfig,
+    FinancialInstitution,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
@@ -834,3 +836,10 @@ def generate_delivery_mechanisms() -> None:
             vision_vendor_number="2300117733",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         )
+
+
+class FinancialInstitutionFactory(DjangoModelFactory):
+    country = factory.SubFactory(CountryFactory)
+
+    class Meta:
+        model = FinancialInstitution

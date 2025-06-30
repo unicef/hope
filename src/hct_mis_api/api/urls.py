@@ -56,6 +56,11 @@ urlpatterns = [
     path("engine-rules/", RuleEngineViewSet().as_view(), name="engine-rules-list"),
     path("lookups/document/", endpoints.lookups.DocumentType().as_view(), name="document-list"),
     path("lookups/country/", endpoints.lookups.CountryAPIView().as_view(), name="country-list"),
+    path(
+        "lookups/financial-institution/",
+        endpoints.lookups.FinancialInstitutionAPIView().as_view(),
+        name="financial-institution-list",
+    ),
     path("lookups/residencestatus/", endpoints.lookups.ResidenceStatus().as_view(), name="residencestatus-list"),
     path("lookups/maritalstatus/", endpoints.lookups.MaritalStatus().as_view(), name="maritalstatus-list"),
     path(
