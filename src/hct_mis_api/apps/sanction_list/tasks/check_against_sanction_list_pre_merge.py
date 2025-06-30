@@ -13,12 +13,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
-from hct_mis_api.apps.household.documents import (
-    IndividualDocumentAfghanistan,
-    IndividualDocumentOthers,
-    IndividualDocumentUkraine,
-    get_individual_doc,
-)
+from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Individual,
@@ -31,8 +26,6 @@ from hct_mis_api.apps.utils.querysets import evaluate_qs
 log = logging.getLogger(__name__)
 
 
-# class CheckAgainstSanctionListPreMergeTask:
-#     @staticmethod
 def _get_query_dict(sanction_list_individual: SanctionListIndividual, individuals_ids: Optional[List[str]]) -> Dict:
     documents = [
         doc
@@ -52,23 +45,29 @@ def _get_query_dict(sanction_list_individual: SanctionListIndividual, individual
         }
         for doc in documents
     ]
-    birth_dates_queries = []
-    #     [
-    #     {"match": {"birth_date": {"query": dob.date, "boost": 1}}}
-    #     for dob in sanction_list_individual.dates_of_birth.all()
-    # ]
+    birth_dates_queries = [
+        {"match": {"birth_date": {"query": dob.date, "boost": 1}}}
+        for dob in sanction_list_individual.dates_of_birth.all()
+    ]
+    possible_names = [
+        sanction_list_individual.full_name,
+    ]
+    for alias_name in sanction_list_individual.alias_names.all():
+        possible_names.append(alias_name.name)
 
-    queries: List = [
+    queries: list = [
         {
             "match": {
                 "full_name": {
-                    "query": sanction_list_individual.full_name,
+                    "query": name,
                     "boost": 4,
                     "operator": "and",
                 }
             }
-        },
+        }
+        for name in possible_names
     ]
+
     queries.extend(document_queries)
     queries.extend(birth_dates_queries)
 
@@ -84,7 +83,6 @@ def _get_query_dict(sanction_list_individual: SanctionListIndividual, individual
     }
     if individuals_ids:
         query_dict["query"]["bool"]["filter"] = [{"terms": {"id": [str(ind_id) for ind_id in individuals_ids]}}]  # type: ignore
-
     return query_dict
 
 
@@ -148,18 +146,9 @@ def check_against_sanction_list_pre_merge(
         )
     if not individuals_ids:
         individuals_ids = Individual.objects.filter(program_id=program_id).values_list("id", flat=True)
-
+    individuals_ids = [str(ind_id) for ind_id in individuals_ids]
     possible_match_score = config.SANCTION_LIST_MATCH_SCORE
-
-    documents: Tuple = (
-        (
-            IndividualDocumentAfghanistan,
-            IndividualDocumentUkraine,
-            IndividualDocumentOthers,
-        )
-        if registration_data_import is None
-        else (get_individual_doc(registration_data_import.business_area.slug),)
-    )
+    documents: Tuple = (get_individual_doc(program.business_area.slug),)
 
     tickets_to_create = []
     ticket_details_to_create = []
@@ -171,7 +160,6 @@ def check_against_sanction_list_pre_merge(
             query = document.search().update_from_dict(query_dict)
 
             results = query.execute()
-
             for individual_hit in results:
                 # Skip if the individual is not in the provided IDs
                 # This is filtered in ES query, but we double-check here
@@ -191,7 +179,6 @@ def check_against_sanction_list_pre_merge(
                 if not marked_individual:
                     log.debug(f"Skipping individual with ID {individual_hit.id} as it does not exist in the database.")
                     continue
-
                 possible_matches.add(marked_individual.id)
                 ticket, ticket_details, tickets_program = _generate_ticket(
                     marked_individual,
@@ -200,7 +187,7 @@ def check_against_sanction_list_pre_merge(
                 )
                 tickets_to_create.append(ticket)
                 ticket_details_to_create.append(ticket_details)
-                tickets_programs.append(tickets_programs)
+                tickets_programs.append(tickets_program)
 
             log.debug(
                 f"SANCTION LIST INDIVIDUAL: {sanction_list_individual.full_name} - reference number: {sanction_list_individual.reference_number}"

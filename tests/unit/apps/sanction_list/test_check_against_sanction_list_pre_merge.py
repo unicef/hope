@@ -80,11 +80,11 @@ class TestSanctionListPreMerge(TestCase):
             individuals_data=[
                 {
                     # DUPLICATE
-                    "given_name": "Ri",
-                    "full_name": "Ri Won Ho",
+                    "given_name": "Alias",
+                    "full_name": "Alias Name2",
                     "middle_name": "",
-                    "family_name": "Won Ho",
-                    "birth_date": "1964-07-17",
+                    "family_name": "Name2",
+                    "birth_date": "1922-04-11",
                 },
                 {
                     "given_name": "Choo",
@@ -161,8 +161,8 @@ class TestSanctionListPreMerge(TestCase):
 
         expected = [
             {"full_name": "Abdul Afghanistan", "sanction_list_possible_match": False},
+            {"full_name": "Alias Name2", "sanction_list_possible_match": True},
             {"full_name": "Choo Ryoong", "sanction_list_possible_match": False},
-            {"full_name": "Ri Won Ho", "sanction_list_possible_match": False},
             {"full_name": "Tescik Testowski", "sanction_list_possible_match": False},
             {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
             {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
@@ -171,17 +171,16 @@ class TestSanctionListPreMerge(TestCase):
         ]
 
         result = list(Individual.objects.order_by("full_name").values("full_name", "sanction_list_possible_match"))
-
         self.assertEqual(result, expected)
 
     def test_create_system_flag_tickets(self) -> None:
         check_against_sanction_list_pre_merge(program_id=self.program.id)
         self.assertEqual(
             GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(),
-            0,
+            1,
         )
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
-            self.assertEqual(grievance_ticket.programs.count(), 0)
+            self.assertEqual(grievance_ticket.programs.count(), 1)
             self.assertEqual(grievance_ticket.programs.first(), self.program)
 
         self.household.refresh_from_db()
