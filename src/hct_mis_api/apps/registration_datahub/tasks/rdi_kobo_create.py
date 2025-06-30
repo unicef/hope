@@ -432,7 +432,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         logger.warning(e)
         raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e
 
-    def _get_drc_mapped_admin_pcode_value(self, admin_field: str, value: str) -> str:
+    def _get_drc_mapped_admin_pcode_value(self, admin_field: Union[str, List[Any]], value: Any) -> Any:
+        if isinstance(value, list):
+            value = value[0] if value else ""
+
         mapping = {
             "admin1": {},
             "admin2": {},
@@ -693,7 +696,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 "CD8309ZS03AS11": "CD8311ZS01AS10",
                 "CD8309ZS03AS12": "CD8311ZS01AS05",
                 "CD8309ZS03AS13": "CD8311ZS01AS09",
-                "CD8309ZS03AS14": "CD8311ZS01AS02"
-            }
+                "CD8309ZS03AS14": "CD8311ZS01AS02",
+            },
         }
         return mapping[admin_field].get(value, value)
