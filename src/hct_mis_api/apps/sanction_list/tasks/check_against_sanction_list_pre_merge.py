@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -86,7 +85,6 @@ def _get_query_dict(sanction_list_individual: SanctionListIndividual, individual
     if individuals_ids:
         query_dict["query"]["bool"]["filter"] = [{"terms": {"id": [str(ind_id) for ind_id in individuals_ids]}}]  # type: ignore
 
-    print(json.dumps(query_dict))
     return query_dict
 
 

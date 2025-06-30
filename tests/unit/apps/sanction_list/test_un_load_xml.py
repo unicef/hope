@@ -7,6 +7,8 @@ from django.utils import timezone
 import pytest
 from strategy_field.utils import fqn
 
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.models import SanctionList, SanctionListIndividual
 from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
@@ -21,8 +23,18 @@ def sanction_list(db: Any) -> "SanctionList":
     return SanctionListFactory(strategy=fqn(UNSanctionList))
 
 
+@pytest.fixture
+def program(db: Any, sanction_list: "SanctionList") -> "Program":
+    from hct_mis_api.apps.program.fixtures import ProgramFactory
+
+    create_afghanistan()
+    program = ProgramFactory()
+    program.sanction_lists.add(sanction_list)
+    return program
+
+
 @pytest.mark.elasticsearch
-def test_execute(sanction_list: "SanctionList") -> None:
+def test_execute(sanction_list: "SanctionList", program: "Program") -> None:
     main_test_files_path = Path(__file__).parent / "test_files"
     # Test #1
     task = LoadSanctionListXMLTask(sanction_list)
@@ -32,7 +44,7 @@ def test_execute(sanction_list: "SanctionList") -> None:
     assert individuals.count() == 1
 
     kpi_33_documents = individuals.get(reference_number="KPi.111").documents.all()
-    assert kpi_33_documents.count() == 1
+    assert kpi_33_documents.count() == 2
 
     # Test #2
     task = LoadSanctionListXMLTask(sanction_list)
@@ -47,7 +59,7 @@ def test_execute(sanction_list: "SanctionList") -> None:
     updated_individual = active_individuals.get(reference_number="KPi.111")
     assert updated_individual.third_name == "TEST"
     assert updated_individual.listed_on == timezone.make_aware(datetime(year=2016, month=11, day=11))
-    assert updated_individual.documents.all().count() == 2
+    assert updated_individual.documents.all().count() == 3
 
     test_doc = updated_individual.documents.get(document_number="111222333555")
     assert test_doc.type_of_document == "Passport"

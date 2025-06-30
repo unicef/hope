@@ -422,13 +422,13 @@ class LoadSanctionListXMLTask:
         root = tree.getroot()
         self.parse(root)
 
-    def load_from_url(self) -> None:
+    def load_from_url(self) -> None:  # pragma: no cover
         url = urlopen(self.url)
         tree = ET.parse(url)
         root = tree.getroot()
         self.parse(root)
 
-    def execute(self) -> None:
+    def execute(self) -> None:  # pragma: no cover
         raise DeprecationWarning()
 
     def parse(self, root: ET.Element) -> None:
@@ -514,12 +514,13 @@ class LoadSanctionListXMLTask:
                 )
 
         try:
+            cls_un = UNSanctionList
             programs = Program.objects.filter(
-                sanction_lists__strategy=self.__class__.__qualname__
+                sanction_lists__strategy=f"{cls_un.__module__}.{cls_un.__qualname__}"
             )  # get programs which use sanction list which is using this strategy
             for program in programs:
                 check_against_sanction_list_pre_merge(program_id=program.id)
-        except NotFoundError:
+        except NotFoundError:  # pragma: no cover
             pass
 
 
