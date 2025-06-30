@@ -101,7 +101,7 @@ class RoleAssignmentsTest(TestCase):
     def test_user_role_exclude_by_expiry_date(self) -> None:
         user_not_unicef_partner = UserFactory(partner=PartnerFactory(name="Test123"))
         role_1 = Role.objects.create(name="111", permissions=[Permissions.RDI_VIEW_LIST.value])
-        role_2 = Role.objects.create(name="222", permissions=[Permissions.REPORTING_EXPORT.value])
+        role_2 = Role.objects.create(name="222", permissions=[Permissions.PM_EXPORT_PDF_SUMMARY.value])
         # user_role_active
         user_role_1 = RoleAssignment.objects.create(
             role=role_1, business_area=self.business_area_afg, user=user_not_unicef_partner
@@ -122,11 +122,11 @@ class RoleAssignmentsTest(TestCase):
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
         )
         self.assertNotIn(
-            Permissions.REPORTING_EXPORT.value,
+            Permissions.PM_EXPORT_PDF_SUMMARY.value,
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
         )
         self.assertIn(
-            Permissions.REPORTING_EXPORT.value,
+            Permissions.PM_EXPORT_PDF_SUMMARY.value,
             user_not_unicef_partner.permissions_in_business_area(self.business_area_ukr.slug),
         )
 
@@ -145,7 +145,7 @@ class RoleAssignmentsTest(TestCase):
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
         )
         self.assertNotIn(
-            Permissions.REPORTING_EXPORT.value,
+            Permissions.PM_EXPORT_PDF_SUMMARY.value,
             user_not_unicef_partner.permissions_in_business_area(self.business_area_afg.slug),
         )
 

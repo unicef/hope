@@ -209,12 +209,6 @@ export const REPORT_TYPES = {
   INDIVIDUALS_AND_PAYMENT: '8',
 };
 
-export const REPORTING_STATES = {
-  PROCESSING: 1,
-  GENERATED: 2,
-  FAILED: 3,
-};
-
 export const COLLECT_TYPES_MAPPING = {
   A_: 'Unknown',
   A_0: 'None',

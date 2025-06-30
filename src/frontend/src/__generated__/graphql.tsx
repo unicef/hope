@@ -230,7 +230,6 @@ export type AreaNode = Node & {
   pCode?: Maybe<Scalars['String']['output']>;
   parent?: Maybe<AreaNode>;
   programs: ProgramNodeConnection;
-  reports: ReportNodeConnection;
   rght: Scalars['Int']['output'];
   treeId: Scalars['Int']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -282,15 +281,6 @@ export type AreaNodeProgramsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type AreaNodeReportsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -523,7 +513,6 @@ export type BusinessAreaNode = Node & {
   regionCode: Scalars['String']['output'];
   regionName: Scalars['String']['output'];
   registrationdataimportSet: RegistrationDataImportNodeConnection;
-  reports: ReportNodeConnection;
   ruleSet: SteficonRuleNodeConnection;
   screenBeneficiary: Scalars['Boolean']['output'];
   slug: Scalars['String']['output'];
@@ -645,15 +634,6 @@ export type BusinessAreaNodeProgramSetArgs = {
 
 
 export type BusinessAreaNodeRegistrationdataimportSetArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type BusinessAreaNodeReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1028,21 +1008,6 @@ export type CreateProgramInput = {
   programmeCode?: InputMaybe<Scalars['String']['input']>;
   sector?: InputMaybe<Scalars['String']['input']>;
   startDate?: InputMaybe<Scalars['Date']['input']>;
-};
-
-export type CreateReport = {
-  __typename?: 'CreateReport';
-  report?: Maybe<ReportNode>;
-};
-
-export type CreateReportInput = {
-  adminArea1?: InputMaybe<Scalars['ID']['input']>;
-  adminArea2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
-  businessAreaSlug: Scalars['String']['input'];
-  dateFrom: Scalars['Date']['input'];
-  dateTo: Scalars['Date']['input'];
-  program?: InputMaybe<Scalars['ID']['input']>;
-  reportType: Scalars['Int']['input'];
 };
 
 export type CreateSurveyInput = {
@@ -2168,6 +2133,7 @@ export type HouseholdNode = Node & {
   childrenCount?: Maybe<Scalars['Int']['output']>;
   childrenDisabledCount?: Maybe<Scalars['Int']['output']>;
   collectType: HouseholdCollectType;
+  collisionFlag: Scalars['Boolean']['output'];
   complaintTicketDetails: TicketComplaintDetailsNodeConnection;
   consent?: Maybe<Scalars['Boolean']['output']>;
   consentSharing?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -2183,6 +2149,7 @@ export type HouseholdNode = Node & {
   detailId?: Maybe<Scalars['String']['output']>;
   deviceid: Scalars['String']['output'];
   enumeratorRecId?: Maybe<Scalars['Int']['output']>;
+  extraRdis: RegistrationDataImportNodeConnection;
   familyId?: Maybe<Scalars['String']['output']>;
   fchildHoh?: Maybe<Scalars['Boolean']['output']>;
   feedbacks: FeedbackNodeConnection;
@@ -2207,6 +2174,7 @@ export type HouseholdNode = Node & {
   headOfHousehold?: Maybe<IndividualNode>;
   householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNodeConnection;
   id: Scalars['ID']['output'];
+  identificationKey?: Maybe<Scalars['String']['output']>;
   importId?: Maybe<Scalars['String']['output']>;
   individuals?: Maybe<IndividualNodeConnection>;
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>;
@@ -2302,6 +2270,15 @@ export type HouseholdNodeCopiedToArgs = {
 
 
 export type HouseholdNodeDeleteHouseholdTicketDetailsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type HouseholdNodeExtraRdisArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -3310,7 +3287,6 @@ export type Mutations = {
   createPaymentPlan?: Maybe<CreatePaymentPlanMutation>;
   createPaymentVerificationPlan?: Maybe<CreateVerificationPlanMutation>;
   createProgram?: Maybe<CreateProgram>;
-  createReport?: Maybe<CreateReport>;
   createSurvey?: Maybe<CreateSurveyMutation>;
   createTicketNote?: Maybe<CreateTicketNoteMutation>;
   deletePaymentPlan?: Maybe<DeletePaymentPlanMutation>;
@@ -3341,7 +3317,6 @@ export type Mutations = {
   registrationProgramPopulationImport?: Maybe<RegistrationProgramPopulationImportMutation>;
   registrationXlsxImport?: Maybe<RegistrationXlsxImportMutation>;
   rerunDedupe?: Maybe<RegistrationDeduplicationMutation>;
-  restartCreateReport?: Maybe<RestartCreateReport>;
   revertMarkPaymentAsFailed?: Maybe<RevertMarkPaymentAsFailedMutation>;
   saveKoboImportDataAsync?: Maybe<SaveKoboProjectImportDataAsync>;
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>;
@@ -3534,11 +3509,6 @@ export type MutationsCreateProgramArgs = {
 };
 
 
-export type MutationsCreateReportArgs = {
-  reportData: CreateReportInput;
-};
-
-
 export type MutationsCreateSurveyArgs = {
   input: CreateSurveyInput;
 };
@@ -3714,11 +3684,6 @@ export type MutationsRegistrationXlsxImportArgs = {
 export type MutationsRerunDedupeArgs = {
   registrationDataImportId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
-};
-
-
-export type MutationsRestartCreateReportArgs = {
-  reportData: RestartCreateReportInput;
 };
 
 
@@ -4810,6 +4775,10 @@ export type PositiveFeedbackTicketExtras = {
   individual?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export enum ProgramCollisionDetector {
+  HctMisApiAppsProgramCollisionDetectorsIdentificationkeycollisiondetector = 'HCT_MIS_API_APPS_PROGRAM_COLLISION_DETECTORS_IDENTIFICATIONKEYCOLLISIONDETECTOR'
+}
+
 export type ProgramCycleNode = Node & {
   __typename?: 'ProgramCycleNode';
   createdAt: Scalars['DateTime']['output'];
@@ -4874,6 +4843,8 @@ export type ProgramNode = Node & {
   businessArea: UserBusinessAreaNode;
   canFinish?: Maybe<Scalars['Boolean']['output']>;
   cashPlus: Scalars['Boolean']['output'];
+  collisionDetectionEnabled: Scalars['Boolean']['output'];
+  collisionDetector?: Maybe<ProgramCollisionDetector>;
   createdAt: Scalars['DateTime']['output'];
   cycles?: Maybe<ProgramCycleNodeConnection>;
   dataCollectingType?: Maybe<DataCollectingTypeNode>;
@@ -4901,7 +4872,6 @@ export type ProgramNode = Node & {
   populationGoal: Scalars['Int']['output'];
   programmeCode?: Maybe<Scalars['String']['output']>;
   registrationImports: RegistrationDataImportNodeConnection;
-  reports: ReportNodeConnection;
   scope?: Maybe<ProgramScope>;
   sector: ProgramSector;
   startDate: Scalars['Date']['output'];
@@ -5016,15 +4986,6 @@ export type ProgramNodeRegistrationImportsArgs = {
 };
 
 
-export type ProgramNodeReportsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
 export type ProgramNodeSurveysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5121,7 +5082,6 @@ export type Query = {
   allPrograms?: Maybe<ProgramNodeConnection>;
   allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>;
   allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>;
-  allReports?: Maybe<ReportNodeConnection>;
   allSanctionListIndividuals?: Maybe<SanctionListIndividualNodeConnection>;
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>;
   allSurveys?: Maybe<SurveyNodeConnection>;
@@ -5150,8 +5110,6 @@ export type Query = {
   countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   crossAreaFilterAvailable?: Maybe<Scalars['Boolean']['output']>;
   currencyChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
-  dashboardReportTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
-  dashboardYearsChoices?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   dataCollectingType?: Maybe<DataCollectingTypeNode>;
   dataCollectingTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   dataCollectionTypeChoices?: Maybe<Array<Maybe<DataCollectingTypeChoiceObject>>>;
@@ -5208,9 +5166,6 @@ export type Query = {
   registrationDataImportDatahub?: Maybe<RegistrationDataImportDatahubNode>;
   registrationDataStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   relationshipChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
-  report?: Maybe<ReportNode>;
-  reportStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
-  reportTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   residenceStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>;
@@ -5724,22 +5679,6 @@ export type QueryAllRegistrationDataImportsArgs = {
 };
 
 
-export type QueryAllReportsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  businessArea: Scalars['String']['input'];
-  createdBy?: InputMaybe<Scalars['ID']['input']>;
-  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
-  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-  reportType?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-};
-
-
 export type QueryAllSanctionListIndividualsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5910,16 +5849,6 @@ export type QueryChartVolumeByDeliveryMechanismArgs = {
 };
 
 
-export type QueryDashboardReportTypesChoicesArgs = {
-  businessAreaSlug: Scalars['String']['input'];
-};
-
-
-export type QueryDashboardYearsChoicesArgs = {
-  businessAreaSlug: Scalars['String']['input'];
-};
-
-
 export type QueryDataCollectingTypeArgs = {
   id: Scalars['ID']['input'];
 };
@@ -6047,11 +5976,6 @@ export type QueryRegistrationDataImportArgs = {
 
 
 export type QueryRegistrationDataImportDatahubArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type QueryReportArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6307,6 +6231,7 @@ export type RegistrationDataImportNode = Node & {
   erased: Scalars['Boolean']['output'];
   errorMessage: Scalars['String']['output'];
   excluded: Scalars['Boolean']['output'];
+  extraHhRdis: HouseholdNodeConnection;
   goldenRecordDuplicates: Scalars['Int']['output'];
   goldenRecordDuplicatesCountAndPercentage?: Maybe<Array<Maybe<CountAndPercentageNode>>>;
   goldenRecordPossibleDuplicates: Scalars['Int']['output'];
@@ -6334,6 +6259,15 @@ export type RegistrationDataImportNode = Node & {
   totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   version: Scalars['BigInt']['output'];
+};
+
+
+export type RegistrationDataImportNodeExtraHhRdisArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -6445,80 +6379,6 @@ export type RegistrationXlsxImportMutationInput = {
   importDataId?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-export type ReportNode = Node & {
-  __typename?: 'ReportNode';
-  adminArea: AreaNodeConnection;
-  adminArea1?: Maybe<AreaNodeConnection>;
-  adminArea2?: Maybe<AreaNodeConnection>;
-  businessArea: UserBusinessAreaNode;
-  createdAt: Scalars['DateTime']['output'];
-  createdBy: UserNode;
-  dateFrom: Scalars['Date']['output'];
-  dateTo: Scalars['Date']['output'];
-  file?: Maybe<Scalars['String']['output']>;
-  fileUrl?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  numberOfRecords?: Maybe<Scalars['Int']['output']>;
-  program?: Maybe<ProgramNode>;
-  reportType: Scalars['Int']['output'];
-  status: Scalars['Int']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-
-export type ReportNodeAdminAreaArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type ReportNodeAdminArea1Args = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type ReportNodeAdminArea2Args = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type ReportNodeConnection = {
-  __typename?: 'ReportNodeConnection';
-  edgeCount?: Maybe<Scalars['Int']['output']>;
-  edges: Array<Maybe<ReportNodeEdge>>;
-  pageInfo: PageInfo;
-  totalCount?: Maybe<Scalars['Int']['output']>;
-};
-
-export type ReportNodeEdge = {
-  __typename?: 'ReportNodeEdge';
-  cursor: Scalars['String']['output'];
-  node?: Maybe<ReportNode>;
-};
-
-export type RestartCreateReport = {
-  __typename?: 'RestartCreateReport';
-  report?: Maybe<ReportNode>;
-};
-
-export type RestartCreateReportInput = {
-  businessAreaSlug: Scalars['String']['input'];
-  reportId: Scalars['ID']['input'];
 };
 
 export type RevertMarkPaymentAsFailedMutation = {
@@ -7741,7 +7601,6 @@ export type UserBusinessAreaNode = Node & {
   regionCode: Scalars['String']['output'];
   regionName: Scalars['String']['output'];
   registrationdataimportSet: RegistrationDataImportNodeConnection;
-  reports: ReportNodeConnection;
   ruleSet: SteficonRuleNodeConnection;
   screenBeneficiary: Scalars['Boolean']['output'];
   slug: Scalars['String']['output'];
@@ -7871,15 +7730,6 @@ export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
 };
 
 
-export type UserBusinessAreaNodeReportsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
 export type UserBusinessAreaNodeRuleSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7950,7 +7800,6 @@ export type UserNode = Node & {
   partner: PartnerNode;
   partnerRoles?: Maybe<Array<Maybe<PartnerRoleNode>>>;
   registrationDataImports: RegistrationDataImportNodeConnection;
-  reports: ReportNodeConnection;
   status: UserStatus;
   surveys: SurveyNodeConnection;
   ticketNotes: TicketNoteNodeConnection;
@@ -8060,15 +7909,6 @@ export type UserNodeMessagesArgs = {
 
 
 export type UserNodeRegistrationDataImportsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type UserNodeReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -8746,20 +8586,6 @@ export type UploadImportDataXlsxFileAsyncMutationVariables = Exact<{
 
 
 export type UploadImportDataXlsxFileAsyncMutation = { __typename?: 'Mutations', uploadImportDataXlsxFileAsync?: { __typename?: 'UploadImportDataXLSXFileAsync', errors?: Array<{ __typename?: 'XlsxRowErrorNode', header?: string | null, message?: string | null, rowNumber?: number | null } | null> | null, importData?: { __typename?: 'ImportDataNode', id: string, numberOfIndividuals?: number | null, numberOfHouseholds?: number | null, registrationDataImport?: { __typename?: 'RegistrationDataImportDatahubNode', id: string } | null } | null } | null };
-
-export type CreateReportMutationVariables = Exact<{
-  reportData: CreateReportInput;
-}>;
-
-
-export type CreateReportMutation = { __typename?: 'Mutations', createReport?: { __typename?: 'CreateReport', report?: { __typename?: 'ReportNode', id: string } | null } | null };
-
-export type RestartCreateReportMutationVariables = Exact<{
-  reportData: RestartCreateReportInput;
-}>;
-
-
-export type RestartCreateReportMutation = { __typename?: 'Mutations', restartCreateReport?: { __typename?: 'RestartCreateReport', report?: { __typename?: 'ReportNode', id: string, status: number, reportType: number, createdAt: any, dateFrom: any, dateTo: any, fileUrl?: string | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string }, adminArea: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> }, program?: { __typename?: 'ProgramNode', name: string } | null } | null } | null };
 
 export type CopyCriteriaMutationVariables = Exact<{
   name: Scalars['String']['input'];
@@ -9622,78 +9448,6 @@ export type XlsxImportDataQueryVariables = Exact<{
 
 
 export type XlsxImportDataQuery = { __typename?: 'Query', importData?: { __typename?: 'ImportDataNode', id: string, status: ImportDataStatus, numberOfIndividuals?: number | null, numberOfHouseholds?: number | null, error: string, xlsxValidationErrors?: Array<{ __typename?: 'XlsxRowErrorNode', rowNumber?: number | null, header?: string | null, message?: string | null } | null> | null } | null };
-
-export type AllReportsQueryVariables = Exact<{
-  before?: InputMaybe<Scalars['String']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
-  businessArea: Scalars['String']['input'];
-  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
-  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
-  reportType?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
-  createdBy?: InputMaybe<Scalars['ID']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type AllReportsQuery = { __typename?: 'Query', allReports?: { __typename?: 'ReportNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ReportNodeEdge', cursor: string, node?: { __typename?: 'ReportNode', id: string, reportType: number, dateFrom: any, dateTo: any, status: number, createdAt: any, updatedAt: any, fileUrl?: string | null, numberOfRecords?: number | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string } } | null } | null> } | null };
-
-export type ReportQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type ReportQuery = { __typename?: 'Query', report?: { __typename?: 'ReportNode', id: string, status: number, reportType: number, createdAt: any, updatedAt: any, dateFrom: any, dateTo: any, fileUrl?: string | null, numberOfRecords?: number | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string }, adminArea2?: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> } | null, adminArea1?: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> } | null, program?: { __typename?: 'ProgramNode', name: string } | null } | null };
-
-export type ReportChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ReportChoiceDataQuery = { __typename?: 'Query', reportStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, reportTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
-
-export type AllChartsQueryVariables = Exact<{
-  businessAreaSlug: Scalars['String']['input'];
-  year: Scalars['Int']['input'];
-  program?: InputMaybe<Scalars['String']['input']>;
-  administrativeArea?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerificationForPeople?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionPeopleReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, chartPeopleReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPeopleWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
-
-export type CountryChartsQueryVariables = Exact<{
-  businessAreaSlug: Scalars['String']['input'];
-  year: Scalars['Int']['input'];
-  program?: InputMaybe<Scalars['String']['input']>;
-  administrativeArea?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type CountryChartsQuery = { __typename?: 'Query', tableTotalCashTransferredByAdministrativeArea?: { __typename?: 'TableTotalCashTransferred', data?: Array<{ __typename?: '_TableTotalCashTransferredDataNode', id?: string | null, admin2?: string | null, totalCashTransferred?: number | null, totalHouseholds?: number | null } | null> | null } | null, tableTotalCashTransferredByAdministrativeAreaForPeople?: { __typename?: 'TableTotalCashTransferredForPeople', data?: Array<{ __typename?: '_TableTotalCashTransferredDataForPeopleNode', id?: string | null, admin2?: string | null, totalCashTransferred?: number | null, totalPeople?: number | null } | null> | null } | null };
-
-export type DashboardReportChoiceDataQueryVariables = Exact<{
-  businessArea: Scalars['String']['input'];
-}>;
-
-
-export type DashboardReportChoiceDataQuery = { __typename?: 'Query', dashboardReportTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
-
-export type DashboardYearsChoiceDataQueryVariables = Exact<{
-  businessArea: Scalars['String']['input'];
-}>;
-
-
-export type DashboardYearsChoiceDataQuery = { __typename?: 'Query', dashboardYearsChoices?: Array<string | null> | null };
-
-export type GlobalAreaChartsQueryVariables = Exact<{
-  year: Scalars['Int']['input'];
-}>;
-
-
-export type GlobalAreaChartsQuery = { __typename?: 'Query', chartTotalTransferredCashByCountry?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
 
 export type LanguageAutocompleteQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -13840,96 +13594,6 @@ export function useUploadImportDataXlsxFileAsyncMutation(baseOptions?: Apollo.Mu
 export type UploadImportDataXlsxFileAsyncMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileAsyncMutation>;
 export type UploadImportDataXlsxFileAsyncMutationResult = Apollo.MutationResult<UploadImportDataXlsxFileAsyncMutation>;
 export type UploadImportDataXlsxFileAsyncMutationOptions = Apollo.BaseMutationOptions<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>;
-export const CreateReportDocument = gql`
-    mutation CreateReport($reportData: CreateReportInput!) {
-  createReport(reportData: $reportData) {
-    report {
-      id
-    }
-  }
-}
-    `;
-export type CreateReportMutationFn = Apollo.MutationFunction<CreateReportMutation, CreateReportMutationVariables>;
-
-/**
- * __useCreateReportMutation__
- *
- * To run a mutation, you first call `useCreateReportMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateReportMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createReportMutation, { data, loading, error }] = useCreateReportMutation({
- *   variables: {
- *      reportData: // value for 'reportData'
- *   },
- * });
- */
-export function useCreateReportMutation(baseOptions?: Apollo.MutationHookOptions<CreateReportMutation, CreateReportMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateReportMutation, CreateReportMutationVariables>(CreateReportDocument, options);
-      }
-export type CreateReportMutationHookResult = ReturnType<typeof useCreateReportMutation>;
-export type CreateReportMutationResult = Apollo.MutationResult<CreateReportMutation>;
-export type CreateReportMutationOptions = Apollo.BaseMutationOptions<CreateReportMutation, CreateReportMutationVariables>;
-export const RestartCreateReportDocument = gql`
-    mutation RestartCreateReport($reportData: RestartCreateReportInput!) {
-  restartCreateReport(reportData: $reportData) {
-    report {
-      id
-      status
-      reportType
-      createdAt
-      dateFrom
-      dateTo
-      fileUrl
-      createdBy {
-        firstName
-        lastName
-      }
-      adminArea {
-        edges {
-          node {
-            name
-          }
-        }
-      }
-      program {
-        name
-      }
-    }
-  }
-}
-    `;
-export type RestartCreateReportMutationFn = Apollo.MutationFunction<RestartCreateReportMutation, RestartCreateReportMutationVariables>;
-
-/**
- * __useRestartCreateReportMutation__
- *
- * To run a mutation, you first call `useRestartCreateReportMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useRestartCreateReportMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [restartCreateReportMutation, { data, loading, error }] = useRestartCreateReportMutation({
- *   variables: {
- *      reportData: // value for 'reportData'
- *   },
- * });
- */
-export function useRestartCreateReportMutation(baseOptions?: Apollo.MutationHookOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RestartCreateReportMutation, RestartCreateReportMutationVariables>(RestartCreateReportDocument, options);
-      }
-export type RestartCreateReportMutationHookResult = ReturnType<typeof useRestartCreateReportMutation>;
-export type RestartCreateReportMutationResult = Apollo.MutationResult<RestartCreateReportMutation>;
-export type RestartCreateReportMutationOptions = Apollo.BaseMutationOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>;
 export const CopyCriteriaDocument = gql`
     mutation CopyCriteria($name: String!, $paymentPlanId: ID!, $programCycleId: ID!) {
   copyTargetingCriteria(
@@ -19802,614 +19466,6 @@ export type XlsxImportDataQueryHookResult = ReturnType<typeof useXlsxImportDataQ
 export type XlsxImportDataLazyQueryHookResult = ReturnType<typeof useXlsxImportDataLazyQuery>;
 export type XlsxImportDataSuspenseQueryHookResult = ReturnType<typeof useXlsxImportDataSuspenseQuery>;
 export type XlsxImportDataQueryResult = Apollo.QueryResult<XlsxImportDataQuery, XlsxImportDataQueryVariables>;
-export const AllReportsDocument = gql`
-    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: DateTime, $createdTo: DateTime, $reportType: [String], $createdBy: ID, $orderBy: String) {
-  allReports(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    status: $status
-    businessArea: $businessArea
-    createdFrom: $createdFrom
-    createdTo: $createdTo
-    reportType: $reportType
-    createdBy: $createdBy
-    orderBy: $orderBy
-  ) {
-    pageInfo {
-      hasNextPage
-      hasPreviousPage
-      endCursor
-      startCursor
-    }
-    totalCount
-    edgeCount
-    edges {
-      cursor
-      node {
-        id
-        reportType
-        dateFrom
-        dateTo
-        status
-        createdAt
-        updatedAt
-        createdBy {
-          firstName
-          lastName
-        }
-        fileUrl
-        numberOfRecords
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useAllReportsQuery__
- *
- * To run a query within a React component, call `useAllReportsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllReportsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllReportsQuery({
- *   variables: {
- *      before: // value for 'before'
- *      after: // value for 'after'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      status: // value for 'status'
- *      businessArea: // value for 'businessArea'
- *      createdFrom: // value for 'createdFrom'
- *      createdTo: // value for 'createdTo'
- *      reportType: // value for 'reportType'
- *      createdBy: // value for 'createdBy'
- *      orderBy: // value for 'orderBy'
- *   },
- * });
- */
-export function useAllReportsQuery(baseOptions: Apollo.QueryHookOptions<AllReportsQuery, AllReportsQueryVariables> & ({ variables: AllReportsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
-      }
-export function useAllReportsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
-        }
-export function useAllReportsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
-        }
-export type AllReportsQueryHookResult = ReturnType<typeof useAllReportsQuery>;
-export type AllReportsLazyQueryHookResult = ReturnType<typeof useAllReportsLazyQuery>;
-export type AllReportsSuspenseQueryHookResult = ReturnType<typeof useAllReportsSuspenseQuery>;
-export type AllReportsQueryResult = Apollo.QueryResult<AllReportsQuery, AllReportsQueryVariables>;
-export const ReportDocument = gql`
-    query Report($id: ID!) {
-  report(id: $id) {
-    id
-    status
-    reportType
-    createdAt
-    updatedAt
-    dateFrom
-    dateTo
-    fileUrl
-    numberOfRecords
-    createdBy {
-      firstName
-      lastName
-    }
-    adminArea2 {
-      edges {
-        node {
-          name
-        }
-      }
-    }
-    adminArea1 {
-      edges {
-        node {
-          name
-        }
-      }
-    }
-    program {
-      name
-    }
-  }
-}
-    `;
-
-/**
- * __useReportQuery__
- *
- * To run a query within a React component, call `useReportQuery` and pass it any options that fit your needs.
- * When your component renders, `useReportQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReportQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useReportQuery(baseOptions: Apollo.QueryHookOptions<ReportQuery, ReportQueryVariables> & ({ variables: ReportQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
-      }
-export function useReportLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReportQuery, ReportQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
-        }
-export function useReportSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ReportQuery, ReportQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
-        }
-export type ReportQueryHookResult = ReturnType<typeof useReportQuery>;
-export type ReportLazyQueryHookResult = ReturnType<typeof useReportLazyQuery>;
-export type ReportSuspenseQueryHookResult = ReturnType<typeof useReportSuspenseQuery>;
-export type ReportQueryResult = Apollo.QueryResult<ReportQuery, ReportQueryVariables>;
-export const ReportChoiceDataDocument = gql`
-    query ReportChoiceData {
-  reportStatusChoices {
-    name
-    value
-  }
-  reportTypesChoices {
-    name
-    value
-  }
-}
-    `;
-
-/**
- * __useReportChoiceDataQuery__
- *
- * To run a query within a React component, call `useReportChoiceDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useReportChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReportChoiceDataQuery({
- *   variables: {
- *   },
- * });
- */
-export function useReportChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
-      }
-export function useReportChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
-        }
-export function useReportChoiceDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
-        }
-export type ReportChoiceDataQueryHookResult = ReturnType<typeof useReportChoiceDataQuery>;
-export type ReportChoiceDataLazyQueryHookResult = ReturnType<typeof useReportChoiceDataLazyQuery>;
-export type ReportChoiceDataSuspenseQueryHookResult = ReturnType<typeof useReportChoiceDataSuspenseQuery>;
-export type ReportChoiceDataQueryResult = Apollo.QueryResult<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>;
-export const AllChartsDocument = gql`
-    query AllCharts($businessAreaSlug: String!, $year: Int!, $program: String, $administrativeArea: String) {
-  chartProgrammesBySector(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    labels
-    datasets {
-      label
-      data
-    }
-  }
-  chartPaymentVerification(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      label
-      data
-    }
-    labels
-    households
-    averageSampleSize
-  }
-  chartPaymentVerificationForPeople(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      label
-      data
-    }
-    labels
-    households
-    averageSampleSize
-  }
-  chartVolumeByDeliveryMechanism(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      data
-    }
-    labels
-  }
-  chartPayment(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      data
-    }
-    labels
-  }
-  chartGrievances(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      data
-    }
-    labels
-    totalNumberOfGrievances
-    totalNumberOfFeedback
-    totalNumberOfOpenSensitive
-  }
-  sectionHouseholdsReached(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    total
-  }
-  sectionIndividualsReached(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    total
-  }
-  sectionPeopleReached(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    total
-  }
-  sectionChildReached(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    total
-  }
-  chartIndividualsReachedByAgeAndGender(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      data
-    }
-    labels
-  }
-  chartIndividualsWithDisabilityReachedByAge(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      data
-      label
-    }
-    labels
-  }
-  chartPeopleReachedByAgeAndGender(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      data
-    }
-    labels
-  }
-  chartPeopleWithDisabilityReachedByAge(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      data
-      label
-    }
-    labels
-  }
-  sectionTotalTransferred(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    total
-  }
-  chartTotalTransferredByMonth(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-  ) {
-    datasets {
-      data
-      label
-    }
-    labels
-  }
-}
-    `;
-
-/**
- * __useAllChartsQuery__
- *
- * To run a query within a React component, call `useAllChartsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAllChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAllChartsQuery({
- *   variables: {
- *      businessAreaSlug: // value for 'businessAreaSlug'
- *      year: // value for 'year'
- *      program: // value for 'program'
- *      administrativeArea: // value for 'administrativeArea'
- *   },
- * });
- */
-export function useAllChartsQuery(baseOptions: Apollo.QueryHookOptions<AllChartsQuery, AllChartsQueryVariables> & ({ variables: AllChartsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
-      }
-export function useAllChartsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
-        }
-export function useAllChartsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
-        }
-export type AllChartsQueryHookResult = ReturnType<typeof useAllChartsQuery>;
-export type AllChartsLazyQueryHookResult = ReturnType<typeof useAllChartsLazyQuery>;
-export type AllChartsSuspenseQueryHookResult = ReturnType<typeof useAllChartsSuspenseQuery>;
-export type AllChartsQueryResult = Apollo.QueryResult<AllChartsQuery, AllChartsQueryVariables>;
-export const CountryChartsDocument = gql`
-    query CountryCharts($businessAreaSlug: String!, $year: Int!, $program: String, $administrativeArea: String, $order: String, $orderBy: String) {
-  tableTotalCashTransferredByAdministrativeArea(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-    order: $order
-    orderBy: $orderBy
-  ) {
-    data {
-      id
-      admin2
-      totalCashTransferred
-      totalHouseholds
-    }
-  }
-  tableTotalCashTransferredByAdministrativeAreaForPeople(
-    businessAreaSlug: $businessAreaSlug
-    year: $year
-    program: $program
-    administrativeArea: $administrativeArea
-    order: $order
-    orderBy: $orderBy
-  ) {
-    data {
-      id
-      admin2
-      totalCashTransferred
-      totalPeople
-    }
-  }
-}
-    `;
-
-/**
- * __useCountryChartsQuery__
- *
- * To run a query within a React component, call `useCountryChartsQuery` and pass it any options that fit your needs.
- * When your component renders, `useCountryChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCountryChartsQuery({
- *   variables: {
- *      businessAreaSlug: // value for 'businessAreaSlug'
- *      year: // value for 'year'
- *      program: // value for 'program'
- *      administrativeArea: // value for 'administrativeArea'
- *      order: // value for 'order'
- *      orderBy: // value for 'orderBy'
- *   },
- * });
- */
-export function useCountryChartsQuery(baseOptions: Apollo.QueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables> & ({ variables: CountryChartsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
-      }
-export function useCountryChartsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
-        }
-export function useCountryChartsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
-        }
-export type CountryChartsQueryHookResult = ReturnType<typeof useCountryChartsQuery>;
-export type CountryChartsLazyQueryHookResult = ReturnType<typeof useCountryChartsLazyQuery>;
-export type CountryChartsSuspenseQueryHookResult = ReturnType<typeof useCountryChartsSuspenseQuery>;
-export type CountryChartsQueryResult = Apollo.QueryResult<CountryChartsQuery, CountryChartsQueryVariables>;
-export const DashboardReportChoiceDataDocument = gql`
-    query DashboardReportChoiceData($businessArea: String!) {
-  dashboardReportTypesChoices(businessAreaSlug: $businessArea) {
-    name
-    value
-  }
-}
-    `;
-
-/**
- * __useDashboardReportChoiceDataQuery__
- *
- * To run a query within a React component, call `useDashboardReportChoiceDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useDashboardReportChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useDashboardReportChoiceDataQuery({
- *   variables: {
- *      businessArea: // value for 'businessArea'
- *   },
- * });
- */
-export function useDashboardReportChoiceDataQuery(baseOptions: Apollo.QueryHookOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables> & ({ variables: DashboardReportChoiceDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
-      }
-export function useDashboardReportChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
-        }
-export function useDashboardReportChoiceDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
-        }
-export type DashboardReportChoiceDataQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataQuery>;
-export type DashboardReportChoiceDataLazyQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataLazyQuery>;
-export type DashboardReportChoiceDataSuspenseQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataSuspenseQuery>;
-export type DashboardReportChoiceDataQueryResult = Apollo.QueryResult<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>;
-export const DashboardYearsChoiceDataDocument = gql`
-    query DashboardYearsChoiceData($businessArea: String!) {
-  dashboardYearsChoices(businessAreaSlug: $businessArea)
-}
-    `;
-
-/**
- * __useDashboardYearsChoiceDataQuery__
- *
- * To run a query within a React component, call `useDashboardYearsChoiceDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useDashboardYearsChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useDashboardYearsChoiceDataQuery({
- *   variables: {
- *      businessArea: // value for 'businessArea'
- *   },
- * });
- */
-export function useDashboardYearsChoiceDataQuery(baseOptions: Apollo.QueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables> & ({ variables: DashboardYearsChoiceDataQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
-      }
-export function useDashboardYearsChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
-        }
-export function useDashboardYearsChoiceDataSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
-        }
-export type DashboardYearsChoiceDataQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataQuery>;
-export type DashboardYearsChoiceDataLazyQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataLazyQuery>;
-export type DashboardYearsChoiceDataSuspenseQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataSuspenseQuery>;
-export type DashboardYearsChoiceDataQueryResult = Apollo.QueryResult<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>;
-export const GlobalAreaChartsDocument = gql`
-    query GlobalAreaCharts($year: Int!) {
-  chartTotalTransferredCashByCountry(year: $year) {
-    datasets {
-      data
-      label
-    }
-    labels
-  }
-}
-    `;
-
-/**
- * __useGlobalAreaChartsQuery__
- *
- * To run a query within a React component, call `useGlobalAreaChartsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGlobalAreaChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGlobalAreaChartsQuery({
- *   variables: {
- *      year: // value for 'year'
- *   },
- * });
- */
-export function useGlobalAreaChartsQuery(baseOptions: Apollo.QueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables> & ({ variables: GlobalAreaChartsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
-      }
-export function useGlobalAreaChartsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
-        }
-export function useGlobalAreaChartsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
-        }
-export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaChartsQuery>;
-export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
-export type GlobalAreaChartsSuspenseQueryHookResult = ReturnType<typeof useGlobalAreaChartsSuspenseQuery>;
-export type GlobalAreaChartsQueryResult = Apollo.QueryResult<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>;
 export const LanguageAutocompleteDocument = gql`
     query LanguageAutocomplete($first: Int, $code: String) {
   allLanguages(first: $first, code: $code) {
@@ -21448,7 +20504,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<_RefType extends Record<string, unknown>> = {
-  Node: ( AccountsNode ) | ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BeneficiaryGroupNode ) | ( BusinessAreaNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( FundsCommitmentItemNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentPlanSupportingDocumentNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode );
+  Node: ( AccountsNode ) | ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BeneficiaryGroupNode ) | ( BusinessAreaNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( FundsCommitmentItemNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentPlanSupportingDocumentNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -21531,8 +20587,6 @@ export type ResolversTypes = {
   CreatePaymentVerificationInput: CreatePaymentVerificationInput;
   CreateProgram: ResolverTypeWrapper<CreateProgram>;
   CreateProgramInput: CreateProgramInput;
-  CreateReport: ResolverTypeWrapper<CreateReport>;
-  CreateReportInput: CreateReportInput;
   CreateSurveyInput: CreateSurveyInput;
   CreateSurveyMutation: ResolverTypeWrapper<CreateSurveyMutation>;
   CreateTicketNoteInput: CreateTicketNoteInput;
@@ -21740,6 +20794,7 @@ export type ResolversTypes = {
   PeriodicFieldDataSubtype: PeriodicFieldDataSubtype;
   PeriodicFieldNode: ResolverTypeWrapper<PeriodicFieldNode>;
   PositiveFeedbackTicketExtras: PositiveFeedbackTicketExtras;
+  ProgramCollisionDetector: ProgramCollisionDetector;
   ProgramCycleNode: ResolverTypeWrapper<ProgramCycleNode>;
   ProgramCycleNodeConnection: ResolverTypeWrapper<ProgramCycleNodeConnection>;
   ProgramCycleNodeEdge: ResolverTypeWrapper<ProgramCycleNodeEdge>;
@@ -21782,11 +20837,6 @@ export type ResolversTypes = {
   RegistrationProgramPopulationImportMutationInput: RegistrationProgramPopulationImportMutationInput;
   RegistrationXlsxImportMutation: ResolverTypeWrapper<RegistrationXlsxImportMutation>;
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput;
-  ReportNode: ResolverTypeWrapper<ReportNode>;
-  ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>;
-  ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>;
-  RestartCreateReport: ResolverTypeWrapper<RestartCreateReport>;
-  RestartCreateReportInput: RestartCreateReportInput;
   RevertMarkPaymentAsFailedMutation: ResolverTypeWrapper<RevertMarkPaymentAsFailedMutation>;
   RoleChoiceObject: ResolverTypeWrapper<RoleChoiceObject>;
   RoleNode: ResolverTypeWrapper<RoleNode>;
@@ -22011,8 +21061,6 @@ export type ResolversParentTypes = {
   CreatePaymentVerificationInput: CreatePaymentVerificationInput;
   CreateProgram: CreateProgram;
   CreateProgramInput: CreateProgramInput;
-  CreateReport: CreateReport;
-  CreateReportInput: CreateReportInput;
   CreateSurveyInput: CreateSurveyInput;
   CreateSurveyMutation: CreateSurveyMutation;
   CreateTicketNoteInput: CreateTicketNoteInput;
@@ -22213,11 +21261,6 @@ export type ResolversParentTypes = {
   RegistrationProgramPopulationImportMutationInput: RegistrationProgramPopulationImportMutationInput;
   RegistrationXlsxImportMutation: RegistrationXlsxImportMutation;
   RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput;
-  ReportNode: ReportNode;
-  ReportNodeConnection: ReportNodeConnection;
-  ReportNodeEdge: ReportNodeEdge;
-  RestartCreateReport: RestartCreateReport;
-  RestartCreateReportInput: RestartCreateReportInput;
   RevertMarkPaymentAsFailedMutation: RevertMarkPaymentAsFailedMutation;
   RoleChoiceObject: RoleChoiceObject;
   RoleNode: RoleNode;
@@ -22446,7 +21489,6 @@ export type AreaNodeResolvers<ContextType = any, ParentType extends ResolversPar
   pCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   parent?: Resolver<Maybe<ResolversTypes['AreaNode']>, ParentType, ContextType>;
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, Partial<AreaNodeProgramsArgs>>;
-  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<AreaNodeReportsArgs>>;
   rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -22640,7 +21682,6 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeRegistrationdataimportSetArgs>>;
-  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeReportsArgs>>;
   ruleSet?: Resolver<ResolversTypes['SteficonRuleNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeRuleSetArgs>>;
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -22840,11 +21881,6 @@ export type CreatePaymentPlanMutationResolvers<ContextType = any, ParentType ext
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
-  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -23597,6 +22633,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   childrenCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   childrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   collectType?: Resolver<ResolversTypes['HouseholdCollectType'], ParentType, ContextType>;
+  collisionFlag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeComplaintTicketDetailsArgs>>;
   consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   consentSharing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
@@ -23612,6 +22649,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   detailId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   enumeratorRecId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  extraRdis?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeExtraRdisArgs>>;
   familyId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   fchildHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   feedbacks?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeFeedbacksArgs>>;
@@ -23636,6 +22674,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
   householdDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeHouseholdDataUpdateTicketDetailsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identificationKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   importId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   individuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, Partial<HouseholdNodeIndividualsArgs>>;
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>;
@@ -24112,7 +23151,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createPaymentPlan?: Resolver<Maybe<ResolversTypes['CreatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentPlanArgs, 'input'>>;
   createPaymentVerificationPlan?: Resolver<Maybe<ResolversTypes['CreateVerificationPlanMutation']>, ParentType, ContextType, RequireFields<MutationsCreatePaymentVerificationPlanArgs, 'input'>>;
   createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>;
-  createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>;
   createSurvey?: Resolver<Maybe<ResolversTypes['CreateSurveyMutation']>, ParentType, ContextType, RequireFields<MutationsCreateSurveyArgs, 'input'>>;
   createTicketNote?: Resolver<Maybe<ResolversTypes['CreateTicketNoteMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>>;
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>;
@@ -24143,7 +23181,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   registrationProgramPopulationImport?: Resolver<Maybe<ResolversTypes['RegistrationProgramPopulationImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationProgramPopulationImportArgs, 'registrationDataImportData'>>;
   registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>;
   rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportId'>>;
-  restartCreateReport?: Resolver<Maybe<ResolversTypes['RestartCreateReport']>, ParentType, ContextType, RequireFields<MutationsRestartCreateReportArgs, 'reportData'>>;
   revertMarkPaymentAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentId'>>;
   saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'pullPictures' | 'uid'>>;
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>;
@@ -24164,7 +23201,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AccountsNode' | 'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BeneficiaryGroupNode' | 'BusinessAreaNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FundsCommitmentItemNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentPlanSupportingDocumentNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'AccountsNode' | 'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BeneficiaryGroupNode' | 'BusinessAreaNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FundsCommitmentItemNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentPlanSupportingDocumentNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -24656,6 +23693,8 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
   canFinish?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  collisionDetectionEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  collisionDetector?: Resolver<Maybe<ResolversTypes['ProgramCollisionDetector']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   cycles?: Resolver<Maybe<ResolversTypes['ProgramCycleNodeConnection']>, ParentType, ContextType, Partial<ProgramNodeCyclesArgs>>;
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>;
@@ -24683,7 +23722,6 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   programmeCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   registrationImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<ProgramNodeRegistrationImportsArgs>>;
-  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<ProgramNodeReportsArgs>>;
   scope?: Resolver<Maybe<ResolversTypes['ProgramScope']>, ParentType, ContextType>;
   sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>;
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
@@ -24754,7 +23792,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>;
   allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>;
   allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, Partial<QueryAllRegistrationDataImportsArgs>>;
-  allReports?: Resolver<Maybe<ResolversTypes['ReportNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllReportsArgs, 'businessArea'>>;
   allSanctionListIndividuals?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNodeConnection']>, ParentType, ContextType, Partial<QueryAllSanctionListIndividualsArgs>>;
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllSteficonRulesArgs, 'type'>>;
   allSurveys?: Resolver<Maybe<ResolversTypes['SurveyNodeConnection']>, ParentType, ContextType, Partial<QueryAllSurveysArgs>>;
@@ -24783,8 +23820,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   crossAreaFilterAvailable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   currencyChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
-  dashboardReportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType, RequireFields<QueryDashboardReportTypesChoicesArgs, 'businessAreaSlug'>>;
-  dashboardYearsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType, RequireFields<QueryDashboardYearsChoicesArgs, 'businessAreaSlug'>>;
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType, RequireFields<QueryDataCollectingTypeArgs, 'id'>>;
   dataCollectingTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   dataCollectionTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['DataCollectingTypeChoiceObject']>>>, ParentType, ContextType>;
@@ -24841,9 +23876,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   registrationDataImportDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportDatahubArgs, 'id'>>;
   registrationDataStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   relationshipChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
-  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType, RequireFields<QueryReportArgs, 'id'>>;
-  reportStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
-  reportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   residenceStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, Partial<QuerySampleSizeArgs>>;
@@ -24982,6 +24014,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   erased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   excluded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  extraHhRdis?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeExtraHhRdisArgs>>;
   goldenRecordDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   goldenRecordDuplicatesCountAndPercentage?: Resolver<Maybe<Array<Maybe<ResolversTypes['CountAndPercentageNode']>>>, ParentType, ContextType>;
   goldenRecordPossibleDuplicates?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -25046,45 +24079,6 @@ export type RegistrationProgramPopulationImportMutationResolvers<ContextType = a
 export type RegistrationXlsxImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationXlsxImportMutation'] = ResolversParentTypes['RegistrationXlsxImportMutation']> = {
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNode'] = ResolversParentTypes['ReportNode']> = {
-  adminArea?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, Partial<ReportNodeAdminAreaArgs>>;
-  adminArea1?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, Partial<ReportNodeAdminArea1Args>>;
-  adminArea2?: Resolver<Maybe<ResolversTypes['AreaNodeConnection']>, ParentType, ContextType, Partial<ReportNodeAdminArea2Args>>;
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
-  dateFrom?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  numberOfRecords?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  reportType?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type ReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeConnection'] = ResolversParentTypes['ReportNodeConnection']> = {
-  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  edges?: Resolver<Array<Maybe<ResolversTypes['ReportNodeEdge']>>, ParentType, ContextType>;
-  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
-  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type ReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeEdge'] = ResolversParentTypes['ReportNodeEdge']> = {
-  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  node?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type RestartCreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['RestartCreateReport'] = ResolversParentTypes['RestartCreateReport']> = {
-  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -25970,7 +24964,6 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeRegistrationdataimportSetArgs>>;
-  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeReportsArgs>>;
   ruleSet?: Resolver<ResolversTypes['SteficonRuleNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeRuleSetArgs>>;
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26024,7 +25017,6 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   partner?: Resolver<ResolversTypes['PartnerNode'], ParentType, ContextType>;
   partnerRoles?: Resolver<Maybe<Array<Maybe<ResolversTypes['PartnerRoleNode']>>>, ParentType, ContextType>;
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<UserNodeRegistrationDataImportsArgs>>;
-  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<UserNodeReportsArgs>>;
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<UserNodeSurveysArgs>>;
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, Partial<UserNodeTicketNotesArgs>>;
@@ -26160,7 +25152,6 @@ export type Resolvers<ContextType = any> = {
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>;
   CreatePaymentPlanMutation?: CreatePaymentPlanMutationResolvers<ContextType>;
   CreateProgram?: CreateProgramResolvers<ContextType>;
-  CreateReport?: CreateReportResolvers<ContextType>;
   CreateSurveyMutation?: CreateSurveyMutationResolvers<ContextType>;
   CreateTicketNoteMutation?: CreateTicketNoteMutationResolvers<ContextType>;
   CreateVerificationPlanMutation?: CreateVerificationPlanMutationResolvers<ContextType>;
@@ -26325,10 +25316,6 @@ export type Resolvers<ContextType = any> = {
   RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<ContextType>;
   RegistrationProgramPopulationImportMutation?: RegistrationProgramPopulationImportMutationResolvers<ContextType>;
   RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<ContextType>;
-  ReportNode?: ReportNodeResolvers<ContextType>;
-  ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>;
-  ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>;
-  RestartCreateReport?: RestartCreateReportResolvers<ContextType>;
   RevertMarkPaymentAsFailedMutation?: RevertMarkPaymentAsFailedMutationResolvers<ContextType>;
   RoleChoiceObject?: RoleChoiceObjectResolvers<ContextType>;
   RoleNode?: RoleNodeResolvers<ContextType>;

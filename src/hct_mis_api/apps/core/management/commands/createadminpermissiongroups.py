@@ -79,7 +79,6 @@ class Command(BaseCommand):
             "program": ["cashplan", "program"],
             "social_django": ["association", "nonce", "usersocialauth"],
             "registration_data": ["registrationdataimport"],
-            "reporting": ["dashboardreport", "report"],
             "sanction_list": ["sanctionlistindividualdocument", "sanctionlistindividual"],
             "explorer": ["query"],
             "steficon": ["rulecommit"],  # 'rule' view only
