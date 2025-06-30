@@ -141,7 +141,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             # TODO remove later, fix for DRC program Paiement des ASC et IT
             # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/260434/
             if self.registration_data_import.program_id == "f5a67047-714f-459a-8ead-911d21f7925c":
-                value = self._get_drc_mapped_admin_pcode_value(field_data_dict["name"], value)
+                value = self._get_drc_mapped_admin_pcode_value(field_data_dict["name"], value)  # type: ignore
             correct_value = Area.objects.get(p_code=value)
         elif field_data_dict["name"] in ["country", "country_origin"]:
             correct_value = GeoCountry.objects.get(iso_code2=Country(value).code)
@@ -432,10 +432,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         logger.warning(e)
         raise Exception(f"Error processing {assigned_to}: field `{field_name}` {e.__class__.__name__}({e})") from e
 
-    def _get_drc_mapped_admin_pcode_value(self, admin_field: Union[str, List[Any]], value: Any) -> Any:
-        if isinstance(value, list):
-            value = value[0] if value else ""
-
+    def _get_drc_mapped_admin_pcode_value(self, admin_field: str, value: str) -> str:
         mapping = {
             "admin1": {},
             "admin2": {},
@@ -699,4 +696,4 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 "CD8309ZS03AS14": "CD8311ZS01AS02",
             },
         }
-        return mapping[admin_field].get(value, value)
+        return mapping[admin_field].get(value, value)  # type: ignore
