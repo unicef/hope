@@ -16,6 +16,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 
 const StyledTable = styled(Table)`
   min-width: 100px;
+  width: 100%;
 `;
 
 export interface EntriesTableProps {
@@ -78,7 +79,7 @@ export function EntriesTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) =>
+        {entries?.map((row, index) =>
           individualDataRow(
             row,
             isSelected,
@@ -90,7 +91,7 @@ export function EntriesTable({
             handleSelectBioData,
           ),
         )}
-        {entriesFlexFields.map((row, index) =>
+        {entriesFlexFields?.map((row, index) =>
           individualDataRow(
             row,
             isSelectedFlexfields,
