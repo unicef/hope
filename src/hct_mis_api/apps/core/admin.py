@@ -221,7 +221,7 @@ class BusinessAreaAdmin(
         "is_accountability_applicable",
     )
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
-    filter_horizontal = ("countries", "partners")
+    filter_horizontal = ("countries", "partners", "payment_countries")
 
     def document_types_valid_for_deduplication(self, obj: Any) -> List:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
