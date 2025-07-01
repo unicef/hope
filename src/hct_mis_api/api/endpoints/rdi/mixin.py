@@ -18,7 +18,11 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import PendingAccount
+from hct_mis_api.apps.payment.models import (
+    AccountType,
+    FinancialInstitution,
+    PendingAccount,
+)
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -40,7 +44,42 @@ class Totals:
     households: int
 
 
-class HouseholdUploadMixin:
+class DocumentMixin:
+    def save_document(self, member: PendingIndividual, doc: Dict) -> None:
+        PendingDocument.objects.create(
+            document_number=doc["document_number"],
+            photo=get_photo_from_stream(doc.get("image", None)),
+            individual=member,
+            country=Country.objects.get(iso_code2=doc["country"]),
+            type=DocumentType.objects.get(key=doc["type"]),
+            program=member.program,
+        )
+
+
+class AccountMixin:
+    def save_account(self, member: PendingIndividual, doc: Dict) -> None:
+        financial_institution_id = doc.pop("financial_institution", None)
+        PendingAccount.objects.create(
+            individual=member,
+            number=doc.pop("number", None),
+            unique_key=doc.pop("unique_key", None),
+            account_type=AccountType.objects.get(key=doc.pop("account_type")),
+            financial_institution=FinancialInstitution.objects.filter(id=financial_institution_id).first(),
+            data={**doc.pop("data"), **doc},
+        )
+
+
+class PhotoMixin:
+    @staticmethod
+    def get_photo(photo: Optional[str]) -> Optional[SimpleUploadedFile]:
+        if photo:
+            data = photo.removeprefix("data:image/png;base64,")
+            p = get_photo_from_stream(data)
+            return p
+        return None
+
+
+class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     def _manage_collision(
         self, household: Household, registration_data_import: RegistrationDataImport
     ) -> Optional[str]:
@@ -54,24 +93,8 @@ class HouseholdUploadMixin:
         household_id = colision_detector.detect_collision(household)
         return household_id
 
-    def save_document(self, member: PendingIndividual, doc: Dict) -> None:
-        PendingDocument.objects.create(
-            document_number=doc["document_number"],
-            photo=get_photo_from_stream(doc.get("image", None)),
-            individual=member,
-            country=Country.objects.get(iso_code2=doc["country"]),
-            type=DocumentType.objects.get(key=doc["type"]),
-            program=member.program,
-        )
-
-    def save_account(self, member: PendingIndividual, doc: Dict) -> None:
-        PendingAccount.objects.create(individual=member, **doc)
-
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: Dict) -> PendingIndividual:
-        photo = member_data.pop("photo", None)
-        if photo:
-            data = photo.removeprefix("data:image/png;base64,")
-            photo = get_photo_from_stream(data)
+        photo = self.get_photo(member_data.pop("photo", None))
         documents = member_data.pop("documents", [])
         accounts = member_data.pop("accounts", [])
         member_of = None
