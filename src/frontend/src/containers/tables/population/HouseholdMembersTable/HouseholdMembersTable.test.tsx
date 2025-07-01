@@ -232,6 +232,12 @@ describe('HouseholdMembersTable', () => {
       { value: 'EMPLOYED', label: 'Employed' },
       { value: 'UNEMPLOYED', label: 'Unemployed' },
     ],
+    deduplicationBatchStatusChoices: [
+      { value: 'SomeValue', label: 'SomeLabel' },
+    ],
+    deduplicationGoldenRecordStatusChoices: [
+      { value: 'SomeValue', label: 'SomeLabel' },
+    ],
   };
 
   beforeEach(() => {

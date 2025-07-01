@@ -1,27 +1,27 @@
-import { ReactElement, useEffect, useState } from 'react';
-import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import TableCell from '@mui/material/TableCell';
+import { ProgramCyclesQuery } from '@api/programCycleApi';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
+import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
+import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Button } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import {
   decodeIdString,
   formatCurrencyWithSymbol,
   programCycleStatusToColor,
 } from '@utils/utils';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { finishProgramCycle, ProgramCyclesQuery } from '@api/programCycleApi';
-import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
-import { RestService } from '@restgenerated/services/RestService';
-import { createApiParams } from '@utils/apiUtils';
-import { BlackLink } from '@core/BlackLink';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@mui/material';
-import { useSnackbar } from '@hooks/useSnackBar';
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -63,9 +63,20 @@ const ProgramCyclesTablePaymentModule = ({
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
-      mutationFn: async ({ programCycleId }: { programCycleId: string }) => {
-        return finishProgramCycle(businessArea, program.id, programCycleId);
-      },
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsCyclesFinishCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['programCycles', businessArea, program.id],
@@ -107,7 +118,11 @@ const ProgramCyclesTablePaymentModule = ({
   const finishAction = async (programCycle: ProgramCycleList) => {
     try {
       const decodedProgramCycleId = decodeIdString(programCycle.id);
-      await finishMutation({ programCycleId: decodedProgramCycleId });
+      await finishMutation({
+        businessAreaSlug: businessArea,
+        id: decodedProgramCycleId,
+        programSlug: programId,
+      });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
       if (e.data && Array.isArray(e.data)) {

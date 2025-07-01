@@ -14,7 +14,6 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Typography } from '@mui/material';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement, ReactNode, useState } from 'react';
@@ -23,6 +22,7 @@ import { useParams } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 const Container = styled.div`
   && {
@@ -61,7 +61,11 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   const { businessArea, programSlug } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
 
-  const { data, isLoading: loading, error } = useQuery<RegistrationDataImportDetail>({
+  const {
+    data,
+    isLoading: loading,
+    error,
+  } = useQuery<RegistrationDataImportDetail>({
     queryKey: ['registrationDataImport', businessArea, programSlug, id],
     queryFn: () =>
       RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve({
@@ -89,10 +93,10 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
   });
 
   const { data: choicesData, isLoading: choicesLoading } =
-    useQuery<HouseholdChoices>({
-      queryKey: ['householdChoices', businessArea],
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
       queryFn: () =>
-        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
     });

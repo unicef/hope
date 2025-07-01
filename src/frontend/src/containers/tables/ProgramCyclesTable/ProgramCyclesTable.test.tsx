@@ -7,6 +7,10 @@ vi.mock('@api/programCycleApi', () => ({
   reactivateProgramCycle: vi.fn(),
 }));
 
+const programCycleApi = require('@api/programCycleApi');
+const finishProgramCycle = programCycleApi.finishProgramCycle;
+const reactivateProgramCycle = programCycleApi.reactivateProgramCycle;
+
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -14,10 +18,6 @@ import { renderWithProviders } from 'src/testUtils/testUtils';
 import { act } from '@testing-library/react';
 import ProgramCyclesTablePaymentModule from './ProgramCyclesTable';
 import { RestService } from '@restgenerated/services/RestService';
-import {
-  finishProgramCycle,
-  reactivateProgramCycle,
-} from '@api/programCycleApi';
 import { restBusinessAreasProgramsCyclesList } from 'src/mocks/responses/restBusinessAreasProgramsCyclesList';
 
 describe('ProgramCyclesTable', () => {
