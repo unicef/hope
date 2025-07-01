@@ -26,18 +26,17 @@ export const NewIdentityFieldArray = ({
         render={(arrayHelpers) => (
           <>
             {values.individualDataUpdateFieldsIdentities?.map((item) => {
-              const existingOrNewId = item.node?.id || item.id;
               return (
                 <Grid
                   size={{ xs: 12 }}
-                  key={`${existingOrNewId}-${item?.country}-${item?.partner}`}
+                  key={`${item?.id}-${item?.country}-${item?.partner}`}
                 >
                   <AgencyField
-                    id={existingOrNewId}
+                    id={item?.id}
                     onDelete={() =>
                       removeItemById(
                         values.individualDataUpdateFieldsIdentities,
-                        existingOrNewId,
+                        item?.id,
                         arrayHelpers,
                       )
                     }

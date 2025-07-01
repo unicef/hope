@@ -21,19 +21,19 @@ export function ExistingIdentityFieldArray({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
 
-  return individual?.identities?.edges?.length > 0 ? (
+  return individual?.identities?.length > 0 ? (
     <Grid container spacing={3}>
       <FieldArray
         name="individualDataUpdateIdentitiesToEdit"
         render={(arrayHelpers) => (
           <>
-            {individual.identities.edges.map((item) => (
-              <Grid size={{ xs: 12 }} key={item.node.id}>
+            {individual.identities.map((item) => (
+              <Grid size={{ xs: 12 }} key={item.id}>
                 <EditIdentityRow
                   setFieldValue={setFieldValue}
                   values={values}
                   identity={item}
-                  id={item.node.id}
+                  id={item.id}
                   arrayHelpers={arrayHelpers}
                   addIndividualFieldsData={addIndividualFieldsData}
                 />

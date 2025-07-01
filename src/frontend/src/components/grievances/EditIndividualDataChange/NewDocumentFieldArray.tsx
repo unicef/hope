@@ -28,18 +28,17 @@ export function NewDocumentFieldArray({
         render={(arrayHelpers) => (
           <>
             {values.individualDataUpdateFieldsDocuments?.map((item) => {
-              const existingOrNewId = item.node?.id || item.id;
               return (
                 <Grid
                   size={{ xs: 12 }}
-                  key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
+                  key={`${item?.id}-${item?.country}-${item?.type?.key}`}
                 >
                   <DocumentField
-                    id={existingOrNewId}
+                    id={item?.id}
                     onDelete={() =>
                       removeItemById(
                         values.individualDataUpdateFieldsDocuments,
-                        existingOrNewId,
+                        item?.id,
                         arrayHelpers,
                       )
                     }

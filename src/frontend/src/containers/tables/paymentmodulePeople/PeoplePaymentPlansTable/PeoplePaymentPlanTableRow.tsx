@@ -30,15 +30,15 @@ export const PeoplePaymentPlanTableRow = ({
   };
 
   const followUpLinks = (): ReactElement => {
-    if (!plan.followUps?.edges?.length) return <>-</>;
+    if (!plan.followUps?.length) return <>-</>;
     return (
       <Box display="flex" flexDirection="column">
-        {plan.followUps?.edges?.map((followUp) => {
-          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
+        {plan.followUps?.map((followUp) => {
+          const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.id}`;
           return (
-            <Box key={followUp?.node?.id} mb={1}>
-              <BlackLink key={followUp?.node?.id} to={followUpPaymentPlanPath}>
-                {followUp?.node?.unicefId}
+            <Box key={followUp?.id} mb={1}>
+              <BlackLink key={followUp?.id} to={followUpPaymentPlanPath}>
+                {followUp?.unicefId}
               </BlackLink>
             </Box>
           );
