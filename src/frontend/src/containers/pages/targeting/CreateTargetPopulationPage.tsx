@@ -7,6 +7,7 @@ import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCr
 import {
   useBusinessAreaDataQuery,
   useCreateTpMutation,
+  useProgramQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
@@ -54,16 +55,21 @@ const CreateTargetPopulationPage = (): ReactElement => {
   const permissions = usePermissions();
   const navigate = useNavigate();
 
+  const { data: programData } = useProgramQuery({
+    variables: { id: programId },
+  });
+
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
   });
 
   if (permissions === null) return null;
   if (!businessAreaData) return null;
+  if (!programData) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
 
-  const screenBeneficiary = businessAreaData?.businessArea?.screenBeneficiary;
+  const screenBeneficiary = programData?.program?.screenBeneficiary;
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Targeting Name is required'))
