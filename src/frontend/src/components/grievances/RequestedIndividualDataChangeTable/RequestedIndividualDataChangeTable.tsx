@@ -52,7 +52,7 @@ export function RequestedIndividualDataChangeTable({
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
     queryKey: ['countriesList'],
-    queryFn: () => RestService.restLookupsCountryList({}),
+    queryFn: () => RestService.restChoicesCountriesList(),
   });
 
   const individualData = {
@@ -76,16 +76,9 @@ export function RequestedIndividualDataChangeTable({
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
   const entriesFlexFields = flexFields && Object.entries(flexFields);
-  const fieldsDict = useArrayToDict(
-    addIndividualFieldsData?.results,
-    'name',
-    '*',
-  );
-  const countriesDict = useArrayToDict(
-    countriesData?.results,
-    'isoCode2',
-    'name',
-  );
+  //@ts-ignore
+  const fieldsDict = useArrayToDict(addIndividualFieldsData, 'name', '*');
+  const countriesDict = useArrayToDict(countriesData, 'name', 'value');
   const documentTypeDict = useArrayToDict(
     individualChoicesData?.documentTypeChoices,
     'value',
