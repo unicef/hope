@@ -278,16 +278,10 @@ export const NeedsAdjudicationDetailsOld = ({
               </UniversalMoment>
             </TableCell>
             <TableCell align="left">
-              {
-                details.goldenRecordsIndividual?.documents?.edges[0]?.node.type
-                  .label
-              }
+              {details.goldenRecordsIndividual?.documents[0]?.type.label}
             </TableCell>
             <TableCell align="left">
-              {
-                details.goldenRecordsIndividual?.documents?.edges[0]?.node
-                  .documentNumber
-              }
+              {details.goldenRecordsIndividual?.documents[0].documentNumber}
             </TableCell>
             <TableCell align="left">
               {details.goldenRecordsIndividual?.household?.admin2?.name}
@@ -355,13 +349,10 @@ export const NeedsAdjudicationDetailsOld = ({
               </UniversalMoment>
             </TableCell>
             <TableCell align="left">
-              {details.possibleDuplicate?.documents?.edges[0]?.node.type.label}
+              {details.possibleDuplicate?.documents[0]?.type.label}
             </TableCell>
             <TableCell align="left">
-              {
-                details.possibleDuplicate?.documents?.edges[0]?.node
-                  .documentNumber
-              }
+              {details.possibleDuplicate?.documents?.documentNumber}
             </TableCell>
             <TableCell align="left">
               {details.possibleDuplicate?.household?.admin2?.name}

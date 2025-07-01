@@ -136,9 +136,9 @@ export const FlagDetails = ({
               </UniversalMoment>
             </TableCell>
             <TableCell align="left">
-              {details.goldenRecordsIndividual.documents.edges
-                .filter((item) => item.node.type.key === 'NATIONAL_ID')
-                .map((item) => item.node.documentNumber)
+              {details.goldenRecordsIndividual.documents
+                .filter((item) => item.type.key === 'NATIONAL_ID')
+                .map((item) => item.documentNumber)
                 .join(', ') || '-'}
             </TableCell>
             <TableCell align="left">{t('Golden Record')}</TableCell>
@@ -152,13 +152,13 @@ export const FlagDetails = ({
               {details.sanctionListIndividual.fullName}
             </TableCell>
             <TableCell align="left">
-              {details.sanctionListIndividual.datesOfBirth.edges
-                .map((item) => moment(item.node.date).format(DATE_FORMAT))
+              {details.sanctionListIndividual.datesOfBirth
+                .map((item) => moment(item.date).format(DATE_FORMAT))
                 .join(', ') || '-'}
             </TableCell>
             <TableCell align="left">
-              {details.sanctionListIndividual.documents.edges
-                .map((item) => item.node.documentNumber)
+              {details.sanctionListIndividual.documents
+                .map((item) => item.documentNumber)
                 .join(', ') || '-'}
             </TableCell>
             <TableCell align="left">{t('Sanction List')}</TableCell>

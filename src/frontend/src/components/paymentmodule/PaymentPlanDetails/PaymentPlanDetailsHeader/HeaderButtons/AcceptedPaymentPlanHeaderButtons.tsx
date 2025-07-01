@@ -40,17 +40,16 @@ export function AcceptedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
 
-  // TODO: Replace with proper REST API call when available
-  // Temporary mock data structure to match GraphQL response
   const { data, isLoading: loading } = useQuery({
-    queryKey: ['fspXlsxTemplates'],
-    queryFn: () =>
-      Promise.resolve({
-        allFinancialServiceProviderXlsxTemplates: {
-          // ({ variables: { businessArea } }) filter by BA
-          edges: [], // Empty array for now - will be populated when REST endpoint is available
+    queryKey: ['fspXlsxTemplates', businessArea, programId],
+    queryFn: async () => {
+      return RestService.restBusinessAreasProgramsPaymentPlansFspXlsxTemplateListList(
+        {
+          businessAreaSlug: businessArea,
+          programSlug: programId,
         },
-      }),
+      );
+    },
   });
 
   const { mutateAsync: sendXlsxPassword, isPending: loadingSend } = useMutation(
@@ -216,13 +215,11 @@ export function AcceptedPaymentPlanHeaderButtons({
               size="small"
               data-cy="select-template"
             >
-              {data.allFinancialServiceProviderXlsxTemplates.edges.map(
-                ({ node }) => (
-                  <MenuItem key={node.id} value={node.id}>
-                    {node.name}
-                  </MenuItem>
-                ),
-              )}
+              {data.results.map((template) => (
+                <MenuItem key={template.id} value={template.id}>
+                  {template.name}
+                </MenuItem>
+              ))}
             </Select>
           </DialogContent>
           <DialogActions>

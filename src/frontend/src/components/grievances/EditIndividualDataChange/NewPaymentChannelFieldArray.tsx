@@ -24,15 +24,14 @@ export function NewPaymentChannelFieldArray({
         render={(arrayHelpers) => (
           <>
             {values.individualDataUpdateFieldsPaymentChannels?.map((item) => {
-              const existingOrNewId = item.node?.id || item.id;
               return (
                 <PaymentChannelField
-                  id={existingOrNewId}
-                  key={existingOrNewId}
+                  id={item?.id}
+                  key={item?.id}
                   onDelete={() =>
                     removeItemById(
                       values.individualDataUpdateFieldsPaymentChannels,
-                      existingOrNewId,
+                      item?.id,
                       arrayHelpers,
                     )
                   }
@@ -41,7 +40,7 @@ export function NewPaymentChannelFieldArray({
                 />
               );
             })}
-            <Grid size={{ xs:8 }} />
+            <Grid size={{ xs: 8 }} />
             <Grid size={{ xs: 12 }}>
               <Button
                 color="primary"

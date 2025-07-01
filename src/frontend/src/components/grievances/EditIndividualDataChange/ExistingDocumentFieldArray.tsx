@@ -27,12 +27,12 @@ export function ExistingDocumentFieldArray({
         render={(arrayHelpers) => (
           <>
             {individual.documents.map((item) => (
-              <Grid size={{ xs: 12 }} key={item.node.id}>
+              <Grid size={{ xs: 12 }} key={item.id}>
                 <EditDocumentRow
                   setFieldValue={setFieldValue}
                   values={values}
                   document={item}
-                  id={item.node.id}
+                  id={item.id}
                   arrayHelpers={arrayHelpers}
                   addIndividualFieldsData={addIndividualFieldsData}
                 />

@@ -1,5 +1,5 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { AllProgramsQuery, ChoiceObject } from '@generated/graphql';
+import { ChoiceObject } from '@generated/graphql';
 import { Choice } from '@restgenerated/models/Choice';
 import { PaymentPlanBackgroundActionStatusEnum as PaymentPlanBackgroundActionStatus } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
 import { PaymentPlanStatusEnum as PaymentPlanStatus } from '@restgenerated/models/PaymentPlanStatusEnum';
@@ -638,14 +638,6 @@ export function decodeIdString(idString: string): string | null {
     console.error('Failed to decode string:', e, idString);
     return null;
   }
-}
-export function programCompare(
-  a: AllProgramsQuery['allPrograms']['edges'][number],
-  b: AllProgramsQuery['allPrograms']['edges'][number],
-): number {
-  const statusA = programStatusToPriority(a.node.status);
-  const statusB = programStatusToPriority(b.node.status);
-  return statusA > statusB ? 1 : -1;
 }
 
 export function formatCurrency(
