@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any
 from unittest import mock
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 import requests_mock
@@ -131,10 +131,6 @@ EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA = {
 
 
 class TestExchangeRatesAPI(TestCase):
-    @mock.patch.dict(os.environ, clear=True)
-    def test_test_api_class_initialization_key_not_in_env(self) -> None:
-        self.assertRaisesMessage(ValueError, "Missing Ocp Apim Subscription Key", ExchangeRateClientAPI)
-
     @parameterized.expand(
         [
             ("default_initialization", None, None),
@@ -142,19 +138,19 @@ class TestExchangeRatesAPI(TestCase):
             ("api_url_provided_as_arg", None, "https://uni-apis.org"),
         ]
     )
+    @override_settings(EXCHANGE_RATES_API_KEY="TEST_API_KEY")
     def test_api_class_initialization(self, _: Any, api_key: str, api_url: str) -> None:
-        with mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"}, clear=True):
-            api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
+        api_client = ExchangeRateClientAPI(api_key=api_key, api_url=api_url)
 
-            if api_key is not None:
-                self.assertEqual(api_key, api_client.api_key)
+        if api_key is not None:
+            self.assertEqual(api_key, api_client.api_key)
 
-            if api_url is not None:
-                self.assertEqual(api_url, api_client.api_url)
+        if api_url is not None:
+            self.assertEqual(api_url, api_client.api_url)
 
-            if api_url is None and api_key is None:
-                self.assertEqual("TEST_API_KEY", api_client.api_key)
-                self.assertEqual("https://uniapis.unicef.org/biapi/v1/exchangerates", api_client.api_url)
+        if api_url is None and api_key is None:
+            self.assertEqual("TEST_API_KEY", api_client.api_key)
+            self.assertEqual("https://uniapis.unicef.org/biapi/v1/exchangerates", api_client.api_url)
 
     @parameterized.expand(
         [

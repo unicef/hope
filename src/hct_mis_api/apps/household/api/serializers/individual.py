@@ -382,6 +382,11 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "flex_fields",
             "linked_grievances",
             "photo",
+            # for grievance table
+            "enrolled_in_nutrition_programme",
+            "who_answers_phone",
+            "who_answers_alt_phone",
+            "payment_delivery_phone_no",
         )
 
     def get_role(self, obj: Individual) -> str:
