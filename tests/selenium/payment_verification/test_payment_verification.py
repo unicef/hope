@@ -271,9 +271,9 @@ class TestSmokePaymentVerification:
         assert "Payment Verification" in pagePaymentVerification.getPageHeaderTitle().text
         assert "List of Payment Plans" in pagePaymentVerification.getTableTitle().text
         assert "Payment Plan ID" in pagePaymentVerification.getUnicefid().text
-        assert "Verification Status" in pagePaymentVerification.getVerificationstatus().text
-        assert "Cash Amount" in pagePaymentVerification.getTotaldeliveredquantity().text
-        assert "Timeframe" in pagePaymentVerification.getStartdate().text
+        assert "Payment Plan Status" in pagePaymentVerification.getVerificationstatus().text
+        assert "Total Amount" in pagePaymentVerification.getTotaldeliveredquantity().text
+        assert "Payment Disbursement Dates" in pagePaymentVerification.getStartdate().text
         assert "Last Modified Date" in pagePaymentVerification.getUpdatedat().text
         assert "PP-0000-00-1122334" in pagePaymentVerification.getCashPlanTableRow().text
         assert "PENDING" in pagePaymentVerification.getStatusContainer().text
@@ -336,7 +336,7 @@ class TestSmokePaymentVerification:
         assert (datetime.now() + relativedelta(months=1)).strftime(
             "%-d %b %Y"
         ) in pagePaymentVerificationDetails.getLabelEndDate().text
-        assert "Bank reconciliation" in pagePaymentVerificationDetails.getTableLabel().text
+        assert "Reconciliation Summary" in pagePaymentVerificationDetails.getTableLabel().text
         payment_verification = add_payment_verification.payment_verification_plan
         assert (
             payment_verification.sampling.lower().replace("_", " ")
