@@ -81,7 +81,7 @@ class LoadSanctionListXMLTask:
         if isinstance(designation_tag, ET.Element):
             designations: List[str] = [value_tag.text for value_tag in individual_tag.find(designation_tag_name)]
             return " ".join(designations)
-        return "" #pragma: no cover
+        return ""  # pragma: no cover
 
     def _get_date_of_births(
         self,
@@ -120,7 +120,7 @@ class LoadSanctionListXMLTask:
                                 date=parsed_date.date(),
                             )
                         )
-                    except Exception: # pragma: no cover
+                    except Exception:  # pragma: no cover
                         pass
                 elif type_of_date == "BETWEEN":
                     from_year: str = date_of_birth_tag.find("FROM_YEAR").text or ""
@@ -516,5 +516,5 @@ class LoadSanctionListXMLTask:
 
 
 class UNSanctionList(BaseSanctionList):
-    def refresh(self) -> None: # pragma: no cover
+    def refresh(self) -> None:  # pragma: no cover
         LoadSanctionListXMLTask(sanction_list=self.context, **self.context.config).load_from_url()
