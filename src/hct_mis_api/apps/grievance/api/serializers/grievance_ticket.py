@@ -309,7 +309,6 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     fchild_hoh = serializers.BooleanField(required=False)
     child_hoh = serializers.BooleanField(required=False)
     start = serializers.DateTimeField(required=False)
-    end = serializers.DateTimeField(required=False)
     name_enumerator = serializers.CharField(required=False)
     org_enumerator = serializers.CharField(required=False)
     org_name_enumerator = serializers.CharField(required=False)

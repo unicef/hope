@@ -1000,6 +1000,10 @@ class TestIndividualDetail:
                 "status": self.grievance_ticket.status,
             }
         ]
+        assert data["enrolled_in_nutrition_programme"] == self.individual1.enrolled_in_nutrition_programme
+        assert data["who_answers_phone"] == self.individual1.who_answers_phone
+        assert data["who_answers_alt_phone"] == self.individual1.who_answers_alt_phone
+        assert data["payment_delivery_phone_no"] == self.individual1.payment_delivery_phone_no
 
     def test_get_individual_photos(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
