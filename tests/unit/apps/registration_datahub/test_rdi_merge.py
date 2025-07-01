@@ -541,6 +541,13 @@ class TestRdiMergeTask(TestCase):
         program = self.rdi.program
         program.biometric_deduplication_enabled = True
         program.save()
+        household = PendingHouseholdFactory(
+            registration_data_import=self.rdi,
+            admin_area=self.area4,
+            admin4=self.area4,
+            zip_code="00-123",
+        )
+        self.set_imported_individuals(household)
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
         create_grievance_tickets_for_duplicates_mock.assert_called_once_with(self.rdi)
