@@ -545,3 +545,10 @@ class TestRdiMergeTask(TestCase):
             RdiMergeTask().execute(self.rdi.pk)
         create_grievance_tickets_for_duplicates_mock.assert_called_once_with(self.rdi)
         update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=self.rdi)
+
+    def test_merge_empty_rdi(self) -> None:
+        rdi = self.rdi
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(rdi.pk)
+        rdi.refresh_from_db()
+        self.assertEqual(rdi.status, RegistrationDataImport.MERGED)

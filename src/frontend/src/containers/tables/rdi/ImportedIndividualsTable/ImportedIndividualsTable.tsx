@@ -49,9 +49,6 @@ function ImportedIndividualsTable({
     household,
     duplicatesOnly: showDuplicates,
     businessArea,
-    rdiMergeStatus: isMerged
-      ? IndividualRdiMergeStatus.Merged
-      : IndividualRdiMergeStatus.Pending,
   };
 
   const replacements = {

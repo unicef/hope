@@ -16,10 +16,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const initialVariables = {
     rdiId: rdi.id,
-    businessArea,
-    rdiMergeStatus: isMerged
-      ? HouseholdRdiMergeStatus.Merged
-      : HouseholdRdiMergeStatus.Pending,
+    businessArea
   };
 
   const { selectedProgram } = useProgramContext();
