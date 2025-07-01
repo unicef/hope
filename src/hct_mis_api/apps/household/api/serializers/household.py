@@ -273,6 +273,13 @@ class HouseholdDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSerial
             "residence_status",
             "program_registration_id",
             "delivered_quantities",
+            # for grievance table
+            "consent",
+            "name_enumerator",
+            "org_enumerator",
+            "org_name_enumerator",
+            "registration_method",
+            "consent_sharing",
         )
 
     def get_has_duplicates(self, obj: Household) -> bool:
