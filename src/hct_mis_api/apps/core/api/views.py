@@ -44,6 +44,7 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     PaymentPlan,
     PaymentVerificationPlan,
+    PaymentVerificationSummary,
 )
 
 
@@ -151,6 +152,12 @@ class ChoicesViewSet(ViewSet):
     @action(detail=False, methods=["get"], url_path="payment-verification-plan-status")
     def payment_verification_plan_status(self, request: Request) -> Response:
         resp = ChoiceSerializer(to_choice_object(PaymentVerificationPlan.STATUS_CHOICES), many=True).data
+        return Response(resp)
+
+    @extend_schema(responses={200: ChoiceSerializer(many=True)})
+    @action(detail=False, methods=["get"], url_path="payment-verification-summary-status")
+    def payment_verification_summary_status(self, request: Request) -> Response:
+        resp = ChoiceSerializer(to_choice_object(PaymentVerificationSummary.STATUS_CHOICES), many=True).data
         return Response(resp)
 
     @extend_schema(responses={200: ChoiceSerializer(many=True)})
