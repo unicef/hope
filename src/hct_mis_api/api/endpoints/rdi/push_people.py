@@ -13,7 +13,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
-from hct_mis_api.api.endpoints.rdi.mixin import get_photo_from_stream
+from hct_mis_api.api.endpoints.rdi.mixin import (
+    AccountMixin,
+    DocumentMixin,
+    PhotoMixin,
+)
 from hct_mis_api.api.endpoints.rdi.upload import (
     AccountSerializer,
     BirthDateValidator,
@@ -28,12 +32,9 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     RESIDENCE_STATUS_CHOICE,
     ROLE_PRIMARY,
-    DocumentType,
-    PendingDocument,
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -95,7 +96,7 @@ class PushPeopleSerializer(serializers.ModelSerializer):
         ]
 
 
-class PeopleUploadMixin:
+class PeopleUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     def save_people(self, rdi: RegistrationDataImport, people_data: List[Dict]) -> List[int]:
         people_ids = []
         for person_data in people_data:
@@ -150,10 +151,7 @@ class PeopleUploadMixin:
     ) -> PendingIndividual:
         individual_fields = [field.name for field in PendingIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
-        photo = individual_data.pop("photo", None)
-        if photo:
-            data = photo.removeprefix("data:image/png;base64,")
-            photo = get_photo_from_stream(data)
+        photo = self.get_photo(individual_data.pop("photo", None))
         person_type = person_data.get("type")
         individual_data.pop("relationship", None)
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
@@ -181,24 +179,12 @@ class PeopleUploadMixin:
             hh.save()
 
         for doc in documents:
-            self._create_document(ind, doc)
+            self.save_document(ind, doc)
 
         for account in accounts:
-            self._create_account(ind, account)
+            self.save_account(ind, account)
+
         return ind
-
-    def _create_document(self, member: PendingIndividual, doc: Dict) -> None:
-        PendingDocument.objects.create(
-            document_number=doc["document_number"],
-            photo=get_photo_from_stream(doc.get("image", None)),
-            individual=member,
-            country=Country.objects.get(iso_code2=doc["country"]),
-            type=DocumentType.objects.get(key=doc["type"]),
-            program=member.program,
-        )
-
-    def _create_account(self, member: PendingIndividual, account: Dict) -> None:
-        PendingAccount.objects.create(individual=member, **account)
 
 
 class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIView):
