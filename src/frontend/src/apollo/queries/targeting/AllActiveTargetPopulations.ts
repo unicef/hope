@@ -8,7 +8,7 @@ export const AllActiveTargetPopulations = gql`
     $last: Int
     $orderBy: String
     $name: String
-    $status: String[]
+    $status: [String]
     $totalHouseholdsCountWithValidPhoneNoMin: Int
     $totalHouseholdsCountWithValidPhoneNoMax: Int
     $totalHouseholdsCountMin: Int

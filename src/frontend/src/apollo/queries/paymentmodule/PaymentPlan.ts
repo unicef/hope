@@ -90,6 +90,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         name
         status
         isSocialWorkerProgram
+        screenBeneficiary
       }
       vulnerabilityScoreMin
       vulnerabilityScoreMax
