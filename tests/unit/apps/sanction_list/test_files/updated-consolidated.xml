@@ -18,7 +18,7 @@
                 <VALUE>Ministry of State Security Official</VALUE>
             </DESIGNATION>
             <NATIONALITY>
-                <VALUE>Democratic Republic</VALUE>
+                <VALUE>PL</VALUE>
             </NATIONALITY>
             <LIST_TYPE>
                 <VALUE>UN List</VALUE>
@@ -31,16 +31,23 @@
                 <ALIAS_NAME/>
             </INDIVIDUAL_ALIAS>
             <INDIVIDUAL_ADDRESS>
-                <COUNTRY/>
+                <COUNTRY>PL</COUNTRY>
             </INDIVIDUAL_ADDRESS>
             <INDIVIDUAL_DATE_OF_BIRTH>
                 <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
                 <DATE>1955-03-13</DATE>
             </INDIVIDUAL_DATE_OF_BIRTH>
-            <INDIVIDUAL_PLACE_OF_BIRTH/>
+            <INDIVIDUAL_DATE_OF_BIRTH>
+                <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
+                <NOTE>1955-03-13</NOTE>
+            </INDIVIDUAL_DATE_OF_BIRTH>
+            <INDIVIDUAL_PLACE_OF_BIRTH>
+                <COUNTRY>PL</COUNTRY>
+            </INDIVIDUAL_PLACE_OF_BIRTH>
             <INDIVIDUAL_DOCUMENT>
                 <TYPE_OF_DOCUMENT>Passport</TYPE_OF_DOCUMENT>
                 <NUMBER>111222333555</NUMBER>
+                <DATE_OF_ISSUE>2025-06-30</DATE_OF_ISSUE>
             </INDIVIDUAL_DOCUMENT>
             <SORT_KEY/>
             <SORT_KEY_LAST_MOD/>
