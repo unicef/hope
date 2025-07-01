@@ -599,6 +599,12 @@ class TestHouseholdDetail:
                 "status": self.grievance_ticket.status,
             }
         ]
+        assert data["consent"] == self.household.consent
+        assert data["name_enumerator"] == self.household.name_enumerator
+        assert data["org_enumerator"] == self.household.org_enumerator
+        assert data["org_name_enumerator"] == self.household.org_name_enumerator
+        assert data["registration_method"] == self.household.registration_method
+        assert data["consent_sharing"] == list(self.household.consent_sharing)
 
     @pytest.mark.parametrize(
         "permissions",
