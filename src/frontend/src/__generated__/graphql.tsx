@@ -23,6 +23,7 @@ export type Scalars = {
   DateTime: { input: any; output: any; }
   Decimal: { input: any; output: any; }
   FlexFieldsScalar: { input: any; output: any; }
+  GenericScalar: { input: any; output: any; }
   JSONString: { input: any; output: any; }
   UUID: { input: any; output: any; }
   Upload: { input: any; output: any; }
@@ -41,12 +42,6 @@ export type AccountNode = Node & {
   number?: Maybe<Scalars['String']['output']>;
   rdiMergeStatus: AccountRdiMergeStatus;
   updatedAt: Scalars['DateTime']['output'];
-};
-
-export type AccountPayloadFieldObjectType = {
-  name: Scalars['String']['input'];
-  previousValue?: InputMaybe<Scalars['String']['input']>;
-  value: Scalars['String']['input'];
 };
 
 export enum AccountRdiMergeStatus {
@@ -1452,10 +1447,8 @@ export enum DocumentStatus {
 }
 
 export type EditAccountObjectType = {
-  approveStatus: Scalars['Boolean']['input'];
-  dataFields: Array<InputMaybe<AccountPayloadFieldObjectType>>;
+  dataFields?: InputMaybe<Scalars['GenericScalar']['input']>;
   id: Scalars['ID']['input'];
-  label: Scalars['String']['input'];
 };
 
 export type EditIndividualDocumentObjectType = {
@@ -21390,7 +21383,6 @@ export type ResolversInterfaceTypes<_RefType extends Record<string, unknown>> = 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   AccountNode: ResolverTypeWrapper<AccountNode>;
-  AccountPayloadFieldObjectType: AccountPayloadFieldObjectType;
   AccountRdiMergeStatus: AccountRdiMergeStatus;
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput;
   AccountabilityFullListArguments: AccountabilityFullListArguments;
@@ -21542,6 +21534,7 @@ export type ResolversTypes = {
   FundsCommitmentNode: ResolverTypeWrapper<FundsCommitmentNode>;
   GenericPaymentNode: ResolverTypeWrapper<GenericPaymentNode>;
   GenericPaymentPlanNode: ResolverTypeWrapper<GenericPaymentPlanNode>;
+  GenericScalar: ResolverTypeWrapper<Scalars['GenericScalar']['output']>;
   GetAccountabilityCommunicationMessageSampleSizeInput: GetAccountabilityCommunicationMessageSampleSizeInput;
   GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput;
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>;
@@ -21870,7 +21863,6 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   AccountNode: AccountNode;
-  AccountPayloadFieldObjectType: AccountPayloadFieldObjectType;
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput;
   AccountabilityFullListArguments: AccountabilityFullListArguments;
   AccountabilityRandomSamplingArguments: AccountabilityRandomSamplingArguments;
@@ -22013,6 +22005,7 @@ export type ResolversParentTypes = {
   FundsCommitmentNode: FundsCommitmentNode;
   GenericPaymentNode: GenericPaymentNode;
   GenericPaymentPlanNode: GenericPaymentPlanNode;
+  GenericScalar: Scalars['GenericScalar']['output'];
   GetAccountabilityCommunicationMessageSampleSizeInput: GetAccountabilityCommunicationMessageSampleSizeInput;
   GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput;
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject;
@@ -23342,6 +23335,10 @@ export type GenericPaymentPlanNodeResolvers<ContextType = any, ParentType extend
   verificationPlans?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, Partial<GenericPaymentPlanNodeVerificationPlansArgs>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
+
+export interface GenericScalarScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['GenericScalar'], any> {
+  name: 'GenericScalar';
+}
 
 export type GetCashplanVerificationSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCashplanVerificationSampleSizeObject'] = ResolversParentTypes['GetCashplanVerificationSampleSizeObject']> = {
   paymentRecordCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -26115,6 +26112,7 @@ export type Resolvers<ContextType = any> = {
   FundsCommitmentNode?: FundsCommitmentNodeResolvers<ContextType>;
   GenericPaymentNode?: GenericPaymentNodeResolvers<ContextType>;
   GenericPaymentPlanNode?: GenericPaymentPlanNodeResolvers<ContextType>;
+  GenericScalar?: GraphQLScalarType;
   GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>;
   GetCommunicationMessageSampleSizeNode?: GetCommunicationMessageSampleSizeNodeResolvers<ContextType>;
   GrievanceDocumentNode?: GrievanceDocumentNodeResolvers<ContextType>;

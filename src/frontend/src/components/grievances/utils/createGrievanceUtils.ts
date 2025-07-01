@@ -236,6 +236,14 @@ function prepareEditIndividualVariables(requiredVariables, values) {
     values.individualDataUpdateFieldsIdentities,
   );
 
+  const accountsToEdit = values.individualDataUpdateAccountsToEdit.map(account => {
+    const { id, ...dataFields } = account;
+    return {
+        id,
+        dataFields,
+    };
+});
+
   return {
     variables: {
       input: {
@@ -255,7 +263,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
-                accountsToEdit: values.individualDataUpdateAccountsToEdit,
+                accountsToEdit: accountsToEdit,
               },
             },
           },

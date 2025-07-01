@@ -1,4 +1,5 @@
 import graphene
+from graphene.types.generic import GenericScalar
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.schema import PartnerType, UserNode
@@ -127,23 +128,19 @@ class EditIndividualIdentityObjectType(graphene.InputObjectType):
     number = graphene.String(required=True)
 
 
-class AccountPayloadFieldObjectType(graphene.InputObjectType):
-    name = graphene.String(required=True)
-    value = graphene.String(required=True)
-    previous_value = graphene.String(required=False)
+# class AccountPayloadFieldObjectType(graphene.InputObjectType):
+#     name = graphene.String(required=True)
+#     value = graphene.String(required=True)
+#     previous_value = graphene.String(required=False)
 
 
 class AccountObjectType(graphene.InputObjectType):
-    label = graphene.String(required=True)
-    approve_status = graphene.Boolean(required=True)
-    data_fields = graphene.List(AccountPayloadFieldObjectType, required=True)
+    account_type = graphene.String(required=True)
 
 
 class EditAccountObjectType(graphene.InputObjectType):
-    id = graphene.Field(graphene.ID, required=True)
-    label = graphene.String(required=True)
-    approve_status = graphene.Boolean(required=True)
-    data_fields = graphene.List(AccountPayloadFieldObjectType, required=True)
+    id = graphene.ID(required=True)
+    data_fields = GenericScalar()
 
 
 class IndividualUpdateDataObjectType(graphene.InputObjectType):

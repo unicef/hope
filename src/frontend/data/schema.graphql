@@ -17,12 +17,6 @@ type AccountNode implements Node {
   dataFields: JSONString
 }
 
-input AccountPayloadFieldObjectType {
-  name: String!
-  value: String!
-  previousValue: String
-}
-
 enum AccountRdiMergeStatus {
   PENDING
   MERGED
@@ -966,9 +960,7 @@ enum DocumentStatus {
 
 input EditAccountObjectType {
   id: ID!
-  label: String!
-  approveStatus: Boolean!
-  dataFields: [AccountPayloadFieldObjectType]!
+  dataFields: GenericScalar
 }
 
 input EditIndividualDocumentObjectType {
@@ -1281,6 +1273,8 @@ type GenericPaymentPlanNode {
   totalUndeliveredQuantity: Float
   canCreatePaymentVerificationPlan: Boolean
 }
+
+scalar GenericScalar
 
 input GetAccountabilityCommunicationMessageSampleSizeInput {
   households: [ID]

@@ -67,7 +67,7 @@ export function AccountToEditTable({
       <TableTitle>
         <Box display="flex" justifyContent="space-between">
           <Typography variant="h6">
-            {t('Account to be edited')}
+            {t('Account to be edited')} - {account.name}
           </Typography>
         </Box>
       </TableTitle>

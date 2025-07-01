@@ -1,11 +1,11 @@
-import {Box, Grid2 as Grid, IconButton, Typography} from '@mui/material';
+import { Box, Grid2 as Grid, IconButton, Typography } from '@mui/material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
 import React, { Fragment, ReactElement, useState } from 'react';
 import { AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
-import { AccountField } from "@components/grievances/AccountField";
+import { AccountField } from '@components/grievances/AccountField';
 
 export interface EditAccountRowProps {
   values;
@@ -39,7 +39,7 @@ export function EditAccountRow({
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
-              ...account.dataFields
+              ...account.dataFields,
             });
             setEdit(false);
           }}

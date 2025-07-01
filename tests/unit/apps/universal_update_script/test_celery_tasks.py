@@ -1,6 +1,6 @@
 import pytest
-
 from apps.payment.models import AccountType
+
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
