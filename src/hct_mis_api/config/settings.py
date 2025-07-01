@@ -66,14 +66,6 @@ MEDIA_ROOT = env("HCT_MIS_UPLOADS_PATH") or os.path.join(DATA_VOLUME, UPLOADS_DI
 FILE_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25mb
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 
-GRIEVANCE_ONE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
-GRIEVANCE_UPLOAD_CONTENT_TYPES = (
-    "image/jpeg",
-    "image/png",
-    "image/tiff",
-    "application/pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-)
 
 # static resources related. See documentation at: http://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 STATIC_URL = "/api/static/"
@@ -332,7 +324,6 @@ GRAPH_MODELS = {
 
 PHONENUMBER_DEFAULT_REGION = "US"
 
-SANCTION_LIST_CC_MAIL = env("SANCTION_LIST_CC_MAIL")
 
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
@@ -365,7 +356,6 @@ ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
-EXCHANGE_RATE_CACHE_EXPIRY = env.int("EXCHANGE_RATE_CACHE_EXPIRY")
 
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 
@@ -442,7 +432,6 @@ SWAGGER_SETTINGS = {
 }
 
 MAX_STORAGE_FILE_SIZE = 30
-USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES") == "yes"
 
 FLAGS_STATE_LOGGING = DEBUG
 FLAGS = {
@@ -469,7 +458,6 @@ SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
 FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
-DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
 UNICEF_HQ_PARTNER = "UNICEF HQ"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -481,6 +469,7 @@ from hct_mis_api.config.fragments.debug_toolbar import *  # noqa: F403, F401, E4
 from hct_mis_api.config.fragments.drf import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.drf_spectacular import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.es import *  # noqa: F403, F401, E402
+from hct_mis_api.config.fragments.hope import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.kobo import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.loggers import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.mailjet import *  # noqa: F403, F401, E402
