@@ -37,7 +37,7 @@ from hct_mis_api.apps.registration_datahub.services.biometric_deduplication impo
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
-    CheckAgainstSanctionListPreMergeTask,
+    check_against_sanction_list_pre_merge,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     populate_index,
@@ -192,9 +192,11 @@ class RdiMergeTask:
                         )
 
                     # SANCTION LIST CHECK
-                    if obj_hct.should_check_against_sanction_list() and obj_hct.business_area.screen_beneficiary:
+                    if obj_hct.should_check_against_sanction_list() and obj_hct.program.sanction_lists.exists():
                         logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
-                        CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
+                        check_against_sanction_list_pre_merge(
+                            program_id=obj_hct.program.id, registration_data_import=obj_hct
+                        )
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
                     # synchronously deduplicate documents
