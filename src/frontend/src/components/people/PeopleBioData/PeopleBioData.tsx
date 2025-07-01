@@ -73,7 +73,7 @@ export const PeopleBioData = ({
     </Grid>
   ));
 
-  const mappedIdentities = individual?.identities?.edges?.map((item) => (
+  const mappedIdentities = individual?.identities?.map((item) => (
     <Grid size={{ xs: 3 }} key={item.id}>
       <Box flexDirection="column">
         <Box mb={1}>

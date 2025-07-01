@@ -211,15 +211,14 @@ function AddIndividualDataChange({
             render={(arrayHelpers) => (
               <>
                 {values.individualData?.documents?.map((item) => {
-                  const existingOrNewId = item.node?.id || item.id;
                   return (
                     <DocumentField
-                      id={existingOrNewId}
-                      key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
+                      id={item?.id}
+                      key={`${item?.id}-${item?.country}-${item?.type?.key}`}
                       onDelete={() =>
                         removeItemById(
                           values.individualData.documents,
-                          existingOrNewId,
+                          item?.id,
                           arrayHelpers,
                         )
                       }
@@ -260,15 +259,14 @@ function AddIndividualDataChange({
             render={(arrayHelpers) => (
               <>
                 {values.individualData?.identities?.map((item) => {
-                  const existingOrNewId = item.node?.id || item.id;
                   return (
                     <AgencyField
-                      key={existingOrNewId}
-                      id={existingOrNewId}
+                      key={item?.id}
+                      id={item?.id}
                       onDelete={() =>
                         removeItemById(
                           values.individualData.identities,
-                          existingOrNewId,
+                          item?.id,
                           arrayHelpers,
                         )
                       }

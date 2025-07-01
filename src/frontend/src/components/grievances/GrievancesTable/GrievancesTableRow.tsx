@@ -96,7 +96,7 @@ export function GrievancesTableRow({
   const onFilterChange = async (assignee, ids): Promise<void> => {
     if (assignee) {
       await mutateAsync({
-        assignedTo: assignee.node.id,
+        assignedTo: assignee.id,
         grievanceTicketIds: ids,
       });
     }

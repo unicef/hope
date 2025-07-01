@@ -68,7 +68,7 @@ function AcceptanceProcess({
     hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
     (paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
       paymentPlan.status === PaymentPlanStatusEnum.FINISHED ||
-    paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW);
+      paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW);
 
   return (
     <Box m={5}>
@@ -89,10 +89,10 @@ function AcceptanceProcess({
             </LoadingButton>
           )}
         </Box>
-        {matchDataSize(approvalProcess).map((edge) => (
+        {matchDataSize(approvalProcess).map((item) => (
           <AcceptanceProcessRow
-            key={edge.node.id}
-            acceptanceProcess={edge.node}
+            key={item.id}
+            acceptanceProcess={item}
             paymentPlan={paymentPlan}
           />
         ))}
