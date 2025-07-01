@@ -40,12 +40,12 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
     <Overview>
       <Title>
         <Typography variant="h6">
-          {t(`${beneficiaryGroup?.memberLabel} Delivery Mechanisms`)}
+          {t(`${beneficiaryGroup?.memberLabel} Accounts`)}
         </Typography>
       </Title>
       <Grid container spacing={6}>
         {individual.accounts.map((mechanism, index) => {
-          const tabData = JSON.parse(mechanism.individualTabData);
+          const tabData = JSON.parse(mechanism.dataFields);
           return (
             <Grid size={{ xs: 12 }} key={index}>
               <Typography variant="h6">{mechanism.name}</Typography>

@@ -255,6 +255,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
+                accountsToEdit: values.individualDataUpdateAccountsToEdit,
               },
             },
           },

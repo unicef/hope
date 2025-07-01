@@ -1,5 +1,6 @@
+import dataclasses
 from datetime import date, datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
@@ -41,6 +42,8 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     to_phone_number_str,
     update_es,
     verify_flex_fields,
+    handle_update_account,
+    prepare_edit_accounts,
 )
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_update_service,
@@ -57,6 +60,20 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 )
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
+@dataclasses.dataclass
+class AccountPayloadField:
+    name: str
+    value: Optional[str] = None
+    previous_value: Optional[str] = None
+
+
+@dataclasses.dataclass
+class AccountPayload:
+    id: str
+    name: str
+    approve_status: bool
+    data_fields: List[AccountPayloadField]
+
 
 class IndividualDataUpdateService(DataChangeService):
     def save(self) -> List[GrievanceTicket]:
@@ -72,6 +89,7 @@ class IndividualDataUpdateService(DataChangeService):
         identities = individual_data.pop("identities", [])
         identities_to_remove = individual_data.pop("identities_to_remove", [])
         identities_to_edit = individual_data.pop("identities_to_edit", [])
+        accounts_to_edit = individual_data.pop("accounts_to_edit", [])
         to_phone_number_str(individual_data, "phone_no")
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
@@ -117,6 +135,9 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
             identities_to_remove_with_approve_status
         )
+        individual_data_with_approve_status["accounts_to_edit"] = prepare_edit_accounts(
+            accounts_to_edit
+        )
         individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
 
         ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
@@ -139,6 +160,7 @@ class IndividualDataUpdateService(DataChangeService):
         identities = new_individual_data.pop("identities", [])
         identities_to_remove = new_individual_data.pop("identities_to_remove", [])
         identities_to_edit = new_individual_data.pop("identities_to_edit", [])
+        accounts_to_edit = new_individual_data.pop("accounts_to_edit", [])
         flex_fields = {
             to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()
         }
@@ -187,6 +209,9 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
             identities_to_remove_with_approve_status
         )
+        individual_data_with_approve_status["accounts_to_edit"] = prepare_edit_accounts(
+            accounts_to_edit
+        )
         individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
         ticket_details.individual_data = individual_data_with_approve_status
         ticket_details.save()
@@ -224,6 +249,11 @@ class IndividualDataUpdateService(DataChangeService):
         ]
         identities_to_edit = [
             identity for identity in individual_data.pop("identities_to_edit", []) if is_approved(identity)
+        ]
+        accounts_to_edit = [
+            account["value"]
+            for account in individual_data.pop("accounts_to_edit", [])
+            if is_approved(account)
         ]
         only_approved_data = {
             field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
@@ -296,6 +326,8 @@ class IndividualDataUpdateService(DataChangeService):
         documents_to_update = [handle_edit_document(document.get("value", {})) for document in documents_to_edit]
         identities_to_create = [handle_add_identity(identity, new_individual) for identity in identities]
         identities_to_update = [handle_edit_identity(identity) for identity in identities_to_edit]
+        for account in accounts_to_edit:
+            handle_update_account(account)
         Document.objects.bulk_create(documents_to_create)
         Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
         Document.objects.filter(id__in=documents_to_remove).delete()

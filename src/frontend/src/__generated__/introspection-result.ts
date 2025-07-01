@@ -7,7 +7,7 @@
       const result: PossibleTypesResultData = {
   "possibleTypes": {
     "Node": [
-      "AccountsNode",
+      "AccountNode",
       "ApprovalProcessNode",
       "AreaNode",
       "AreaTypeNode",

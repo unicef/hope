@@ -12,6 +12,8 @@ import { EntriesTable } from './EntriesTable';
 import { IdentitiesTable } from './IdentitiesTable';
 import { IdentitiesToEditTable } from './IdentitiesToEditTable';
 import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
+import { AccountToEditTable } from './AccountToEditTable';
+
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -39,6 +41,7 @@ export function RequestedIndividualDataChangeTable({
     previous_identities: previousIdentities,
     identities_to_remove: identitiesToRemove,
     identities_to_edit: identitiesToEdit,
+    accounts_to_edit: accountsToEdit,
     flex_fields: flexFields,
     ...restIndividualData
   } = individualData;
@@ -135,6 +138,19 @@ export function RequestedIndividualDataChangeTable({
               countriesDict={countriesDict}
               index={index}
               identity={identity}
+            />
+          ))
+        : null}
+      {accountsToEdit?.length
+        ? accountsToEdit.map((account, index) => (
+            <AccountToEditTable
+              key={account.id}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              index={index}
+              account={account}
             />
           ))
         : null}

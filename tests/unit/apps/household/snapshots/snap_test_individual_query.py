@@ -818,11 +818,11 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
             'birthDate': '1943-07-30',
             'accounts': [
                 {
-                    'individualTabData': '{"card_expiry_date": "2022-01-01", "card_number": "123", "name_of_cardholder": "Marek", "number": "123", "financial_institution": "123"}',
+                    'individualTabData': '{"card_expiry_date": "2022-01-01", "card_number": "123", "financial_institution": "123", "name_of_cardholder": "Marek", "number": "123"}',
                     'name': 'Bank'
                 },
                 {
-                    'individualTabData': '{"delivery_phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC", "number": "321", "financial_institution": "123"}',
+                    'individualTabData': '{"delivery_phone_number": "123456789", "number": "321", "financial_institution": "123", "provider": "Provider", "service_provider_code": "ABC"}',
                     'name': 'Mobile'
                 }
             ],

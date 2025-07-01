@@ -92,7 +92,7 @@ export function validate(
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
         !values.individualDataUpdateIdentitiesToEdit?.length &&
-        !values.individualDataUpdateDeliveryMechanismDataToEdit?.length
+        !values.individualDataUpdateAccountsToEdit?.length
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
       }
@@ -162,6 +162,16 @@ export function validate(
             if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
+            }
+          });
+      }
+      if (values.individualDataUpdateFieldsAccountsToEdit?.length) {
+        values.individualDataUpdateFieldsAccountsToEdit
+          .filter((el) => el)
+          .forEach((doc) => {
+            if (!doc.number) {
+              errors.individualDataUpdateFieldsAccountsToEdit =
+                'Number is required';
             }
           });
       }
@@ -314,6 +324,7 @@ export function validateUsingSteps(
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
         !values.individualDataUpdateIdentitiesToEdit?.length &&
+        !values.individualDataUpdateAccountsToEdit?.length &&
         activeStep === GrievanceSteps.Description
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
@@ -381,6 +392,18 @@ export function validateUsingSteps(
             if (!docValue.country || !partner || !docValue.number) {
               errors.individualDataUpdateFieldsIdentitiesToEdit =
                 'Identity partner, country and number are required';
+            }
+          },
+        );
+      }
+      if (values.individualDataUpdateFieldsAccountsToEdit?.length) {
+        values.individualDataUpdateFieldsAccountsToEdit.forEach(
+          (el, index) => {
+            const doc =
+              values.individualDataUpdateFieldsAccountsToEdit[index];
+            if (!doc.number) {
+              errors.individualDataUpdateFieldsAccountsToEdit =
+                'Number is required';
             }
           },
         );

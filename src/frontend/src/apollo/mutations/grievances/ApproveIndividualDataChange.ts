@@ -11,6 +11,7 @@ export const ApproveIndividualDataChange = gql`
     $approvedIdentitiesToCreate: [Int]
     $approvedIdentitiesToEdit: [Int]
     $approvedIdentitiesToRemove: [Int]
+    $approvedAccountsToEdit: [Int]
   ) {
     approveIndividualDataChange(
       grievanceTicketId: $grievanceTicketId
@@ -22,6 +23,7 @@ export const ApproveIndividualDataChange = gql`
       approvedIdentitiesToCreate: $approvedIdentitiesToCreate
       approvedIdentitiesToEdit: $approvedIdentitiesToEdit
       approvedIdentitiesToRemove: $approvedIdentitiesToRemove
+      approvedAccountsToEdit: $approvedAccountsToEdit
     ) {
       grievanceTicket {
         id

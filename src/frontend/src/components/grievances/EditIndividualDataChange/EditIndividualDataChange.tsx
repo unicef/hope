@@ -18,6 +18,7 @@ import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { useProgramContext } from 'src/programContext';
+import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const BoxWithBorders = styled.div`
@@ -176,6 +177,18 @@ function EditIndividualDataChange({
               addIndividualFieldsData={addIndividualFieldsData}
             />
           )}
+        </Box>
+      </BoxWithBorders>
+       <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant="h6">{t('Accounts')}</Typography>
+          </Title>
+          <ExistingAccountsFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={fullIndividual.individual}
+          />
         </Box>
       </BoxWithBorders>
     </>

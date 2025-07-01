@@ -193,16 +193,16 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
         model = IndividualRoleInHousehold
 
 
-class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
+class AccountNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION),)
 
     name = graphene.String(required=False)
-    individual_tab_data = graphene.JSONString()
+    data_fields = graphene.JSONString()
 
     def resolve_name(self, info: Any) -> str:
         return self.account_type.label
 
-    def resolve_individual_tab_data(self, info: Any) -> dict:
+    def resolve_data_fields(self, info: Any) -> dict:
         return dict(sorted(self.account_data.items()))
 
     class Meta:
@@ -239,7 +239,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
     preferred_language = graphene.String()
-    accounts = graphene.List(AccountsNode)
+    accounts = graphene.List(AccountNode)
     email = graphene.String(source="email")
     import_id = graphene.String()
 

@@ -42,6 +42,9 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import (
+    Account
+)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:
@@ -255,6 +258,33 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     identity.partner = partner
     identity.country = country
     return identity
+
+def prepare_edit_accounts(accounts: List[Dict]) -> List[Dict]:
+    items = []
+    for account in accounts:
+        _id = account.get("id")
+        data_fields = account.get("data_fields", [])
+        delivery_mechanism_data = get_object_or_404(Account, id=_id)
+        data = {
+            "id": _id,
+            "name": ["name"],
+            "approve_status": False,
+            "data_fields": [
+                {
+                    "name": field.get("name"),
+                    "value": field.get("value"),
+                    "previous_value": delivery_mechanism_data.account_data.get(field.get("name")),
+                }
+                for field in data_fields
+            ],
+        }
+        items.append(data)
+    return items
+
+def handle_update_account(account: Dict) -> Optional[Account]:
+    account = get_object_or_404(Account, id=decode_id_string(account.get("id")))
+    account.account_data = account
+    return account
 
 
 def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:

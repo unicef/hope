@@ -121,8 +121,9 @@ export const individualDetailed = gql`
     photo
     workStatus
     accounts {
+      id
       name
-      individualTabData
+      dataFields
     }
     documents {
       edges {

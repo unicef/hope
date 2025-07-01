@@ -16,6 +16,8 @@ import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ExistingAccountsFieldArray } from '../EditIndividualDataChange/ExistingAccountsFieldArray';
+
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -143,6 +145,18 @@ function EditPeopleDataChange({
               setFieldValue={setFieldValue}
             />
           )}
+        </Box>
+      </BoxWithBorders>
+      <BoxWithBorders>
+        <Box mt={3}>
+          <Title>
+            <Typography variant="h6">{t('Accounts')}</Typography>
+          </Title>
+          <ExistingAccountsFieldArray
+            values={values}
+            setFieldValue={setFieldValue}
+            individual={fullIndividual.individual}
+          />
         </Box>
       </BoxWithBorders>
     </>

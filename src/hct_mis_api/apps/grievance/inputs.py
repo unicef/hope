@@ -127,21 +127,23 @@ class EditIndividualIdentityObjectType(graphene.InputObjectType):
     number = graphene.String(required=True)
 
 
-class BankTransferObjectType(graphene.InputObjectType):
-    type = graphene.String(required=True)
-    bank_name = graphene.String(required=True)
-    bank_account_number = graphene.String(required=True)
-    bank_branch_name = graphene.String(required=False)
-    account_holder_name = graphene.String(required=True)
+class AccountPayloadFieldObjectType(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    value = graphene.String(required=True)
+    previous_value = graphene.String(required=False)
 
 
-class EditBankTransferObjectType(graphene.InputObjectType):
+class AccountObjectType(graphene.InputObjectType):
+    label = graphene.String(required=True)
+    approve_status = graphene.Boolean(required=True)
+    data_fields = graphene.List(AccountPayloadFieldObjectType, required=True)
+
+
+class EditAccountObjectType(graphene.InputObjectType):
     id = graphene.Field(graphene.ID, required=True)
-    type = graphene.String(required=True)
-    bank_name = graphene.String(required=True)
-    bank_account_number = graphene.String(required=True)
-    bank_branch_name = graphene.String(required=False)
-    account_holder_name = graphene.String(required=True)
+    label = graphene.String(required=True)
+    approve_status = graphene.Boolean(required=True)
+    data_fields = graphene.List(AccountPayloadFieldObjectType, required=True)
 
 
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
@@ -178,6 +180,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     identities = graphene.List(IndividualIdentityObjectType)
     identities_to_remove = graphene.List(graphene.ID)
     identities_to_edit = graphene.List(EditIndividualIdentityObjectType)
+    accounts_to_edit = graphene.List(EditAccountObjectType)
     preferred_language = graphene.String()
     flex_fields = Arg()
     payment_delivery_phone_no = graphene.String()

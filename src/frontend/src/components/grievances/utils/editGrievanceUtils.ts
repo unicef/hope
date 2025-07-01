@@ -94,7 +94,8 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     identities,
     identities_to_remove: identitiesToRemove,
     identities_to_edit: identitiesToEdit,
-    delivery_mechanism_data_to_edit: deliveryMechanismDataToEdit,
+    accounts_to_edit: accountsToEdit,
+
     ...rest
   } = individualData;
 
@@ -116,8 +117,8 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     individualDataUpdateDocumentsToEdit: camelizeArrayObjects(documentsToEdit),
     individualDataUpdateIdentitiesToEdit:
       camelizeArrayObjects(identitiesToEdit),
-    individualDataUpdateDeliveryMechanismDataToEdit: camelizeArrayObjects(
-      deliveryMechanismDataToEdit,
+    individualDataUpdateAccountsToEdit: camelizeArrayObjects(
+      accountsToEdit,
     ),
   };
 }
@@ -390,8 +391,8 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               identitiesToEdit: transformNestedData(
                 values.individualDataUpdateIdentitiesToEdit,
               ),
-              deliveryMechanismDataToEdit:
-                values.individualDataUpdateDeliveryMechanismDataToEdit,
+              accountsToEdit:
+                values.individualDataUpdateAccountsToEdit,
             },
           },
         },

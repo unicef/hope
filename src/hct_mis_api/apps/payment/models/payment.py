@@ -1968,6 +1968,17 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
             data["financial_institution"] = str(self.financial_institution.id)
         return data
 
+    @account_data.setter
+    def account_data(self, value: dict) -> None:
+        for field_name, value in value.items():
+            if field_name in self.data:
+                self.data[field_name] = value
+            if field_name == "number":
+                self.number = value
+            if field_name == "financial_institution":
+                self.financial_institution = FinancialInstitution.objects.filter(id=value).first()
+        self.save()
+
     @cached_property
     def unique_delivery_data_for_account_type(self) -> Dict:
         delivery_data = {}

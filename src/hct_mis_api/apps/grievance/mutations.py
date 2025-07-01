@@ -799,6 +799,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_identities_to_create = graphene.List(graphene.Int)
         approved_identities_to_edit = graphene.List(graphene.Int)
         approved_identities_to_remove = graphene.List(graphene.Int)
+        approved_accounts_to_edit = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
         version = BigInt(required=False)
 
@@ -817,6 +818,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_identities_to_create: List,
         approved_identities_to_edit: List,
         approved_identities_to_remove: List,
+        approved_accounts_to_edit: List,
         flex_fields_approve_data: Dict,
         **kwargs: Any,
     ) -> "IndividualDataChangeApproveMutation":
@@ -849,6 +851,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
             "identities": approved_identities_to_create,
             "identities_to_remove": approved_identities_to_remove,
             "identities_to_edit": approved_identities_to_edit,
+            "accounts_to_edit": approved_accounts_to_edit,
         }
 
         for field_name, item in individual_data.items():
