@@ -144,7 +144,6 @@ class TestDrawer:
             "Programmes",
             "Managerial Console",
             "Grievance",
-            "Reporting",
             "Activity Log",
         ]
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
