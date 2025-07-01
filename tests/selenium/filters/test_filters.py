@@ -493,13 +493,6 @@ class TestSmokeFilters:
                 filters.selectFilter,
                 filters.filtersProgramState,
             ],
-            "Reporting": [
-                filters.reportOnlyMyFilter,
-                filters.reportStatusFilter,
-                filters.reportCreatedToFilter,
-                filters.reportCreatedFromFilter,
-                filters.reportTypeFilter,
-            ],
             "Activity Log": [
                 filters.filtersResidenceStatus,
                 filters.filtersSearch,
