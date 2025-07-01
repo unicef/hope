@@ -83,7 +83,7 @@ export function CashPlanDetailsSection({
         <BorderLeftBox>
           <Title>
             <Typography variant="h6" data-cy="table-label">
-              {t('Bank reconciliation')}
+              {t('Reconciliation Summary')}
             </Typography>
           </Title>
           <Grid container>
