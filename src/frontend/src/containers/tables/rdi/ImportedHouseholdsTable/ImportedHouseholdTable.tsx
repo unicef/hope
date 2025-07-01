@@ -1,7 +1,6 @@
 import {
   AllHouseholdsQueryVariables,
   HouseholdMinimalFragment,
-  HouseholdRdiMergeStatus,
   useAllHouseholdsQuery,
 } from '@generated/graphql';
 import { ReactElement } from 'react';
@@ -17,9 +16,6 @@ function ImportedHouseholdTable({ rdi, businessArea, isMerged }): ReactElement {
   const initialVariables = {
     rdiId: rdi.id,
     businessArea,
-    rdiMergeStatus: isMerged
-      ? HouseholdRdiMergeStatus.Merged
-      : HouseholdRdiMergeStatus.Pending,
   };
 
   const { selectedProgram } = useProgramContext();
