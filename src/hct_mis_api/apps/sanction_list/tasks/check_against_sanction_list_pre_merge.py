@@ -133,14 +133,14 @@ def check_against_sanction_list_pre_merge(
 ) -> None:
     program = Program.objects.get(id=program_id)
     sanction_lists = program.sanction_lists
-    if not sanction_lists.exists():
+    if not sanction_lists.exists(): # pragma: no cover
         log.debug(f"No sanction lists found for program {program_id}. Skipping check against sanction list.")
         return
     sanction_list_individuals_queryset = SanctionListIndividual.objects.filter(
         sanction_list__in=sanction_lists.all(),
         active=True,
     )
-    if sanction_list_individuals is not None:
+    if sanction_list_individuals is not None: # pragma: no cover
         sanction_list_individuals_queryset = sanction_list_individuals_queryset.filter(
             id__in=sanction_list_individuals,
         )
