@@ -245,14 +245,6 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    name: 'Reporting',
-    href: '/reporting',
-    selectedRegexp: /^\/reporting.*$/,
-    icon: <TrendingUpRoundedIcon />,
-    permissions: [PERMISSIONS.REPORTING_EXPORT],
-    scopes: [SCOPE_ALL_PROGRAMS],
-  },
-  {
     name: 'Programme Users',
     href: '/users-list',
     selectedRegexp: /^\/users-list.*$/,
@@ -279,6 +271,11 @@ export const menuItems: MenuItem[] = [
 ];
 
 export const resourcesItems = [
+    {
+    name: 'Reporting',
+    href: 'https://reporting.hope.unicef.org/',
+    icon: <TrendingUpRoundedIcon />,
+  },
   {
     name: 'Knowledge Base',
     href: 'https://unicef.service-now.com/cc?id=kb_search&kb_knowledge_base=be5501f9db003850d180f264f39619ee',

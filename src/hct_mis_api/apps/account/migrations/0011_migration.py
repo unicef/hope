@@ -332,4 +332,3 @@ class Migration(migrations.Migration):
         migrations.RunPython(migrate_partner_roles_and_access, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(migrate_unicef_partners, reverse_code=migrations.RunPython.noop),
     ]
-
