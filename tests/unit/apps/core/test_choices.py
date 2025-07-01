@@ -31,6 +31,21 @@ class TestChoicesViewSet:
             {"name": "Random sampling", "value": "RANDOM"},
         ]
 
+    def test_get_payment_verification_summary_status(self) -> None:
+        response = self.client.get(reverse("api:choices-payment-verification-summary-status"))
+        assert response.status_code == 200
+        response_data = response.data
+        assert response_data is not None
+        assert len(response_data) == 3
+        assert "ACTIVE" in response_data[0]["value"]
+        assert "FINISHED" in response_data[1]["value"]
+        assert "PENDING" in response_data[2]["value"]
+        assert response_data == [
+            {"name": "Active", "value": "ACTIVE"},
+            {"name": "Finished", "value": "FINISHED"},
+            {"name": "Pending", "value": "PENDING"},
+        ]
+
     def test_get_languages(self) -> None:
         # Test without filter
         response = self.client.get(reverse("api:choices-languages"))
