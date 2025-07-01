@@ -7,10 +7,11 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
-    DeduplicateAndCheckAgainstSanctionsListTask,
+    deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.sanction_list import SanctionListFactory
 
 
 class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
@@ -26,31 +27,21 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        cls.individuals_to_create = [
-            {
-                "full_name": "Benjamin Butler",
-                "given_name": "Benjamin",
-                "family_name": "Butler",
-                "phone_no": "(953)682-4596",
-                "birth_date": "1943-07-30",
-            },
-            {
-                "full_name": "Robin Ford",
-                "given_name": "Robin",
-                "family_name": "Ford",
-                "phone_no": "+18663567905",
-                "birth_date": "1946-02-15",
-            },
-        ]
-        cls.individuals = [
-            IndividualFactory(household=None, program=program_one, business_area=cls.business_area, **individual)
-            for individual in cls.individuals_to_create
-        ]
+        cls.individual_data = {
+            "full_name": "Benjamin Butler",
+            "given_name": "Benjamin",
+            "family_name": "Butler",
+            "phone_no": "(953)682-4596",
+            "birth_date": "1943-07-30",
+        }
+        cls.individual = IndividualFactory(
+            household=None, program=program_one, business_area=cls.business_area, **cls.individual_data
+        )
         household_one = HouseholdFactory(
             program=program_one,
-            head_of_household=cls.individuals[0],
+            head_of_household=cls.individual,
         )
-        household_one.individuals.add(*cls.individuals)
+        household_one.individuals.add(cls.individual)
 
     @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.populate_index")
     @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.HardDocumentDeduplication.deduplicate")
@@ -58,9 +49,7 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
     @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
-    @patch(
-        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
-    )
+    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
     def test_execute(
         self,
         sanction_execute_mock: Any,
@@ -72,9 +61,9 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         self.business_area.postpone_deduplication = True
         self.business_area.save()
 
-        DeduplicateAndCheckAgainstSanctionsListTask().execute(
+        deduplicate_and_check_against_sanctions_list_task_single_individual(
             should_populate_index=True,
-            individuals_ids=[str(individual.id) for individual in self.individuals],
+            individual=self.individual,
         )
         assert populate_index_mock.call_count == 1
         assert deduplicate_mock.call_count == 1
@@ -87,9 +76,9 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         self.business_area.screen_beneficiary = False
         self.business_area.save()
 
-        DeduplicateAndCheckAgainstSanctionsListTask().execute(
+        deduplicate_and_check_against_sanctions_list_task_single_individual(
             should_populate_index=False,
-            individuals_ids=[str(individual.id) for individual in self.individuals],
+            individual=self.individual,
         )
 
         assert populate_index_mock.call_count == 0
@@ -104,9 +93,7 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.DeduplicateTask.deduplicate_individuals_from_other_source"
     )
     @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.create_needs_adjudication_tickets")
-    @patch(
-        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
-    )
+    @patch("hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.check_against_sanction_list_pre_merge")
     def test_execute_enabled_screening(
         self,
         sanction_execute_mock: Any,
@@ -116,12 +103,14 @@ class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
         populate_index_mock: Any,
     ) -> None:
         self.business_area.postpone_deduplication = False
-        self.business_area.screen_beneficiary = True
+        sanction_list = SanctionListFactory()
+        sanction_list.save()
+        self.individual.program.sanction_lists.add(sanction_list)
         self.business_area.save()
 
-        DeduplicateAndCheckAgainstSanctionsListTask().execute(
+        deduplicate_and_check_against_sanctions_list_task_single_individual(
             should_populate_index=False,
-            individuals_ids=[str(individual.id) for individual in self.individuals],
+            individual=self.individual,
         )
 
         assert populate_index_mock.call_count == 0
