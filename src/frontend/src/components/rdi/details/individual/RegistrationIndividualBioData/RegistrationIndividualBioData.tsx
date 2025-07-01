@@ -55,36 +55,36 @@ export function RegistrationIndividualBioData({
     choicesData.severityOfDisabilityChoices,
   );
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
-  const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
-    <Grid key={edge.node.id} size={{ xs: 3 }}>
+  const mappedIndividualDocuments = individual.documents?.map((doc) => (
+    <Grid key={doc.id} size={{ xs: 3 }}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={edge.node.type.label}>
-            {edge.node.photo ? (
+          <LabelizedField label={doc.type.label}>
+            {doc.photo ? (
               <DocumentRegistrationPhotoModal
-                documentNumber={edge.node.documentNumber}
-                documentId={edge.node.id}
+                documentNumber={doc.documentNumber}
+                documentId={doc.id}
                 individual={individual}
               />
             ) : (
-              edge.node.documentNumber
+              doc.documentNumber
             )}
           </LabelizedField>
         </Box>
-        <LabelizedField label={t('issued')}>{edge.node.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{doc.country}</LabelizedField>
       </Box>
     </Grid>
   ));
 
-  const mappedIdentities = individual.identities?.edges?.map((item) => (
-    <Grid key={item.node.id} size={{ xs: 3 }}>
+  const mappedIdentities = individual.identities?.map((item) => (
+    <Grid key={item.id} size={{ xs: 3 }}>
       <Box flexDirection="column">
         <Box mb={1}>
-          <LabelizedField label={`${item.node.partner} ID`}>
-            {item.node.number}
+          <LabelizedField label={`${item.partner} ID`}>
+            {item.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label={t('issued')}>{item.node.country}</LabelizedField>
+        <LabelizedField label={t('issued')}>{item.country}</LabelizedField>
       </Box>
     </Grid>
   ));

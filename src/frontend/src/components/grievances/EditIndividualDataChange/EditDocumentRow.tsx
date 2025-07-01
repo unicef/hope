@@ -41,18 +41,18 @@ export function EditDocumentRow({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const documentsToRemove = values?.individualDataUpdateDocumentsToRemove || [];
-  const removed = documentsToRemove.includes(document.node.id);
+  const removed = documentsToRemove.includes(document.id);
 
   return isEdited ? (
     <Grid container spacing={3}>
       <Grid size={{ xs: 11 }}>
         <DocumentField
           id={id}
-          key={`${id}-${document.node.country}-${document.node.type.label}`}
+          key={`${id}-${document.country}-${document.type.label}`}
           onDelete={() =>
             removeItemById(
               values.individualDataUpdateDocumentsToEdit,
-              document.node.id,
+              document.id,
               arrayHelpers,
             )
           }
@@ -60,7 +60,7 @@ export function EditDocumentRow({
           documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
           baseName="individualDataUpdateDocumentsToEdit"
           isEdited={isEdited}
-          photoSrc={document.node.photo}
+          photoSrc={document.photo}
           setFieldValue={setFieldValue}
           values={values}
         />
@@ -70,11 +70,11 @@ export function EditDocumentRow({
           <IconButton
             onClick={() => {
               arrayHelpers.remove({
-                id: document.node.id,
-                country: document.node.countryIso3,
-                key: document.node.type.key,
-                number: document.node.documentNumber,
-                photo: document.node.photo,
+                id: document.id,
+                country: document.countryIso3,
+                key: document.type.key,
+                number: document.documentNumber,
+                photo: document.photo,
               });
               setEdit(false);
             }}
@@ -85,30 +85,27 @@ export function EditDocumentRow({
       </Grid>
     </Grid>
   ) : (
-    <Grid container spacing={3} key={document.node.id}>
+    <Grid container spacing={3} key={document.id}>
       <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField
-            label={t('ID TYPE')}
-            value={document.node.type.label}
-          />
+          <LabelizedField label={t('ID TYPE')} value={document.type.label} />
         </DisabledDiv>
       </Grid>
       <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('Country')} value={document.node.country} />
+          <LabelizedField label={t('Country')} value={document.country} />
         </DisabledDiv>
       </Grid>
       <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('ID Number')}
-            value={document.node.documentNumber}
+            value={document.documentNumber}
           />
         </DisabledDiv>
       </Grid>
       <Grid size={{ xs: 2 }}>
-        <PhotoModal showRotate={false} src={document.node.photo} />
+        <PhotoModal showRotate={false} src={document.photo} />
       </Grid>
       <Grid size={{ xs: 1 }}>
         {!removed ? (
@@ -118,7 +115,7 @@ export function EditDocumentRow({
                 onClick={() => {
                   setFieldValue(
                     `individualDataUpdateDocumentsToRemove[${documentsToRemove.length}]`,
-                    document.node.id,
+                    document.id,
                   );
                 }}
               >
@@ -127,11 +124,11 @@ export function EditDocumentRow({
               <IconButton
                 onClick={() => {
                   arrayHelpers.push({
-                    id: document.node.id,
-                    country: document.node.countryIso3,
-                    key: document.node.type.key,
-                    number: document.node.documentNumber,
-                    photo: document.node.photo,
+                    id: document.id,
+                    country: document.countryIso3,
+                    key: document.type.key,
+                    number: document.documentNumber,
+                    photo: document.photo,
                   });
                   setEdit(true);
                 }}

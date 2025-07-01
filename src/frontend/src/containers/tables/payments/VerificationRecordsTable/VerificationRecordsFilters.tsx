@@ -62,9 +62,9 @@ export function VerificationRecordsFilters({
     return null;
   }
 
-  const verificationPlanOptions = verifications.edges.map((item) => (
-    <MenuItem key={item.node.unicefId} value={item.node.id}>
-      {item.node.unicefId}
+  const verificationPlanOptions = verifications.map((item) => (
+    <MenuItem key={item.unicefId} value={item.id}>
+      {item.unicefId}
     </MenuItem>
   ));
 

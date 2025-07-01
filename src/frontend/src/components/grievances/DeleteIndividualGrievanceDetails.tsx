@@ -101,7 +101,8 @@ export function DeleteIndividualGrievanceDetails({
   if (isLoading) return <LoadingComponent />;
   if (!addIndividualFieldsData) return null;
   const documents = ticket.individual?.documents;
-  const fieldsDict = addIndividualFieldsData.results?.reduce(
+  //@ts-ignore
+  const fieldsDict = addIndividualFieldsData?.reduce(
     (previousValue, currentValue) => ({
       ...previousValue,
       [currentValue?.name]: currentValue,
@@ -123,10 +124,13 @@ export function DeleteIndividualGrievanceDetails({
     'typeName',
     'commsDisability',
   ];
+
   const labels =
     Object.entries(ticket.individual || {})
       .filter(([key]) => {
         const snakeKey = snakeCase(key);
+        console.log('snakeKey', snakeKey);
+        console.log('fieldsDict', fieldsDict);
         const fieldAttribute = fieldsDict[snakeKey];
         return fieldAttribute && !excludedFields.includes(key);
       })
@@ -171,8 +175,8 @@ export function DeleteIndividualGrievanceDetails({
       }) || [];
 
   const documentLabels =
-    documents?.edges?.map((edge) => {
-      const item = edge.node;
+    documents?.map((doc) => {
+      const item = doc;
       return (
         <Grid key={item.country + item.type.label} size={{ xs: 6 }}>
           <LabelizedField
