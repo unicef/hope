@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from hct_mis_api.apps.geo.models import Country
+from hct_mis_api.apps.payment.models.payment import FinancialInstitution
 
 
 class RejectPolicy(models.TextChoices):
@@ -25,3 +26,15 @@ class CountrySerializer(serializers.ModelSerializer):
             "valid_until",
             "updated_at",
         )
+
+
+class FinancialInstitutionListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    type = serializers.CharField(allow_null=True, allow_blank=True)
+    swift_code = serializers.CharField(allow_null=True, allow_blank=True)
+    country_iso_code3 = serializers.SerializerMethodField()
+    updated_at = serializers.DateTimeField(allow_null=True)
+
+    def get_country_iso_code3(self, obj: FinancialInstitution) -> str:
+        return obj.country.iso_code3
