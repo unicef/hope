@@ -85,6 +85,12 @@ describe('IndividualsListTable', () => {
     observedDisabilityChoices: [],
     severityOfDisabilityChoices: [],
     workStatusChoices: [],
+    deduplicationBatchStatusChoices: [
+      { value: 'SomeValue', label: 'SomeLabel' },
+    ],
+    deduplicationGoldenRecordStatusChoices: [
+      { value: 'SomeValue', label: 'SomeLabel' },
+    ],
   };
 
   const defaultFilter = {

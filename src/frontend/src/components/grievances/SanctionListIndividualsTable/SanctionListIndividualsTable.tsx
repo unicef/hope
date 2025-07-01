@@ -6,6 +6,7 @@ import { headCells } from './SanctionListIndividualsHeadCells';
 import { PaginatedSanctionListIndividualList } from '@restgenerated/models/PaginatedSanctionListIndividualList';
 import { SanctionListIndividual } from '@restgenerated/models/SanctionListIndividual';
 import { ReactElement, useMemo, useState, useEffect } from 'react';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface SanctionListIndividualsTableProps {
   filter: {
@@ -18,12 +19,14 @@ interface SanctionListIndividualsTableProps {
 export function SanctionListIndividualsTable({
   filter,
 }: SanctionListIndividualsTableProps): ReactElement {
+  const { businessAreaSlug } = useBaseUrl();
   const initialQueryVariables = useMemo(
     () => ({
+      businessAreaSlug,
       fullName: filter.fullName || undefined,
       referenceNumber: filter.referenceNumber || undefined,
     }),
-    [filter.fullName, filter.referenceNumber],
+    [businessAreaSlug, filter.fullName, filter.referenceNumber],
   );
 
   const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
@@ -34,7 +37,8 @@ export function SanctionListIndividualsTable({
   const { data, isLoading, error } =
     useQuery<PaginatedSanctionListIndividualList>({
       queryKey: ['restSanctionListList', queryVariables],
-      queryFn: () => RestService.restSanctionListList(queryVariables),
+      queryFn: () =>
+        RestService.restBusinessAreasSanctionListList({ ...queryVariables }),
     });
 
   return (

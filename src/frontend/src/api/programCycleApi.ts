@@ -109,19 +109,3 @@ export const deleteProgramCycle = async (
     handleMutationError(error, 'delete program cycle');
   }
 };
-
-export const finishProgramCycle = async (
-  businessArea: string,
-  programId: string,
-  programCycleId: string,
-): Promise<any> => {
-  try {
-    const response = await api.post(
-      `${businessArea}/programs/${programId}/cycles/${programCycleId}/finish/`,
-      {},
-    );
-    return response.data;
-  } catch (error) {
-    handleMutationError(error, 'finish program cycle');
-  }
-};

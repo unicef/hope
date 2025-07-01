@@ -10,7 +10,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
 import { ImportedPeopleTableRow } from './ImportedPeopleTableRow';
 import { headCells as mergedPeopleTableHeadCells } from './MergedPeopleTableHeadCells';
-import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
 
 interface ImportedPeopleTableProps {
   rdi;
@@ -21,7 +21,7 @@ interface ImportedPeopleTableProps {
   rowsPerPageOptions?: number[];
   isOnPaper?: boolean;
   businessArea: string;
-  choicesData: HouseholdChoices;
+  choicesData: IndividualChoices;
   isMerged: boolean;
 }
 
