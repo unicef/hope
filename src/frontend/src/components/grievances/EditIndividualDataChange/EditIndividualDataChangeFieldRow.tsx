@@ -10,7 +10,7 @@ import { CurrentValue } from './CurrentValue';
 import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 export interface EditIndividualDataChangeFieldRowProps {
-  fields: any[];
+  fields;
   individual: IndividualDetail;
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;

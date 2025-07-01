@@ -211,6 +211,7 @@ const ProgramForm = ({
             fullWidth
             variant="outlined"
             required
+            disabled={programHasRdi}
             onChange={(e) => {
               // Only clear Beneficiary Group if NOT copying a program
               if (!isCopyProgramPage) {
