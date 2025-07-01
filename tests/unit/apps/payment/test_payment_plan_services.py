@@ -760,7 +760,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.payment_items.count(), 2)
 
         old_payment_ids = list(pp.payment_items.values_list("id", flat=True))
-        # old_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
+        old_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
 
         # check rebuild
         pp_service = PaymentPlanService(payment_plan=pp)
@@ -770,15 +770,14 @@ class TestPaymentPlanServices(APITestCase):
         # all Payments (removed and new)
         self.assertEqual(Payment.all_objects.filter(parent=pp).count(), 2)
 
-        new_payment_ids = list(pp.payment_items.all().values_list("id", flat=True))
+        new_payment_ids = list(pp.payment_items.values_list("id", flat=True))
+        new_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
 
         for p_id in new_payment_ids:
             self.assertNotIn(p_id, old_payment_ids)
 
-        # unicef_id is None?
-        # for payment in pp.payment_items.all():
-        #     payment.refresh_from_db()
-        #     self.assertNotIn(payment.unicef_id, old_payment_unicef_ids)
+        for p_unicef_id in new_payment_unicef_ids:
+            self.assertNotIn(p_unicef_id, old_payment_unicef_ids)
 
     def test_get_approval_type_by_action_value_error(self) -> None:
         with self.assertRaises(ValueError) as error:
