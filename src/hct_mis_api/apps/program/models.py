@@ -28,6 +28,7 @@ from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.program.collision_detectors import collision_detectors_registry
+from hct_mis_api.apps.sanction_list.models import SanctionList
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -243,6 +244,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     deduplication_set_id = models.UUIDField(blank=True, null=True, help_text="Program deduplication set id [sys]")
 
+    sanction_lists = models.ManyToManyField(
+        SanctionList, blank=True, related_name="programs", help_text="Program sanction lists"
+    )
     objects = SoftDeletableIsVisibleManager()
 
     def clean(self) -> None:
