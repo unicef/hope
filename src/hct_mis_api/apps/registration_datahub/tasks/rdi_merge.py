@@ -60,7 +60,7 @@ class RdiMergeTask:
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
             if not individual_ids and not household_ids:
-                # empty RDI, nothing to merge, happens when all households has extra_rdi
+                # empty RDI, nothing to merge, happens when all households have extra_rdi
                 obj_hct.status = RegistrationDataImport.MERGED
                 obj_hct.save()
                 return
