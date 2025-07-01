@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 import pytest
@@ -39,11 +39,10 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 @pytest.mark.elasticsearch
 @disabled_locally_test
 class TestBatchDeduplication(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         import_data = ImportData.objects.create(
             file="test_file/x.xlsx",
             number_of_households=10,
@@ -307,11 +306,10 @@ class TestBatchDeduplication(TestCase):
 
 @pytest.mark.elasticsearch
 class TestGoldenRecordDeduplication(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",

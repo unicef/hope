@@ -1,6 +1,6 @@
 import { Checkbox, TableCell, TableRow } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import camelCase from 'lodash/camelCase';
+import { camelCase, snakeCase } from 'lodash';
 import mapKeys from 'lodash/mapKeys';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -25,8 +25,9 @@ export const householdDataRow = (
   isEdit,
   handleSelectBioData,
 ): ReactElement => {
-  const fieldName = row[0];
-  const field = fieldsDict[row[0]];
+  const fieldName = snakeCase(row[0]);
+  const field = fieldsDict[fieldName];
+
   const isItemSelected = isSelected(fieldName);
   const labelId = `enhanced-table-checkbox-${index}`;
   const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
@@ -43,8 +44,8 @@ export const householdDataRow = (
       : valueDetails.previousValue;
 
   const householdValue = field.isFlexField
-    ? ticket.householdDataUpdateTicketDetails.household.flexFields[fieldName]
-    : ticket.householdDataUpdateTicketDetails.household[camelCase(fieldName)];
+    ? ticket.ticketDetails.householdData.flexFields[fieldName]
+    : ticket.ticketDetails.householdData[camelCase(fieldName)];
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? previousValue

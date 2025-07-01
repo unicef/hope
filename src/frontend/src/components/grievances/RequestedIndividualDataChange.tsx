@@ -1,106 +1,98 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import {
-  GrievanceTicketQuery,
-  HouseholdNode,
-  IndividualNode,
-  IndividualRoleInHouseholdRole,
-  useApproveIndividualDataChangeMutation,
-} from '@generated/graphql';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
-
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
-`;
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { GrievanceIndividualDataChangeApprove } from '@restgenerated/models/GrievanceIndividualDataChangeApprove';
+import { RestService } from '@restgenerated/services/RestService';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { ApproveBox } from '@components/grievances/GrievancesApproveSection/ApproveSectionStyles';
 
 export type RoleReassignData = {
-  role: IndividualRoleInHouseholdRole | string;
-  individual: IndividualNode;
-  household: HouseholdNode;
+  role: string;
+  individual: IndividualDetail;
+  household: HouseholdDetail;
 };
 
 export function RequestedIndividualDataChange({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
+  const queryClient = useQueryClient();
+  const { businessArea } = useBaseUrl();
   const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
+    ...ticket.ticketDetails.individualData,
   };
   let allApprovedCount = 0;
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const documents = individualData?.documents || [];
-  const documentsToRemove = individualData.documents_to_remove || [];
-  const documentsToEdit = individualData.documents_to_edit || [];
+  const documentsToRemove = individualData.documentsToRemove || [];
+  const documentsToEdit = individualData.documentsToEdit || [];
   const identities = individualData?.identities || [];
-  const identitiesToRemove = individualData.identities_to_remove || [];
-  const identitiesToEdit = individualData.identities_to_edit || [];
-  const paymentChannels = individualData?.payment_channels || [];
-  const paymentChannelsToRemove =
-    individualData.payment_channels_to_remove || [];
-  const paymentChannelsToEdit = individualData.payment_channels_to_edit || [];
-  const flexFields = individualData.flex_fields || {};
+  const identitiesToRemove = individualData.identitiesToRemove || [];
+  const identitiesToEdit = individualData.identitiesToEdit || [];
+  const paymentChannels = individualData?.paymentChannels || [];
+  const paymentChannelsToRemove = individualData.paymentChannelsToRemove || [];
+  const paymentChannelsToEdit = individualData.paymentChannelsToEdit || [];
+  const flexFields = individualData.flexFields || {};
 
-  delete individualData.flex_fields;
+  delete individualData.flexFields;
   delete individualData.documents;
   delete individualData.identities;
-  delete individualData.documents_to_remove;
-  delete individualData.documents_to_edit;
-  delete individualData.payment_channels;
-  delete individualData.payment_channels_to_remove;
-  delete individualData.payment_channels_to_edit;
-  delete individualData.identities_to_remove;
-  delete individualData.identities_to_edit;
-  delete individualData.previous_documents;
-  delete individualData.previous_identities;
-  delete individualData.previous_payment_channels;
+  delete individualData.documentsToRemove;
+  delete individualData.documentsToEdit;
+  delete individualData.paymentChannels;
+  delete individualData.paymentChannelsToRemove;
+  delete individualData.paymentChannelsToEdit;
+  delete individualData.identitiesToRemove;
+  delete individualData.identitiesToEdit;
+  delete individualData.previousDocuments;
+  delete individualData.previousIdentities;
+  delete individualData.previousPaymentChannels;
 
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
-  allApprovedCount += documents.filter((el) => el.approve_status).length;
-  allApprovedCount += documentsToRemove.filter(
-    (el) => el.approve_status,
-  ).length;
-  allApprovedCount += documentsToEdit.filter((el) => el.approve_status).length;
-  allApprovedCount += identities.filter((el) => el.approve_status).length;
+  allApprovedCount += documents.filter((el) => el.approveStatus).length;
+  allApprovedCount += documentsToRemove.filter((el) => el.approveStatus).length;
+  allApprovedCount += documentsToEdit.filter((el) => el.approveStatus).length;
+  allApprovedCount += identities.filter((el) => el.approveStatus).length;
   allApprovedCount += identitiesToRemove.filter(
-    (el) => el.approve_status,
+    (el) => el.approveStatus,
   ).length;
-  allApprovedCount += identitiesToEdit.filter((el) => el.approve_status).length;
-  allApprovedCount += paymentChannels.filter((el) => el.approve_status).length;
+  allApprovedCount += identitiesToEdit.filter((el) => el.approveStatus).length;
+  allApprovedCount += paymentChannels.filter((el) => el.approveStatus).length;
   allApprovedCount += paymentChannelsToRemove.filter(
-    (el) => el.approve_status,
+    (el) => el.approveStatus,
   ).length;
   allApprovedCount += paymentChannelsToEdit.filter(
-    (el) => el.approve_status,
+    (el) => el.approveStatus,
   ).length;
   allApprovedCount += entries.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
   ).length;
   allApprovedCount += entriesFlexFields.filter(
-    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
@@ -108,25 +100,91 @@ export function RequestedIndividualDataChange({
     `You approved ${allChangesLength || 0} change${
       allChangesLength === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
-  const [mutate] = useApproveIndividualDataChangeMutation();
+
+  const { mutateAsync: mutate } = useMutation({
+    mutationFn: ({
+      individualApproveData,
+      approvedDocumentsToCreate,
+      approvedDocumentsToRemove,
+      approvedDocumentsToEdit,
+      approvedIdentitiesToCreate,
+      approvedIdentitiesToRemove,
+      approvedIdentitiesToEdit,
+      approvedPaymentChannelsToCreate,
+      approvedPaymentChannelsToRemove,
+      approvedPaymentChannelsToEdit,
+      flexFieldsApproveData,
+    }: {
+      individualApproveData: any;
+      approvedDocumentsToCreate?: number[];
+      approvedDocumentsToRemove?: number[];
+      approvedDocumentsToEdit?: number[];
+      approvedIdentitiesToCreate?: number[];
+      approvedIdentitiesToRemove?: number[];
+      approvedIdentitiesToEdit?: number[];
+      approvedPaymentChannelsToCreate?: number[];
+      approvedPaymentChannelsToRemove?: number[];
+      approvedPaymentChannelsToEdit?: number[];
+      flexFieldsApproveData?: any;
+    }) => {
+      const requestBody: GrievanceIndividualDataChangeApprove = {
+        individualApproveData,
+        approvedDocumentsToCreate,
+        approvedDocumentsToRemove,
+        approvedDocumentsToEdit,
+        approvedIdentitiesToCreate,
+        approvedIdentitiesToRemove,
+        approvedIdentitiesToEdit,
+        approvedPaymentChannelsToCreate,
+        approvedPaymentChannelsToRemove,
+        approvedPaymentChannelsToEdit,
+        flexFieldsApproveData,
+      };
+
+      return RestService.restBusinessAreasGrievanceTicketsApproveIndividualDataChangeCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: ticket.id,
+          requestBody,
+        },
+      );
+    },
+    onSuccess: () => {
+      showMessage('Changes Approved');
+      queryClient.invalidateQueries({
+        queryKey: ['GrievanceTicketDetail', ticket.id],
+      });
+    },
+    onError: (error: any) => {
+      if (error?.body?.errors) {
+        Object.values(error.body.errors)
+          .flat()
+          .forEach((msg: string) => {
+            showMessage(msg);
+          });
+      } else {
+        showMessage('An error occurred while approving changes');
+      }
+    },
+  });
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   const selectedDocumentsToEdit = [];
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < documents?.length; i++) {
-    if (documents[i]?.approve_status) {
+    if (documents[i]?.approveStatus) {
       selectedDocuments.push(i);
     }
   }
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < documentsToRemove?.length; i++) {
-    if (documentsToRemove[i]?.approve_status) {
+    if (documentsToRemove[i]?.approveStatus) {
       selectedDocumentsToRemove.push(i);
     }
   }
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < documentsToEdit?.length; i++) {
-    if (documentsToEdit[i]?.approve_status) {
+    if (documentsToEdit[i]?.approveStatus) {
       selectedDocumentsToEdit.push(i);
     }
   }
@@ -135,19 +193,19 @@ export function RequestedIndividualDataChange({
   const selectedIdentitiesToEdit = [];
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < identities?.length; i++) {
-    if (identities[i]?.approve_status) {
+    if (identities[i]?.approveStatus) {
       selectedIdentities.push(i);
     }
   }
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < identitiesToRemove?.length; i++) {
-    if (identitiesToRemove[i]?.approve_status) {
+    if (identitiesToRemove[i]?.approveStatus) {
       selectedIdentitiesToRemove.push(i);
     }
   }
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < identitiesToEdit?.length; i++) {
-    if (identitiesToEdit[i]?.approve_status) {
+    if (identitiesToEdit[i]?.approveStatus) {
       selectedIdentitiesToEdit.push(i);
     }
   }
@@ -157,19 +215,19 @@ export function RequestedIndividualDataChange({
   const selectedPaymentChannelsToEdit = [];
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < paymentChannels?.length; i++) {
-    if (paymentChannels[i]?.approve_status) {
+    if (paymentChannels[i]?.approveStatus) {
       selectedPaymentChannels.push(i);
     }
   }
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < paymentChannelsToRemove?.length; i++) {
-    if (paymentChannelsToRemove[i]?.approve_status) {
+    if (paymentChannelsToRemove[i]?.approveStatus) {
       selectedPaymentChannelsToRemove.push(i);
     }
   }
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < paymentChannelsToEdit?.length; i++) {
-    if (paymentChannelsToEdit[i]?.approve_status) {
+    if (paymentChannelsToEdit[i]?.approveStatus) {
       selectedPaymentChannelsToEdit.push(i);
     }
   }
@@ -178,14 +236,12 @@ export function RequestedIndividualDataChange({
     ticket.individual?.id === ticket.household?.headOfHousehold?.id;
 
   const primaryCollectorRolesCount =
-    ticket?.individual?.householdsAndRoles.filter(
-      (el) => el.role === IndividualRoleInHouseholdRole.Primary,
-    ).length + (isHeadOfHousehold ? 1 : 0);
+    ticket?.individual?.rolesInHouseholds.filter((el) => el.role === 'PRIMARY')
+      .length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
-    JSON.parse(ticket.individualDataUpdateTicketDetails.roleReassignData),
+    ticket.ticketDetails.roleReassignData,
   )?.filter(
-    (el: RoleReassignData) =>
-      el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+    (el: RoleReassignData) => el.role === 'PRIMARY' || el.role === 'HEAD',
   ).length;
 
   let approveEnabled = false;
@@ -299,6 +355,7 @@ export function RequestedIndividualDataChange({
           values.selectedPaymentChannelsToRemove;
         const approvedPaymentChannelsToEdit =
           values.selectedPaymentChannelsToEdit;
+
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -309,26 +366,22 @@ export function RequestedIndividualDataChange({
         );
         try {
           await mutate({
-            variables: {
-              grievanceTicketId: ticket.id,
-              individualApproveData: JSON.stringify(individualApproveData),
-              approvedDocumentsToCreate,
-              approvedDocumentsToRemove,
-              approvedDocumentsToEdit,
-              approvedIdentitiesToCreate,
-              approvedIdentitiesToRemove,
-              approvedIdentitiesToEdit,
-              approvedPaymentChannelsToCreate,
-              approvedPaymentChannelsToRemove,
-              approvedPaymentChannelsToEdit,
-              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
-            },
+            individualApproveData,
+            approvedDocumentsToCreate,
+            approvedDocumentsToRemove,
+            approvedDocumentsToEdit,
+            approvedIdentitiesToCreate,
+            approvedIdentitiesToRemove,
+            approvedIdentitiesToEdit,
+            approvedPaymentChannelsToCreate,
+            approvedPaymentChannelsToRemove,
+            approvedPaymentChannelsToEdit,
+            flexFieldsApproveData,
           });
-          showMessage('Changes Approved');
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          // Error handling is already in the mutation onError callback
         }
       }}
     >
@@ -336,7 +389,7 @@ export function RequestedIndividualDataChange({
         const allChangesLength = Object.values(values).flat().length;
 
         return (
-          <StyledBox>
+          <ApproveBox>
             <Title>
               <Box display="flex" justifyContent="space-between">
                 <Typography variant="h6">Requested Data Change</Typography>
@@ -361,7 +414,7 @@ export function RequestedIndividualDataChange({
               setFieldValue={setFieldValue}
               isEdit={isEdit}
             />
-          </StyledBox>
+          </ApproveBox>
         );
       }}
     </Formik>

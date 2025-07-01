@@ -9,7 +9,6 @@ import { Formik, FormikValues } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -18,6 +17,8 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
 import { LookUpLinkedTicketsTable } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsTable';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 
 export const LookUpLinkedTicketsModal = ({
   onValueChange,
@@ -28,8 +29,13 @@ export const LookUpLinkedTicketsModal = ({
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const location = useLocation();
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
   const initialFilter = {
     search: '',
     documentType: choicesData?.documentTypeChoices?.[0]?.value,

@@ -8,39 +8,55 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import {
-  SurveyCategory,
-  useExportSurveySampleMutation,
-  useSurveyQuery,
-  useSurveysChoiceDataQuery,
-} from '@generated/graphql';
-import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { SurveyCategoryEnum } from '@utils/enums';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
-import { AdminButton } from '@core/AdminButton';
 import { ReactElement } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import SurveyDetails from '@components/accountability/Surveys/SurveyDetails';
+import { Survey } from '@restgenerated/models/Survey';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import RecipientsTable from '@containers/tables/Communication/RecipientsTable/RecipientsTable';
 
 function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, programId } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
-  const { data, loading, error } = useSurveyQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
-  const { data: choicesData, loading: choicesLoading } =
-    useSurveysChoiceDataQuery({
-      fetchPolicy: 'cache-and-network',
-    });
 
-  const [mutate] = useExportSurveySampleMutation();
+  const {
+    data,
+    isLoading: loading,
+    error,
+  } = useHopeDetailsQuery<Survey>(
+    id,
+    RestService.restBusinessAreasProgramsSurveysRetrieve,
+    {},
+  );
+
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['surveyCategoryChoices', baseUrl, programId],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsSurveysCategoryChoicesList({
+        businessAreaSlug: baseUrl,
+        programSlug: programId,
+      }),
+  });
+
+  const exportSurveyMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsSurveysExportSampleRetrieve({
+        businessAreaSlug: baseUrl,
+        programSlug: programId,
+        id: id,
+      }),
+  });
   const permissions = usePermissions();
 
   if (loading || choicesLoading) return <LoadingComponent />;
@@ -49,7 +65,7 @@ function SurveyDetailsPage(): ReactElement {
 
   if (!data || !choicesData || permissions === null) return null;
 
-  const { survey } = data;
+  const survey = data; // REST API returns survey directly, not wrapped in { survey }
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -60,19 +76,15 @@ function SurveyDetailsPage(): ReactElement {
 
   const exportSurveySample = async (): Promise<void> => {
     try {
-      await mutate({
-        variables: {
-          surveyId: id,
-        },
-      });
+      await exportSurveyMutation.mutateAsync();
       showMessage(t('Survey sample exported.'));
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showMessage(e instanceof Error ? e.message : 'An error occurred');
     }
   };
 
   const renderActions = (): ReactElement => {
-    if (survey.category === SurveyCategory.RapidPro) {
+    if (survey.category === SurveyCategoryEnum.RAPID_PRO) {
       return (
         <ButtonTooltip
           variant="contained"
@@ -89,7 +101,7 @@ function SurveyDetailsPage(): ReactElement {
         </ButtonTooltip>
       );
     }
-    if (survey.category === SurveyCategory.Manual) {
+    if (survey.category === SurveyCategoryEnum.MANUAL) {
       if (survey.hasValidSampleFile) {
         return (
           <Button
@@ -127,7 +139,6 @@ function SurveyDetailsPage(): ReactElement {
             ? breadCrumbsItems
             : null
         }
-        flags={<AdminButton adminUrl={survey.adminUrl} />}
       >
         {renderActions()}
       </PageHeader>

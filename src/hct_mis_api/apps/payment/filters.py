@@ -20,11 +20,7 @@ from django_filters import (
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
-from hct_mis_api.apps.core.utils import (
-    CustomOrderingFilter,
-    decode_id_string,
-    decode_id_string_required,
-)
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
@@ -109,8 +105,7 @@ class PaymentVerificationPlanFilter(FilterSet):
         model = PaymentVerificationPlan
 
     def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentVerificationPlan]":
-        program_id = decode_id_string_required(value)
-        return qs.filter(Q(payment_plan__program_id=program_id) | Q(cash_plan__program_id=program_id))
+        return qs.filter(payment_plan__program_cycle__program_id=value)
 
 
 class PaymentVerificationSummaryFilter(FilterSet):
@@ -252,13 +247,13 @@ class PaymentPlanFilter(FilterSet):
         return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__istartswith=value))
 
     def source_payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return PaymentPlan.objects.filter(source_payment_plan_id=decode_id_string(value))
+        return PaymentPlan.objects.filter(source_payment_plan_id=value)
 
     def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(program_cycle__program_id=decode_id_string_required(value))
+        return qs.filter(program_cycle__program_id=value)
 
     def filter_by_program_cycle(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(program_cycle_id=decode_id_string_required(value))
+        return qs.filter(program_cycle_id=value)
 
     def filter_is_payment_plan(self, qs: "QuerySet", name: str, value: bool) -> "QuerySet[PaymentPlan]":
         if value:
@@ -350,8 +345,7 @@ class PaymentFilter(FilterSet):
     household_id = CharFilter(method="filter_by_household_id")
 
     def payment_plan_id_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        payment_plan_id = decode_id_string(value)
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        payment_plan = get_object_or_404(PaymentPlan, id=value)
         q = Q(parent=payment_plan)
         if payment_plan.status != PaymentPlan.Status.OPEN:
             qs = qs.eligible()
@@ -402,9 +396,7 @@ class PaymentFilter(FilterSet):
         return super().filter_queryset(queryset)
 
     def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
-        return qs.filter(parent__program_cycle__program_id=decode_id_string_required(value))
+        return qs.filter(parent__program_cycle__program_id=value)
 
     def filter_by_household_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
-        return qs.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(
-            household_id=decode_id_string_required(value)
-        )
+        return qs.exclude(parent__status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES).filter(household_id=value)

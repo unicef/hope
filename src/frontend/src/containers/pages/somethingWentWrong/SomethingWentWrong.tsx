@@ -14,6 +14,7 @@ const Container = styled.div`
   padding-top: 30px;
   font-family: 'Roboto', sans-serif;
   height: 100vh;
+  width: 100%;
 `;
 
 const LogoContainer = styled.div`

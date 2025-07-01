@@ -1,3 +1,7 @@
+import { Bold } from '@components/core/Bold';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
   Box,
   Button,
@@ -8,15 +12,11 @@ import {
   TableBody,
   Typography,
 } from '@mui/material';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '@containers/dialogs/Dialog';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AllGrievanceTicketQuery } from '@generated/graphql';
 import { useProgramContext } from '../../../../programContext';
-import { Bold } from '@components/core/Bold';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -34,14 +34,12 @@ const StyledDialog = styled(Dialog)`
 `;
 
 interface BulkBaseModalProps {
-  selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+  selectedTickets: GrievanceTicketList[];
   icon: ReactElement;
   buttonTitle: string;
   title: string;
   children?: ReactNode;
-  onSave: (
-    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
-  ) => Promise<void>;
+  onSave: (tickets: GrievanceTicketList[]) => Promise<void>;
   disabledSave?: boolean;
 }
 

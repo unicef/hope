@@ -25,25 +25,25 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
 import {
-  ProgramCycle,
   ProgramCycleUpdate,
   ProgramCycleUpdateResponse,
   updateProgramCycle,
 } from '@api/programCycleApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ProgramQuery } from '@generated/graphql';
 import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
 interface MutationError extends DefaultError {
   data: any;
 }
 
 interface EditProgramCycleProps {
-  programCycle: ProgramCycle;
-  program: ProgramQuery['program'];
+  programCycle: ProgramCycleList;
+  program: ProgramDetail;
 }
 
 const EditProgramCycle = ({
@@ -77,7 +77,7 @@ const EditProgramCycle = ({
     },
   });
 
-  const isEndDateRequired = !!programCycle.end_date;
+  const isEndDateRequired = !!programCycle.endDate;
 
   const handleUpdate = async (values: any): Promise<void> => {
     try {
@@ -92,19 +92,19 @@ const EditProgramCycle = ({
     [key: string]: string | boolean | number;
   } = {
     title: programCycle.title,
-    start_date: programCycle.start_date,
-    end_date: programCycle.end_date ?? undefined,
+    startDate: programCycle.startDate,
+    end_date: programCycle.endDate ?? undefined,
   };
 
   const endDateValidationSchema = () => {
     let validation = Yup.date()
       .min(today, t('End Date cannot be in the past'))
-      .when('start_date', ([start_date], schema) =>
-        start_date
+      .when('startDate', ([startDate], schema) =>
+        startDate
           ? schema.min(
-              new Date(start_date),
+              new Date(startDate),
               `${t('End date have to be greater than')} ${moment(
-                start_date,
+                startDate,
               ).format('YYYY-MM-DD')}`,
             )
           : schema,
@@ -129,7 +129,7 @@ const EditProgramCycle = ({
       .required(t('Programme Cycle title is required'))
       .min(2, t('Too short'))
       .max(150, t('Too long')),
-    start_date: Yup.date()
+    startDate: Yup.date()
       .required(t('Start Date is required'))
       .min(
         program.startDate,
@@ -183,7 +183,7 @@ const EditProgramCycle = ({
                   </Grid>
                   <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
                     <Field
-                      name="start_date"
+                      name="startDate"
                       label={t('Start Date')}
                       component={FormikDateField}
                       required
@@ -192,9 +192,9 @@ const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
-                    {error?.data?.start_date && (
+                    {error?.data?.startDate && (
                       <FormHelperText error>
-                        {error.data.start_date}
+                        {error.data.startDate}
                       </FormHelperText>
                     )}
                   </Grid>
@@ -209,9 +209,9 @@ const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
-                    {error?.data?.end_date && (
+                    {error?.data?.endDate && (
                       <FormHelperText error>
-                        {error.data.end_date}
+                        {error.data.endDate}
                       </FormHelperText>
                     )}
                   </Grid>

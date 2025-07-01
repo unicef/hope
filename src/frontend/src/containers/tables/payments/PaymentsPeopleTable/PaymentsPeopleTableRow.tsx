@@ -1,6 +1,5 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import { PaymentNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import {
@@ -12,9 +11,10 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { PaymentList } from '@restgenerated/models/PaymentList';
 
 interface PaymentsPeopleTableRowProps {
-  payment: PaymentNode;
+  payment: PaymentList;
   openInNewTab: boolean;
   canViewDetails: boolean;
 }

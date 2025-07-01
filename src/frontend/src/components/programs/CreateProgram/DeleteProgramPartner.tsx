@@ -58,7 +58,6 @@ export function DeleteProgramPartner({
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
-              // TODO: fix this
               loading={false}
               type="submit"
               variant="contained"

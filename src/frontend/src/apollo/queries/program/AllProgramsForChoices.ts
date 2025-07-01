@@ -51,6 +51,7 @@ export const AllProgramsForChoices = gql`
           id
           name
           status
+          slug
           dataCollectingType {
             id
             code

@@ -1,17 +1,17 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
-import { Radio } from '@mui/material';
-import { RegistrationDataImportNode } from '@generated/graphql';
-import { useBusinessArea } from '@hooks/useBusinessArea';
-import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
-import { StatusBox } from '@components/core/StatusBox';
-import { registrationDataImportStatusToColor } from '@utils/utils';
-import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { useBusinessArea } from '@hooks/useBusinessArea';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
+import { registrationDataImportStatusToColor } from '@utils/utils';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface LookUpRegistrationDataImportTableRowCommunicationProps {
-  registrationDataImport: RegistrationDataImportNode;
+  registrationDataImport: RegistrationDataImportList;
   canViewDetails: boolean;
   selectedRDI?;
   radioChangeHandler?: (id: string) => void;
@@ -35,10 +35,7 @@ export function LookUpRegistrationDataImportTableRowCommunication({
   };
   const renderImportedBy = (): string => {
     if (registrationDataImport?.importedBy) {
-      if (registrationDataImport.importedBy.firstName) {
-        return `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`;
-      }
-      return registrationDataImport.importedBy.email;
+      return registrationDataImport.importedBy || '-';
     }
     return '-';
   };
@@ -84,7 +81,7 @@ export function LookUpRegistrationDataImportTableRowCommunication({
         </UniversalMoment>
       </TableCell>
       <TableCell align="right">
-        {registrationDataImport.totalHouseholdsCountWithValidPhoneNo || 0}
+        {registrationDataImport.numberOfHouseholds || 0}
       </TableCell>
       <TableCell align="left">{renderImportedBy()}</TableCell>
       <TableCell align="left">{registrationDataImport.dataSource}</TableCell>

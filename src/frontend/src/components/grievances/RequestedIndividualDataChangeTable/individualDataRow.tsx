@@ -7,6 +7,7 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
 import { ReactElement } from 'react';
+import { snakeCase } from 'lodash';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -34,7 +35,7 @@ export const individualDataRow = (
     previousValue: string;
     approveStatus: boolean;
   };
-  const field = fieldsDict[row[0]];
+  const field = fieldsDict[snakeCase(row[0])];
 
   const isCountryFieldName =
     fieldName === 'country' ||
@@ -46,16 +47,10 @@ export const individualDataRow = (
     : valueDetails.previousValue;
 
   const individualValue = field?.isFlexField
-    ? ticket.individualDataUpdateTicketDetails?.individual?.flexFields[row[0]]
+    ? ticket.ticketDetails?.individual?.flexFields[row[0]]
     : isCountryFieldName
-      ? countriesDict[
-          ticket.individualDataUpdateTicketDetails?.individual[
-            camelCase(fieldName)
-          ]
-        ]
-      : ticket.individualDataUpdateTicketDetails?.individual[
-          camelCase(fieldName)
-        ];
+      ? countriesDict[ticket.ticketDetails?.individual[camelCase(fieldName)]]
+      : ticket.ticketDetails?.individual[camelCase(fieldName)];
 
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED

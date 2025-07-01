@@ -9,13 +9,14 @@ import camelCase from 'lodash/camelCase';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { handleSelected } from '../utils/helpers';
 import { individualDataRow } from './individualDataRow';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
+  width: 100%;
 `;
 
 export interface EntriesTableProps {
@@ -23,7 +24,7 @@ export interface EntriesTableProps {
   isEdit;
   fieldsDict;
   countriesDict;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   entries;
   entriesFlexFields;
   setFieldValue;
@@ -78,7 +79,7 @@ export function EntriesTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) =>
+        {entries?.map((row, index) =>
           individualDataRow(
             row,
             isSelected,
@@ -90,7 +91,7 @@ export function EntriesTable({
             handleSelectBioData,
           ),
         )}
-        {entriesFlexFields.map((row, index) =>
+        {entriesFlexFields?.map((row, index) =>
           individualDataRow(
             row,
             isSelectedFlexfields,

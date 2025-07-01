@@ -11,7 +11,6 @@ from openpyxl.packaging.custom import StringProperty
 
 from hct_mis_api.apps.core.attributes_qet_queries import age_to_birth_date_query
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
@@ -158,13 +157,9 @@ class PeriodicDataUpdateExportTemplateService:
         queryset = Individual.objects.all()
         queryset = queryset.filter(program=self.program)
         if self.registration_data_import_id_filter:
-            registration_data_import_id_filter_decoded = decode_id_string_required(
-                self.registration_data_import_id_filter
-            )
-            queryset = queryset.filter(registration_data_import_id=registration_data_import_id_filter_decoded)
+            queryset = queryset.filter(registration_data_import_id=self.registration_data_import_id_filter)
         if self.target_population_id_filter:
-            target_population_id_filter_decoded = decode_id_string_required(self.target_population_id_filter)
-            queryset = queryset.filter(household__payment__parent_id=target_population_id_filter_decoded)
+            queryset = queryset.filter(household__payment__parent_id=self.target_population_id_filter)
         if self.gender_filter:
             queryset = queryset.filter(sex=self.gender_filter)
         if self.age_filter:
@@ -186,11 +181,9 @@ class PeriodicDataUpdateExportTemplateService:
                 )
 
         if self.admin1_filter:
-            admin1_filter_decoded = [decode_id_string_required(admin1) for admin1 in self.admin1_filter]
-            queryset = queryset.filter(household__admin1__in=admin1_filter_decoded)
+            queryset = queryset.filter(household__admin1__in=self.admin1_filter)
         if self.admin2_filter:
-            admin2_filter_decoded = [decode_id_string_required(admin2) for admin2 in self.admin2_filter]
-            queryset = queryset.filter(household__admin2__in=admin2_filter_decoded)
+            queryset = queryset.filter(household__admin2__in=self.admin2_filter)
         if self.has_grievance_ticket_filter:
             queryset = self._get_grievance_ticket_filter(queryset)
         elif self.has_grievance_ticket_filter is False:

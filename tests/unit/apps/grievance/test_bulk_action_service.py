@@ -35,7 +35,6 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
         create_afghanistan()
         cls.user = UserFactory(first_name="user")
         cls.user_two = UserFactory.create(first_name="user_two")
-        # cls.assignedTo = encode_id_base64(cls.user_two.id, "Grievance")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         cls.grievance_ticket1 = GrievanceTicket.objects.create(

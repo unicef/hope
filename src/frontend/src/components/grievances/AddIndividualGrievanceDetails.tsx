@@ -4,12 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { getFlexFieldTextValue, renderBoolean } from '@utils/utils';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  useAllAddIndividualFieldsQuery,
-  useApproveAddIndividualDataChangeMutation,
-} from '@generated/graphql';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -18,17 +12,54 @@ import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { RestService } from '@restgenerated/services/RestService';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 function AddIndividualGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canApproveDataChange: boolean;
 }): ReactElement {
   const { t } = useTranslation();
-  const { data, loading } = useAllAddIndividualFieldsQuery();
-  const [mutate] = useApproveAddIndividualDataChangeMutation();
+  const { businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
+
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['addIndividualFieldsAttributes', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsAllAddIndividualsFieldsAttributesList(
+        {
+          businessAreaSlug: businessArea,
+        },
+      ),
+  });
+
+  const { mutate } = useMutation({
+    mutationFn: ({
+      grievanceTicketId,
+      approveStatus,
+    }: {
+      grievanceTicketId: string;
+      approveStatus: boolean;
+    }) =>
+      RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
+        businessAreaSlug: businessArea,
+        id: grievanceTicketId,
+        requestBody: {
+          approveStatus,
+        },
+      }),
+    onSuccess: () => {
+      // Invalidate and refetch the grievance ticket details
+      queryClient.invalidateQueries({
+        queryKey: ['grievanceTicket', ticket.id],
+      });
+    },
+  });
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -40,23 +71,24 @@ function AddIndividualGrievanceDetails({
   if (!data) {
     return null;
   }
-  const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => ({
-      ...previousValue,
-      [currentValue?.name]: currentValue,
-    }),
-    {},
-  );
+  const fieldsDict =
+    data?.results?.reduce(
+      (previousValue, currentValue) => ({
+        ...previousValue,
+        [currentValue?.name]: currentValue,
+      }),
+      {},
+    ) || {};
 
   const individualData = {
-    ...ticket.addIndividualTicketDetails?.individualData,
+    ...ticket.ticketDetails?.individualData,
   };
   const documents = individualData?.documents;
   const identities = individualData?.identities;
   delete individualData.documents;
   delete individualData.identities;
-  const flexFields = individualData?.flex_fields;
-  delete individualData?.flex_fields;
+  const flexFields = individualData?.flexFields;
+  delete individualData?.flexFields;
   delete individualData.documents;
   delete individualData.identities;
   const labels =
@@ -124,7 +156,7 @@ function AddIndividualGrievanceDetails({
   let dialogText = t(
     `You did not approve the following add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
   );
-  if (!ticket.addIndividualTicketDetails.approveStatus) {
+  if (!ticket.ticketDetails.approveStatus) {
     dialogText = t(
       `You are approving the following Add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
     );
@@ -144,41 +176,30 @@ function AddIndividualGrievanceDetails({
                 confirm({
                   title: t('Warning'),
                   content: dialogText,
-                }).then(async () => {
+                }).then(() => {
                   try {
-                    await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus:
-                          !ticket.addIndividualTicketDetails.approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
-                        },
-                      ],
+                    mutate({
+                      grievanceTicketId: ticket.id,
+                      approveStatus: !ticket.ticketDetails.approveStatus,
                     });
-                    if (ticket.addIndividualTicketDetails.approveStatus) {
+                    if (ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Disapproved'));
                     }
-                    if (!ticket.addIndividualTicketDetails.approveStatus) {
+                    if (!ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                    showMessage(t('An error occurred'));
                   }
                 })
               }
               variant={
-                ticket.addIndividualTicketDetails?.approveStatus
-                  ? 'outlined'
-                  : 'contained'
+                ticket.ticketDetails?.approveStatus ? 'outlined' : 'contained'
               }
               color="primary"
               disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             >
-              {ticket.addIndividualTicketDetails.approveStatus
+              {ticket.ticketDetails.approveStatus
                 ? t('Disapprove')
                 : t('Approve')}
             </Button>
