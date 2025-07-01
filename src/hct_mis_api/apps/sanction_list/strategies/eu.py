@@ -14,7 +14,7 @@ from ..tasks.check_against_sanction_list_pre_merge import (
 )
 from ._base import BaseSanctionList
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from typing import Generator, TypedDict
 
     Alias = TypedDict(
@@ -142,7 +142,7 @@ class EUSanctionList(BaseSanctionList):
                 try:
                     country = Country.objects.get(iso_code2=nationality["iso_code2"])
                     ind.nationalities.get_or_create(nationality=country)
-                except Country.DoesNotExist:
+                except Country.DoesNotExist:  # pragma: no cover
                     logger.error(f"Unknown country: '{nationality['iso_code2']}'")
 
         try:
@@ -152,7 +152,7 @@ class EUSanctionList(BaseSanctionList):
             )  # get programs which use sanction list which is using this strategy
             for program in programs:
                 check_against_sanction_list_pre_merge(program_id=program.id)
-        except NotFoundError:
+        except NotFoundError:  # pragma: no cover
             pass
         return _i
 
