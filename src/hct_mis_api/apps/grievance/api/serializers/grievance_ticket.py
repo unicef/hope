@@ -535,7 +535,7 @@ class CreateGrievanceTicketSerializer(serializers.Serializer):
         required=False,
         allow_empty=True,
     )
-    extras = CreateGrievanceTicketExtrasSerializer()
+    extras = CreateGrievanceTicketExtrasSerializer(allow_null=True, required=False)
     priority = serializers.IntegerField(required=False)
     urgency = serializers.IntegerField(required=False)
     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), required=False, allow_null=True)
