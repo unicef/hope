@@ -20,7 +20,6 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.models import (
     AccountType,
-    FinancialInstitution,
     PendingAccount,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
@@ -58,13 +57,12 @@ class DocumentMixin:
 
 class AccountMixin:
     def save_account(self, member: PendingIndividual, doc: Dict) -> None:
-        financial_institution_id = doc.pop("financial_institution", None)
         PendingAccount.objects.create(
             individual=member,
             number=doc.pop("number", None),
             unique_key=doc.pop("unique_key", None),
             account_type=AccountType.objects.get(key=doc.pop("account_type")),
-            financial_institution=FinancialInstitution.objects.filter(id=financial_institution_id).first(),
+            financial_institution=doc.pop("financial_institution", None),
             data={**doc.pop("data"), **doc},
         )
 
