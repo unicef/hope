@@ -21,10 +21,6 @@ class Migration(migrations.Migration):
         migrations.DeleteModel(
             name='PendingBankAccountInfo',
         ),
-        migrations.AddConstraint(
-            model_name='household',
-            constraint=models.UniqueConstraint(condition=models.Q(('is_removed', False), ('identification_key__isnull', False)), fields=('identification_key', 'program'), name='identification_key_unique_constraint'),
-        ),
         migrations.DeleteModel(
             name='BankAccountInfo',
         ),
