@@ -1,6 +1,7 @@
 from dataclasses import asdict
 from typing import TYPE_CHECKING, Any, Dict
 
+from django.contrib.auth import get_user_model
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.http import HttpRequest
@@ -8,6 +9,7 @@ from django.http.response import Http404, HttpResponseBase
 from django.utils.functional import cached_property
 
 from rest_framework import serializers, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -30,12 +32,14 @@ class RDISerializer(serializers.ModelSerializer):
     program = serializers.SlugRelatedField(
         slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
     )
+    imported_by_email = serializers.EmailField(required=True, write_only=True)
 
     class Meta:
         model = RegistrationDataImport
-        fields = ("name", "program")
+        fields = ("name", "program", "imported_by_email")
 
     def create(self, validated_data: Dict) -> None:
+        validated_data.pop("imported_by_email", None)
         return super().create(validated_data)
 
 
@@ -53,10 +57,16 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
 
     @atomic()
     def perform_create(self, serializer: serializers.BaseSerializer) -> None:
+        imported_by_email = serializer.validated_data.get("imported_by_email")
+        User = get_user_model()
+        try:
+            imported_by = User.objects.get(email=imported_by_email)
+        except User.DoesNotExist:
+            raise PermissionDenied("User with this email does not exist.")
         self.rdi = serializer.save(
             business_area=self.selected_business_area,
             status=RegistrationDataImport.LOADING,
-            imported_by=self.request.user,
+            imported_by=imported_by,
             data_source=RegistrationDataImport.API,
             number_of_individuals=0,
             number_of_households=0,
