@@ -204,7 +204,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               size="small"
               data-cy="select-template"
             >
-              {templateData.results.map((template) => (
+              {templateData?.results?.map((template) => (
                 <MenuItem key={template.id} value={template.id}>
                   {template.name}
                 </MenuItem>

@@ -7,6 +7,7 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
 import { ReactElement } from 'react';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -24,6 +25,7 @@ export const householdDataRow = (
   ticket,
   isEdit,
   handleSelectBioData,
+  household: HouseholdDetail | undefined,
 ): ReactElement => {
   const fieldName = snakeCase(row[0]);
   const field = fieldsDict[fieldName];
@@ -44,8 +46,8 @@ export const householdDataRow = (
       : valueDetails.previousValue;
 
   const householdValue = field.isFlexField
-    ? ticket.ticketDetails.householdData.flexFields[fieldName]
-    : ticket.ticketDetails.householdData[camelCase(fieldName)];
+    ? household.flexFields[fieldName]
+    : household[camelCase(fieldName)];
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? previousValue
@@ -74,7 +76,7 @@ export const householdDataRow = (
       </TableCell>
       <TableCell id={labelId} scope="row" align="left">
         <Capitalize>
-          {row[0].replaceAll('_h_f', '').replaceAll('_', ' ')}
+          {snakeCase(row[0]).replaceAll('_h_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
       <TableCell align="left">
