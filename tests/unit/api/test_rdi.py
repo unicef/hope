@@ -29,6 +29,7 @@ from hct_mis_api.apps.program.fixtures import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.unit.api.base import HOPEApiTestCase
+from tests.unit.api.factories import UserFactory
 
 
 class CreateRDITests(HOPEApiTestCase):
@@ -42,10 +43,12 @@ class CreateRDITests(HOPEApiTestCase):
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
 
     def test_create_rdi(self) -> None:
+        user = UserFactory()
         data = {
             "name": "aaaa",
             "collect_data_policy": "FULL",
             "program": str(self.program.id),
+            "imported_by_email": user.email,
         }
         response = self.client.post(self.url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
@@ -53,9 +56,20 @@ class CreateRDITests(HOPEApiTestCase):
         self.assertIsNotNone(rdi)
         self.assertEqual(rdi.program, self.program)
         self.assertEqual(rdi.status, RegistrationDataImport.LOADING)
-
+        self.assertEqual(rdi.imported_by, user)
         self.assertEqual(response.json()["id"], str(rdi.id))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
+
+    def test_create_rdi_permission_denied_for_invalid_email(self) -> None:
+        data = {
+            "name": "aaaa",
+            "collect_data_policy": "FULL",
+            "program": str(self.program.id),
+            "imported_by_email": "nonexistentuser@example.com",
+        }
+        response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, str(response.json()))
+        self.assertIn("User with this email does not exist.", str(response.json()))
 
 
 class PushToRDITests(HOPEApiTestCase):
