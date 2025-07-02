@@ -48,5 +48,5 @@ export function CurrentValue({
     default:
       displayValue = value;
   }
-  return <>{displayValue || '-'}</>;
+  return <>{JSON.stringify(displayValue.previousValue) || '-'}</>;
 }

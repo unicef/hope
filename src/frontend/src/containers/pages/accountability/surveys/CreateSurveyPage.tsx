@@ -217,7 +217,6 @@ const CreateSurveyPage = (): ReactElement => {
           programSlug: programId,
         });
       setFlowsData({ surveyAvailableFlows: result });
-      console.log('Available flows loaded:', result);
     } catch (error) {
       console.error('Error loading available flows:', error);
       setFlowsError(error);
