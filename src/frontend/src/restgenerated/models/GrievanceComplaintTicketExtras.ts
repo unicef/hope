@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type GrievanceComplaintTicketExtras = {
-    household?: string;
-    individual?: string;
+    household?: string | null;
+    individual?: string | null;
     paymentRecord: Array<string>;
 };
 

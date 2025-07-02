@@ -435,8 +435,8 @@ class NegativeFeedbackTicketExtras(serializers.Serializer):
 
 
 class GrievanceComplaintTicketExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
-    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
+    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all(), allow_null=True)
+    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all(), allow_null=True)
     payment_record = serializers.ListField(child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()))
 
 

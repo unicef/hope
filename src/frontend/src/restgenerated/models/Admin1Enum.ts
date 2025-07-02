@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `HR60` - Davisfort
- * * `AF67` - East Williamberg
- * * `UA76` - Erichaven
- * * `UA36` - Heidiberg
- * * `UA58` - Kirkshire
- * * `AF98` - Lake Michaelchester
- * * `HR45` - Markstad
- * * `AF52` - New Ryan
- * * `HR23` - Port Jessicashire
+ * * `AF25` - Branditown
+ * * `HR61` - Brownstad
+ * * `HR71` - East Jessicabury
+ * * `AF53` - Evansborough
+ * * `UA20` - Jamesshire
+ * * `AF95` - Lake Chase
+ * * `UA11` - Lake Heidi
+ * * `HR33` - Lake Patrick
+ * * `UA93` - South Ashley
  */
 export enum Admin1Enum {
-    HR60 = 'HR60',
-    AF67 = 'AF67',
-    UA76 = 'UA76',
-    UA36 = 'UA36',
-    UA58 = 'UA58',
-    AF98 = 'AF98',
-    HR45 = 'HR45',
-    AF52 = 'AF52',
-    HR23 = 'HR23',
+    AF25 = 'AF25',
+    HR61 = 'HR61',
+    HR71 = 'HR71',
+    AF53 = 'AF53',
+    UA20 = 'UA20',
+    AF95 = 'AF95',
+    UA11 = 'UA11',
+    HR33 = 'HR33',
+    UA93 = 'UA93',
 }

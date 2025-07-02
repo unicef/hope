@@ -37,7 +37,6 @@ export type HouseholdUpdateData = {
     fchildHoh?: boolean;
     childHoh?: boolean;
     start?: string;
-    end?: string;
     nameEnumerator?: string;
     orgEnumerator?: string;
     orgNameEnumerator?: string;

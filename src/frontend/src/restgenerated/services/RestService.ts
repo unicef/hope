@@ -13056,6 +13056,18 @@ export class RestService {
         });
     }
     /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentVerificationSummaryStatusList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-verification-summary-status/',
+        });
+    }
+    /**
      * @returns any No response body
      * @throws ApiError
      */
