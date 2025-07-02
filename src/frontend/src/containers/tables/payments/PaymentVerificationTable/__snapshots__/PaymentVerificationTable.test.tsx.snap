@@ -74,7 +74,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
                   role="button"
                   tabindex="0"
                 >
-                  Verification Status
+                  Payment Plan Status
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -99,7 +99,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
                   role="button"
                   tabindex="0"
                 >
-                  Cash Amount
+                  Total Amount
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -124,7 +124,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
                   role="button"
                   tabindex="0"
                 >
-                  Timeframe
+                  Payment Disbursement Dates
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
