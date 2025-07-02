@@ -47,10 +47,12 @@ export const individualDataRow = (
     : valueDetails.previousValue;
 
   const individualValue = field?.isFlexField
-    ? ticket.ticketDetails?.individual?.flexFields[row[0]]
+    ? ticket.ticketDetails?.individualData?.flexFields[row[0]]
     : isCountryFieldName
-      ? countriesDict[ticket.ticketDetails?.individual[camelCase(fieldName)]]
-      : ticket.ticketDetails?.individual[camelCase(fieldName)];
+      ? countriesDict[
+          ticket.ticketDetails?.individualData?.[camelCase(fieldName)]
+        ]
+      : ticket.ticketDetails?.individualData?.[camelCase(fieldName)];
 
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
