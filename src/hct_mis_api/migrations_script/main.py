@@ -17,7 +17,6 @@ def export_migration_info_to_csv(filename="migrations_info.csv"):
         cursor.execute("SELECT * FROM django_migrations")
         rows = cursor.fetchall()
         column_names = [desc[0] for desc in cursor.description]
-    print(rows)
 
     with open(filename, mode="w", newline="") as file:
         writer = csv.writer(file)
