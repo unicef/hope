@@ -175,10 +175,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
-        if (
-            created_obj_hct.should_check_against_sanction_list()
-            and not business_area.should_check_against_sanction_list()
-        ):
+        if created_obj_hct.should_check_against_sanction_list() and not created_obj_hct.program.sanction_lists.exists():
             raise ValidationError("Cannot check against sanction list")
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
@@ -243,10 +240,7 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
-        if (
-            created_obj_hct.should_check_against_sanction_list()
-            and not business_area.should_check_against_sanction_list()
-        ):
+        if created_obj_hct.should_check_against_sanction_list() and not created_obj_hct.program.sanction_lists.exists():
             raise ValidationError("Cannot check against sanction list")
 
         if created_obj_hct.number_of_households == 0 and created_obj_hct.number_of_individuals == 0:
@@ -352,10 +346,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
-        if (
-            created_obj_hct.should_check_against_sanction_list()
-            and not business_area.should_check_against_sanction_list()
-        ):
+        if created_obj_hct.should_check_against_sanction_list() and not created_obj_hct.program.sanction_lists.exists():
             raise ValidationError("Cannot check against sanction list")
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
