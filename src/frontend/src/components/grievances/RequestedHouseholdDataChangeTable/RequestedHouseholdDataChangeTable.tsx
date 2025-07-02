@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { handleSelected } from '../utils/helpers';
 import { householdDataRow } from './householdDataRow';
+import { snakeCase } from 'lodash';
 
 interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketDetail;
@@ -52,10 +53,11 @@ function RequestedHouseholdDataChangeTable({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
-  const selectedBioData = values.selected;
+  // Convert selectedBioData to snake_case
+  const selectedBioData = values.selected.map((name) => snakeCase(name));
   const { selectedFlexFields } = values;
-  const { householdData } = {
-    ...ticket.ticketDetails,
+  const householdData = {
+    ...ticket.ticketDetails.householdData,
   };
   const flexFields = householdData.flexFields || {};
   delete householdData.flexFields;
@@ -78,10 +80,11 @@ function RequestedHouseholdDataChangeTable({
     );
   };
   const handleSelectBioData = (name): void => {
-    handleSelected(name, 'selected', selectedBioData, setFieldValue);
+    handleSelected(snakeCase(name), 'selected', selectedBioData, setFieldValue);
   };
 
-  const isSelected = (name: string): boolean => selectedBioData.includes(name);
+  const isSelected = (name: string): boolean =>
+    selectedBioData.includes(snakeCase(name));
   const isSelectedFlexfields = (name: string): boolean =>
     selectedFlexFields.includes(name);
 
