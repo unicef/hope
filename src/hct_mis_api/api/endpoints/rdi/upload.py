@@ -92,8 +92,8 @@ class DocumentSerializer(serializers.ModelSerializer):
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
     document_number = serializers.CharField(required=True)
-    issuance_date = serializers.DateField(required=True)
-    expiry_date = serializers.DateField(required=True)
+    issuance_date = serializers.DateField(required=False)
+    expiry_date = serializers.DateField(required=False)
 
     class Meta:
         model = PendingDocument
