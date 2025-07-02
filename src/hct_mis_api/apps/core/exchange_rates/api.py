@@ -34,11 +34,8 @@ class ExchangeRateClientDummy(ExchangeRateClient):
 
 class ExchangeRateClientAPI(ExchangeRateClient):
     def __init__(self, api_key: Optional[str] = None, api_url: Optional[str] = None) -> None:
-        self.api_key = api_key or os.getenv("EXCHANGE_RATES_API_KEY")
-        self.api_url: str = (
-            api_url or os.getenv("EXCHANGE_RATES_API_URL") or "https://uniapis.unicef.org/biapi/v1/exchangerates"
-        )
-
+        self.api_key = api_key or settings.EXCHANGE_RATES_API_KEY
+        self.api_url: str = api_url or settings.EXCHANGE_RATES_API_URL
         if self.api_key is None:
             raise ValueError("Missing Ocp Apim Subscription Key")
 
