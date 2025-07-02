@@ -15,6 +15,8 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketDetail;
@@ -54,6 +56,13 @@ export function RequestedIndividualDataChangeTable({
     queryKey: ['countriesList'],
     queryFn: () => RestService.restChoicesCountriesList(),
   });
+
+  const { data: individual, isLoading: individualLoading } =
+    useHopeDetailsQuery<IndividualDetail>(
+      ticket.individual.id,
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      {},
+    );
 
   const individualData = {
     ...ticket.ticketDetails.individualData,
@@ -97,7 +106,8 @@ export function RequestedIndividualDataChangeTable({
     !fieldsDict ||
     !countriesDict ||
     !documentTypeDict ||
-    !identityTypeDict
+    !identityTypeDict ||
+    individualLoading
   ) {
     return <LoadingComponent />;
   }
@@ -114,6 +124,7 @@ export function RequestedIndividualDataChangeTable({
           entries={entries}
           entriesFlexFields={entriesFlexFields}
           setFieldValue={setFieldValue}
+          individual={individual}
         />
       ) : null}
       {documents?.length ? (
