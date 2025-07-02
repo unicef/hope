@@ -8,7 +8,7 @@ from django.utils import timezone
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
 from hct_mis_api.apps.grievance.celery_tasks import (
-    deduplicate_and_check_against_sanctions_list_task,
+    deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -161,7 +161,7 @@ class AddIndividualService(DataChangeService):
 
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
-                lambda: deduplicate_and_check_against_sanctions_list_task.delay(
+                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual.delay(
                     should_populate_index=True,
                     individuals_ids=[str(individual.id)],
                 )

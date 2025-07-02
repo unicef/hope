@@ -321,7 +321,6 @@ type BusinessAreaNode implements Node {
   deduplicationBatchDuplicatesAllowed: Int!
   deduplicationGoldenRecordDuplicatesPercentage: Int!
   deduplicationGoldenRecordDuplicatesAllowed: Int!
-  screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
   customFields: JSONString!
@@ -390,11 +389,6 @@ type ChartPaymentVerification {
   datasets: [_DetailedDatasetsNode]
   households: Int
   averageSampleSize: Float
-}
-
-type CheckAgainstSanctionListMutation {
-  ok: Boolean
-  errors: [XlsxRowErrorNode]
 }
 
 type ChoiceObject {
@@ -2261,7 +2255,6 @@ type Mutations {
   refuseRegistrationDataImport(id: ID!, refuseReason: String, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportId: ID!, version: BigInt): RegistrationDeduplicationMutation
   eraseRegistrationDataImport(id: ID!, version: BigInt): EraseRegistrationDataImportMutation
-  checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
 type NeedsAdjudicationApproveMutation {
@@ -3075,6 +3068,7 @@ type ProgramNode implements Node {
   isSocialWorkerProgram: Boolean
   targetPopulationsCount: Int
   canFinish: Boolean
+  screenBeneficiary: Boolean
 }
 
 type ProgramNodeConnection {
@@ -3754,7 +3748,7 @@ type SanctionListIndividualNode implements Node {
   listType: String!
   unListType: String!
   referenceNumber: String!
-  listedOn: DateTime!
+  listedOn: DateTime
   comments: String!
   designation: String!
   street: String!
@@ -4563,7 +4557,6 @@ type UserBusinessAreaNode implements Node {
   deduplicationBatchDuplicatesAllowed: Int!
   deduplicationGoldenRecordDuplicatesPercentage: Int!
   deduplicationGoldenRecordDuplicatesAllowed: Int!
-  screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
   customFields: JSONString!

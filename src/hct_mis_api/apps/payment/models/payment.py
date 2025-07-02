@@ -1933,11 +1933,11 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         null=True,
         blank=True,
     )
-    number = models.CharField(max_length=256, blank=True, null=True)
+    number = models.CharField(max_length=256, blank=True, null=True, db_index=True)
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)  # type: ignore
-    is_unique = models.BooleanField(default=True)
-    active = models.BooleanField(default=True)  # False for duplicated/withdrawn individual
+    is_unique = models.BooleanField(default=True, db_index=True)
+    active = models.BooleanField(default=True, db_index=True)  # False for duplicated/withdrawn individual
 
     signature_fields = (
         "data",
