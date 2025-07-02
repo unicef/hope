@@ -2,7 +2,6 @@ import {
   AllIndividualsQueryVariables,
   HouseholdChoiceDataQuery,
   IndividualMinimalFragment,
-  IndividualRdiMergeStatus,
   useAllIndividualsQuery,
 } from '@generated/graphql';
 import { Box, Checkbox, FormControlLabel, Grid2 as Grid } from '@mui/material';
@@ -49,9 +48,6 @@ function ImportedIndividualsTable({
     household,
     duplicatesOnly: showDuplicates,
     businessArea,
-    rdiMergeStatus: isMerged
-      ? IndividualRdiMergeStatus.Merged
-      : IndividualRdiMergeStatus.Pending,
   };
 
   const replacements = {
