@@ -57,20 +57,24 @@ export function RequestedIndividualDataChange({
   const identities = individualData?.identities || [];
   const identitiesToRemove = individualData.identities_to_remove || [];
   const identitiesToEdit = individualData.identities_to_edit || [];
+  const accounts = individualData.accounts || [];
   const accountsToEdit = individualData.accounts_to_edit || [];
   const flexFields = individualData.flex_fields || {};
 
   delete individualData.flex_fields;
   delete individualData.documents;
-  delete individualData.identities;
-  delete individualData.documents_to_remove;
   delete individualData.documents_to_edit;
-  delete individualData.accounts_to_edit;
-  delete individualData.identities_to_remove;
-  delete individualData.identities_to_edit;
+  delete individualData.documents_to_remove;
   delete individualData.previous_documents;
+
+  delete individualData.identities;
+  delete individualData.identities_to_edit;
+  delete individualData.identities_to_remove;
   delete individualData.previous_identities;
-  delete individualData.previous_payment_channels;
+
+  delete individualData.accounts;
+  delete individualData.accounts_to_edit;
+
 
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
@@ -87,6 +91,7 @@ export function RequestedIndividualDataChange({
   allApprovedCount += entries.filter(
     ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
+  allApprovedCount += accounts.filter((el) => el.approve_status).length;
   allApprovedCount += accountsToEdit.filter(
     (el) => el.approve_status,
   ).length;
@@ -143,6 +148,13 @@ export function RequestedIndividualDataChange({
     }
   }
 
+  const selectedAccounts = [];
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < accounts?.length; i++) {
+    if (accounts[i]?.approve_status) {
+      selectedAccounts.push(i);
+    }
+  }
   const selectedAccountsToEdit = [];
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < accountsToEdit?.length; i++) {
@@ -186,6 +198,7 @@ export function RequestedIndividualDataChange({
       documentsToEdit.length +
       identities.length +
       identitiesToRemove.length +
+      accounts.length +
       accountsToEdit.length +
       identitiesToEdit.length;
 
@@ -253,6 +266,7 @@ export function RequestedIndividualDataChange({
         selectedIdentities,
         selectedIdentitiesToEdit,
         selectedIdentitiesToRemove,
+        selectedAccounts,
         selectedAccountsToEdit,
 
       }}
@@ -268,6 +282,7 @@ export function RequestedIndividualDataChange({
         const approvedIdentitiesToCreate = values.selectedIdentities;
         const approvedIdentitiesToRemove = values.selectedIdentitiesToRemove;
         const approvedIdentitiesToEdit = values.selectedIdentitiesToEdit;
+        const approvedAccountsToCreate = values.selectedAccounts;
         const approvedAccountsToEdit = values.selectedAccountsToEdit;
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
@@ -288,6 +303,7 @@ export function RequestedIndividualDataChange({
               approvedIdentitiesToCreate,
               approvedIdentitiesToRemove,
               approvedIdentitiesToEdit,
+              approvedAccountsToCreate,
               approvedAccountsToEdit,
               flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },

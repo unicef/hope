@@ -236,13 +236,26 @@ function prepareEditIndividualVariables(requiredVariables, values) {
     values.individualDataUpdateFieldsIdentities,
   );
 
-  const accountsToEdit = values.individualDataUpdateAccountsToEdit.map(account => {
-    const { id, ...dataFields } = account;
-    return {
+  const newlyAddedAccountsWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsAccounts,
+  )?.map(account => {
+      const { id, name, ...dataFields } = account;
+      return {
         id,
+        name,
         dataFields,
+      };
+    },
+  );
+
+  const accountsToEdit = values.individualDataUpdateAccountsToEdit?.map(account => {
+    const { id, name, ...dataFields } = account;
+    return {
+      id,
+      name,
+      dataFields,
     };
-});
+  });
 
   return {
     variables: {
@@ -263,6 +276,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
+                accounts: newlyAddedAccountsWithoutIds,
                 accountsToEdit: accountsToEdit,
               },
             },

@@ -83,7 +83,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
-from hct_mis_api.apps.payment.models import Account
+from hct_mis_api.apps.payment.models import Account, AccountType, FinancialInstitution
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.nodes import (
@@ -200,7 +200,7 @@ class AccountNode(BaseNodePermissionMixin, DjangoObjectType):
     data_fields = graphene.JSONString()
 
     def resolve_name(self, info: Any) -> str:
-        return self.account_type.label
+        return self.account_type.key
 
     def resolve_data_fields(self, info: Any) -> dict:
         return dict(sorted(self.account_data.items()))
@@ -321,9 +321,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         ):
             return parent.accounts.none()
 
-        return (
-            parent.accounts(manager="all_objects").filter(rdi_merge_status=parent.rdi_merge_status).exclude(data={})  # type: ignore
-        )
+        return parent.accounts(manager="all_objects").filter(rdi_merge_status=parent.rdi_merge_status)  # type: ignore
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
@@ -671,6 +669,8 @@ class Query(graphene.ObjectType):
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
     identity_type_choices = graphene.List(ChoiceObject)
+    account_type_choices = graphene.List(ChoiceObject)
+    account_financial_institution_choices = graphene.List(ChoiceObject)
     countries_choices = graphene.List(ChoiceObject)
     observed_disability_choices = graphene.List(ChoiceObject)
     severity_of_disability_choices = graphene.List(ChoiceObject)
@@ -825,6 +825,12 @@ class Query(graphene.ObjectType):
 
     def resolve_identity_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(AGENCY_TYPE_CHOICES)
+
+    def resolve_account_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.label, "value": x.key} for x in AccountType.objects.all()]
+
+    def resolve_account_financial_institution_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.name, "value": x.id} for x in FinancialInstitution.objects.all()]
 
     def resolve_countries_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])

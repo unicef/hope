@@ -128,17 +128,15 @@ class EditIndividualIdentityObjectType(graphene.InputObjectType):
     number = graphene.String(required=True)
 
 
-# class AccountPayloadFieldObjectType(graphene.InputObjectType):
-#     name = graphene.String(required=True)
-#     value = graphene.String(required=True)
-#     previous_value = graphene.String(required=False)
-
-
 class AccountObjectType(graphene.InputObjectType):
-    account_type = graphene.String(required=True)
+    name = graphene.String(required=True)
+    approve_status = graphene.Boolean(required=False)
+    data_fields = GenericScalar()
 
 
 class EditAccountObjectType(graphene.InputObjectType):
+    name = graphene.String(required=False)
+    approve_status = graphene.Boolean(required=False)
     id = graphene.ID(required=True)
     data_fields = GenericScalar()
 
@@ -177,6 +175,7 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     identities = graphene.List(IndividualIdentityObjectType)
     identities_to_remove = graphene.List(graphene.ID)
     identities_to_edit = graphene.List(EditIndividualIdentityObjectType)
+    accounts = graphene.List(AccountObjectType)
     accounts_to_edit = graphene.List(EditAccountObjectType)
     preferred_language = graphene.String()
     flex_fields = Arg()

@@ -1,9 +1,9 @@
-import { Box, Grid2 as Grid, IconButton, Typography } from '@mui/material';
+import { Box, Grid2 as Grid, IconButton } from '@mui/material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
 import React, { Fragment, ReactElement, useState } from 'react';
-import { AllIndividualsQuery } from '@generated/graphql';
+import { AllAddIndividualFieldsQuery, AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { AccountField } from '@components/grievances/AccountField';
 
@@ -12,6 +12,7 @@ export interface EditAccountRowProps {
   account: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts'][number];
   arrayHelpers;
   id: string;
+ addIndividualFieldsData: AllAddIndividualFieldsQuery;
 }
 
 export function EditAccountRow({
@@ -19,6 +20,7 @@ export function EditAccountRow({
   account,
   arrayHelpers,
   id,
+   addIndividualFieldsData,
 }: EditAccountRowProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
@@ -26,7 +28,6 @@ export function EditAccountRow({
   const dataFields = JSON.parse(account.dataFields);
   return isEdited ? (
     <>
-    <Typography variant="h7">{account.name}</Typography>
       <AccountField
         id={id}
         key={`${id}-${account.id}`}
@@ -34,6 +35,8 @@ export function EditAccountRow({
         isEdited={isEdited}
         account={account}
         values={values}
+        accountTypeChoices={addIndividualFieldsData.accountTypeChoices}
+        accountFinancialInstitutionChoices={addIndividualFieldsData.accountFinancialInstitutionChoices}
       />
       <Box display="flex" alignItems="center">
         <IconButton
@@ -50,7 +53,13 @@ export function EditAccountRow({
     </>
   ) : (
     <Fragment key={account.id}>
-    <Typography variant="h7">{account.name}</Typography>
+      <Grid item xs={4} key="type">
+        <LabelizedField
+          label="type"
+          value={String(account.name)}
+          disabled
+        />
+      </Grid>
     {Object.entries(dataFields).map(([key, value]) => (
       <Grid item xs={4} key={key}>
         <LabelizedField

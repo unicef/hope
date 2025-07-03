@@ -1,5 +1,3 @@
-from apps.payment.models import AccountType
-
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -26,7 +24,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.payment.models import Account, DeliveryMechanism
+from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (

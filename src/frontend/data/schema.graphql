@@ -17,6 +17,12 @@ type AccountNode implements Node {
   dataFields: JSONString
 }
 
+input AccountObjectType {
+  name: String!
+  approveStatus: Boolean
+  dataFields: GenericScalar
+}
+
 enum AccountRdiMergeStatus {
   PENDING
   MERGED
@@ -953,6 +959,8 @@ enum DocumentStatus {
 }
 
 input EditAccountObjectType {
+  name: String
+  approveStatus: Boolean
   id: ID!
   dataFields: GenericScalar
 }
@@ -2027,6 +2035,7 @@ input IndividualUpdateDataObjectType {
   identities: [IndividualIdentityObjectType]
   identitiesToRemove: [ID]
   identitiesToEdit: [EditIndividualIdentityObjectType]
+  accounts: [AccountObjectType]
   accountsToEdit: [EditAccountObjectType]
   preferredLanguage: String
   flexFields: Arg
@@ -2198,7 +2207,7 @@ type Mutations {
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedAccountsToEdit: [Int], approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveIndividualDataChange(approvedAccountsToCreate: [Int], approvedAccountsToEdit: [Int], approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
@@ -3248,6 +3257,8 @@ type Query {
   roleChoices: [ChoiceObject]
   documentTypeChoices: [ChoiceObject]
   identityTypeChoices: [ChoiceObject]
+  accountTypeChoices: [ChoiceObject]
+  accountFinancialInstitutionChoices: [ChoiceObject]
   countriesChoices: [ChoiceObject]
   observedDisabilityChoices: [ChoiceObject]
   severityOfDisabilityChoices: [ChoiceObject]

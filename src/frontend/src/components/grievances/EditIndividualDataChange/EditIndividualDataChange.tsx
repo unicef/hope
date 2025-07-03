@@ -20,6 +20,7 @@ import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { useProgramContext } from 'src/programContext';
 import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -188,7 +189,9 @@ function EditIndividualDataChange({
             values={values}
             setFieldValue={setFieldValue}
             individual={fullIndividual.individual}
+            addIndividualFieldsData={addIndividualFieldsData}
           />
+           {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={addIndividualFieldsData}/>}
         </Box>
       </BoxWithBorders>
     </>

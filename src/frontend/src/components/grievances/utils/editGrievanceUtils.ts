@@ -94,8 +94,8 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     identities,
     identities_to_remove: identitiesToRemove,
     identities_to_edit: identitiesToEdit,
+    accounts,
     accounts_to_edit: accountsToEdit,
-
     ...rest
   } = individualData;
 
@@ -120,6 +120,7 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     individualDataUpdateAccountsToEdit: camelizeArrayObjects(
       accountsToEdit,
     ),
+    individualDataUpdateFieldsAccounts: camelizeArrayObjects(accounts),
   };
 }
 

@@ -92,6 +92,7 @@ export function validate(
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
         !values.individualDataUpdateIdentitiesToEdit?.length &&
+        !values.individualDataUpdateFieldsAccounts?.length &&
         !values.individualDataUpdateAccountsToEdit?.length
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
@@ -325,6 +326,7 @@ export function validateUsingSteps(
         !values.individualDataUpdateDocumentsToEdit?.length &&
         !values.individualDataUpdateIdentitiesToEdit?.length &&
         !values.individualDataUpdateAccountsToEdit?.length &&
+        !values.individualDataUpdateFieldsAccounts?.length &&
         activeStep === GrievanceSteps.Description
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;

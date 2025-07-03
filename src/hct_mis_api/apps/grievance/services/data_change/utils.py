@@ -43,7 +43,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import Account
+from hct_mis_api.apps.payment.models import Account, AccountType
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:
@@ -259,7 +259,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     return identity
 
 
-def prepare_edit_accounts(accounts: List[Dict]) -> List[Dict]:
+def prepare_edit_accounts_save(accounts: List[Dict]) -> List[Dict]:
     items = []
     for account in accounts:
         _id = account.pop("id")
@@ -281,10 +281,40 @@ def prepare_edit_accounts(accounts: List[Dict]) -> List[Dict]:
     return items
 
 
+def prepare_edit_accounts_update(accounts: List[Dict]) -> List[Dict]:
+    items = []
+    for account in accounts:
+        data = {
+            "id": account["id"],
+            "name": account["name"],
+            "approve_status": account["approve_status"],
+            "data_fields": [
+                {
+                    "name": data_field["name"],
+                    "value": data_field["value"],
+                    "previous_value": data_field["previousValue"],
+                }
+                for data_field in account["data_fields"]
+            ],
+        }
+        items.append(data)
+    return items
+
+
 def handle_update_account(account: Dict) -> Optional[Account]:
     account_instance = get_object_or_404(Account, id=decode_id_string(account.get("id")))
     data_fields_dict = {field["name"]: field["value"] for field in account["data_fields"]}
     account_instance.account_data = data_fields_dict
+    return account_instance
+
+
+def handle_add_account(account: Dict, individual: Individual) -> Account:
+    account_instance = Account(
+        individual=individual,
+        account_type=AccountType.objects.get(key=account["name"]),
+        rdi_merge_status=individual.rdi_merge_status,
+    )
+    account_instance.account_data = account["data_fields"]
     return account_instance
 
 

@@ -17,6 +17,7 @@ import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividua
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ExistingAccountsFieldArray } from '../EditIndividualDataChange/ExistingAccountsFieldArray';
+import { NewAccountFieldArray } from '../EditIndividualDataChange/NewAccountFieldArray';
 
 
 const BoxWithBorders = styled.div`
@@ -157,6 +158,7 @@ function EditPeopleDataChange({
             setFieldValue={setFieldValue}
             individual={fullIndividual.individual}
           />
+          {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={editPeopleFieldsData}/>}
         </Box>
       </BoxWithBorders>
     </>

@@ -44,6 +44,12 @@ export type AccountNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type AccountObjectType = {
+  approveStatus?: InputMaybe<Scalars['Boolean']['input']>;
+  dataFields?: InputMaybe<Scalars['GenericScalar']['input']>;
+  name: Scalars['String']['input'];
+};
+
 export enum AccountRdiMergeStatus {
   Merged = 'MERGED',
   Pending = 'PENDING'
@@ -1440,8 +1446,10 @@ export enum DocumentStatus {
 }
 
 export type EditAccountObjectType = {
+  approveStatus?: InputMaybe<Scalars['Boolean']['input']>;
   dataFields?: InputMaybe<Scalars['GenericScalar']['input']>;
   id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type EditIndividualDocumentObjectType = {
@@ -3008,6 +3016,7 @@ export enum IndividualSex {
 }
 
 export type IndividualUpdateDataObjectType = {
+  accounts?: InputMaybe<Array<InputMaybe<AccountObjectType>>>;
   accountsToEdit?: InputMaybe<Array<InputMaybe<EditAccountObjectType>>>;
   address?: InputMaybe<Scalars['String']['input']>;
   adminAreaTitle?: InputMaybe<Scalars['String']['input']>;
@@ -3340,6 +3349,7 @@ export type MutationsApproveHouseholdDataChangeArgs = {
 
 
 export type MutationsApproveIndividualDataChangeArgs = {
+  approvedAccountsToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedAccountsToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedDocumentsToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
   approvedDocumentsToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
@@ -5018,6 +5028,8 @@ export enum ProgramStatus {
 export type Query = {
   __typename?: 'Query';
   _debug?: Maybe<DjangoDebug>;
+  accountFinancialInstitutionChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
+  accountTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
   accountabilityCommunicationMessage?: Maybe<CommunicationMessageNode>;
   accountabilityCommunicationMessageSampleSize?: Maybe<GetCommunicationMessageSampleSizeNode>;
   accountabilitySampleSize?: Maybe<AccountabilitySampleSizeNode>;
@@ -8221,6 +8233,7 @@ export type ApproveIndividualDataChangeMutationVariables = Exact<{
   approvedIdentitiesToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
   approvedIdentitiesToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
   approvedIdentitiesToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
+  approvedAccountsToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
   approvedAccountsToEdit?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
 }>;
 
@@ -8907,7 +8920,7 @@ export type UserChoiceDataQuery = { __typename?: 'Query', userRolesChoices?: Arr
 export type AllAddIndividualFieldsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllAddIndividualFieldsQuery = { __typename?: 'Query', allAddIndividualsFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, identityTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type AllAddIndividualFieldsQuery = { __typename?: 'Query', allAddIndividualsFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, identityTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, accountTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, accountFinancialInstitutionChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllEditHouseholdFieldsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8917,7 +8930,7 @@ export type AllEditHouseholdFieldsQuery = { __typename?: 'Query', allEditHouseho
 export type AllEditPeopleFieldsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllEditPeopleFieldsQuery = { __typename?: 'Query', allEditPeopleFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, labelEn?: string | null, hint?: string | null, isFlexField?: boolean | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, identityTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+export type AllEditPeopleFieldsQuery = { __typename?: 'Query', allEditPeopleFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, labelEn?: string | null, hint?: string | null, isFlexField?: boolean | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, identityTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, accountTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, accountFinancialInstitutionChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllHouseholdsFlexFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -11180,7 +11193,7 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = Apollo.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = Apollo.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int], $approvedAccountsToEdit: [Int]) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedDocumentsToEdit: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToEdit: [Int], $approvedIdentitiesToRemove: [Int], $approvedAccountsToCreate: [Int], $approvedAccountsToEdit: [Int]) {
   approveIndividualDataChange(
     grievanceTicketId: $grievanceTicketId
     individualApproveData: $individualApproveData
@@ -11191,6 +11204,7 @@ export const ApproveIndividualDataChangeDocument = gql`
     approvedIdentitiesToCreate: $approvedIdentitiesToCreate
     approvedIdentitiesToEdit: $approvedIdentitiesToEdit
     approvedIdentitiesToRemove: $approvedIdentitiesToRemove
+    approvedAccountsToCreate: $approvedAccountsToCreate
     approvedAccountsToEdit: $approvedAccountsToEdit
   ) {
     grievanceTicket {
@@ -11231,6 +11245,7 @@ export type ApproveIndividualDataChangeMutationFn = Apollo.MutationFunction<Appr
  *      approvedIdentitiesToCreate: // value for 'approvedIdentitiesToCreate'
  *      approvedIdentitiesToEdit: // value for 'approvedIdentitiesToEdit'
  *      approvedIdentitiesToRemove: // value for 'approvedIdentitiesToRemove'
+ *      approvedAccountsToCreate: // value for 'approvedAccountsToCreate'
  *      approvedAccountsToEdit: // value for 'approvedAccountsToEdit'
  *   },
  * });
@@ -15149,6 +15164,14 @@ export const AllAddIndividualFieldsDocument = gql`
     name
     value
   }
+  accountTypeChoices {
+    name
+    value
+  }
+  accountFinancialInstitutionChoices {
+    name
+    value
+  }
 }
     `;
 
@@ -15281,6 +15304,14 @@ export const AllEditPeopleFieldsDocument = gql`
     value
   }
   identityTypeChoices {
+    name
+    value
+  }
+  accountTypeChoices {
+    name
+    value
+  }
+  accountFinancialInstitutionChoices {
     name
     value
   }
@@ -21438,6 +21469,7 @@ export type ResolversInterfaceTypes<_RefType extends Record<string, unknown>> = 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   AccountNode: ResolverTypeWrapper<AccountNode>;
+  AccountObjectType: AccountObjectType;
   AccountRdiMergeStatus: AccountRdiMergeStatus;
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput;
   AccountabilityFullListArguments: AccountabilityFullListArguments;
@@ -21917,6 +21949,7 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   AccountNode: AccountNode;
+  AccountObjectType: AccountObjectType;
   AccountabilityCommunicationMessageAgeInput: AccountabilityCommunicationMessageAgeInput;
   AccountabilityFullListArguments: AccountabilityFullListArguments;
   AccountabilityRandomSamplingArguments: AccountabilityRandomSamplingArguments;
@@ -24653,6 +24686,8 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   _debug?: Resolver<Maybe<ResolversTypes['DjangoDebug']>, ParentType, ContextType>;
+  accountFinancialInstitutionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
+  accountTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   accountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageArgs, 'id'>>;
   accountabilityCommunicationMessageSampleSize?: Resolver<Maybe<ResolversTypes['GetCommunicationMessageSampleSizeNode']>, ParentType, ContextType, Partial<QueryAccountabilityCommunicationMessageSampleSizeArgs>>;
   accountabilitySampleSize?: Resolver<Maybe<ResolversTypes['AccountabilitySampleSizeNode']>, ParentType, ContextType, Partial<QueryAccountabilitySampleSizeArgs>>;

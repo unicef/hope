@@ -1,7 +1,7 @@
 import { Box, Grid2 as Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import { IndividualQuery } from '@generated/graphql';
+import { AllAddIndividualFieldsQuery, IndividualQuery } from '@generated/graphql';
 import { EditAccountRow } from './EditAccountRow';
 import { ReactElement } from 'react';
 
@@ -9,12 +9,14 @@ export interface ExistingAccountsFieldArrayProps {
   setFieldValue;
   values;
   individual: IndividualQuery['individual'];
+  addIndividualFieldsData: AllAddIndividualFieldsQuery;
 }
 
 export function ExistingAccountsFieldArray({
   setFieldValue,
   values,
   individual,
+  addIndividualFieldsData,
 }: ExistingAccountsFieldArrayProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -28,12 +30,13 @@ export function ExistingAccountsFieldArray({
             {individual.accounts.map((item) => (
               <Grid item xs={12} key={item.id}>
                 <Grid container direction="row" alignItems="center" spacing={3}>
-                  <EditAccountRow
+                  < EditAccountRow
                     setFieldValue={setFieldValue}
                     values={values}
                     account={item}
                     id={item.id}
                     arrayHelpers={arrayHelpers}
+                    addIndividualFieldsData={addIndividualFieldsData}
                   />
                 </Grid>
               </Grid>

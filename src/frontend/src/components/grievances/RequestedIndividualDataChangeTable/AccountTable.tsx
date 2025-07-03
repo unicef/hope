@@ -18,17 +18,14 @@ import { handleSelected } from '../utils/helpers';
 import { ReactElement } from 'react';
 
 const GreenIcon = styled.div`
-  color: #28cb15;
-`;
-const GreyText = styled.div`
-  color: #9e9e9e;
+    color: #28cb15;
 `;
 
 const StyledTable = styled(Table)`
-  min-width: 100px;
+    min-width: 100px;
 `;
 
-export interface AccountToEditTableProps {
+export interface AccountsTableProps {
   values;
   isEdit;
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -37,29 +34,24 @@ export interface AccountToEditTableProps {
   account;
 }
 
-export function AccountToEditTable({
-  values,
-  isEdit,
-  ticket,
-  setFieldValue,
-  index,
-  account,
-}: AccountToEditTableProps): ReactElement {
+export function AccountTable({
+                                values,
+                                isEdit,
+                                ticket,
+                                setFieldValue,
+                                index,
+                                account,
+                              }: AccountsTableProps): ReactElement {
   const { t } = useTranslation();
-  const { selectedAccountsToEdit } = values;
-  const handleSelectAccountsToEdit = (accountIndex): void => {
+  const { selectedAccounts } = values;
+
+  const handleSelectAccount = (idx): void => {
     handleSelected(
-      accountIndex,
-      'selectedAccountsToEdit',
-      selectedAccountsToEdit,
+      idx,
+      'selectedAccounts',
+      selectedAccounts,
       setFieldValue,
     );
-  };
-  const renderNewOrNotUpdated = (prev, curr): ReactElement => {
-    if (prev === curr) {
-      return <GreyText>{t('Not updated')}</GreyText>;
-    }
-    return <span>{curr}</span>;
   };
 
   return (
@@ -67,7 +59,7 @@ export function AccountToEditTable({
       <TableTitle>
         <Box display="flex" justifyContent="space-between">
           <Typography variant="h6">
-            {t('Account to be edited')} - {account.name}
+            {t('Account to be created')} - {account.value.name}
           </Typography>
         </Box>
       </TableTitle>
@@ -78,18 +70,18 @@ export function AccountToEditTable({
               {isEdit ? (
                 <Checkbox
                   color="primary"
-                  data-cy="checkbox-edit-account"
+                  data-cy="checkbox-create-account"
                   onChange={(): void => {
-                    handleSelectAccountsToEdit(index);
+                    handleSelectAccount(index);
                   }}
                   disabled={
                     ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                   }
-                  checked={selectedAccountsToEdit.includes(index)}
+                  checked={selectedAccounts.includes(index)}
                   inputProps={{ 'aria-labelledby': 'selected' }}
                 />
               ) : (
-                selectedAccountsToEdit.includes(index) && (
+                selectedAccounts.includes(index) && (
                   <GreenIcon data-cy="green-check">
                     <CheckCircleIcon />
                   </GreenIcon>
@@ -97,29 +89,19 @@ export function AccountToEditTable({
               )}
             </TableCell>
             <TableCell align="left">{t('Field')}</TableCell>
-            <TableCell align="left">{t('Current Value')}</TableCell>
-            <TableCell align="left">{t('New Value')}</TableCell>
+            <TableCell align="left">{t('Value')}</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>
-            {account.data_fields.map(
-              (field, fieldIndex) => (
-                <TableRow key={fieldIndex}>
-                  <TableCell align="left"></TableCell>
-                  <TableCell align="left">{field.name}</TableCell>
-                  <TableCell align="left">
-                    {field.previous_value || '-'}
-                  </TableCell>
-                  <TableCell align="left">
-                    {renderNewOrNotUpdated(
-                      field.previous_value,
-                      field.value,
-                    )}
-                  </TableCell>
-                </TableRow>
-              ),
-            )}
-          </TableBody>
+       <TableBody>
+          {Object.entries(account.value.data_fields).map(([key, value]) => (
+            <TableRow key={key}>
+              <TableCell align="left"></TableCell>
+              <TableCell align="left">{key}</TableCell>
+              <TableCell align="left">{value}</TableCell>
+              <TableCell align="left"></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
       </StyledTable>
     </>
   );

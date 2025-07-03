@@ -13,6 +13,7 @@ import { IdentitiesTable } from './IdentitiesTable';
 import { IdentitiesToEditTable } from './IdentitiesToEditTable';
 import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { AccountToEditTable } from './AccountToEditTable';
+import { AccountTable } from './AccountTable';
 
 
 interface RequestedIndividualDataChangeTableProps {
@@ -41,6 +42,7 @@ export function RequestedIndividualDataChangeTable({
     previous_identities: previousIdentities,
     identities_to_remove: identitiesToRemove,
     identities_to_edit: identitiesToEdit,
+    accounts: accounts,
     accounts_to_edit: accountsToEdit,
     flex_fields: flexFields,
     ...restIndividualData
@@ -141,6 +143,17 @@ export function RequestedIndividualDataChangeTable({
             />
           ))
         : null}
+      {accounts?.length ? accounts.map((account, index) => (
+        <AccountTable
+          key={account.id}
+          values={values}
+          isEdit={isEdit}
+          ticket={ticket}
+          setFieldValue={setFieldValue}
+          index={index}
+          account={account}
+        />
+      )) : null}
       {accountsToEdit?.length
         ? accountsToEdit.map((account, index) => (
             <AccountToEditTable

@@ -234,6 +234,7 @@ const EditGrievancePage = (): ReactElement => {
       'individualDataUpdateFieldsIdentities',
       'individualDataUpdateDocumentsToEdit',
       'individualDataUpdateIdentitiesToEdit',
+      'individualDataUpdateFieldsAccounts',
       'individualDataUpdateAccountsToEdit',
       'peopleDataUpdateFields',
     ].map(
@@ -325,6 +326,7 @@ const EditGrievancePage = (): ReactElement => {
           issueTypeDescriptions[
             GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
           ] || '';
+
         return (
           <>
             <AutoSubmitFormOnEnter />
@@ -619,7 +621,7 @@ const EditGrievancePage = (): ReactElement => {
                                     index: number,
                                   ) => (
                                     <Grid
-                                      container
+                                      item
                                       size={{ xs: 12 }}
                                       key={item.id}
                                     >
@@ -642,22 +644,24 @@ const EditGrievancePage = (): ReactElement => {
                                             key={field.name}
                                             container
                                             alignItems="flex-end"
-                                            spacing={3}
+                                            spacing={2}
                                           >
                                             <Grid size={{ xs: 4 }}>
                                               <LabelizedField
                                                 label={t('Field Name')}
+                                                fullWidth
                                               >
                                                 {field.name}
                                               </LabelizedField>
                                             </Grid>
                                             <Grid size={{ xs: 4 }}>
                                               <Field
-                                                name={`individualDataUpdateAccountsToEdit[${index}].dataFields[${fieldIndex}].previous_value`}
+                                                name={`individualDataUpdateAccountsToEdit[${index}].dataFields[${fieldIndex}].previousValue`}
                                                 type="text"
                                                 label={t('Current Value')}
                                                 component={FormikTextField}
                                                 disabled
+                                                fullWidth
                                               />
                                             </Grid>
                                             <Grid size={{ xs: 4 }}>
@@ -667,6 +671,7 @@ const EditGrievancePage = (): ReactElement => {
                                                 label={t('New Value')}
                                                 component={FormikTextField}
                                                 required
+                                                fullWidth
                                               />
                                             </Grid>
                                           </Grid>
