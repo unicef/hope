@@ -1292,8 +1292,17 @@ class TestGrievanceTicketApprove:
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert "id" in resp_data
 
-    def test_bulk_update_grievance_assignee(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.PROGRAMME_UPDATE], status.HTTP_403_FORBIDDEN),
+            ([Permissions.GRIEVANCES_UPDATE], status.HTTP_202_ACCEPTED),
+        ],
+    )
+    def test_bulk_update_grievance_assignee(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
         response = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-bulk-update-assignee",
@@ -1307,10 +1316,11 @@ class TestGrievanceTicketApprove:
         )
 
         resp_data = response.json()
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert len(resp_data) == 2
-        assert resp_data[0]["assigned_to"]["first_name"] == "SecondUser"
-        assert resp_data[1]["assigned_to"]["first_name"] == "SecondUser"
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_202_ACCEPTED:
+            assert len(resp_data) == 2
+            assert resp_data[0]["assigned_to"]["first_name"] == "SecondUser"
+            assert resp_data[1]["assigned_to"]["first_name"] == "SecondUser"
 
     def test_bulk_update_grievance_priority(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
