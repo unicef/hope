@@ -57,7 +57,6 @@ class AccountMixin:
         PendingAccount.objects.create(
             individual=member,
             number=doc.pop("number", None),
-            unique_key=doc.pop("unique_key", None),
             account_type=AccountType.objects.get(key=doc.pop("account_type")),
             financial_institution=doc.pop("financial_institution", None),
             data={**doc.pop("data"), **doc},
