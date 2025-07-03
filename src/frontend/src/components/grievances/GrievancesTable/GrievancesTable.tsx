@@ -419,7 +419,6 @@ export const GrievancesTable = ({
             gap={4}
             component="div"
           >
-            {' '}
             <BulkAssignModal
               selectedTickets={selectedTickets}
               setSelected={setSelectedTickets}

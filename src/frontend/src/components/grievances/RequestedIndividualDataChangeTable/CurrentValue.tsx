@@ -46,7 +46,19 @@ export function CurrentValue({
       );
       break;
     default:
-      displayValue = value;
+      displayValue =
+        typeof value === 'object' && value !== null && 'value' in value
+          ? value.value
+          : value;
   }
-  return <>{displayValue || '-'}</>;
+  return (
+    <>
+      {displayValue === null ||
+      displayValue === 'null' ||
+      displayValue === undefined ||
+      displayValue === ''
+        ? '-'
+        : displayValue}
+    </>
+  );
 }

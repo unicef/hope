@@ -227,6 +227,24 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
   };
 }
 
+export function customSnakeCase(str: string): string {
+  return (
+    str
+      // Insert _ between lowercase and uppercase
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      // Insert _ between letter and number
+      .replace(/([a-zA-Z])([0-9])/g, '$1_$2')
+      // Insert _ between number and letter
+      .replace(/([0-9])([a-zA-Z])/g, '$1_$2')
+      // Replace age group numbers like 05, 611, 1217, 1859, 60 with correct underscores
+      .replace(/_0(\d)(_|$)/g, '_0_$1$2') // 05 -> 0_5
+      .replace(/_6(\d{2})(_|$)/g, '_6_$1$2') // 611 -> 6_11
+      .replace(/_1(\d{2})(_|$)/g, '_1_$1$2') // 1217, 1859 -> 12_17, 18_59
+      .replace(/_6_0(_|$)/g, '_60$1') // 60 stays as 60 (optional, if you want _60 not _6_0)
+      .toLowerCase()
+  );
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareDeleteHouseholdVariables(requiredVariables, values) {
   return {
@@ -533,6 +551,7 @@ export function prepareRestVariables(
           prev[camelCase(current.fieldName)] = current.fieldValue;
           return prev;
         }, {});
+
       const flexFields = values.individualDataUpdateFields
         .filter((item) => item.fieldName && item.isFlexField)
         .reduce((prev, current) => {

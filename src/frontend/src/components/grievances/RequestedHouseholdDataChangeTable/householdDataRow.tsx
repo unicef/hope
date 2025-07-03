@@ -45,7 +45,7 @@ export const householdDataRow = (
       ? countriesDict[valueDetails.previousValue]
       : valueDetails.previousValue;
 
-  const householdValue = field.isFlexField
+  const householdValue = field?.isFlexField
     ? household.flexFields[fieldName]
     : household[camelCase(fieldName)];
   const currentValue =
