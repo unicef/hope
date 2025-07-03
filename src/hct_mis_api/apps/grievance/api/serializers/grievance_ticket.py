@@ -574,8 +574,7 @@ class UpdateGrievanceDocumentSerializer(serializers.Serializer):
 
 class UpdateGrievanceTicketSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
-    description = serializers.CharField()
-    assigned_to = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
+    assigned_to = serializers.PrimaryKeyRelatedField(allow_null=True, queryset=User.objects.all())
     admin = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Area.objects.all())
     area = serializers.CharField(required=False, allow_blank=True)
     language = serializers.CharField(allow_blank=True)
