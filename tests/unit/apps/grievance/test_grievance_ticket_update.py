@@ -391,6 +391,68 @@ class TestGrievanceTicketUpdate:
         resp_data = response.json()
         assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New One"
 
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_UPDATE], status.HTTP_200_OK),
+            ([Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_update_payment_verification_ticket_with_new_received_amount_extras(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
+        payment_plan = PaymentPlanFactory(
+            name="TEST",
+            program_cycle=self.program.cycles.first(),
+            business_area=self.afghanistan,
+        )
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan=payment_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+        )
+        payment = PaymentFactory(
+            parent=payment_plan,
+            household=self.household_one,
+            unicef_id="P8F-21-CSH-00031-123123",
+            currency="PLN",
+        )
+        payment_verification = PaymentVerificationFactory(
+            id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
+            payment_verification_plan=payment_verification_plan,
+            payment=payment,
+            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            received_amount=10.00,
+        )
+        ticket_details = TicketPaymentVerificationDetailsFactory(payment_verification=payment_verification)
+        ticket_details.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+        ticket_details.ticket.programs.set([self.program])
+        ticket_details.ticket.save()
+        data = {
+            "priority": PRIORITY_LOW,
+            "extras": {
+                "ticket_payment_verification_details_extras": {
+                    "new_received_amount": 1234.99,
+                    "new_status": PaymentVerification.STATUS_RECEIVED,
+                }
+            },
+        }
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-detail",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(ticket_details.ticket.pk)},
+        )
+        response = self.api_client.patch(url, data, format="json")
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_200_OK:
+            resp_data = response.json()
+            assert resp_data["ticket_details"]["new_received_amount"] == "1234.99"
+            assert resp_data["ticket_details"]["new_status"] == PaymentVerification.STATUS_RECEIVED
+            assert resp_data["ticket_details"]["payment_verification"]["received_amount"] == "10.00"
+            assert (
+                resp_data["ticket_details"]["payment_verification"]["status"]
+                == PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+            )
+
     def test_update_grievance_ticket_complaint(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
             self.user,
@@ -1256,10 +1318,17 @@ class TestGrievanceTicketApprove:
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert "id" in response.json()
 
-    def test_approve_payment_details(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION], self.afghanistan, self.program
-        )
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_APPROVE_PAYMENT_VERIFICATION], status.HTTP_202_ACCEPTED),
+            ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_approve_payment_details(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
         payment_plan = PaymentPlanFactory(
             name="TEST",
             program_cycle=self.program.cycles.first(),
@@ -1296,10 +1365,11 @@ class TestGrievanceTicketApprove:
         )
 
         resp_data = response.json()
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert "id" in resp_data
-        ticket_details.refresh_from_db()
-        assert ticket_details.approve_status is True
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_202_ACCEPTED:
+            assert "id" in resp_data
+            ticket_details.refresh_from_db()
+            assert ticket_details.approve_status is True
 
     def test_reassign_role(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
