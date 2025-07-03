@@ -51,7 +51,6 @@ class TestGrievanceCreateFeedbackTicket:
 
     def test_create_negative_feedback_ticket_not_supported(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
-
         input_data = {
             "description": "Test Feedback AaaaQwooL",
             "assigned_to": str(self.user.id),
