@@ -646,7 +646,9 @@ class GrievanceDeleteHouseholdApproveStatusSerializer(serializers.Serializer):
 
 
 class GrievanceNeedsAdjudicationApproveSerializer(serializers.Serializer):
-    selected_individual_id = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=False)
+    selected_individual_id = serializers.PrimaryKeyRelatedField(
+        queryset=Individual.objects.all(), required=False, allow_null=True
+    )
     duplicate_individual_ids = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()), required=False
     )

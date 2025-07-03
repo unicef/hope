@@ -7,7 +7,6 @@ import type { UpdateGrievanceDocument } from './UpdateGrievanceDocument';
 import type { UpdateGrievanceTicketExtras } from './UpdateGrievanceTicketExtras';
 export type PatchedUpdateGrievanceTicket = {
     version?: number;
-    description?: string;
     assignedTo?: string | null;
     admin?: string | null;
     area?: string;

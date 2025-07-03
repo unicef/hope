@@ -5,6 +5,6 @@
 export type SensitiveGrievanceTicketExtras = {
     household?: string;
     individual?: string;
-    paymentRecord: Array<string>;
+    paymentRecord?: Array<string>;
 };
 
