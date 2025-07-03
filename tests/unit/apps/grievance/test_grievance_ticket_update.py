@@ -16,7 +16,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.constants import PRIORITY_MEDIUM, URGENCY_NOT_URGENT
+from hct_mis_api.apps.grievance.constants import (
+    PRIORITY_LOW,
+    PRIORITY_MEDIUM,
+    URGENCY_NOT_URGENT,
+)
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceDocumentFactory,
     GrievanceTicketFactory,
@@ -252,12 +256,15 @@ class TestGrievanceTicketUpdate:
 
     def test_update_grievance_ticket_hh_update(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
+            self.user,
+            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            self.afghanistan,
+            program=self.program,
         )
         grv_doc = GrievanceDocumentFactory(grievance_ticket=self.household_data_change_grievance_ticket, file_size=123)
+        owner = UserFactory()
         data = {
-            "description": "this is new description",
-            "assigned_to": str(UserFactory().id),
+            "assigned_to": str(owner.id),
             "admin": str(self.household_data_change_grievance_ticket.admin2.id),
             "language": self.household_data_change_grievance_ticket.language,
             "area": self.household_data_change_grievance_ticket.area,
@@ -274,16 +281,27 @@ class TestGrievanceTicketUpdate:
             "priority": PRIORITY_MEDIUM,
             "urgency": URGENCY_NOT_URGENT,
             "partner": str(PartnerFactory().id),
-            "program": str(ProgramFactory().id),
         }
         response = self.api_client.patch(self.list_details, data, format="json")
         resp_data = response.json()
         assert response.status_code == status.HTTP_200_OK
+        assert resp_data["priority"] == PRIORITY_MEDIUM
+        assert resp_data["urgency"] == URGENCY_NOT_URGENT
+        assert resp_data["assigned_to"] == {
+            "id": str(owner.id),
+            "first_name": owner.first_name,
+            "last_name": owner.last_name,
+            "email": owner.email,
+            "username": owner.username,
+        }
         assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New"
 
     def test_update_grievance_ticket_with_no_area_access(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
+            self.user,
+            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            self.afghanistan,
+            self.program,
         )
         areas = [self.area_1]
         admin_area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
@@ -291,7 +309,7 @@ class TestGrievanceTicketUpdate:
             partner=self.user.partner,
         )
         admin_area_limits.areas.set(areas)
-        data = {"description": "just description"}
+        data = {"priority": PRIORITY_LOW}
         response = self.api_client.patch(self.list_details, data, format="json")
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == "No GrievanceTicket matches the given query."
@@ -299,7 +317,7 @@ class TestGrievanceTicketUpdate:
     def test_update_grievance_ticket_as_creator(self, create_user_role_with_permissions: Any) -> None:
         assert self.household_data_change_grievance_ticket.created_by == self.user
         data = {
-            "description": "just description",
+            "priority": PRIORITY_LOW,
             "extras": {
                 "household_data_update_issue_type_extras": {
                     "household_data": {
@@ -313,18 +331,31 @@ class TestGrievanceTicketUpdate:
         response = self.api_client.patch(self.list_details, data, format="json")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-        # added permission as creator and should be able to update ticket
+        # add permission to update as creator -> should be able to update ticket but extras not updated
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_UPDATE_AS_CREATOR], self.afghanistan, self.program
+        )
+        response = self.api_client.patch(self.list_details, data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert "id" in response.json()
+        resp_data = response.json()
+        assert resp_data["priority"] == PRIORITY_LOW
+        assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test Village"
+
+        # add permission to update extras
         create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR], self.afghanistan, self.program
         )
         response = self.api_client.patch(self.list_details, data, format="json")
         assert response.status_code == status.HTTP_200_OK
-        assert "id" in response.json()
+        resp_data = response.json()
+        assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test V"
 
     def test_update_grievance_ticket_as_owner(self, create_user_role_with_permissions: Any) -> None:
         assert self.household_data_change_grievance_ticket.assigned_to == self.user
         data = {
-            "description": "just description",
+            "priority": PRIORITY_LOW,
+            "assigned_to": str(self.user.id),  # not changing value; but is expected in input
             "extras": {
                 "household_data_update_issue_type_extras": {
                     "household_data": {
@@ -338,24 +369,41 @@ class TestGrievanceTicketUpdate:
         response = self.api_client.patch(self.list_details, data, format="json")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-        # added permission as owner and should be able to update ticket
+        # add permission to update as owner -> should be able to update ticket but extras not updated
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_UPDATE_AS_OWNER], self.afghanistan, self.program
+        )
+        response = self.api_client.patch(self.list_details, data, format="json")
+        assert response.status_code == status.HTTP_200_OK
+        assert "id" in response.json()
+        resp_data = response.json()
+        assert resp_data["priority"] == PRIORITY_LOW
+        assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test Village"
+
+        self.household_data_change_grievance_ticket.refresh_from_db()
+
+        # add permission to update extras
         create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER], self.afghanistan, self.program
         )
         response = self.api_client.patch(self.list_details, data, format="json")
         assert response.status_code == status.HTTP_200_OK
-        assert "id" in response.json()
+        resp_data = response.json()
+        assert resp_data["ticket_details"]["household_data"]["village"]["value"] == "Test New One"
 
     def test_update_grievance_ticket_complaint(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
+            self.user,
+            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            self.afghanistan,
+            self.program,
         )
         url = reverse(
             "api:grievance-tickets:grievance-tickets-global-detail",
             kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(self.grv_2.pk)},
         )
         data = {
-            "description": "AAAA",
+            "priority": PRIORITY_LOW,
             "assigned_to": str(self.user.id),
             "extras": {
                 "category": {
@@ -372,7 +420,10 @@ class TestGrievanceTicketUpdate:
 
     def test_update_grievance_ticket_validation_error(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
+            self.user,
+            [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            self.afghanistan,
+            self.program,
         )
         data = {
             "extras": {
@@ -423,6 +474,51 @@ class TestGrievanceTicketUpdate:
         response = self.api_client.post(url, {"status": 22}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "New status is incorrect" in response.json()
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], status.HTTP_400_BAD_REQUEST),
+            ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),
+            ([Permissions.GRIEVANCES_SET_ON_HOLD], status.HTTP_403_FORBIDDEN),
+            ([Permissions.PROGRAMME_UPDATE], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_grievance_status_change_invalid_status_flow(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        grv = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+            issue_type=GrievanceTicket.ISSUE_TYPE_PAYMENT_COMPLAINT,
+            admin2=self.area,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=self.user,
+            assigned_to=self.user,
+        )
+        grv.programs.set([self.program])
+        grv.save()
+
+        TicketComplaintDetails.objects.create(
+            ticket=grv,
+            household=self.household_one,
+            individual=self.individuals[0],
+        )
+
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-status-change",
+            kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grv.pk)},
+        )
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+            whole_business_area_access=True,
+        )
+        response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_CLOSED}, format="json")
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_400_BAD_REQUEST:
+            assert "New status is incorrect" in response.json()
 
     def test_grievance_status_change_other_statuses(self, create_user_role_with_permissions: Any) -> None:
         url = reverse(
@@ -481,6 +577,7 @@ class TestGrievanceTicketUpdate:
         [
             ([Permissions.GRIEVANCE_ASSIGN, Permissions.GRIEVANCES_UPDATE], status.HTTP_202_ACCEPTED),
             ([Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_AS_CREATOR], status.HTTP_403_FORBIDDEN),
+            ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),  # cannot be assigned
         ],
     )
     def test_grievance_status_change_assigned_to(
@@ -516,6 +613,15 @@ class TestGrievanceTicketUpdate:
         )
         response = self.api_client.post(url, {"status": GrievanceTicket.STATUS_ASSIGNED}, format="json")
         assert response.status_code == expected_status
+        if expected_status == status.HTTP_202_ACCEPTED:
+            assert response.json()["status"] == GrievanceTicket.STATUS_ASSIGNED
+            assert response.json()["assigned_to"] == {
+                "id": str(self.user.id),
+                "first_name": self.user.first_name,
+                "last_name": self.user.last_name,
+                "email": self.user.email,
+                "username": self.user.username,
+            }
 
     def test_grievance_status_change_close_na_without_access(self, create_user_role_with_permissions: Any) -> None:
         program_2 = ProgramFactory()
