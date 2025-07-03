@@ -111,11 +111,10 @@ class AccountSerializer(serializers.ModelSerializer):
         required=False, queryset=FinancialInstitution.objects.all()
     )
     data = serializers.JSONField(required=False, default=dict)  # type: ignore
-    unique_key = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
         model = PendingAccount
-        exclude = ["individual", "is_unique", "signature_hash"]
+        exclude = ["individual", "unique_key", "is_unique", "signature_hash"]
 
 
 class IndividualSerializer(serializers.ModelSerializer):
