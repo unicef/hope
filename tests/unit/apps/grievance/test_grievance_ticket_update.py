@@ -992,6 +992,7 @@ class TestGrievanceTicketApprove:
             created_by=self.user2,
             business_area=self.afghanistan,
         )
+        self.bulk_grievance_ticket1.programs.set([self.program])
         self.bulk_grievance_ticket2 = GrievanceTicketFactory(
             description="Test 2",
             assigned_to=self.user,
@@ -1003,6 +1004,7 @@ class TestGrievanceTicketApprove:
             created_by=self.user2,
             business_area=self.afghanistan,
         )
+        self.bulk_grievance_ticket2.programs.set([self.program])
 
     def test_approve_individual_data_change(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1471,14 +1473,31 @@ class TestGrievanceTicketApprove:
     @pytest.mark.parametrize(
         "permissions, expected_status",
         [
-            ([Permissions.PROGRAMME_UPDATE], status.HTTP_403_FORBIDDEN),
-            ([Permissions.GRIEVANCES_UPDATE], status.HTTP_202_ACCEPTED),
+            (
+                [Permissions.PROGRAMME_UPDATE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                status.HTTP_403_FORBIDDEN,
+            ),
+            (
+                [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+                status.HTTP_202_ACCEPTED,
+            ),
         ],
     )
     def test_bulk_update_grievance_assignee(
         self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
     ) -> None:
-        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, program=self.program)
+        url_list = reverse(
+            "api:grievance:grievance-tickets-list",
+            kwargs={"business_area_slug": self.afghanistan.slug, "program_slug": self.program.slug},
+        )
+        response_list_before = self.api_client.get(url_list, {"category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT})
+        assert response_list_before.status_code == status.HTTP_200_OK
+        assert len(response_list_before.json()["results"]) == 2
+        for ticket in response_list_before.json()["results"]:
+            assert ticket["assigned_to"]["id"] == str(self.user.id)
+
+        # bulk update assignee
         response = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-bulk-update-assignee",
@@ -1497,6 +1516,17 @@ class TestGrievanceTicketApprove:
             assert len(resp_data) == 2
             assert resp_data[0]["assigned_to"]["first_name"] == "SecondUser"
             assert resp_data[1]["assigned_to"]["first_name"] == "SecondUser"
+
+        # check list after bulk update - should have updated assigned_to; the response should not be cached
+        response_list_after = self.api_client.get(url_list, {"category": GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT})
+        assert response_list_after.status_code == status.HTTP_200_OK
+        assert len(response_list_after.json()["results"]) == 2
+        if expected_status == status.HTTP_202_ACCEPTED:  # assigned_to updated
+            for ticket in response_list_after.json()["results"]:
+                assert ticket["assigned_to"]["id"] == str(self.user2.id)
+        else:
+            for ticket in response_list_after.json()["results"]:
+                assert ticket["assigned_to"]["id"] == str(self.user.id)
 
     def test_bulk_update_grievance_priority(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
