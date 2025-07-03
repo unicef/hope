@@ -98,7 +98,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
-
+    # TODO: deprecated to remove in the next release
     kobo_username = models.CharField(max_length=255, null=True, blank=True)
     kobo_token = models.CharField(max_length=255, null=True, blank=True)
     kobo_url = models.URLField(max_length=255, null=True, blank=True)
