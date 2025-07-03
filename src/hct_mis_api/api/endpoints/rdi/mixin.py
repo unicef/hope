@@ -18,7 +18,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.models import AccountType, PendingAccount
+from hct_mis_api.apps.payment.models import PendingAccount
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -41,7 +41,8 @@ class Totals:
 
 
 class DocumentMixin:
-    def save_document(self, member: PendingIndividual, doc: Dict) -> None:
+    @staticmethod
+    def save_document(member: PendingIndividual, doc: Dict) -> None:
         PendingDocument.objects.create(
             document_number=doc["document_number"],
             photo=get_photo_from_stream(doc.get("image", None)),
@@ -53,14 +54,9 @@ class DocumentMixin:
 
 
 class AccountMixin:
-    def save_account(self, member: PendingIndividual, doc: Dict) -> None:
-        PendingAccount.objects.create(
-            individual=member,
-            number=doc.pop("number", None),
-            account_type=AccountType.objects.get(key=doc.pop("account_type")),
-            financial_institution=doc.pop("financial_institution", None),
-            data={**doc.pop("data"), **doc},
-        )
+    @staticmethod
+    def save_account(member: PendingIndividual, doc: Dict) -> None:
+        PendingAccount.objects.create(individual=member, **doc)
 
 
 class PhotoMixin:
