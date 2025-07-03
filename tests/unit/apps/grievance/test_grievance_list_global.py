@@ -449,6 +449,41 @@ class TestGrievanceTicketGlobalList:
         )
         assert response_count.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_grievance_ticket_global_list_check_non_program(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            user=self.user,
+            permissions=[
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+            ],
+            business_area=self.afghanistan,
+            whole_business_area_access=True,
+        )
+        GrievanceTicketFactory(
+            description="Test 1",
+            assigned_to=self.user,
+            category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+            business_area=self.afghanistan,
+        )
+
+        response = self.api_client.get(
+            reverse(self.global_url_name, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_results = response.data["results"]
+        assert len(response_results) == 10
+
+        response_count = self.api_client.get(
+            reverse(self.global_count_url, kwargs={"business_area_slug": self.afghanistan.slug})
+        )
+        assert response_count.status_code == status.HTTP_200_OK
+        assert response_count.json()["count"] == 10
+
     def test_grievance_ticket_global_list_area_limits(
         self, create_user_role_with_permissions: Any, set_admin_area_limits_in_program: Any
     ) -> None:
