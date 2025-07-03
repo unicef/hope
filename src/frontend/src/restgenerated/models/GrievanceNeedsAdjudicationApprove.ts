@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type GrievanceNeedsAdjudicationApprove = {
-    selectedIndividualId?: string;
+    selectedIndividualId?: string | null;
     duplicateIndividualIds?: Array<string>;
     distinctIndividualIds?: Array<string>;
     clearIndividualIds?: Array<string>;
