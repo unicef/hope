@@ -13,11 +13,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaView, HOPEAPIView
-from hct_mis_api.api.endpoints.rdi.mixin import (
-    AccountMixin,
-    DocumentMixin,
-    PhotoMixin,
-)
+from hct_mis_api.api.endpoints.rdi.mixin import AccountMixin, DocumentMixin, PhotoMixin
 from hct_mis_api.api.endpoints.rdi.upload import (
     AccountSerializer,
     BirthDateValidator,
