@@ -452,7 +452,9 @@ class ReferralTicketExtras(serializers.Serializer):
 class SensitiveGrievanceTicketExtras(serializers.Serializer):
     household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
     individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
-    payment_record = serializers.ListField(child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()))
+    payment_record = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()), required=False
+    )
 
 
 class AddIndividualIssueTypeExtras(serializers.Serializer):
