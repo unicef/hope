@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `AF25` - Branditown
- * * `HR61` - Brownstad
- * * `HR71` - East Jessicabury
- * * `AF53` - Evansborough
- * * `UA20` - Jamesshire
- * * `AF95` - Lake Chase
- * * `UA11` - Lake Heidi
- * * `HR33` - Lake Patrick
- * * `UA93` - South Ashley
+ * * `AF82` - Alanhaven
+ * * `UA87` - East Christopherport
+ * * `AF19` - East Maryburgh
+ * * `UA98` - Manntown
+ * * `AF39` - Michaelchester
+ * * `HR13` - North Nicholeport
+ * * `UA76` - Port Heatherport
+ * * `HR14` - Port Patricktown
+ * * `HR15` - South Peter
  */
 export enum Admin1Enum {
-    AF25 = 'AF25',
-    HR61 = 'HR61',
-    HR71 = 'HR71',
-    AF53 = 'AF53',
-    UA20 = 'UA20',
-    AF95 = 'AF95',
-    UA11 = 'UA11',
-    HR33 = 'HR33',
-    UA93 = 'UA93',
+    AF82 = 'AF82',
+    UA87 = 'UA87',
+    AF19 = 'AF19',
+    UA98 = 'UA98',
+    AF39 = 'AF39',
+    HR13 = 'HR13',
+    UA76 = 'UA76',
+    HR14 = 'HR14',
+    HR15 = 'HR15',
 }

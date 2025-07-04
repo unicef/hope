@@ -1,7 +1,6 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
 import {
   Box,
@@ -34,6 +33,7 @@ import {
   ReactElement,
   ReactNode,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -210,7 +210,7 @@ export const TargetingCriteriaForm = ({
   criteriaIndex,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea } = useBaseUrl();
 
   const confirm = useConfirmation();
   const confirmationText = t(
@@ -219,10 +219,6 @@ export const TargetingCriteriaForm = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data, loading } = useCachedIndividualFieldsQuery(
-    businessArea,
-    programId,
-  );
   const { data: allCollectorFieldsAttributesData } =
     useQuery<PaginatedCollectorAttributeList>({
       queryKey: ['collectorFieldsAttributes'],
@@ -241,6 +237,11 @@ export const TargetingCriteriaForm = ({
       RestService.restBusinessAreasAvailableFspsForDeliveryMechanismsList({
         businessAreaSlug: businessArea,
       }),
+  });
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['businessAreasAllFieldsAttributesList'],
+    queryFn: () => RestService.restBusinessAreasAllFieldsAttributesList({}),
+    staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
   });
 
   const householdsFiltersBlocksWrapperRef = useRef(null);
@@ -265,39 +266,55 @@ export const TargetingCriteriaForm = ({
     setOpenPaymentChannelCollapse(!openPaymentChannelCollapse);
   };
 
-  useEffect(() => {
-    if (loading) return;
-
-    const filteredIndividualData = {
-      allFieldsAttributes: data?.allFieldsAttributes
+  const filteredIndividualData = useMemo(
+    () => ({
+      allFieldsAttributes: data
+        //@ts-ignore
         ?.filter(associatedWith('Individual'))
         .filter(isNot('IMAGE')),
-    };
+    }),
+    [data],
+  );
+
+  const filteredHouseholdData = useMemo(
+    () => ({
+      //@ts-ignore
+      allFieldsAttributes: data?.filter(associatedWith('Household')),
+    }),
+    [data],
+  );
+
+  const allDataChoicesDictTmp = useMemo(
+    () =>
+      // @ts-ignore
+      data?.reduce((acc, item) => {
+        acc[item.name] = item.choices;
+        return acc;
+      }, {}),
+    [data],
+  );
+
+  const allCollectorFieldsChoicesDictTmp = useMemo(
+    () =>
+      // @ts-ignore
+      allCollectorFieldsAttributesData?.reduce((acc, item) => {
+        acc[item.name] = item.choices;
+        return acc;
+      }, {}),
+    [allCollectorFieldsAttributesData],
+  );
+
+  useEffect(() => {
     setIndividualData(filteredIndividualData);
-
-    const filteredHouseholdData = {
-      allFieldsAttributes: data?.allFieldsAttributes?.filter(
-        associatedWith('Household'),
-      ),
-    };
     setHouseholdData(filteredHouseholdData);
-
-    const allDataChoicesDictTmp = data?.allFieldsAttributes?.reduce(
-      (acc, item) => {
-        acc[item.name] = item.choices;
-        return acc;
-      },
-      {},
-    );
     setAllDataChoicesDict(allDataChoicesDictTmp);
-
-    const allCollectorFieldsChoicesDictTmp =
-      allCollectorFieldsAttributesData?.results?.reduce((acc, item) => {
-        acc[item.name] = item.choices;
-        return acc;
-      }, {});
     setAllCollectorFieldsChoicesDict(allCollectorFieldsChoicesDictTmp);
-  }, [data, loading, allCollectorFieldsAttributesData]);
+  }, [
+    filteredIndividualData,
+    filteredHouseholdData,
+    allDataChoicesDictTmp,
+    allCollectorFieldsChoicesDictTmp,
+  ]);
 
   if (!data || !allCollectorFieldsAttributesData) return null;
 
@@ -429,7 +446,11 @@ export const TargetingCriteriaForm = ({
                           // eslint-disable-next-line
                           key={index}
                           index={index}
-                          data={isSocialWorkingProgram ? data : householdData}
+                          data={
+                            isSocialWorkingProgram
+                              ? data
+                              : householdData.allFieldsAttributes
+                          }
                           choicesDict={allDataChoicesDict}
                           each={each}
                           onChange={(e, object) => {

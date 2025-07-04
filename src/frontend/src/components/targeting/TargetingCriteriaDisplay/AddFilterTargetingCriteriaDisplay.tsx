@@ -1,12 +1,10 @@
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
+import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
 import { useQuery } from '@tanstack/react-query';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -93,10 +91,12 @@ const AddFilterTargetingCriteriaDisplay = ({
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
-  const { businessArea, programId } = useBaseUrl();
 
-  const { data: allCoreFieldsAttributesData, loading } =
-    useCachedIndividualFieldsQuery(businessArea, programId);
+  const { data: allCoreFieldsAttributesData, isLoading: loading } = useQuery({
+    queryKey: ['allFieldsAttributes'],
+    queryFn: () => RestService.restBusinessAreasAllFieldsAttributesList({}),
+    staleTime: 5 * 60 * 1000, // 5 minutes - equivalent to cache-first policy
+  });
   const { data: allCollectorFieldsAttributesData } =
     useQuery<PaginatedCollectorAttributeList>({
       queryKey: ['collectorFieldsAttributes'],
@@ -114,11 +114,13 @@ const AddFilterTargetingCriteriaDisplay = ({
 
   useEffect(() => {
     if (loading) return;
-    const allDataChoicesDictTmp =
-      allCoreFieldsAttributesData?.allFieldsAttributes?.reduce((acc, item) => {
+    const allDataChoicesDictTmp = allCoreFieldsAttributesData?.results?.reduce(
+      (acc, item) => {
         acc[item.name] = item.choices;
         return acc;
-      }, {});
+      },
+      {},
+    );
     setAllDataChoicesDict(allDataChoicesDictTmp);
   }, [allCoreFieldsAttributesData, loading]);
 
