@@ -239,21 +239,37 @@ function prepareEditIndividualVariables(requiredVariables, values) {
   const newlyAddedAccountsWithoutIds = removeIdPropertyFromObjects(
     values.individualDataUpdateFieldsAccounts,
   )?.map(account => {
-      const { id, name, ...dataFields } = account;
+      const { name, ...dataFields } = account;
+      const { dynamicFields, ...restDataFields } = dataFields;
+      const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
+        if (curr.key) acc[curr.key] = curr.value;
+        return acc;
+      }, {});
+
       return {
-        id,
         name,
-        dataFields,
+        dataFields: {
+          ...restDataFields,
+          ...mappedDynamicFields,
+        },
       };
     },
   );
 
   const accountsToEdit = values.individualDataUpdateAccountsToEdit?.map(account => {
     const { id, name, ...dataFields } = account;
+     const { dynamicFields, ...restDataFields } = dataFields;
+    const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
+    if (curr.key) acc[curr.key] = curr.value;
+    return acc;
+        }, {});
     return {
       id,
       name,
-      dataFields,
+      dataFields: {
+          ...restDataFields,
+          ...mappedDynamicFields,
+        },
     };
   });
 

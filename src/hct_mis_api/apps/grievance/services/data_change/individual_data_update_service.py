@@ -36,7 +36,6 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     handle_update_account,
     is_approved,
     prepare_edit_accounts_save,
-    prepare_edit_accounts_update,
     prepare_edit_documents,
     prepare_edit_identities,
     prepare_previous_documents,
@@ -166,7 +165,6 @@ class IndividualDataUpdateService(DataChangeService):
         identities = new_individual_data.pop("identities", [])
         identities_to_remove = new_individual_data.pop("identities_to_remove", [])
         identities_to_edit = new_individual_data.pop("identities_to_edit", [])
-        accounts_to_edit = new_individual_data.pop("accounts_to_edit", [])
         flex_fields = {
             to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()
         }
@@ -215,7 +213,6 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
             identities_to_remove_with_approve_status
         )
-        individual_data_with_approve_status["accounts_to_edit"] = prepare_edit_accounts_update(accounts_to_edit)
         individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
         ticket_details.individual_data = individual_data_with_approve_status
         ticket_details.save()

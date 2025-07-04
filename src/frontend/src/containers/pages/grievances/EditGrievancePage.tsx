@@ -261,11 +261,6 @@ const EditGrievancePage = (): ReactElement => {
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
 
-  const accountsToEdit =
-    ticket?.individualDataUpdateTicketDetails?.individualData
-      ?.accounts_to_edit;
-
-
   const individualFieldsDictForValidation = isSocialDctType
     ? peopleFieldsDict
     : individualFieldsDict;
@@ -594,95 +589,6 @@ const EditGrievancePage = (): ReactElement => {
                             setFieldValue={setFieldValue}
                           />
                           {dataChangeErrors(errors, touched)}
-                        </BoxPadding>
-                        <BoxPadding>
-                          {accountsToEdit && (
-                            <>
-                              <Title>
-                                <Typography variant="h6">
-                                  {t('Accounts to Edit')}
-                                </Typography>
-                              </Title>
-                              <Grid container spacing={3}>
-                                {values.individualDataUpdateAccountsToEdit?.map(
-                                  (
-                                    item: {
-                                      id: string;
-                                      label: string;
-                                      dataFields: Record<
-                                        string,
-                                        {
-                                          name: string;
-                                          previousValue: string;
-                                          value: string;
-                                        }
-                                      >;
-                                    },
-                                    index: number,
-                                  ) => (
-                                    <Grid
-                                      item
-                                      size={{ xs: 12 }}
-                                      key={item.id}
-                                    >
-                                      <Typography variant="subtitle1">
-                                        Account: {item.name}
-                                      </Typography>
-                                      {Object.entries(item.dataFields).map(
-                                        (
-                                          [, field]: [
-                                            string,
-                                            {
-                                              name: string;
-                                              previousValue: string;
-                                              value: string;
-                                            },
-                                          ],
-                                          fieldIndex: number,
-                                        ) => (
-                                          <Grid
-                                            key={field.name}
-                                            container
-                                            alignItems="flex-end"
-                                            spacing={2}
-                                          >
-                                            <Grid size={{ xs: 4 }}>
-                                              <LabelizedField
-                                                label={t('Field Name')}
-                                                fullWidth
-                                              >
-                                                {field.name}
-                                              </LabelizedField>
-                                            </Grid>
-                                            <Grid size={{ xs: 4 }}>
-                                              <Field
-                                                name={`individualDataUpdateAccountsToEdit[${index}].dataFields[${fieldIndex}].previousValue`}
-                                                type="text"
-                                                label={t('Current Value')}
-                                                component={FormikTextField}
-                                                disabled
-                                                fullWidth
-                                              />
-                                            </Grid>
-                                            <Grid size={{ xs: 4 }}>
-                                              <Field
-                                                name={`individualDataUpdateAccountsToEdit[${index}].dataFields[${fieldIndex}].value`}
-                                                type="text"
-                                                label={t('New Value')}
-                                                component={FormikTextField}
-                                                required
-                                                fullWidth
-                                              />
-                                            </Grid>
-                                          </Grid>
-                                        ),
-                                      )}
-                                    </Grid>
-                                  ),
-                                )}
-                              </Grid>
-                            </>
-                          )}
                         </BoxPadding>
                       </>
                     )}

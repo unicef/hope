@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, IconButton } from '@mui/material';
+import { Box, Grid2 as Grid, IconButton, Button } from '@mui/material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
@@ -39,16 +39,20 @@ export function EditAccountRow({
         accountFinancialInstitutionChoices={addIndividualFieldsData.accountFinancialInstitutionChoices}
       />
       <Box display="flex" alignItems="center">
-        <IconButton
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<Close/>}
           onClick={() => {
             arrayHelpers.remove({
+              id: account.id,
               ...account.dataFields,
             });
             setEdit(false);
           }}
         >
-          <Close />
-        </IconButton>
+          Cancel Edit
+        </Button>
       </Box>
     </>
   ) : (

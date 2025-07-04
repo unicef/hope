@@ -281,26 +281,6 @@ def prepare_edit_accounts_save(accounts: List[Dict]) -> List[Dict]:
     return items
 
 
-def prepare_edit_accounts_update(accounts: List[Dict]) -> List[Dict]:
-    items = []
-    for account in accounts:
-        data = {
-            "id": account["id"],
-            "name": account["name"],
-            "approve_status": account["approve_status"],
-            "data_fields": [
-                {
-                    "name": data_field["name"],
-                    "value": data_field["value"],
-                    "previous_value": data_field["previousValue"],
-                }
-                for data_field in account["data_fields"]
-            ],
-        }
-        items.append(data)
-    return items
-
-
 def handle_update_account(account: Dict) -> Optional[Account]:
     account_instance = get_object_or_404(Account, id=decode_id_string(account.get("id")))
     data_fields_dict = {field["name"]: field["value"] for field in account["data_fields"]}

@@ -1,13 +1,13 @@
-import { Grid2 as Grid, IconButton } from '@mui/material';
-import { Delete } from '@mui/icons-material';
+import { Grid2 as Grid, IconButton, Button } from '@mui/material';
+import { Delete, Add } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
-import { Field } from 'formik';
+import { Field, FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery, AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
-import  React, { Fragment, ReactElement } from 'react';
+import React, { Fragment, ReactElement } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 
 
@@ -23,15 +23,15 @@ export interface AccountProps {
 }
 
 export function AccountField({
-  id,
-  baseName,
-  onDelete,
-  isEdited,
-  account,
-  values,
-  accountTypeChoices,
-  accountFinancialInstitutionChoices,
-}: AccountProps): ReactElement {
+                               id,
+                               baseName,
+                               onDelete,
+                               isEdited,
+                               account,
+                               values,
+                               accountTypeChoices,
+                               accountFinancialInstitutionChoices,
+                             }: AccountProps): ReactElement {
   const { t } = useTranslation();
 
   const accountFieldName = `${baseName}.${getIndexForId(
@@ -42,6 +42,8 @@ export function AccountField({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const dataFields = account?.dataFields ? JSON.parse(account.dataFields) : {};
+
+  const dynamicFieldsName = `${accountFieldName}.dynamicFields`;
 
   return (
     <>
@@ -165,8 +167,54 @@ export function AccountField({
         </>
       )
       }
-
-
+      {/* --- Dynamic Fields Section --- */}
+      <FieldArray name={dynamicFieldsName}>
+        {({ push, remove, form }) => (
+          <>
+            {form.values[baseName][getIndexForId(values[baseName], id)]?.dynamicFields?.map(
+              (field, idx) => (
+                <Fragment key={idx}>
+                  <Grid size={{ xs: 4 }}>
+                    <Field
+                      name={`${dynamicFieldsName}.${idx}.key`}
+                      component={FormikTextField}
+                      label={t('Field Name')}
+                      variant="outlined"
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 7 }}>
+                    <Field
+                      name={`${dynamicFieldsName}.${idx}.value`}
+                      component={FormikTextField}
+                      label={t('Field Value')}
+                      variant="outlined"
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 1 }}>
+                    <IconButton onClick={() => remove(idx)}>
+                      <Delete/>
+                    </IconButton>
+                  </Grid>
+                </Fragment>
+              ),
+            )}
+            <Grid size={{ xs: 12 }}>
+              <Button
+                variant="outlined"
+                startIcon={<Add/>}
+                onClick={() => push({ key: '', value: '' })}
+              >
+                {t('Add Field')}
+              </Button>
+            </Grid>
+          </>
+        )}
+      </FieldArray>
+      {/* --- End Dynamic Fields --- */}
     </>
   );
 }
