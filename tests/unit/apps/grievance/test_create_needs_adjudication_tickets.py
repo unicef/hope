@@ -1,8 +1,14 @@
+from typing import Any
+
 from django.core.files.base import ContentFile
+from django.core.management import call_command
+from django.urls import reverse
 
 import pytest
+from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -21,6 +27,7 @@ from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilar
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.mark.elasticsearch
@@ -127,16 +134,16 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
 
 
 @pytest.mark.elasticsearch
-class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.business_area.biometric_deduplication_threshold = 44.44
-        cls.business_area.save()
-        program = ProgramFactory(
+class TestCreateNeedsAdjudicationTicketsBiometrics:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        call_command("loadcountries")
+        self.business_area = create_afghanistan()
+        self.business_area.biometric_deduplication_threshold = 44.44
+        self.business_area.save()
+        self.user = UserFactory.create()
+        self.api_client = api_client(self.user)
+        self.program = ProgramFactory(
             name="Test HOPE",
             business_area=BusinessArea.objects.first(),
         )
@@ -144,32 +151,32 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             name="Test HOPE2",
             business_area=BusinessArea.objects.first(),
         )
-        cls.household = HouseholdFactory.build(
+        self.household = HouseholdFactory.build(
             size=2,
-            program=program,
+            program=self.program,
         )
-        cls.household2 = HouseholdFactory.build(
+        self.household2 = HouseholdFactory.build(
             size=1,
-            program=program,
+            program=self.program,
         )
-        cls.household3 = HouseholdFactory.build(
+        self.household3 = HouseholdFactory.build(
             size=1,
             program=program2,
         )
-        cls.household.household_collection.save()
-        cls.household.registration_data_import.imported_by.save()
-        cls.household.registration_data_import.program = program
-        cls.household.registration_data_import.save()
-        cls.household2.household_collection.save()
-        cls.household2.registration_data_import.imported_by.save()
-        cls.household2.registration_data_import.program = program
-        cls.household2.registration_data_import.save()
-        cls.household3.household_collection.save()
-        cls.household3.registration_data_import.imported_by.save()
-        cls.household3.registration_data_import.program = program2
-        cls.household3.registration_data_import.save()
-        cls.rdi = cls.household.registration_data_import
-        cls.rd2 = cls.household3.registration_data_import
+        self.household.household_collection.save()
+        self.household.registration_data_import.imported_by.save()
+        self.household.registration_data_import.program = self.program
+        self.household.registration_data_import.save()
+        self.household2.household_collection.save()
+        self.household2.registration_data_import.imported_by.save()
+        self.household2.registration_data_import.program = self.program
+        self.household2.registration_data_import.save()
+        self.household3.household_collection.save()
+        self.household3.registration_data_import.imported_by.save()
+        self.household3.registration_data_import.program = program2
+        self.household3.registration_data_import.save()
+        self.rdi = self.household.registration_data_import
+        self.rd2 = self.household3.registration_data_import
         individuals_to_create = [
             {
                 "id": "11111111-1111-1111-1111-111111111111",
@@ -226,72 +233,77 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         ]
 
         individuals = [
-            IndividualFactory(household=cls.household, program=program, **individual)
+            IndividualFactory(household=self.household, program=self.program, **individual)
             for individual in individuals_to_create
         ]
         other_individual = [
-            IndividualFactory(household=cls.household2, program=program, **individual)
+            IndividualFactory(household=self.household2, program=self.program, **individual)
             for individual in individuals_to_create_2
         ][0]
         other_individual2 = [
-            IndividualFactory(household=cls.household3, program=program2, **individual)
+            IndividualFactory(household=self.household3, program=program2, **individual)
             for individual in individuals_to_create_3
         ][0]
-        cls.household.head_of_household = individuals[0]
-        cls.household.save()
-        cls.household2.head_of_household = other_individual
-        cls.household2.save()
-        cls.household3.head_of_household = other_individual2
-        cls.household3.save()
+        self.household.head_of_household = individuals[0]
+        self.household.save()
+        self.household2.head_of_household = other_individual
+        self.household2.save()
+        self.household3.head_of_household = other_individual2
+        self.household3.save()
 
-        cls.ind1, cls.ind2 = sorted(individuals, key=lambda x: x.id)
-        cls.ind1.registration_data_import = cls.rdi
-        cls.ind2.registration_data_import = cls.rdi
-        cls.ind1.save()
-        cls.ind2.save()
-        cls.ind3, cls.ind4 = sorted([cls.ind1, other_individual], key=lambda x: x.id)
-        cls.ind5 = other_individual2
+        self.ind1, self.ind2 = sorted(individuals, key=lambda x: x.id)
+        self.ind1.registration_data_import = self.rdi
+        self.ind2.registration_data_import = self.rdi
+        self.ind1.save()
+        self.ind2.save()
+        self.ind3, self.ind4 = sorted([self.ind1, other_individual], key=lambda x: x.id)
+        self.ind5 = other_individual2
 
-        cls.dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
-            program=program, individual1=cls.ind1, individual2=cls.ind2, similarity_score=55.55, status_code="200"
+        self.dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
+            program=self.program,
+            individual1=self.ind1,
+            individual2=self.ind2,
+            similarity_score=55.55,
+            status_code="200",
         )
-        cls.dedup_engine_similarity_pair_2 = DeduplicationEngineSimilarityPair.objects.create(
-            program=program, individual1=cls.ind3, individual2=cls.ind4, similarity_score=75.25, status_code="200"
+        self.dedup_engine_similarity_pair_2 = DeduplicationEngineSimilarityPair.objects.create(
+            program=self.program,
+            individual1=self.ind3,
+            individual2=self.ind4,
+            similarity_score=75.25,
+            status_code="200",
         )
-        cls.dedup_engine_similarity_pair_3 = DeduplicationEngineSimilarityPair.objects.create(
-            program=program2, individual1=cls.ind5, individual2=None, similarity_score=0.0, status_code="429"
+        self.dedup_engine_similarity_pair_3 = DeduplicationEngineSimilarityPair.objects.create(
+            program=program2, individual1=self.ind5, individual2=None, similarity_score=0.0, status_code="429"
         )
 
     def test_create_na_tickets_biometrics(self) -> None:
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
-        self.assertIsNone(self.rdi.deduplication_engine_status)
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 0
+        assert self.rdi.deduplication_engine_status is None
 
         create_needs_adjudication_tickets_for_biometrics(DeduplicationEngineSimilarityPair.objects.none(), self.rdi)
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 0
 
-        self.assertEqual(DeduplicationEngineSimilarityPair.objects.all().count(), 3)
+        assert DeduplicationEngineSimilarityPair.objects.all().count() == 3
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair.pk),
             self.rdi,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 1
         grievance_ticket = GrievanceTicket.objects.first()
         na_ticket = TicketNeedsAdjudicationDetails.objects.first()
 
-        self.assertEqual(grievance_ticket.category, GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION)
-        self.assertEqual(
-            grievance_ticket.issue_type,
-            GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
-        )
+        assert grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION
+        assert grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY
 
-        self.assertTrue(na_ticket.is_multiple_duplicates_version)
-        self.assertEqual(
-            na_ticket.extra_data["dedup_engine_similarity_pair"],
-            self.dedup_engine_similarity_pair.serialize_for_ticket(),
+        assert na_ticket.is_multiple_duplicates_version is True
+        assert (
+            na_ticket.extra_data["dedup_engine_similarity_pair"]
+            == self.dedup_engine_similarity_pair.serialize_for_ticket()
         )
 
         # different RDI
@@ -299,39 +311,68 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_2.pk),
             self.rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 2)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
+        assert GrievanceTicket.objects.all().count() == 2
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 2
         # run one time
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_2.pk),
             self.rdi,
         )
-        self.assertEqual(GrievanceTicket.objects.all().count(), 2)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
+        assert GrievanceTicket.objects.all().count() == 2
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 2
 
     def test_create_na_tickets_biometrics_for_1_ind(self) -> None:
-        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 0
 
         create_needs_adjudication_tickets_for_biometrics(
             DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_3.pk),
             self.rdi,
         )
 
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
-        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 1)
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 1
         grievance_ticket = GrievanceTicket.objects.first()
         na_ticket = TicketNeedsAdjudicationDetails.objects.first()
 
-        self.assertEqual(grievance_ticket.category, GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION)
-        self.assertEqual(
-            grievance_ticket.issue_type,
-            GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+        assert grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION
+        assert grievance_ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY
+
+        assert str(na_ticket.golden_records_individual.id) == str(self.ind5.id)
+        assert na_ticket.possible_duplicate is None
+        assert (
+            na_ticket.extra_data["dedup_engine_similarity_pair"]
+            == self.dedup_engine_similarity_pair_3.serialize_for_ticket()
         )
 
-        self.assertEqual(str(na_ticket.golden_records_individual.id), str(self.ind5.id))
-        self.assertIsNone(na_ticket.possible_duplicate)
-        self.assertEqual(
-            na_ticket.extra_data["dedup_engine_similarity_pair"],
-            self.dedup_engine_similarity_pair_3.serialize_for_ticket(),
+    def test_ticket_biometric_query_response(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
+            self.business_area,
+            self.program,
         )
+
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 0
+
+        create_needs_adjudication_tickets_for_biometrics(
+            DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair.pk),
+            self.rdi,
+        )
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketNeedsAdjudicationDetails.objects.all().count() == 1
+
+        response = self.api_client.get(
+            reverse(
+                "api:grievance:grievance-tickets-list",
+                kwargs={"business_area_slug": self.business_area.slug, "program_slug": self.program.slug},
+            )
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()["results"]) == 1
+        data_extra = TicketNeedsAdjudicationDetails.objects.first().extra_data
+        assert "individual1" in data_extra["dedup_engine_similarity_pair"]
+        assert "individual2" in data_extra["dedup_engine_similarity_pair"]
+        assert "status_code" in data_extra["dedup_engine_similarity_pair"]
+        assert "similarity_score" in data_extra["dedup_engine_similarity_pair"]
