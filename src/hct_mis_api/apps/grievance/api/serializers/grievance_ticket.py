@@ -234,9 +234,7 @@ class IndividualDocumentSerializer(serializers.Serializer):
 
 
 class EditIndividualDocumentSerializer(serializers.Serializer):
-    id = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()), required=False
-    )
+    id = serializers.PrimaryKeyRelatedField(queryset=Document.objects.all())
     country = serializers.CharField()
     key = serializers.CharField()
     number = serializers.CharField()
