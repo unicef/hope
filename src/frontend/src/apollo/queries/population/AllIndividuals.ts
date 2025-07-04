@@ -151,6 +151,15 @@ export const AllIndividuals = gql`
               }
             }
           }
+          accounts {
+            edges {
+              node {
+                id
+                name
+                dataFields
+              }
+            }
+          }
         }
       }
     }

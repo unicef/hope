@@ -97,7 +97,7 @@ export function AccountTable({
             <TableRow key={key}>
               <TableCell align="left"></TableCell>
               <TableCell align="left">{key}</TableCell>
-              <TableCell align="left">{value}</TableCell>
+              <TableCell align="left">{String(value)}</TableCell>
               <TableCell align="left"></TableCell>
             </TableRow>
           ))}

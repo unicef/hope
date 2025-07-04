@@ -13,7 +13,6 @@ export interface ExistingAccountsFieldArrayProps {
 }
 
 export function ExistingAccountsFieldArray({
-  setFieldValue,
   values,
   individual,
   addIndividualFieldsData,
@@ -25,16 +24,15 @@ export function ExistingAccountsFieldArray({
     <FieldArray
       name="individualDataUpdateAccountsToEdit"
       render={(arrayHelpers) =>
-        individual?.accounts?.length > 0 ? (
+        individual?.accounts?.edges?.length > 0 ? (
           <>
-            {individual.accounts.map((item) => (
-              <Grid item xs={12} key={item.id}>
+            {individual.accounts.edges.map((item) => (
+              <Grid  size={{ xs: 12 }} key={item.node.id}>
                 <Grid container direction="row" alignItems="center" spacing={3}>
                   < EditAccountRow
-                    setFieldValue={setFieldValue}
                     values={values}
-                    account={item}
-                    id={item.id}
+                    account={item.node}
+                    id={item.node.id}
                     arrayHelpers={arrayHelpers}
                     addIndividualFieldsData={addIndividualFieldsData}
                   />

@@ -19,7 +19,7 @@ from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import Boolean, DateTime, Enum, Int, String, relay
-from graphene_django import DjangoObjectType
+from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
@@ -239,7 +239,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
     preferred_language = graphene.String()
-    accounts = graphene.List(AccountNode)
+    accounts = DjangoConnectionField(AccountNode)
     email = graphene.String(source="email")
     import_id = graphene.String()
 
@@ -697,6 +697,8 @@ class Query(graphene.ObjectType):
             queryset = queryset.select_related("household__admin2__area_type")
         if does_path_exist_in_query("edges.node.program", info):
             queryset = queryset.select_related("program")
+        if does_path_exist_in_query("edges.node.accounts", info):
+            queryset = queryset.prefetch_related("accounts")
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id

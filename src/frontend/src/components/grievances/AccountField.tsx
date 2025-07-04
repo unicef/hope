@@ -16,7 +16,7 @@ export interface AccountProps {
   baseName: string;
   onDelete;
   isEdited?: boolean;
-  account?: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts'][number];
+  account?: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts']['edges'][number]['node'];
   values;
   accountTypeChoices: AllAddIndividualFieldsQuery['accountTypeChoices'];
   accountFinancialInstitutionChoices: AllAddIndividualFieldsQuery['accountFinancialInstitutionChoices'];
@@ -74,11 +74,8 @@ export function AccountField({
             </Grid>
             <Grid size={{ xs: 3 }}>
               <LabelizedField
-                fullWidth
                 label={t('New Value')}
                 value={account?.name || ''}
-                component={FormikTextField}
-                disabled
               />
             </Grid>
           </>

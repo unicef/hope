@@ -157,6 +157,7 @@ function EditPeopleDataChange({
             values={values}
             setFieldValue={setFieldValue}
             individual={fullIndividual.individual}
+            addIndividualFieldsData={editPeopleFieldsData}
           />
           {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={editPeopleFieldsData}/>}
         </Box>

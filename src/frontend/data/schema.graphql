@@ -17,6 +17,18 @@ type AccountNode implements Node {
   dataFields: JSONString
 }
 
+type AccountNodeConnection {
+  pageInfo: PageInfo!
+  edges: [AccountNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type AccountNodeEdge {
+  node: AccountNode
+  cursor: String!
+}
+
 input AccountObjectType {
   name: String!
   approveStatus: Boolean
@@ -1905,7 +1917,7 @@ type IndividualNode implements Node {
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  accounts: [AccountNode]
+  accounts(offset: Int, before: String, after: String, first: Int, last: Int): AccountNodeConnection
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!

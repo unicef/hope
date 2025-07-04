@@ -9,7 +9,7 @@ import { AccountField } from '@components/grievances/AccountField';
 
 export interface EditAccountRowProps {
   values;
-  account: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts'][number];
+  account: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['accounts']['edges'][number]['node'];
   arrayHelpers;
   id: string;
  addIndividualFieldsData: AllAddIndividualFieldsQuery;
@@ -20,7 +20,7 @@ export function EditAccountRow({
   account,
   arrayHelpers,
   id,
-   addIndividualFieldsData,
+  addIndividualFieldsData,
 }: EditAccountRowProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
@@ -37,6 +37,7 @@ export function EditAccountRow({
         values={values}
         accountTypeChoices={addIndividualFieldsData.accountTypeChoices}
         accountFinancialInstitutionChoices={addIndividualFieldsData.accountFinancialInstitutionChoices}
+        onDelete={() => {}}
       />
       <Box display="flex" alignItems="center">
         <Button
@@ -57,22 +58,21 @@ export function EditAccountRow({
     </>
   ) : (
     <Fragment key={account.id}>
-      <Grid item xs={4} key="type">
+      <Grid size={{ xs: 4 }} key="type">
         <LabelizedField
           label="type"
           value={String(account.name)}
-          disabled
         />
       </Grid>
     {Object.entries(dataFields).map(([key, value]) => (
-      <Grid item xs={4} key={key}>
+      <Grid size={{ xs: 4 }} key={key}>
         <LabelizedField
           label={key}
           value={String(value)}
         />
       </Grid>
     ))}
-    <Grid item xs={1}>
+    <Grid  size={{ xs: 1 }}>
       <Box display="flex" alignItems="center">
         <IconButton
           onClick={() => {
