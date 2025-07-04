@@ -101,5 +101,6 @@ export type ProgramDetail = {
     partnerAccess?: PartnerAccessEnum;
     readonly registrationImportsTotalCount: number;
     readonly targetPopulationsCount: number;
+    readonly screenBeneficiary: boolean;
 };
 

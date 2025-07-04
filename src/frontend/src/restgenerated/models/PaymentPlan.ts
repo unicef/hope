@@ -220,5 +220,6 @@ export type PaymentPlan = {
     readonly lastApprovalProcessDate: string | null;
     readonly lastApprovalProcessBy: string | null;
     readonly adminUrl: string;
+    readonly screenBeneficiary: boolean;
 };
 

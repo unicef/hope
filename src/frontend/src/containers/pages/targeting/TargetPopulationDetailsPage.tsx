@@ -21,7 +21,6 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
   const { isStandardDctType, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { programId } = useBaseUrl();
-
   const { businessArea } = useBaseUrl();
   const { data: businessAreaData } = useQuery<BusinessArea>({
     queryKey: ['businessArea', businessArea],
@@ -82,7 +81,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
         permissions={permissions}
-        screenBeneficiary={businessAreaData?.screenBeneficiary}
+        screenBeneficiary={paymentPlan.screenBeneficiary}
       />
     </>
   );
