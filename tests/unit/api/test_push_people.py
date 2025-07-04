@@ -374,7 +374,13 @@ class TestPeopleUploadMixin:
         }
         assert base64_photo.startswith(prefix) is True
 
-        individual = PeopleUploadMixin()._create_individual(documents=[], hh=None, person_data=person_data, rdi=rdi)
+        individual = PeopleUploadMixin()._create_individual(
+            documents=[],
+            accounts=[],
+            hh=None,
+            person_data=person_data,
+            rdi=rdi,
+        )
 
         assert individual.photo.name[:5] == "photo"
         assert individual.photo.name[-4:] == ".png"

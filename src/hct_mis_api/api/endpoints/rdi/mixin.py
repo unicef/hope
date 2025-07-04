@@ -40,7 +40,36 @@ class Totals:
     households: int
 
 
-class HouseholdUploadMixin:
+class DocumentMixin:
+    @staticmethod
+    def save_document(member: PendingIndividual, doc: Dict) -> None:
+        PendingDocument.objects.create(
+            document_number=doc["document_number"],
+            photo=get_photo_from_stream(doc.get("image", None)),
+            individual=member,
+            country=Country.objects.get(iso_code2=doc["country"]),
+            type=DocumentType.objects.get(key=doc["type"]),
+            program=member.program,
+        )
+
+
+class AccountMixin:
+    @staticmethod
+    def save_account(member: PendingIndividual, doc: Dict) -> None:
+        PendingAccount.objects.create(individual=member, **doc)
+
+
+class PhotoMixin:
+    @staticmethod
+    def get_photo(photo: Optional[str]) -> Optional[SimpleUploadedFile]:
+        if photo:
+            data = photo.removeprefix("data:image/png;base64,")
+            p = get_photo_from_stream(data)
+            return p
+        return None
+
+
+class HouseholdUploadMixin(DocumentMixin, AccountMixin, PhotoMixin):
     def _manage_collision(
         self, household: Household, registration_data_import: RegistrationDataImport
     ) -> Optional[str]:
@@ -54,24 +83,8 @@ class HouseholdUploadMixin:
         household_id = colision_detector.detect_collision(household)
         return household_id
 
-    def save_document(self, member: PendingIndividual, doc: Dict) -> None:
-        PendingDocument.objects.create(
-            document_number=doc["document_number"],
-            photo=get_photo_from_stream(doc.get("image", None)),
-            individual=member,
-            country=Country.objects.get(iso_code2=doc["country"]),
-            type=DocumentType.objects.get(key=doc["type"]),
-            program=member.program,
-        )
-
-    def save_account(self, member: PendingIndividual, doc: Dict) -> None:
-        PendingAccount.objects.create(individual=member, **doc)
-
     def save_member(self, rdi: RegistrationDataImport, hh: PendingHousehold, member_data: Dict) -> PendingIndividual:
-        photo = member_data.pop("photo", None)
-        if photo:
-            data = photo.removeprefix("data:image/png;base64,")
-            photo = get_photo_from_stream(data)
+        photo = self.get_photo(member_data.pop("photo", None))
         documents = member_data.pop("documents", [])
         accounts = member_data.pop("accounts", [])
         member_of = None
