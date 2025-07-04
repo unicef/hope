@@ -19,7 +19,7 @@ from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import Boolean, DateTime, Enum, Int, String, relay
-from graphene_django import DjangoObjectType, DjangoConnectionField
+from graphene_django import DjangoConnectionField, DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
