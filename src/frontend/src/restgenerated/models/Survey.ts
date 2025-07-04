@@ -13,7 +13,7 @@ export type Survey = {
     samplingType: string;
     flow?: string;
     flowId?: string | null;
-    paymentPlan?: string;
+    paymentPlan?: string | null;
     fullListArguments?: AccountabilityFullListArguments | null;
     randomSamplingArguments?: AccountabilityRandomSamplingArguments | null;
     readonly sampleFilePath: string | null;

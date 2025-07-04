@@ -7,10 +7,10 @@ import type { AccountabilityRandomSamplingArguments } from './AccountabilityRand
 import type { SamplingTypeE86Enum } from './SamplingTypeE86Enum';
 export type MessageSampleSize = {
     households?: Array<string>;
-    paymentPlan?: string;
-    registrationDataImport?: string;
+    paymentPlan?: string | null;
+    registrationDataImport?: string | null;
     samplingType: SamplingTypeE86Enum;
-    fullListArguments?: AccountabilityFullListArguments;
-    randomSamplingArguments?: AccountabilityRandomSamplingArguments;
+    fullListArguments?: AccountabilityFullListArguments | null;
+    randomSamplingArguments?: AccountabilityRandomSamplingArguments | null;
 };
 

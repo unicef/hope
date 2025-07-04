@@ -2,7 +2,6 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import EditTargetPopulation from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { BusinessArea } from '@restgenerated/models/BusinessArea';
@@ -11,23 +10,24 @@ import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { businessArea, programId } = useBaseUrl();
+  const { businessArea, programSlug } = useBaseUrl();
 
   const {
     data: paymentPlan,
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
-    queryKey: ['targetPopulation', businessArea, id, programId],
+    queryKey: ['targetPopulation', businessArea, id, programSlug],
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
         businessAreaSlug: businessArea,
         id: id,
-        programSlug: programId,
+        programSlug,
       }),
     refetchInterval: () => {
       const { backgroundActionStatus } = paymentPlan;
@@ -39,6 +39,7 @@ const EditTargetPopulationPage = (): ReactElement => {
     },
     refetchIntervalInBackground: true,
   });
+
 
   const { data: businessAreaData } = useQuery<BusinessArea>({
     queryKey: ['businessArea', businessArea],
@@ -54,10 +55,11 @@ const EditTargetPopulationPage = (): ReactElement => {
 
   if (!paymentPlan || permissions === null || !businessAreaData) return null;
 
+
   return (
     <EditTargetPopulation
       paymentPlan={paymentPlan}
-      screenBeneficiary={businessAreaData?.screenBeneficiary}
+      screenBeneficiary={paymentPlan?.screenBeneficiary}
     />
   );
 };

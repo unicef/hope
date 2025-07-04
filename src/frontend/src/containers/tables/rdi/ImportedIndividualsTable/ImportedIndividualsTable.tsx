@@ -51,6 +51,7 @@ function ImportedIndividualsTable({
     setQueryVariables(initialVariables);
   }, [initialVariables]);
 
+
   const replacements = {
     id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     full_name: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,

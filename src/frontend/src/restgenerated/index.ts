@@ -230,6 +230,7 @@ export type { PaymentVerificationPlanList as PaymentVerificationPlanListCamelCas
 export { PaymentVerificationPlanSamplingEnum as PaymentVerificationPlanSamplingEnumCamelCase } from './models/PaymentVerificationPlanSamplingEnum';
 export { PaymentVerificationPlanStatusEnum as PaymentVerificationPlanStatusEnumCamelCase } from './models/PaymentVerificationPlanStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
+export { PaymentVerificationSummaryStatusEnum as PaymentVerificationSummaryStatusEnumCamelCase } from './models/PaymentVerificationSummaryStatusEnum';
 export type { PDUData as PDUDataCamelCase } from './models/PDUData';
 export type { PDUFieldsCreate as PDUFieldsCreateCamelCase } from './models/PDUFieldsCreate';
 export type { PDUFieldsUpdate as PDUFieldsUpdateCamelCase } from './models/PDUFieldsUpdate';

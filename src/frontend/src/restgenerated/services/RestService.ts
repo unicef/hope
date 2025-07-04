@@ -12489,7 +12489,7 @@ export class RestService {
     }: {
         businessAreaSlug: string,
         /**
-         * A UUID string identifying this sanction list individual.
+         * A UUID string identifying this Individual.
          */
         id: string,
     }): CancelablePromise<SanctionListIndividual> {
@@ -13053,6 +13053,18 @@ export class RestService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/rest/choices/payment-verification-plan-status/',
+        });
+    }
+    /**
+     * return choices used in the system like statuses, currencies
+     * Response([{"value": k, "name": v} for k, v in PaymentPlan.Status.choices])
+     * @returns Choice
+     * @throws ApiError
+     */
+    public static restChoicesPaymentVerificationSummaryStatusList(): CancelablePromise<Array<Choice>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/rest/choices/payment-verification-summary-status/',
         });
     }
     /**

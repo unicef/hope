@@ -246,5 +246,21 @@ export type IndividualDetail = {
      * Photo
      */
     photo?: string;
+    /**
+     * Enrolled in nutrition program [sys]
+     */
+    enrolledInNutritionProgramme?: boolean | null;
+    /**
+     * Who answers phone number
+     */
+    whoAnswersPhone?: string;
+    /**
+     * Who answers alternative phone number
+     */
+    whoAnswersAltPhone?: string;
+    /**
+     * Beneficiary contact phone number
+     */
+    paymentDeliveryPhoneNo?: string | null;
 };
 

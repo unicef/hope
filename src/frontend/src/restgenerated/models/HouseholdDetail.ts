@@ -3,9 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { AreaSimple } from './AreaSimple';
+import type { ConsentSharingEnum } from './ConsentSharingEnum';
 import type { CurrencyEnum } from './CurrencyEnum';
 import type { HeadOfHousehold } from './HeadOfHousehold';
+import type { OrgEnumeratorEnum } from './OrgEnumeratorEnum';
 import type { RegistrationDataImport } from './RegistrationDataImport';
+import type { RegistrationMethodEnum } from './RegistrationMethodEnum';
 import type { ResidenceStatusEnum } from './ResidenceStatusEnum';
 export type HouseholdDetail = {
     readonly id: string;
@@ -365,5 +368,43 @@ export type HouseholdDetail = {
      */
     programRegistrationId?: string | null;
     readonly deliveredQuantities: Record<string, any>;
+    /**
+     * Household consent
+     */
+    consent?: boolean | null;
+    /**
+     * Household name enumerator [sys]
+     */
+    nameEnumerator?: string;
+    /**
+     * Household org enumerator [sys]
+     *
+     * * `` - None
+     * * `PARTNER` - Partner
+     * * `UNICEF` - UNICEF
+     */
+    orgEnumerator?: OrgEnumeratorEnum;
+    /**
+     * Household org name enumerator [sys]
+     */
+    orgNameEnumerator?: string;
+    /**
+     * Household registration method [sys]
+     *
+     * * `` - None
+     * * `COMMUNITY` - Community-level Registration
+     * * `HH_REGISTRATION` - Household Registration
+     */
+    registrationMethod?: RegistrationMethodEnum;
+    /**
+     * Household consent sharing
+     *
+     * * `` - None
+     * * `GOVERNMENT_PARTNER` - Government partners
+     * * `HUMANITARIAN_PARTNER` - Humanitarian partners
+     * * `PRIVATE_PARTNER` - Private partners
+     * * `UNICEF` - UNICEF
+     */
+    consentSharing?: ConsentSharingEnum;
 };
 

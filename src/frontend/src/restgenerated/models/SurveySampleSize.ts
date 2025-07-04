@@ -6,9 +6,9 @@ import type { AccountabilityFullListArguments } from './AccountabilityFullListAr
 import type { AccountabilityRandomSamplingArguments } from './AccountabilityRandomSamplingArguments';
 import type { SurveySampleSizeSamplingTypeEnum } from './SurveySampleSizeSamplingTypeEnum';
 export type SurveySampleSize = {
-    paymentPlan?: string;
-    samplingType: SurveySampleSizeSamplingTypeEnum;
-    fullListArguments?: AccountabilityFullListArguments;
-    randomSamplingArguments?: AccountabilityRandomSamplingArguments;
+    paymentPlan?: string | null;
+    samplingType: SurveySampleSizeSamplingTypeEnum | null;
+    fullListArguments?: AccountabilityFullListArguments | null;
+    randomSamplingArguments?: AccountabilityRandomSamplingArguments | null;
 };
 
