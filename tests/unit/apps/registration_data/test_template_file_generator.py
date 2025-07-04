@@ -84,7 +84,7 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual("pp_village_i_c", people_rows[0][69])
         self.assertEqual("Village - STRING", people_rows[1][69])
 
-        self.assertEqual("pp_bank_branch_name_i_c", people_rows[0][87])
+        self.assertEqual("pdu_flex_attribute_round_1_collection_date", people_rows[0][87])
 
         self.assertEqual("pp_index_id", people_rows[0][83])
         self.assertEqual("Index ID - INTEGER - required", people_rows[1][83])

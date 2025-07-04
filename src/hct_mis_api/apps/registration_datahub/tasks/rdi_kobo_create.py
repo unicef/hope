@@ -28,7 +28,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -71,13 +70,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         self.DOCS_AND_IDENTITIES_FIELDS = [
             f"{key}_{suffix}" for key in document_keys for suffix in ["no_i_c", "photo_i_c", "issuer_i_c"]
         ]
-        self.BANK_RELATED_FIELDS = (
-            "bank_name_i_c",
-            "bank_account_number_i_c",
-            "debit_card_number_i_c",
-            "bank_branch_name_i_c",
-            "account_holder_name_i_c",
-        )
         self.registration_data_import = RegistrationDataImport.objects.get(
             id=registration_data_import_id,
         )
@@ -219,7 +211,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         head_of_households_mapping = {}
         households_to_create = []
         individuals_ids_hash_dict = {}
-        bank_accounts_to_create = []
         collectors_to_create = defaultdict(list)
         household_hash_list = []
         household_batch_size = 50
@@ -247,7 +238,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
                 submission_meta_data.pop("amended", None)
                 self.handle_household(
-                    bank_accounts_to_create,
                     collectors_to_create,
                     head_of_households_mapping,
                     household,
@@ -256,8 +246,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     submission_meta_data,
                     household_count,
                 )
-            self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
-            bank_accounts_to_create = []
+            self.bulk_creates(head_of_households_mapping, households_to_create)
             head_of_households_mapping = {}
             households_to_create = []
         self._handle_collectors(collectors_to_create, individuals_ids_hash_dict)
@@ -286,7 +275,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     def bulk_creates(
         self,
-        bank_accounts_to_create: list[PendingBankAccountInfo],
         head_of_households_mapping: dict,
         households_to_create: list[PendingHousehold],
     ) -> None:
@@ -299,11 +287,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             households_to_update,
             ["head_of_household"],
         )
-        PendingBankAccountInfo.objects.bulk_create(bank_accounts_to_create)
 
     def handle_household(
         self,
-        bank_accounts_to_create: list[PendingBankAccountInfo],
         collectors_to_create: dict,
         head_of_households_mapping: dict,
         household: dict,
@@ -325,7 +311,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 for individual in hh_value:
                     ind_count += 1
                     current_individual_docs_and_identities = defaultdict(dict)
-                    current_individual_bank_account = {}
                     individual_obj = PendingIndividual()
                     only_collector_flag = False
                     role = None
@@ -351,10 +336,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             only_collector_flag = True
                         elif i_field == "role_i_c":
                             role = i_value.upper()
-                        elif i_field in self.BANK_RELATED_FIELDS:
-                            name = i_field.replace("_i_c", "")
-                            current_individual_bank_account["individual"] = individual_obj
-                            current_individual_bank_account[name] = i_value
                         elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
                             try:
                                 self._cast_and_assign(i_value, i_field, household_obj)
@@ -387,8 +368,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     individuals_to_create_list.append(individual_obj)
                     current_individuals.append(individual_obj)
                     documents_and_identities_to_create.append(current_individual_docs_and_identities)
-                    if current_individual_bank_account:
-                        bank_accounts_to_create.append(PendingBankAccountInfo(**current_individual_bank_account))
                     if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                         role_obj = PendingIndividualRoleInHousehold(
                             individual_id=individual_obj.pk,

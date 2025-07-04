@@ -72,9 +72,6 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
     get_unhcr_id_issuer,
     get_unhcr_id_no,
 )
-from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
-    PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
-)
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import (
@@ -99,8 +96,7 @@ logger = logging.getLogger(__name__)
 # about "snapshot_field"
 # if it's the same field that can connect with "associated_with" and "lookup"
 # like individual.full_name or household.size <-- no needed any "snapshot_field" info
-# but for "account_holder_name" it gets from  "bank_account_info__account_holder_name"
-# or for field "debit_card_issuer" used individual.full_name and in "snapshot_field" it's "full_name"
+# but for field "debit_card_issuer" used individual.full_name and in "snapshot_field" it's "full_name"
 
 CORE_FIELDS_ATTRIBUTES = [
     {
@@ -2213,7 +2209,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "scope": [Scope.TARGETING, Scope.XLSX_PEOPLE],
         "xlsx_field": "extra_rdis_",
     },
-] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
+]
 
 
 def get_core_fields_attributes() -> List[Dict[str, Any]]:

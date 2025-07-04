@@ -37,5 +37,13 @@ export const AllEditPeopleFieldsAttributes = gql`
       name
       value
     }
+    accountTypeChoices {
+      name
+      value
+    }
+    accountFinancialInstitutionChoices {
+      name
+      value
+    }
   }
 `;

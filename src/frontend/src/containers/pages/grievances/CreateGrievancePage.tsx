@@ -219,6 +219,7 @@ const CreateGrievancePage = (): ReactElement => {
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
       'individualDataUpdateFieldsIdentities',
+      'individualDataUpdateFieldsAccounts',
       'verificationRequired',
     ].map((fieldname) => (
       <FormHelperText key={fieldname} error>
@@ -281,6 +282,7 @@ const CreateGrievancePage = (): ReactElement => {
             showMessage(msg);
             navigate(url);
           } catch (e) {
+            console.log(e);
             e.graphQLErrors.map((x) => showMessage(x.message));
           }
         } else {

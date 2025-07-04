@@ -896,7 +896,7 @@ class TestAccountModel(TestCase):
         dmd = AccountFactory(data={"test": "test"}, individual=self.ind)
         self.assertEqual(
             PaymentDataCollector.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value, self.ind, dmd),
-            dmd.data,
+            dmd.account_data,
         )
         self.assertEqual(
             PaymentDataCollector.get_associated_object(
@@ -928,7 +928,7 @@ class TestAccountModel(TestCase):
         fsp2 = FinancialServiceProviderFactory()  # no dm config (no required fields), just unpack dmd.data
         self.assertEqual(
             PaymentDataCollector.delivery_data(fsp2, self.dm_atm_card, self.ind),
-            dmd.data,
+            dmd.account_data,
         )
 
         dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)

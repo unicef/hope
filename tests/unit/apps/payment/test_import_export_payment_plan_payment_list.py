@@ -24,17 +24,11 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
 )
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
-    DocumentFactory,
-    create_household,
-)
+from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
-    ROLE_PRIMARY,
     Document,
     Household,
-    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
@@ -327,52 +321,6 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:  # type: ignore
             file_list = zip_file.namelist()
             self.assertEqual(splits_count, len(file_list))
-
-    def test_payment_row_bank_information(self) -> None:
-        core_fields = [
-            "account_holder_name",
-            "bank_branch_name",
-            "bank_name",
-            "bank_account_number",
-            "debit_card_number",
-        ]
-        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
-        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=core_fields)
-        headers = export_service.prepare_headers(fsp_xlsx_template)
-        household, _ = create_household({"size": 1})
-        primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY, household=household).first().individual
-        BankAccountInfoFactory(
-            individual=primary,
-            account_holder_name="Kowalski",
-            bank_branch_name="BranchJPMorgan",
-            bank_name="JPMorgan",
-            bank_account_number="362277220020615398848112903",
-            debit_card_number="123",
-        )
-        payment = PaymentFactory(
-            parent=self.payment_plan,
-            household=household,
-            collector=primary,
-            financial_service_provider=self.fsp_1,
-            delivery_type=self.dm_cash,
-        )
-        # remove old and create new snapshot with bank account info
-        PaymentHouseholdSnapshot.objects.all().delete()
-        create_payment_plan_snapshot_data(self.payment_plan)
-
-        account_holder_name_index = headers.index("account_holder_name")
-        bank_branch_name_index = headers.index("bank_branch_name")
-        bank_name_index = headers.index("bank_name")
-        bank_account_number_index = headers.index("bank_account_number")
-        debit_card_number_index = headers.index("debit_card_number")
-
-        payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
-
-        self.assertEqual(payment_row[account_holder_name_index], "Kowalski")
-        self.assertEqual(payment_row[bank_branch_name_index], "BranchJPMorgan")
-        self.assertEqual(payment_row[bank_name_index], "JPMorgan")
-        self.assertEqual(payment_row[bank_account_number_index], "362277220020615398848112903")
-        self.assertEqual(payment_row[debit_card_number_index], "123")
 
     def test_payment_row_flex_fields(self) -> None:
         core_fields = [

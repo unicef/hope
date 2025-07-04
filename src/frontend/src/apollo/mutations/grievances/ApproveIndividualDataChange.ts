@@ -11,9 +11,8 @@ export const ApproveIndividualDataChange = gql`
     $approvedIdentitiesToCreate: [Int]
     $approvedIdentitiesToEdit: [Int]
     $approvedIdentitiesToRemove: [Int]
-    $approvedPaymentChannelsToCreate: [Int]
-    $approvedPaymentChannelsToEdit: [Int]
-    $approvedPaymentChannelsToRemove: [Int]
+    $approvedAccountsToCreate: [Int]
+    $approvedAccountsToEdit: [Int]
   ) {
     approveIndividualDataChange(
       grievanceTicketId: $grievanceTicketId
@@ -25,9 +24,8 @@ export const ApproveIndividualDataChange = gql`
       approvedIdentitiesToCreate: $approvedIdentitiesToCreate
       approvedIdentitiesToEdit: $approvedIdentitiesToEdit
       approvedIdentitiesToRemove: $approvedIdentitiesToRemove
-      approvedPaymentChannelsToCreate: $approvedPaymentChannelsToCreate
-      approvedPaymentChannelsToEdit: $approvedPaymentChannelsToEdit
-      approvedPaymentChannelsToRemove: $approvedPaymentChannelsToRemove
+      approvedAccountsToCreate: $approvedAccountsToCreate
+      approvedAccountsToEdit: $approvedAccountsToEdit
     ) {
       grievanceTicket {
         id

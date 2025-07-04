@@ -151,12 +151,14 @@ export const AllIndividuals = gql`
               }
             }
           }
-          paymentChannels {
-            id
-            bankName
-            bankAccountNumber
-            accountHolderName
-            bankBranchName
+          accounts {
+            edges {
+              node {
+                id
+                name
+                dataFields
+              }
+            }
           }
         }
       }

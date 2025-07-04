@@ -1353,26 +1353,6 @@ class Individual(
             return cache.get("sanction_list_last_check")
         return None
 
-    @property
-    def bank_name(self) -> str:
-        bank_account_info = self.bank_account_info.first()
-        return bank_account_info.bank_name if bank_account_info else None
-
-    @property
-    def bank_account_number(self) -> str:
-        bank_account_info = self.bank_account_info.first()
-        return bank_account_info.bank_account_number if bank_account_info else None
-
-    @property
-    def account_holder_name(self) -> str:
-        bank_account_info = self.bank_account_info.first()
-        return bank_account_info.account_holder_name if bank_account_info else None
-
-    @property
-    def bank_branch_name(self) -> str:
-        bank_account_info = self.bank_account_info.first()
-        return bank_account_info.bank_branch_name if bank_account_info else None
-
     def withdraw(self) -> None:
         self.documents.update(status=Document.STATUS_INVALID)
         self.accounts.update(active=False)
@@ -1540,37 +1520,6 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
-class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
-    individual = models.ForeignKey(
-        "household.Individual",
-        related_name="bank_account_info",
-        on_delete=models.CASCADE,
-    )
-    bank_name = models.CharField(max_length=255)
-    bank_account_number = models.CharField(max_length=64, db_index=True)
-    debit_card_number = models.CharField(max_length=255, blank=True, default="", db_index=True)
-    bank_branch_name = models.CharField(max_length=255, blank=True, default="")
-    account_holder_name = models.CharField(max_length=255, blank=True, default="")
-    copied_from = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="copied_to",
-        help_text="If this object was copied from another, this field will contain the object it was copied from.",
-    )
-
-    def __str__(self) -> str:
-        return f"{self.bank_account_number} ({self.bank_name})"
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        if self.bank_account_number:
-            self.bank_account_number = str(self.bank_account_number).replace(" ", "")
-        if self.debit_card_number:
-            self.debit_card_number = str(self.debit_card_number).replace(" ", "")
-        super().save(*args, **kwargs)
-
-
 class PendingHousehold(Household):
     objects = SoftDeletableRepresentationPendingManager()
 
@@ -1616,10 +1565,6 @@ class PendingIndividual(Individual):
         return super().identities(manager="pending_objects")
 
     @property
-    def bank_account_info(self) -> QuerySet:
-        return super().bank_account_info(manager="pending_objects")
-
-    @property
     def pending_household(self) -> QuerySet:
         return PendingHousehold.objects.get(pk=self.household.pk)
 
@@ -1645,15 +1590,6 @@ class PendingDocument(Document):
         proxy = True
         verbose_name = "Imported Document"
         verbose_name_plural = "Imported Documents"
-
-
-class PendingBankAccountInfo(BankAccountInfo):
-    objects = SoftDeletableRepresentationPendingManager()
-
-    class Meta:
-        proxy = True
-        verbose_name = "Imported Bank Account Info"
-        verbose_name_plural = "Imported Bank Account Infos"
 
 
 class PendingIndividualRoleInHousehold(IndividualRoleInHousehold):

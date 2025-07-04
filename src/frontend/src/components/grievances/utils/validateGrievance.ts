@@ -92,10 +92,8 @@ export function validate(
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
         !values.individualDataUpdateIdentitiesToEdit?.length &&
-        !values.individualDataUpdateFieldsPaymentChannels?.length &&
-        !values.individualDataUpdatePaymentChannelsToRemove?.length &&
-        !values.individualDataUpdatePaymentChannelsToEdit?.length &&
-        !values.individualDataUpdateDeliveryMechanismDataToEdit?.length
+        !values.individualDataUpdateFieldsAccounts?.length &&
+        !values.individualDataUpdateAccountsToEdit?.length
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
       }
@@ -168,23 +166,13 @@ export function validate(
             }
           });
       }
-      if (values.individualDataUpdateFieldsPaymentChannelsToEdit?.length) {
-        values.individualDataUpdateFieldsPaymentChannelsToEdit
+      if (values.individualDataUpdateFieldsAccountsToEdit?.length) {
+        values.individualDataUpdateFieldsAccountsToEdit
           .filter((el) => el)
           .forEach((doc) => {
-            if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannelsToEdit =
-                'Bank name and bank account number are required';
-            }
-          });
-      }
-      if (values.individualDataUpdateFieldsPaymentChannels?.length) {
-        values.individualDataUpdateFieldsPaymentChannels
-          .filter((el) => el)
-          .forEach((doc) => {
-            if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannels =
-                'Bank name and bank account number are required';
+            if (!doc.number) {
+              errors.individualDataUpdateFieldsAccountsToEdit =
+                'Number is required';
             }
           });
       }
@@ -337,9 +325,8 @@ export function validateUsingSteps(
         !values.individualDataUpdateIdentitiesToRemove?.length &&
         !values.individualDataUpdateDocumentsToEdit?.length &&
         !values.individualDataUpdateIdentitiesToEdit?.length &&
-        !values.individualDataUpdateFieldsPaymentChannels?.length &&
-        !values.individualDataUpdatePaymentChannelsToRemove?.length &&
-        !values.individualDataUpdatePaymentChannelsToEdit?.length &&
+        !values.individualDataUpdateAccountsToEdit?.length &&
+        !values.individualDataUpdateFieldsAccounts?.length &&
         activeStep === GrievanceSteps.Description
       ) {
         errors.individualDataUpdateFields = `${beneficiaryGroup?.memberLabel} Data Change is Required`;
@@ -411,25 +398,14 @@ export function validateUsingSteps(
           },
         );
       }
-      if (values.individualDataUpdateFieldsPaymentChannelsToEdit?.length) {
-        values.individualDataUpdateFieldsPaymentChannelsToEdit.forEach(
+      if (values.individualDataUpdateFieldsAccountsToEdit?.length) {
+        values.individualDataUpdateFieldsAccountsToEdit.forEach(
           (el, index) => {
             const doc =
-              values.individualDataUpdateFieldsPaymentChannelsToEdit[index];
-            if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannelsToEdit =
-                'Bank name and bank account number are required';
-            }
-          },
-        );
-      }
-      if (values.individualDataUpdateFieldsPaymentChannels?.length) {
-        values.individualDataUpdateFieldsPaymentChannels.forEach(
-          (el, index) => {
-            const doc = values.individualDataUpdateFieldsPaymentChannels[index];
-            if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannels =
-                'Bank name and bank account number are required';
+              values.individualDataUpdateFieldsAccountsToEdit[index];
+            if (!doc.number) {
+              errors.individualDataUpdateFieldsAccountsToEdit =
+                'Number is required';
             }
           },
         );

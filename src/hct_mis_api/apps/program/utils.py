@@ -12,7 +12,6 @@ from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
-    BankAccountInfo,
     Document,
     EntitlementCard,
     Household,
@@ -210,7 +209,6 @@ class CopyProgramPopulation:
         individuals_to_update = []
         documents_to_create = []
         individual_identities_to_create = []
-        bank_account_infos_to_create = []
         delivery_mechanism_data_to_create = []
 
         for new_individual in new_individuals:
@@ -230,13 +228,6 @@ class CopyProgramPopulation:
                     self.rdi_merge_status,
                 )
             )
-            bank_account_infos_to_create.extend(
-                self.copy_bank_account_info_per_individual(
-                    list(new_individual.copied_from.bank_account_info.all()),
-                    new_individual,
-                    self.rdi_merge_status,
-                )
-            )
             delivery_mechanism_data_to_create.extend(
                 self.copy_delivery_mechanism_data_per_individual(
                     list(new_individual.copied_from.accounts.all()),
@@ -248,7 +239,6 @@ class CopyProgramPopulation:
         getattr(Individual, self.manager).bulk_update(individuals_to_update, ["household"])
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(individual_identities_to_create)
-        BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
         Account.objects.bulk_create(delivery_mechanism_data_to_create)
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
@@ -300,32 +290,13 @@ class CopyProgramPopulation:
         return identities_list
 
     @staticmethod
-    def copy_bank_account_info_per_individual(
-        bank_accounts_info: List[BankAccountInfo],
-        individual_representation: Individual,
-        rdi_merge_status: str = MergeStatusModel.MERGED,
-    ) -> List[BankAccountInfo]:
-        """
-        Clone bank_account_info for individual if new individual_representation has been created.
-        """
-        bank_accounts_info_list = []
-        for bank_account_info in bank_accounts_info:
-            original_bank_account_info_id = bank_account_info.id
-            bank_account_info.copied_from_id = original_bank_account_info_id
-            bank_account_info.pk = None
-            bank_account_info.individual = individual_representation
-            bank_account_info.rdi_merge_status = rdi_merge_status
-            bank_accounts_info_list.append(bank_account_info)
-        return bank_accounts_info_list
-
-    @staticmethod
     def copy_delivery_mechanism_data_per_individual(
         accounts: List[Account],
         individual_representation: Individual,
         rdi_merge_status: str = MergeStatusModel.MERGED,
     ) -> List[Account]:
         """
-        Clone bank_account_info for individual if new individual_representation has been created.
+        Clone account for individual if new individual_representation has been created.
         """
         accounts_list = []
         for account in accounts:
@@ -380,7 +351,6 @@ def create_roles_for_new_representation(
     individuals_to_create = []
     documents_to_create = []
     identities_to_create = []
-    bank_account_info_to_create = []
     roles_to_create = []
     for role in old_roles:
         individual_representation = Individual.objects.filter(
@@ -392,13 +362,11 @@ def create_roles_for_new_representation(
                 individual_representation,
                 documents_to_create_batch,
                 identities_to_create_batch,
-                bank_account_info_to_create_batch,
             ) = copy_individual(role.individual, program, rdi)
 
             individuals_to_create.append(individual_representation)
             documents_to_create.extend(documents_to_create_batch)
             identities_to_create.extend(identities_to_create_batch)
-            bank_account_info_to_create.extend(bank_account_info_to_create_batch)
 
         role.pk = None
         role.household = new_household
@@ -408,7 +376,6 @@ def create_roles_for_new_representation(
     Individual.objects.bulk_create(individuals_to_create)
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
-    BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
 
@@ -440,7 +407,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                     household.household_collection = HouseholdCollection.objects.create()
                     household.save()
 
-                individuals = household.individuals.prefetch_related("documents", "identities", "bank_account_info")
+                individuals = household.individuals.prefetch_related("documents", "identities")
                 individuals_to_exclude_dict = {
                     str(x["unicef_id"]): str(x["pk"])
                     for x in Individual.objects.filter(
@@ -451,7 +418,6 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
 
                 documents_to_create = []
                 identities_to_create = []
-                bank_account_info_to_create = []
                 individuals_to_create = []
                 external_collectors_id_to_update = []
 
@@ -463,18 +429,15 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                         individual_to_create,
                         documents_to_create_batch,
                         identities_to_create_batch,
-                        bank_account_info_to_create_batch,
                     ) = copy_individual(individual, program, rdi)
                     documents_to_create.extend(documents_to_create_batch)
                     identities_to_create.extend(identities_to_create_batch)
-                    bank_account_info_to_create.extend(bank_account_info_to_create_batch)
                     individuals_to_create.append(individual_to_create)
 
                 individuals_dict = {i.unicef_id: i for i in individuals_to_create}
                 Individual.objects.bulk_create(individuals_to_create)
                 Document.objects.bulk_create(documents_to_create)
                 IndividualIdentity.objects.bulk_create(identities_to_create)
-                BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
 
                 original_household_id = household.id
                 original_head_of_household_unicef_id = household.head_of_household.unicef_id
@@ -524,7 +487,6 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
 def copy_individual(individual: Individual, program: Program, rdi: RegistrationDataImport) -> tuple:
     documents = list(individual.documents.all())
     identities = list(individual.identities.all())
-    bank_accounts_info = list(individual.bank_account_info.all())
     if not individual.individual_collection:
         individual.individual_collection = IndividualCollection.objects.create()
         individual.save()
@@ -542,10 +504,8 @@ def copy_individual(individual: Individual, program: Program, rdi: RegistrationD
 
     documents_to_create = CopyProgramPopulation.copy_document_per_individual(documents, individual)
     identities_to_create = CopyProgramPopulation.copy_individual_identity_per_individual(identities, individual)
-    bank_account_info_to_create = CopyProgramPopulation.copy_bank_account_info_per_individual(
-        bank_accounts_info, individual
-    )
-    return individual, documents_to_create, identities_to_create, bank_account_info_to_create
+
+    return individual, documents_to_create, identities_to_create
 
 
 def create_program_partner_access(

@@ -19,7 +19,7 @@ from django.db.models.functions import Coalesce
 
 import graphene
 from graphene import Boolean, DateTime, Enum, Int, String, relay
-from graphene_django import DjangoObjectType
+from graphene_django import DjangoConnectionField, DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.permissions import (
@@ -73,7 +73,6 @@ from hct_mis_api.apps.household.models import (
     STATUS_ACTIVE,
     STATUS_INACTIVE,
     WORK_STATUS_CHOICE,
-    BankAccountInfo,
     Document,
     DocumentType,
     Household,
@@ -84,7 +83,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
-from hct_mis_api.apps.payment.models import Account
+from hct_mis_api.apps.payment.models import Account, AccountType, FinancialInstitution
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.nodes import (
@@ -194,32 +193,17 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
         model = IndividualRoleInHousehold
 
 
-class BankAccountInfoNode(DjangoObjectType):
-    type = graphene.String(required=False)
-
-    class Meta:
-        model = BankAccountInfo
-        exclude = ("debit_card_number",)
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class AccountsNode(BaseNodePermissionMixin, DjangoObjectType):
+class AccountNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION),)
 
     name = graphene.String(required=False)
-    individual_tab_data = graphene.JSONString()
+    data_fields = graphene.JSONString()
 
     def resolve_name(self, info: Any) -> str:
-        return self.account_type.label
+        return self.account_type.key
 
-    def resolve_individual_tab_data(self, info: Any) -> dict:
-        data = dict(sorted(self.data.items()))
-        if self.number:
-            data["number"] = self.number
-        if self.financial_institution:
-            data["financial_institution"] = str(self.financial_institution.id)
-        return data
+    def resolve_data_fields(self, info: Any) -> dict:
+        return dict(sorted(self.account_data.items()))
 
     class Meta:
         model = Account
@@ -251,13 +235,11 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     )
     photo = graphene.String()
     age = graphene.Int()
-    bank_account_info = graphene.Field(BankAccountInfoNode, required=False)
     sanction_list_last_check = graphene.DateTime()
     phone_no_valid = graphene.Boolean()
     phone_no_alternative_valid = graphene.Boolean()
-    payment_channels = graphene.List(BankAccountInfoNode)
     preferred_language = graphene.String()
-    accounts = graphene.List(AccountsNode)
+    accounts = DjangoConnectionField(AccountNode)
     email = graphene.String(source="email")
     import_id = graphene.String()
 
@@ -287,16 +269,6 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     @staticmethod
     def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
         return parent.get_preferred_language_display()
-
-    @staticmethod
-    def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
-        return BankAccountInfo.all_merge_status_objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
-
-    def resolve_bank_account_info(parent, info: Any) -> Optional[BankAccountInfo]:
-        bank_account_info = parent.bank_account_info(manager="all_merge_status_objects").first()  # type: ignore
-        if bank_account_info:
-            return bank_account_info
-        return None
 
     def resolve_role(parent, info: Any) -> str:
         role = parent.households_and_roles(manager="all_merge_status_objects").first()
@@ -349,9 +321,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         ):
             return parent.accounts.none()
 
-        return (
-            parent.accounts(manager="all_objects").filter(rdi_merge_status=parent.rdi_merge_status).exclude(data={})  # type: ignore
-        )
+        return parent.accounts(manager="all_objects").filter(rdi_merge_status=parent.rdi_merge_status)  # type: ignore
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
@@ -699,6 +669,8 @@ class Query(graphene.ObjectType):
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
     identity_type_choices = graphene.List(ChoiceObject)
+    account_type_choices = graphene.List(ChoiceObject)
+    account_financial_institution_choices = graphene.List(ChoiceObject)
     countries_choices = graphene.List(ChoiceObject)
     observed_disability_choices = graphene.List(ChoiceObject)
     severity_of_disability_choices = graphene.List(ChoiceObject)
@@ -725,6 +697,8 @@ class Query(graphene.ObjectType):
             queryset = queryset.select_related("household__admin2__area_type")
         if does_path_exist_in_query("edges.node.program", info):
             queryset = queryset.select_related("program")
+        if does_path_exist_in_query("edges.node.accounts", info):
+            queryset = queryset.prefetch_related("accounts")
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
@@ -853,6 +827,12 @@ class Query(graphene.ObjectType):
 
     def resolve_identity_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(AGENCY_TYPE_CHOICES)
+
+    def resolve_account_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.label, "value": x.key} for x in AccountType.objects.all()]
+
+    def resolve_account_financial_institution_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.name, "value": x.id} for x in FinancialInstitution.objects.all()]
 
     def resolve_countries_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
