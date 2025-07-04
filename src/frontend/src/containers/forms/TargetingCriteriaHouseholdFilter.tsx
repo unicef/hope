@@ -46,13 +46,16 @@ export function TargetingCriteriaHouseholdFilter({
   onClick: () => void;
   choicesDict;
 }): ReactElement {
+  console.log('data', data);
+  console.log('choicesDict', choicesDict);
+
   const { t } = useTranslation();
   const shouldShowDivider = index + 1 < values.householdsFiltersBlocks.length;
   return (
     <div>
       <FieldChooser
         index={index}
-        choices={data.allFieldsAttributes}
+        choices={data}
         fieldName={each.fieldName}
         onChange={onChange}
         showDelete

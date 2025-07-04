@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { CoreFieldChoice } from './CoreFieldChoice';
 export type FieldAttributeSimple = {
     id: string;
     type: string;
@@ -9,5 +10,6 @@ export type FieldAttributeSimple = {
     readonly labelEn: string | null;
     readonly associatedWith: string | null;
     readonly isFlexField: boolean;
+    choices: Array<CoreFieldChoice>;
 };
 

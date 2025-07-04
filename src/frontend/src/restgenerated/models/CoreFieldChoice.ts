@@ -10,7 +10,6 @@ export type CoreFieldChoice = {
      * that should be validated and transformed to a native value.
      */
     readonly value: string | null;
-    admin?: string;
     listName?: string;
 };
 
