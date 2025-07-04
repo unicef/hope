@@ -16,7 +16,11 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    FlexibleAttribute,
+    FlexibleAttributeChoice,
+)
 from hct_mis_api.apps.core.utils import get_fields_attr_generators
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -356,18 +360,30 @@ class TestAllFieldsAttributes:
         self.client = api_client(self.user)
         self.all_fields_attributes_url = reverse("api:core:business-areas-all-fields-attributes")
 
-        FlexibleAttribute.objects.create(
+        flex_field_1 = FlexibleAttribute.objects.create(
             type=FlexibleAttribute.STRING,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             label={"English(EN)": "Flex Field 1"},
             name="flex_field_1",
         )
-        FlexibleAttribute.objects.create(
+        flex_field_2 = FlexibleAttribute.objects.create(
             type=FlexibleAttribute.INTEGER,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
             label={"English(EN)": "Muac"},
             name="muac",
         )
+        choice_1 = FlexibleAttributeChoice.objects.create(
+            label={"English(EN)": "Choice 1"},
+            name="option_1",
+            list_name="Option 1",
+        )
+        choice_2 = FlexibleAttributeChoice.objects.create(
+            label={"English(EN)": "Choice 2"},
+            name="option_2",
+            list_name="Option 2",
+        )
+        choice_1.flex_attributes.add(flex_field_1)
+        choice_2.flex_attributes.add(flex_field_2)
 
     def test_all_fields_attributes(self) -> None:
         response = self.client.get(self.all_fields_attributes_url)
@@ -382,6 +398,15 @@ class TestAllFieldsAttributes:
                 "label_en": attr.label.get("English(EN)", None) if getattr(attr, "label", None) else None,
                 "associated_with": "Household" if attr.associated_with == 0 else "Individual",
                 "is_flex_field": True,
+                "choices": [
+                    {
+                        "labels": [{"language": k, "label": v} for k, v in choice.label.items()],
+                        "label_en": choice.label.get("English(EN)", None) if getattr(choice, "label", None) else None,
+                        "value": choice.name,
+                        "list_name": choice.list_name,
+                    }
+                    for choice in attr.choices.all()
+                ],
             }
             for attr in get_fields_attr_generators(flex_field=True)
         ]
@@ -393,6 +418,15 @@ class TestAllFieldsAttributes:
                 "label_en": attr_dict.get("label", {}).get("English(EN)", None) if attr_dict.get("label") else None,
                 "associated_with": attr_dict.get("associated_with"),
                 "is_flex_field": False,
+                "choices": [
+                    {
+                        "labels": [{"language": k, "label": v} for k, v in choice.get("label", {}).items()],
+                        "label_en": choice.get("label", {}).get("English(EN)", None) if choice.get("label") else None,
+                        "value": choice.get("value", None),
+                        "list_name": choice.get("list_name", None),
+                    }
+                    for choice in attr_dict.get("choices", [])
+                ],
             }
             for attr_dict in get_fields_attr_generators(flex_field=False)
         ]
@@ -400,6 +434,5 @@ class TestAllFieldsAttributes:
         sorted_expected_attributes = sorted(
             expected_response_flex_fields + expected_response_core_fields, key=lambda x: str(x.get("id"))
         )
-
         assert len(response_data) == len(sorted_expected_attributes)
         assert sorted_response_data == sorted_expected_attributes
