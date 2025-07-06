@@ -11,9 +11,10 @@ from rest_framework.test import APIClient
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -424,6 +425,9 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         unicef_partner = PartnerFactory(name="UNICEF")
+        cls.business_area.screen_beneficiary = True
+        cls.business_area.save()
+
         unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
         cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=unicef, is_superuser=False)
         cls.program = ProgramFactory(
@@ -610,13 +614,15 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         )
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
         # Create a source program to import from, matching beneficiary group and data collecting type
+        compatible_dct = DataCollectingTypeFactory(code="compatible_dct")
         import_from_program = ProgramFactory(
             name="Source Program",
             status=Program.ACTIVE,
             biometric_deduplication_enabled=True,
             beneficiary_group=self.program.beneficiary_group,
-            data_collecting_type=self.program.data_collecting_type,
+            data_collecting_type=compatible_dct,
         )
+        import_from_program.data_collecting_type.compatible_types.add(self.program.data_collecting_type)
         # Create at least one household and individual in the source program
         create_household_and_individuals(
             household_data={
@@ -624,6 +630,16 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
                 "business_area": self.business_area,
             },
             individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
                 {"program": import_from_program, "business_area": self.business_area},
             ],
         )
@@ -641,10 +657,257 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
             response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["name"], "Test Import")
-        self.assertEqual(response.data["number_of_households"], 1)
-        self.assertEqual(response.data["number_of_individuals"], 1)
+        self.assertEqual(response.data["number_of_households"], 2)
+        self.assertEqual(response.data["number_of_individuals"], 3)
         self.assertIn("id", response.data)
         mock_registration_task.assert_called_once()
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_registration_data_import_with_ids_filter(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        # Grant permission for create
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        # Create a source program to import from, matching beneficiary group and data collecting type
+        compatible_dct = DataCollectingTypeFactory(code="compatible_dct")
+        import_from_program = ProgramFactory(
+            name="Source Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=self.program.beneficiary_group,
+            data_collecting_type=compatible_dct,
+        )
+        import_from_program.data_collecting_type.compatible_types.add(self.program.data_collecting_type)
+        # Create at least one household and individual in the source program
+        create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        household, individuals = create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", self.program.slug],
+        )
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": f"{household.unicef_id}",  # Only 1 household
+            "name": "Test Import",
+            "screen_beneficiary": True,
+        }
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["name"], "Test Import")
+        self.assertEqual(response.data["number_of_households"], 1)
+        self.assertEqual(response.data["number_of_individuals"], 2)
+        mock_registration_task.assert_called_once()
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_registration_data_import_invalid_bg(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        import_from_program = ProgramFactory(
+            name="Source Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=BeneficiaryGroupFactory(
+                name="Different Beneficiary Group",
+            ),
+            data_collecting_type=self.program.data_collecting_type,
+        )
+        create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", self.program.slug],
+        )
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": "",
+            "name": "Test Import",
+            "screen_beneficiary": True,
+        }
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert "Cannot import data from a program with a different Beneficiary Group." in response.data
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_registration_data_import_invalid_dct(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        import_from_program = ProgramFactory(
+            name="Source Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=self.program.beneficiary_group,
+            data_collecting_type=DataCollectingTypeFactory(
+                code="incompatible_dct",
+            ),
+        )
+        create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", self.program.slug],
+        )
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": "",
+            "name": "Test Import",
+            "screen_beneficiary": True,
+        }
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert "Cannot import data from a program with not compatible data collecting type." in response.data
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_registration_data_import_program_finished(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        import_from_program = ProgramFactory(
+            name="Source Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=self.program.beneficiary_group,
+            data_collecting_type=self.program.data_collecting_type,
+        )
+        create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        self.program.status = Program.FINISHED
+        self.program.save()
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", self.program.slug],
+        )
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": "",
+            "name": "Test Import",
+            "screen_beneficiary": True,
+        }
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert "In order to perform this action, program status must not be finished." in response.data
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_registration_data_import_cannot_check_against_sanction_list(
+        self, mock_registration_task: Mock
+    ) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        self.business_area.screen_beneficiary = False
+        self.business_area.save()
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        import_from_program = ProgramFactory(
+            name="Source Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=self.program.beneficiary_group,
+            data_collecting_type=self.program.data_collecting_type,
+        )
+        create_household_and_individuals(
+            household_data={
+                "program": import_from_program,
+                "business_area": self.business_area,
+            },
+            individuals_data=[
+                {"program": import_from_program, "business_area": self.business_area},
+            ],
+        )
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", self.program.slug],
+        )
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": "",
+            "name": "Test Import",
+            "screen_beneficiary": True,
+        }
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert "Cannot check against sanction list." in response.data
+
+    @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
+    def test_create_registration_data_import_0_objects(self, mock_registration_task: Mock) -> None:
+        self.client.force_authenticate(user=self.user)
+        role, _ = Role.objects.update_or_create(
+            name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
+        )
+        RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
+        import_from_program = ProgramFactory(
+            name="Source Program",
+            status=Program.ACTIVE,
+            biometric_deduplication_enabled=True,
+            beneficiary_group=self.program.beneficiary_group,
+            data_collecting_type=self.program.data_collecting_type,
+        )
+        url = reverse(
+            "api:registration-data:registration-data-imports-list",
+            args=["afghanistan", self.program.slug],
+        )
+        data = {
+            "import_from_program_id": str(import_from_program.id),
+            "import_from_ids": "",
+            "name": "Test Import",
+            "screen_beneficiary": True,
+        }
+        with capture_on_commit_callbacks(execute=True):
+            response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert "This action would result in importing 0 households and 0 individuals." in response.data
 
     @patch("hct_mis_api.apps.registration_datahub.celery_tasks.registration_program_population_import_task.delay")
     def test_create_registration_data_import_permission_denied(self, mock_registration_task: Mock) -> None:
