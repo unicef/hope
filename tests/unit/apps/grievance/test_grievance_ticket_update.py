@@ -8,7 +8,11 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    AdminAreaLimitedToFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import AdminAreaLimitedTo
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -1402,7 +1406,7 @@ class TestGrievanceTicketApprove:
         ticket_details.possible_duplicates.add(first_individual, second_individual)
         assert ticket_details.selected_individuals.all().count() == 0
 
-        response = self.api_client.post(
+        response_clear_individual_ids = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
                 kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
@@ -1410,10 +1414,10 @@ class TestGrievanceTicketApprove:
             {"clear_individual_ids": [str(individuals[1].id)], "version": na_grv.version},
             format="json",
         )
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert "id" in response.json()
+        assert response_clear_individual_ids.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in response_clear_individual_ids.json()
 
-        response = self.api_client.post(
+        response_selected_individual_id = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
                 kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
@@ -1421,10 +1425,10 @@ class TestGrievanceTicketApprove:
             {"selected_individual_id": str(individuals[1].id)},
             format="json",
         )
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert "id" in response.json()
+        assert response_selected_individual_id.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in response_selected_individual_id.json()
 
-        response = self.api_client.post(
+        response_distinct_individual_ids = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
                 kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
@@ -1432,8 +1436,81 @@ class TestGrievanceTicketApprove:
             {"distinct_individual_ids": [str(individuals[1].id)]},
             format="json",
         )
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert "id" in response.json()
+        assert response_distinct_individual_ids.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in response_distinct_individual_ids.json()
+
+    def test_approve_needs_adjudication_partner_with_area_limit(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.afghanistan, self.program
+        )
+        partner = PartnerFactory()
+        area_1 = AreaFactory(name="Another Area", area_type=self.area_1.area_type, p_code="another-area-code")
+        AdminAreaLimitedToFactory(partner=self.partner, program=self.program, areas=[area_1])
+        household_one = HouseholdFactory.build(
+            registration_data_import__imported_by__partner=partner,
+            program=self.program,
+            admin2=self.area_1,
+        )
+        household_one.household_collection.save()
+        household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = household_one.program
+        household_one.registration_data_import.save()
+
+        individuals_to_create = [
+            {
+                "full_name": "Benjamin Butler",
+                "given_name": "Benjamin",
+                "family_name": "Butler",
+                "phone_no": "(953)682-4596",
+                "birth_date": "1943-07-30",
+                "unicef_id": "IND-123-123",
+                "photo": ContentFile(b"111", name="foo1.png"),
+            },
+            {
+                "full_name": "Robin Ford",
+                "given_name": "Robin",
+                "family_name": "Ford",
+                "phone_no": "+18663567905",
+                "birth_date": "1946-02-15",
+                "unicef_id": "IND-222-222",
+                "photo": ContentFile(b"222", name="foo2.png"),
+            },
+        ]
+
+        individuals = [
+            IndividualFactory(household=household_one, program=self.program, **individual)
+            for individual in individuals_to_create
+        ]
+        first_individual = individuals[0]
+        second_individual = individuals[1]
+        household_one.head_of_household = first_individual
+        household_one.save()
+        na_grv = GrievanceTicketFactory(
+            description="needs_adjudication_grievance_ticket",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            admin2=self.area_1,
+            business_area=self.afghanistan,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        na_grv.programs.set([self.program])
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
+            ticket=na_grv,
+            golden_records_individual=first_individual,
+            possible_duplicate=second_individual,
+            selected_individual=None,
+        )
+        ticket_details.possible_duplicates.add(first_individual, second_individual)
+        assert ticket_details.selected_individuals.all().count() == 0
+
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(na_grv.pk)},
+            ),
+            {"duplicate_individual_ids": [str(individuals[1].id)], "version": na_grv.version},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
