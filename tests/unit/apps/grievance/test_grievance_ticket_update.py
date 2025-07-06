@@ -1006,15 +1006,22 @@ class TestGrievanceTicketApprove:
         )
         self.bulk_grievance_ticket2.programs.set([self.program])
 
-    def test_approve_individual_data_change(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.afghanistan, self.program
-        )
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], status.HTTP_202_ACCEPTED),
+            ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_approve_individual_data_change(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
         data = {
             "individual_approve_data": {"given_name": True, "full_name": True, "family_name": True},
             "approved_documents_to_create": [0],
             "approved_documents_to_edit": [0],
-            "approved_documents_torRemove": [0],
+            "approved_documents_to_remove": [0],
             "approved_identities_to_create": [],
             "approved_identities_to_edit": [],
             "approved_identities_to_remove": [],
@@ -1032,13 +1039,78 @@ class TestGrievanceTicketApprove:
             format="json",
         )
         resp_data = response.json()
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert "id" in resp_data
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_202_ACCEPTED:
+            assert "id" in resp_data
+            assert resp_data["ticket_details"]["individual_data"]["given_name"] == {
+                "value": "Test",
+                "approve_status": True,
+            }
+            assert resp_data["ticket_details"]["individual_data"]["full_name"] == {
+                "value": "Test Example",
+                "approve_status": True,
+            }
+            assert resp_data["ticket_details"]["individual_data"]["family_name"] == {
+                "value": "Example",
+                "approve_status": True,
+            }
+            assert resp_data["ticket_details"]["individual_data"]["sex"] == {
+                "value": "MALE",
+                "approve_status": False,
+            }
+            assert resp_data["ticket_details"]["individual_data"]["birth_date"] == {
+                "value": date(year=1980, month=2, day=1).isoformat(),
+                "approve_status": False,
+            }
+            assert resp_data["ticket_details"]["individual_data"]["marital_status"] == {
+                "value": SINGLE,
+                "approve_status": False,
+            }
+            assert resp_data["ticket_details"]["individual_data"]["documents"] == [
+                {
+                    "value": {
+                        "country": "POL",
+                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                        "number": "999-888-777",
+                    },
+                    "approve_status": True,
+                },
+            ]
+            assert resp_data["ticket_details"]["individual_data"]["documents_to_edit"] == [
+                {
+                    "value": {
+                        "id": self.national_id.id,
+                        "country": None,
+                        "type": None,
+                        "number": "999-888-666",
+                        "photo": "",
+                    },
+                    "previous_value": {
+                        "id": self.national_id.id,
+                        "country": "POL",
+                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                        "number": "789-789-645",
+                        "photo": "",
+                    },
+                    "approve_status": True,
+                },
+            ]
+            assert resp_data["ticket_details"]["individual_data"]["documents_to_remove"] == [
+                {"value": self.national_id.id, "approve_status": True},
+                {"value": self.birth_certificate.id, "approve_status": False},
+            ]
 
-    def test_approve_household_data_change(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.afghanistan, self.program
-        )
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], status.HTTP_202_ACCEPTED),
+            ([Permissions.GRIEVANCES_UPDATE], status.HTTP_403_FORBIDDEN),
+        ],
+    )
+    def test_approve_household_data_change(
+        self, permissions: list, expected_status: int, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(self.user, permissions, self.afghanistan, self.program)
         data = {
             "household_approve_data": {"village": True},
             "flex_fields_approve_data": {},
@@ -1052,8 +1124,18 @@ class TestGrievanceTicketApprove:
             format="json",
         )
         resp_data = response.json()
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        assert "id" in resp_data
+        assert response.status_code == expected_status
+        if expected_status == status.HTTP_202_ACCEPTED:
+            assert "id" in resp_data
+            assert resp_data["ticket_details"]["household_data"]["village"] == {
+                "value": "Test Village",
+                "approve_status": True,
+            }
+            assert resp_data["ticket_details"]["household_data"]["size"] == {
+                "value": 19,
+                "approve_status": False,
+            }
+            assert resp_data["ticket_details"]["household_data"]["flex_fields"] == {}
 
     def test_approve_add_individual(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1078,6 +1160,10 @@ class TestGrievanceTicketApprove:
         create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.afghanistan, self.program
         )
+        reason_household = HouseholdFactory(
+            program=self.program,
+            unicef_id="HH-0002",
+        )
         grievance_ticket = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
@@ -1097,7 +1183,7 @@ class TestGrievanceTicketApprove:
                 "api:grievance-tickets:grievance-tickets-global-approve-delete-household",
                 kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
             ),
-            {"approve_status": True, "reason_hh_id": "", "version": grievance_ticket.version},
+            {"approve_status": True, "reason_hh_id": reason_household.unicef_id, "version": grievance_ticket.version},
             format="json",
         )
         resp_data = response.json()
@@ -1105,6 +1191,7 @@ class TestGrievanceTicketApprove:
         assert "id" in resp_data
         details.refresh_from_db()
         assert details.approve_status is True
+        assert details.reason_household == reason_household
 
     def test_approve_delete_household_validation_errors(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1118,12 +1205,12 @@ class TestGrievanceTicketApprove:
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         grievance_ticket.programs.set([self.program])
-        TicketDeleteHouseholdDetailsFactory(
+        ticket_details = TicketDeleteHouseholdDetailsFactory(
             ticket=grievance_ticket,
             household=self.household_one,
             approve_status=False,
         )
-        response = self.api_client.post(
+        response_reason_hh_same = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-approve-delete-household",
                 kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
@@ -1131,15 +1218,16 @@ class TestGrievanceTicketApprove:
             {"approve_status": True, "reason_hh_id": self.household_one.unicef_id, "version": grievance_ticket.version},
             format="json",
         )
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response_reason_hh_same.status_code == status.HTTP_400_BAD_REQUEST
         assert (
             f"The provided household {self.household_one.unicef_id} is the same as the one being withdrawn."
-            in response.json()
+            in response_reason_hh_same.json()
         )
+        assert ticket_details.reason_household is None
 
         self.household_one.withdrawn = True
         self.household_one.save()
-        response = self.api_client.post(
+        response_reason_hh_withdrawn = self.api_client.post(
             reverse(
                 "api:grievance-tickets:grievance-tickets-global-approve-delete-household",
                 kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
@@ -1147,8 +1235,35 @@ class TestGrievanceTicketApprove:
             {"approve_status": True, "reason_hh_id": self.household_one.unicef_id, "version": grievance_ticket.version},
             format="json",
         )
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert f"The provided household {self.household_one.unicef_id} has to be active." in response.json()
+        assert response_reason_hh_withdrawn.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            f"The provided household {self.household_one.unicef_id} has to be active."
+            in response_reason_hh_withdrawn.json()
+        )
+        assert ticket_details.reason_household is None
+
+        response_reason_hh_invalid_id = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-delete-household",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
+            ),
+            {"approve_status": True, "reason_hh_id": "invalid_id", "version": grievance_ticket.version},
+            format="json",
+        )
+        assert response_reason_hh_invalid_id.status_code == status.HTTP_404_NOT_FOUND
+        assert ticket_details.reason_household is None
+
+        response_reason_hh_empty_ok = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-delete-household",
+                kwargs={"business_area_slug": self.afghanistan.slug, "pk": str(grievance_ticket.pk)},
+            ),
+            {"approve_status": True, "reason_hh_id": "", "version": grievance_ticket.version},
+            format="json",
+        )
+        assert response_reason_hh_empty_ok.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in response_reason_hh_empty_ok.json()
+        assert ticket_details.reason_household is None
 
     def test_approve_needs_adjudication(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
