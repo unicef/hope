@@ -260,9 +260,9 @@ class RegistrationDataImportViewSet(
             raise ValidationError("Cannot import data from a program with not compatible data collecting type.")
         if (
             registration_data_import.should_check_against_sanction_list()
-            and not registration_data_import.should_check_against_sanction_list()
+            and not registration_data_import.business_area.should_check_against_sanction_list()
         ):
-            raise ValidationError("Cannot check against sanction list")
+            raise ValidationError("Cannot check against sanction list.")
 
         if registration_data_import.number_of_households == 0 and registration_data_import.number_of_individuals == 0:
             raise ValidationError("This action would result in importing 0 households and 0 individuals.")
