@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { RestService } from '@restgenerated/index';
-import { decodeIdString } from '@utils/utils';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycleList;
@@ -82,8 +81,8 @@ export const ProgramCycleDetailsHeader = ({
           queryKey: [
             'programCyclesDetails',
             businessArea,
-            programId,
             programCycle.id,
+            programId,
           ],
         });
       },
@@ -102,10 +101,9 @@ export const ProgramCycleDetailsHeader = ({
 
   const finishAction = async () => {
     try {
-      const decodedProgramCycleId = decodeIdString(programCycle.id);
       await finishMutation({
         businessAreaSlug: businessArea,
-        id: decodedProgramCycleId,
+        id: programCycle.id,
         programSlug: programId,
       });
       showMessage(t('Programme Cycle Finished'));

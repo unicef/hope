@@ -65,7 +65,7 @@ const ProgramForm = ({
 
     // Find the selected beneficiary group to determine its masterDetail property
     const selectedBG = beneficiaryGroupsData.results.find(
-      (bg) => bg.id === values.beneficiaryGroup,
+      (bg) => String(bg.id) === String(values.beneficiaryGroup),
     );
 
     if (!selectedBG) return allDCTs;
@@ -211,7 +211,7 @@ const ProgramForm = ({
             fullWidth
             variant="outlined"
             required
-            disabled={programHasRdi}
+            disabled={programHasRdi || isCopyProgramPage} // Disable on copy page
             onChange={(e) => {
               // Only clear Beneficiary Group if NOT copying a program
               if (!isCopyProgramPage) {
@@ -252,7 +252,7 @@ const ProgramForm = ({
                 component={FormikSelectField}
                 data-cy="input-beneficiary-group"
                 disabled={
-                  isCopyProgramPage ||
+                  (isCopyProgramPage && !!values.beneficiaryGroup) ||
                   (!values.dataCollectingTypeCode && !isCopyProgramPage) ||
                   programHasRdi
                 }

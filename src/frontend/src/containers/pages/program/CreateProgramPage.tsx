@@ -49,6 +49,7 @@ export const CreateProgramPage = (): ReactElement => {
           businessAreaSlug: businessArea,
         }),
     });
+
   const { data: userPartnerChoicesData, isLoading: userPartnerChoicesLoading } =
     useQuery<UserChoices>({
       queryKey: ['userChoices', businessArea],
@@ -192,7 +193,10 @@ export const CreateProgramPage = (): ReactElement => {
         dataCollectingType: requestValues.dataCollectingTypeCode,
         beneficiaryGroup: requestValues.beneficiaryGroup || '',
         startDate: requestValues.startDate,
-        endDate: requestValues.endDate,
+        endDate:
+          requestValues.endDate === '' || requestValues.endDate === undefined
+            ? null
+            : requestValues.endDate,
         pduFields: pduFieldsToSend || [],
         partners: partnersToSet,
         partnerAccess: values.partnerAccess,
@@ -257,7 +261,6 @@ export const CreateProgramPage = (): ReactElement => {
 
   if (!treeData || !userPartnerChoicesData || !choicesData) return null;
 
-  const allAreasTree = treeData?.results || [];
   const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -389,7 +392,7 @@ export const CreateProgramPage = (): ReactElement => {
                     {step === 2 && (
                       <PartnersStep
                         values={values}
-                        allAreasTreeData={allAreasTree}
+                        allAreasTreeData={treeData || []}
                         partnerChoices={mappedPartnerChoices}
                         step={step}
                         setStep={setStep}

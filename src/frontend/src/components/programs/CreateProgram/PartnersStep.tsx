@@ -11,11 +11,10 @@ import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
-import { AreaTree } from '@restgenerated/models/AreaTree';
 
 interface PartnersStepProps {
   values;
-  allAreasTreeData: AreaTree[];
+  allAreasTreeData;
   partnerChoices;
   step: number;
   setStep: (step: number) => void;

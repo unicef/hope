@@ -190,7 +190,10 @@ const DuplicateProgramPage = (): ReactElement => {
         dataCollectingType: requestValues.dataCollectingTypeCode,
         beneficiaryGroup: requestValues.beneficiaryGroup,
         startDate: requestValues.startDate,
-        endDate: requestValues.endDate,
+        endDate:
+          requestValues.endDate === '' || requestValues.endDate === undefined
+            ? null
+            : requestValues.endDate,
         pduFields: pduFieldsToSend,
         partners: partnersToSet.map(({ partner, areas }) => ({
           partner,
@@ -244,7 +247,7 @@ const DuplicateProgramPage = (): ReactElement => {
     endDate,
     sector,
     dataCollectingTypeCode: dataCollectingType?.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
+    beneficiaryGroup: beneficiaryGroup?.id,
     description,
     budget,
     administrativeAreasOfImplementation: administrativeAreasOfImplementation,
