@@ -983,6 +983,40 @@ class TestAccountModel(TestCase):
             },
         )
 
+    def test_delivery_data_setter(self) -> None:
+        account = AccountFactory(
+            data={
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+            },
+            individual=self.ind,
+            account_type=AccountType.objects.get(key="bank"),
+            number="123",
+            financial_institution=self.financial_institution,
+        )
+        financial_institution2 = FinancialInstitution.objects.create(
+            name="DEF", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
+
+        account.account_data = {
+            "number": "456",
+            "financial_institution": str(financial_institution2.id),
+            "expiry_date": "12.12.2025",
+            "new_field": "new_value",
+        }
+        account.save()
+
+        self.assertEqual(
+            account.account_data,
+            {
+                "number": "456",
+                "expiry_date": "12.12.2025",
+                "financial_institution": str(financial_institution2.id),
+                "new_field": "new_value",
+                "name_of_cardholder": "Marek",
+            },
+        )
+
     def test_validate(self) -> None:
         AccountFactory(
             data={
