@@ -1,9 +1,4 @@
-import {
-  ProgramCycle,
-  ProgramCycleUpdate,
-  ProgramCycleUpdateResponse,
-  updateProgramCycle,
-} from '@api/programCycleApi';
+import { ProgramCycle, ProgramCycleUpdate } from '@api/programCycleApi';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
@@ -15,19 +10,13 @@ import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  FormHelperText,
-} from '@mui/material';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import Grid from '@mui/material/Grid2';
+import { RestService } from '@restgenerated/index';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
-import type { DefaultError } from '@tanstack/query-core';
 import { useMutation } from '@tanstack/react-query';
-import { decodeIdString, today } from '@utils/utils';
+import { today } from '@utils/utils';
 import { Field, Form, Formik, FormikValues } from 'formik';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
@@ -39,10 +28,6 @@ interface UpdateProgramCycleProps {
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
-}
-
-interface MutationError extends DefaultError {
-  data: any;
 }
 
 const UpdateProgramCycle = ({
@@ -89,19 +74,24 @@ const UpdateProgramCycle = ({
     end_date: undefined,
   };
 
-  const { mutateAsync, isPending, error } = useMutation<
-    ProgramCycleUpdateResponse,
-    MutationError,
-    ProgramCycleUpdate
-  >({
-    mutationFn: async (body) => {
-      return updateProgramCycle(
-        businessArea,
-        program.id,
-        decodeIdString(programCycle.id),
-        body,
-      );
-    },
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+      requestBody: ProgramCycleUpdate;
+    }) =>
+      RestService.restBusinessAreasProgramsCyclesUpdate({
+        businessAreaSlug,
+        id,
+        programSlug,
+        requestBody,
+      }),
     onSuccess: () => {
       onSubmit();
     },
@@ -110,9 +100,14 @@ const UpdateProgramCycle = ({
   const handleSubmit = async (values: FormikValues) => {
     try {
       await mutateAsync({
-        title: programCycle.title,
-        start_date: programCycle.start_date,
-        end_date: values.endDate,
+        businessAreaSlug: businessArea,
+        id: programCycle.id,
+        programSlug: program.id,
+        requestBody: {
+          title: programCycle.title,
+          start_date: programCycle.start_date,
+          end_date: values.endDate,
+        },
       });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
@@ -171,9 +166,6 @@ const UpdateProgramCycle = ({
                   decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                   data-cy="input-previous-program-cycle-end-date"
                 />
-                {error?.data?.endDate && (
-                  <FormHelperText error>{error.data.endDate}</FormHelperText>
-                )}
               </Grid>
             </Grid>
           </DialogContent>

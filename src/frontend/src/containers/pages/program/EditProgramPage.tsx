@@ -232,7 +232,11 @@ const EditProgramPage = (): ReactElement => {
         dataCollectingType: requestValuesDetails.dataCollectingTypeCode,
         beneficiaryGroup: requestValuesDetails.beneficiaryGroup,
         startDate: requestValuesDetails.startDate,
-        endDate: requestValuesDetails.endDate,
+        endDate:
+          requestValuesDetails.endDate === '' ||
+          requestValuesDetails.endDate === undefined
+            ? null
+            : requestValuesDetails.endDate,
         pduFields: pduFieldsToSendWithoutTypename,
         version,
         status: '', // readonly field, will be ignored by API
@@ -331,7 +335,6 @@ const EditProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  const allAreasTree = treeData?.results || [];
   const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -474,7 +477,7 @@ const EditProgramPage = (): ReactElement => {
                   <div>
                     <PartnersStep
                       values={values}
-                      allAreasTreeData={allAreasTree}
+                      allAreasTreeData={treeData || []}
                       partnerChoices={mappedPartnerChoices}
                       submitForm={submitForm}
                       setFieldValue={setFieldValue}
