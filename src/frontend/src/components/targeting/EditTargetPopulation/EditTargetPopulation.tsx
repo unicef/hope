@@ -14,7 +14,7 @@ import {
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import Exclusions from '../CreateTargetPopulation/Exclusions';
@@ -38,6 +38,12 @@ const EditTargetPopulation = ({
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
+  const { id } = useParams();
+  const { baseUrl, programSlug, businessArea } = useBaseUrl();
+  const { selectedProgram, isSocialDctType, isStandardDctType } =
+    useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const targetingCriteriaCopy =
     paymentPlan.targetingCriteria?.rules.map((rule) => ({
@@ -75,26 +81,21 @@ const EditTargetPopulation = ({
       mutationFn: ({
         businessAreaSlug,
         id,
-        programSlug,
+        slug,
         requestBody,
       }: {
         businessAreaSlug: string;
         id: string;
-        programSlug: string;
+        slug: string;
         requestBody?: PatchedTargetPopulationCreate;
       }) =>
         RestService.restBusinessAreasProgramsTargetPopulationsPartialUpdate({
           businessAreaSlug,
           id,
-          programSlug,
+          programSlug: slug,
           requestBody,
         }),
     });
-  const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
-  const { selectedProgram, isSocialDctType, isStandardDctType } =
-    useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria, householdIds, individualIds } = values;
@@ -124,9 +125,9 @@ const EditTargetPopulation = ({
     try {
       await updateTargetPopulation(
         {
-          businessAreaSlug: values.businessAreaSlug,
-          id: values.id,
-          programSlug: values.programSlug,
+          businessAreaSlug: businessArea,
+          id: id,
+          slug: programSlug,
           requestBody: {
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,

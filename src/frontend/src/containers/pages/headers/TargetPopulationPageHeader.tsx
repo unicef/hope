@@ -71,7 +71,7 @@ export function TargetPopulationPageHeader({
   let buttons;
 
   switch (paymentPlan.status) {
-    case PaymentPlanStatusEnum.TP_OPEN:
+    case PaymentPlanStatusEnum.OPEN:
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={paymentPlan}

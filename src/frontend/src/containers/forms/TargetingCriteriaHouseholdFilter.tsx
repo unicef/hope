@@ -46,10 +46,12 @@ export function TargetingCriteriaHouseholdFilter({
   onClick: () => void;
   choicesDict;
 }): ReactElement {
-  console.log('data', data);
-  console.log('choicesDict', choicesDict);
-
   const { t } = useTranslation();
+
+  if (!data || !data.length) {
+    return <div>{t('No data available')}</div>;
+  }
+
   const shouldShowDivider = index + 1 < values.householdsFiltersBlocks.length;
   return (
     <div>
