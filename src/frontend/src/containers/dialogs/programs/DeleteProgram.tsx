@@ -63,7 +63,13 @@ export const DeleteProgram = ({
         navigate(`/${businessArea}/programs/all/list`);
       },
       onError: (e) => {
-        showMessage(e.message);
+        // Handle empty response error as success
+        if (e.message && e.message.includes('Unexpected end of JSON input')) {
+          showMessage(t('Programme removed'));
+          navigate(`/${businessArea}/programs/all/list`);
+        } else {
+          showMessage(e.message);
+        }
       },
     });
 
