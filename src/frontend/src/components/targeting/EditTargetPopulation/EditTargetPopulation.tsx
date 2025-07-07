@@ -80,18 +80,18 @@ const EditTargetPopulation = ({
     useMutation({
       mutationFn: ({
         businessAreaSlug,
-        id,
+        tpId,
         slug,
         requestBody,
       }: {
         businessAreaSlug: string;
-        id: string;
+        tpId: string;
         slug: string;
         requestBody?: PatchedTargetPopulationCreate;
       }) =>
         RestService.restBusinessAreasProgramsTargetPopulationsPartialUpdate({
           businessAreaSlug,
-          id,
+          id: tpId,
           programSlug: slug,
           requestBody,
         }),
@@ -126,7 +126,7 @@ const EditTargetPopulation = ({
       await updateTargetPopulation(
         {
           businessAreaSlug: businessArea,
-          id: id,
+          tpId: id,
           slug: programSlug,
           requestBody: {
             excludedIds: values.excludedIds,

@@ -5,7 +5,7 @@ import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../../programContext';
@@ -26,6 +26,7 @@ export const ActivateProgram = ({
   const { showMessage } = useSnackbar();
   const { businessArea } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: activateProgram, isPending: loading } = useMutation({
     mutationFn: () =>
@@ -33,6 +34,11 @@ export const ActivateProgram = ({
         businessAreaSlug: businessArea,
         slug: program.slug,
       }),
+    onSuccess: () => {
+      queryClient.refetchQueries({
+        queryKey: ['program', businessArea, program.id],
+      });
+    },
   });
 
   const handleActivateProgram = async (): Promise<void> => {
