@@ -712,7 +712,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectIndividualdataMaritalstatus().click()
         pageGrievanceNewTicket.select_listbox_element("Married")
         pageGrievanceNewTicket.getInputIndividualdataMiddlename().send_keys("Batu")
-        pageGrievanceNewTicket.getInputIndividualdataPaymentdeliveryphoneno().send_keys("123 456 789")
         pageGrievanceNewTicket.getInputIndividualdataPhoneno().send_keys("098 765 432")
         pageGrievanceNewTicket.getSelectIndividualdataPreferredlanguage().click()
         pageGrievanceNewTicket.select_listbox_element("English")

@@ -73,8 +73,9 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         approvedIdentitiesToCreate: $approvedIdentitiesToCreate,
         approvedIdentitiesToEdit: $approvedIdentitiesToEdit,
         approvedIdentitiesToRemove: $approvedIdentitiesToRemove,
+        approvedAccountsToCreate: $approvedAccountsToRemove,
         approvedAccountsToEdit: $approvedAccountsToEdit,
-        approvedAccountsToRemove: $approvedAccountsToRemove,
+
       ) {
         grievanceTicket {
           id

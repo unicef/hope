@@ -788,8 +788,12 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         phoneNo
         birthDate
         accounts {
-            name
-            dataFields
+        edges {
+            node {
+              name
+              dataFields
+            }
+          }
         }
       }
     }
