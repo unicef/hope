@@ -205,7 +205,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             partner=PartnerFactory(),
         )
 
-        cls.delivery_mechanism = DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money")
+        cls.delivery_mechanism = DeliveryMechanism.objects.get(code="mobile_money")
         cls.delivery_mechanism_data = Account(
             individual=cls.individuals[0],
             data={"phone_number_test": "1234567890"},

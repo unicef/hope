@@ -472,6 +472,10 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             ],
                             'identities_to_remove': [
                             ],
+                            'accounts_to': [
+                            ],
+                            'accounts_to_edit': [
+                            ],
                             'marital_status': {
                                 'approve_status': False,
                                 'previous_value': 'WIDOWED',

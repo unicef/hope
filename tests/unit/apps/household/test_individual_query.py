@@ -789,7 +789,7 @@ class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
         birthDate
         accounts {
             name
-            individualTabData
+            dataFields
         }
       }
     }

@@ -60,6 +60,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
       $approvedIdentitiesToCreate: [Int],
       $approvedIdentitiesToEdit: [Int],
       $approvedIdentitiesToRemove: [Int],
+      $approvedAccountsToCreate: [Int],
+      $approvedAccountsToEdit: [Int],
     ) {
       approveIndividualDataChange(
         grievanceTicketId: $grievanceTicketId,
@@ -71,6 +73,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         approvedIdentitiesToCreate: $approvedIdentitiesToCreate,
         approvedIdentitiesToEdit: $approvedIdentitiesToEdit,
         approvedIdentitiesToRemove: $approvedIdentitiesToRemove,
+        approvedAccountsToEdit: $approvedAccountsToEdit,
+        approvedAccountsToRemove: $approvedAccountsToRemove,
       ) {
         grievanceTicket {
           id
