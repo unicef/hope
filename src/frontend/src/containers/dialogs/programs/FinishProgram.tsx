@@ -5,7 +5,7 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
@@ -22,6 +22,7 @@ interface FinishProgramProps {
 export function FinishProgram({ program }: FinishProgramProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -34,6 +35,11 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
           businessAreaSlug: businessArea,
           slug: program.slug,
         }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['program', businessArea, program.id],
+        });
+      },
     });
 
   const finishProgram = async (): Promise<void> => {
@@ -49,7 +55,7 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
       navigate(`/${baseUrl}/details/${program.slug}`);
       setOpen(false);
     } catch (error) {
-      showMessage(t('Programme finish action failed.'));
+      showMessage(error.message || t('Failed to finish programme.'));
     }
   };
   return (
