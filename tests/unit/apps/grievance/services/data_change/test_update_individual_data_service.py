@@ -4,7 +4,6 @@ from django.test import TestCase
 import pytest
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
@@ -203,13 +202,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_not_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
@@ -245,13 +244,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "22222",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
@@ -295,13 +294,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "123456",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_not_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",

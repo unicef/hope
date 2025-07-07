@@ -115,9 +115,7 @@ class TestGrievanceUpdatePaymentVerificationTicket:
     def test_update_payment_verification_ticket_with_new_received_amount_extras(
         self, create_user_role_with_permissions: Any
     ) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
-        )
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
         data = {
             "extras": {
                 "ticket_payment_verification_details_extras": {

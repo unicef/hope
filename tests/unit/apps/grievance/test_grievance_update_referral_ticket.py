@@ -51,7 +51,7 @@ class TestGrievanceUpdateReferralTicket:
         self.ticket = ReferralTicketWithoutExtrasFactory(
             ticket__business_area=self.afghanistan,
             ticket__status=GrievanceTicket.STATUS_NEW,
-            ticket__description="",
+            ticket__description="OLD description",
             ticket__language="",
         )
         self.ticket.ticket.programs.set([self.program])
@@ -78,21 +78,17 @@ class TestGrievanceUpdateReferralTicket:
         return input_data
 
     def test_update_referral_ticket_without_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
-        )
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
         input_data = self._prepare_input()
 
         response = self.api_client.patch(self.list_details, input_data, format="json")
         assert response.status_code == status.HTTP_200_OK
-        assert response.json()["description"] == "Test Feedback NEW"
+        assert response.json()["description"] == "OLD description"
         assert response.json()["language"] == "Polish, English, ESP"
         assert response.json()["assigned_to"]["first_name"] == "TestUser"
 
     def test_update_referral_ticket_with_household_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
-        )
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
         extras = {
             "household": str(self.household.id),
         }
@@ -103,9 +99,7 @@ class TestGrievanceUpdateReferralTicket:
         assert response.json()["household"]["id"] == str(self.household.id)
 
     def test_update_referral_ticket_with_individual_extras(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
-        )
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
         extras = {
             "individual": str(self.individuals[0].id),
         }
@@ -118,9 +112,7 @@ class TestGrievanceUpdateReferralTicket:
     def test_update_referral_ticket_with_household_and_individual_extras(
         self, create_user_role_with_permissions: Any
     ) -> None:
-        create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE], self.afghanistan, self.program
-        )
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.afghanistan, self.program)
         extras = {
             "individual": str(self.individuals[0].id),
             "household": str(self.household.id),
