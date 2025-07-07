@@ -73,7 +73,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         approvedIdentitiesToCreate: $approvedIdentitiesToCreate,
         approvedIdentitiesToEdit: $approvedIdentitiesToEdit,
         approvedIdentitiesToRemove: $approvedIdentitiesToRemove,
-        approvedAccountsToCreate: $approvedAccountsToRemove,
+        approvedAccountsToCreate: $approvedAccountsToCreate,
         approvedAccountsToEdit: $approvedAccountsToEdit,
 
       ) {
@@ -334,6 +334,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "approvedIdentitiesToCreate": [],
                 "approvedIdentitiesToEdit": [],
                 "approvedIdentitiesToRemove": [],
+                "approvedAccountsToCreate": [],
+                "approvedAccountsToEdit": [],
                 "flexFieldsApproveData": json.dumps({}),
             },
         )
