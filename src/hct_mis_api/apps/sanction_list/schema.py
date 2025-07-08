@@ -8,14 +8,15 @@ from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectio
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.sanction_list.filters import SanctionListIndividualFilter
 from hct_mis_api.apps.sanction_list.models import (
+    SanctionList,
     SanctionListIndividual,
     SanctionListIndividualAliasName,
     SanctionListIndividualCountries,
     SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
     SanctionListIndividualNationalities,
-    SanctionList,
 )
+
 
 class SanctionListNode(DjangoObjectType):
     name = graphene.String()
