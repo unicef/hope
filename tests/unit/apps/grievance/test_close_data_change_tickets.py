@@ -42,6 +42,12 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -70,6 +76,8 @@ class TestCloseDataChangeTickets(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        generate_delivery_mechanisms()
+
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         partner = PartnerFactory(name="Partner")
@@ -172,6 +180,18 @@ class TestCloseDataChangeTickets(APITestCase):
         ]
 
         first_individual = cls.individuals[0]
+
+        cls.fi1 = FinancialInstitutionFactory()
+        cls.fi2 = FinancialInstitutionFactory()
+        cls.account = AccountFactory(
+            id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
+            individual=first_individual,
+            number="123",
+            data={"field": "value"},
+            financial_institution=cls.fi1,
+            account_type=AccountType.objects.get(key="mobile"),
+        )
+
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
         national_id_type = DocumentType.objects.get(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
@@ -264,6 +284,28 @@ class TestCloseDataChangeTickets(APITestCase):
                 "documents_to_remove": [
                     {"value": cls.id_to_base64(cls.national_id.id, "DocumentNode"), "approve_status": True},
                     {"value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                ],
+                "accounts": [
+                    {
+                        "approve_status": True,
+                        "value": {
+                            "data_fields": {"financial_institution": "1", "new_field": "new_value", "number": "2222"},
+                            "name": "mobile",
+                        },
+                    }
+                ],
+                "accounts_to_edit": [
+                    {
+                        "approve_status": True,
+                        "data_fields": [
+                            {"name": "field", "previous_value": "value", "value": "updated_value"},
+                            {"name": "new_field", "previous_value": None, "value": "new_value"},
+                            {"name": "number", "previous_value": "123", "value": "123123"},
+                            {"name": "financial_institution", "previous_value": "1", "value": "2"},
+                        ],
+                        "id": "QWNjb3VudE5vZGU6ZTBhNzYwNWYtNjJmNC00MjgwLTk5ZjYtYjdhMmM0MDAxNjgw",
+                        "name": "mobile",
+                    }
                 ],
             },
         )
@@ -395,6 +437,28 @@ class TestCloseDataChangeTickets(APITestCase):
 
             self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
             self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
+
+            self.account.refresh_from_db()
+            self.assertEqual(self.account.number, "123123")
+            self.assertEqual(self.account.financial_institution, self.fi2)
+            self.assertEqual(
+                self.account.data,
+                {
+                    "field": "updated_value",
+                    "new_field": "new_value",
+                },
+            )
+
+            new_account = individual.accounts.exclude(id=self.account.id).first()
+            self.assertEqual(new_account.number, "2222")
+            self.assertEqual(new_account.financial_institution, self.fi1)
+            self.assertEqual(
+                new_account.data,
+                {
+                    "new_field": "new_value",
+                },
+            )
+
         else:
             self.assertEqual(individual.given_name, "Benjamin")
             self.assertEqual(individual.full_name, "Benjamin Butler")
