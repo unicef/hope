@@ -34,6 +34,7 @@ export const ALL_SANCTION_LIST_INDIVIDUALS_QUERY = gql`
           fullName
           listedOn
           sanctionList {
+              id
               name
           }
           documents {
