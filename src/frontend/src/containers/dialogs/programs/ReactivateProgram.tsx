@@ -11,7 +11,7 @@ import {
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../../programContext';
@@ -31,18 +31,21 @@ export function ReactivateProgram({
   const { showMessage } = useSnackbar();
   const { businessAreaSlug } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
+  const queryClient = useQueryClient();
 
   const { mutate, isPending: loading } = useMutation({
-    mutationFn: async (programData: any) =>
-      RestService.restBusinessAreasProgramsUpdate({
+    mutationFn: async () =>
+      RestService.restBusinessAreasProgramsActivateCreate({
         businessAreaSlug,
         slug: program.slug,
-        requestBody: programData,
       }),
     onSuccess: () => {
       setSelectedProgram({
         ...selectedProgram,
         status: ProgramStatus.ACTIVE,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['program', businessAreaSlug, program.slug],
       });
       showMessage(t('Programme reactivated.'));
       setOpen(false);
@@ -53,10 +56,7 @@ export function ReactivateProgram({
   });
 
   const reactivateProgram = (): void => {
-    mutate({
-      ...program,
-      status: ProgramStatus.ACTIVE,
-    });
+    mutate();
   };
   return (
     <span>
