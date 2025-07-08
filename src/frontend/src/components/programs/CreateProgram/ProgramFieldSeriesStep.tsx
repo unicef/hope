@@ -51,10 +51,9 @@ export const ProgramFieldSeriesStep = ({
   const { businessArea, programId, baseUrl } = useBaseUrl();
 
   const confirm = useConfirmation();
-
   const mappedPduSubtypeChoices = pdusubtypeChoicesData?.map((el) => ({
     value: el.value,
-    name: el.displayName,
+    name: el.name,
   }));
 
   const confirmationModalTitle = t('Deleting Time Series Field');
