@@ -4907,6 +4907,7 @@ export type ProgramNode = Node & {
   programmeCode?: Maybe<Scalars['String']['output']>;
   registrationImports: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
+  sanctionLists: SanctionListNodeConnection;
   scope?: Maybe<ProgramScope>;
   screenBeneficiary?: Maybe<Scalars['Boolean']['output']>;
   sector: ProgramSector;
@@ -5023,6 +5024,15 @@ export type ProgramNodeRegistrationImportsArgs = {
 
 
 export type ProgramNodeReportsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type ProgramNodeSanctionListsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -6778,6 +6788,7 @@ export type SanctionListIndividualNode = Node & {
   nameOriginalScript: Scalars['String']['output'];
   nationalities: SanctionListIndividualNationalitiesNodeConnection;
   referenceNumber: Scalars['String']['output'];
+  sanctionList?: Maybe<SanctionListNode>;
   secondName: Scalars['String']['output'];
   stateProvince: Scalars['String']['output'];
   street: Scalars['String']['output'];
@@ -6845,6 +6856,56 @@ export type SanctionListIndividualNodeEdge = {
   cursor: Scalars['String']['output'];
   node?: Maybe<SanctionListIndividualNode>;
 };
+
+export type SanctionListNode = Node & {
+  __typename?: 'SanctionListNode';
+  config: Scalars['JSONString']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  entries: SanctionListIndividualNodeConnection;
+  id: Scalars['ID']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  programs: ProgramNodeConnection;
+  strategy: SanctionListStrategy;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type SanctionListNodeEntriesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type SanctionListNodeProgramsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type SanctionListNodeConnection = {
+  __typename?: 'SanctionListNodeConnection';
+  edgeCount?: Maybe<Scalars['Int']['output']>;
+  edges: Array<Maybe<SanctionListNodeEdge>>;
+  pageInfo: PageInfo;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type SanctionListNodeEdge = {
+  __typename?: 'SanctionListNodeEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<SanctionListNode>;
+};
+
+export enum SanctionListStrategy {
+  HctMisApiAppsSanctionListStrategiesEuEusanctionlist = 'HCT_MIS_API_APPS_SANCTION_LIST_STRATEGIES_EU_EUSANCTIONLIST',
+  HctMisApiAppsSanctionListStrategiesUnUnsanctionlist = 'HCT_MIS_API_APPS_SANCTION_LIST_STRATEGIES_UN_UNSANCTIONLIST'
+}
 
 export type SaveKoboProjectImportDataAsync = {
   __typename?: 'SaveKoboProjectImportDataAsync';
@@ -8904,7 +8965,7 @@ export type AllSanctionListIndividualsQueryVariables = Exact<{
 }>;
 
 
-export type AllSanctionListIndividualsQuery = { __typename?: 'Query', allSanctionListIndividuals?: { __typename?: 'SanctionListIndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'SanctionListIndividualNodeEdge', cursor: string, node?: { __typename?: 'SanctionListIndividualNode', id: string, referenceNumber: string, fullName: string, listedOn?: any | null, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string, issuingCountry?: string | null } | null } | null> }, aliasNames: { __typename?: 'SanctionListIndividualAliasNameNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualAliasNameNodeEdge', node?: { __typename?: 'SanctionListIndividualAliasNameNode', id: string, name: string } | null } | null> }, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> } } | null } | null> } | null };
+export type AllSanctionListIndividualsQuery = { __typename?: 'Query', allSanctionListIndividuals?: { __typename?: 'SanctionListIndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'SanctionListIndividualNodeEdge', cursor: string, node?: { __typename?: 'SanctionListIndividualNode', id: string, referenceNumber: string, fullName: string, listedOn?: any | null, sanctionList?: { __typename?: 'SanctionListNode', name?: string | null } | null, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string, issuingCountry?: string | null } | null } | null> }, aliasNames: { __typename?: 'SanctionListIndividualAliasNameNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualAliasNameNodeEdge', node?: { __typename?: 'SanctionListIndividualAliasNameNode', id: string, name: string } | null } | null> }, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> } } | null } | null> } | null };
 
 export type AllUsersQueryVariables = Exact<{
   search?: InputMaybe<Scalars['String']['input']>;
@@ -14656,6 +14717,9 @@ export const AllSanctionListIndividualsDocument = gql`
         referenceNumber
         fullName
         listedOn
+        sanctionList {
+          name
+        }
         documents {
           edges {
             node {
@@ -21531,7 +21595,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<_RefType extends Record<string, unknown>> = {
-  Node: ( AccountsNode ) | ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BeneficiaryGroupNode ) | ( BusinessAreaNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( FundsCommitmentItemNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentPlanSupportingDocumentNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode );
+  Node: ( AccountsNode ) | ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BeneficiaryGroupNode ) | ( BusinessAreaNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DeliveryMechanismPerPaymentPlanNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( FundsCommitmentItemNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentPlanSupportingDocumentNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( PeriodicFieldNode ) | ( ProgramCycleNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( SanctionListNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode );
 };
 
 /** Mapping between all available schema types and the resolvers types */
@@ -21900,6 +21964,10 @@ export type ResolversTypes = {
   SanctionListIndividualNode: ResolverTypeWrapper<SanctionListIndividualNode>;
   SanctionListIndividualNodeConnection: ResolverTypeWrapper<SanctionListIndividualNodeConnection>;
   SanctionListIndividualNodeEdge: ResolverTypeWrapper<SanctionListIndividualNodeEdge>;
+  SanctionListNode: ResolverTypeWrapper<SanctionListNode>;
+  SanctionListNodeConnection: ResolverTypeWrapper<SanctionListNodeConnection>;
+  SanctionListNodeEdge: ResolverTypeWrapper<SanctionListNodeEdge>;
+  SanctionListStrategy: SanctionListStrategy;
   SaveKoboProjectImportDataAsync: ResolverTypeWrapper<SaveKoboProjectImportDataAsync>;
   SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>;
   SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
@@ -22324,6 +22392,9 @@ export type ResolversParentTypes = {
   SanctionListIndividualNode: SanctionListIndividualNode;
   SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection;
   SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge;
+  SanctionListNode: SanctionListNode;
+  SanctionListNodeConnection: SanctionListNodeConnection;
+  SanctionListNodeEdge: SanctionListNodeEdge;
   SaveKoboProjectImportDataAsync: SaveKoboProjectImportDataAsync;
   SectionTotalNode: SectionTotalNode;
   SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
@@ -24241,7 +24312,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'AccountsNode' | 'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BeneficiaryGroupNode' | 'BusinessAreaNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FundsCommitmentItemNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentPlanSupportingDocumentNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'AccountsNode' | 'ApprovalProcessNode' | 'AreaNode' | 'AreaTypeNode' | 'BankAccountInfoNode' | 'BeneficiaryGroupNode' | 'BusinessAreaNode' | 'CommunicationMessageNode' | 'CommunicationMessageRecipientMapNode' | 'DataCollectingTypeNode' | 'DeliveryMechanismNode' | 'DeliveryMechanismPerPaymentPlanNode' | 'DocumentNode' | 'FeedbackMessageNode' | 'FeedbackNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FundsCommitmentItemNode' | 'GrievanceDocumentNode' | 'GrievanceTicketNode' | 'HouseholdNode' | 'ImportDataNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'KoboImportDataNode' | 'LogEntryNode' | 'PaymentHouseholdSnapshotNode' | 'PaymentNode' | 'PaymentPlanNode' | 'PaymentPlanSupportingDocumentNode' | 'PaymentVerificationLogEntryNode' | 'PaymentVerificationNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationSummaryNode' | 'PeriodicFieldNode' | 'ProgramCycleNode' | 'ProgramNode' | 'RecipientNode' | 'RegistrationDataImportDatahubNode' | 'RegistrationDataImportNode' | 'ReportNode' | 'RuleCommitNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualDateOfBirthNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualNode' | 'SanctionListNode' | 'SteficonRuleNode' | 'SurveyNode' | 'TicketAddIndividualDetailsNode' | 'TicketComplaintDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketNoteNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'TicketSensitiveDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'UserBusinessAreaNode' | 'UserNode', ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -24763,6 +24834,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   programmeCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   registrationImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<ProgramNodeRegistrationImportsArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<ProgramNodeReportsArgs>>;
+  sanctionLists?: Resolver<ResolversTypes['SanctionListNodeConnection'], ParentType, ContextType, Partial<ProgramNodeSanctionListsArgs>>;
   scope?: Resolver<Maybe<ResolversTypes['ProgramScope']>, ParentType, ContextType>;
   screenBeneficiary?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>;
@@ -25360,6 +25432,7 @@ export type SanctionListIndividualNodeResolvers<ContextType = any, ParentType ex
   nameOriginalScript?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   nationalities?: Resolver<ResolversTypes['SanctionListIndividualNationalitiesNodeConnection'], ParentType, ContextType, Partial<SanctionListIndividualNodeNationalitiesArgs>>;
   referenceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  sanctionList?: Resolver<Maybe<ResolversTypes['SanctionListNode']>, ParentType, ContextType>;
   secondName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   stateProvince?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   street?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -25381,6 +25454,32 @@ export type SanctionListIndividualNodeConnectionResolvers<ContextType = any, Par
 export type SanctionListIndividualNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNodeEdge'] = ResolversParentTypes['SanctionListIndividualNodeEdge']> = {
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SanctionListNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListNode'] = ResolversParentTypes['SanctionListNode']> = {
+  config?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  entries?: Resolver<ResolversTypes['SanctionListIndividualNodeConnection'], ParentType, ContextType, Partial<SanctionListNodeEntriesArgs>>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, Partial<SanctionListNodeProgramsArgs>>;
+  strategy?: Resolver<ResolversTypes['SanctionListStrategy'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SanctionListNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListNodeConnection'] = ResolversParentTypes['SanctionListNodeConnection']> = {
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListNodeEdge']>>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SanctionListNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListNodeEdge'] = ResolversParentTypes['SanctionListNodeEdge']> = {
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  node?: Resolver<Maybe<ResolversTypes['SanctionListNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -26432,6 +26531,9 @@ export type Resolvers<ContextType = any> = {
   SanctionListIndividualNode?: SanctionListIndividualNodeResolvers<ContextType>;
   SanctionListIndividualNodeConnection?: SanctionListIndividualNodeConnectionResolvers<ContextType>;
   SanctionListIndividualNodeEdge?: SanctionListIndividualNodeEdgeResolvers<ContextType>;
+  SanctionListNode?: SanctionListNodeResolvers<ContextType>;
+  SanctionListNodeConnection?: SanctionListNodeConnectionResolvers<ContextType>;
+  SanctionListNodeEdge?: SanctionListNodeEdgeResolvers<ContextType>;
   SaveKoboProjectImportDataAsync?: SaveKoboProjectImportDataAsyncResolvers<ContextType>;
   SectionTotalNode?: SectionTotalNodeResolvers<ContextType>;
   SetSteficonRuleOnPaymentPlanPaymentListMutation?: SetSteficonRuleOnPaymentPlanPaymentListMutationResolvers<ContextType>;

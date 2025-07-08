@@ -14,11 +14,21 @@ from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividualDateOfBirth,
     SanctionListIndividualDocument,
     SanctionListIndividualNationalities,
+    SanctionList,
 )
+
+class SanctionListNode(DjangoObjectType):
+    name = graphene.String()
+
+    class Meta:
+        model = SanctionList
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class SanctionListIndividualNode(DjangoObjectType):
     country_of_birth = graphene.String(description="Country of birth")
+    sanction_list = graphene.Field(SanctionListNode)
 
     class Meta:
         model = SanctionListIndividual
