@@ -38,7 +38,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             'previous_documents': {
                             },
                             'previous_identities': {
-                            },
+                            }
                         }
                     },
                     'issueType': 14,
@@ -100,7 +100,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'previous_documents': {
                             },
                             'previous_identities': {
-                            },
+                            }
                         }
                     },
                     'issueType': 14,
@@ -384,6 +384,48 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'fullName': 'Benjamin Butler'
                         },
                         'individualData': {
+                            'accounts': [
+                                {
+                                    'approve_status': False,
+                                    'value': {
+                                        'data_fields': {
+                                            'financial_institution': '1',
+                                            'new_field': 'new_value',
+                                            'number': '2222'
+                                        },
+                                        'name': 'mobile'
+                                    }
+                                }
+                            ],
+                            'accounts_to_edit': [
+                                {
+                                    'approve_status': False,
+                                    'data_fields': [
+                                        {
+                                            'name': 'field',
+                                            'previous_value': 'value',
+                                            'value': 'updated_value'
+                                        },
+                                        {
+                                            'name': 'new_field',
+                                            'previous_value': None,
+                                            'value': 'new_value'
+                                        },
+                                        {
+                                            'name': 'number',
+                                            'previous_value': '123',
+                                            'value': '123123'
+                                        },
+                                        {
+                                            'name': 'financial_institution',
+                                            'previous_value': '1',
+                                            'value': '2'
+                                        }
+                                    ],
+                                    'id': 'QWNjb3VudE5vZGU6ZTBhNzYwNWYtNjJmNC00MjgwLTk5ZjYtYjdhMmM0MDAxNjgw',
+                                    'name': 'mobile'
+                                }
+                            ],
                             'birth_date': {
                                 'approve_status': False,
                                 'previous_value': '1943-07-30',
@@ -471,10 +513,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 }
                             ],
                             'identities_to_remove': [
-                            ],
-                            'accounts': [
-                            ],
-                            'accounts_to_edit': [
                             ],
                             'marital_status': {
                                 'approve_status': False,

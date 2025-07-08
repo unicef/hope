@@ -149,7 +149,6 @@ class IndividualDataUpdateService(DataChangeService):
             individual=individual,
             ticket=self.grievance_ticket,
         )
-        print()
         ticket_individual_data_update_details.save()
         self.grievance_ticket.refresh_from_db()
         return [self.grievance_ticket]

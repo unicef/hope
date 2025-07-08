@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 from typing import Any, List
 from unittest import mock
@@ -35,6 +36,12 @@ from hct_mis_api.apps.household.models import (
     WIDOWED,
     DocumentType,
 )
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -81,6 +88,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        generate_delivery_mechanisms()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
 
@@ -193,6 +201,17 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_one.save()
         household_two.save()
         cls.household_one = household_one
+
+        cls.fi1 = FinancialInstitutionFactory()
+        cls.fi2 = FinancialInstitutionFactory()
+        cls.account = AccountFactory(
+            id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
+            individual=cls.individuals[0],
+            number="123",
+            data={"field": "value"},
+            financial_institution=cls.fi1,
+            account_type=AccountType.objects.get(key="mobile"),
+        )
 
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
         national_id_type = DocumentType.objects.get(
@@ -351,6 +370,27 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                     }
                                 ],
                                 "disability": "disabled",
+                                "accounts": [
+                                    {
+                                        "name": "mobile",
+                                        "dataFields": {
+                                            "new_field": "new_value",
+                                            "number": "2222",
+                                            "financial_institution": str(self.fi1.id),
+                                        },
+                                    }
+                                ],
+                                "accountsToEdit": [
+                                    {
+                                        "id": self.id_to_base64(str(self.account.id), "AccountNode"),
+                                        "dataFields": {
+                                            "field": "updated_value",
+                                            "new_field": "new_value",
+                                            "number": "123123",
+                                            "financial_institution": str(self.fi2.id),
+                                        },
+                                    }
+                                ],
                             },
                         }
                     }
