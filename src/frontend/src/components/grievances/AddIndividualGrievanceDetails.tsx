@@ -20,7 +20,6 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { error } from 'console';
 
 function AddIndividualGrievanceDetails({
   ticket,
@@ -194,7 +193,7 @@ function AddIndividualGrievanceDetails({
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
-                    showApiErrorMessages(error, showMessage);
+                    showApiErrorMessages(e, showMessage);
                   }
                 })
               }

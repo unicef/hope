@@ -21,7 +21,6 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 import { showApiErrorMessages } from '@utils/utils';
-import { error } from 'console';
 
 interface ApprovalSectionProps {
   selectedApproved: any[];
@@ -159,7 +158,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
             showMessage(t('Payment Plan(s) Approved'));
             setSelectedApproved([]);
           } catch (e) {
-            showApiErrorMessages(error, showMessage);
+            showApiErrorMessages(e, showMessage);
           }
         }}
       />
