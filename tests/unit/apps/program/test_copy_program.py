@@ -15,7 +15,6 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     EntitlementCardFactory,
     IndividualIdentityFactory,
@@ -23,7 +22,6 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import (
-    BankAccountInfo,
     Document,
     EntitlementCard,
     Household,
@@ -130,7 +128,6 @@ class TestCopyProgram(APITestCase):
         )
         cls.document1 = DocumentFactory(individual=cls.individual, program=cls.individual.program)
         cls.individual_identity1 = IndividualIdentityFactory(individual=cls.individual)
-        cls.bank_account_info1 = BankAccountInfoFactory(individual=cls.individual)
         cls.individual.individual_collection = None
 
         # Flex fields on the individual (should be copied) and PDU flex fields (should be ignored)
@@ -325,19 +322,6 @@ class TestCopyProgram(APITestCase):
         self.assertEqual(
             copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().number,
             self.individual_identity1.number,
-        )
-
-        self.assertEqual(BankAccountInfo.objects.count(), 2)
-        self.assertNotEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().bank_account_info.first().id,
-            self.bank_account_info1.id,
-        )
-        self.assertEqual(
-            copied_program.individuals.filter(copied_from=self.individuals1[0])
-            .first()
-            .bank_account_info.first()
-            .bank_account_number,
-            self.bank_account_info1.bank_account_number,
         )
 
         self.assertEqual(IndividualRoleInHousehold.objects.count(), 2)

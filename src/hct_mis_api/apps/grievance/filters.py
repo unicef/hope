@@ -196,7 +196,6 @@ class GrievanceTicketFilter(FilterSet):
                 | Q(program_registration_id__icontains=search)
                 | Q(phone_no__icontains=search)
                 | Q(phone_no_alternative__icontains=search)
-                | Q(bank_account_info__bank_account_number__icontains=search)
                 | Q(unicef_id=search)
             )
             .select_related("household")

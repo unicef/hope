@@ -26,7 +26,6 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -38,12 +37,17 @@ from hct_mis_api.apps.household.models import (
     NOT_ANSWERED,
     ROLE_PRIMARY,
     SINGLE,
-    BankAccountInfo,
     Document,
     DocumentType,
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -72,6 +76,8 @@ class TestCloseDataChangeTickets(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        generate_delivery_mechanisms()
+
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         partner = PartnerFactory(name="Partner")
@@ -174,6 +180,18 @@ class TestCloseDataChangeTickets(APITestCase):
         ]
 
         first_individual = cls.individuals[0]
+
+        cls.fi1 = FinancialInstitutionFactory(id="6")
+        cls.fi2 = FinancialInstitutionFactory(id="7")
+        cls.account = AccountFactory(
+            id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
+            individual=first_individual,
+            number="123",
+            data={"field": "value"},
+            financial_institution=cls.fi1,
+            account_type=AccountType.objects.get(key="mobile"),
+        )
+
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
         national_id_type = DocumentType.objects.get(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
@@ -228,13 +246,6 @@ class TestCloseDataChangeTickets(APITestCase):
                         "photoraw": "test_file_name.jpg",
                     }
                 ],
-                "payment_channels": [
-                    {
-                        "type": "BANK_TRANSFER",
-                        "bank_name": "privatbank",
-                        "bank_account_number": 2356789789789789,
-                    },
-                ],
             },
             approve_status=True,
         )
@@ -273,6 +284,36 @@ class TestCloseDataChangeTickets(APITestCase):
                 "documents_to_remove": [
                     {"value": cls.id_to_base64(cls.national_id.id, "DocumentNode"), "approve_status": True},
                     {"value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                ],
+                "accounts": [
+                    {
+                        "approve_status": True,
+                        "value": {
+                            "data_fields": {
+                                "financial_institution": str(cls.fi1.id),
+                                "new_field": "new_value",
+                                "number": "2222",
+                            },
+                            "name": "mobile",
+                        },
+                    }
+                ],
+                "accounts_to_edit": [
+                    {
+                        "approve_status": True,
+                        "data_fields": [
+                            {"name": "field", "previous_value": "value", "value": "updated_value"},
+                            {"name": "new_field", "previous_value": None, "value": "new_value"},
+                            {"name": "number", "previous_value": "123", "value": "123123"},
+                            {
+                                "name": "financial_institution",
+                                "previous_value": str(cls.fi1.id),
+                                "value": str(cls.fi2.id),
+                            },
+                        ],
+                        "id": "QWNjb3VudE5vZGU6ZTBhNzYwNWYtNjJmNC00MjgwLTk5ZjYtYjdhMmM0MDAxNjgw",
+                        "name": "mobile",
+                    }
                 ],
             },
         )
@@ -357,9 +398,6 @@ class TestCloseDataChangeTickets(APITestCase):
             )
             self.assertEqual(str(role.household.id), str(self.household_one.id))
 
-            bank_account_info = BankAccountInfo.objects.get(individual=created_individual)
-            self.assertEqual(bank_account_info.bank_name, "privatbank")
-            self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
         else:
             self.assertFalse(created_individual.exists())
 
@@ -407,6 +445,28 @@ class TestCloseDataChangeTickets(APITestCase):
 
             self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
             self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
+
+            self.account.refresh_from_db()
+            self.assertEqual(self.account.number, "123123")
+            self.assertEqual(self.account.financial_institution, self.fi2)
+            self.assertEqual(
+                self.account.data,
+                {
+                    "field": "updated_value",
+                    "new_field": "new_value",
+                },
+            )
+
+            new_account = individual.accounts.exclude(id=self.account.id).first()
+            self.assertEqual(new_account.number, "2222")
+            self.assertEqual(new_account.financial_institution, self.fi1)
+            self.assertEqual(
+                new_account.data,
+                {
+                    "new_field": "new_value",
+                },
+            )
+
         else:
             self.assertEqual(individual.given_name, "Benjamin")
             self.assertEqual(individual.full_name, "Benjamin Butler")
@@ -573,136 +633,3 @@ class TestCloseDataChangeTickets(APITestCase):
         cls.assertTrue(cls.household_one.withdrawn)
         cls.assertTrue(cls.individuals[0].withdrawn)
         cls.assertTrue(cls.individuals[1].withdrawn)
-
-    def test_close_add_individual_create_bank_account(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
-        )
-
-        self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={
-                "grievanceTicketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
-        )
-        created_individual = (
-            Individual.objects.exclude(id="257f6f84-313c-43bd-8f0e-89b96c41a7d5")
-            .filter(
-                given_name="Test",
-                full_name="Test Example",
-                family_name="Example",
-                sex="MALE",
-            )
-            .first()
-        )
-
-        bank_account_info = BankAccountInfo.objects.get(individual=created_individual)
-        self.assertEqual(bank_account_info.bank_name, "privatbank")
-        self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
-
-    def test_close_update_individual_create_bank_account(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
-        )
-
-        ticket = GrievanceTicketFactory(
-            id="9dc794ba-b59a-4acf-a7cb-6590d879e86e",
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        TicketIndividualDataUpdateDetailsFactory(
-            ticket=ticket,
-            individual=self.individuals[0],
-            individual_data={
-                "payment_channels": [
-                    {
-                        "value": {
-                            "type": "BANK_TRANSFER",
-                            "bank_name": "privatbank",
-                            "bank_account_number": 2356789789789789,
-                        },
-                        "approve_status": True,
-                    },
-                ],
-            },
-        )
-
-        self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={
-                "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
-        )
-        individual = self.individuals[0]
-        individual.refresh_from_db()
-
-        bank_account_info = BankAccountInfo.objects.get(individual=individual)
-        self.assertEqual(bank_account_info.bank_name, "privatbank")
-        self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
-
-    def test_close_update_individual_update_bank_account(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
-        )
-
-        ticket = GrievanceTicketFactory(
-            id="9dc794ba-b59a-4acf-a7cb-6590d879e86e",
-            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
-            issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=self.admin_area_1,
-            business_area=self.business_area,
-            status=GrievanceTicket.STATUS_FOR_APPROVAL,
-        )
-        BankAccountInfoFactory(
-            id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
-            individual=self.individuals[0],
-            bank_name="privatbank",
-            bank_account_number=2356789789789789,
-        )
-        TicketIndividualDataUpdateDetailsFactory(
-            ticket=ticket,
-            individual=self.individuals[0],
-            individual_data={
-                "payment_channels_to_edit": [
-                    {
-                        "approve_status": True,
-                        "previous_value": {
-                            "bank_account_number": "2356789789789789",
-                            "bank_name": "privatbank",
-                            "id": "QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=",
-                            "individual": "SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh",
-                            "type": "BANK_TRANSFER",
-                        },
-                        "value": {
-                            "bank_account_number": "1111222233334444",
-                            "bank_name": "privatbank",
-                            "id": "QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=",
-                            "individual": "SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh",
-                            "type": "BANK_TRANSFER",
-                        },
-                    }
-                ],
-            },
-        )
-
-        self.graphql_request(
-            request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables={
-                "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
-                "status": GrievanceTicket.STATUS_CLOSED,
-            },
-        )
-        individual = self.individuals[0]
-        individual.refresh_from_db()
-
-        bank_account_info = BankAccountInfo.objects.get(individual=individual)
-        self.assertEqual(bank_account_info.bank_name, "privatbank")
-        self.assertEqual(bank_account_info.bank_account_number, "1111222233334444")
