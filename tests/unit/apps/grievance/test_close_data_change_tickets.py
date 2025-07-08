@@ -181,8 +181,8 @@ class TestCloseDataChangeTickets(APITestCase):
 
         first_individual = cls.individuals[0]
 
-        cls.fi1 = FinancialInstitutionFactory()
-        cls.fi2 = FinancialInstitutionFactory()
+        cls.fi1 = FinancialInstitutionFactory(id="6")
+        cls.fi2 = FinancialInstitutionFactory(id="7")
         cls.account = AccountFactory(
             id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
             individual=first_individual,
@@ -289,7 +289,11 @@ class TestCloseDataChangeTickets(APITestCase):
                     {
                         "approve_status": True,
                         "value": {
-                            "data_fields": {"financial_institution": "1", "new_field": "new_value", "number": "2222"},
+                            "data_fields": {
+                                "financial_institution": str(cls.fi1.id),
+                                "new_field": "new_value",
+                                "number": "2222",
+                            },
                             "name": "mobile",
                         },
                     }
@@ -301,7 +305,11 @@ class TestCloseDataChangeTickets(APITestCase):
                             {"name": "field", "previous_value": "value", "value": "updated_value"},
                             {"name": "new_field", "previous_value": None, "value": "new_value"},
                             {"name": "number", "previous_value": "123", "value": "123123"},
-                            {"name": "financial_institution", "previous_value": "1", "value": "2"},
+                            {
+                                "name": "financial_institution",
+                                "previous_value": str(cls.fi1.id),
+                                "value": str(cls.fi2.id),
+                            },
                         ],
                         "id": "QWNjb3VudE5vZGU6ZTBhNzYwNWYtNjJmNC00MjgwLTk5ZjYtYjdhMmM0MDAxNjgw",
                         "name": "mobile",

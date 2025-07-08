@@ -202,8 +202,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         cls.household_one = household_one
 
-        cls.fi1 = FinancialInstitutionFactory()
-        cls.fi2 = FinancialInstitutionFactory()
+        cls.fi1 = FinancialInstitutionFactory(id="6")
+        cls.fi2 = FinancialInstitutionFactory(id="7")
         cls.account = AccountFactory(
             id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
             individual=cls.individuals[0],

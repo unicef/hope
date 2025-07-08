@@ -389,7 +389,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                     'approve_status': False,
                                     'value': {
                                         'data_fields': {
-                                            'financial_institution': '1',
+                                            'financial_institution': '6',
                                             'new_field': 'new_value',
                                             'number': '2222'
                                         },
@@ -418,8 +418,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                         },
                                         {
                                             'name': 'financial_institution',
-                                            'previous_value': '1',
-                                            'value': '2'
+                                            'previous_value': '6',
+                                            'value': '7'
                                         }
                                     ],
                                     'id': 'QWNjb3VudE5vZGU6ZTBhNzYwNWYtNjJmNC00MjgwLTk5ZjYtYjdhMmM0MDAxNjgw',
