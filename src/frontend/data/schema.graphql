@@ -3103,6 +3103,7 @@ type ProgramNode implements Node {
   householdCount: Int!
   individualCount: Int!
   deduplicationSetId: UUID
+  sanctionLists(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListNodeConnection!
   pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3815,6 +3816,7 @@ type SanctionListIndividualNode implements Node {
   versionNum: Int!
   countryOfBirth: String
   active: Boolean!
+  sanctionList: SanctionListNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListIndividualDocumentNodeConnection!
   nationalities(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListIndividualNationalitiesNodeConnection!
   countries(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListIndividualCountriesNodeConnection!
@@ -3832,6 +3834,34 @@ type SanctionListIndividualNodeConnection {
 type SanctionListIndividualNodeEdge {
   node: SanctionListIndividualNode
   cursor: String!
+}
+
+type SanctionListNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String
+  config: JSONString!
+  strategy: SanctionListStrategy!
+  entries(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListIndividualNodeConnection!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+}
+
+type SanctionListNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SanctionListNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SanctionListNodeEdge {
+  node: SanctionListNode
+  cursor: String!
+}
+
+enum SanctionListStrategy {
+  HCT_MIS_API_APPS_SANCTION_LIST_STRATEGIES_EU_EUSANCTIONLIST
+  HCT_MIS_API_APPS_SANCTION_LIST_STRATEGIES_UN_UNSANCTIONLIST
 }
 
 type SaveKoboProjectImportDataAsync {
