@@ -30,7 +30,7 @@ class XlsxExportTargetingService:
             "Household unicef_id": "household.unicef_id",
             "unicef_id": "unicef_id",
             "Linked Households": self._render_all_linked_households,
-            "Bank account information": self._bank_account_info,
+            "Accounts information": self._accounts_info,
         }
 
     @cached_property
@@ -54,7 +54,7 @@ class XlsxExportTargetingService:
                 | Q(households_and_roles__household__in=self.households)
             )
             .select_related("household")
-            .prefetch_related("bank_account_info")
+            .prefetch_related("accounts")
             .order_by("household__unicef_id")
             .distinct()
         )
@@ -128,9 +128,9 @@ class XlsxExportTargetingService:
         return ",".join(roles_string_list)
 
     @staticmethod
-    def _bank_account_info(individual: Individual) -> str:
-        if individual.bank_account_info.exists():
-            return ", ".join([str(bank_info) for bank_info in individual.bank_account_info.all()])
+    def _accounts_info(individual: Individual) -> str:
+        if individual.accounts.exists():
+            return ", ".join([str(account.account_data) for account in individual.accounts.all()])
         return ""
 
     def _adjust_column_width_from_col(self, ws: Worksheet, min_row: int, min_col: int, max_col: int) -> None:

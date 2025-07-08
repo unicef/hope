@@ -234,8 +234,8 @@ const EditGrievancePage = (): ReactElement => {
       'individualDataUpdateFieldsIdentities',
       'individualDataUpdateDocumentsToEdit',
       'individualDataUpdateIdentitiesToEdit',
-      'individualDataUpdateFieldsPaymentChannels',
-      'individualDataUpdatePaymentChannelsToEdit',
+      'individualDataUpdateFieldsAccounts',
+      'individualDataUpdateAccountsToEdit',
       'peopleDataUpdateFields',
     ].map(
       (fieldname) =>
@@ -321,6 +321,7 @@ const EditGrievancePage = (): ReactElement => {
           issueTypeDescriptions[
             GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
           ] || '';
+
         return (
           <>
             <AutoSubmitFormOnEnter />

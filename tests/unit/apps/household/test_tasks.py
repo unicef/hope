@@ -6,7 +6,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
@@ -52,7 +51,6 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         )
         cls.document1 = DocumentFactory(individual=cls.individual, program=cls.individual.program)
         cls.individual_identity1 = IndividualIdentityFactory(individual=cls.individual)
-        cls.bank_account_info1 = BankAccountInfoFactory(individual=cls.individual)
         cls.individual.individual_collection = None
         cls.individual.save()
         cls.household1.household_collection = None
@@ -126,4 +124,3 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         )
         self.assertEqual(enrolled_household.individuals.first().documents.count(), 1)
         self.assertEqual(enrolled_household.individuals.first().identities.count(), 1)
-        self.assertEqual(enrolled_household.individuals.first().bank_account_info.count(), 1)
