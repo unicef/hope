@@ -21,7 +21,6 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 import { showApiErrorMessages } from '@utils/utils';
-import { error } from 'console';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
@@ -159,7 +158,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
             showMessage(t('Payment Plan(s) Authorized'));
             setSelectedAuthorized([]);
           } catch (e) {
-            showApiErrorMessages(error, showMessage);
+            showApiErrorMessages(e, showMessage);
           }
         }}
       />

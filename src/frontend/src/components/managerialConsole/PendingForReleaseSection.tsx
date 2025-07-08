@@ -21,7 +21,6 @@ import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 import { showApiErrorMessages } from '@utils/utils';
-import { error } from 'console';
 
 interface PendingForReleaseSectionProps {
   selectedInReview: any[];
@@ -159,7 +158,7 @@ export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
             showMessage(t('Payment Plan(s) Released'));
             setSelectedInReview([]);
           } catch (e) {
-            showApiErrorMessages(error, showMessage);
+            showApiErrorMessages(e, showMessage);
           }
         }}
       />

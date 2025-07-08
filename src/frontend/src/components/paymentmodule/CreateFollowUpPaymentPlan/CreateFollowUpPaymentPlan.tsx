@@ -34,7 +34,6 @@ import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useProgramContext } from '../../../programContext';
-import { error } from 'console';
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -130,7 +129,7 @@ export function CreateFollowUpPaymentPlan({
       showMessage(t('Payment Plan Created'));
       navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      showApiErrorMessages(error, showMessage);
+      showApiErrorMessages(e, showMessage);
     }
   };
 
