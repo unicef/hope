@@ -38,5 +38,13 @@ export const AllAddIndividualFields = gql`
       name
       value
     }
+    accountTypeChoices {
+      name
+      value
+    }
+    accountFinancialInstitutionChoices {
+      name
+      value
+    }
   }
 `;

@@ -171,7 +171,7 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
             'locations': [
                 {
                     'column': 7,
-                    'line': 16
+                    'line': 15
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',

@@ -432,6 +432,84 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_birth_certifica
     ]
 }
 
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_with_search_type_0_with_permission 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'birthDate': '1943-07-30',
+                        'familyName': 'Butler',
+                        'fullName': 'Benjamin Butler',
+                        'givenName': 'Benjamin',
+                        'phoneNo': '(953)682-4596',
+                        'phoneNoValid': False
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_with_search_type_1_without_permission 1'] = {
+    'data': {
+        'allIndividuals': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allIndividuals'
+            ]
+        }
+    ]
+}
+
 snapshots['TestIndividualQuery::test_query_individuals_by_search_disability_card_filter_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {
@@ -666,84 +744,6 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_phone_no_filter
     ]
 }
 
-snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_0_with_permission 1'] = {
-    'data': {
-        'allIndividuals': {
-            'edges': [
-                {
-                    'node': {
-                        'birthDate': '1943-07-30',
-                        'familyName': 'Butler',
-                        'fullName': 'Benjamin Butler',
-                        'givenName': 'Benjamin',
-                        'phoneNo': '(953)682-4596',
-                        'phoneNoValid': False
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_1_without_permission 1'] = {
-    'data': {
-        'allIndividuals': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied',
-            'path': [
-                'allIndividuals'
-            ]
-        }
-    ]
-}
-
-snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_with_search_type_0_with_permission 1'] = {
-    'data': {
-        'allIndividuals': {
-            'edges': [
-                {
-                    'node': {
-                        'birthDate': '1943-07-30',
-                        'familyName': 'Butler',
-                        'fullName': 'Benjamin Butler',
-                        'givenName': 'Benjamin',
-                        'phoneNo': '(953)682-4596',
-                        'phoneNoValid': False
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestIndividualQuery::test_query_individuals_by_search_detail_id_filter_with_search_type_1_without_permission 1'] = {
-    'data': {
-        'allIndividuals': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied',
-            'path': [
-                'allIndividuals'
-            ]
-        }
-    ]
-}
-
 snapshots['TestIndividualQuery::test_query_individuals_by_search_tax_id_filter_0_with_permission 1'] = {
     'data': {
         'allIndividuals': {
@@ -815,17 +815,23 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_
 snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_accounts_0_with_permissions 1'] = {
     'data': {
         'individual': {
+            'accounts': {
+                'edges': [
+                    {
+                        'node': {
+                            'dataFields': '{"card_expiry_date": "2022-01-01", "card_number": "123", "financial_institution": "123", "name_of_cardholder": "Marek", "number": "123"}',
+                            'name': 'bank'
+                        }
+                    },
+                    {
+                        'node': {
+                            'dataFields': '{"delivery_phone_number": "123456789", "financial_institution": "123", "number": "321", "provider": "Provider", "service_provider_code": "ABC"}',
+                            'name': 'mobile'
+                        }
+                    }
+                ]
+            },
             'birthDate': '1943-07-30',
-            'accounts': [
-                {
-                    'individualTabData': '{"card_expiry_date": "2022-01-01", "card_number": "123", "name_of_cardholder": "Marek", "number": "123", "financial_institution": "123"}',
-                    'name': 'Bank'
-                },
-                {
-                    'individualTabData': '{"delivery_phone_number": "123456789", "provider": "Provider", "service_provider_code": "ABC", "number": "321", "financial_institution": "123"}',
-                    'name': 'Mobile'
-                }
-            ],
             'familyName': 'Butler',
             'fullName': 'Benjamin Butler',
             'givenName': 'Benjamin',
@@ -837,14 +843,15 @@ snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_
 snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_accounts_1_without_permissions 1'] = {
     'data': {
         'individual': {
+            'accounts': {
+                'edges': [
+                ]
+            },
             'birthDate': '1943-07-30',
-            'accounts': [
-            ],
             'familyName': 'Butler',
             'fullName': 'Benjamin Butler',
             'givenName': 'Benjamin',
             'phoneNo': '(953)682-4596'
-            ''
         }
     }
 }

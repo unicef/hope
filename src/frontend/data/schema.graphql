@@ -3,6 +3,38 @@ schema {
   mutation: Mutations
 }
 
+type AccountNode implements Node {
+  id: ID!
+  rdiMergeStatus: AccountRdiMergeStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode!
+  number: String
+  data: JSONString!
+  isUnique: Boolean!
+  active: Boolean!
+  name: String
+  dataFields: JSONString
+}
+
+type AccountNodeConnection {
+  pageInfo: PageInfo!
+  edges: [AccountNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type AccountNodeEdge {
+  node: AccountNode
+  cursor: String!
+}
+
+input AccountObjectType {
+  name: String!
+  approveStatus: Boolean
+  dataFields: GenericScalar
+}
+
 enum AccountRdiMergeStatus {
   PENDING
   MERGED
@@ -36,20 +68,6 @@ input AccountabilitySampleSizeInput {
 type AccountabilitySampleSizeNode {
   numberOfRecipients: Int
   sampleSize: Int
-}
-
-type AccountsNode implements Node {
-  id: ID!
-  rdiMergeStatus: AccountRdiMergeStatus!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  individual: IndividualNode!
-  number: String
-  data: JSONString!
-  isUnique: Boolean!
-  active: Boolean!
-  name: String
-  individualTabData: JSONString
 }
 
 enum Action {
@@ -115,7 +133,6 @@ input AddIndividualDataObjectType {
   role: String!
   documents: [IndividualDocumentObjectType]
   identities: [IndividualIdentityObjectType]
-  paymentChannels: [BankTransferObjectType]
   businessArea: String
   preferredLanguage: String
   flexFields: Arg
@@ -258,50 +275,6 @@ scalar Arg
 
 type AssignFundsCommitmentsMutation {
   paymentPlan: PaymentPlanNode
-}
-
-type BankAccountInfoNode implements Node {
-  id: ID!
-  rdiMergeStatus: BankAccountInfoRdiMergeStatus!
-  isOriginal: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  isRemoved: Boolean!
-  removedDate: DateTime
-  lastSyncAt: DateTime
-  individual: IndividualNode!
-  bankName: String!
-  bankAccountNumber: String!
-  bankBranchName: String!
-  accountHolderName: String!
-  copiedFrom: BankAccountInfoNode
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): BankAccountInfoNodeConnection!
-  type: String
-}
-
-type BankAccountInfoNodeConnection {
-  pageInfo: PageInfo!
-  edges: [BankAccountInfoNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type BankAccountInfoNodeEdge {
-  node: BankAccountInfoNode
-  cursor: String!
-}
-
-enum BankAccountInfoRdiMergeStatus {
-  PENDING
-  MERGED
-}
-
-input BankTransferObjectType {
-  type: String!
-  bankName: String!
-  bankAccountNumber: String!
-  bankBranchName: String
-  accountHolderName: String!
 }
 
 type BeneficiaryGroupNode implements Node {
@@ -997,13 +970,11 @@ enum DocumentStatus {
   INVALID
 }
 
-input EditBankTransferObjectType {
+input EditAccountObjectType {
+  name: String
+  approveStatus: Boolean
   id: ID!
-  type: String!
-  bankName: String!
-  bankAccountNumber: String!
-  bankBranchName: String
-  accountHolderName: String!
+  dataFields: GenericScalar
 }
 
 input EditIndividualDocumentObjectType {
@@ -1316,6 +1287,8 @@ type GenericPaymentPlanNode {
   totalUndeliveredQuantity: Float
   canCreatePaymentVerificationPlan: Boolean
 }
+
+scalar GenericScalar
 
 input GetAccountabilityCommunicationMessageSampleSizeInput {
   households: [ID]
@@ -1942,10 +1915,9 @@ type IndividualNode implements Node {
   identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  bankAccountInfo: BankAccountInfoNode
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  accounts: [AccountsNode]
+  accounts(offset: Int, before: String, after: String, first: Int, last: Int): AccountNodeConnection
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
@@ -1964,7 +1936,6 @@ type IndividualNode implements Node {
   role: String
   age: Int
   sanctionListLastCheck: DateTime
-  paymentChannels: [BankAccountInfoNode]
   importId: String
 }
 
@@ -2076,9 +2047,8 @@ input IndividualUpdateDataObjectType {
   identities: [IndividualIdentityObjectType]
   identitiesToRemove: [ID]
   identitiesToEdit: [EditIndividualIdentityObjectType]
-  paymentChannels: [BankTransferObjectType]
-  paymentChannelsToEdit: [EditBankTransferObjectType]
-  paymentChannelsToRemove: [ID]
+  accounts: [AccountObjectType]
+  accountsToEdit: [EditAccountObjectType]
   preferredLanguage: String
   flexFields: Arg
   paymentDeliveryPhoneNo: String
@@ -2249,7 +2219,7 @@ type Mutations {
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], approvedPaymentChannelsToCreate: [Int], approvedPaymentChannelsToEdit: [Int], approvedPaymentChannelsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveIndividualDataChange(approvedAccountsToCreate: [Int], approvedAccountsToEdit: [Int], approvedDocumentsToCreate: [Int], approvedDocumentsToEdit: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToEdit: [Int], approvedIdentitiesToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
@@ -2476,14 +2446,9 @@ type PaymentNode implements Node {
   verification: PaymentVerificationNode
   distributionModality: String
   serviceProvider: FinancialServiceProviderNode
-  debitCardNumber: String
-  debitCardIssuer: String
   totalPersonsCovered: Int
   snapshotCollectorFullName: String
-  snapshotCollectorDeliveryPhoneNo: String
-  snapshotCollectorBankName: String
-  snapshotCollectorBankAccountNumber: String
-  snapshotCollectorDebitCardNumber: String
+  snapshotCollectorAccountData: JSONString
 }
 
 type PaymentNodeConnection {
@@ -3304,6 +3269,8 @@ type Query {
   roleChoices: [ChoiceObject]
   documentTypeChoices: [ChoiceObject]
   identityTypeChoices: [ChoiceObject]
+  accountTypeChoices: [ChoiceObject]
+  accountFinancialInstitutionChoices: [ChoiceObject]
   countriesChoices: [ChoiceObject]
   observedDisabilityChoices: [ChoiceObject]
   severityOfDisabilityChoices: [ChoiceObject]
