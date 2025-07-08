@@ -3,7 +3,6 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
     HouseholdCollectionFactory,
@@ -18,14 +17,14 @@ from hct_mis_api.apps.household.models import (
     MALE,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
     Document,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import Account, DeliveryMechanism
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
+from hct_mis_api.apps.payment.models import Account, AccountType, DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.import_program_population import (
@@ -128,6 +127,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        generate_delivery_mechanisms()
         cls.afghanistan = create_afghanistan()
         country = CountryFactory()
         country_origin = CountryFactory(
@@ -205,15 +205,12 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             partner=PartnerFactory(),
         )
 
-        cls.bank_account_info = BankAccountInfoFactory(
-            individual=cls.individuals[0],
-        )
-
-        cls.delivery_mechanism = DeliveryMechanism.objects.create(name="Mobile Money", code="mobile_money")
+        cls.delivery_mechanism = DeliveryMechanism.objects.get(code="mobile_money")
         cls.delivery_mechanism_data = Account(
             individual=cls.individuals[0],
             data={"phone_number_test": "1234567890"},
             rdi_merge_status=MergeStatusModel.MERGED,
+            account_type=AccountType.objects.get(key="mobile"),
         )
         cls.delivery_mechanism_data.save()
 
@@ -232,10 +229,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
         self.assertEqual(
             Document.pending_objects.count(),
-            0,
-        )
-        self.assertEqual(
-            BankAccountInfo.pending_objects.count(),
             0,
         )
         self.assertEqual(
@@ -264,10 +257,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
         self.assertEqual(
             Document.pending_objects.count(),
-            1,
-        )
-        self.assertEqual(
-            BankAccountInfo.pending_objects.count(),
             1,
         )
         self.assertEqual(
@@ -425,31 +414,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             pending_identity.individual,
             head_of_household_pending_individual,
         )
-
-        pending_bank_account_info = BankAccountInfo.pending_objects.first()
-        for field in (
-            "bank_name",
-            "bank_account_number",
-            "debit_card_number",
-            "bank_branch_name",
-            "account_holder_name",
-        ):
-            pending_bank_account_info_field = getattr(pending_bank_account_info, field)
-            bank_account_info_field = getattr(self.bank_account_info, field)
-            self.assertEqual(
-                pending_bank_account_info_field,
-                bank_account_info_field,
-            )
-
-        self.assertEqual(
-            pending_bank_account_info.rdi_merge_status,
-            MergeStatusModel.PENDING,
-        )
-        self.assertEqual(
-            pending_bank_account_info.individual,
-            head_of_household_pending_individual,
-        )
-
         pending_individual_role_in_household = IndividualRoleInHousehold.pending_objects.first()
         self.assertEqual(
             pending_individual_role_in_household.household.unicef_id,
