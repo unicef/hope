@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
-    BankAccountInfo,
     Household,
     Individual,
     PendingDocument,
@@ -258,22 +257,6 @@ class IndividualForm(forms.ModelForm):
 
         if "household" in self.Meta.fields:
             self.fields["household"].queryset = PendingHousehold.objects.all()
-
-
-# used in UkraineBaseRegistrationService
-class BankAccountInfoForm(forms.ModelForm):
-    class Meta:
-        model = BankAccountInfo
-        fields = []  # dynamically set in __init__
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        data = kwargs.get("data")
-        self.Meta.fields = list(data.keys()) if data else "__all__"  # type: ignore
-        super().__init__(*args, **kwargs)
-
-        # override queryset for Individual
-        if "individual" in self.Meta.fields:
-            self.fields["individual"].queryset = PendingIndividual.objects.all()
 
 
 # used in UkraineBaseRegistrationService

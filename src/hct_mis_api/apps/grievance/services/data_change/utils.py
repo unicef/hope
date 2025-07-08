@@ -24,6 +24,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
+    decode_id_string_required,
     encode_id_base64,
     encode_id_base64_required,
     serialize_flex_attributes,
@@ -35,7 +36,6 @@ from hct_mis_api.apps.household.models import (
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
     Document,
     DocumentType,
     Household,
@@ -43,6 +43,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import Account, AccountType
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:
@@ -219,37 +220,6 @@ def handle_edit_document(document_data: Dict) -> Document:
     return document
 
 
-def handle_add_payment_channel(payment_channel: Dict, individual: Individual) -> Optional[BankAccountInfo]:
-    payment_channel_type = payment_channel.get("type")
-    if payment_channel_type == "BANK_TRANSFER":
-        bank_name = payment_channel.get("bank_name")
-        bank_account_number = payment_channel.get("bank_account_number")
-        return BankAccountInfo(
-            individual=individual,
-            bank_name=bank_name,
-            bank_account_number=bank_account_number,
-            account_holder_name=payment_channel.get("account_holder_name", ""),
-            bank_branch_name=payment_channel.get("bank_branch_name", ""),
-            rdi_merge_status=MergeStatusModel.MERGED,
-        )
-    return None
-
-
-def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccountInfo]:
-    payment_channel_type = payment_channel.get("type")
-    payment_channel_id = decode_id_string(payment_channel.get("id"))
-
-    if payment_channel_type == "BANK_TRANSFER":
-        bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
-        bank_account_info.bank_name = payment_channel.get("bank_name")
-        bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
-        bank_account_info.account_holder_name = payment_channel.get("account_holder_name", "")
-        bank_account_info.bank_branch_name = payment_channel.get("bank_branch_name", "")
-        return bank_account_info
-
-    return None
-
-
 def handle_add_identity(identity: Dict, individual: Individual) -> IndividualIdentity:
     partner_name = identity.get("partner")
     country_code = identity.get("country")
@@ -287,6 +257,45 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     identity.partner = partner
     identity.country = country
     return identity
+
+
+def prepare_edit_accounts_save(accounts: List[Dict]) -> List[Dict]:
+    items = []
+    for account in accounts:
+        _id = account.pop("id")
+        delivery_mechanism_data = get_object_or_404(Account, id=decode_id_string_required(_id))
+        data = {
+            "id": _id,
+            "name": delivery_mechanism_data.account_type.key,
+            "approve_status": False,
+            "data_fields": [
+                {
+                    "name": field,
+                    "value": value,
+                    "previous_value": delivery_mechanism_data.account_data.get(field),
+                }
+                for field, value in account["data_fields"].items()
+            ],
+        }
+        items.append(data)
+    return items
+
+
+def handle_update_account(account: Dict) -> Optional[Account]:
+    account_instance = get_object_or_404(Account, id=decode_id_string(account.get("id")))
+    data_fields_dict = {field["name"]: field["value"] for field in account["data_fields"]}
+    account_instance.account_data = data_fields_dict
+    return account_instance
+
+
+def handle_add_account(account: Dict, individual: Individual) -> Account:
+    account_instance = Account(
+        individual=individual,
+        account_type=AccountType.objects.get(key=account["name"]),
+        rdi_merge_status=individual.rdi_merge_status,
+    )
+    account_instance.account_data = account["data_fields"]
+    return account_instance
 
 
 def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:
@@ -363,24 +372,6 @@ def prepare_previous_identities(identities_to_remove_with_approve_status: List[D
     return previous_identities
 
 
-def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_status: List[Dict]) -> Dict[str, Any]:
-    previous_payment_channels = {}
-    for payment_channel_data in payment_channels_to_remove_with_approve_status:
-        payment_channel_id: str = payment_channel_data.get("value", "")
-        bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(payment_channel_id))
-        previous_payment_channels[payment_channel_id] = {
-            "id": payment_channel_id,
-            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
-            "bank_name": bank_account_info.bank_name,
-            "bank_account_number": bank_account_info.bank_account_number,
-            "account_holder_name": bank_account_info.account_holder_name,
-            "bank_branch_name": bank_account_info.bank_branch_name,
-            "type": "BANK_TRANSFER",
-        }
-
-    return previous_payment_channels
-
-
 def prepare_edit_identities(identities: List[Dict]) -> List[Dict]:
     edited_identities = []
     for identity_data in identities:
@@ -412,49 +403,6 @@ def prepare_edit_identities(identities: List[Dict]) -> List[Dict]:
             }
         )
     return edited_identities
-
-
-def prepare_edit_payment_channel(payment_channels: List[Dict]) -> List[Dict]:
-    items = []
-
-    handlers = {
-        "BANK_TRANSFER": handle_bank_transfer_payment_method,
-    }
-
-    for pc in payment_channels:
-        if type_ := pc.get("type"):
-            if handler := handlers.get(type_):
-                items.append(handler(pc))
-    return items
-
-
-def handle_bank_transfer_payment_method(pc: Dict) -> Dict:
-    bank_account_number = pc.get("bank_account_number")
-    bank_name = pc.get("bank_name")
-    encoded_id = pc.get("id")
-    payment_channel_type = pc.get("type")
-    bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(encoded_id))
-    return {
-        "approve_status": False,
-        "value": {
-            "id": encoded_id,
-            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
-            "bank_account_number": bank_account_number,
-            "bank_name": bank_name,
-            "type": payment_channel_type,
-            "account_holder_name": pc.get("account_holder_name", ""),
-            "bank_branch_name": pc.get("bank_branch_name", ""),
-        },
-        "previous_value": {
-            "id": encoded_id,
-            "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
-            "bank_account_number": bank_account_info.bank_account_number,
-            "bank_name": bank_account_info.bank_name,
-            "type": payment_channel_type,
-            "account_holder_name": bank_account_info.account_holder_name,
-            "bank_branch_name": bank_account_info.bank_branch_name,
-        },
-    }
 
 
 def generate_filename() -> str:

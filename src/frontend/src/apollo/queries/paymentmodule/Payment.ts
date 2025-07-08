@@ -8,10 +8,7 @@ export const Payment = gql`
       distributionModality
       status
       statusDate
-      snapshotCollectorBankName
-      snapshotCollectorBankAccountNumber
-      debitCardNumber
-      debitCardIssuer
+      snapshotCollectorAccountData
       parent {
         id
         name

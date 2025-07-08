@@ -38,10 +38,6 @@ from hct_mis_api.apps.activity_log.schema import LogEntryNode
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.field_attributes.lookup_functions import (
-    get_debit_card_issuer,
-    get_debit_card_number,
-)
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import (
@@ -315,17 +311,12 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     distribution_modality = graphene.String()
     service_provider = graphene.Field(FinancialServiceProviderNode)
     household_snapshot = graphene.Field(PaymentHouseholdSnapshotNode)
-    debit_card_number = graphene.String()
-    debit_card_issuer = graphene.String()
     additional_collector_name = graphene.String()
     additional_document_type = graphene.String()
     additional_document_number = graphene.String()
     total_persons_covered = graphene.Int(description="Get from Household Snapshot")
     snapshot_collector_full_name = graphene.String(description="Get from Household Snapshot")
-    snapshot_collector_delivery_phone_no = graphene.String(description="Get from Household Snapshot")
-    snapshot_collector_bank_name = graphene.String(description="Get from Household Snapshot")
-    snapshot_collector_bank_account_number = graphene.String(description="Get from Household Snapshot")
-    snapshot_collector_debit_card_number = graphene.String(description="Get from Household Snapshot")
+    snapshot_collector_account_data = graphene.JSONString(description="Get from Household Snapshot")
     fsp_auth_code = graphene.String()
 
     class Meta:
@@ -362,12 +353,6 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_service_provider(self, info: Any) -> Optional[FinancialServiceProvider]:
         return self.financial_service_provider
 
-    def resolve_debit_card_number(self, info: Any) -> str:
-        return get_debit_card_number(self.collector)
-
-    def resolve_debit_card_issuer(self, info: Any) -> str:
-        return get_debit_card_issuer(self.collector)
-
     def resolve_total_persons_covered(self, info: Any) -> Optional[int]:
         # TODO: migrate old data maybe?
         if household_snapshot := getattr(self, "household_snapshot", None):
@@ -388,23 +373,9 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_snapshot_collector_full_name(self, info: Any) -> Any:
         return PaymentNode.get_collector_field(self, "full_name")
 
-    def resolve_snapshot_collector_delivery_phone_no(self, info: Any) -> Any:
-        return PaymentNode.get_collector_field(self, "payment_delivery_phone_no")
-
-    def resolve_snapshot_collector_bank_name(self, info: Any) -> Optional[str]:
-        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
-            return bank_account_info.get("bank_name")
-        return None
-
-    def resolve_snapshot_collector_bank_account_number(self, info: Any) -> Optional[str]:
-        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
-            return bank_account_info.get("bank_account_number")
-        return None
-
-    def resolve_snapshot_collector_debit_card_number(self, info: Any) -> Optional[str]:
-        if bank_account_info := PaymentNode.get_collector_field(self, "bank_account_info"):
-            return bank_account_info.get("debit_card_number")
-        return None
+    def resolve_snapshot_collector_account_data(self, info: Any) -> Any:
+        # TODO MB refactor FE
+        return PaymentNode.get_collector_field(self, "account_data")
 
     @classmethod
     def get_collector_field(cls, payment: "Payment", field_name: str) -> Union[None, str, Dict]:

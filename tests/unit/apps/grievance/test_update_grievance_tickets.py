@@ -338,15 +338,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "number": "2222",
                                 }
                             ],
-                            "paymentChannels": [
-                                {
-                                    "type": "BANK_TRANSFER",
-                                    "bankName": "privatbank",
-                                    "bankAccountNumber": 2356789789789789,
-                                    "accountHolderName": "Holder Name Updated",
-                                    "bankBranchName": "Branch Name Updated",
-                                },
-                            ],
                         }
                     }
                 },
@@ -372,15 +363,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "photo": "test_file_name.jpg",
                         "photoraw": "test_file_name.jpg",
                     }
-                ],
-                "payment_channels": [
-                    {
-                        "type": "BANK_TRANSFER",
-                        "bank_name": "privatbank",
-                        "bank_account_number": "2356789789789789",
-                        "account_holder_name": "Holder Name Updated",
-                        "bank_branch_name": "Branch Name Updated",
-                    },
                 ],
                 "identities": [{"partner": "UNHCR", "country": "POL", "number": "2222"}],
                 "full_name": "John Example",
@@ -538,10 +520,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
                 "flex_fields": {},
                 "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
-                "payment_channels": [],
-                "payment_channels_to_edit": [],
-                "payment_channels_to_remove": [],
-                "previous_payment_channels": {},
                 "documents_to_edit": [],
                 "previous_documents": {},
                 "documents_to_remove": [],
