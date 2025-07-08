@@ -4,12 +4,13 @@ import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
 import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { renderUserName } from '@utils/utils';
+import { renderUserName, showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,7 +43,7 @@ interface MessagesProps {
 function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
   const { businessAreaSlug, programSlug } = useBaseUrl();
-
+  const { showMessage } = useSnackbar();
   const { data: meData, isLoading: meLoading } = useQuery({
     queryKey: ['profile', businessAreaSlug, programSlug],
     queryFn: () => {
@@ -75,7 +76,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
         queryKey: ['businessAreasFeedbacksRetrieve', id],
       });
     } catch (error) {
-      console.error('Error creating feedback message:', error);
+      showApiErrorMessages(error, showMessage);
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../../programContext';
@@ -52,7 +53,11 @@ export const ActivateProgram = ({
       showMessage(t('Programme activated.'));
       setOpen(false);
     } catch (error) {
-      showMessage(t('Programme activate action failed.'));
+      showApiErrorMessages(
+        error,
+        showMessage,
+        t('Programme activate action failed.'),
+      );
     }
   };
   return (

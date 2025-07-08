@@ -39,7 +39,10 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
 } from '@utils/constants';
-import { thingForSpecificGrievanceType } from '@utils/utils';
+import {
+  showApiErrorMessages,
+  thingForSpecificGrievanceType,
+} from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -317,9 +320,10 @@ const CreateGrievancePage = (): ReactElement => {
             showMessage(msg);
             navigate(url);
           } catch (e) {
-            showMessage(
-              e.message ||
-                'An error occurred while creating the grievance ticket',
+            showApiErrorMessages(
+              e,
+              showMessage,
+              'An error occurred while creating the grievance ticket',
             );
           }
         } else {

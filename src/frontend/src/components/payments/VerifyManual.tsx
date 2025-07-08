@@ -1,3 +1,11 @@
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -5,22 +13,15 @@ import {
   DialogTitle,
   Grid2 as Grid,
 } from '@mui/material';
+import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '@containers/dialogs/Dialog';
-import { DialogActions } from '@containers/dialogs/DialogActions';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
-import { PatchedPaymentVerificationUpdate } from '@restgenerated/models/PatchedPaymentVerificationUpdate';
 
 export interface Props {
   paymentVerificationId: string;
@@ -67,7 +68,7 @@ export function VerifyManual({
       setVerifyManualDialogOpen(false);
       showMessage(t('Payment has been verified.'));
     } catch (e) {
-      showMessage(e.message || t('Failed to verify payment'));
+      showApiErrorMessages(e, showMessage);
     }
   };
 

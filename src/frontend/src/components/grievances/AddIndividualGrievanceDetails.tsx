@@ -3,7 +3,11 @@ import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { getFlexFieldTextValue, renderBoolean } from '@utils/utils';
+import {
+  getFlexFieldTextValue,
+  renderBoolean,
+  showApiErrorMessages,
+} from '@utils/utils';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -16,6 +20,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { error } from 'console';
 
 function AddIndividualGrievanceDetails({
   ticket,
@@ -189,7 +194,7 @@ function AddIndividualGrievanceDetails({
                       showMessage(t('Changes Approved'));
                     }
                   } catch (e) {
-                    showMessage(t('An error occurred'));
+                    showApiErrorMessages(error, showMessage);
                   }
                 })
               }

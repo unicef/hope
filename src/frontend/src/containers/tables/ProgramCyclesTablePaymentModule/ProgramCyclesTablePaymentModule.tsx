@@ -13,7 +13,11 @@ import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
+import {
+  decodeIdString,
+  programCycleStatusToColor,
+  showApiErrorMessages,
+} from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -152,9 +156,7 @@ export const ProgramCyclesTablePaymentModule = ({
       });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 

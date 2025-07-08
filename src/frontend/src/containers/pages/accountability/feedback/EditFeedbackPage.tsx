@@ -31,6 +31,7 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
+import { showApiErrorMessages } from '@utils/utils';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string().required('Issue Type is required').nullable(),
@@ -173,7 +174,7 @@ const EditFeedbackPage = (): ReactElement => {
           showMessage(t('Feedback updated'));
           navigate(`/${baseUrl}/grievance/feedback/${id}`);
         } catch (e) {
-          showMessage(e.message || 'Error updating feedback');
+          showApiErrorMessages(e, showMessage, 'Error updating feedback');
         }
       }}
       validationSchema={validationSchema}

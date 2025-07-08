@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { RestService } from '@restgenerated/index';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface ProgramCycleDetailsHeaderProps {
   programCycle: ProgramCycleList;
@@ -108,9 +109,7 @@ export const ProgramCycleDetailsHeader = ({
       });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -123,9 +122,7 @@ export const ProgramCycleDetailsHeader = ({
       });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 

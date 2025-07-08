@@ -20,6 +20,7 @@ import { ImportXlsx } from './ImportXlsx';
 import { ReactElement } from 'react';
 import { PaymentVerificationPlanDetails } from '@restgenerated/models/PaymentVerificationPlanDetails';
 import { PaymentVerificationPlan } from '@restgenerated/models/PaymentVerificationPlan';
+import { showApiErrorMessages } from '@utils/utils';
 
 const StyledLink = styled.a`
   text-decoration: none;
@@ -162,9 +163,7 @@ export function VerificationPlanActions({
                             ),
                           );
                         } catch (error) {
-                          showMessage(
-                            error?.message || t('Error while exporting'),
-                          );
+                          showApiErrorMessages(error, showMessage);
                         }
                       }}
                     >
@@ -230,10 +229,7 @@ export function VerificationPlanActions({
                             t('Verification plan marked as invalid.'),
                           );
                         } catch (error) {
-                          showMessage(
-                            error?.message ||
-                              t('Error while marking as invalid'),
-                          );
+                          showApiErrorMessages(error, showMessage);
                         }
                       }}
                     >

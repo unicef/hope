@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { decodeIdString } from '@utils/utils';
+import { decodeIdString, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -63,9 +63,7 @@ const DeleteProgramCycle = ({
       await mutateAsync();
       showMessage(t('Programme Cycle Deleted'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 

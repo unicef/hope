@@ -24,7 +24,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation } from '@tanstack/react-query';
-import { today, tomorrow } from '@utils/utils';
+import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
 import { format } from 'date-fns';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
@@ -34,6 +34,7 @@ import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useProgramContext } from '../../../programContext';
+import { error } from 'console';
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanDetail;
@@ -129,7 +130,7 @@ export function CreateFollowUpPaymentPlan({
       showMessage(t('Payment Plan Created'));
       navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      showMessage(e);
+      showApiErrorMessages(error, showMessage);
     }
   };
 

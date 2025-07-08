@@ -23,7 +23,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
-import { today, tomorrow } from '@utils/utils';
+import { showApiErrorMessages, today, tomorrow } from '@utils/utils';
 import { DividerLine } from '@core/DividerLine';
 import { FieldBorder } from '@core/FieldBorder';
 import { GreyText } from '@core/GreyText';
@@ -127,7 +127,7 @@ export function CreateFollowUpPaymentPlan({
       showMessage(t('Payment Plan Created'));
       navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      showMessage(e);
+      showApiErrorMessages(e, showMessage);
     }
   };
 

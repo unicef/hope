@@ -1315,3 +1315,33 @@ export const fieldNameToLabel = (fieldName: string): string => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 };
+
+export function showApiErrorMessages(
+  error: any,
+  showMessage: (msg: string) => void,
+  fallbackMsg: string = 'An error occurred',
+): void {
+  if (error && typeof error === 'object' && Array.isArray(error.body)) {
+    error.body.forEach((msg: string) => {
+      if (msg) showMessage(msg);
+    });
+    return;
+  }
+  if (error && typeof error === 'object') {
+    if (typeof error.body === 'string') {
+      showMessage(error.body);
+      return;
+    } else if (typeof error.body === 'object' && error.body !== null) {
+      Object.values(error.body)
+        .flat()
+        .forEach((msg: string) => {
+          if (msg) showMessage(msg);
+        });
+      return;
+    } else if (typeof error.message === 'string') {
+      showMessage(error.message);
+      return;
+    }
+  }
+  showMessage(fallbackMsg);
+}

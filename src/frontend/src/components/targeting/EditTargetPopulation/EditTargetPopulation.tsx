@@ -26,6 +26,7 @@ import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDe
 import { useMutation } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface EditTargetPopulationProps {
   paymentPlan: TargetPopulationDetail;
@@ -151,7 +152,7 @@ const EditTargetPopulation = ({
         },
       );
     } catch (e) {
-      console.error(e);
+      showApiErrorMessages(e, showMessage);
     }
   };
 

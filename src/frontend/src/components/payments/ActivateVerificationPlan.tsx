@@ -1,15 +1,16 @@
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../programContext';
 
 export interface ActivateVerificationPlanProps {
@@ -47,7 +48,7 @@ export function ActivateVerificationPlan({
 
       // TODO: Implement proper React Query cache invalidation if needed
     } catch (error) {
-      showMessage(error?.message || t('Error while submitting'));
+      showApiErrorMessages(error, showMessage);
     }
   };
   return (

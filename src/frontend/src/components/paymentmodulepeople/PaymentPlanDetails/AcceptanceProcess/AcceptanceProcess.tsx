@@ -17,6 +17,7 @@ import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
@@ -61,7 +62,7 @@ export function AcceptanceProcess({
       await exportPdfMutation.mutateAsync();
       showMessage(t('PDF generated. Please check your email.'));
     } catch (e) {
-      showMessage(e.message || t('Failed to export PDF'));
+      showApiErrorMessages(e, showMessage, t('Failed to export PDF'));
     }
   };
 
@@ -69,7 +70,7 @@ export function AcceptanceProcess({
     hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
     (paymentPlan.status === PaymentPlanStatusEnum.ACCEPTED ||
       paymentPlan.status === PaymentPlanStatusEnum.FINISHED ||
-    paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW);
+      paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW);
 
   return (
     <Box m={5}>

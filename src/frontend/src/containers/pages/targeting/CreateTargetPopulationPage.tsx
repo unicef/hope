@@ -18,6 +18,7 @@ import {
   getTargetingCriteriaVariables,
   HhIndIdValidation,
 } from '@utils/targetingUtils';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -117,7 +118,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
       showMessage(t('Target Population Created'));
       navigate(`/${baseUrl}/target-population/${res.id}`);
     } catch (e) {
-      showMessage(e.message);
+      showApiErrorMessages(e, showMessage);
     }
   };
 

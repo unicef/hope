@@ -25,6 +25,7 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -110,13 +111,7 @@ function ExcludeSection({
       showMessage(`${beneficiaryGroup?.groupLabelPlural} exclusion started`);
       setExclusionsOpen(false);
     } catch (e) {
-      if (e?.body?.detail) {
-        showMessage(e.body.detail);
-      } else if (e?.message) {
-        showMessage(e.message);
-      } else {
-        showMessage('Unknown error');
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 
