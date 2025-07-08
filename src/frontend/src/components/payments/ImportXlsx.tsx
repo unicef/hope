@@ -11,6 +11,8 @@ import { LoadingButton } from '@core/LoadingButton';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
 import { PaymentVerificationPlanImport } from '@restgenerated/models/PaymentVerificationPlanImport';
+import { showApiErrorMessages } from '@utils/utils';
+import { error } from 'console';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -68,7 +70,7 @@ export const ImportXlsx = ({
         setOpenImport(false);
         showMessage(t('Your import was successful!'));
       } catch (e) {
-        showMessage(e.message || t('Failed to import file'));
+        showApiErrorMessages(error, showMessage, t('Failed to import file'));
       }
     }
   };

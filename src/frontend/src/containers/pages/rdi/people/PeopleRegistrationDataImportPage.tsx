@@ -12,7 +12,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -64,7 +64,7 @@ function PeopleRegistrationDataImportPage(): ReactElement {
     try {
       await mutateAsync();
     } catch (error) {
-      showMessage(error.message);
+      showApiErrorMessages(error, showMessage);
     }
   };
 

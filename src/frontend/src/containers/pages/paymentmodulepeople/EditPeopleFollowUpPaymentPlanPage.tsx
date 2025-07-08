@@ -13,7 +13,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { today } from '@utils/utils';
+import { showApiErrorMessages, today } from '@utils/utils';
 import { Form, Formik } from 'formik';
 import moment from 'moment';
 import { ReactElement } from 'react';
@@ -152,7 +152,7 @@ const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
       showMessage(t('Follow-up Payment Plan Edited'));
       navigate(`/${baseUrl}/payment-module/followup-payment-plans/${res.id}`);
     } catch (e) {
-      showMessage(e);
+      showApiErrorMessages(e, showMessage);
     }
   };
 

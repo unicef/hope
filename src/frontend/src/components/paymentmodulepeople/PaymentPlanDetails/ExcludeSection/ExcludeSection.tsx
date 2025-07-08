@@ -26,6 +26,7 @@ import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -125,7 +126,7 @@ export function ExcludeSection({
         setExclusionsOpen(false);
       }
     } catch (e) {
-      showMessage(e.message || 'An error occurred');
+      showApiErrorMessages(e, showMessage);
     }
   };
 

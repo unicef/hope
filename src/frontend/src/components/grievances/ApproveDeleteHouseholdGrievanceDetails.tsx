@@ -27,6 +27,7 @@ import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { RestService } from '@restgenerated/services/RestService';
 import { useProgramContext } from 'src/programContext';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 const EditIcon = styled(Edit)`
   color: ${({ theme }) => theme.hctPalette.darkerBlue};
@@ -135,10 +136,8 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
           }
           setDialogOpen(false);
           resetForm();
-        } catch (e: any) {
-          const errorMessage =
-            e?.message || e?.response?.data?.message || 'An error occurred';
-          showMessage(errorMessage);
+        } catch (error) {
+          showApiErrorMessages(error, showMessage);
         }
       }}
     >

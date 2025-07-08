@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { ReactElement } from 'react';
+import { showApiErrorMessages } from '@utils/utils';
 
 const RefuseRdiForm = ({
   registration,
@@ -45,7 +46,7 @@ const RefuseRdiForm = ({
           onClose();
           showMessage('RDI refused');
         } catch (e) {
-          showMessage(e.message || 'Failed to refuse RDI');
+          showApiErrorMessages(e, showMessage, t('Failed to refuse RDI'));
         }
       }}
     >

@@ -19,6 +19,7 @@ import {
   decodeIdString,
   formatCurrencyWithSymbol,
   programCycleStatusToColor,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -125,9 +126,7 @@ const ProgramCyclesTablePaymentModule = ({
       });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 

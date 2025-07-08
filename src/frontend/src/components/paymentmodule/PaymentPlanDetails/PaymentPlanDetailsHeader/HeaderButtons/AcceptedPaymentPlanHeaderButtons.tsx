@@ -22,6 +22,7 @@ import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 import { ReactElement, useState } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canSendToPaymentGateway: boolean;
@@ -152,9 +153,7 @@ export function AcceptedPaymentPlanHeaderButtons({
       });
       handleClose();
     } catch (e: any) {
-      showMessage(
-        e?.body?.errors || e?.message || 'An error occurred while exporting',
-      );
+      showApiErrorMessages(e, showMessage);
     }
   };
 

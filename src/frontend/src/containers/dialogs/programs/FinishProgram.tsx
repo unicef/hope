@@ -14,6 +14,7 @@ import { useProgramContext } from '../../../programContext';
 import { useNavigate } from 'react-router-dom';
 import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface FinishProgramProps {
   program: ProgramDetail;
@@ -35,7 +36,8 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
           businessAreaSlug: businessArea,
           slug: program.slug,
         }),
-      onSuccess: () => {
+      onSuccess: (res) => {
+        console.log('res', res);
         queryClient.invalidateQueries({
           queryKey: ['program', businessArea, program.id],
         });
@@ -45,17 +47,19 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
   const finishProgram = async (): Promise<void> => {
     try {
       await finishProgramMutation();
-
       setSelectedProgram({
         ...selectedProgram,
         status: ProgramStatus.FINISHED,
       });
-
       showMessage(t('Programme finished.'));
       navigate(`/${baseUrl}/details/${program.slug}`);
       setOpen(false);
-    } catch (error) {
-      showMessage(error.message || t('Failed to finish programme.'));
+    } catch (error: any) {
+      showApiErrorMessages(
+        error,
+        showMessage,
+        t('Failed to finish programme.'),
+      );
     }
   };
   return (

@@ -45,7 +45,7 @@ import {
 } from '../../../../config/permissions';
 import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 import { createApiParams } from '@utils/apiUtils';
-import { decodeIdString } from '@utils/utils';
+import { decodeIdString, showApiErrorMessages } from '@utils/utils';
 
 // Constants for feedback issue types
 const FEEDBACK_ISSUE_TYPE = {
@@ -263,7 +263,7 @@ function CreateFeedbackPage(): ReactElement {
             showMessage(t('Feedback created'));
             navigate(`/${baseUrl}/grievance/feedback/${response.id}`);
           } catch (e) {
-            showMessage(e.message || 'Error creating feedback');
+            showApiErrorMessages(e, showMessage, 'Error creating feedback');
           }
         } else {
           handleNext();

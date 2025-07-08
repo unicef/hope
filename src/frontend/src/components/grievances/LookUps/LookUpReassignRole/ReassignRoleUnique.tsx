@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRole';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
 
 const ReassignRoleButton = styled(Button)`
   padding: 25px;
@@ -84,8 +85,8 @@ export function ReassignRoleUnique({
         };
         try {
           await reassignRoleMutation(requestBody);
-        } catch (e) {
-          console.error('Reassign role failed:', e);
+        } catch (error) {
+          showApiErrorMessages(error, showMessage);
         }
       }}
     >
