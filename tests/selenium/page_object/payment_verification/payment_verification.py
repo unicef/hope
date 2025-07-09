@@ -22,6 +22,8 @@ class PaymentVerification(BaseComponents):
     verificationstatus = 'th[data-cy="verificationStatus"]'
     totaldeliveredquantity = 'th[data-cy="totalDeliveredQuantity"]'
     startdate = 'th[data-cy="startDate"]'
+    cycleTitleHeader = 'th[data-cy="cycleTitle"]'
+    cycleTitle = 'td[data-cy="cycle-title"]'
     updatedat = 'th[data-cy="updatedAt"]'
     cashPlanTableRow = 'tr[data-cy="cash-plan-table-row"]'
     statusContainer = 'div[data-cy="status-container"]'
@@ -94,6 +96,12 @@ class PaymentVerification(BaseComponents):
 
     def getStartdate(self) -> WebElement:
         return self.wait_for(self.startdate)
+
+    def getCycleTitleHeader(self) -> WebElement:
+        return self.wait_for(self.cycleTitleHeader)
+
+    def getCycleTitle(self) -> WebElement:
+        return self.wait_for(self.cycleTitle)
 
     def getUpdatedat(self) -> WebElement:
         return self.wait_for(self.updatedat)
