@@ -1340,14 +1340,13 @@ export function showApiErrorMessages(
     typeof error.body === 'object' &&
     error.body !== null
   ) {
-    Object.entries(error.body)
-      .forEach(([field, messages]) => {
-        if (Array.isArray(messages)) {
-          messages.forEach((msg: string) => {
-            if (msg) showMessage(`${field}: ${msg}`);
-          });
-        }
-      });
+    Object.entries(error.body).forEach(([field, messages]) => {
+      if (Array.isArray(messages)) {
+        messages.forEach((msg: string) => {
+          if (msg) showMessage(`${field}: ${msg}`);
+        });
+      }
+    });
     return;
   }
   // Handle top-level object of arrays (field errors)
