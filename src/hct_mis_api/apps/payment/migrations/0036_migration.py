@@ -6,10 +6,17 @@ from django.db import migrations, models
 def create_verification_summary(apps, schema_editor):  # pragma: no cover
     PaymentPlan = apps.get_model("payment", "PaymentPlan")
     PaymentVerificationSummary = apps.get_model("payment", "PaymentVerificationSummary")
-    for pp in PaymentPlan.objects.filter(
+
+    payment_plans = PaymentPlan.objects.filter(
         status="ACCEPTED", payment_verification_summary__isnull=True
-    ):
-        PaymentVerificationSummary.objects.create(payment_plan=pp)
+    ).only('id')
+
+    summaries_to_create = [
+        PaymentVerificationSummary(payment_plan=pp)
+        for pp in payment_plans
+    ]
+    if summaries_to_create:
+        PaymentVerificationSummary.objects.bulk_create(summaries_to_create)
 
 
 class Migration(migrations.Migration):
