@@ -21,6 +21,7 @@ import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
+
 export const GrievancesTablePage = (): ReactElement => {
   const { businessArea, baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();

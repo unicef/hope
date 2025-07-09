@@ -276,17 +276,19 @@ export const GrievancesFilters = ({
             </Grid>
           </Grid>
         )}
-        <Grid size={{ xs: 3 }}>
-          <RdiAutocompleteRestFilter
-            filter={filter}
-            name="registrationDataImport"
-            value={filter.registrationDataImport}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            setFilter={setFilter}
-          />
-        </Grid>
+        {!isAllPrograms && (
+          <Grid size={{ xs: 3 }}>
+            <RdiAutocompleteRestFilter
+              filter={filter}
+              name="registrationDataImport"
+              value={filter.registrationDataImport}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              setFilter={setFilter}
+            />
+          </Grid>
+        )}
         <Grid size={{ xs: 3 }}>
           <LanguageAutocompleteRestFilter
             filter={filter}

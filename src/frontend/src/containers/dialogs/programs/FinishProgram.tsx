@@ -36,10 +36,9 @@ export function FinishProgram({ program }: FinishProgramProps): ReactElement {
           businessAreaSlug: businessArea,
           slug: program.slug,
         }),
-      onSuccess: (res) => {
-        console.log('res', res);
+      onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['program', businessArea, program.id],
+          queryKey: ['program', businessArea, program.slug],
         });
       },
     });

@@ -11,18 +11,21 @@ import {
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
-import { UserChoices } from '@restgenerated/models/UserChoices';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
+import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
 import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
 import type { ProgramCreate } from '@restgenerated/models/ProgramCreate';
-import { PaginatedAreaTreeList } from '@restgenerated/models/PaginatedAreaTreeList';
+import { UserChoices } from '@restgenerated/models/UserChoices';
 import { RestService } from '@restgenerated/services/RestService';
 import type { DefaultError } from '@tanstack/query-core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { mapPartnerChoicesWithoutUnicef } from '@utils/utils';
+import {
+  mapPartnerChoicesWithoutUnicef,
+  showApiErrorMessages,
+} from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
 import { ReactElement, useState } from 'react';
@@ -66,6 +69,8 @@ export const CreateProgramPage = (): ReactElement => {
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
     });
 
   const queryClient = useQueryClient();
@@ -207,13 +212,7 @@ export const CreateProgramPage = (): ReactElement => {
       showMessage('Programme created.');
       navigate(`/${baseUrl}/details/${response.slug}`);
     } catch (error: any) {
-      if (error?.body?.detail) {
-        showMessage(error.body.detail);
-      } else if (error?.message) {
-        showMessage(error.message);
-      } else {
-        showMessage('An error occurred while creating the programme.');
-      }
+      showApiErrorMessages(error, showMessage);
     }
   };
 

@@ -36,29 +36,27 @@ export const ActivateProgram = ({
         slug: program.slug,
       }),
     onSuccess: () => {
-      queryClient.refetchQueries({
-        queryKey: ['program', businessArea, program.id],
-      });
-    },
-  });
-
-  const handleActivateProgram = async (): Promise<void> => {
-    try {
-      await activateProgram();
       setSelectedProgram({
         ...selectedProgram,
         status: ProgramStatus.ACTIVE,
       });
-
       showMessage(t('Programme activated.'));
+      queryClient.invalidateQueries({
+        queryKey: ['program', businessArea, program.slug],
+      });
       setOpen(false);
-    } catch (error) {
+    },
+    onError: (error) => {
       showApiErrorMessages(
         error,
         showMessage,
         t('Programme activate action failed.'),
       );
-    }
+    },
+  });
+
+  const handleActivateProgram = async (): Promise<void> => {
+    await activateProgram();
   };
   return (
     <span>
