@@ -96,6 +96,9 @@ export const AllPaymentPlansForTable = gql`
             id
             name
           }
+          programCycle{
+            title
+          }
           currency
           currencyName
           startDate

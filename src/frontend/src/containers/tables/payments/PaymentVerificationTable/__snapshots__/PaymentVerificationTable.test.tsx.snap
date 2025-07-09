@@ -74,7 +74,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
                   role="button"
                   tabindex="0"
                 >
-                  Payment Plan Status
+                  Verification Status
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -140,6 +140,31 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               </th>
               <th
                 class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
+                data-cy="cycleTitle"
+                scope="col"
+              >
+                <span
+                  class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc sc-jbAkgO fgxtAO css-7x9vt0-MuiButtonBase-root-MuiTableSortLabel-root"
+                  data-cy="table-label"
+                  role="button"
+                  tabindex="0"
+                >
+                  Programme Cycle Title
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-7ojauk-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1e9a4b0-MuiTableCell-root"
                 data-cy="updatedAt"
                 scope="col"
               >
@@ -173,8 +198,8 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT eJeVzL css-1dc80h3-MuiTableCell-root"
-                colspan="5"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT FMiPw css-1dc80h3-MuiTableCell-root"
+                colspan="6"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
@@ -187,8 +212,8 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT eJeVzL css-1dc80h3-MuiTableCell-root"
-                colspan="5"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT FMiPw css-1dc80h3-MuiTableCell-root"
+                colspan="6"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
@@ -201,8 +226,8 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT eJeVzL css-1dc80h3-MuiTableCell-root"
-                colspan="5"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT FMiPw css-1dc80h3-MuiTableCell-root"
+                colspan="6"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
@@ -215,8 +240,8 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT eJeVzL css-1dc80h3-MuiTableCell-root"
-                colspan="5"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT FMiPw css-1dc80h3-MuiTableCell-root"
+                colspan="6"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"
@@ -229,8 +254,8 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT eJeVzL css-1dc80h3-MuiTableCell-root"
-                colspan="5"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-jUkaYT FMiPw css-1dc80h3-MuiTableCell-root"
+                colspan="6"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-3sr0vz-MuiSkeleton-root"

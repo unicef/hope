@@ -11,7 +11,7 @@ export const headCells: HeadCell<PaymentPlanNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Payment Plan Status',
+    label: 'Verification Status',
     id: 'verificationStatus',
     numeric: false,
     dataCy: 'verificationStatus',
@@ -29,6 +29,13 @@ export const headCells: HeadCell<PaymentPlanNode>[] = [
     id: 'timeframe',
     numeric: false,
     dataCy: 'startDate',
+  },
+  {
+    disablePadding: false,
+    label: 'Programme Cycle Title',
+    id: 'cycleTitle',
+    numeric: false,
+    dataCy: 'cycleTitle',
   },
   {
     disablePadding: false,
