@@ -354,6 +354,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     partners = serializers.SerializerMethodField()
     registration_imports_total_count = serializers.SerializerMethodField()
     target_populations_count = serializers.SerializerMethodField()
+    pdu_fields = PeriodicFieldSerializer(many=True)  # type: ignore
 
     class Meta(ProgramListSerializer.Meta):
         fields = ProgramListSerializer.Meta.fields + (  # type: ignore
@@ -393,7 +394,7 @@ class PartnersDataSerializer(serializers.Serializer):
     areas = serializers.ListField(child=serializers.CharField())
 
 
-class PDUDataSerializer(serializers.Serializer):
+class PDUDataCreateSerializer(serializers.Serializer):
     subtype = serializers.ChoiceField(choices=PeriodicFieldData.TYPE_CHOICES)
     number_of_rounds = serializers.IntegerField(min_value=1)
     rounds_names = serializers.ListField(child=serializers.CharField(max_length=100, allow_blank=True))
@@ -401,7 +402,7 @@ class PDUDataSerializer(serializers.Serializer):
 
 class PDUFieldsCreateSerializer(serializers.Serializer):
     label = serializers.CharField()  # type: ignore
-    pdu_data = PDUDataSerializer()
+    pdu_data = PDUDataCreateSerializer()
 
 
 class PDUFieldsUpdateSerializer(PDUFieldsCreateSerializer):
