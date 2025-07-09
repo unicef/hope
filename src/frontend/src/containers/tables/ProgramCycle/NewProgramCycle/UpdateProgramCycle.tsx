@@ -16,7 +16,7 @@ import { RestService } from '@restgenerated/index';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation } from '@tanstack/react-query';
-import { today } from '@utils/utils';
+import { showApiErrorMessages, today } from '@utils/utils';
 import { Field, Form, Formik, FormikValues } from 'formik';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
@@ -62,7 +62,7 @@ const UpdateProgramCycle = ({
     );
   }
   const validationSchema = Yup.object().shape({
-    end_date: endDate,
+    endDate: endDate,
   });
 
   const initialValues: {
@@ -71,7 +71,7 @@ const UpdateProgramCycle = ({
     id: programCycle.id,
     title: programCycle.title,
     startDate: programCycle.start_date,
-    end_date: undefined,
+    endDate: programCycle.end_date,
   };
 
   const { mutateAsync, isPending } = useMutation({
@@ -98,20 +98,21 @@ const UpdateProgramCycle = ({
   });
 
   const handleSubmit = async (values: FormikValues) => {
+    console.log('this submit');
     try {
       await mutateAsync({
         businessAreaSlug: businessArea,
         id: programCycle.id,
-        programSlug: program.id,
+        programSlug: program.slug ?? program.id,
         requestBody: {
-          title: programCycle.title,
-          start_date: programCycle.start_date,
-          end_date: values.endDate,
-        },
+          title: values.title,
+          startDate: values.startDate,
+          endDate: values.endDate,
+        } as any, // type assertion to allow camelCase, REST client will transform
       });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
-      /* empty */
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -158,7 +159,7 @@ const UpdateProgramCycle = ({
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <Field
-                  name="end_date"
+                  name="endDate"
                   label={t('End Date')}
                   component={FormikDateField}
                   required
