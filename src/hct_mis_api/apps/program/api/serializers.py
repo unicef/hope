@@ -548,7 +548,7 @@ class ProgramUpdateSerializer(serializers.ModelSerializer):
         validate_data_collecting_type(data_collecting_type, self.instance.business_area.slug)
 
         # validate if DCT can be updated
-        if self.instance.data_collecting_type.code != value:
+        if self.instance.data_collecting_type != value:
             # can update for draft program without population
             if self.instance.status != Program.DRAFT:
                 raise serializers.ValidationError("Data Collecting Type can be updated only for Draft Programs.")
