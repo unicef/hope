@@ -165,6 +165,7 @@ const ProgramForm = ({
             variant="outlined"
             component={FormikTextField}
             maxLength={4}
+            required
             data-cy="input-programme-code"
             disabled={isEditProgram}
           />
