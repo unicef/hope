@@ -9167,7 +9167,7 @@ export type AllPaymentPlansForTableQueryVariables = Exact<{
 }>;
 
 
-export type AllPaymentPlansForTableQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null, isFollowUp: boolean, status: PaymentPlanStatus, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null } | null } | null> }, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', status: PaymentVerificationSummaryStatus } | null, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
+export type AllPaymentPlansForTableQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, name?: string | null, isFollowUp: boolean, status: PaymentPlanStatus, currency?: string | null, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null } | null } | null> }, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', status: PaymentVerificationSummaryStatus } | null, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, programCycle: { __typename?: 'ProgramCycleNode', title?: string | null } } | null } | null> } | null };
 
 export type PaymentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -16686,6 +16686,9 @@ export const AllPaymentPlansForTableDocument = gql`
         program {
           id
           name
+        }
+        programCycle {
+          title
         }
         currency
         currencyName
