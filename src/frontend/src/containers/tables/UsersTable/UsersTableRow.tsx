@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import TableCell from '@mui/material/TableCell';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { Box, Collapse, IconButton, TableRow } from '@mui/material';
+import { Box, capitalize, Collapse, IconButton, TableRow } from '@mui/material';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { StatusBox } from '@components/core/StatusBox';
 import { userStatusToColor } from '@utils/utils';
@@ -20,13 +20,13 @@ export const UsersTableRow = ({ user }: UsersTableRowProps): ReactElement => {
 
   const mappedRoles = user?.userRoles?.map((el) => (
     <p key={el.role?.name}>
-      {el.businessArea?.name} / {el.program?.name || 'All'} / {el.role?.name}
+      {capitalize(el.businessArea)} / {el.program || 'All'} / {el.role?.name}
     </p>
   ));
 
   const mappedPartnerRoles = user?.partnerRoles?.map((el) => (
     <p key={el.role?.name}>
-      {el.businessArea?.name} / {el.program?.name || 'All'} / {el.role?.name}
+      {capitalize(el.businessArea)} / {el.program || 'All'} / {el.role?.name}
     </p>
   ));
 

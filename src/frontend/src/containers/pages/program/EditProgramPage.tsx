@@ -31,6 +31,7 @@ import {
   decodeIdString,
   isPartnerVisible,
   mapPartnerChoicesWithoutUnicef,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
@@ -84,6 +85,8 @@ const EditProgramPage = (): ReactElement => {
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
     });
 
   const queryClient = useQueryClient();
@@ -247,9 +250,7 @@ const EditProgramPage = (): ReactElement => {
       showMessage(t('Programme edited.'));
       navigate(`/${baseUrl}/details/${response.slug}`);
     } catch (e: any) {
-      const errorMessage =
-        e?.message || 'An error occurred while updating the program';
-      showMessage(errorMessage);
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -273,9 +274,7 @@ const EditProgramPage = (): ReactElement => {
       showMessage(t('Programme Partners updated.'));
       navigate(`/${baseUrl}/details/${id}`);
     } catch (e: any) {
-      const errorMessage =
-        e?.message || 'An error occurred while updating partners';
-      showMessage(errorMessage);
+      showApiErrorMessages(e, showMessage);
     }
   };
 

@@ -27,6 +27,7 @@ import {
   decodeIdString,
   isPartnerVisible,
   mapPartnerChoicesWithoutUnicef,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
@@ -94,6 +95,8 @@ const DuplicateProgramPage = (): ReactElement => {
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
     });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -206,9 +209,11 @@ const DuplicateProgramPage = (): ReactElement => {
       showMessage('Programme created.');
       navigate(`/${baseUrl}/list`);
     } catch (e: any) {
-      const errorMessage =
-        e?.message || 'An error occurred while copying the program';
-      showMessage(errorMessage);
+      showApiErrorMessages(
+        e,
+        showMessage,
+        t('Programme create action failed.'),
+      );
     }
   };
 
