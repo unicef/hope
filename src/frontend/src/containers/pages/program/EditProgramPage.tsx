@@ -175,39 +175,40 @@ const EditProgramPage = (): ReactElement => {
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
       : '0.00';
-    const populationGoalValue = parseInt(values.population_goal, 10) ?? 0;
+    const populationGoalValue = parseInt(values.populationGoal, 10) ?? 0;
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
 
     const pduFieldsToSend = values.pduFields
       .filter((item) => item.label !== '')
-      .map(({ pduData, ...rest }) => ({
-        ...rest,
-        pduData: pduData
-          ? {
-              ...Object.fromEntries(
-                Object.entries(pduData).filter(
-                  ([key]) => key !== '__typename' && key !== 'id',
-                ),
-              ),
-              roundsNames: (() => {
-                if (!pduData.roundsNames) {
-                  pduData.roundsNames = [];
-                }
-
-                if (
-                  pduData.numberOfRounds === 1 &&
-                  pduData.roundsNames.length === 0
-                ) {
-                  return [''];
-                }
-
-                return pduData.roundsNames.map((roundName) => roundName || '');
-              })(),
+      .map(({ pduData, ...rest }) => {
+        let newPduData = pduData;
+        if (pduData) {
+          const filteredPduData = Object.fromEntries(
+            Object.entries(pduData).filter(
+              ([key]) => key !== '__typename' && key !== 'id',
+            ),
+          );
+          filteredPduData.roundsNames = (() => {
+            if (!pduData.roundsNames) {
+              pduData.roundsNames = [];
             }
-          : pduData,
-      }));
+            if (
+              pduData.numberOfRounds === 1 &&
+              pduData.roundsNames.length === 0
+            ) {
+              return [''];
+            }
+            return pduData.roundsNames.map((roundName) => roundName || '');
+          })();
+          newPduData = filteredPduData;
+        }
+        return {
+          ...rest,
+          pduData: newPduData,
+        };
+      });
 
     try {
       const requestValuesDetails = omit(values, [
@@ -220,6 +221,7 @@ const EditProgramPage = (): ReactElement => {
         omit(pduField, ['__typename']),
       );
 
+      // Build the base programData object
       const programData: ProgramUpdate = {
         programmeCode: requestValuesDetails.programmeCode,
         name: requestValuesDetails.name,
@@ -232,7 +234,11 @@ const EditProgramPage = (): ReactElement => {
         populationGoal: populationGoalParsed,
         cashPlus: requestValuesDetails.cashPlus,
         frequencyOfPayments: requestValuesDetails.frequencyOfPayments,
-        dataCollectingType: requestValuesDetails.dataCollectingTypeCode,
+        // Always send dataCollectingType, but only update if Draft
+        dataCollectingType:
+          program.status === 'DRAFT'
+            ? requestValuesDetails.dataCollectingTypeCode
+            : program.dataCollectingType.code,
         beneficiaryGroup: requestValuesDetails.beneficiaryGroup,
         startDate: requestValuesDetails.startDate,
         endDate:
