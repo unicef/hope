@@ -6,9 +6,11 @@ from django.test import TestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     create_household,
@@ -379,3 +381,46 @@ class TestIndividualModel(TestCase):
         IndividualFactory(unicef_id="IND-000", program=self.program)
         with self.assertRaises(IntegrityError):
             IndividualFactory(unicef_id="IND-123", program=self.program)
+
+    def test_mark_as_distinct_raise_errors(self) -> None:
+        ind = IndividualFactory(unicef_id="IND-333", program=self.program)
+        doc_type = DocumentTypeFactory(key="registration_token")
+        country = CountryFactory()
+        DocumentFactory(
+            status=Document.STATUS_VALID,
+            program=self.program,
+            type=doc_type,
+            document_number="123456ABC",
+            individual=ind,
+            country=country,
+        )
+        DocumentFactory(
+            status=Document.STATUS_INVALID,
+            program=self.program,
+            type=doc_type,
+            document_number="123456ABC",
+            individual=ind,
+            country=country,
+        )
+
+        with self.assertRaises(Exception) as error:
+            ind.mark_as_distinct()
+
+        self.assertEqual(
+            str(error.exception),
+            "IND-333: Valid Document already exists: 123456ABC.",
+        )
+
+        with self.assertRaises(Exception) as error_2:
+            DocumentFactory(
+                status=Document.STATUS_VALID,
+                program=self.program,
+                type=doc_type,
+                document_number="123456ABC",
+                individual=ind,
+                country=country,
+            )
+        self.assertEqual(
+            str(error_2.exception),
+            "An error occurred in the current transaction. You can't execute queries until the end of the 'atomic' block.",
+        )
