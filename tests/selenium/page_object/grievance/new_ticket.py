@@ -92,7 +92,6 @@ class NewTicket(BaseComponents):
     selectIndividualdataPregnant = 'div[data-cy="select-individualData.pregnant"]'
     selectIndividualdataMaritalstatus = 'div[data-cy="select-individualData.maritalStatus"]'
     inputIndividualdataMiddlename = 'input[data-cy="input-individualData.middleName"]'
-    inputIndividualdataPaymentdeliveryphoneno = 'input[data-cy="input-individualData.paymentDeliveryPhoneNo"]'
     inputIndividualdataPhoneno = 'input[data-cy="input-individualData.phoneNo"]'
     selectIndividualdataPreferredlanguage = 'div[data-cy="select-individualData.preferredLanguage"]'
     selectIndividualdataRelationship = 'div[data-cy="select-individualData.relationship"]'
@@ -445,9 +444,6 @@ class NewTicket(BaseComponents):
 
     def getInputIndividualdataMiddlename(self) -> WebElement:
         return self.wait_for(self.inputIndividualdataMiddlename)
-
-    def getInputIndividualdataPaymentdeliveryphoneno(self) -> WebElement:
-        return self.wait_for(self.inputIndividualdataPaymentdeliveryphoneno)
 
     def getInputIndividualdataPhoneno(self) -> WebElement:
         return self.wait_for(self.inputIndividualdataPhoneno)

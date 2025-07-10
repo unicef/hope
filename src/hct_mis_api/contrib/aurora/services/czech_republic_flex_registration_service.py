@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -11,11 +11,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.models import Country as GeoCountry
-from hct_mis_api.apps.household.forms import (
-    BankAccountInfoForm,
-    DocumentForm,
-    IndividualForm,
-)
+from hct_mis_api.apps.household.forms import DocumentForm, IndividualForm
 from hct_mis_api.apps.household.models import (
     GOVERNMENT_PARTNER,
     HEAD,
@@ -25,7 +21,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -204,18 +199,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return individual_data
 
-    def _prepare_bank_account_info(self, individual_dict: Dict, individual: PendingIndividual) -> Optional[Dict]:
-        bank_account_number = individual_dict.get("bank_account_number_h_f")
-        if not bank_account_number:
-            return None
-
-        return {
-            "bank_account_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
-            "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
-            "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
-            "individual": str(individual.pk),
-        }
-
     def _prepare_documents(self, individual_dict: Dict, individual: PendingIndividual) -> list[PendingDocument]:
         documents = []
         document_keys = self._get_all_document_keys_from_individual_dict(individual_dict)
@@ -323,10 +306,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
                 individual.phone_no = phone_no
                 individual.detail_id = record.source_id
                 individual.save()
-
-                bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
-                if bank_account_data:
-                    self._create_object_and_validate(bank_account_data, PendingBankAccountInfo, BankAccountInfoForm)
 
                 if role:
                     if role.upper() == ROLE_PRIMARY:
