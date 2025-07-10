@@ -22,7 +22,7 @@ def create_verification_summary(apps, schema_editor):  # pragma: no cover
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0034_migration'),
+        ('payment', '0035_migration'),
     ]
 
     operations = [
