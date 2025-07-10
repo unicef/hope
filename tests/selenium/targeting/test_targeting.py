@@ -525,7 +525,7 @@ class TestCreateTargeting:
         pageTargetingCreate: TargetingCreate,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
-        pageTargeting.navigate_to_page("afghanistan", sw_program.id)
+        pageTargeting.navigate_to_page("afghanistan", sw_program.slug)
         pageTargeting.getButtonCreateNew().click()
 
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
@@ -568,7 +568,7 @@ class TestCreateTargeting:
         pageTargetingCreate: TargetingCreate,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
-        pageTargeting.navigate_to_page("afghanistan", non_sw_program.id)
+        pageTargeting.navigate_to_page("afghanistan", non_sw_program.slug)
         pageTargeting.getButtonCreateNew().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
@@ -617,7 +617,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
         individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.navigate_to_page("afghanistan", program.slug)
         pageTargeting.getButtonCreateNew().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
@@ -667,7 +667,7 @@ class TestCreateTargeting:
         individual2.flex_fields[bool_attribute.name]["2"]["value"] = False
         individual2.save()
         individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.navigate_to_page("afghanistan", program.slug)
         pageTargeting.getButtonCreateNew().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
@@ -741,7 +741,7 @@ class TestCreateTargeting:
         individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 7.0
         individual2.save()
         individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.navigate_to_page("afghanistan", program.slug)
         pageTargeting.getButtonCreateNew().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
@@ -821,7 +821,7 @@ class TestCreateTargeting:
         individual2.flex_fields[date_attribute.name]["1"]["value"] = "2022-10-02"
         individual2.save()
         individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.navigate_to_page("afghanistan", program.slug)
         pageTargeting.getButtonCreateNew().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
@@ -873,7 +873,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
         individual3 = individual(program)
-        pageTargeting.navigate_to_page("afghanistan", program.id)
+        pageTargeting.navigate_to_page("afghanistan", program.slug)
         pageTargeting.getButtonCreateNew().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
@@ -929,7 +929,7 @@ class TestCreateTargeting:
         individual2.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Failed"
         individual2.save()
         individual(sw_program)
-        pageTargeting.navigate_to_page("afghanistan", sw_program.id)
+        pageTargeting.navigate_to_page("afghanistan", sw_program.slug)
         pageTargeting.getButtonCreateNew().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
