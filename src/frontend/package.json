@@ -1,12 +1,12 @@
 {
   "name": "frontend",
-  "version": "3.2.8",
+  "version": "3.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build-fotr-backend": "yarn build --outDir '../hct_mis_api/apps/web/static/web' --emptyOutDir",
+    "build-for-backend": "yarn build --outDir '../hct_mis_api/apps/web/static/web' --emptyOutDir",
     "build-and-watch": "yarn build-for-backend --watch",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "TZ=UTC jest --config jest.config.ts",
@@ -83,7 +83,7 @@
     "ts-node": "^10.9.2",
     "use-deep-compare-effect": "^1.8.1",
     "uuid": "^11.0.5",
-    "vite": "^6.1.5",
+    "vite": "^6.1.6",
     "vite-tsconfig-paths": "^4.3.1",
     "waait": "^1.0.5",
     "yup": "^1.6.1"

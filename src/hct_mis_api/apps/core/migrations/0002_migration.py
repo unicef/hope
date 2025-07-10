@@ -134,7 +134,21 @@ class Migration(migrations.Migration):
             sql="\n            CREATE OR REPLACE FUNCTION payment_plan_business_area_seq() RETURNS trigger \n                LANGUAGE plpgsql\n                AS $$\n            begin\n                execute format('create sequence if not exists payment_plan_business_area_seq_%s', translate(NEW.id::text, '-','_'));\n                return NEW;\n            end\n            $$;\n\n            ",
         ),
         migrations.RunSQL(
-            sql='CREATE TRIGGER payment_plan_business_area_seq AFTER INSERT ON core_businessarea FOR EACH ROW EXECUTE PROCEDURE payment_plan_business_area_seq();',
+            sql="""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_trigger
+                    WHERE tgname = 'payment_plan_business_area_seq'
+                ) THEN
+                    CREATE TRIGGER payment_plan_business_area_seq
+                    AFTER INSERT ON core_businessarea
+                    FOR EACH ROW
+                    EXECUTE PROCEDURE payment_plan_business_area_seq();
+                END IF;
+            END;
+            $$;
+            """,
         ),
         migrations.RunSQL(
             sql="\n            CREATE OR REPLACE FUNCTION payment_business_area_seq() RETURNS trigger \n                LANGUAGE plpgsql\n                AS $$\n            begin\n                execute format('create sequence if not exists payment_business_area_seq_%s', translate(NEW.id::text, '-','_'));\n                return NEW;\n            end\n            $$;\n\n            ",

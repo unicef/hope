@@ -43,6 +43,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestGrievanceCreateDataChangeMutation(APITestCase):
     CREATE_DATA_CHANGE_GRIEVANCE_MUTATION = """
     mutation createGrievanceTicket($input:CreateGrievanceTicketInput!){

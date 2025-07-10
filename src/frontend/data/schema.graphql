@@ -366,7 +366,6 @@ type BusinessAreaNode implements Node {
   deduplicationBatchDuplicatesAllowed: Int!
   deduplicationGoldenRecordDuplicatesPercentage: Int!
   deduplicationGoldenRecordDuplicatesAllowed: Int!
-  screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
   customFields: JSONString!
@@ -435,11 +434,6 @@ type ChartPaymentVerification {
   datasets: [_DetailedDatasetsNode]
   households: Int
   averageSampleSize: Float
-}
-
-type CheckAgainstSanctionListMutation {
-  ok: Boolean
-  errors: [XlsxRowErrorNode]
 }
 
 type ChoiceObject {
@@ -866,6 +860,8 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   internalData: JSONString!
   businessArea: UserBusinessAreaNode!
   programCycle: ProgramCycleNode!
+  deliveryMechanism: DeliveryMechanismNode
+  financialServiceProvider: FinancialServiceProviderNode
   steficonRule: RuleCommitNode
   steficonRuleTargeting: RuleCommitNode
   createdBy: UserNode!
@@ -907,8 +903,6 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   excludeHouseholdError: String
   statusDate: DateTime!
   isCashAssist: Boolean!
-  deliveryMechanism: DeliveryMechanismNode
-  financialServiceProvider: FinancialServiceProviderNode
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -1590,6 +1584,9 @@ type HouseholdNode implements Node {
   koboSubmissionTime: DateTime
   enumeratorRecId: Int
   flexRegistrationsRecordId: Int
+  extraRdis(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+  identificationKey: String
+  collisionFlag: Boolean!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, rdiId: String, duplicatesOnly: Boolean, rdiMergeStatus: String, orderBy: String): IndividualNodeConnection
@@ -2309,7 +2306,6 @@ type Mutations {
   refuseRegistrationDataImport(id: ID!, refuseReason: String, version: BigInt): RefuseRegistrationDataImportMutation
   rerunDedupe(registrationDataImportId: ID!, version: BigInt): RegistrationDeduplicationMutation
   eraseRegistrationDataImport(id: ID!, version: BigInt): EraseRegistrationDataImportMutation
-  checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
 type NeedsAdjudicationApproveMutation {
@@ -2699,6 +2695,8 @@ type PaymentPlanNode implements Node {
   internalData: JSONString!
   businessArea: UserBusinessAreaNode!
   programCycle: ProgramCycleNode!
+  deliveryMechanism: DeliveryMechanismNode
+  financialServiceProvider: FinancialServiceProviderNode
   steficonRule: RuleCommitNode
   steficonRuleTargeting: RuleCommitNode
   createdBy: UserNode!
@@ -2740,8 +2738,6 @@ type PaymentPlanNode implements Node {
   excludeHouseholdError: String
   statusDate: DateTime!
   isCashAssist: Boolean!
-  deliveryMechanism: DeliveryMechanismNode
-  financialServiceProvider: FinancialServiceProviderNode
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -3030,6 +3026,10 @@ input PositiveFeedbackTicketExtras {
   individual: ID
 }
 
+enum ProgramCollisionDetector {
+  HCT_MIS_API_APPS_PROGRAM_COLLISION_DETECTORS_IDENTIFICATIONKEYCOLLISIONDETECTOR
+}
+
 type ProgramCycleNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -3097,10 +3097,13 @@ type ProgramNode implements Node {
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
   biometricDeduplicationEnabled: Boolean!
+  collisionDetectionEnabled: Boolean!
+  collisionDetector: ProgramCollisionDetector
   isVisible: Boolean!
   householdCount: Int!
   individualCount: Int!
   deduplicationSetId: UUID
+  sanctionLists(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListNodeConnection!
   pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3122,6 +3125,7 @@ type ProgramNode implements Node {
   isSocialWorkerProgram: Boolean
   targetPopulationsCount: Int
   canFinish: Boolean
+  screenBeneficiary: Boolean
 }
 
 type ProgramNodeConnection {
@@ -3484,6 +3488,7 @@ type RegistrationDataImportNode implements Node {
   dedupEngineBatchDuplicates: Int!
   dedupEngineGoldenRecordDuplicates: Int!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  extraHhRdis(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
@@ -3800,7 +3805,7 @@ type SanctionListIndividualNode implements Node {
   listType: String!
   unListType: String!
   referenceNumber: String!
-  listedOn: DateTime!
+  listedOn: DateTime
   comments: String!
   designation: String!
   street: String!
@@ -3811,6 +3816,7 @@ type SanctionListIndividualNode implements Node {
   versionNum: Int!
   countryOfBirth: String
   active: Boolean!
+  sanctionList: SanctionListNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListIndividualDocumentNodeConnection!
   nationalities(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListIndividualNationalitiesNodeConnection!
   countries(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListIndividualCountriesNodeConnection!
@@ -3828,6 +3834,34 @@ type SanctionListIndividualNodeConnection {
 type SanctionListIndividualNodeEdge {
   node: SanctionListIndividualNode
   cursor: String!
+}
+
+type SanctionListNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String
+  config: JSONString!
+  strategy: SanctionListStrategy!
+  entries(offset: Int, before: String, after: String, first: Int, last: Int): SanctionListIndividualNodeConnection!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+}
+
+type SanctionListNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SanctionListNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SanctionListNodeEdge {
+  node: SanctionListNode
+  cursor: String!
+}
+
+enum SanctionListStrategy {
+  HCT_MIS_API_APPS_SANCTION_LIST_STRATEGIES_EU_EUSANCTIONLIST
+  HCT_MIS_API_APPS_SANCTION_LIST_STRATEGIES_UN_UNSANCTIONLIST
 }
 
 type SaveKoboProjectImportDataAsync {
@@ -4609,7 +4643,6 @@ type UserBusinessAreaNode implements Node {
   deduplicationBatchDuplicatesAllowed: Int!
   deduplicationGoldenRecordDuplicatesPercentage: Int!
   deduplicationGoldenRecordDuplicatesAllowed: Int!
-  screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
   customFields: JSONString!
