@@ -692,3 +692,41 @@ export const categoriesAndColors = [
   { category: 'Sensitive Grievance', color: '#7FCB28' },
   { category: 'System Flagging', color: '#00867B' },
 ];
+
+/**
+ * Recursively converts a grievance request object to FormData, handling nested objects, arrays, and files.
+ */
+export function grievanceRequestToFormData(
+  obj: any,
+  form?: FormData,
+  namespace?: string,
+): FormData {
+  const formData = form || new FormData();
+  for (const key in obj) {
+    if (obj[key] === undefined || obj[key] === null) continue;
+    // Only use namespace for nested objects/arrays
+    const formKey = namespace ? `${namespace}[${key}]` : key;
+    if (obj[key] instanceof File) {
+      formData.append(formKey, obj[key]);
+    } else if (Array.isArray(obj[key])) {
+      obj[key].forEach((item, idx) => {
+        if (item instanceof File) {
+          formData.append(`${formKey}[${idx}]`, item);
+        } else if (typeof item === 'object' && item !== null) {
+          grievanceRequestToFormData(item, formData, `${formKey}[${idx}]`);
+        } else if (typeof item === 'boolean') {
+          formData.append(`${formKey}[${idx}]`, item ? 'true' : 'false');
+        } else if (item !== undefined && item !== null) {
+          formData.append(`${formKey}[${idx}]`, item);
+        }
+      });
+    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+      grievanceRequestToFormData(obj[key], formData, formKey);
+    } else if (typeof obj[key] === 'boolean') {
+      formData.append(formKey, obj[key] ? 'true' : 'false');
+    } else {
+      formData.append(formKey, obj[key]);
+    }
+  }
+  return formData;
+}

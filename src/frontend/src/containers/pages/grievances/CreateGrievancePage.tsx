@@ -21,6 +21,7 @@ import {
   getGrievanceDetailsPath,
   prepareRestVariables,
   selectedIssueType,
+  grievanceRequestToFormData,
 } from '@components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
@@ -139,11 +140,24 @@ const CreateGrievancePage = (): ReactElement => {
   });
 
   const { mutateAsync, isPending: loading } = useMutation({
-    mutationFn: (requestData: CreateGrievanceTicket) =>
-      RestService.restBusinessAreasGrievanceTicketsCreate({
+    mutationFn: (requestData: CreateGrievanceTicket) => {
+      // Check for files in requestData
+      const hasFile = (obj: any): boolean => {
+        if (obj instanceof File) return true;
+        if (Array.isArray(obj)) return obj.some(hasFile);
+        if (obj && typeof obj === 'object')
+          return Object.values(obj).some(hasFile);
+        return false;
+      };
+      const payload = hasFile(requestData)
+        ? grievanceRequestToFormData(requestData)
+        : requestData;
+
+      return RestService.restBusinessAreasGrievanceTicketsCreate({
         businessAreaSlug: businessArea,
-        requestBody: requestData,
-      }),
+        requestBody: payload as any,
+      });
+    },
   });
 
   const { data: programsData, isLoading: programsDataLoading } =
