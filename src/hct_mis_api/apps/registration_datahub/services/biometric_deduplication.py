@@ -157,6 +157,10 @@ class BiometricDeduplicationService:
         program.deduplication_set_id = None
         program.save(update_fields=["deduplication_set_id"])
 
+        RegistrationDataImport.objects.filter(program=program).exclude(
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        ).update(deduplication_engine_status=None)
+
     def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
         DeduplicationEngineSimilarityPair.remove_pairs(deduplication_set_id)
         DeduplicationEngineSimilarityPair.bulk_add_pairs(deduplication_set_id, similarity_pairs)
@@ -368,6 +372,13 @@ class BiometricDeduplicationService:
             except Exception:
                 logger.exception(f"Dedupe Engine processing results error for dedupe_set_id {deduplication_set_id}")
                 self.mark_rdis_as_error(deduplication_set_id)
+
+        elif deduplication_set_data.state == "Error":
+            self.mark_rdis_as_error(deduplication_set_id)
+            logger.error(
+                f"Failed to process deduplication set {deduplication_set_id},"
+                f" dedupe engine state: {deduplication_set_data.state}"
+            )
 
     def report_false_positive_duplicate(
         self, individual1_photo: str, individual2_photo: str, deduplication_set_id: str
