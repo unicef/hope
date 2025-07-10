@@ -179,13 +179,15 @@ export const getHeaders = async (
   }
 
   if (options.body !== undefined) {
-    if (options.mediaType) {
+    if (isFormData(options.body)) {
+      // Do not set Content-Type for FormData; browser will set it
+    } else if (options.mediaType) {
       headers['Content-Type'] = options.mediaType;
     } else if (isBlob(options.body)) {
       headers['Content-Type'] = options.body.type || 'application/octet-stream';
     } else if (isString(options.body)) {
       headers['Content-Type'] = 'text/plain';
-    } else if (!isFormData(options.body)) {
+    } else {
       headers['Content-Type'] = 'application/json';
     }
   }
@@ -195,13 +197,11 @@ export const getHeaders = async (
 
 export const getRequestBody = (options: ApiRequestOptions): any => {
   if (options.body !== undefined) {
-    if (options.mediaType?.includes('/json')) {
+    if (isFormData(options.body)) {
+      return options.body;
+    } else if (options.mediaType?.includes('/json')) {
       return JSON.stringify(options.body);
-    } else if (
-      isString(options.body) ||
-      isBlob(options.body) ||
-      isFormData(options.body)
-    ) {
+    } else if (isString(options.body) || isBlob(options.body)) {
       return options.body;
     } else {
       return JSON.stringify(options.body);
@@ -220,13 +220,15 @@ export const sendRequest = async (
   onCancel: OnCancel,
 ): Promise<Response> => {
   const controller = new AbortController();
-  let underscoreBodyData = undefined;
-  if (body) {
-    underscoreBodyData = JSON.stringify(deepUnderscore(JSON.parse(body)));
+  let requestBody = body;
+  if (isFormData(body)) {
+    requestBody = body; // send as-is
+  } else if (body) {
+    requestBody = JSON.stringify(deepUnderscore(JSON.parse(body)));
   }
   const request: RequestInit = {
     headers,
-    body: underscoreBodyData,
+    body: requestBody,
     method: options.method,
     signal: controller.signal,
   };
