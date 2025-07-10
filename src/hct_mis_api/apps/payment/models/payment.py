@@ -714,7 +714,7 @@ class PaymentPlan(
         payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
         extra_validation: Optional[Callable] = None,
     ) -> QuerySet:
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION + Payment.PENDING_STATUSES, delivered_quantity__gt=0)
 
         if payment_verification_plan:
             params &= Q(
@@ -1219,7 +1219,12 @@ class PaymentPlan(
         target=Status.ACCEPTED,
     )
     def status_mark_as_reviewed(self) -> None:
+        from hct_mis_api.apps.payment.models import PaymentVerificationSummary
+
         self.status_date = timezone.now()
+
+        if not hasattr(self, "payment_verification_summary"):
+            PaymentVerificationSummary.objects.create(payment_plan=self)
 
     @transition(
         field=status,
@@ -1227,12 +1232,7 @@ class PaymentPlan(
         target=Status.FINISHED,
     )
     def status_finished(self) -> None:
-        from hct_mis_api.apps.payment.models import PaymentVerificationSummary
-
         self.status_date = timezone.now()
-
-        if not hasattr(self, "payment_verification_summary"):
-            PaymentVerificationSummary.objects.create(payment_plan=self)
 
     @transition(
         field=status,
