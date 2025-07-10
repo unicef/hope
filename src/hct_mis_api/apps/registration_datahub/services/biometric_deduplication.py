@@ -157,6 +157,10 @@ class BiometricDeduplicationService:
         program.deduplication_set_id = None
         program.save(update_fields=["deduplication_set_id"])
 
+        RegistrationDataImport.objects.filter(program=program).exclude(
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+        ).update(deduplication_engine_status=None)
+
     def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
         DeduplicationEngineSimilarityPair.remove_pairs(deduplication_set_id)
         DeduplicationEngineSimilarityPair.bulk_add_pairs(deduplication_set_id, similarity_pairs)
