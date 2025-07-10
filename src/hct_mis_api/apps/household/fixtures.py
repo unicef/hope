@@ -256,7 +256,7 @@ class DocumentTypeFactory(DjangoModelFactory):
 class DocumentFactory(DjangoModelFactory):
     class Meta:
         model = Document
-        django_get_or_create = ("document_number", "type", "country", "program", "status")
+        django_get_or_create = ("document_number", "type", "country", "program")
 
     document_number = factory.Faker("pystr", min_chars=None, max_chars=20)
     type = factory.SubFactory(DocumentTypeFactory)

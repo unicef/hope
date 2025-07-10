@@ -394,14 +394,16 @@ class TestIndividualModel(TestCase):
             individual=ind,
             country=country,
         )
-        DocumentFactory(
+        doc_2 = DocumentFactory(
             status=Document.STATUS_INVALID,
             program=self.program,
             type=doc_type,
-            document_number="123456ABC",
+            document_number="UUUUU",
             individual=ind,
             country=country,
         )
+        doc_2.document_number = "123456ABC"
+        doc_2.save()
 
         with self.assertRaises(Exception) as error:
             ind.mark_as_distinct()
