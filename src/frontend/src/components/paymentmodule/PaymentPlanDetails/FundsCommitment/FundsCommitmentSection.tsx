@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Autocomplete,
   TextField,
@@ -85,8 +85,10 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
       commitment.fundsCommitmentNumber === selectedFundsCommitment?.fundsCommitmentNumber,
   );
 
+  const [isSubmittingFC, setIsSubmitting] = useState(false);
+
   const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value as string[];
+  const value = event.target.value as string[];
 
     if (value.includes('select-all')) {
       const allItems =
@@ -112,6 +114,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
 
   const handleSubmit = async () => {
     if (paymentPlan) {
+      setIsSubmitting(true);  // block button
       try {
         await mutate({
           variables: {
@@ -133,9 +136,29 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
           (x: any) => x.message,
         ) || [t('An error occurred while assigning funds commitments')];
         errorMessages.forEach((message) => showMessage(message));
-      }
+      } finally {
+    setIsSubmitting(false); // unblock button
+  }
     }
   };
+
+  const isSameSelection = (a_set: number[], b_set: number[]) => {
+  if (a_set.length !== b_set.length) return false;
+  const setA = new Set(a_set);
+  return b_set.every((item) => setA.has(item));
+};
+
+  const assignedFundsCommitmentItems = useMemo(
+    () =>
+      paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
+        (item) => item.recSerialNumber,
+      ) || [],
+    [paymentPlan],
+  );
+
+  const isAlreadyAssigned = useMemo(() => {
+    return isSameSelection(selectedItems, assignedFundsCommitmentItems);
+  }, [selectedItems, assignedFundsCommitmentItems]);
 
   const clearItems = () => {
     setSelectedItems([]);
@@ -149,7 +172,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
             <Typography variant="h6">{t('Funds Commitment')}</Typography>
           </Title>
         </Box>
-        {paymentPlan.status === PaymentPlanStatus.InReview ? (
+        {paymentPlan.status === PaymentPlanStatus.InReview && (
           <>
             <Box mt={2}>
               <FormControl fullWidth size="small">
@@ -247,9 +270,11 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     color="primary"
                     onClick={handleSubmit}
                     disabled={
+                      isSubmittingFC ||
                       !canAssignFunds || // Permission check
                       (selectedFundsCommitment && selectedItems.length === 0) || // Items required if commitment is filled
-                      (!selectedFundsCommitment && selectedItems.length > 0) // Commitment required if items are filled
+                      (!selectedFundsCommitment && selectedItems.length > 0) || // Commitment required if items are filled
+                      isAlreadyAssigned  // don't allow assigning the same
                     }
                   >
                     {t('Assign Funds Commitments')}
@@ -258,12 +283,13 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
               </Tooltip>
             </Box>
           </>
-        ) : (
+        )}
+        {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.length > 0 && (
           <>
             <Box mt={2}>
               {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
                   <Typography variant="h6" fontWeight="bold" mb={2}>
-                    {t('Funds Commitment Number')}: {selectedCommitment.fundsCommitmentNumber} {paymentPlan.fundsCommitments.insufficientAmount && <WarningTooltip
+                    {t('Funds Commitment Number')}: {selectedCommitment?.fundsCommitmentNumber} {paymentPlan.fundsCommitments.insufficientAmount && <WarningTooltip
                       message={t(
                         'Insufficient Commitment Amount',
                       )}

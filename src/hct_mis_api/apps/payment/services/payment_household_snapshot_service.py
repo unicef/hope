@@ -13,7 +13,6 @@ from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
     Household,
     Individual,
     IndividualRoleInHousehold,
@@ -65,7 +64,6 @@ def bulk_create_payment_snapshot_data(payments_ids: list[str]) -> None:
             "household__individuals",
             "household__individuals__documents",
             "household__individuals_and_roles",
-            "household__individuals__bank_account_info",
         )
         .order_by("id")
     )
@@ -132,7 +130,6 @@ def get_individual_snapshot(individual: Individual, payment: Optional[Payment] =
         individual_data[key] = handle_type_mapping(value)
     individual_data["documents"] = []
     individual_data["needs_adjudication_tickets_count"] = get_needs_adjudication_tickets_count(individual)
-    individual_data["bank_account_info"] = {}
 
     for document in individual.documents.all():
         document_data = {
@@ -148,16 +145,6 @@ def get_individual_snapshot(individual: Individual, payment: Optional[Payment] =
             "photo": document.photo.name if document.photo else "",
         }
         individual_data["documents"].append(document_data)
-
-    bank_account_info: Optional[BankAccountInfo] = individual.bank_account_info.first()
-    if bank_account_info:
-        individual_data["bank_account_info"] = {
-            "bank_name": bank_account_info.bank_name,
-            "bank_account_number": bank_account_info.bank_account_number,
-            "debit_card_number": bank_account_info.debit_card_number,
-            "bank_branch_name": bank_account_info.bank_branch_name,
-            "account_holder_name": bank_account_info.account_holder_name,
-        }
 
     is_hh_collector = IndividualRoleInHousehold.objects.filter(
         role__in=[ROLE_PRIMARY, ROLE_ALTERNATE], household=individual.household, individual=individual

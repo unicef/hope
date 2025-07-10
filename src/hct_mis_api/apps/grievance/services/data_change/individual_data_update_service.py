@@ -1,5 +1,6 @@
+import dataclasses
 from datetime import date, datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
@@ -25,21 +26,20 @@ from hct_mis_api.apps.grievance.services.data_change.data_change_service import 
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
     convert_to_empty_string_if_null,
+    handle_add_account,
     handle_add_document,
     handle_add_identity,
-    handle_add_payment_channel,
     handle_document,
     handle_edit_document,
     handle_edit_identity,
     handle_role,
-    handle_update_payment_channel,
+    handle_update_account,
     is_approved,
+    prepare_edit_accounts_save,
     prepare_edit_documents,
     prepare_edit_identities,
-    prepare_edit_payment_channel,
     prepare_previous_documents,
     prepare_previous_identities,
-    prepare_previous_payment_channels,
     save_images,
     to_date_string,
     to_phone_number_str,
@@ -51,7 +51,6 @@ from hct_mis_api.apps.grievance.services.reassign_roles_services import (
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
-    BankAccountInfo,
     Document,
     Household,
     Individual,
@@ -60,7 +59,23 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.payment.models import Account
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
+
+
+@dataclasses.dataclass
+class AccountPayloadField:
+    name: str
+    value: Optional[str] = None
+    previous_value: Optional[str] = None
+
+
+@dataclasses.dataclass
+class AccountPayload:
+    id: str
+    name: str
+    approve_status: bool
+    data_fields: List[AccountPayloadField]
 
 
 class IndividualDataUpdateService(DataChangeService):
@@ -77,9 +92,8 @@ class IndividualDataUpdateService(DataChangeService):
         identities = individual_data.pop("identities", [])
         identities_to_remove = individual_data.pop("identities_to_remove", [])
         identities_to_edit = individual_data.pop("identities_to_edit", [])
-        payment_channels = individual_data.pop("payment_channels", [])
-        payment_channels_to_remove = individual_data.pop("payment_channels_to_remove", [])
-        payment_channels_to_edit = individual_data.pop("payment_channels_to_edit", [])
+        accounts = individual_data.pop("accounts", [])
+        accounts_to_edit = individual_data.pop("accounts_to_edit", [])
         to_phone_number_str(individual_data, "phone_no")
         to_phone_number_str(individual_data, "phone_no_alternative")
         to_phone_number_str(individual_data, "payment_delivery_phone_no")
@@ -109,10 +123,7 @@ class IndividualDataUpdateService(DataChangeService):
         identities_to_remove_with_approve_status = [
             {"value": identity_id, "approve_status": False} for identity_id in identities_to_remove
         ]
-        payment_channels_with_approve_status = [{"value": pc, "approve_status": False} for pc in payment_channels]
-        payment_channels_to_remove_with_approve_status = [
-            {"value": payment_channel_id, "approve_status": False} for payment_channel_id in payment_channels_to_remove
-        ]
+        accounts_with_approve_status = [{"value": account, "approve_status": False} for account in accounts]
         flex_fields_with_approve_status = {
             field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
             for field, value in flex_fields.items()
@@ -129,16 +140,8 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
             identities_to_remove_with_approve_status
         )
-        individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
-        individual_data_with_approve_status[
-            "payment_channels_to_remove"
-        ] = payment_channels_to_remove_with_approve_status
-        individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
-            payment_channels_to_edit
-        )
-        individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
-            payment_channels_to_remove_with_approve_status
-        )
+        individual_data_with_approve_status["accounts"] = accounts_with_approve_status
+        individual_data_with_approve_status["accounts_to_edit"] = prepare_edit_accounts_save(accounts_to_edit)
         individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
 
         ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
@@ -161,9 +164,6 @@ class IndividualDataUpdateService(DataChangeService):
         identities = new_individual_data.pop("identities", [])
         identities_to_remove = new_individual_data.pop("identities_to_remove", [])
         identities_to_edit = new_individual_data.pop("identities_to_edit", [])
-        payment_channels = new_individual_data.pop("payment_channels", [])
-        payment_channels_to_remove = new_individual_data.pop("payment_channels_to_remove", [])
-        payment_channels_to_edit = new_individual_data.pop("payment_channels_to_edit", [])
         flex_fields = {
             to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()
         }
@@ -196,10 +196,6 @@ class IndividualDataUpdateService(DataChangeService):
         identities_to_remove_with_approve_status = [
             {"value": identity_id, "approve_status": False} for identity_id in identities_to_remove
         ]
-        payment_channels_with_approve_status = [{"value": pc, "approve_status": False} for pc in payment_channels]
-        payment_channels_to_remove_with_approve_status = [
-            {"value": payment_channel_id, "approve_status": False} for payment_channel_id in payment_channels_to_remove
-        ]
         flex_fields_with_approve_status = {
             field: {"value": value, "approve_status": False, "previous_value": individual.flex_fields.get(field)}
             for field, value in flex_fields.items()
@@ -215,16 +211,6 @@ class IndividualDataUpdateService(DataChangeService):
         individual_data_with_approve_status["identities_to_edit"] = prepare_edit_identities(identities_to_edit)
         individual_data_with_approve_status["previous_identities"] = prepare_previous_identities(
             identities_to_remove_with_approve_status
-        )
-        individual_data_with_approve_status["payment_channels"] = payment_channels_with_approve_status
-        individual_data_with_approve_status[
-            "payment_channels_to_remove"
-        ] = payment_channels_to_remove_with_approve_status
-        individual_data_with_approve_status["payment_channels_to_edit"] = prepare_edit_payment_channel(
-            payment_channels_to_edit
-        )
-        individual_data_with_approve_status["previous_payment_channels"] = prepare_previous_payment_channels(
-            payment_channels_to_remove_with_approve_status
         )
         individual_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
         ticket_details.individual_data = individual_data_with_approve_status
@@ -264,18 +250,8 @@ class IndividualDataUpdateService(DataChangeService):
         identities_to_edit = [
             identity for identity in individual_data.pop("identities_to_edit", []) if is_approved(identity)
         ]
-        payment_channels = [
-            identity["value"] for identity in individual_data.pop("payment_channels", []) if is_approved(identity)
-        ]
-        payment_channels_to_remove_encoded = individual_data.pop("payment_channels_to_remove", [])
-        payment_channels_to_remove = [
-            decode_id_string(data["value"]) for data in payment_channels_to_remove_encoded if is_approved(data)
-        ]
-        payment_channels_to_edit = [
-            identity["value"]
-            for identity in individual_data.pop("payment_channels_to_edit", [])
-            if is_approved(identity)
-        ]
+        accounts = [account["value"] for account in individual_data.pop("accounts", []) if is_approved(account)]
+        accounts_to_edit = [account for account in individual_data.pop("accounts_to_edit", []) if is_approved(account)]
         only_approved_data = {
             field: convert_to_empty_string_if_null(value_and_approve_status.get("value"))
             for field, value_and_approve_status in individual_data.items()
@@ -347,23 +323,19 @@ class IndividualDataUpdateService(DataChangeService):
         documents_to_update = [handle_edit_document(document.get("value", {})) for document in documents_to_edit]
         identities_to_create = [handle_add_identity(identity, new_individual) for identity in identities]
         identities_to_update = [handle_edit_identity(identity) for identity in identities_to_edit]
-        payment_channels_to_create = [
-            handle_add_payment_channel(payment_channel, new_individual) for payment_channel in payment_channels
-        ]
-        payment_channels_to_update = [
-            handle_update_payment_channel(payment_channel) for payment_channel in payment_channels_to_edit
-        ]
+        accounts_to_create = [handle_add_account(account, new_individual) for account in accounts]
+        accounts_to_update = [handle_update_account(account) for account in accounts_to_edit]
+
+        Account.objects.bulk_update(accounts_to_update, ["data", "number", "financial_institution"])
+        Account.objects.bulk_create(accounts_to_create)
+        Account.validate_uniqueness(accounts_to_update)  # type: ignore
+        Account.validate_uniqueness(accounts_to_create)
         Document.objects.bulk_create(documents_to_create)
         Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
         Document.objects.filter(id__in=documents_to_remove).delete()
         IndividualIdentity.objects.bulk_create(identities_to_create)
         IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "partner"])
         IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
-        BankAccountInfo.objects.bulk_create(payment_channels_to_create)
-        BankAccountInfo.objects.bulk_update(
-            payment_channels_to_update, ["bank_name", "bank_account_number", "account_holder_name", "bank_branch_name"]
-        )
-        BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
 
         if new_individual.household:
             recalculate_data(new_individual.household)

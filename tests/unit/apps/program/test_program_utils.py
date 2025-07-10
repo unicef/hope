@@ -12,7 +12,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -22,7 +21,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
     Document,
     Household,
     Individual,
@@ -72,9 +70,6 @@ class TestEnrolHouseholdToProgram(TestCase):
         self.individual1_identity = IndividualIdentityFactory(
             individual=self.individual1,
         )
-        self.individual1_bank_account_info = BankAccountInfoFactory(
-            individual=self.individual1,
-        )
 
         self.individual_2_original = IndividualFactory(household=None, program=self.program1)
         self.individual_2_already_enrolled = IndividualFactory(household=None, program=self.program2)
@@ -85,9 +80,6 @@ class TestEnrolHouseholdToProgram(TestCase):
             individual=self.individual_2_already_enrolled,
         )
         self.individual_2_already_enrolled_identity = IndividualIdentityFactory(
-            individual=self.individual_2_already_enrolled,
-        )
-        self.individual_2_already_enrolled_bank_account_info = BankAccountInfoFactory(
             individual=self.individual_2_already_enrolled,
         )
 
@@ -159,7 +151,6 @@ class TestEnrolHouseholdToProgram(TestCase):
         ind_count = Individual.original_and_repr_objects.count()
         document_count = Document.objects.count()
         identities_count = IndividualIdentity.objects.count()
-        bank_account_info_count = BankAccountInfo.objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
         enroll_households_to_program(
             Household.objects.filter(id=self.household.id),
@@ -175,7 +166,6 @@ class TestEnrolHouseholdToProgram(TestCase):
         # 1 new object related to individual1 enrolled to program2
         self.assertEqual(document_count + 1, Document.objects.count())
         self.assertEqual(identities_count + 1, IndividualIdentity.objects.count())
-        self.assertEqual(bank_account_info_count + 1, BankAccountInfo.objects.count())
         self.assertEqual(roles_count + 2, IndividualRoleInHousehold.objects.count())
 
         original_household = Household.objects.get(id=self.original_household_id)

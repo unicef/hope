@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 from typing import Any, List
 from unittest import mock
@@ -19,7 +20,6 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -36,6 +36,12 @@ from hct_mis_api.apps.household.models import (
     WIDOWED,
     DocumentType,
 )
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -82,6 +88,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        generate_delivery_mechanisms()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
 
@@ -195,6 +202,17 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         cls.household_one = household_one
 
+        cls.fi1 = FinancialInstitutionFactory(id="6")
+        cls.fi2 = FinancialInstitutionFactory(id="7")
+        cls.account = AccountFactory(
+            id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
+            individual=cls.individuals[0],
+            number="123",
+            data={"field": "value"},
+            financial_institution=cls.fi1,
+            account_type=AccountType.objects.get(key="mobile"),
+        )
+
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
         national_id_type = DocumentType.objects.get(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
@@ -271,15 +289,6 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                         "country": "POL",
                                         "number": "2222",
                                     }
-                                ],
-                                "paymentChannels": [
-                                    {
-                                        "type": "BANK_TRANSFER",
-                                        "bankName": "privatbank",
-                                        "bankAccountNumber": 2356789789789789,
-                                        "accountHolderName": "Holder Name 132",
-                                        "bankBranchName": "newName 123",
-                                    },
                                 ],
                             },
                         }
@@ -361,53 +370,26 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                     }
                                 ],
                                 "disability": "disabled",
-                            },
-                        }
-                    }
-                },
-            }
-        }
-
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=variables,
-        )
-
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_create_payment_channel_for_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        variables = {
-            "input": {
-                "description": "Test",
-                "businessArea": "afghanistan",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "issueType": 14,
-                "category": 2,
-                "consent": True,
-                "language": "PL",
-                "extras": {
-                    "issueType": {
-                        "individualDataUpdateIssueTypeExtras": {
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "individualData": {
-                                "paymentChannels": [
+                                "accounts": [
                                     {
-                                        "type": "BANK_TRANSFER",
-                                        "bankName": "privatbank",
-                                        "bankAccountNumber": 2356789789789789,
-                                        "accountHolderName": "Holder Name 333",
-                                        "bankBranchName": "New Branch Name 333",
-                                    },
+                                        "name": "mobile",
+                                        "dataFields": {
+                                            "new_field": "new_value",
+                                            "number": "2222",
+                                            "financial_institution": str(self.fi1.id),
+                                        },
+                                    }
+                                ],
+                                "accountsToEdit": [
+                                    {
+                                        "id": self.id_to_base64(str(self.account.id), "AccountNode"),
+                                        "dataFields": {
+                                            "field": "updated_value",
+                                            "new_field": "new_value",
+                                            "number": "123123",
+                                            "financial_institution": str(self.fi2.id),
+                                        },
+                                    }
                                 ],
                             },
                         }
@@ -415,63 +397,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 },
             }
         }
-        self.snapshot_graphql_request(
-            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
-            variables=variables,
-        )
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_CREATE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_edit_payment_channel_for_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        bank_account = BankAccountInfoFactory(
-            id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
-            individual=self.individuals[0],
-            bank_name="privatbank",
-            bank_account_number=2356789789789789,
-            account_holder_name="Old Holder Name",
-            bank_branch_name="BranchSantander",
-        )
-
-        variables = {
-            "input": {
-                "description": "Test",
-                "businessArea": "afghanistan",
-                "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
-                "issueType": 14,
-                "category": 2,
-                "consent": True,
-                "language": "PL",
-                "extras": {
-                    "issueType": {
-                        "individualDataUpdateIssueTypeExtras": {
-                            "individual": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                            "individualData": {
-                                "paymentChannelsToEdit": [
-                                    {
-                                        "id": self.id_to_base64(bank_account.id, "BankAccountInfoNode"),
-                                        "type": "BANK_TRANSFER",
-                                        "bankName": "privatbank",
-                                        "bankAccountNumber": 1111222233334444,
-                                        "accountHolderName": "Holder Name NEW 2",
-                                        "bankBranchName": "New Name NEW 2",
-                                    },
-                                ],
-                            },
-                        }
-                    }
-                },
-            }
-        }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
