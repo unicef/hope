@@ -98,41 +98,43 @@ function EditIndividualDataChange({
           <Title>
             <Typography variant="h6">{t('Bio Data')}</Typography>
           </Title>
-          <FieldArray
-            name="individualDataUpdateFields"
-            render={(arrayHelpers) => (
-              <>
-                {values.individualDataUpdateFields.map((item, index) => (
-                  <EditIndividualDataChangeFieldRow
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${index}-${item?.fieldName}`}
-                    itemValue={item}
-                    index={index}
-                    individual={fullIndividual.individual}
-                    fields={
-                      addIndividualFieldsData.allAddIndividualsFieldsAttributes
-                    }
-                    notAvailableFields={notAvailableItems}
-                    onDelete={() => arrayHelpers.remove(index)}
-                    values={values}
-                  />
-                ))}
-                <Grid size={{ xs: 4 }}>
-                  <Button
-                    color="primary"
-                    onClick={() => {
-                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
-                    }}
-                    startIcon={<AddCircleOutline />}
-                    data-cy="button-add-new-field"
-                    disabled={isEditTicket}
-                  >
-                    {t('Add new field')}
-                  </Button>
-                </Grid>
-              </>
-            )}
-          />
+          <Grid container spacing={3}>
+            <FieldArray
+              name="individualDataUpdateFields"
+              render={(arrayHelpers) => (
+                <>
+                  {values.individualDataUpdateFields.map((item, index) => (
+                    <Grid size={{ xs: 12 }} key={`${index}-${item?.fieldName}`}>
+                      <EditIndividualDataChangeFieldRow
+                        itemValue={item}
+                        index={index}
+                        individual={fullIndividual.individual}
+                        fields={
+                          addIndividualFieldsData.allAddIndividualsFieldsAttributes
+                        }
+                        notAvailableFields={notAvailableItems}
+                        onDelete={() => arrayHelpers.remove(index)}
+                        values={values}
+                      />
+                    </Grid>
+                  ))}
+                  <Grid size={{ xs: 4 }}>
+                    <Button
+                      color="primary"
+                      onClick={() => {
+                        arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                      }}
+                      startIcon={<AddCircleOutline />}
+                      data-cy="button-add-new-field"
+                      disabled={isEditTicket}
+                    >
+                      {t('Add new field')}
+                    </Button>
+                  </Grid>
+                </>
+              )}
+            />
+          </Grid>
         </BoxWithBorders>
       )}
       <BoxWithBorders>

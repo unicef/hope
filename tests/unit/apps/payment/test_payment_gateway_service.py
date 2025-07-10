@@ -598,13 +598,14 @@ class TestPaymentGatewayService(APITestCase):
                         "amount": str(self.payments[0].entitlement_quantity),
                         "phone_no": str(self.payments[0].collector.phone_no),
                         "last_name": self.payments[0].collector.family_name,
+                        "middle_name": self.payments[0].collector.middle_name,
                         "first_name": self.payments[0].collector.given_name,
                         "full_name": self.payments[0].collector.full_name,
                         "destination_currency": self.payments[0].currency,
                         "delivery_mechanism": "transfer",
                         "account_type": "bank",
                     },
-                    "extra_data": {},
+                    "extra_data": self.payments[0].household_snapshot.snapshot_data,
                 }
             ],
             validate_response=True,
@@ -655,6 +656,7 @@ class TestPaymentGatewayService(APITestCase):
                         "amount": str(self.payments[0].entitlement_quantity),
                         "phone_no": str(primary_collector.phone_no),
                         "last_name": primary_collector.family_name,
+                        "middle_name": primary_collector.middle_name,
                         "first_name": primary_collector.given_name,
                         "full_name": primary_collector.full_name,
                         "destination_currency": self.payments[0].currency,
@@ -667,7 +669,7 @@ class TestPaymentGatewayService(APITestCase):
                             "financial_institution": str(fi.id),
                         },
                     },
-                    "extra_data": {},
+                    "extra_data": self.payments[0].household_snapshot.snapshot_data,
                 }
             ],
             validate_response=True,
@@ -727,11 +729,14 @@ class TestPaymentGatewayService(APITestCase):
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payments[0].parent)
         self.payments[0].refresh_from_db()
+        self.payments[0].collector.refresh_from_db()
+        self.payments[0].household_snapshot.refresh_from_db()
 
         expected_payload = {
             "amount": str(self.payments[0].entitlement_quantity),
             "phone_no": str(primary_collector.phone_no),
             "last_name": primary_collector.family_name,
+            "middle_name": primary_collector.middle_name,
             "first_name": primary_collector.given_name,
             "full_name": primary_collector.full_name,
             "destination_currency": self.payments[0].currency,
@@ -743,7 +748,7 @@ class TestPaymentGatewayService(APITestCase):
             "remote_id": str(self.payments[0].id),
             "record_code": self.payments[0].unicef_id,
             "payload": expected_payload,
-            "extra_data": {},
+            "extra_data": self.payments[0].household_snapshot.snapshot_data,
         }
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         actual_args, actual_kwargs = post_mock.call_args
@@ -771,10 +776,16 @@ class TestPaymentGatewayService(APITestCase):
         PaymentHouseholdSnapshot.objects.all().delete()
         create_payment_plan_snapshot_data(self.payments[0].parent)
         self.payments[0].refresh_from_db()
+        self.payments[0].collector.refresh_from_db()
+        self.payments[0].household_snapshot.refresh_from_db()
+        for account in self.payments[0].collector.accounts.all():
+            account.refresh_from_db()
 
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         expected_payload["account"]["code"] = "456"
         expected_payload["account"]["service_provider_code"] = "789"
+        # update 'extra_data' with new snapshot_data
+        expected_body["extra_data"] = self.payments[0].household_snapshot.snapshot_data
 
         actual_args, actual_kwargs = post_mock.call_args
         assert actual_args[0] == "payment_instructions/123/add_records/"
@@ -862,7 +873,6 @@ class TestPaymentGatewayService(APITestCase):
             "fsp": "123",
             "system": "123",
             "payload": "123",
-            "extra": "123",
         }, 200
 
         response_data = PaymentGatewayAPI().create_payment_instruction({})

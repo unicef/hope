@@ -21,11 +21,14 @@ from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
 from rest_framework.exceptions import ValidationError as DRFValidationError
+from strategy_field.fields import StrategyField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.program.collision_detectors import collision_detectors_registry
+from hct_mis_api.apps.sanction_list.models import SanctionList
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -230,6 +233,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     biometric_deduplication_enabled = models.BooleanField(
         default=False, help_text="Enable Deduplication of Face Images"
     )
+    collision_detection_enabled = models.BooleanField(default=False, help_text="don't create duplicated")
+    collision_detector = StrategyField(
+        registry=collision_detectors_registry, null=True, blank=True, help_text="Object which detects collisions"
+    )
     # System fields
     is_visible = models.BooleanField(default=True, help_text="Program is visible in UI [sys]")
     household_count = models.PositiveIntegerField(default=0, help_text="Program household count [sys]")
@@ -237,6 +244,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     deduplication_set_id = models.UUIDField(blank=True, null=True, help_text="Program deduplication set id [sys]")
 
+    sanction_lists = models.ManyToManyField(
+        SanctionList, blank=True, related_name="programs", help_text="Program sanction lists"
+    )
     objects = SoftDeletableIsVisibleManager()
 
     def clean(self) -> None:

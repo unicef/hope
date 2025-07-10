@@ -36,6 +36,7 @@ from tests.unit.conftest import disabled_locally_test
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 @disabled_locally_test
 class TestBatchDeduplication(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
@@ -304,6 +305,7 @@ class TestBatchDeduplication(TestCase):
         )
 
 
+@pytest.mark.elasticsearch
 class TestGoldenRecordDeduplication(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 

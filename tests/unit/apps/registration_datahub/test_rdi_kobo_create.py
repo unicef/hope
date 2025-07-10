@@ -39,6 +39,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@pytest.mark.elasticsearch
 class TestRdiKoboCreateTask(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 

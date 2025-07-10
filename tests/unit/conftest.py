@@ -2,7 +2,9 @@ import logging
 import os
 import re
 import sys
+from pathlib import Path
 from time import sleep
+from typing import Any
 
 from django.conf import settings
 
@@ -25,8 +27,18 @@ def pytest_addoption(parser: Parser) -> None:
     )
 
 
+@pytest.fixture(autouse=True)
+def clear_default_cache() -> None:
+    from django.core.cache import cache
+
+    cache.clear()
+
+
 def pytest_configure(config: Config) -> None:
     pytest.localhost = True if config.getoption("--localhost") else False
+    here = Path(__file__).parent
+    utils = here.parent / "extras"
+    sys.path.append(str(utils))
 
     sys._called_from_pytest = True
     from django.conf import settings
@@ -53,7 +65,8 @@ def pytest_configure(config: Config) -> None:
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.CACHE_ENABLED = False
-    settings.TESTS_ROOT = "/app/tests/unit"
+    settings.TESTS_ROOT = os.getenv("TESTS_ROOT")
+    settings.PROJECT_ROOT = os.getenv("PROJECT_ROOT")
     settings.CACHES = {
         "default": {
             "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
@@ -161,3 +174,56 @@ def _teardown_test_elasticsearch(suffix: str) -> None:
 
     for doc in registry.get_documents():
         doc._index._name = pattern.sub("", doc._index._name)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def register_custom_sql_signal() -> None:
+    from django.db import connections
+    from django.db.migrations.loader import MigrationLoader
+    from django.db.models.signals import post_migrate, pre_migrate
+
+    orig = getattr(settings, "MIGRATION_MODULES", None)
+    settings.MIGRATION_MODULES = {}
+
+    loader = MigrationLoader(None, load=False)
+    loader.load_disk()
+    all_migrations = loader.disk_migrations
+    if orig is not None:
+        settings.MIGRATION_MODULES = orig
+    apps = set()
+    all_sqls = []
+    for (app_label, _), migration in all_migrations.items():
+        apps.add(app_label)
+
+        for operation in migration.operations:
+            from django.db.migrations.operations.special import RunSQL
+
+            if isinstance(operation, RunSQL):
+                sql_statements = operation.sql if isinstance(operation.sql, (list, tuple)) else [operation.sql]
+                for stmt in sql_statements:
+                    all_sqls.append(stmt)
+
+    def pre_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        filename = settings.TESTS_ROOT + "/../../development_tools/db/premigrations.sql"
+        with open(filename, "r") as file:
+            pre_sql = file.read()
+        conn = connections[using]
+        conn.cursor().execute(pre_sql)
+
+    def post_migration_custom_sql(
+        sender: Any, app_config: Any, verbosity: Any, interactive: Any, using: Any, **kwargs: Any
+    ) -> None:
+        app_label = app_config.label
+        if app_label not in apps:
+            return
+        apps.remove(app_label)
+        if apps:
+            return
+        conn = connections[using]
+        for stmt in all_sqls:
+            conn.cursor().execute(stmt)
+
+    pre_migrate.connect(pre_migration_custom_sql, dispatch_uid="tests.pre_migrationc_custom_sql", weak=False)
+    post_migrate.connect(post_migration_custom_sql, dispatch_uid="tests.post_migration_custom_sql", weak=False)

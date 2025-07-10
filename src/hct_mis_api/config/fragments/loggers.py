@@ -1,11 +1,10 @@
 import logging
-import sys
 from typing import Any, Dict
 
 from hct_mis_api.config.env import env
 from hct_mis_api.config.settings import DEBUG
 
-LOG_LEVEL = env("LOG_LEVEL") if "test" not in sys.argv else "INFO"
+LOG_LEVEL = env("LOG_LEVEL")
 
 LOGGING: Dict[str, Any] = {
     "version": 1,

@@ -45,7 +45,7 @@ export function DocumentField({
 
   return (
     <Grid container alignItems="center" spacing={3}>
-      <Grid size={{ xs: 3 }}>
+      <Grid size={{ xs: 2 }}>
         <Field
           name={`${docFieldName}.key`}
           fullWidth

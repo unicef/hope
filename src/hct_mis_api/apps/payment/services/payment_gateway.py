@@ -60,22 +60,20 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     external_code = serializers.SerializerMethodField()
     fsp = serializers.SerializerMethodField()
     payload = serializers.SerializerMethodField()
-    extra = serializers.SerializerMethodField()
 
     def get_fsp(self, obj: Any) -> str:
         return obj.financial_service_provider.payment_gateway_id
 
-    def get_extra(self, obj: Any) -> Dict:
-        return {
+    def get_payload(self, obj: Any) -> Dict:
+        payload = {
+            "destination_currency": obj.payment_plan.currency,
             "user": self.context["user_email"],
             "config_key": obj.payment_plan.business_area.code,
             "delivery_mechanism": obj.delivery_mechanism.code,
         }
-
-    def get_payload(self, obj: Any) -> Dict:
-        return {
-            "destination_currency": obj.payment_plan.currency,
-        }
+        if obj.payment_plan.business_area.payment_countries.count() == 1:  # TODO temporary solution
+            payload["destination_country"] = obj.payment_plan.business_area.payment_countries.first().iso_code3
+        return payload
 
     def get_external_code(self, obj: Any) -> str:
         return f"{obj.payment_plan.unicef_id}-{obj.order}"  # pragma: no cover
@@ -87,7 +85,6 @@ class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
             "external_code",
             "fsp",
             "payload",
-            "extra",
         ]
 
 
@@ -96,6 +93,7 @@ class PaymentPayloadSerializer(serializers.Serializer):
     phone_no = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
+    middle_name = serializers.CharField(required=False, allow_blank=True)
     full_name = serializers.CharField(required=False, allow_blank=True)
     destination_currency = serializers.CharField(required=True)
     origination_currency = serializers.CharField(required=False)
@@ -111,14 +109,14 @@ class PaymentSerializer(ReadOnlyModelSerializer):
     extra_data = serializers.SerializerMethodField()
 
     def get_extra_data(self, obj: Payment) -> Dict:
-        return {}
-
-    def get_payload(self, obj: Payment) -> Dict:
         snapshot = getattr(obj, "household_snapshot", None)
         if not snapshot:
             raise PaymentGatewayAPI.PaymentGatewayAPIException(f"Not found snapshot for Payment {obj.unicef_id}")
 
-        snapshot_data = snapshot.snapshot_data
+        return snapshot.snapshot_data
+
+    def get_payload(self, obj: Payment) -> Dict:
+        snapshot_data = self.get_extra_data(obj)
         collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
         account_data = collector_data.get("account_data", {})
 
@@ -127,6 +125,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "destination_currency": obj.currency,
             "delivery_mechanism": obj.delivery_type.code,
             "account_type": obj.delivery_type.account_type and obj.delivery_type.account_type.key,
+            "collector_id": collector_data.get("unicef_id", ""),
             "phone_no": collector_data.get("phone_no", ""),
             "last_name": collector_data.get("family_name", ""),
             "first_name": collector_data.get("given_name", ""),
@@ -240,7 +239,6 @@ class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
     fsp: str
     system: int
     payload: dict
-    extra: dict
     id: Optional[int] = None
 
 
@@ -520,19 +518,8 @@ class PaymentGatewayService:
         payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
         payment.status_date = now()
         payment.fsp_auth_code = matching_pg_payment.auth_code
-        update_fields = ["status", "status_date", "fsp_auth_code"]
-
-        if payment.status in [
-            Payment.STATUS_ERROR,
-            Payment.STATUS_MANUALLY_CANCELLED,
-        ]:
-            if matching_pg_payment.message:
-                payment.reason_for_unsuccessful_payment = matching_pg_payment.message
-            elif matching_pg_payment.payout_amount:
-                payment.reason_for_unsuccessful_payment = f"Delivered amount: {matching_pg_payment.payout_amount}"
-            else:
-                payment.reason_for_unsuccessful_payment = "Unknown error"
-            update_fields.append("reason_for_unsuccessful_payment")
+        payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+        update_fields = ["status", "status_date", "fsp_auth_code", "reason_for_unsuccessful_payment"]
 
         delivered_quantity = matching_pg_payment.payout_amount
         if payment.status in [

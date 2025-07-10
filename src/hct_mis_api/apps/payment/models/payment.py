@@ -293,6 +293,10 @@ class PaymentPlan(
     program_cycle = models.ForeignKey(
         "program.ProgramCycle", related_name="payment_plans", on_delete=models.CASCADE, help_text="Program Cycle"
     )
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
+    financial_service_provider = models.ForeignKey(
+        "payment.FinancialServiceProvider", blank=True, null=True, on_delete=models.PROTECT
+    )
     imported_file = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL, help_text="Imported File"
     )
@@ -510,19 +514,15 @@ class PaymentPlan(
     )
     status_date = models.DateTimeField(help_text="Date and time of Payment Plan status [sys]")
     is_cash_assist = models.BooleanField(default=False, help_text="Cash Assist Flag [sys]")
-    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", blank=True, null=True, on_delete=models.PROTECT)
-    financial_service_provider = models.ForeignKey(
-        "payment.FinancialServiceProvider", blank=True, null=True, on_delete=models.PROTECT
-    )
 
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        constraints = [
-            UniqueConstraint(
-                fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
-            ),
-        ]
+        # constraints = [
+        #     UniqueConstraint(
+        #         fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
+        #     ),
+        # ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -1939,11 +1939,11 @@ class Account(MergeStatusModel, TimeStampedUUIDModel, SignatureMixin):
         null=True,
         blank=True,
     )
-    number = models.CharField(max_length=256, blank=True, null=True)
+    number = models.CharField(max_length=256, blank=True, null=True, db_index=True)
     data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
     unique_key = models.CharField(max_length=256, blank=True, null=True, editable=False)  # type: ignore
-    is_unique = models.BooleanField(default=True)
-    active = models.BooleanField(default=True)  # False for duplicated/withdrawn individual
+    is_unique = models.BooleanField(default=True, db_index=True)
+    active = models.BooleanField(default=True, db_index=True)  # False for duplicated/withdrawn individual
 
     signature_fields = (
         "data",
