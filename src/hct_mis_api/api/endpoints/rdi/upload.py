@@ -18,6 +18,7 @@ from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     HEAD,
@@ -167,6 +168,32 @@ class HouseholdSerializer(serializers.ModelSerializer):
     country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     size = serializers.IntegerField(required=False, allow_null=True)
     consent_sharing = serializers.MultipleChoiceField(choices=DATA_SHARING_CHOICES, required=False)
+    village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+
+    admin1 = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.filter(area_type__area_level=1),
+    )
+    admin2 = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.filter(area_type__area_level=2),
+    )
+    admin3 = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.filter(area_type__area_level=3),
+    )
+    admin4 = serializers.SlugRelatedField(
+        slug_field="p_code",
+        required=False,
+        allow_null=True,
+        queryset=Area.objects.filter(area_type__area_level=4),
+    )
 
     class Meta:
         model = PendingHousehold
