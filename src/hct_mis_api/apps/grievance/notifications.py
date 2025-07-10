@@ -45,7 +45,7 @@ class GrievanceNotification:
         context = {
             "first_name": user_recipient.first_name,
             "last_name": user_recipient.last_name,
-            "ticket_url": f'{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/programs/all/grievance/tickets/{self.grievance_ticket.grievance_type_to_string()}-generated/{encode_id_base64(self.grievance_ticket.id, "GrievanceTicket")}',
+            "ticket_url": f'{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/programs/all/grievance/tickets/{self.grievance_ticket.grievance_type_to_string()}-generated/{self.grievance_ticket.id}',
             "ticket_id": self.grievance_ticket.unicef_id,
             "ticket_category": self.grievance_ticket.get_category_display(),
             "title": "Grievance and feedback notification",
