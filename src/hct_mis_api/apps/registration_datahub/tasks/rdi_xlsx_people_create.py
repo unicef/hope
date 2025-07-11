@@ -97,9 +97,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 header = header_cell.value
                 combined_fields = self.COMBINED_FIELDS
                 current_field = combined_fields.get(header, {})
-                if header == "identification_key_h_c":
-                    identification_key = cell.value
-                    obj_to_create.identification_key = identification_key
                 if not current_field and header not in complex_fields[sheet_title]:
                     continue
                 is_not_image = current_field.get("type") != "IMAGE"
@@ -115,8 +112,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     continue
 
                 if header in complex_fields[sheet_title]:
-                    if self.index_id in self.households_to_ignore:
-                        continue
                     fn_complex: Callable = complex_fields[sheet_title][header]
                     value = fn_complex(
                         value=cell_value,
@@ -183,15 +178,10 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         obj_to_create.detail_id = row[0].row
         obj_to_create.business_area = registration_data_import.business_area
         if sheet_title == "households":
-            if not self._check_collision(obj_to_create):  # Dont create household if collision
-                obj_to_create.set_admin_areas()
-                obj_to_create.save()
-                self.households[self.index_id] = obj_to_create
-            else:
-                self.households_to_ignore.append(self.index_id)
+            obj_to_create.set_admin_areas()
+            obj_to_create.save()
+            self.households[self.index_id] = obj_to_create
         else:
-            if self.index_id in self.households_to_ignore:
-                return
             obj_to_create = self._validate_birth_date(obj_to_create)
             obj_to_create.age_at_registration = calculate_age_at_registration(
                 registration_data_import.created_at, str(obj_to_create.birth_date)
@@ -293,7 +283,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         self._create_collectors()
         self._create_bank_accounts_infos()
         self._create_accounts()
-        self.registration_data_import.extra_hh_rdis.add(*self.colided_households_pks)
 
     @transaction.atomic()
     def execute(

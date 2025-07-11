@@ -1289,7 +1289,9 @@ class Individual(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True, help_text="Original unicef_id [sys]")
     is_migration_handled = models.BooleanField(default=False, help_text="Migration status [sys]")
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Migrated at [sys]")
-
+    identification_key = models.CharField(
+        null=True, blank=True, max_length=255, help_text="Key used to identify Collisions in the system"
+    )
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
