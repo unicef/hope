@@ -228,6 +228,7 @@ dependencies = [
     "drf-jwt<2.0.0,>=1.19.2",
     "drf-spectacular[sidecar]<1.0,>=0.27",
     "drf-extensions==0.7.1",
+    "nested-multipart-parser==1.5.0",
     "elasticsearch-dsl~=8.14.0",
     "gevent",
     "graphene-file-upload<2.0.0,>=1.3.0",

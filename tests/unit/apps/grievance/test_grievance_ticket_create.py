@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
 import pytest
@@ -298,10 +299,43 @@ class TestGrievanceTicketCreate:
         assert TicketIndividualDataUpdateDetails.objects.all().count() == 0
         response = self.api_client.post(self.list_url, data, format="json")
         resp_data = response.json()
+
         assert response.status_code == status.HTTP_201_CREATED
         assert len(resp_data) == 1
         assert GrievanceTicket.objects.all().count() == 1
         assert TicketIndividualDataUpdateDetails.objects.all().count() == 1
+
+    def test_create_grievance_ticket_update_individual_with_document(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_CREATE, Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
+            self.afghanistan,
+            self.program,
+        )
+        fake_file = SimpleUploadedFile("test.jpeg", b"test file content", content_type="image/jpeg")
+        data = {
+            "description": "Upd Ind",
+            "language": "Polish",
+            "area": str(self.area_1.pk),
+            "issue_type": 14,
+            "category": 2,
+            "consent": True,
+            "extras.issue_type.individual_data_update_issue_type_extras.individual": str(self.individuals[0].pk),
+            "extras.issue_type.individual_data_update_issue_type_extras.individual_data.full_name": "New full_name",
+            "documentation[0].file": fake_file,
+            "documentation[0].name": fake_file.name,
+        }
+        assert GrievanceTicket.objects.all().count() == 0
+        assert TicketIndividualDataUpdateDetails.objects.all().count() == 0
+        response = self.api_client.post(self.list_url, data, format="multipart")
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_201_CREATED
+        assert len(resp_data) == 1
+        assert GrievanceTicket.objects.all().count() == 1
+        assert TicketIndividualDataUpdateDetails.objects.all().count() == 1
+        assert GrievanceTicket.objects.first().support_documents.count() == 1
 
     def test_create_grievance_ticket_delete_individual(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
