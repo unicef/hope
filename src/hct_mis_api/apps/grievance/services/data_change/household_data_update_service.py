@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List
+from typing import Any, Dict, List
 
 from django.contrib.auth.models import AbstractUser
 from django.shortcuts import get_object_or_404
@@ -24,10 +24,26 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     to_date_string,
     verify_flex_fields,
 )
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+
+
+def _prepare_roles_with_approve_status(roles_data: List[Dict[Any, Any]]) -> List[Dict[str, Any]]:
+    roles_with_approve_status = []
+    for role in roles_data:
+        individual_id = role["individual"]
+        individual = get_object_or_404(Individual, id=decode_id_string(individual_id))
+        roles_with_approve_status.append(
+            {
+                "value": role["new_role"],
+                "approve_status": False,
+                "previous_value": individual.role,
+                "individual_id": individual_id,
+            }
+        )
+    return roles_with_approve_status
 
 
 class HouseholdDataUpdateService(DataChangeService):
@@ -38,6 +54,7 @@ class HouseholdDataUpdateService(DataChangeService):
         household_id = decode_id_string(household_encoded_id)
         household = get_object_or_404(Household, id=household_id)
         household_data = household_data_update_issue_type_extras.get("household_data", {})
+        roles = household_data.pop("roles", [])
         to_date_string(household_data, "start")
         to_date_string(household_data, "end")
         flex_fields = {to_snake_case(field): value for field, value in household_data.pop("flex_fields", {}).items()}
@@ -69,6 +86,8 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
+        household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)
+
         ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
             household_data=household_data_with_approve_status,
             household=household,
