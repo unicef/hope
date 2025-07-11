@@ -609,21 +609,22 @@ class PaymentPlanService:
             should_update_money_stats = True
             Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
-        if not (fsp_id and delivery_mechanism_code) and hasattr(self.payment_plan, "delivery_mechanism"):
-            self.payment_plan.delivery_mechanism = None
-            self.payment_plan.financial_service_provider = None
-            should_rebuild_list = True
-
-        if fsp_id and delivery_mechanism_code:
-            fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
-            delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
-            if (
-                self.payment_plan.financial_service_provider != fsp
-                or self.payment_plan.delivery_mechanism != delivery_mechanism
-            ):
+        if self.payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES:
+            if not (fsp_id and delivery_mechanism_code):
+                self.payment_plan.delivery_mechanism = None
+                self.payment_plan.financial_service_provider = None
                 should_rebuild_list = True
-                self.payment_plan.financial_service_provider = fsp
-                self.payment_plan.delivery_mechanism = delivery_mechanism
+
+            if fsp_id and delivery_mechanism_code:
+                fsp = get_object_or_404(FinancialServiceProvider, pk=decode_id_string(fsp_id))
+                delivery_mechanism = get_object_or_404(DeliveryMechanism, code=delivery_mechanism_code)
+                if (
+                    self.payment_plan.financial_service_provider != fsp
+                    or self.payment_plan.delivery_mechanism != delivery_mechanism
+                ):
+                    should_rebuild_list = True
+                    self.payment_plan.financial_service_provider = fsp
+                    self.payment_plan.delivery_mechanism = delivery_mechanism
 
         self.payment_plan.save()
         # remove old targeting_criteria

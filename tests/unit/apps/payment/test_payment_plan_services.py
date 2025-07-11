@@ -1097,10 +1097,11 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(payment_plan.dispersion_end_date, timezone.now().date() + timedelta(days=3))
 
     def test_update_pp_dm_fsp(self) -> None:
+        # allow changing dm/dsp on a TP PP stage
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle,
             created_by=self.user,
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentPlan.Status.TP_OPEN,
             currency="AMD",
             delivery_mechanism=None,
             financial_service_provider=None,
@@ -1109,6 +1110,30 @@ class TestPaymentPlanServices(APITestCase):
             {
                 "fsp_id": encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
                 "delivery_mechanism_code": self.dm_transfer_to_account.code,
+            }
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.delivery_mechanism, self.dm_transfer_to_account)
+        self.assertEqual(payment_plan.financial_service_provider, self.fsp)
+
+        # do not allow changing dm/dsp on a promoted PP stage
+        payment_plan.status = PaymentPlan.Status.OPEN
+        payment_plan.save()
+
+        PaymentPlanService(payment_plan).update(
+            {
+                "fsp_id": encode_id_base64(self.fsp.id, "FinancialServiceProvider"),
+                "delivery_mechanism_code": self.dm_transfer_to_digital_wallet.code,
+            }
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.delivery_mechanism, self.dm_transfer_to_account)
+        self.assertEqual(payment_plan.financial_service_provider, self.fsp)
+
+        PaymentPlanService(payment_plan).update(
+            {
+                "fsp_id": None,
+                "delivery_mechanism_code": None,
             }
         )
         payment_plan.refresh_from_db()
