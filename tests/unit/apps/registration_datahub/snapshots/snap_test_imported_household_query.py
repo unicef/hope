@@ -11,7 +11,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_0_detail_id
     'data': {
         'household': {
             'country': 'Afghanistan',
-            'importId': 'HH-123 (Detail id test123)',
+            'importId': 'HH-12344 (Detail id test123)',
             'individuals': {
                 'edges': [
                     {
@@ -44,7 +44,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_1_enumerato
     'data': {
         'household': {
             'country': 'Afghanistan',
-            'importId': 'HH-123 (Enumerator ID 123)',
+            'importId': 'HH-12355 (Enumerator ID 123)',
             'individuals': {
                 'edges': [
                     {

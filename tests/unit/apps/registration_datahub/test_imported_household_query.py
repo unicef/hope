@@ -132,20 +132,14 @@ class TestImportedHouseholdQuery(APITestCase):
 
     @parameterized.expand(
         [
-            (
-                "detail_id",
-                "test123",
-            ),
-            (
-                "enumerator_rec_id",
-                123,
-            ),
+            ("detail_id", "test123", "HH-12344"),
+            ("enumerator_rec_id", 123, "HH-12355"),
         ]
     )
-    def test_imported_household_query(self, field_name: str, value: Any) -> None:
+    def test_imported_household_query(self, field_name: str, value: Any, hh_unicef_id: str) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_VIEW_DETAILS], self.business_area)
         country = CountryFactory()
-        hh = PendingHouseholdFactory(country=country, unicef_id="HH-123", program=self.program)
+        hh = PendingHouseholdFactory(country=country, unicef_id=hh_unicef_id, program=self.program)
         setattr(hh, field_name, value)
         hh.save()
         ind = PendingIndividualFactory(
