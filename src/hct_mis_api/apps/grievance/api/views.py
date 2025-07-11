@@ -19,6 +19,7 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     UpdateModelMixin,
 )
+from rest_framework.parsers import JSONParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
@@ -38,6 +39,7 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.api.parsers import DictDrfNestedParser
 from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
@@ -302,6 +304,7 @@ class GrievanceTicketGlobalViewSet(
     filterset_class = GrievanceTicketFilter
     admin_area_model_fields = ["admin2"]
     program_model_field = "programs"
+    parser_classes = (DictDrfNestedParser, JSONParser)
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
@@ -342,7 +345,6 @@ class GrievanceTicketGlobalViewSet(
         serializer.is_valid(raise_exception=True)
         user: AbstractUser = request.user  # type: ignore
         input_data = serializer.validated_data
-
         # check if user has access to the program
         if program := input_data.get("program"):
             if not check_permissions(
@@ -358,7 +360,7 @@ class GrievanceTicketGlobalViewSet(
                 user,
                 [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
                 business_area=self.business_area,
-                program=program.slug,
+                program=program.slug if program else None,
             ):
                 raise PermissionDenied
 
@@ -369,6 +371,7 @@ class GrievanceTicketGlobalViewSet(
             raise ValidationError("Feedback tickets are not allowed to be created through this mutation.")
 
         self.verify_required_arguments(input_data, "category", self.CREATE_CATEGORY_OPTIONS)
+
         if input_data.get("issue_type"):
             self.verify_required_arguments(input_data, "issue_type", self.CREATE_ISSUE_TYPE_OPTIONS)
 
