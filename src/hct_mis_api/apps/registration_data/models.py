@@ -179,6 +179,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         blank=True,
     )
     import_from_ids = models.TextField(blank=True, null=True)
+    exclude_external_collectors = models.BooleanField(
+        default=False,
+        help_text="Exclude external alternate collectors from the RDI. "
+        "This is used for the RDI created from the program population.",
+    )
     pull_pictures = models.BooleanField(default=True)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
