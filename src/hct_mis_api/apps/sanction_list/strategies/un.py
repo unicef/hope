@@ -148,22 +148,22 @@ class LoadSanctionListXMLTask:
         path = "INDIVIDUAL_ALIAS"
         alias_names_tags = individual_tag.findall(path)
 
-        aliases = set()
+        aliases = {}
         for tag in alias_names_tags:
             quality_tag = tag.find("QUALITY")
             alias_name_tag = tag.find("ALIAS_NAME")
             is_valid_quality_tag = isinstance(quality_tag, ET.Element) and quality_tag.text
             is_valid_name_tag = isinstance(alias_name_tag, ET.Element) and alias_name_tag.text
             if is_valid_quality_tag and is_valid_name_tag:
+                individual_instance = self._get_individual_from_db_or_file(individual)
+                unique_key = f"{alias_name_tag.text}-{str(individual_instance.id)}"
                 if quality_tag.text.lower() in ("good", "a.k.a") and alias_name_tag.text:
-                    aliases.add(
-                        SanctionListIndividualAliasName(
-                            individual=self._get_individual_from_db_or_file(individual),
-                            name=alias_name_tag.text,
-                        )
+                    aliases[unique_key] = SanctionListIndividualAliasName(
+                        individual=individual_instance,
+                        name=alias_name_tag.text,
                     )
 
-        return aliases
+        return set(aliases.values())
 
     @staticmethod
     def _get_country_field(individual_tag: ET.Element, path: str, *args: Any, **kwargs: Any) -> Union[str, None, set]:
