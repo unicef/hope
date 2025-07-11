@@ -100,7 +100,6 @@ class TestProgrammeManagement:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
