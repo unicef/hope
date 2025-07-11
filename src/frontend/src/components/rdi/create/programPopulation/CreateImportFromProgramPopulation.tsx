@@ -94,6 +94,8 @@ export const CreateImportFromProgramPopulationForm = ({
               screenBeneficiary: values.screenBeneficiary,
               importFromProgramId: values.importFromProgramId,
               importFromIds: values.importFromIds,
+              excludeExternalCollectors:
+                values.importType === 'excludeAlternateCollectors',
             },
           },
         );
@@ -168,6 +170,11 @@ export const CreateImportFromProgramPopulationForm = ({
               value: 'all',
               name: 'All Programme Population',
               dataCy: 'radio-all',
+            },
+            {
+              value: 'excludeAlternateCollectors',
+              name: 'Exclude Alternate Collectors',
+              dataCy: 'radio-exclude-alternate-collectors',
             },
             { value: 'usingIds', name: 'Using Ids', dataCy: 'radio-ids' },
           ]}
