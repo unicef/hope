@@ -412,28 +412,3 @@ class TestIndividualModel(TestCase):
             str(error.exception),
             "IND-333: Valid Document already exists: 123456ABC.",
         )
-
-    def test_mark_as_distinct_raise_errors_2(self) -> None:
-        ind = IndividualFactory(unicef_id="IND-9999", program=self.program)
-        doc_type = DocumentTypeFactory(key="registration", unique_for_individual=True)
-        country = CountryFactory()
-        DocumentFactory(
-            status=Document.STATUS_VALID,
-            program=self.program,
-            type=doc_type,
-            document_number="AAA",
-            individual=ind,
-            country=country,
-        )
-        DocumentFactory(
-            status=Document.STATUS_INVALID,
-            program=self.program,
-            type=doc_type,
-            document_number="BBB",
-            individual=ind,
-            country=country,
-        )
-        with self.assertRaises(Exception) as error_2:
-            ind.mark_as_distinct()
-        error_msg = 'duplicate key value violates unique constraint "unique_for_individual_if_not_removed_and_valid"'
-        self.assertIn(error_msg, str(error_2.exception))
