@@ -710,100 +710,47 @@ export const categoriesAndColors = [
  *   empty_obj={}
  *   (empty_arr is omitted)
  */
-function deepSnakeCaseKeys(obj: any): any {
-  if (Array.isArray(obj)) {
-    return obj.map(deepSnakeCaseKeys);
-  } else if (obj && typeof obj === 'object' && !(obj instanceof File)) {
-    const newObj: any = {};
-    for (const k in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, k)) {
-        newObj[customSnakeCase(k)] = deepSnakeCaseKeys(obj[k]);
-      }
-    }
-    return newObj;
-  }
-  return obj;
-}
-
-function extractFilesAndStrip(
-  obj: any,
-  path: string[] = [],
-  files: Array<{ key: string; file: File }> = [],
-) {
-  if (obj instanceof File) {
-    const fileKey = path.join('__');
-    files.push({ key: fileKey, file: obj });
-    // Return the FormData key string so the JSON references the file
-    return fileKey;
-  } else if (Array.isArray(obj)) {
-    return obj.map((item, idx) =>
-      extractFilesAndStrip(item, [...path, String(idx)], files),
-    );
-  } else if (typeof obj === 'object' && obj !== null) {
-    const newObj: any = {};
-    for (const k in obj) {
-      if (obj[k] !== undefined && obj[k] !== null) {
-        const result = extractFilesAndStrip(
-          obj[k],
-          [...path, customSnakeCase(k)],
-          files,
-        );
-        if (result !== undefined) newObj[k] = result;
-      }
-    }
-    return newObj;
-  }
-  return obj;
-}
 
 export function grievanceRequestToFormData(
   obj: any,
   form?: FormData,
+  parentKey?: string,
 ): FormData {
   const formData = form || new FormData();
   for (const key in obj) {
     if (obj[key] === undefined || obj[key] === null) continue;
-    const snakeKey = customSnakeCase(key);
     const value = obj[key];
-    // Special handling for top-level 'extras' field
-    if (snakeKey === 'extras' && typeof value === 'object' && value !== null) {
-      const files: Array<{ key: string; file: File }> = [];
-      // Convert all keys in extras to snake_case
-      const snakeCasedExtras = deepSnakeCaseKeys(value);
-      const stripped = extractFilesAndStrip(snakeCasedExtras, [], files);
-      formData.append('extras', JSON.stringify(stripped));
-      files.forEach(({ key: fileKey, file }) => {
-        formData.append(`extras__${fileKey}`, file);
-      });
-    } else if (value instanceof File) {
-      formData.append(snakeKey, value);
+    const snakeKey = customSnakeCase(key);
+    let formKey;
+    if (Array.isArray(obj)) {
+      // Array: use bracket notation for index
+      formKey = parentKey ? `${parentKey}[${key}]` : key;
+    } else {
+      // Object: use dot notation for nesting
+      formKey = parentKey ? `${parentKey}.${snakeKey}` : snakeKey;
+    }
+
+    if (value instanceof File) {
+      formData.append(formKey, value);
     } else if (Array.isArray(value)) {
       if (value.length === 0) {
         continue;
       } else {
         value.forEach((item, idx) => {
-          const arrayKey = `${snakeKey}[${idx}]`;
-          if (item instanceof File) {
-            formData.append(arrayKey, item);
-          } else if (typeof item === 'object' && item !== null) {
-            grievanceRequestToFormData(item, formData);
-          } else if (typeof item === 'boolean') {
-            formData.append(arrayKey, item ? 'true' : 'false');
-          } else if (item !== undefined && item !== null) {
-            formData.append(arrayKey, item);
-          }
+          grievanceRequestToFormData(item, formData, `${formKey}[${idx}]`);
         });
       }
     } else if (typeof value === 'object' && value !== null) {
       if (Object.keys(value).length === 0) {
-        formData.append(snakeKey, '{}');
+        // Do not send empty objects at all
+        continue;
       } else {
-        grievanceRequestToFormData(value, formData);
+        grievanceRequestToFormData(value, formData, formKey);
       }
     } else if (typeof value === 'boolean') {
-      formData.append(snakeKey, value ? 'true' : 'false');
+      formData.append(formKey, value ? 'true' : 'false');
     } else {
-      formData.append(snakeKey, value);
+      formData.append(formKey, value);
     }
   }
   return formData;
