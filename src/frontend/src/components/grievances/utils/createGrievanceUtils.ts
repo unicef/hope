@@ -694,38 +694,116 @@ export const categoriesAndColors = [
 ];
 
 /**
- * Recursively converts a grievance request object to FormData, handling nested objects, arrays, and files.
+ * Converts a nested object into FormData, recursively flattening keys using bracket notation and snake_case.
+ * - Files are appended directly.
+ * - Booleans are serialized as 'true'/'false'.
+ * - Arrays: Non-empty arrays are expanded with indexed keys; empty arrays are omitted (not sent).
+ * - Objects: Empty objects are always sent as '{}'.
+ * - All keys are snake_cased and use bracket notation for nesting.
+ *
+ * This utility is robust to OpenAPI codegen overwrites and backend requirements.
+ *
+ * Example:
+ *   { fooBar: [ { nestedKey: true } ], emptyArr: [], emptyObj: {} }
+ *   =>
+ *   foo_bar[0][nested_key]=true
+ *   empty_obj={}
+ *   (empty_arr is omitted)
  */
+function deepSnakeCaseKeys(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(deepSnakeCaseKeys);
+  } else if (obj && typeof obj === 'object' && !(obj instanceof File)) {
+    const newObj: any = {};
+    for (const k in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, k)) {
+        newObj[customSnakeCase(k)] = deepSnakeCaseKeys(obj[k]);
+      }
+    }
+    return newObj;
+  }
+  return obj;
+}
+
+function extractFilesAndStrip(
+  obj: any,
+  path: string[] = [],
+  files: Array<{ key: string; file: File }> = [],
+) {
+  if (obj instanceof File) {
+    const fileKey = path.join('__');
+    files.push({ key: fileKey, file: obj });
+    // Return the FormData key string so the JSON references the file
+    return fileKey;
+  } else if (Array.isArray(obj)) {
+    return obj.map((item, idx) =>
+      extractFilesAndStrip(item, [...path, String(idx)], files),
+    );
+  } else if (typeof obj === 'object' && obj !== null) {
+    const newObj: any = {};
+    for (const k in obj) {
+      if (obj[k] !== undefined && obj[k] !== null) {
+        const result = extractFilesAndStrip(
+          obj[k],
+          [...path, customSnakeCase(k)],
+          files,
+        );
+        if (result !== undefined) newObj[k] = result;
+      }
+    }
+    return newObj;
+  }
+  return obj;
+}
+
 export function grievanceRequestToFormData(
   obj: any,
   form?: FormData,
-  namespace?: string,
 ): FormData {
   const formData = form || new FormData();
   for (const key in obj) {
     if (obj[key] === undefined || obj[key] === null) continue;
-    // Only use namespace for nested objects/arrays
-    const formKey = namespace ? `${namespace}[${key}]` : key;
-    if (obj[key] instanceof File) {
-      formData.append(formKey, obj[key]);
-    } else if (Array.isArray(obj[key])) {
-      obj[key].forEach((item, idx) => {
-        if (item instanceof File) {
-          formData.append(`${formKey}[${idx}]`, item);
-        } else if (typeof item === 'object' && item !== null) {
-          grievanceRequestToFormData(item, formData, `${formKey}[${idx}]`);
-        } else if (typeof item === 'boolean') {
-          formData.append(`${formKey}[${idx}]`, item ? 'true' : 'false');
-        } else if (item !== undefined && item !== null) {
-          formData.append(`${formKey}[${idx}]`, item);
-        }
+    const snakeKey = customSnakeCase(key);
+    const value = obj[key];
+    // Special handling for top-level 'extras' field
+    if (snakeKey === 'extras' && typeof value === 'object' && value !== null) {
+      const files: Array<{ key: string; file: File }> = [];
+      // Convert all keys in extras to snake_case
+      const snakeCasedExtras = deepSnakeCaseKeys(value);
+      const stripped = extractFilesAndStrip(snakeCasedExtras, [], files);
+      formData.append('extras', JSON.stringify(stripped));
+      files.forEach(({ key: fileKey, file }) => {
+        formData.append(`extras__${fileKey}`, file);
       });
-    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      grievanceRequestToFormData(obj[key], formData, formKey);
-    } else if (typeof obj[key] === 'boolean') {
-      formData.append(formKey, obj[key] ? 'true' : 'false');
+    } else if (value instanceof File) {
+      formData.append(snakeKey, value);
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) {
+        continue;
+      } else {
+        value.forEach((item, idx) => {
+          const arrayKey = `${snakeKey}[${idx}]`;
+          if (item instanceof File) {
+            formData.append(arrayKey, item);
+          } else if (typeof item === 'object' && item !== null) {
+            grievanceRequestToFormData(item, formData);
+          } else if (typeof item === 'boolean') {
+            formData.append(arrayKey, item ? 'true' : 'false');
+          } else if (item !== undefined && item !== null) {
+            formData.append(arrayKey, item);
+          }
+        });
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      if (Object.keys(value).length === 0) {
+        formData.append(snakeKey, '{}');
+      } else {
+        grievanceRequestToFormData(value, formData);
+      }
+    } else if (typeof value === 'boolean') {
+      formData.append(snakeKey, value ? 'true' : 'false');
     } else {
-      formData.append(formKey, obj[key]);
+      formData.append(snakeKey, value);
     }
   }
   return formData;
