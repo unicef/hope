@@ -16,6 +16,7 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
     BankAccountInfo,
     Document,
     EntitlementCard,
@@ -186,6 +187,12 @@ class CopyProgramPopulation:
         copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from).exclude(
             Q(individual__withdrawn=True) | Q(individual__duplicate=True)
         )
+        if (
+            self.rdi.exclude_external_collectors
+        ):  # exclude roles held by external alternate collectors - external alternate collectors are not copied
+            copied_from_roles = copied_from_roles.filter(
+                Q(individual__household=new_household.copied_from) | Q(role=ROLE_PRIMARY)
+            )
         for role in copied_from_roles:
             role.pk = None
             role.household = new_household

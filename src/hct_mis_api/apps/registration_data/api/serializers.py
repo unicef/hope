@@ -160,6 +160,7 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
     )
     name = serializers.CharField(required=True)
     screen_beneficiary = serializers.BooleanField(required=True)
+    exclude_external_collectors = serializers.BooleanField(required=False, default=False)
 
     def get_object(self, validated_data: dict) -> RegistrationDataImport:
         request = self.context["request"]
@@ -169,7 +170,10 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
         screen_beneficiary = validated_data.get("screen_beneficiary", False)
         import_from_program_id: str = validated_data["import_from_program_id"]
         import_from_ids = validated_data.get("import_from_ids")
-        households, individuals = get_rdi_program_population(import_from_program_id, program.id, import_from_ids)
+        exclude_external_collectors = validated_data["exclude_external_collectors"]
+        households, individuals = get_rdi_program_population(
+            import_from_program_id, program.id, import_from_ids, exclude_external_collectors
+        )
         return RegistrationDataImport(
             name=validated_data["name"],
             status=RegistrationDataImport.IMPORTING,
@@ -182,4 +186,5 @@ class RegistrationDataImportCreateSerializer(serializers.Serializer):
             screen_beneficiary=screen_beneficiary,
             program=program,
             import_from_ids=import_from_ids,
+            exclude_external_collectors=exclude_external_collectors,
         )
