@@ -11,7 +11,7 @@ from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
-from django.db import models
+from django.db import IntegrityError, models
 from django.db.models import BooleanField, F, Func, JSONField, QuerySet, Value
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -1378,28 +1378,19 @@ class Individual(
         self.save()
 
     def mark_as_distinct(self) -> None:
-        try:
-            self.documents.update(status=Document.STATUS_VALID)
+        # try update per each Document
+        for doc in self.documents.all():
+            try:
+                doc.status = Document.STATUS_VALID
+                doc.save()
+            # AB#244721
+            except IntegrityError:
+                error_message = f"{self.unicef_id}: Valid Document already exists: {doc.document_number}."
+                raise Exception(error_message)
             self.accounts.update(active=True)
             self.duplicate = False
             self.duplicate_date = timezone.now()
             self.save()
-        # AB#244721
-        except Exception as e:
-            error_message = str(e)
-            if "unique_if_not_removed_and_valid_for_representations" in error_message:
-                if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):
-                    keys = document_data.group(1).split(", ")
-                    values = document_data.group(2).split(", ")
-                    document_dict = dict(zip(keys, values))
-                    error_message = (
-                        f"{self.unicef_id}: Valid Document already exists: {document_dict.get('document_number')}."
-                    )
-            else:
-                detail_index = error_message.find("DETAIL")
-                if detail_index != -1:
-                    error_message = error_message[:detail_index].strip()
-            raise Exception(error_message)
 
     def set_relationship_confirmed_flag(self, confirmed: bool) -> None:
         self.relationship_confirmed = confirmed
