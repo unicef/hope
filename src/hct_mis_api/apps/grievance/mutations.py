@@ -917,7 +917,10 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, PermissionMutation
             grievance_ticket.assigned_to == info.context.user,
             Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
         )
+        #  {"roles": [{"individual_id": "AAaaa", "approve_status": True}], "country_origin": True}"
+
         cls.verify_approve_data(household_approve_data)
+
         cls.verify_approve_data(flex_fields_approve_data)
         household_approve_data = {to_snake_case(key): value for key, value in household_approve_data.items()}
         household_data_details = grievance_ticket.household_data_update_ticket_details

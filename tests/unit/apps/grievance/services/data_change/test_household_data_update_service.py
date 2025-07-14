@@ -108,11 +108,200 @@ class TestHouseholdDataUpdateService(TestCase):
 
         self.assertEqual(details.household_data, expected_dict)
 
-    def test_update_roles_new_update_ticket(self) -> None:
-        pass
+    def test_update_roles_new_update_ticket_add_new_role(self) -> None:
+        individual = IndividualFactory()
+        household = individual.household
+        IndividualRoleInHousehold.objects.create(
+            household=household,
+            individual=individual,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        grievance_ticket = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            business_area=self.business_area,
+        )
+        hh_id_decoded = id_to_base64(str(household.id), "HouseholdNode")
+        ind_id_decoded = id_to_base64(str(individual.id), "IndividualNode")
+        extras = {
+            "issue_type": {
+                "household_data_update_issue_type_extras": {
+                    "household": hh_id_decoded,
+                    "household_data": {
+                        "country": "AGO",
+                        "flex_fields": {},
+                        "roles": [],
+                    },
+                }
+            }
+        }
+        # create ticket without Roles
+        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+        ticket = service.save()[0]
+        details = ticket.ticket_details
+        expected_dict = {
+            "roles": [],
+            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+            "flex_fields": {},
+        }
+        self.assertEqual(details.household_data, expected_dict)
+
+        # update ticket details and add new Role
+        extras = {
+            "household_data_update_issue_type_extras": {
+                "household": hh_id_decoded,
+                "household_data": {
+                    "country": "AGO",
+                    "flex_fields": {},
+                    "roles": [{
+                        "new_role": "ALTERNATE",
+                        "individual": ind_id_decoded
+                    }],
+                },
+            }
+        }
+        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+        ticket = service.update()
+        details = ticket.ticket_details
+        expected_dict = {
+            "roles": [
+                {
+                    "value": "ALTERNATE",
+                    "individual_id": ind_id_decoded,
+                    "approve_status": False,
+                    "previous_value": "ALTERNATE",
+                }
+            ],
+            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+            "flex_fields": {},
+        }
+        self.assertEqual(details.household_data, expected_dict)
+
+
+    def test_update_roles_new_update_ticket_update_role(self) -> None:
+        individual = IndividualFactory()
+        household = individual.household
+        IndividualRoleInHousehold.objects.create(
+            household=household,
+            individual=individual,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        grievance_ticket = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            business_area=self.business_area,
+        )
+        hh_id_decoded = id_to_base64(str(household.id), "HouseholdNode")
+        ind_id_decoded = id_to_base64(str(individual.id), "IndividualNode")
+        extras = {
+            "issue_type": {
+                "household_data_update_issue_type_extras": {
+                    "household": hh_id_decoded,
+                    "household_data": {
+                        "country": "AGO",
+                        "flex_fields": {},
+                        "roles": [{"individual": ind_id_decoded, "new_role": "ALTERNATE"}],
+                    },
+                }
+            }
+        }
+        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+        ticket = service.save()[0]
+        details = ticket.ticket_details
+        expected_dict = {
+            "roles": [
+                {
+                    "value": "ALTERNATE",
+                    "individual_id": ind_id_decoded,
+                    "approve_status": False,
+                    "previous_value": "ALTERNATE",
+                }
+            ],
+            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+            "flex_fields": {},
+        }
+        self.assertEqual(details.household_data, expected_dict)
+
+        # update Role to PRIMARY
+        extras = {
+            "household_data_update_issue_type_extras": {
+                "household": hh_id_decoded,
+                "household_data": {
+                    "country": "AGO",
+                    "flex_fields": {},
+                    "roles": [{
+                        "new_role": "PRIMARY",
+                        "individual": ind_id_decoded
+                    }],
+                },
+            }
+        }
+        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+        ticket = service.update()
+        details = ticket.ticket_details
+        expected_dict = {
+            "roles": [
+                {
+                    "value": "PRIMARY",
+                    "individual_id": ind_id_decoded,
+                    "approve_status": False,
+                    "previous_value": "ALTERNATE",
+                }
+            ],
+            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+            "flex_fields": {},
+        }
+        self.assertEqual(details.household_data, expected_dict)
 
     def test_update_roles_new_approve_ticket(self) -> None:
-        pass
+        individual = IndividualFactory()
+        household = individual.household
+        IndividualRoleInHousehold.objects.create(
+            household=household,
+            individual=individual,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        grievance_ticket = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            business_area=self.business_area,
+        )
+        hh_id_decoded = id_to_base64(str(household.id), "HouseholdNode")
+        ind_id_decoded = id_to_base64(str(individual.id), "IndividualNode")
+        extras = {
+            "issue_type": {
+                "household_data_update_issue_type_extras": {
+                    "household": hh_id_decoded,
+                    "household_data": {
+                        "country": "AGO",
+                        "flex_fields": {},
+                        "roles": [{"individual": ind_id_decoded, "new_role": "PRIMARY"}],
+                    },
+                }
+            }
+        }
+        service = HouseholdDataUpdateService(grievance_ticket=grievance_ticket, extras=extras)
+        ticket = service.save()[0]
+        details = ticket.ticket_details
+        expected_dict = {
+            "roles": [
+                {
+                    "value": "PRIMARY",
+                    "individual_id": ind_id_decoded,
+                    "approve_status": False,
+                    "previous_value": "ALTERNATE",
+                }
+            ],
+            "country": {"value": "AGO", "approve_status": False, "previous_value": None},
+            "flex_fields": {},
+        }
+        self.assertEqual(details.household_data, expected_dict)
+        # approve from ALTERNATE > PRIMARY
 
-    def test_update_roles_new_close_ticket(self) -> None:
-        pass
+
+
+    # def test_update_roles_new_close_ticket(self) -> None:
+    #     pass

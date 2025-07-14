@@ -102,6 +102,7 @@ class HouseholdDataUpdateService(DataChangeService):
         household_data_update_new_extras = self.extras.get("household_data_update_issue_type_extras")
         household = ticket_details.household
         new_household_data = household_data_update_new_extras.get("household_data", {})
+        roles = new_household_data.pop("roles", [])
         to_date_string(new_household_data, "start")
         to_date_string(new_household_data, "end")
         flex_fields = {
@@ -136,6 +137,7 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
+        household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)
         ticket_details.household_data = household_data_with_approve_status
         ticket_details.save()
         self.grievance_ticket.refresh_from_db()
