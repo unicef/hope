@@ -46,6 +46,7 @@ export const FieldsToUpdate: FC<FieldsToUpdateProps> = ({
   setCheckedFields,
 }) => {
   const isInitialized = useRef(false);
+  console.log('values.roundsData', values.roundsData);
 
   useEffect(() => {
     if (!isInitialized.current) {
@@ -101,7 +102,12 @@ export const FieldsToUpdate: FC<FieldsToUpdateProps> = ({
                     />
                   </TableCell>
                   <TableCell data-cy={`table-cell-field-${field.field}`}>
-                    {field.label}
+                    {typeof field.label === 'string'
+                      ? field.label
+                      : //@ts-ignore
+                        field.label?.englishEn ||
+                        Object.values(field.label)[0] ||
+                        ''}
                   </TableCell>
                   <TableCell data-cy={`table-cell-roundNumber-${field.field}`}>
                     <Select

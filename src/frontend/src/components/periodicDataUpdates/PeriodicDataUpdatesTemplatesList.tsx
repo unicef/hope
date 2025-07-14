@@ -20,9 +20,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
-import {
-  useExportPeriodicDataUpdateTemplate,
-} from './PeriodicDataUpdatesTemplatesListActions';
+import { useExportPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
 import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
@@ -103,8 +101,8 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const handleExportClick = (templateId: number) => {
     exportTemplate({
       businessAreaSlug,
-      programId,
-      templateId: templateId.toString(),
+      programSlug: programId,
+      templateId: templateId,
     });
   };
 

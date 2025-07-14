@@ -1,4 +1,3 @@
-import { createPeriodicDataUpdateTemplate } from '@api/periodicDataUpdateApi';
 import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -6,12 +5,13 @@ import { PageHeader } from '@components/core/PageHeader';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { FieldsToUpdate } from '@components/periodicDataUpdates/FieldsToUpdate';
 import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndividuals';
+import { useUploadPeriodicDataUpdateTemplate } from '@components/periodicDataUpdates/PeriodicDataUpdatesTemplatesListActions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
 import moment from 'moment';
 import { ReactElement, useState } from 'react';
@@ -50,27 +50,7 @@ export const NewTemplatePage = (): ReactElement => {
     {},
   );
 
-  const createTemplate = useMutation({
-    mutationFn: (params: {
-      businessAreaSlug: string;
-      programId: string;
-      //TODO MS: Add types
-      roundsData: any;
-      filters: any;
-    }) =>
-      createPeriodicDataUpdateTemplate(
-        params.businessAreaSlug,
-        params.programId,
-        params.roundsData,
-        params.filters,
-      ),
-    onSuccess: () => {
-      showMessage(t('Template created successfully.'));
-      navigate(`/${baseUrl}/population/individuals`, {
-        state: { isNewTemplateJustCreated: true },
-      });
-    },
-  });
+  const uploadTemplate = useUploadPeriodicDataUpdateTemplate();
 
   const [activeStep, setActiveStep] = useState(0);
   const steps = [
@@ -208,12 +188,24 @@ export const NewTemplatePage = (): ReactElement => {
       filters: filtersToSend,
     };
 
-    createTemplate.mutate({
-      businessAreaSlug: businessArea,
-      programId: programId,
-      roundsData: payload.rounds_data,
-      filters: payload.filters,
-    });
+    uploadTemplate.mutate(
+      {
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        requestBody: {
+          rounds_data: payload.rounds_data,
+          filters: payload.filters,
+        },
+      },
+      {
+        onSuccess: () => {
+          showMessage(t('Template created successfully.'));
+          navigate(`/${baseUrl}/population/individuals`, {
+            state: { isNewTemplateJustCreated: true },
+          });
+        },
+      },
+    );
   };
 
   return (
