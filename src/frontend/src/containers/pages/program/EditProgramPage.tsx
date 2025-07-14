@@ -262,7 +262,7 @@ const EditProgramPage = (): ReactElement => {
 
   const handleSubmitPartners = async (values): Promise<void> => {
     const partnersToSet =
-      values.partnerAccess === '"SELECTED_PARTNERS_ACCESS"'
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS'
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
             partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
