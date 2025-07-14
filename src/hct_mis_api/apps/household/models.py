@@ -1387,10 +1387,10 @@ class Individual(
             except IntegrityError:
                 error_message = f"{self.unicef_id}: Valid Document already exists: {doc.document_number}."
                 raise Exception(error_message)
-            self.accounts.update(active=True)
-            self.duplicate = False
-            self.duplicate_date = timezone.now()
-            self.save()
+        self.accounts.update(active=True)
+        self.duplicate = False
+        self.duplicate_date = timezone.now()
+        self.save()
 
     def set_relationship_confirmed_flag(self, confirmed: bool) -> None:
         self.relationship_confirmed = confirmed
