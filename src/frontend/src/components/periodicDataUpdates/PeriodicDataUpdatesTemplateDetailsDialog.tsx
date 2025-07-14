@@ -86,18 +86,21 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
               {templateDetailsData?.roundsData?.map((roundData, index) => (
                 <TableRow key={index}>
                   <TableCell data-cy={`template-field-${index}`}>
-                    {pduDataDict[roundData.field].label}
+                    {typeof pduDataDict[roundData.field]?.label === 'object'
+                      ? pduDataDict[roundData.field]?.label.englishEn ||
+                        roundData.field
+                      : pduDataDict[roundData.field]?.label || roundData.field}
                   </TableCell>
                   <TableCell data-cy={`template-round-number-${index}`}>
                     {roundData.round}
                   </TableCell>
                   <TableCell data-cy={`template-round-name-${index}`}>
-                    {roundData.round_name}
+                    {roundData.roundName}
                   </TableCell>
                   <TableCell
                     data-cy={`template-number-of-individuals-${index}`}
                   >
-                    {roundData.number_of_records}
+                    {roundData.numberOfRecords}
                   </TableCell>
                 </TableRow>
               ))}

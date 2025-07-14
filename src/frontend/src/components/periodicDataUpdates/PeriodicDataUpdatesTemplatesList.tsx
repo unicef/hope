@@ -201,7 +201,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
                 color="primary"
                 startIcon={<GetAppIcon />}
                 data-cy={`download-btn-${row.id}`}
-                href={`/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${row.id}/download/`}
+                href={`/api/rest/business-areas/${businessAreaSlug}/programs/${programId}/periodic-data-update-templates/${row.id}/download/`}
                 disabled={
                   row?.numberOfRecords === 0 || !canExportOrDownloadTemplate
                 }
