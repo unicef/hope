@@ -11,7 +11,7 @@ from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
-from django.db import models
+from django.db import IntegrityError, models
 from django.db.models import BooleanField, F, Func, JSONField, QuerySet, Value
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -1378,7 +1378,15 @@ class Individual(
         self.save()
 
     def mark_as_distinct(self) -> None:
-        self.documents.update(status=Document.STATUS_VALID)
+        # try update per each Document
+        for doc in self.documents.all():
+            try:
+                doc.status = Document.STATUS_VALID
+                doc.save()
+            # AB#244721
+            except IntegrityError:
+                error_message = f"{self.unicef_id}: Valid Document already exists: {doc.document_number}."
+                raise Exception(error_message)
         self.accounts.update(active=True)
         self.duplicate = False
         self.duplicate_date = timezone.now()
