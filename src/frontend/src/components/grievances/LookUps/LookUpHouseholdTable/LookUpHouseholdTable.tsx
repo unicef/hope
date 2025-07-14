@@ -134,6 +134,7 @@ export function LookUpHouseholdTable({
         businessAreaSlug: businessArea,
         programSlug: programId,
       }),
+    enabled: !!businessArea && !!programId,
   });
 
   //allPrograms
@@ -171,6 +172,7 @@ export function LookUpHouseholdTable({
         createApiParams({ businessAreaSlug: businessArea }, restQueryVariables),
       );
     },
+    enabled: !!businessArea && isAllPrograms,
   });
 
   const [selected, setSelected] = useState<string[]>(

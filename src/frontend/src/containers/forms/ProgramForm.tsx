@@ -189,7 +189,6 @@ const ProgramForm = ({
             disabled={!values.startDate}
             initialFocusedDate={values.startDate}
             fullWidth
-            required={values.editMode}
             decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
             minDate={values.startDate}
             data-cy="input-end-date"
