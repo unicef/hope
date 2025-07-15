@@ -179,9 +179,9 @@ class TestRuleMixin:
                     }
                     try:
                         if isinstance(rule, Rule):
-                            row["result"] = rule.interpreter.execute(values)
+                            row["result"] = rule.interpreter.execute({"data": values})
                         else:
-                            row["result"] = rule.execute(values)
+                            row["result"] = rule.execute({"data": values})
                     except Exception as e:
                         row["error"] = f"{e.__class__.__name__}: {str(e)}"
                         row["success"] = False
