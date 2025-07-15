@@ -122,8 +122,8 @@ class TestHouseholdDataUpdateService(TestCase):
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
             business_area=self.business_area,
         )
-        hh_id_decoded = id_to_base64(str(household.id), "HouseholdNode")
-        ind_id_decoded = id_to_base64(str(individual.id), "IndividualNode")
+        hh_id_decoded: str = id_to_base64(str(household.id), "HouseholdNode")
+        ind_id_decoded: str = id_to_base64(str(individual.id), "IndividualNode")
         extras = {
             "issue_type": {
                 "household_data_update_issue_type_extras": {
@@ -150,14 +150,11 @@ class TestHouseholdDataUpdateService(TestCase):
         # update ticket details and add new Role
         extras = {
             "household_data_update_issue_type_extras": {
-                "household": hh_id_decoded,
+                "household": hh_id_decoded,  # type: ignore
                 "household_data": {
                     "country": "AGO",
                     "flex_fields": {},
-                    "roles": [{
-                        "new_role": "ALTERNATE",
-                        "individual": ind_id_decoded
-                    }],
+                    "roles": [{"new_role": "ALTERNATE", "individual": ind_id_decoded}],  # type: ignore
                 },
             }
         }
@@ -166,7 +163,7 @@ class TestHouseholdDataUpdateService(TestCase):
         details = ticket.ticket_details
         expected_dict = {
             "roles": [
-                {
+                {  # type: ignore
                     "value": "ALTERNATE",
                     "individual_id": ind_id_decoded,
                     "approve_status": False,
@@ -177,7 +174,6 @@ class TestHouseholdDataUpdateService(TestCase):
             "flex_fields": {},
         }
         self.assertEqual(details.household_data, expected_dict)
-
 
     def test_update_roles_new_update_ticket_update_role(self) -> None:
         individual = IndividualFactory()
@@ -227,14 +223,11 @@ class TestHouseholdDataUpdateService(TestCase):
         # update Role to PRIMARY
         extras = {
             "household_data_update_issue_type_extras": {
-                "household": hh_id_decoded,
+                "household": hh_id_decoded,  # type: ignore
                 "household_data": {
                     "country": "AGO",
                     "flex_fields": {},
-                    "roles": [{
-                        "new_role": "PRIMARY",
-                        "individual": ind_id_decoded
-                    }],
+                    "roles": [{"new_role": "PRIMARY", "individual": ind_id_decoded}],  # type: ignore
                 },
             }
         }
@@ -299,9 +292,3 @@ class TestHouseholdDataUpdateService(TestCase):
             "flex_fields": {},
         }
         self.assertEqual(details.household_data, expected_dict)
-        # approve from ALTERNATE > PRIMARY
-
-
-
-    # def test_update_roles_new_close_ticket(self) -> None:
-    #     pass

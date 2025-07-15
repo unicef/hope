@@ -20,6 +20,7 @@ from hct_mis_api.apps.grievance.services.data_change.data_change_service import 
 )
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
+    handle_role,
     is_approved,
     to_date_string,
     verify_flex_fields,
@@ -86,7 +87,7 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
-        household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)
+        household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)  # type: ignore
 
         ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
             household_data=household_data_with_approve_status,
@@ -137,7 +138,7 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
-        household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)
+        household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)  # type: ignore
         ticket_details.household_data = household_data_with_approve_status
         ticket_details.save()
         self.grievance_ticket.refresh_from_db()
@@ -155,6 +156,7 @@ class HouseholdDataUpdateService(DataChangeService):
         country = household_data.get("country", {})
         admin_area_title = household_data.pop("admin_area_title", {})
         flex_fields_with_additional_data = household_data.pop("flex_fields", {})
+        roles_data = household_data.pop("roles", [])
         flex_fields = {
             field: data.get("value")
             for field, data in flex_fields_with_additional_data.items()
@@ -185,6 +187,13 @@ class HouseholdDataUpdateService(DataChangeService):
         Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
         updated_household = Household.objects.get(id=household.id)
         updated_household.set_admin_areas()
+        # update Roles
+        for role in roles_data:
+            # update only approved roles
+            if role.get("approve_status") is True:
+                individual_id = decode_id_string(role["individual_id"])
+                individual = get_object_or_404(Individual, id=individual_id)
+                handle_role(role.get("value"), household, individual)
 
         new_household = Household.objects.select_for_update().get(id=household.id)
         recalculate_data(new_household)

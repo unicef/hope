@@ -141,6 +141,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
 
         cls.individuals_to_create = [
             {
+                "pk": "df1ce6e8-2864-4c3f-803d-19ec6f4c4999",
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
                 "family_name": "Butler",
@@ -148,6 +149,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "birth_date": "1943-07-30",
             },
             {
+                "pk": "df1ce6e8-2864-4c3f-803d-19ec6f4c4123",
                 "full_name": "Robin Ford",
                 "given_name": "Robin",
                 "family_name": "Ford",
@@ -287,6 +289,30 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             },
         )
 
+        cls.household_data_change_grv_new = GrievanceTicketFactory(
+            id="72ee7d98-6108-4ef0-85bd-2ef20e1d5499",
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            admin2=cls.admin_area_1,
+            business_area=cls.business_area,
+        )
+        TicketHouseholdDataUpdateDetailsFactory(
+            ticket=cls.household_data_change_grv_new,
+            household=cls.household_one,
+            household_data={
+                "village": {"value": "Test new"},
+                "flex_fields": {},
+                "roles": [
+                    {
+                        "value": "PRIMARY",
+                        "individual_id": cls.id_to_base64(str(first_individual.id), "IndividualNode"),
+                        "approve_status": False,
+                        "previous_value": "ALTERNATE",
+                    }
+                ],
+            },
+        )
+
     @parameterized.expand(
         [
             (
@@ -360,6 +386,32 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                     self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
                 ),
                 "householdApproveData": json.dumps({"village": True}),
+                "flexFieldsApproveData": json.dumps({}),
+            },
+        )
+
+    def test_approve_update_household_new_role_update(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE], self.business_area
+        )
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_HOUSEHOLD_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    str(self.household_data_change_grv_new.id), "GrievanceTicketNode"
+                ),
+                "householdApproveData": json.dumps(
+                    {
+                        "village": True,
+                        "roles": [
+                            {
+                                "individual_id": self.id_to_base64(str(self.individuals[0].pk), "IndividualNode"),
+                                "approve_status": True,
+                            }
+                        ],
+                    }
+                ),
                 "flexFieldsApproveData": json.dumps({}),
             },
         )

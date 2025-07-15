@@ -934,6 +934,14 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, PermissionMutation
                     household_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
                         flex_field_name
                     )
+            if field_name == "roles":
+                role_lookup = {
+                    role["individual_id"]: role["approve_status"] for role in household_approve_data.get("roles", [])
+                }
+                for role_data in item:
+                    individual_id = role_data["individual_id"]
+                    if individual_id in role_lookup:
+                        role_data["approve_status"] = role_lookup[individual_id]
             elif household_approve_data.get(field_name):
                 household_data[field_name]["approve_status"] = True
             else:

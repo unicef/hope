@@ -26,10 +26,10 @@ class DataChangeValidator:
                 log_and_raise("Can't find individual_id in role")
             if "approve_status" not in role.keys():
                 log_and_raise("Can't find approve_status in role")
-            if not isinstance(roles_data["approve_status"], bool):
-                log_and_raise("Values for approve_status must be booleans")
+            if not isinstance(role["approve_status"], bool):
+                log_and_raise("Value for approve_status must be boolean")
 
-        if not all([isinstance(value, bool) for value in approve_data.values()]):
+        if not all(isinstance(v, bool) for k, v in approve_data.items() if k != "roles"):
             log_and_raise("Values must be booleans")
 
     @classmethod
@@ -37,7 +37,6 @@ class DataChangeValidator:
         error = "Provided fields are not the same as provided in the object approve data"
         if approve_data and not isinstance(object_data, dict):
             log_and_raise(error)
-        print("===>> Check data here")
 
         approve_data_names = set(approve_data.keys())
         object_data_names = set(object_data.keys())

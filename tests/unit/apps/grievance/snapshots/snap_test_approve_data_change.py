@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestGrievanceApproveDataChangeMutation::test_approve_add_individual_0_with_permission 1'] = {
@@ -46,6 +47,7 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_household
                 'householdDataUpdateTicketDetails': {
                     'householdData': {
                         'flex_fields': {
+                            'approve_status': False
                         },
                         'size': {
                             'approve_status': False,
@@ -81,6 +83,35 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_household
             ]
         }
     ]
+}
+
+snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_household_new_role_update 1'] = {
+    'data': {
+        'approveHouseholdDataChange': {
+            'grievanceTicket': {
+                'householdDataUpdateTicketDetails': {
+                    'householdData': {
+                        'flex_fields': {
+                            'approve_status': False
+                        },
+                        'roles': [
+                            {
+                                'approve_status': True,
+                                'individual_id': 'SW5kaXZpZHVhbE5vZGU6ZGYxY2U2ZTgtMjg2NC00YzNmLTgwM2QtMTllYzZmNGM0OTk5',
+                                'previous_value': 'ALTERNATE',
+                                'value': 'PRIMARY'
+                            }
+                        ],
+                        'village': {
+                            'approve_status': True,
+                            'value': 'Test new'
+                        }
+                    }
+                },
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTo3MmVlN2Q5OC02MTA4LTRlZjAtODViZC0yZWYyMGUxZDU0OTk='
+            }
+        }
+    }
 }
 
 snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individual_0_with_permission 1'] = {

@@ -35,6 +35,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     NOT_ANSWERED,
+    ROLE_ALTERNATE,
     ROLE_PRIMARY,
     SINGLE,
     Document,
@@ -130,6 +131,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
         cls.individuals_to_create = [
             {
+                "pk": "df1ce6e8-2864-4c3f-803d-19ec6f4c4111",
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
                 "family_name": "Butler",
@@ -137,6 +139,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "birth_date": "1943-07-30",
             },
             {
+                "pk": "df1ce6e8-2864-4c3f-803d-19ec6f4c4222",
                 "full_name": "Robin Ford",
                 "given_name": "Robin",
                 "family_name": "Ford",
@@ -633,3 +636,66 @@ class TestCloseDataChangeTickets(APITestCase):
         cls.assertTrue(cls.household_one.withdrawn)
         cls.assertTrue(cls.individuals[0].withdrawn)
         cls.assertTrue(cls.individuals[1].withdrawn)
+
+    def test_close_household_update_new_roles(self) -> None:
+        first_individual = self.individuals[0]
+        second_individual = self.individuals[1]
+        # add ALTERNATE role for first_individual
+        IndividualRoleInHousehold.objects.create(
+            household=self.household_one,
+            individual=first_individual,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        household_data_change_grv_new = GrievanceTicketFactory(
+            id="72ee7d98-6108-4ef0-85bd-2ef20e1d5444",
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
+            admin2=self.admin_area_1,
+            business_area=self.business_area,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        TicketHouseholdDataUpdateDetailsFactory(
+            ticket=household_data_change_grv_new,
+            household=self.household_one,
+            household_data={
+                "village": {
+                    "value": "Test new",
+                    "approve_status": True,
+                },
+                "flex_fields": {},
+                "roles": [
+                    {
+                        "value": "PRIMARY",
+                        "individual_id": self.id_to_base64(str(first_individual.id), "IndividualNode"),
+                        "approve_status": True,
+                        "previous_value": "ALTERNATE",
+                    },
+                    {
+                        "value": "ALTERNATE",
+                        "individual_id": self.id_to_base64(str(second_individual.id), "IndividualNode"),
+                        "approve_status": True,
+                        "previous_value": "-",
+                    },
+                ],
+            },
+        )
+        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=self.household_one).count(), 1)
+        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=first_individual).role, "ALTERNATE")
+
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
+        )
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={
+                "grievanceTicketId": self.id_to_base64(household_data_change_grv_new.id, "GrievanceTicketNode"),
+                "status": GrievanceTicket.STATUS_CLOSED,
+            },
+        )
+
+        # check if role updated and new one created for second_individual
+        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=self.household_one).count(), 2)
+        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=first_individual).role, "PRIMARY")
+        self.assertEqual(IndividualRoleInHousehold.objects.get(individual=second_individual).role, "ALTERNATE")
