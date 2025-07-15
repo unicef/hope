@@ -296,7 +296,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(15):
+            with self.assertNumQueries(16):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )

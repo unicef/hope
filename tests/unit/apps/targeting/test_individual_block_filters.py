@@ -28,13 +28,8 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
     TargetingCriteriaRule,
-    TargetingCriteriaRuleQueryingBase,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetingIndividualRuleFilterBlockBase,
-)
-from hct_mis_api.apps.targeting.services.targeting_service import (
-    TargetingCollectorRuleFilterBlockBase,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -93,63 +88,70 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_all_individuals_are_female_on_mixins(self) -> None:
         query = Household.objects.all()
-        married_rule_filter = TargetingIndividualBlockRuleFilter.objects.create(
+        pp = PaymentPlanFactory()
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=pp)
+        pp.rules.set([tcr])
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        TargetingIndividualBlockRuleFilter.objects.create(
             comparison_method="EQUALS",
             field_name="marital_status",
             arguments=["MARRIED"],
+            individuals_filters_block=individuals_filters_block,
         )
-        sex_filter = TargetingIndividualBlockRuleFilter.objects.create(
+        TargetingIndividualBlockRuleFilter.objects.create(
             comparison_method="EQUALS",
             field_name="sex",
             arguments=[MALE],
+            individuals_filters_block=individuals_filters_block,
         )
-        individuals_filters_block = TargetingIndividualRuleFilterBlockBase(
-            individual_block_filters=[married_rule_filter, sex_filter], target_only_hoh=False
-        )
-        tcr = TargetingCriteriaRuleQueryingBase(
-            filters=[], individuals_filters_blocks=[individuals_filters_block], collectors_filters_blocks=[]
-        )
-        pp = PaymentPlanFactory()
-        pp.rules.set([tcr])
+
         query = query.filter(pp.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_1_indiv.id)
 
     def test_two_separate_blocks_on_mixins(self) -> None:
         query = Household.objects.all()
-        married_rule_filter = TargetingIndividualBlockRuleFilter(
+
+        pp = PaymentPlanFactory()
+        tcr = TargetingCriteriaRule.objects.create(
+            payment_plan=pp,
+        )
+        pp.rules.set([tcr])
+
+        individuals_filters_block1 = TargetingIndividualRuleFilterBlock.objects.create(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        TargetingIndividualBlockRuleFilter.objects.create(
+            individuals_filters_block=individuals_filters_block1,
             comparison_method="EQUALS",
             field_name="marital_status",
             arguments=["MARRIED"],
         )
-        single_rule_filter = TargetingIndividualBlockRuleFilter(
-            comparison_method="EQUALS",
-            field_name="marital_status",
-            arguments=["SINGLE"],
-        )
-        male_sex_filter = TargetingIndividualBlockRuleFilter(
-            comparison_method="EQUALS",
-            field_name="sex",
-            arguments=[MALE],
-        )
-        female_sex_filter = TargetingIndividualBlockRuleFilter(
+        TargetingIndividualBlockRuleFilter.objects.create(
+            individuals_filters_block=individuals_filters_block1,
             comparison_method="EQUALS",
             field_name="sex",
             arguments=[FEMALE],
         )
-        individuals_filters_block1 = TargetingIndividualRuleFilterBlockBase(
-            individual_block_filters=[married_rule_filter, female_sex_filter], target_only_hoh=False
+
+        individuals_filters_block2 = TargetingIndividualRuleFilterBlock.objects.create(
+            targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block2 = TargetingIndividualRuleFilterBlockBase(
-            individual_block_filters=[single_rule_filter, male_sex_filter], target_only_hoh=False
+        TargetingIndividualBlockRuleFilter.objects.create(
+            individuals_filters_block=individuals_filters_block2,
+            comparison_method="EQUALS",
+            field_name="marital_status",
+            arguments=["SINGLE"],
         )
-        tcr = TargetingCriteriaRuleQueryingBase(
-            filters=[],
-            individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2],
-            collectors_filters_blocks=[],
+        TargetingIndividualBlockRuleFilter.objects.create(
+            individuals_filters_block=individuals_filters_block2,
+            comparison_method="EQUALS",
+            field_name="sex",
+            arguments=[MALE],
         )
-        pp = PaymentPlanFactory()
-        pp.rules.set([tcr])
+        pp.refresh_from_db()
         query = query.filter(pp.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_2_indiv.id)
@@ -349,24 +351,18 @@ class TestIndividualBlockFilter(TestCase):
         AccountFactory(
             individual=collector, data={"phone_number": "test123"}, account_type=AccountType.objects.get(key="mobile")
         )
+
         # Target population
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
-        collector_filter = TargetingCollectorBlockRuleFilter(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        col_block = TargetingCollectorRuleFilterBlock.objects.create(targeting_criteria_rule=tcr)
+        TargetingCollectorBlockRuleFilter.objects.create(
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="mobile__phone_number",
             arguments=[True],
         )
-        collectors_filters_block = TargetingCollectorRuleFilterBlockBase(collector_block_filters=[collector_filter])
-        tcr = TargetingCriteriaRuleQueryingBase(
-            filters=[],
-            individuals_filters_blocks=[],
-            collectors_filters_blocks=[collectors_filters_block],
-        )
-        pp = PaymentPlanFactory()
-        pp.rules.set([tcr])
-        query = query.filter(pp.get_query())
+        payment_plan.rules.set([tcr])
+        query = query.filter(payment_plan.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().unicef_id, self.household_1_indiv.unicef_id)
