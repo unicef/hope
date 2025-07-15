@@ -58,7 +58,7 @@ from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
-    TargetingCriteriaRuleQueryingBase,
+    TargetingCriteriaQueryingBase,
 )
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
@@ -148,7 +148,7 @@ class PaymentPlan(
     SoftDeletableModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
-    TargetingCriteriaRuleQueryingBase,
+    TargetingCriteriaQueryingBase,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
