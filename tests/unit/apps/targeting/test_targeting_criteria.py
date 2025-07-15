@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 
 from django.core.management import call_command
 
-from apps.payment.models import PaymentPlan
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -16,6 +15,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
