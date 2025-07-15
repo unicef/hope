@@ -385,7 +385,7 @@ class TestPaymentPlanModel(TestCase):
     def test_has_empty_ids_criteria(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user)
         TargetingCriteriaRuleFactory(
-            targeting_criteria=pp.targeting_criteria,
+            payment_plan=pp,
             household_ids="HH-1, HH-2",
             individual_ids="IND-01, IND-02",
         )

@@ -623,7 +623,7 @@ class PaymentPlan(
 
     def get_criteria_string(self) -> str:
         try:
-            return self.targeting_criteria.get_criteria_string()
+            return self.get_criteria_string()
         except Exception:
             return ""
 
@@ -757,7 +757,7 @@ class PaymentPlan(
         1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
         """
         all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
-        households = all_households.filter(self.targeting_criteria.get_query()).order_by("unicef_id")
+        households = all_households.filter(self.get_query()).order_by("unicef_id")
         return households.distinct()
 
     @property
@@ -826,12 +826,12 @@ class PaymentPlan(
 
     @property
     def has_empty_criteria(self) -> bool:
-        return self.targeting_criteria is None or self.targeting_criteria.rules.count() == 0
+        return self.rules.count() == 0
 
     @property
     def has_empty_ids_criteria(self) -> bool:
         has_hh_ids, has_ind_ids = False, False
-        for rule in self.targeting_criteria.rules.all():
+        for rule in self.rules.all():
             if rule.household_ids:
                 has_hh_ids = True
             if rule.individual_ids:
