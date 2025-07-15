@@ -122,7 +122,7 @@ const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: `${beneficiaryGroup?.groupLabelPlural}`,
+      title: `${beneficiaryGroup?.memberLabelPlural}`,
       to: `/${baseUrl}/population/individuals`,
     },
   ];
