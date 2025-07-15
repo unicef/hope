@@ -715,6 +715,12 @@ class AccountTypeAdmin(HOPEModelAdminBase):
     search_fields = ("key", "payment_gateway_id")
 
 
+class FinancialInstitutionMappingInline(admin.TabularInline):
+    model = FinancialInstitutionMapping
+    extra = 0
+    raw_id_fields = ("financial_institution", "financial_service_provider")
+
+
 @admin.register(FinancialInstitution)
 class FinancialInstitutionAdmin(HOPEModelAdminBase):
     list_display = (
@@ -729,6 +735,8 @@ class FinancialInstitutionAdmin(HOPEModelAdminBase):
         "type",
     )
     raw_id_fields = ("country",)
+
+    inlines = [FinancialInstitutionMappingInline]
 
 
 @admin.register(DeliveryMechanismConfig)
