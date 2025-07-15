@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Typography,
 } from '@mui/material';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -90,12 +91,18 @@ export const PeriodicDataUpdatesUploadDetailsDialog: FC<
     <Dialog open={open} onClose={onClose} scroll="paper">
       <DialogTitle>{t('Periodic Data Updates Errors')}</DialogTitle>
       <DialogContent>
-        <NonFormErrorDisplay
-          nonFormErrors={uploadDetailsData?.errorsInfo?.nonFormErrors}
-        />
-        <FormErrorDisplay
-          formErrors={uploadDetailsData?.errorsInfo?.formErrors}
-        />
+        {!uploadDetailsData?.errorsInfo ? (
+          <Typography>No errors to display.</Typography>
+        ) : (
+          <>
+            <NonFormErrorDisplay
+              nonFormErrors={uploadDetailsData?.errorsInfo?.nonFormErrors}
+            />
+            <FormErrorDisplay
+              formErrors={uploadDetailsData?.errorsInfo?.formErrors}
+            />
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('Close')}</Button>
