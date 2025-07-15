@@ -92,6 +92,7 @@ from hct_mis_api.apps.payment.utils import (
     get_payment_plan_object,
 )
 from hct_mis_api.apps.program.schema import ProgramNode
+from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaRuleNode
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -551,6 +552,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     failed_wallet_validation_collectors_ids = graphene.List(graphene.String)
     available_funds_commitments = graphene.List(FundsCommitmentNode)
     funds_commitments = graphene.Field(FundsCommitmentNode)
+    rules = graphene.List(TargetingCriteriaRuleNode)
+    household_ids = graphene.String()
+    individual_ids = graphene.String()
 
     class Meta:
         model = PaymentPlan
@@ -833,6 +837,23 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
                 insufficient_amount=insufficient_amount,
             )
         return None
+
+    def resolve_rules(parent, info: Any) -> "QuerySet":
+        return parent.get_rules()
+
+    def resolve_individual_ids(parent, info: Any) -> str:
+        ind_ids: set = set()
+        for rule in parent.get_rules():
+            if rule.individual_ids:
+                ind_ids.update(ind_id.strip() for ind_id in rule.individual_ids.split(",") if ind_id.strip())
+        return ", ".join(sorted(ind_ids))
+
+    def resolve_household_ids(parent, info: Any) -> str:
+        hh_ids: set = set()
+        for rule in parent.get_rules():
+            if rule.household_ids:
+                hh_ids.update(hh_id.strip() for hh_id in rule.household_ids.split(",") if hh_id.strip())
+        return ", ".join(sorted(hh_ids))
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):

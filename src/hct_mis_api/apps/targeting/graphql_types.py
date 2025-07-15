@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 import graphene
 from graphene_django import DjangoObjectType
 
-import hct_mis_api.apps.payment.models.payment as payment_models
 import hct_mis_api.apps.targeting.models as target_models
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
@@ -156,32 +155,6 @@ class TargetingCriteriaRuleNode(DjangoObjectType):
         exclude_fields = [
             "filters",
         ]
-
-
-class TargetingCriteriaNode(DjangoObjectType):
-    rules = graphene.List(TargetingCriteriaRuleNode)
-    household_ids = graphene.String()
-    individual_ids = graphene.String()
-
-    def resolve_rules(parent, info: Any) -> "QuerySet":
-        return parent.get_rules()
-
-    def resolve_individual_ids(parent, info: Any) -> str:
-        ind_ids: set = set()
-        for rule in parent.get_rules():
-            if rule.individual_ids:
-                ind_ids.update(ind_id.strip() for ind_id in rule.individual_ids.split(",") if ind_id.strip())
-        return ", ".join(sorted(ind_ids))
-
-    def resolve_household_ids(parent, info: Any) -> str:
-        hh_ids: set = set()
-        for rule in parent.get_rules():
-            if rule.household_ids:
-                hh_ids.update(hh_id.strip() for hh_id in rule.household_ids.split(",") if hh_id.strip())
-        return ", ".join(sorted(hh_ids))
-
-    class Meta:
-        model = payment_models.PaymentPlan
 
 
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
