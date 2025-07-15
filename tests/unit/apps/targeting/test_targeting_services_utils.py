@@ -3,6 +3,8 @@ from django.test import TestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
@@ -34,17 +36,19 @@ class TestPaymentPlanModel(TestCase):
         cls.ind1 = IndividualFactory(household=cls.hh1, program=cls.program)
         cls.ind2 = IndividualFactory(household=cls.hh2, program=cls.program)
 
+        cls.pp = PaymentPlanFactory()
+
     def test_get_unicef_ids(self) -> None:
-        ids_1 = get_existing_unicef_ids(f"{self.hh1},HH-invalid", "household", self.program)
+        ids_1 = get_existing_unicef_ids(f"{self.hh1},HH-invalid", Household, self.program)
         self.assertEqual(ids_1, f"{self.hh1}")
 
-        ids_2 = get_existing_unicef_ids(f" {self.hh1}, {self.hh2} ", "household", self.program)
+        ids_2 = get_existing_unicef_ids(f" {self.hh1}, {self.hh2} ", Household, self.program)
         self.assertEqual(ids_2, f"{self.hh1}, {self.hh2}")
 
-        ids_3 = get_existing_unicef_ids(f"{self.ind1}, IND-000", "individual", self.program)
+        ids_3 = get_existing_unicef_ids(f"{self.ind1}, IND-000", Individual, self.program)
         self.assertEqual(ids_3, f"{self.ind1}")
 
-        ids_4 = get_existing_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", "individual", self.program)
+        ids_4 = get_existing_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", Individual, self.program)
         self.assertEqual(ids_4, f"{self.ind1}, {self.ind2}")
 
     def test_from_input_to_targeting_criteria(self) -> None:
@@ -97,7 +101,7 @@ class TestPaymentPlanModel(TestCase):
                 }
             ],
         }
-        from_input_to_targeting_criteria(targeting_criteria_input, self.program)
+        from_input_to_targeting_criteria(targeting_criteria_input, self.program, self.pp)
 
         self.assertEqual(TargetingCriteriaRule.objects.count(), 1)
         self.assertEqual(TargetingCriteriaRuleFilter.objects.count(), 1)

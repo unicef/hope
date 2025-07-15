@@ -288,25 +288,25 @@ class TestPaymentPlanMutation(APITestCase):
             created_by=self.user,
         )
 
-        tcr = TargetingCriteriaRule(household_ids="HH-001", individual_ids="IND-001", payment_plan=payment_plan)
+        tcr = TargetingCriteriaRule.objects.create(
+            household_ids="HH-001", individual_ids="IND-001", payment_plan=payment_plan
+        )
         TargetingCriteriaRuleFilter.objects.create(
             targeting_criteria_rule=tcr,
             comparison_method="LESS_THAN",
             field_name="size",
             arguments=[1],
         )
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         TargetingIndividualBlockRuleFilter.objects.create(
             individuals_filters_block=individuals_filters_block,
             comparison_method="LESS_THAN",
             field_name="age",
             arguments=[40],
         )
-        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
-        col_block.save()
+        col_block = TargetingCollectorRuleFilterBlock.objects.create(targeting_criteria_rule=tcr)
         TargetingCollectorBlockRuleFilter.objects.create(
             collector_block_filters=col_block,
             comparison_method="EQUALS",

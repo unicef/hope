@@ -697,7 +697,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_greater_than(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule.objects.create(payment_pla=payment_plan)
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
         individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )

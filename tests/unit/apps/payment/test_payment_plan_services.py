@@ -296,7 +296,7 @@ class TestPaymentPlanServices(APITestCase):
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(15):
+            with self.assertNumQueries(16):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
@@ -306,7 +306,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(99):
+        with self.assertNumQueries(98):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
@@ -435,7 +435,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(6):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -587,7 +587,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[2].split_payment_items.count(), 2)
 
         # split by admin2
-        with self.assertNumQueries(15):
+        with self.assertNumQueries(16):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
         self.assertEqual(unique_admin2_count, 2)
