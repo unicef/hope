@@ -109,7 +109,8 @@ class TestIndividualBlockFilter(TestCase):
         tcr = TargetingCriteriaRuleQueryingBase(
             filters=[], individuals_filters_blocks=[individuals_filters_block], collectors_filters_blocks=[]
         )
-        pp = PaymentPlanFactory(rules=[tcr])
+        pp = PaymentPlanFactory()
+        pp.rules.set([tcr])
         query = query.filter(pp.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_1_indiv.id)
@@ -147,7 +148,8 @@ class TestIndividualBlockFilter(TestCase):
             individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2],
             collectors_filters_blocks=[],
         )
-        pp = PaymentPlanFactory(rules=[tcr])
+        pp = PaymentPlanFactory()
+        pp.rules.set([tcr])
         query = query.filter(pp.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_2_indiv.id)
@@ -176,11 +178,10 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_filter_on_flex_field(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         FlexibleAttribute.objects.create(
             name="flex_field_1",
             type=FlexibleAttribute.STRING,
@@ -188,14 +189,13 @@ class TestIndividualBlockFilter(TestCase):
             label={"English(EN)": "value"},
         )
         query = Household.objects.all()
-        flex_field_filter = TargetingIndividualBlockRuleFilter(
+        TargetingIndividualBlockRuleFilter.objects.create(
             individuals_filters_block=individuals_filters_block,
             comparison_method="CONTAINS",
             field_name="flex_field_1",
             arguments=["Average"],
             flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
-        flex_field_filter.save()
         query = query.filter(payment_plan.get_query())
         self.assertEqual(query.count(), 0)
 
@@ -365,7 +365,8 @@ class TestIndividualBlockFilter(TestCase):
             individuals_filters_blocks=[],
             collectors_filters_blocks=[collectors_filters_block],
         )
-        pp = PaymentPlanFactory(rules=[tcr])
+        pp = PaymentPlanFactory()
+        pp.rules.set([tcr])
         query = query.filter(pp.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().unicef_id, self.household_1_indiv.unicef_id)

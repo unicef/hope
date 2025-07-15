@@ -29,11 +29,6 @@ class TargetingCriteriaQueryingBase:
     this mixin connects OR blocks
     """
 
-    def __init__(self, *args: Any, rules: Optional[List] = None, **kwargs: Any) -> None:
-        if rules:
-            self.rules.set(rules)
-        super().__init__(*args, **kwargs)
-
     def get_household_queryset(self) -> QuerySet:
         return Household.objects
 

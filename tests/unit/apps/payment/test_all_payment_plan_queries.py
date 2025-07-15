@@ -309,12 +309,10 @@ class TestPaymentPlanQueries(APITestCase):
       paymentPlan(id: $id) {
         name
         status
-        targetingCriteria {
-          householdIds
-          individualIds
-          flagExcludeIfOnSanctionList
-          flagExcludeIfActiveAdjudicationTicket
-        }
+        householdIds
+        individualIds
+        flagExcludeIfOnSanctionList
+        flagExcludeIfActiveAdjudicationTicket
       }
     }
     """
