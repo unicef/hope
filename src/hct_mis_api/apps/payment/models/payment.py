@@ -819,7 +819,7 @@ class PaymentPlan(
         return hh_ids_list
 
     def get_query(self) -> Q:
-        query = self.get_query()
+        query = super().get_query()
         if self.status != PaymentPlan.Status.TP_OPEN:
             query &= Q(size__gt=0)
         return query

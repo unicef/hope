@@ -635,11 +635,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_string_contains(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="CONTAINS",
@@ -656,11 +655,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_string_is_null(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="IS_NULL",
@@ -677,12 +675,11 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_range(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
 
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="RANGE",
@@ -700,11 +697,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_greater_than(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_pla=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_pla=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="GREATER_THAN",
@@ -723,11 +719,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_less_than(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="LESS_THAN",
@@ -744,11 +739,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_is_null(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="IS_NULL",
@@ -765,11 +759,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_date_range(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="RANGE",
@@ -787,11 +780,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_date_greater_than(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="GREATER_THAN",
@@ -808,11 +800,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_date_less_than(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="LESS_THAN",
@@ -830,11 +821,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_date_is_null(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="IS_NULL",
@@ -851,11 +841,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_boolean_true(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="EQUALS",
@@ -873,11 +862,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_boolean_false(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="EQUALS",
@@ -894,11 +882,10 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_boolean_is_null(self) -> None:
         payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+        tcr = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock.objects.create(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
-        individuals_filters_block.save()
         rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
             comparison_method="IS_NULL",

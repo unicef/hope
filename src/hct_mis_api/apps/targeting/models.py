@@ -210,9 +210,7 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     )
 
     def get_query(self) -> Q:
-        program = (
-            self.collector_block_filters.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
-        )
+        program = self.collector_block_filters.targeting_criteria_rule.payment_plan.program_cycle.program
         argument = self.arguments[0] if len(self.arguments) else None
         if argument is None:
             return Q()

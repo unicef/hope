@@ -416,7 +416,7 @@ class TargetingCriteriaFilterBase:
             targeting_criteria_rule = (
                 getattr(self, "targeting_criteria_rule", None) or self.individuals_filters_block.targeting_criteria_rule
             )
-            program = targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
+            program = targeting_criteria_rule.payment_plan.program_cycle.program
             flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=program).first()
             if not flex_field_attr:
                 logger.warning(
