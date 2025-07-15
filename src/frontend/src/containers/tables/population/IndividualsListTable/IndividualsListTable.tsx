@@ -12,6 +12,7 @@ import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
 import { PaginatedIndividualListList } from '@restgenerated/models/PaginatedIndividualListList';
 import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface IndividualsListTableProps {
   filter;
@@ -101,6 +102,22 @@ export function IndividualsListTable({
       ),
   });
 
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsHouseholdsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsIndividualsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+  });
+
   return (
     <TableWrapper>
       <UniversalRestTable
@@ -114,6 +131,7 @@ export function IndividualsListTable({
         isLoading={isLoading}
         allowSort={false}
         filterOrderBy={filter.orderBy}
+        itemsCount={countData?.count}
         renderRow={(row: IndividualList) => (
           <IndividualsListTableRow
             key={row.id}
