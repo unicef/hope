@@ -154,7 +154,7 @@ class TestRuleMixin:
                 elif selection == "optTargetPopulation":
                     tp = form.cleaned_data.get("target_population")
                     context["target_population"] = tp
-                    data = [{"household": e.household} for e in tp.selections.all()]
+                    data = [{"household": e.household} for e in tp.payment_items.all()]
                     title = f"Test result for '{rule}' using TargetPopulation '{tp}'"
                 elif selection == "optContentType":
                     ct: ContentType = form.cleaned_data["content_type"]
