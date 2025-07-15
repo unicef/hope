@@ -64,10 +64,7 @@ from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -338,8 +335,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertTrue(pp.has_empty_criteria)
 
     def test_payment_plan_has_empty_ids_criteria_property(self) -> None:
-        targeting_criteria = TargetingCriteriaFactory()
-        pp: PaymentPlan = PaymentPlanFactory(targeting_criteria=targeting_criteria, created_by=self.user)
+        pp: PaymentPlan = PaymentPlanFactory(created_by=self.user)
 
         self.assertTrue(pp.has_empty_ids_criteria)
 

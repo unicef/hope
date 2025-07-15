@@ -1,5 +1,10 @@
 from django.test import TestCase
 
+from apps.targeting.services.utils import (
+    from_input_to_targeting_criteria,
+    get_existing_unicef_ids,
+)
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -12,10 +17,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-)
-from hct_mis_api.apps.targeting.services.utils import (
-    from_input_to_targeting_criteria,
-    get_unicef_ids,
 )
 
 
@@ -36,16 +37,16 @@ class TestPaymentPlanModel(TestCase):
         cls.ind2 = IndividualFactory(household=cls.hh2, program=cls.program)
 
     def test_get_unicef_ids(self) -> None:
-        ids_1 = get_unicef_ids(f"{self.hh1},HH-invalid", "household", self.program)
+        ids_1 = get_existing_unicef_ids(f"{self.hh1},HH-invalid", "household", self.program)
         self.assertEqual(ids_1, f"{self.hh1}")
 
-        ids_2 = get_unicef_ids(f" {self.hh1}, {self.hh2} ", "household", self.program)
+        ids_2 = get_existing_unicef_ids(f" {self.hh1}, {self.hh2} ", "household", self.program)
         self.assertEqual(ids_2, f"{self.hh1}, {self.hh2}")
 
-        ids_3 = get_unicef_ids(f"{self.ind1}, IND-000", "individual", self.program)
+        ids_3 = get_existing_unicef_ids(f"{self.ind1}, IND-000", "individual", self.program)
         self.assertEqual(ids_3, f"{self.ind1}")
 
-        ids_4 = get_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", "individual", self.program)
+        ids_4 = get_existing_unicef_ids(f"{self.ind1}, {self.ind2}, HH-2", "individual", self.program)
         self.assertEqual(ids_4, f"{self.ind1}, {self.ind2}")
 
     def test_from_input_to_targeting_criteria(self) -> None:

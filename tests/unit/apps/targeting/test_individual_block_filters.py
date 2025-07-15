@@ -24,11 +24,9 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
-    TargetingCriteriaQueryingBase,
     TargetingCriteriaRule,
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualBlockRuleFilter,
@@ -37,6 +35,7 @@ from hct_mis_api.apps.targeting.models import (
 )
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCollectorRuleFilterBlockBase,
+    TargetingCriteriaQueryingBase,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -72,11 +71,8 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_all_individuals_are_female(self) -> None:
         queryset = Household.objects.all()
-        tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
         individuals_filters_block = TargetingIndividualRuleFilterBlock(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
@@ -95,7 +91,7 @@ class TestIndividualBlockFilter(TestCase):
             arguments=[MALE],
         )
         sex_filter.save()
-        queryset = queryset.filter(tc.get_query())
+        queryset = queryset.filter(payment_plan.get_query())
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset.first().id, self.household_1_indiv.id)
 
@@ -161,11 +157,8 @@ class TestIndividualBlockFilter(TestCase):
         self.assertEqual(query.first().id, self.household_2_indiv.id)
 
     def test_filter_on_flex_field_not_exist(self) -> None:
-        tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
         individuals_filters_block = TargetingIndividualRuleFilterBlock(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
@@ -181,18 +174,15 @@ class TestIndividualBlockFilter(TestCase):
         flex_field_filter.save()
 
         with self.assertRaises(Exception) as e:
-            query.filter(tc.get_query())
+            query.filter(payment_plan.get_query())
         self.assertIn(
             "There is no Flex Field Attributes associated with this fieldName flex_field_2",
             str(e.exception),
         )
 
     def test_filter_on_flex_field(self) -> None:
-        tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
         individuals_filters_block = TargetingIndividualRuleFilterBlock(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
@@ -212,23 +202,21 @@ class TestIndividualBlockFilter(TestCase):
             flex_field_classification=FlexFieldClassification.FLEX_FIELD_BASIC,
         )
         flex_field_filter.save()
-        query = query.filter(tc.get_query())
+        query = query.filter(payment_plan.get_query())
         self.assertEqual(query.count(), 0)
 
         self.individual_1.flex_fields["flex_field_1"] = "Average value"
         self.individual_1.save()
 
-        query = query.filter(tc.get_query())
+        query = query.filter(payment_plan.get_query())
 
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_1_indiv.id)
 
     def test_filter_on_pdu_flex_field_not_exist(self) -> None:
-        tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
+
         individuals_filters_block = TargetingIndividualRuleFilterBlock(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
@@ -245,18 +233,15 @@ class TestIndividualBlockFilter(TestCase):
         pdu_filter.save()
 
         with self.assertRaises(Exception) as e:
-            query.filter(tc.get_query())
+            query.filter(payment_plan.get_query())
         self.assertIn(
             "There is no PDU Flex Field Attribute associated with this fieldName pdu_field_1 in program Test Program",
             str(e.exception),
         )
 
     def test_filter_on_pdu_flex_field_no_round_number(self) -> None:
-        tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
         individuals_filters_block = TargetingIndividualRuleFilterBlock(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
@@ -282,18 +267,15 @@ class TestIndividualBlockFilter(TestCase):
         pdu_filter.save()
 
         with self.assertRaises(Exception) as e:
-            query.filter(tc.get_query())
+            query.filter(payment_plan.get_query())
         self.assertIn(
             "Round number is missing for PDU Flex Field Attribute pdu_field_1",
             str(e.exception),
         )
 
     def test_filter_on_pdu_flex_field_incorrect_round_number(self) -> None:
-        tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
         individuals_filters_block = TargetingIndividualRuleFilterBlock(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
@@ -320,18 +302,15 @@ class TestIndividualBlockFilter(TestCase):
         pdu_filter.save()
 
         with self.assertRaises(Exception) as e:
-            query.filter(tc.get_query())
+            query.filter(payment_plan.get_query())
         self.assertIn(
             "Round number 3 is greater than the number of rounds for PDU Flex Field Attribute pdu_field_1",
             str(e.exception),
         )
 
     def test_filter_on_pdu_flex_field(self) -> None:
-        tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
         individuals_filters_block = TargetingIndividualRuleFilterBlock(
             targeting_criteria_rule=tcr, target_only_hoh=False
         )
@@ -364,13 +343,13 @@ class TestIndividualBlockFilter(TestCase):
         }
         self.individual_2.save()
 
-        query = query.filter(tc.get_query())
+        query = query.filter(payment_plan.get_query())
         self.assertEqual(query.count(), 0)
 
         self.individual_1.flex_fields["pdu_field_1"]["1"] = {"value": 2.5, "collection_date": "2021-01-01"}
         self.individual_1.save()
 
-        query = query.filter(tc.get_query())
+        query = query.filter(payment_plan.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_1_indiv.id)
 
@@ -385,11 +364,8 @@ class TestIndividualBlockFilter(TestCase):
             individual=collector, data={"phone_number": "test123"}, account_type=AccountType.objects.get(key="mobile")
         )
         # Target population
-        tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(program_cycle=self.program_cycle, created_by=self.user)
+        tcr = TargetingCriteriaRule(payment_plan=payment_plan)
         col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
         collector_filter = TargetingCollectorBlockRuleFilter(
             collector_block_filters=col_block,

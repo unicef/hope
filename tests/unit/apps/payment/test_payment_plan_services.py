@@ -52,10 +52,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 
 
 class TestPaymentPlanServices(APITestCase):
@@ -350,9 +347,7 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
-        tc = TargetingCriteriaFactory()
         pp = PaymentPlanFactory(
-            targeting_criteria=tc,
             total_households_count=1,
             created_by=self.user,
         )
@@ -1158,17 +1153,16 @@ class TestPaymentPlanServices(APITestCase):
                 "program": self.program,
             },
         )
-        targeting_criteria = TargetingCriteriaFactory()
-        TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", targeting_criteria=targeting_criteria)
         payment_plan = PaymentPlanFactory(
             created_by=self.user,
             status=PaymentPlan.Status.PREPARING,
             business_area=self.business_area,
             program_cycle=self.cycle,
-            targeting_criteria=targeting_criteria,
             delivery_mechanism=self.dm_transfer_to_account,
             financial_service_provider=self.fsp,
         )
+        TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", payment_plan=payment_plan)
+
         PaymentFactory(
             parent=payment_plan,
             program_id=self.program.id,

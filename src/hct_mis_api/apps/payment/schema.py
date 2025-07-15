@@ -601,7 +601,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     @staticmethod
     def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
         delivery_mechanism = getattr(payment_plan, "delivery_mechanism", None)
-        if not delivery_mechanism:
+        financial_service_provider = getattr(payment_plan, "financial_service_provider", None)
+        if not delivery_mechanism or not financial_service_provider:
             return False
         if not payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism):
             return False

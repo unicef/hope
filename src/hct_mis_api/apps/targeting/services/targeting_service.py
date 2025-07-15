@@ -17,7 +17,6 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
-from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 
@@ -30,16 +29,13 @@ class TargetingCriteriaQueryingBase:
     this mixin connects OR blocks
     """
 
-    def __init__(self, rules: Optional[List] = None, excluded_household_ids: Optional[List] = None) -> None:
-        if rules is None:
-            return
-        self.rules = rules
-        self.flag_exclude_if_active_adjudication_ticket = False
-        self.flag_exclude_if_on_sanction_list = False
-        if excluded_household_ids is None:
-            self._excluded_household_ids = []
-        else:
-            self._excluded_household_ids = excluded_household_ids
+    def __init__(
+        self, *args: Any, rules: Optional[List] = None, excluded_household_ids: Optional[List] = None, **kwargs: Any
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        if rules:
+            self.rules.set(rules)
+        self._excluded_household_ids = excluded_household_ids or []
 
     def get_household_queryset(self) -> QuerySet:
         return Household.objects
@@ -48,7 +44,7 @@ class TargetingCriteriaQueryingBase:
         return Individual.objects
 
     def get_rules(self) -> Any:
-        return self.rules
+        return self.rules.all()
 
     def get_excluded_household_ids(self) -> List[Optional[str]]:
         return self._excluded_household_ids
@@ -65,6 +61,8 @@ class TargetingCriteriaQueryingBase:
         return self.apply_flag_exclude_if_active_adjudication_ticket() & self.apply_flag_exclude_if_on_sanction_list()
 
     def apply_flag_exclude_if_active_adjudication_ticket(self) -> Q:
+        from hct_mis_api.apps.grievance.models import GrievanceTicket
+
         if not self.flag_exclude_if_active_adjudication_ticket:
             return Q()
         return ~Q(

@@ -28,7 +28,6 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
@@ -282,11 +281,14 @@ class TestPaymentPlanMutation(APITestCase):
     )
     def test_copy_target_criteria_mutation(self, name: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        # create criteria
-        tc = TargetingCriteriaFactory()
-        tcr = TargetingCriteriaRule(household_ids="HH-001", individual_ids="IND-001")
-        tcr.targeting_criteria = tc
-        tcr.save()
+        payment_plan = PaymentPlanFactory(
+            name="New PaymentPlan",
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=self.cycle,
+            created_by=self.user,
+        )
+
+        tcr = TargetingCriteriaRule(household_ids="HH-001", individual_ids="IND-001", payment_plan=payment_plan)
         TargetingCriteriaRuleFilter.objects.create(
             targeting_criteria_rule=tcr,
             comparison_method="LESS_THAN",
@@ -310,14 +312,6 @@ class TestPaymentPlanMutation(APITestCase):
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
             arguments=[True],
-        )
-
-        payment_plan = PaymentPlanFactory(
-            name="New PaymentPlan",
-            status=PaymentPlan.Status.OPEN,
-            program_cycle=self.cycle,
-            created_by=self.user,
-            targeting_criteria=tc,
         )
 
         self.cycle.status = ProgramCycle.FINISHED

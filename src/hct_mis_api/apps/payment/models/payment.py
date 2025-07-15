@@ -57,6 +57,9 @@ from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
+from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCriteriaRuleQueryingBase,
+)
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -145,6 +148,7 @@ class PaymentPlan(
     SoftDeletableModel,
     UnicefIdentifiedModel,
     AdminUrlMixin,
+    TargetingCriteriaRuleQueryingBase,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -341,12 +345,6 @@ class PaymentPlan(
         related_name="created_payment_plans",
         help_text="Created by user",
     )
-    targeting_criteria = models.OneToOneField(
-        "targeting.TargetingCriteria",
-        on_delete=models.PROTECT,
-        related_name="payment_plan",
-        help_text="Target Criteria",
-    )
     source_payment_plan = models.ForeignKey(
         "self",
         null=True,
@@ -515,14 +513,25 @@ class PaymentPlan(
     status_date = models.DateTimeField(help_text="Date and time of Payment Plan status [sys]")
     is_cash_assist = models.BooleanField(default=False, help_text="Cash Assist Flag [sys]")
 
+    """
+    Filtering criteria flags and a set of ORed Rules. Rules are either applied for a candidate list
+    (against Golden Record) or for a final list (against the approved candidate list).
+    If flag is applied, target population needs to be filtered by it as an AND condition to the existing set of rules.
+    """
+    flag_exclude_if_active_adjudication_ticket = models.BooleanField(
+        default=False,
+        help_text=_(
+            "Exclude households with individuals (members or collectors) that have active adjudication ticket(s)."
+        ),
+    )
+    flag_exclude_if_on_sanction_list = models.BooleanField(
+        default=False,
+        help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
+    )
+
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
-        # constraints = [
-        #     UniqueConstraint(
-        #         fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
-        #     ),
-        # ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -801,6 +810,19 @@ class PaymentPlan(
     @property
     def targeting_criteria_string(self) -> str:
         return Truncator(self.get_criteria_string()).chars(390, "...")
+
+    def get_excluded_household_ids(self) -> List[str]:
+        if not self.excluded_ids:
+            return []
+        hh_ids_list = []
+        hh_ids_list.extend(hh_id.strip() for hh_id in self.excluded_ids.split(",") if hh_id.strip())
+        return hh_ids_list
+
+    def get_query(self) -> Q:
+        query = self.get_query()
+        if self.status != PaymentPlan.Status.TP_OPEN:
+            query &= Q(size__gt=0)
+        return query
 
     @property
     def has_empty_criteria(self) -> bool:
