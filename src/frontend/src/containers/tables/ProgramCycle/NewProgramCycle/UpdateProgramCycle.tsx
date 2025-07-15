@@ -98,7 +98,6 @@ const UpdateProgramCycle = ({
   });
 
   const handleSubmit = async (values: FormikValues) => {
-    console.log('this submit');
     try {
       await mutateAsync({
         businessAreaSlug: businessArea,

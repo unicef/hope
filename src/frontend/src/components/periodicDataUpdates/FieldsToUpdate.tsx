@@ -46,7 +46,6 @@ export const FieldsToUpdate: FC<FieldsToUpdateProps> = ({
   setCheckedFields,
 }) => {
   const isInitialized = useRef(false);
-  console.log('values.roundsData', values.roundsData);
 
   useEffect(() => {
     if (!isInitialized.current) {
