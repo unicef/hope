@@ -590,6 +590,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
         expected_result = {
             "size": {"value": 3, "approve_status": False, "previous_value": 2},
+            "roles": [],
             "country": {
                 "value": "AFG",
                 "approve_status": False,

@@ -7,130 +7,6 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_for_individual_0_with_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': None,
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': {
-                        'individual': {
-                            'fullName': 'Benjamin Butler'
-                        },
-                        'individualData': {
-                            'documents': [
-                            ],
-                            'documents_to_edit': [
-                            ],
-                            'documents_to_remove': [
-                            ],
-                            'flex_fields': {
-                            },
-                            'identities': [
-                            ],
-                            'identities_to_edit': [
-                            ],
-                            'identities_to_remove': [
-                            ],
-                            'previous_documents': {
-                            },
-                            'previous_identities': {
-                            }
-                        }
-                    },
-                    'issueType': 14,
-                    'sensitiveTicketDetails': None
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_for_individual_1_without_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'createGrievanceTicket'
-            ]
-        }
-    ]
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_individual_0_with_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': None,
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': {
-                        'individual': {
-                            'fullName': 'Benjamin Butler'
-                        },
-                        'individualData': {
-                            'documents': [
-                            ],
-                            'documents_to_edit': [
-                            ],
-                            'documents_to_remove': [
-                            ],
-                            'flex_fields': {
-                            },
-                            'identities': [
-                            ],
-                            'identities_to_edit': [
-                            ],
-                            'identities_to_remove': [
-                            ],
-                            'previous_documents': {
-                            },
-                            'previous_identities': {
-                            }
-                        }
-                    },
-                    'issueType': 14,
-                    'sensitiveTicketDetails': None
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_individual_1_without_permission 1'] = {
-    'data': {
-        'createGrievanceTicket': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'createGrievanceTicket'
-            ]
-        }
-    ]
-}
-
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_household_data_change_with_admin_area 1'] = {
     'data': {
         'createGrievanceTicket': {
@@ -150,7 +26,9 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_househol
                                 'value': 'City Test1 - area1'
                             },
                             'flex_fields': {
-                            }
+                            },
+                            'roles': [
+                            ]
                         }
                     },
                     'individualDataUpdateTicketDetails': None,
@@ -334,6 +212,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                             },
                             'flex_fields': {
                             },
+                            'roles': [
+                            ],
                             'size': {
                                 'approve_status': False,
                                 'previous_value': 3,
