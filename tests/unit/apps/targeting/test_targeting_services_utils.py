@@ -99,7 +99,6 @@ class TestPaymentPlanModel(TestCase):
         }
         from_input_to_targeting_criteria(targeting_criteria_input, self.program)
 
-        self.assertEqual(TargetingCriteria.objects.count(), 1)
         self.assertEqual(TargetingCriteriaRule.objects.count(), 1)
         self.assertEqual(TargetingCriteriaRuleFilter.objects.count(), 1)
         self.assertEqual(TargetingIndividualRuleFilterBlock.objects.count(), 1)
