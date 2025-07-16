@@ -62,7 +62,7 @@ def district(poland: Country, state: AreaType) -> AreaType:
 
 
 @pytest.fixture
-def source_household(program, admin1):
+def source_household(program: Program, admin1: Area) -> tuple[Household, Individual]:
     household, individuals = create_household_and_individuals(
         household_data={
             "unicef_id": "HH-20-0000.0002",
@@ -97,7 +97,7 @@ def source_household(program, admin1):
 
 
 @pytest.fixture
-def destination_household(program, admin1):
+def destination_household(program: Program, admin1: Area) -> tuple[Household, Individual]:
     household, individuals = create_household_and_individuals(
         household_data={
             "unicef_id": "HH-20-0000.2002",
@@ -143,7 +143,12 @@ def destination_household(program, admin1):
     return (household, ind)
 
 
-def test_update_individual_identities_with_fixture_households(source_household, destination_household, poland, program):
+def test_update_individual_identities_with_fixture_households(
+    source_household: tuple[Household, Individual],
+    destination_household: tuple[Household, Individual],
+    poland: Country,
+    program: Program,
+) -> None:
     """Test _update_individual_identities method using source and destination household fixtures.
 
     Plan:
@@ -205,7 +210,12 @@ def test_update_individual_identities_with_fixture_households(source_household, 
         assert identity.country == poland
 
 
-def test_update_documents_with_fixture_households(source_household, destination_household, poland, program):
+def test_update_documents_with_fixture_households(
+    source_household: tuple[Household, Individual],
+    destination_household: tuple[Household, Individual],
+    poland: Country,
+    program: Program,
+) -> None:
     """Test _update_documents method using source and destination household fixtures.
 
     Plan:
@@ -307,7 +317,12 @@ def test_update_documents_with_fixture_households(source_household, destination_
     assert transferred_doc2.rdi_merge_status == Individual.MERGED
 
 
-def test_update_individual_with_fixture_households(source_household, destination_household, poland, program):
+def test_update_individual_with_fixture_households(
+    source_household: tuple[Household, Individual],
+    destination_household: tuple[Household, Individual],
+    poland: Country,
+    program: Program,
+) -> None:
     """Test _update_individual method using source and destination household fixtures.
 
     Plan:
@@ -326,7 +341,9 @@ def test_update_individual_with_fixture_households(source_household, destination
        - Check that excluded fields were not modified
     """
     source_individual = source_household[1]
-    destination_individual = destination_household[0].individuals(manager="all_objects").get(unicef_id="IND-00-0000.00134")
+    destination_individual = (
+        destination_household[0].individuals(manager="all_objects").get(unicef_id="IND-00-0000.00134")
+    )
 
     source_individual.full_name = "Source Full Name"
     source_individual.given_name = "Source"
@@ -345,7 +362,7 @@ def test_update_individual_with_fixture_households(source_household, destination
     program.save()
 
     detector = IdentificationKeyCollisionDetector(program)
-    print(destination_individual,source_individual)
+    print(destination_individual, source_individual)
     detector._update_individual(destination_individual, source_individual)
 
     destination_individual.refresh_from_db()
@@ -363,7 +380,11 @@ def test_update_individual_with_fixture_households(source_household, destination
     assert destination_individual.household_id == destination_original_household_id
 
 
-def test_update_household_with_fixture_households(source_household, destination_household, program):
+def test_update_household_with_fixture_households(
+    source_household: tuple[Household, Individual],
+    destination_household: tuple[Household, Individual],
+    program: Program,
+) -> None:
     """Test _update_household method using source and destination household fixtures.
 
     Plan:
@@ -427,7 +448,12 @@ def test_update_household_with_fixture_households(source_household, destination_
     assert destination_household_obj.head_of_household == head_of_household
 
 
-def test_update_household_collision(source_household, destination_household, poland, program):
+def test_update_household_collision(
+    source_household: tuple[Household, Individual],
+    destination_household: tuple[Household, Individual],
+    poland: Country,
+    program: Program,
+) -> None:
     """Test the update_household method from IdentificationKeyCollisionDetector which handles household collisions.
 
     This test verifies the complete process of detecting and resolving a household collision:
@@ -456,8 +482,9 @@ def test_update_household_collision(source_household, destination_household, pol
     source_individual = source_household[1]
     destination_individual = destination_household[1]
     head_of_household_identification_key = source_individual.identification_key
-    individual_to_keep_and_update = Individual.all_objects.get(household=destination_household_obj,
-                                                               identification_key="IND-KEY-002")
+    individual_to_keep_and_update = Individual.all_objects.get(
+        household=destination_household_obj, identification_key="IND-KEY-002"
+    )
 
     destination_household_obj.head_of_household = destination_individual
     destination_household_obj.save()
@@ -502,16 +529,11 @@ def test_update_household_collision(source_household, destination_household, pol
 
     source_household_obj.head_of_household = source_individual
     source_household_obj.save()
-
-    source_individuals_count = source_household_obj.individuals.count()
-    destination_individuals_count = destination_household_obj.individuals.count()
-
     source_household_obj.flex_fields = {"custom_field": "Source Value"}
     source_household_obj.save()
 
     destination_original_id = destination_household_obj.id
     destination_original_unicef_id = destination_household_obj.unicef_id
-    destination_individual_key = destination_individual.identification_key
     additional_individual_key = additional_individual.identification_key
 
     program.collision_detection_enabled = True
@@ -534,8 +556,8 @@ def test_update_household_collision(source_household, destination_household, pol
     assert destination_household_obj.unicef_id == destination_original_unicef_id
 
     assert (
-            destination_household_obj.head_of_household.id
-            == Individual.objects.get(identification_key=head_of_household_identification_key).id
+        destination_household_obj.head_of_household.id
+        == Individual.objects.get(identification_key=head_of_household_identification_key).id
     )
 
     assert "custom_field" in destination_household_obj.flex_fields
@@ -550,4 +572,3 @@ def test_update_household_collision(source_household, destination_household, pol
     assert roles.get(role="ALTERNATE").individual.identification_key == additional_individual.identification_key
 
     assert Individual.objects.filter(id=individual_to_keep_and_update.id).exists()
-
