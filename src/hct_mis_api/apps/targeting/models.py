@@ -117,9 +117,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     @property
     def is_social_worker_program(self) -> bool:
         try:
-            return (
-                self.targeting_criteria_rule.payment_plan.program_cycle.program.is_social_worker_program
-            )
+            return self.targeting_criteria_rule.payment_plan.program_cycle.program.is_social_worker_program
         except (
             AttributeError,
             TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,
