@@ -92,14 +92,14 @@ export const ProgramCyclesTablePaymentModule = ({
           id,
           programSlug,
         }),
-      onSuccess: async (_data, variables) => {
+      onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [
-            'programCyclesDetails',
-            businessArea,
-            variables.id,
-            programId,
-          ],
+          queryKey: ['programCycles', businessArea, program.slug],
+          exact: false,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['programCycles', queryVariables, businessArea, programId],
+          exact: false,
         });
       },
       mutationKey: ['finishProgramCycle', businessArea, program.id],
@@ -121,14 +121,14 @@ export const ProgramCyclesTablePaymentModule = ({
           id,
           programSlug,
         }),
-      onSuccess: async (_data, variables) => {
+      onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: [
-            'programCyclesDetails',
-            businessArea,
-            variables.id,
-            programId,
-          ],
+          queryKey: ['programCycles', businessArea, program.slug],
+          exact: false,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['programCycles', queryVariables, businessArea, programId],
+          exact: false,
         });
       },
       mutationKey: ['reactivateProgramCycle', businessArea, program.id],
