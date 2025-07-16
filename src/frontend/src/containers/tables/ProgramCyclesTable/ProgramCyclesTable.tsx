@@ -47,13 +47,13 @@ const ProgramCyclesTablePaymentModule = ({
 
   const { data, refetch, error, isLoading } =
     useQuery<PaginatedProgramCycleListList>({
-      queryKey: ['programCycles', businessArea, program.id, queryVariables],
+      queryKey: ['programCycles', businessArea, program.slug, queryVariables],
       queryFn: () => {
         return RestService.restBusinessAreasProgramsCyclesList(
           createApiParams(
             {
               businessAreaSlug: businessArea,
-              programSlug: program.id,
+              programSlug: program.slug,
             },
             queryVariables,
             { withPagination: true },
@@ -80,7 +80,7 @@ const ProgramCyclesTablePaymentModule = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.id],
+          queryKey: ['programCycles', businessArea, program.slug],
         });
       },
     });
@@ -103,7 +103,7 @@ const ProgramCyclesTablePaymentModule = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.id],
+          queryKey: ['programCycles', businessArea, program.slug],
         });
       },
     });

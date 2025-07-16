@@ -247,7 +247,7 @@ const DuplicateProgramPage = (): ReactElement => {
   const initialValues = {
     editMode: true,
     name: `Copy of Programme: (${name})`,
-    programmeCode: '',
+    programmeCode: null,
     startDate,
     endDate,
     sector,

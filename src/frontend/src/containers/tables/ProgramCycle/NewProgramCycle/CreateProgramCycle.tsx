@@ -105,7 +105,7 @@ const CreateProgramCycle = ({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.id],
+        queryKey: ['programCycles', businessArea, program.slug],
       });
       onSubmit();
     },
