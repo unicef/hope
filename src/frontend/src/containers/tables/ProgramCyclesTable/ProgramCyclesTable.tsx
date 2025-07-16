@@ -1,4 +1,3 @@
-import { ProgramCyclesQuery } from '@api/programCycleApi';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
@@ -16,7 +15,6 @@ import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
 import {
-  decodeIdString,
   formatCurrencyWithSymbol,
   programCycleStatusToColor,
   showApiErrorMessages,
@@ -34,7 +32,7 @@ const ProgramCyclesTablePaymentModule = ({
   filters,
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
-  const [queryVariables, setQueryVariables] = useState<ProgramCyclesQuery>({
+  const [queryVariables, setQueryVariables] = useState<ProgramCycleList>({
     offset: 0,
     limit: 5,
     ordering: 'created_at',
@@ -95,12 +93,14 @@ const ProgramCyclesTablePaymentModule = ({
         businessAreaSlug: string;
         id: string;
         programSlug: string;
-      }) =>
-        RestService.restBusinessAreasProgramsCyclesReactivateCreate({
+      }) => {
+        return RestService.restBusinessAreasProgramsCyclesReactivateCreate({
           businessAreaSlug,
           id,
           programSlug,
-        }),
+        });
+      },
+
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['programCycles', businessArea, program.slug],
@@ -118,10 +118,9 @@ const ProgramCyclesTablePaymentModule = ({
 
   const finishAction = async (programCycle: ProgramCycleList) => {
     try {
-      const decodedProgramCycleId = decodeIdString(programCycle.id);
       await finishMutation({
         businessAreaSlug: businessArea,
-        id: decodedProgramCycleId,
+        id: programCycle.id,
         programSlug: programId,
       });
       showMessage(t('Programme Cycle Finished'));
@@ -132,18 +131,14 @@ const ProgramCyclesTablePaymentModule = ({
 
   const reactivateAction = async (programCycle: ProgramCycleList) => {
     try {
-      const decodedProgramCycleId = decodeIdString(programCycle.id);
       await reactivateMutation({
         businessAreaSlug: businessArea,
-        id: decodedProgramCycleId,
+        id: programCycle.id,
         programSlug: programId,
       });
       showMessage(t('Programme Cycle Reactivated'));
-      showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage, t('Failed to  reactivate cycle.'));
     }
   };
 
