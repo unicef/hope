@@ -22,7 +22,7 @@ import { useProgramContext } from '../../../../programContext';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface ApprovePaymentPlanProps {
@@ -38,6 +38,7 @@ export function ApprovePaymentPlan({
 
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: approve, isPending: loadingApprove } = useMutation({
     mutationFn: ({
@@ -60,6 +61,9 @@ export function ApprovePaymentPlan({
     onSuccess: () => {
       showMessage(t('Payment Plan has been approved.'));
       setApproveDialogOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+      });
     },
   });
   const initialValues = {
