@@ -59,7 +59,7 @@ class TestPhoneNumberVerification(TestCase):
             household, individuals = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
+                    "admin2": Area.objects.order_by("?").first(),
                     "program": program,
                 },
                 {
@@ -110,7 +110,7 @@ class TestPhoneNumberVerification(TestCase):
             other_household, other_individuals = create_household(
                 {
                     "registration_data_import": other_registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
+                    "admin2": Area.objects.order_by("?").first(),
                     "program": other_program,
                 },
                 {"registration_data_import": other_registration_data_import},

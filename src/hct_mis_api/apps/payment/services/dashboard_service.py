@@ -36,10 +36,7 @@ def payment_verification_chart_query(
 
     if administrative_area:
         inner_params = Q()
-        inner_params |= Q(
-            Q(payment__household__admin_area__id=administrative_area)
-            & Q(payment__household__admin_area__area_type__area_level=2)
-        )
+        inner_params |= Q(payment__household__admin2=administrative_area)
         params &= inner_params
 
     payment_verifications = PaymentVerification.objects.filter(params).distinct()

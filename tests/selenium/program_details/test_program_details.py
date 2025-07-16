@@ -182,7 +182,7 @@ def create_custom_household() -> Household:
     household, _ = create_household(
         {
             "registration_data_import": registration_data_import,
-            "admin_area": Area.objects.order_by("?").first(),
+            "admin2": Area.objects.order_by("?").first(),
             "program": program,
         },
         {"registration_data_import": registration_data_import},

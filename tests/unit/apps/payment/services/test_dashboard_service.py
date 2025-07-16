@@ -61,22 +61,22 @@ class TestPaymentVerificationChartQuery:
         )
 
         household1, individuals1 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area1, "program": program},
+            household_args={"size": 2, "business_area": business_area, "admin2": admin_area1, "program": program},
         )
         household2, individuals2 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area2, "program": program},
+            household_args={"size": 2, "business_area": business_area, "admin2": admin_area2, "program": program},
         )
         household3, individuals3 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area3, "program": program},
+            household_args={"size": 2, "business_area": business_area, "admin2": admin_area3, "program": program},
         )
         household4, individuals4 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area1, "program": program},
+            household_args={"size": 2, "business_area": business_area, "admin2": admin_area1, "program": program},
         )
         household5, individuals5 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area2, "program": program},
+            household_args={"size": 2, "business_area": business_area, "admin2": admin_area2, "program": program},
         )
         household6, individuals6 = create_household(
-            household_args={"size": 2, "business_area": business_area, "admin_area": admin_area3, "program": program},
+            household_args={"size": 2, "business_area": business_area, "admin2": admin_area3, "program": program},
         )
 
         payment_plan1 = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=business_area)

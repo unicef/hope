@@ -74,13 +74,6 @@ class SriLankaRegistrationService(BaseRegistrationService):
         if admin2 and Area.objects.filter(p_code=admin2).exists():
             household_data["admin1"] = str(Area.objects.get(p_code=admin2).parent.id)
 
-        if admin4 and Area.objects.filter(p_code=admin4).exists():
-            household_data["admin_area"] = str(Area.objects.get(p_code=admin4).id)
-        elif admin3 and Area.objects.filter(p_code=admin3).exists():
-            household_data["admin_area"] = str(Area.objects.get(p_code=admin3).id)
-        elif admin2 and Area.objects.filter(p_code=admin2).exists():
-            household_data["admin_area"] = str(Area.objects.get(p_code=admin2).id)
-
         return household_data
 
     def _prepare_individual_data(

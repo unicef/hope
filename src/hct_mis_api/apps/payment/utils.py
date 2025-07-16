@@ -110,7 +110,7 @@ def get_payment_items_for_dashboard(
             **chart_create_filter_query(
                 filters,
                 program_id_path="parent__program_cycle__program__id",
-                administrative_area_path="household__admin_area",
+                administrative_area_path="household__admin2",
             ),
         },
         year_filter_path="delivery_date",

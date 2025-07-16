@@ -108,7 +108,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         household, _ = create_household(
             {
                 "registration_data_import": registration_data_import,
-                "admin_area": Area.objects.order_by("?").first(),
+                "admin2": Area.objects.order_by("?").first(),
                 "program": program,
             },
             {"registration_data_import": registration_data_import},
@@ -159,7 +159,7 @@ def empty_payment_verification(social_worker_program: Program) -> None:
     household, individuals = create_household(
         {
             "registration_data_import": registration_data_import,
-            "admin_area": Area.objects.order_by("?").first(),
+            "admin2": Area.objects.order_by("?").first(),
             "program": program,
         },
         {"registration_data_import": registration_data_import},
@@ -202,7 +202,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
     household, individuals = create_household(
         {
             "registration_data_import": registration_data_import,
-            "admin_area": Area.objects.order_by("?").first(),
+            "admin2": Area.objects.order_by("?").first(),
             "program": program,
         },
         {"registration_data_import": registration_data_import},

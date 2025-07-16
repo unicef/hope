@@ -1357,7 +1357,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 country = Country.objects.filter(pk=household_data.get(main_key)).first()
                 return country.iso_code3 if country else None
 
-            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
+            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id"}:
                 area = Area.objects.filter(pk=household_data.get(main_key)).first()
                 return f"{area.p_code} - {area.name}" if area else "" if area else None
 
