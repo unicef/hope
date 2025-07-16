@@ -76,8 +76,6 @@ class Migration(migrations.Migration):
                 ('original_id', models.UUIDField(blank=True, null=True)),
                 ('name', models.CharField(max_length=255)),
                 ('p_code', models.CharField(blank=True, max_length=32, null=True, verbose_name='P Code')),
-                ('geom', django.contrib.gis.db.models.fields.MultiPolygonField(blank=True, null=True, srid=4326)),
-                ('point', django.contrib.gis.db.models.fields.PointField(blank=True, null=True, srid=4326)),
                 ('valid_from', models.DateTimeField(auto_now_add=True, null=True)),
                 ('valid_until', models.DateTimeField(blank=True, null=True)),
                 ('extras', models.JSONField(blank=True, default=dict)),
