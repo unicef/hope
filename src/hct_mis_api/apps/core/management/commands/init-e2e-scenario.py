@@ -123,7 +123,7 @@ def init_payment_plan(seed: str) -> None:
 
     TargetingCriteriaRuleFilter.objects.create(
         targeting_criteria_rule=TargetingCriteriaRule.objects.create(
-            targeting_criteria=payment_plan,
+            payment_plan=payment_plan,
         ),
         comparison_method="EQUALS",
         field_name="address",
@@ -131,7 +131,7 @@ def init_payment_plan(seed: str) -> None:
     )
     TargetingCriteriaRuleFilter.objects.create(
         targeting_criteria_rule=TargetingCriteriaRule.objects.create(
-            targeting_criteria=payment_plan,
+            payment_plan=payment_plan,
         ),
         comparison_method="EQUALS",
         field_name="address",
@@ -139,7 +139,7 @@ def init_payment_plan(seed: str) -> None:
     )
     TargetingCriteriaRuleFilter.objects.create(
         targeting_criteria_rule=TargetingCriteriaRule.objects.create(
-            targeting_criteria=payment_plan,
+            payment_plan=payment_plan,
         ),
         comparison_method="EQUALS",
         field_name="address",

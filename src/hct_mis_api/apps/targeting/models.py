@@ -118,7 +118,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     def is_social_worker_program(self) -> bool:
         try:
             return (
-                self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
+                self.targeting_criteria_rule.payment_plan.program_cycle.program.is_social_worker_program
             )
         except (
             AttributeError,
