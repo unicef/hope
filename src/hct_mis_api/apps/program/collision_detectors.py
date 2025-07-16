@@ -1,5 +1,6 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
+from django.db import models
 from django.forms.models import model_to_dict
 
 from strategy_field.registry import Registry
@@ -24,7 +25,7 @@ class AbstractCollisionDetector:
     def detect_collision(self, household: Household) -> Optional[str]:
         raise NotImplementedError("Subclasses should implement this method")  # pragma: no cover
 
-    def _update_roles_in_household(self, household_id_destination: str, roles_by_id: dict[int, str]):
+    def _update_roles_in_household(self, household_id_destination: str, roles_by_id: dict[int, str]) -> None:
         """
         1. Deletes all roles in destination household
         2. Reassigns roles from source household to destination household
@@ -38,11 +39,13 @@ class AbstractCollisionDetector:
                 rdi_merge_status=Individual.MERGED,
             )
 
-    def _update_individual_identities(self, individual_destination, individual_source):
+    def _update_individual_identities(
+        self, individual_destination: Individual, individual_source: Individual
+    ) -> Individual:
         """
         1. Remove all identities from destination individual
         2. Reassign identities from source individual to destination individual
-        :return:
+        :return: The updated destination individual
         """
         identities_destination = individual_destination.identities(manager="all_objects").all()
         identities_source = individual_source.identities(manager="all_objects").all()
@@ -56,7 +59,7 @@ class AbstractCollisionDetector:
 
         return individual_destination
 
-    def _update_documents(self, individual_destination, individual_source):
+    def _update_documents(self, individual_destination: Individual, individual_source: Individual) -> Individual:
         """
         1. Saves statuses in dict by number+type_id
         2. Deletes all documents in destination
@@ -88,7 +91,7 @@ class AbstractCollisionDetector:
 
         return individual_destination
 
-    def _update_individual(self, individual_destination: Individual, individual_source: Individual):
+    def _update_individual(self, individual_destination: Individual, individual_source: Individual) -> None:
         exclude = {
             "id",
             "pk",
@@ -111,7 +114,7 @@ class AbstractCollisionDetector:
 
     def _update_household(
         self, household_destination: Household, household_source: Household, head_of_household: Individual
-    ):
+    ) -> None:
         exclude = {
             "id",
             "pk",
@@ -133,7 +136,13 @@ class AbstractCollisionDetector:
             household_source, household_destination, exclude, {"head_of_household": head_of_household}
         )
 
-    def _update_db_instance(self, source, destination, exclude, extra_fields=None):
+    def _update_db_instance(
+        self,
+        source: models.Model,
+        destination: models.Model,
+        exclude: set[str],
+        extra_fields: Optional[dict[str, Any]] = None,
+    ) -> None:
         """
         Update a database instance by copying data from a source model to a destination model.
 
@@ -149,7 +158,7 @@ class AbstractCollisionDetector:
             exclude: A set/list of field names to exclude from the update
             extra_fields: Optional dictionary of additional fields to set on the destination
         """
-        data = model_to_dict(source, exclude=exclude)
+        data = model_to_dict(source, exclude=list(exclude))
         for name, field in source._meta.fields_map.items():
             if field.many_to_many:
                 data.pop(name, None)
@@ -179,7 +188,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         self.initialize()
         return self.unique_identification_keys_dict.get(household.identification_key, None)
 
-    def update_household(self, household_to_merge: Household):
+    def update_household(self, household_to_merge: Household) -> None:
         """
         Updates an existing household with data from another household based on matching identification keys.
 
