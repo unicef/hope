@@ -2471,11 +2471,17 @@ export type HouseholdUpdateDataObjectType = {
   registrationMethod?: InputMaybe<Scalars['String']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
   returnee?: InputMaybe<Scalars['Boolean']['input']>;
+  roles?: InputMaybe<Array<InputMaybe<HouseholdUpdateRolesType>>>;
   size?: InputMaybe<Scalars['Int']['input']>;
   start?: InputMaybe<Scalars['DateTime']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
   unhcrId?: InputMaybe<Scalars['String']['input']>;
   village?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type HouseholdUpdateRolesType = {
+  individual: Scalars['ID']['input'];
+  newRole?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum ImportDataDataType {
@@ -3081,7 +3087,6 @@ export type IndividualUpdateDataObjectType = {
   registrationMethod?: InputMaybe<Scalars['String']['input']>;
   relationship?: InputMaybe<Scalars['String']['input']>;
   residenceStatus?: InputMaybe<Scalars['String']['input']>;
-  role?: InputMaybe<Scalars['String']['input']>;
   seeingDisability?: InputMaybe<Scalars['String']['input']>;
   selfcareDisability?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
@@ -21688,6 +21693,7 @@ export type ResolversTypes = {
   HouseholdRdiMergeStatus: HouseholdRdiMergeStatus;
   HouseholdRegistrationMethod: HouseholdRegistrationMethod;
   HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType;
+  HouseholdUpdateRolesType: HouseholdUpdateRolesType;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   ImportDataDataType: ImportDataDataType;
   ImportDataNode: ResolverTypeWrapper<ImportDataNode>;
@@ -22157,6 +22163,7 @@ export type ResolversParentTypes = {
   HouseholdNodeConnection: HouseholdNodeConnection;
   HouseholdNodeEdge: HouseholdNodeEdge;
   HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType;
+  HouseholdUpdateRolesType: HouseholdUpdateRolesType;
   ID: Scalars['ID']['output'];
   ImportDataNode: ImportDataNode;
   ImportXLSXPaymentPlanPaymentListMutation: ImportXlsxPaymentPlanPaymentListMutation;
