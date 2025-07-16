@@ -3,7 +3,7 @@
 from django.db import migrations, models
 
 
-def transfer_targeting_criteria_data(apps, schema_editor):
+def transfer_targeting_criteria_data(apps, schema_editor):  # pragma: no-cover
     PaymentPlan = apps.get_model('payment', 'PaymentPlan')
 
     for plan in PaymentPlan.objects.filter(targeting_criteria__isnull=False):
