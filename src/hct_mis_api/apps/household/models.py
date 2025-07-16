@@ -355,7 +355,6 @@ class Household(
             "zip_code",
             "size",
             "address",
-            "admin_area",
             "admin1",
             "admin2",
             "admin3",
@@ -470,10 +469,6 @@ class Household(
         on_delete=models.PROTECT,
         help_text="Household country",
     )
-    admin_area = models.ForeignKey(
-        "geo.Area", null=True, on_delete=models.SET_NULL, blank=True, help_text="Household lowest administrative area"
-    )
-    """location contains lowest administrative area info"""
     admin1 = models.ForeignKey(
         "geo.Area",
         null=True,
@@ -753,14 +748,17 @@ class Household(
         self.withdrawn_date = None
         self.save()
 
+    @property
+    def admin_area(self) -> Optional[Area]:
+        """Returns the lowest admin area of the household."""
+        return self.admin4 or self.admin3 or self.admin2 or self.admin1
+
     def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
         """Propagates admin1,2,3,4 based on admin_area parents"""
         admins = ["admin1", "admin2", "admin3", "admin4"]
 
         if not new_admin_area:
             new_admin_area = self.admin_area
-        else:
-            self.admin_area = new_admin_area
         if not new_admin_area:
             return
         for admin in admins:
@@ -773,7 +771,7 @@ class Household(
             new_admin_area = getattr(new_admin_area, "parent", None)
 
         if save:
-            self.save(update_fields=["admin_area"] + admins)
+            self.save(update_fields=admins)
 
     @property
     def sanction_list_possible_match(self) -> bool:

@@ -44,7 +44,7 @@ def add_household() -> Household:
     household, individuals = create_household(
         {
             "registration_data_import": registration_data_import,
-            "admin_area": Area.objects.order_by("?").first(),
+            "admin2": Area.objects.order_by("?").first(),
             "program": Program.objects.filter(name="Test Programm").first(),
             "size": 7,
             "residence_status": REFUGEE,

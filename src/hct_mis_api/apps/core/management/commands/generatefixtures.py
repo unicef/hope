@@ -128,7 +128,7 @@ class Command(BaseCommand):
                     {
                         "registration_data_import": registration_data_import,
                         "business_area": business_area,
-                        "admin_area": Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
+                        "admin1": Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
                         "program": program,
                     },
                     {"registration_data_import": registration_data_import},
@@ -136,8 +136,8 @@ class Command(BaseCommand):
                 for individual in individuals:
                     DocumentFactory(individual=individual)
 
-                if household.admin_area:
-                    program.admin_areas.add(household.admin_area)
+                if household.admin1:
+                    program.admin_areas.add(household.admin1)
 
                 payment = PaymentFactory(
                     parent=payment_plan,

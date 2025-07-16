@@ -112,7 +112,6 @@ class TestGrievanceTicketDetail:
 
         self.household1, self.individuals1 = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "country": self.country,
@@ -124,7 +123,6 @@ class TestGrievanceTicketDetail:
         )
         self.household2, self.individuals2 = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "country": self.country,

@@ -216,7 +216,6 @@ class TestRdiMergeTask(TestCase):
     def test_merge_rdi_and_recalculation(self) -> None:
         hh = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -293,7 +292,6 @@ class TestRdiMergeTask(TestCase):
                 "male_age_group_60_count",
                 "children_count",
                 "size",
-                "admin_area",
                 "admin1",
                 "admin2",
                 "admin3",
@@ -315,7 +313,6 @@ class TestRdiMergeTask(TestCase):
             "male_age_group_60_count": 1,
             "children_count": 5,
             "size": 8,
-            "admin_area": self.area4.id,
             "admin1": self.area1.id,
             "admin2": self.area2.id,
             "admin3": self.area3.id,
@@ -331,7 +328,6 @@ class TestRdiMergeTask(TestCase):
     def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -362,7 +358,6 @@ class TestRdiMergeTask(TestCase):
     def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -394,7 +389,6 @@ class TestRdiMergeTask(TestCase):
     def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -498,7 +492,6 @@ class TestRdiMergeTask(TestCase):
     def test_merging_external_collector(self) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             zip_code="00-123",
         )

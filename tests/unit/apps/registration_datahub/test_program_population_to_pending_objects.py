@@ -153,7 +153,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 "first_registration_date": "2021-01-01",
                 "last_registration_date": "2021-01-01",
                 "program": cls.program_from,
-                "admin_area": AreaFactory(),
                 "admin1": AreaFactory(),
                 "admin2": AreaFactory(),
                 "admin3": AreaFactory(),
