@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -34,6 +34,7 @@ export function LockFspPaymentPlan({
   const { isActiveProgram } = useProgramContext();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: lock, isPending: loadingLock } = useMutation({
     mutationFn: ({
@@ -50,9 +51,13 @@ export function LockFspPaymentPlan({
         id,
         programSlug,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       showMessage(t('Payment Plan FSPs are locked.'));
       setLockDialogOpen(false);
+      await queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        exact: false,
+      });
     },
   });
 
