@@ -730,7 +730,9 @@ class Household(
             ),
             UniqueConstraint(
                 fields=["identification_key", "program"],
-                condition=Q(is_removed=False) & Q(identification_key__isnull=False),
+                condition=Q(is_removed=False)
+                & Q(identification_key__isnull=False)
+                & Q(rdi_merge_status=SoftDeletableRepresentationMergeStatusModelWithDate.MERGED),
                 name="identification_key_unique_constraint",
             ),
         ]
@@ -1421,7 +1423,14 @@ class Individual(
                 fields=["unicef_id", "program"],
                 condition=Q(is_removed=False) & Q(duplicate=False),
                 name="unique_ind_unicef_id_in_program",
-            )
+            ),
+            UniqueConstraint(
+                fields=["identification_key", "program"],
+                condition=Q(is_removed=False)
+                & Q(identification_key__isnull=False)
+                & Q(rdi_merge_status=SoftDeletableRepresentationMergeStatusModelWithDate.MERGED),
+                name="identification_key_ind_unique_constraint",
+            ),
         ]
         permissions = (("update_individual_iban", "Can update individual IBAN"),)
 

@@ -1,8 +1,14 @@
 from typing import TYPE_CHECKING, Optional
+
 from django.forms.models import model_to_dict
+
 from strategy_field.registry import Registry
 
-from hct_mis_api.apps.household.models import Household, Individual, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 
 # only for typing purposes
 if TYPE_CHECKING:
@@ -20,13 +26,17 @@ class AbstractCollisionDetector:
 
     def _update_roles_in_household(self, household_id_destination: str, roles_by_id: dict[int, str]):
         """
-         1. Deletes all roles in destination household
-         2. Reassigns roles from source household to destination household
+        1. Deletes all roles in destination household
+        2. Reassigns roles from source household to destination household
         """
-        IndividualRoleInHousehold.objects.filter(household_id=household_id_destination).delete()
+        IndividualRoleInHousehold.all_objects.filter(household_id=household_id_destination).delete()
         for individual_id, role in roles_by_id.items():
-            IndividualRoleInHousehold.objects.create(individual_id=individual_id, role=role,
-                                                     household_id=household_id_destination)
+            IndividualRoleInHousehold.all_objects.create(
+                individual_id=individual_id,
+                role=role,
+                household_id=household_id_destination,
+                rdi_merge_status=Individual.MERGED,
+            )
 
     def _update_individual_identities(self, individual_destination, individual_source):
         """
@@ -34,14 +44,14 @@ class AbstractCollisionDetector:
         2. Reassign identities from source individual to destination individual
         :return:
         """
-        identities_destination = individual_destination.identities.all()
-        identities_source = individual_source.identities.all()
+        identities_destination = individual_destination.identities(manager="all_objects").all()
+        identities_source = individual_source.identities(manager="all_objects").all()
         # 1. Remove all identities from destination individual
-        if identities_destination:
-            identities_destination.delete()
+        identities_destination.delete()
         # 2. Reassign identities from source individual to destination individual
         for identity in identities_source:
             identity.individual = individual_destination
+            identity.rdi_merge_status = Individual.MERGED
             identity.save()
 
         return individual_destination
@@ -53,13 +63,13 @@ class AbstractCollisionDetector:
         4. Reassigns documents from source individual to destination individual
         5. Updates statuses in destination (for unchanged documents)
         """
-        documents_source = individual_source.documents.all()
-        documents_destination = individual_destination.documents.all()
+        documents_source = individual_source.documents(manager="all_objects").all()
+        documents_destination = individual_destination.documents(manager="all_objects").all()
 
         # 1. Save statuses in dict by number+type_id
         destination_statuses = {}
         for doc in documents_destination:
-            key = f"{doc.number}_{doc.document_type_id}"
+            key = f"{doc.document_number}_{doc.type_id}"
             destination_statuses[key] = doc.status
 
         # 2. Delete all documents in destination
@@ -69,54 +79,59 @@ class AbstractCollisionDetector:
         for doc in documents_source:
             # Assign it to the destination individual
             doc.individual = individual_destination
+            doc.rdi_merge_status = Individual.MERGED
             # 5. Update statuses in destination (for unchanged documents)
-            key = f"{doc.number}_{doc.document_type_id}"
+            key = f"{doc.document_number}_{doc.type_id}"
             if key in destination_statuses:
                 doc.status = destination_statuses[key]
-                doc.save()
+            doc.save()
 
         return individual_destination
 
     def _update_individual(self, individual_destination: Individual, individual_source: Individual):
         exclude = {
-            'id',
-            'pk',
-            'unicef_id',
-            'collection_id',
-            'collection',
-            'created_at',
-            'program_id',
-            'created_at',
-            'individual_collection_id',
-            'individual_collection',
-            'rdi_merge_status',
+            "id",
+            "pk",
+            "unicef_id",
+            "collection_id",
+            "collection",
+            "created_at",
+            "program_id",
+            "created_at",
+            "individual_collection_id",
+            "individual_collection",
+            "rdi_merge_status",
             "registration_data_import",
             "registration_data_import_id",
             "household",
-            "household_id"
+            "household_id",
+            "rdi_merge_status",
         }
         self._update_db_instance(individual_source, individual_destination, exclude)
 
-    def _update_household(self, household_destination: Household, household_source: Household,
-                          head_of_household: Individual):
+    def _update_household(
+        self, household_destination: Household, household_source: Household, head_of_household: Individual
+    ):
         exclude = {
-            'id',
-            'pk',
-            'unicef_id',
-            'created_at',
-            'program_id',
-            'created_at',
-            'updated_at',
-            'household_collection_id',
-            'household_collection',
-            'rdi_merge_status',
+            "id",
+            "pk",
+            "unicef_id",
+            "created_at",
+            "program_id",
+            "created_at",
+            "updated_at",
+            "household_collection_id",
+            "household_collection",
+            "rdi_merge_status",
             "extra_rdis",
             "representatives",
             "registration_data_import",
-            "registration_data_import_id"
+            "registration_data_import_id",
+            "rdi_merge_status",
         }
-        self._update_db_instance(household_source, household_destination, exclude,
-                                 {"head_of_household": head_of_household})
+        self._update_db_instance(
+            household_source, household_destination, exclude, {"head_of_household": head_of_household}
+        )
 
     def _update_db_instance(self, source, destination, exclude, extra_fields=None):
         """
@@ -196,15 +211,18 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         old_household_id = self.detect_collision(household_to_merge)
         if old_household_id is None:
             return
+        old_household = Household.objects.get(id=old_household_id)
         old_individuals = Household.objects.get(id=old_household_id).individuals.all()
-        individuals_to_merge = household_to_merge.individuals.all()
+        individuals_to_merge = household_to_merge.individuals(manager="all_objects").all()
         # 3. Sanity check - All individuals in both households must have an identification key
         if any([x for x in old_individuals if x.identification_key is None]):
             raise ValueError(
-                f"Cannot merge households with individuals with no identification key household {old_household_id}")
+                f"Cannot merge households with individuals with no identification key household {old_household_id}"
+            )
         if any([x for x in individuals_to_merge if x.identification_key is None]):
             raise ValueError(
-                f"Cannot merge households with individuals with no identification key {household_to_merge.id}")
+                f"Cannot merge households with individuals with no identification key {household_to_merge.id}"
+            )
         # 4. Prepare the lists of individuals to add, update and remove. By comparing if the identification keys exist in both households
         old_individuals_by_identification_key = {
             ind.identification_key: ind for ind in old_individuals if ind.identification_key
@@ -213,22 +231,28 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
             ind.identification_key: ind for ind in individuals_to_merge if ind.identification_key
         }
         identification_keys_to_remove = set(old_individuals_by_identification_key.keys()) - set(
-            individuals_to_merge_by_identification_key.keys())
+            individuals_to_merge_by_identification_key.keys()
+        )
         individuals_to_remove = [
             old_individuals_by_identification_key[key] for key in identification_keys_to_remove
         ]  # don't exist in the new household
         identification_keys_to_add = set(individuals_to_merge_by_identification_key.keys()) - set(
-            old_individuals_by_identification_key.keys())
-        individuals_to_add = [
-            individuals_to_merge_by_identification_key[key] for key in identification_keys_to_add
-        ]
+            old_individuals_by_identification_key.keys()
+        )
+        individuals_to_add = [individuals_to_merge_by_identification_key[key] for key in identification_keys_to_add]
         identification_keys_to_update = set(individuals_to_merge_by_identification_key.keys()) & set(
-            old_individuals_by_identification_key.keys())
+            old_individuals_by_identification_key.keys()
+        )
+
         # 5. Store the new roles (by identification_keys), because it will be deleted when we delete individuals
-        role_by_identification_key = {role.individual.identification_key: role.role for role in
-                                      household_to_merge.individuals_and_roles.all()}
+        role_by_identification_key = {
+            role.individual.identification_key: role.role
+            for role in household_to_merge.individuals_and_roles(manager="all_objects").all()
+        }
         # 6. Store the head of household identification key, we will have no access to it when we delete individuals
         head_of_household_identification_key = household_to_merge.head_of_household.identification_key
+        old_household.head_of_household = None
+        old_household.save()
         # 7. Update the individuals in the old household with the new ones
         for key in identification_keys_to_update:
             individual_original = old_individuals_by_identification_key[key]
@@ -239,28 +263,30 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         # 8. Delete the individuals that are in the old household but not in the new household
         Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_remove]).delete()
         # 9. Add the new individuals to the old household
-        Individual.objects.filter(id__in=[ind.id for ind in individuals_to_add]).update(
+        Individual.all_objects.filter(id__in=[ind.id for ind in individuals_to_add]).update(
             household=old_household_id,
             rdi_merge_status=Individual.MERGED,
         )
         # 10. Get the fresh list of individuals in the old household
-        updated_individuals_in_household = Household.objects.get(id=old_household_id).individuals.all()
+        updated_individuals_in_household = Household.all_objects.get(id=old_household_id).individuals.all()
         updated_individuals_in_household_by_identification_key = {
             ind.identification_key: ind for ind in updated_individuals_in_household if ind.identification_key
         }
-
         updated_head_of_household = updated_individuals_in_household_by_identification_key[
-            head_of_household_identification_key]
+            head_of_household_identification_key
+        ]
         # 11. Update the roles in the old household, based on the dict of roles by identification key
-        roles_list = [(updated_individuals_in_household_by_identification_key[key], role) for key, role in
-                      role_by_identification_key.items()]
+        roles_list = [
+            (updated_individuals_in_household_by_identification_key[key], role)
+            for key, role in role_by_identification_key.items()
+        ]
         self._update_roles_in_household(
-            household_id_destination=old_household_id,
-            roles_by_id={ind.id: role for ind, role in roles_list}
+            household_id_destination=old_household_id, roles_by_id={ind.id: role for ind, role in roles_list}
         )
         # 12. Update the household with the new data
-        self._update_household(Household.objects.get(id=old_household_id), household_to_merge,
-                               updated_head_of_household)
+        self._update_household(
+            Household.objects.get(id=old_household_id), household_to_merge, updated_head_of_household
+        )
 
 
 collision_detectors_registry = Registry(AbstractCollisionDetector)

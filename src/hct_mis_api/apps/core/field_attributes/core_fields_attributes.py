@@ -2199,7 +2199,7 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.PEOPLE_UPDATE,
         ],
     },
-{
+    {
         "id": "7003a190-f71f-4ba1-b0f5-fd805097b33c",
         "type": TYPE_STRING,
         "name": "ind_identification_key",
