@@ -1,4 +1,3 @@
-import { ProgramCycle, ProgramCycleUpdate } from '@api/programCycleApi';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
@@ -13,6 +12,8 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { RestService } from '@restgenerated/index';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { ProgramCycleUpdate } from '@restgenerated/models/ProgramCycleUpdate';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useMutation } from '@tanstack/react-query';
@@ -24,7 +25,7 @@ import * as Yup from 'yup';
 
 interface UpdateProgramCycleProps {
   program: ProgramDetail;
-  programCycle?: ProgramCycle;
+  programCycle?: ProgramCycleList;
   onClose: () => void;
   onSubmit: () => void;
   step?: string;
@@ -70,8 +71,8 @@ const UpdateProgramCycle = ({
   } = {
     id: programCycle.id,
     title: programCycle.title,
-    startDate: programCycle.start_date,
-    endDate: programCycle.end_date,
+    startDate: programCycle.startDate,
+    endDate: programCycle.endDate,
   };
 
   const { mutateAsync, isPending } = useMutation({

@@ -1,7 +1,7 @@
 import { HeadCell } from '@core/Table/EnhancedTableHead';
-import { ProgramCycle } from '@api/programCycleApi';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 
-export const headCells: HeadCell<ProgramCycle>[] = [
+export const headCells: HeadCell<ProgramCycleList>[] = [
   {
     id: 'title',
     numeric: false,
