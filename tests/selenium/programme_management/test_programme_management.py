@@ -51,7 +51,7 @@ def create_unhcr_partner() -> None:
         partner=partner_unhcr,
         business_area=afghanistan,
         role=RoleFactory(name="Role for UNHCR"),
-        program=ProgramFactory(name="Program for UNHCR"),
+        program=None,
     )
 
 
@@ -161,7 +161,6 @@ class TestProgrammeManagement:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_optional_values(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
@@ -224,7 +223,6 @@ class TestProgrammeManagement:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_Frequency_of_Payment(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
@@ -277,7 +275,6 @@ class TestProgrammeManagement:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_Cash_Plus(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
@@ -330,7 +327,6 @@ class TestProgrammeManagement:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_check(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
@@ -372,7 +368,6 @@ class TestProgrammeManagement:
         assert "DRAFT" in elements[1]
         assert "Health" in elements[2]
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement: ProgrammeManagement) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -400,7 +395,6 @@ class TestProgrammeManagement:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_delete_partners(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
@@ -435,7 +429,6 @@ class TestProgrammeManagement:
         with pytest.raises(Exception):
             assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_cancel_scenario(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -466,7 +459,6 @@ class TestBusinessAreas:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_add_partners_Business_Area(
         self,
         change_super_user: None,
@@ -520,7 +512,6 @@ class TestBusinessAreas:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_copy_programme(
         self,
         change_super_user: None,
@@ -599,7 +590,6 @@ class TestAdminAreas:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_add_partners_Admin_Area(
         self,
         change_super_user: None,
@@ -665,7 +655,6 @@ class TestComeBackScenarios:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_back_scenarios(
         self,
         change_super_user: None,
@@ -798,7 +787,6 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_create_programme_accesses(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
@@ -830,7 +818,6 @@ class TestManualCalendar:
         assert test_data["partners_access"] in pageProgrammeDetails.getLabelPartnerAccess().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
 
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_edit_programme(
         self,
@@ -970,7 +957,6 @@ class TestManualCalendar:
             ),
         ],
     )
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_edit_programme_with_rdi(
         self,
         pageProgrammeManagement: ProgrammeManagement,
