@@ -24,25 +24,6 @@ export interface PaginatedListResponse<T> {
   results: T[];
 }
 
-export interface ProgramCycle {
-  id: string;
-  unicef_id: string;
-  title: string;
-  status: ProgramCycleStatus;
-  start_date: string;
-  end_date: string;
-  program_start_date: string;
-  program_end_date: string;
-  created_at: string;
-  created_by: string;
-  total_entitled_quantity_usd: number;
-  total_undelivered_quantity_usd: number;
-  total_delivered_quantity_usd: number;
-  frequency_of_payments: string;
-  admin_url?: string;
-  can_remove_cycle: boolean;
-}
-
 export interface ProgramCycleCreate {
   title: string;
   start_date: string;

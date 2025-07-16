@@ -1,10 +1,10 @@
-import { ProgramCycle } from '@api/programCycleApi';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import CreateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/CreateProgramCycle';
 import UpdateProgramCycle from '@containers/tables/ProgramCycle/NewProgramCycle/UpdateProgramCycle';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Dialog } from '@mui/material';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 interface AddNewProgramCycleProps {
   program: ProgramDetail;
-  lastProgramCycle?: ProgramCycle;
+  lastProgramCycle?: ProgramCycleList;
 }
 
 const AddNewProgramCycle = ({
@@ -27,7 +27,7 @@ const AddNewProgramCycle = ({
 
   const handleClose = async () => {
     await queryClient.invalidateQueries({
-      queryKey: ['programCycles', businessArea, program.id],
+      queryKey: ['programCycles', businessArea, program.slug],
     });
     setOpen(false);
     setStep(0);
@@ -43,7 +43,7 @@ const AddNewProgramCycle = ({
   };
 
   const stepsToRender = [];
-  if (lastProgramCycle.end_date) {
+  if (lastProgramCycle.endDate) {
     stepsToRender.push(
       <CreateProgramCycle
         program={program}

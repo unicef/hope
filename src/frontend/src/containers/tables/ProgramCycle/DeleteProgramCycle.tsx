@@ -1,4 +1,4 @@
-import { deleteProgramCycle, ProgramCycle } from '@api/programCycleApi';
+import { RestService } from '@restgenerated/services/RestService';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -16,9 +16,10 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
+import { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { decodeIdString, showApiErrorMessages } from '@utils/utils';
+import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -29,7 +30,7 @@ const WhiteDeleteIcon = styled(DeleteIcon)`
 
 interface DeleteProgramCycleProps {
   program: ProgramDetail;
-  programCycle: ProgramCycle;
+  programCycle: ProgramCycleCreate;
 }
 
 const DeleteProgramCycle = ({
@@ -43,18 +44,14 @@ const DeleteProgramCycle = ({
   const queryClient = useQueryClient();
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: async () => {
-      return deleteProgramCycle(
-        businessArea,
-        program.id,
-        decodeIdString(programCycle.id),
-      );
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.id],
+    mutationFn: () => {
+      // Use the generated RestService method for deleting a program cycle
+      return RestService.restBusinessAreasProgramsCyclesDestroy({
+        businessAreaSlug: businessArea,
+        programSlug: program.slug,
+        //@ts-ignore
+        id: programCycle.id,
       });
-      setOpen(false);
     },
   });
 
@@ -63,8 +60,18 @@ const DeleteProgramCycle = ({
       await mutateAsync();
       showMessage(t('Programme Cycle Deleted'));
     } catch (e) {
-      showApiErrorMessages(e, showMessage);
+      // Ignore empty response error
+      if (e.message && e.message.includes('Unexpected end of JSON input')) {
+        showMessage(t('Programme Cycle Deleted'));
+      } else {
+        showApiErrorMessages(e, showMessage);
+      }
     }
+    await queryClient.invalidateQueries({
+      queryKey: ['programCycles', businessArea, program.slug],
+      exact: false,
+    });
+    setOpen(false);
   };
 
   return (

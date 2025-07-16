@@ -61,7 +61,7 @@ const EditProgramCycle = ({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.id],
+        queryKey: ['programCycles', businessArea, program.slug],
       });
       setOpen(false);
     },
