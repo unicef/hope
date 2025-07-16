@@ -20,12 +20,8 @@ class TestAutocompleteWidget:
 
     def test_get_url_with_business_area(self) -> None:
         business_area_id = uuid4()
-        widget = AutocompleteWidget(
-            model=Program, admin_site="admin", business_area=business_area_id
-        )
-        expected_url = (
-            f"{reverse('admin:autocomplete')}?business_area={business_area_id}"
-        )
+        widget = AutocompleteWidget(model=Program, admin_site="admin", business_area=business_area_id)
+        expected_url = f"{reverse('admin:autocomplete')}?business_area={business_area_id}"
         assert widget.get_url() == expected_url
 
     def test_get_context_without_business_area(self) -> None:
@@ -43,29 +39,19 @@ class TestAutocompleteWidget:
 
     def test_get_context_with_business_area(self) -> None:
         business_area_id = uuid4()
-        widget = AutocompleteWidget(
-            model=Program, admin_site="admin", business_area=business_area_id
-        )
+        widget = AutocompleteWidget(model=Program, admin_site="admin", business_area=business_area_id)
         mock_attrs = {"class": "test-class"}
         context = widget.get_context("program", "test_value", mock_attrs)
 
-        assert (
-            context["widget"]["query_string"]
-            == f"business_area__exact={business_area_id}"
-        )
-        assert (
-            context["widget"]["url"]
-            == f"{reverse('admin:autocomplete')}?business_area={business_area_id}"
-        )
+        assert context["widget"]["query_string"] == f"business_area__exact={business_area_id}"
+        assert context["widget"]["url"] == f"{reverse('admin:autocomplete')}?business_area={business_area_id}"
 
 
 @pytest.mark.django_db
 class TestTestRuleMixin(TestCase):
     def setUp(self) -> None:
         User = get_user_model()
-        self.admin_user = User.objects.create_superuser(
-            username="root", email="root@root.com", password="password"
-        )
+        self.admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
         self.client.login(username=self.admin_user.username, password="password")
         self.rule = Rule.objects.create(
             name="Test Rule",
