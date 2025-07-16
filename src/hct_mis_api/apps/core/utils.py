@@ -666,7 +666,6 @@ def chart_create_filter_query(
         filter_query.update(
             {
                 f"{administrative_area_path}__id": administrative_area,
-                f"{administrative_area_path}__area_type__area_level": 2,
             }
         )
     return filter_query

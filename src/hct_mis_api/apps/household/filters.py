@@ -92,7 +92,7 @@ class HouseholdFilter(UpdatedAtFilter):
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
     is_active_program = BooleanFilter(method="filter_is_active_program")
     rdi_merge_status = ChoiceFilter(method="rdi_merge_status_filter", choices=MergeStatusModel.STATUS_CHOICE)
-    admin_area = CharFilter(method="admin_field_filter", field_name="admin_area")
+    admin_area = CharFilter(method="admin_area_filter")
     admin1 = CharFilter(method="admin_field_filter", field_name="admin1")
     admin2 = CharFilter(method="admin_field_filter", field_name="admin2")
     address = CharFilter(field_name="address", lookup_expr="icontains")
@@ -105,7 +105,6 @@ class HouseholdFilter(UpdatedAtFilter):
         fields = {
             "unicef_id": ["exact"],
             "size": ["range", "lte", "gte"],
-            "admin_area": ["exact"],
             "admin1": ["exact"],
             "admin2": ["exact"],
             "residence_status": ["exact"],
@@ -124,7 +123,6 @@ class HouseholdFilter(UpdatedAtFilter):
             "size",
             "status_label",
             Lower("head_of_household__full_name"),
-            Lower("admin_area__name"),
             "residence_status",
             Lower("registration_data_import__name"),
             "total_cash_received",
@@ -283,6 +281,9 @@ class HouseholdFilter(UpdatedAtFilter):
     def admin_field_filter(self, qs: QuerySet, field_name: str, value: str) -> QuerySet:
         return qs.filter(**{field_name: value})
 
+    def admin_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        return qs.filter(Q(admin1=value) | Q(admin2=value) | Q(admin3=value) | Q(admin4=value))
+
     def filter_survey(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Household]:
         return queryset.filter(surveys__id=value)
 
@@ -316,7 +317,6 @@ class IndividualFilter(UpdatedAtFilter):
         model = Individual
         fields = {
             "household__id": ["exact"],
-            "household__admin_area": ["exact"],
             "withdrawn": ["exact"],
             "program": ["exact"],
         }
@@ -331,7 +331,6 @@ class IndividualFilter(UpdatedAtFilter):
             "birth_date",
             "sex",
             "relationship",
-            Lower("household__admin_area__name"),
             "last_registration_date",
             "first_registration_date",
         )

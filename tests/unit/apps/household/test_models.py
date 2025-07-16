@@ -57,7 +57,6 @@ class TestHousehold(TestCase):
 
     def test_household_admin_areas_set(self) -> None:
         household, (individual) = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.admin_area = self.area1
         household.admin1 = self.area1
         household.save()
 
@@ -88,22 +87,21 @@ class TestHousehold(TestCase):
         self.assertEqual(household.admin3, self.area3)
         self.assertEqual(household.admin4, None)
 
-    def test_household_set_admin_area_none_clears_all_admin_fields_when_area_is_none(self) -> None:
+    def test_household_set_admin_area_based_on_lowest_admin(self) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.admin_area = None
-        household.admin1 = self.area1
-        household.admin2 = self.area2
-        household.admin3 = self.area3
+        household.admin1 = None
+        household.admin2 = None
+        household.admin3 = None
         household.admin4 = self.area4
 
-        household.set_admin_areas(None)
+        household.set_admin_areas()
         household.refresh_from_db()
 
-        self.assertIsNone(household.admin_area)
-        self.assertIsNone(household.admin1)
-        self.assertIsNone(household.admin2)
-        self.assertIsNone(household.admin3)
-        self.assertIsNone(household.admin4)
+        self.assertEqual(household.admin_area, self.area4)
+        self.assertEqual(household.admin1, self.area1)
+        self.assertEqual(household.admin2, self.area2)
+        self.assertEqual(household.admin3, self.area3)
+        self.assertEqual(household.admin4, self.area4)
 
     def test_remove_household(self) -> None:
         household1, _ = create_household(

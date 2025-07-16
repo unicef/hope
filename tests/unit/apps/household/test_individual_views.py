@@ -482,7 +482,6 @@ class TestIndividualDetail:
         )
         self.household, (self.individual1, self.individual2) = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "admin3": self.area3,
@@ -1069,7 +1068,6 @@ class TestIndividualGlobalViewSet:
             self.individual_afghanistan1_2,
         ) = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "admin3": self.area3,
@@ -1084,7 +1082,6 @@ class TestIndividualGlobalViewSet:
             self.individual_afghanistan2_2,
         ) = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "admin3": self.area3,
@@ -1100,7 +1097,6 @@ class TestIndividualGlobalViewSet:
             self.individual_ukraine_2,
         ) = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "admin3": self.area3,
@@ -1276,7 +1272,6 @@ class TestIndividualGlobalViewSet:
             individual_afghanistan_different_areas2,
         ) = create_household_and_individuals(
             household_data={
-                "admin_area": area_different,
                 "admin1": area_different,
                 "admin2": area_different,
                 "admin3": area_different,
