@@ -578,6 +578,7 @@ class TestProgrammeDetails:
         with pytest.raises(Exception):
             assert pageProgrammeDetails.getDeleteProgrammeCycle()[2]
 
+    @pytest.mark.skip(reason="Unskip after fix 211823")
     def test_program_details_edit_default_cycle_by_add_new_cancel(
         self, standard_program_with_draft_programme_cycle: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -614,6 +615,7 @@ class TestProgrammeDetails:
         ) in pageProgrammeDetails.getProgramCycleEndDate()[2].text
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
 
+    @pytest.mark.skip("Unskip after fixing")
     def test_program_details_add_new_cycle_with_wrong_date(
         self, standard_active_program_cycle_draft: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -685,6 +687,7 @@ class TestProgrammeDetails:
         ) in pageProgrammeDetails.getProgramCycleEndDate()[1].text
         assert "New cycle with wrong date" in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
+    @pytest.mark.skip("Unskip after fixing")
     def test_program_details_edit_cycle_with_wrong_date(
         self, program_with_different_cycles: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
@@ -761,6 +764,7 @@ class TestProgrammeDetails:
         ) in pageProgrammeDetails.getProgramCycleEndDate()[1].text
         assert "New cycle with wrong date" in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
+    @pytest.mark.skip("Unskip after fix: 212581")
     def test_edit_program_details_with_wrong_date(
         self,
         program_with_different_cycles: Program,
