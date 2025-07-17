@@ -149,7 +149,7 @@ class RdiMergeTask:
                         Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
 
-                    if not obj_hct.business_area.postpone_deduplication:
+                    if not obj_hct.business_area.postpone_deduplication and len(individuals):
                         # DEDUPLICATION
                         DeduplicateTask(
                             obj_hct.business_area.slug, obj_hct.program.id

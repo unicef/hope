@@ -296,6 +296,7 @@ class IdentificationKeyCollisionDetector(AbstractCollisionDetector):
         self._update_household(
             Household.objects.get(id=old_household_id), household_to_merge, updated_head_of_household
         )
+        household_to_merge.delete(soft=False)
 
 
 collision_detectors_registry = Registry(AbstractCollisionDetector)
