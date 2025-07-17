@@ -6,7 +6,6 @@ from typing import Any
 from unittest import mock
 
 from django.conf import settings
-from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.management import call_command
 from django.forms import model_to_dict
@@ -437,9 +436,9 @@ class TestRdiXlsxCreateTask(TestCase):
         task = self.RdiXlsxCreateTask()
 
         result = task._handle_geopoint_field(empty_geopoint)
-        self.assertEqual(result, "")
+        self.assertEqual(result, None)
 
-        expected = Point(x=51.107883, y=17.038538, srid=4326)
+        expected = 51.107883, 17.038538
         result = task._handle_geopoint_field(valid_geopoint)
         self.assertEqual(result, expected)
 

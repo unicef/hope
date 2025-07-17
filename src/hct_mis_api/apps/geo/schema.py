@@ -6,6 +6,15 @@ from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.geo.models import Area, AreaType
+from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
+
+
+class AreaNode(DjangoObjectType):
+    class Meta:
+        model = Area
+        filter_fields = ["name"]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class AreaTypeNode(DjangoObjectType):

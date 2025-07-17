@@ -1,4 +1,3 @@
-from django.contrib.gis.geos import Point
 from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
@@ -124,7 +123,7 @@ class TestHousehold(TestCase):
 
     def test_geopoint(self) -> None:
         household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
-        household.geopoint = Point(1.2, 0.5)  # type: ignore
+        household.geopoint = 1.2, 0.5  # type: ignore
         self.assertEqual(household.longitude, 1.2)
         self.assertEqual(household.latitude, 0.5)
         household.geopoint = None

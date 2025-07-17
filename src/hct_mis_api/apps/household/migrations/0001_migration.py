@@ -3,12 +3,10 @@
 import uuid
 
 import concurrency.fields
-import django.contrib.gis.db.models.fields
 import django.contrib.postgres.fields
-import django.contrib.postgres.fields.citext
 import django.contrib.postgres.search
 import django.core.validators
-import django.db.models.deletion
+from django.db import migrations, models
 import django.utils.timezone
 import model_utils.fields
 import multiselectfield.db.fields
@@ -237,7 +235,6 @@ class Migration(migrations.Migration):
                 ),
                 ("address", django.contrib.postgres.fields.citext.CICharField(blank=True, max_length=1024)),
                 ("zip_code", models.CharField(blank=True, max_length=12, null=True)),
-                ("geopoint", django.contrib.gis.db.models.fields.PointField(blank=True, null=True, srid=4326)),
                 ("size", models.PositiveIntegerField(blank=True, db_index=True, null=True)),
                 ("female_age_group_0_5_count", models.PositiveIntegerField(default=None, null=True)),
                 ("female_age_group_6_11_count", models.PositiveIntegerField(default=None, null=True)),
