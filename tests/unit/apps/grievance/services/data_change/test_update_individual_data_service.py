@@ -1,3 +1,5 @@
+import uuid
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
@@ -17,6 +19,8 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
 )
 from hct_mis_api.apps.household.models import Document
+from hct_mis_api.apps.payment.fixtures import FinancialInstitutionFactory, AccountFactory, generate_delivery_mechanisms
+from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
@@ -29,6 +33,7 @@ class TestUpdateIndividualDataService(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = BusinessAreaFactory()
+        generate_delivery_mechanisms()
         cls.program = ProgramFactory()
         cls.country_afg = CountryFactory(iso_code3="AFG")
         cls.user = UserFactory()
@@ -320,6 +325,77 @@ class TestUpdateIndividualDataService(TestCase):
         document_to_edit.refresh_from_db()
         # document was not updated
         self.assertEqual(document_to_edit.document_number, "111111")
+
+    def test_edit_account(self) -> None:
+        fi1 = FinancialInstitutionFactory(id="6")
+        fi2 = FinancialInstitutionFactory(id="7")
+        account = AccountFactory(
+            id=uuid.UUID("e0a7605f-62f4-4280-99f6-b7a2c4001680"),
+            individual=self.individual,
+            number="123",
+            data={"field": "value"},
+            financial_institution=fi1,
+            account_type=AccountType.objects.get(key="mobile"),
+        )
+
+        self.ticket.individual_data_update_ticket_details.individual_data["accounts"] = [
+                    {
+                        "approve_status": True,
+                        "value": {
+                            "data_fields": {
+                                "financial_institution": str(fi1.id),
+                                "new_field": "new_value",
+                                "number": "2222",
+                            },
+                            "name": "mobile",
+                        },
+                    }
+        ]
+        self.ticket.individual_data_update_ticket_details.individual_data["accounts_to_edit"] = [
+                {
+                    "approve_status": True,
+                    "data_fields": [
+                        {"name": "field", "previous_value": "value", "value": "updated_value"},
+                        {"name": "new_field", "previous_value": None, "value": "new_value"},
+                        {"name": "number", "previous_value": "123", "value": "123123"},
+                        {
+                            "name": "financial_institution",
+                            "previous_value": str(fi1.id),
+                            "value": str(fi2.id),
+                        },
+                    ],
+                    "id": "e0a7605f-62f4-4280-99f6-b7a2c4001680",
+                    "name": "mobile",
+                }
+        ]
+        self.ticket.individual_data_update_ticket_details.save()
+
+        service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
+        try:
+            service.close(self.user)
+        except ValidationError:
+            self.fail("ValidationError should not be raised")
+
+        account.refresh_from_db()
+        self.assertEqual(account.number, "123123")
+        self.assertEqual(account.financial_institution, fi2)
+        self.assertEqual(
+            account.data,
+            {
+                "field": "updated_value",
+                "new_field": "new_value",
+            },
+        )
+
+        new_account = self.individual.accounts.exclude(id=account.id).first()
+        self.assertEqual(new_account.number, "2222")
+        self.assertEqual(new_account.financial_institution, fi1)
+        self.assertEqual(
+            new_account.data,
+            {
+                "new_field": "new_value",
+            },
+        )
 
     def test_update_people_individual_hh_fields(self) -> None:
         pl = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
