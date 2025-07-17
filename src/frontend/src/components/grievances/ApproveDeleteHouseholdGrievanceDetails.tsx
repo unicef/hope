@@ -63,7 +63,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
         {
           businessAreaSlug,
           id: ticket.id,
-          requestBody: {
+          formData: {
             approveStatus: mutationApproveStatus,
             reasonHhId,
           },

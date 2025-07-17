@@ -88,7 +88,7 @@ export function DeleteIndividualGrievanceDetails({
       RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
         businessAreaSlug: businessArea,
         id: grievanceTicketId,
-        requestBody: {
+        formData: {
           approveStatus,
         },
       }),

@@ -5,11 +5,6 @@ import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopu
 import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
-import {
-  useBusinessAreaDataQuery,
-  useCreateTpMutation,
-  useProgramQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -18,7 +13,7 @@ import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getTargetingCriteriaVariables,
   HhIndIdValidation,
@@ -54,20 +49,24 @@ const CreateTargetPopulationPage = (): ReactElement => {
     deliveryMechanism: '',
     fsp: '',
   };
+  const queryClient = useQueryClient();
   const { mutateAsync: createTargetPopulation, isPending: loadingCreate } =
     useMutation({
-      mutationFn: ({
-        requestBody,
-      }: {
-        businessAreaSlug: string;
-        programSlug: string;
-        requestBody;
-      }) =>
+      mutationFn: ({ requestBody }: { requestBody: any }) =>
         RestService.restBusinessAreasProgramsTargetPopulationsCreate({
           businessAreaSlug,
           programSlug,
           requestBody,
         }),
+      onSuccess: () => {
+        // Invalidate the list and detail queries for target populations and program
+        queryClient.invalidateQueries({
+          queryKey: ['targetPopulations', businessAreaSlug, programSlug],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['program', businessAreaSlug, programSlug],
+        });
+      },
     });
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
@@ -87,9 +86,6 @@ const CreateTargetPopulationPage = (): ReactElement => {
         businessAreaSlug,
         slug: programSlug,
       }),
-
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
   });
 
   if (permissions === null) return null;
@@ -111,7 +107,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
     }),
   });
 
-  const handleSubmit = async (values): Promise<void> => {
+  const handleSubmit = async (values: any): Promise<void> => {
     const fsp = values.criterias[0]?.fsp || null;
     const deliveryMechanism = values.criterias[0]?.deliveryMechanism || null;
     const requestBody = {
@@ -126,8 +122,6 @@ const CreateTargetPopulationPage = (): ReactElement => {
 
     try {
       const res = await createTargetPopulation({
-        businessAreaSlug,
-        programSlug,
         requestBody,
       });
       showMessage(t('Target Population Created'));
