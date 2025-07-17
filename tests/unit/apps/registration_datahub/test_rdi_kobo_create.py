@@ -575,11 +575,11 @@ class TestRdiKoboCreateTask(TestCase):
             "hohh_is_caregiver_h_f": "0",
             "alternate_collector": "1",
             "_xform_id_string": "kobo_asset_id_string_OR_detail_id",
-            "_uuid": "123123-411d-85f1-123123",
+            "_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af155",
             "_submission_time": "2022-02-22T12:22:22",
         }
         submission_meta_data = {
-            "kobo_submission_uuid": "123123-411d-85f1-123123",
+            "kobo_submission_uuid": "5b6f30ee-010b-4bd5-a510-e78f062af155",
             "kobo_asset_id": "kobo_asset_id_string_OR_detail_id",
             "kobo_submission_time": "2022-02-22T12:22:22",
         }
@@ -599,4 +599,4 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(len(households_to_create), 1)
         self.assertEqual(hh.detail_id, "kobo_asset_id_string_OR_detail_id")
         self.assertEqual(hh.kobo_submission_time.isoformat(), "2022-02-22T12:22:22")
-        self.assertEqual(hh.kobo_submission_uuid, "123123-411d-85f1-123123")
+        self.assertEqual(hh.kobo_submission_uuid, "5b6f30ee-010b-4bd5-a510-e78f062af155")
