@@ -17,6 +17,7 @@ import { useProgramContext } from '../../../programContext';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationDetail;
@@ -56,7 +57,7 @@ export function OpenTargetPopulationHeaderButtons({
         id,
       }),
     onSuccess: () => showMessage(t('Payment Plan has been rebuilt.')),
-    onError: (e) => showMessage(e.message),
+    onError: (e) => showApiErrorMessages(e, showMessage),
   });
 
   return (

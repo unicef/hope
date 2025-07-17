@@ -15,6 +15,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -71,7 +72,7 @@ export function ImportXlsxPaymentPlanPaymentList({
       });
     },
     onError: (e) => {
-      showMessage(e.message || 'An error occurred during import');
+      showApiErrorMessages(e, showMessage);
     },
   });
 

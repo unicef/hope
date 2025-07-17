@@ -23,6 +23,7 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { GrievanceUpdateApproveStatus } from '@restgenerated/models/GrievanceUpdateApproveStatus';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { showApiErrorMessages } from '@utils/utils';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -80,15 +81,7 @@ export function PaymentGrievanceDetails({
       });
     },
     onError: (error: any) => {
-      if (error?.body?.errors) {
-        Object.values(error.body.errors)
-          .flat()
-          .forEach((msg: string) => {
-            showMessage(msg);
-          });
-      } else {
-        showMessage(error?.message || 'An error occurred');
-      }
+      showApiErrorMessages(error, showMessage);
     },
   });
 

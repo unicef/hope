@@ -3,9 +3,14 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,10 +18,6 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-import { useQuery } from '@tanstack/react-query';
-import { RestService } from '@restgenerated/services/RestService';
-import { createApiParams } from '@utils/apiUtils';
-import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
 
 export const CreateImportFromProgramPopulationForm = ({
   setSubmitForm,
@@ -93,20 +94,14 @@ export const CreateImportFromProgramPopulationForm = ({
               screenBeneficiary: values.screenBeneficiary,
               importFromProgramId: values.importFromProgramId,
               importFromIds: values.importFromIds,
+              excludeExternalCollectors:
+                values.importType === 'excludeAlternateCollectors',
             },
           },
         );
       navigate(`/${baseUrl}/registration-data-import/${response.id}`);
     } catch (e: any) {
-      if (e?.body?.errors) {
-        Object.values(e.body.errors).forEach((msgArr: any) => {
-          if (Array.isArray(msgArr)) msgArr.forEach((msg) => showMessage(msg));
-        });
-      } else if (e?.message) {
-        showMessage(e.message);
-      } else {
-        showMessage('Unknown error');
-      }
+      showApiErrorMessages(e, showMessage);
       setSubmitDisabled(false);
     }
   };
@@ -175,6 +170,11 @@ export const CreateImportFromProgramPopulationForm = ({
               value: 'all',
               name: 'All Programme Population',
               dataCy: 'radio-all',
+            },
+            {
+              value: 'excludeAlternateCollectors',
+              name: 'Exclude Alternate Collectors',
+              dataCy: 'radio-exclude-alternate-collectors',
             },
             { value: 'usingIds', name: 'Using Ids', dataCy: 'radio-ids' },
           ]}

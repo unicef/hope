@@ -90,7 +90,6 @@ class CoreFieldChoiceSerializer(serializers.Serializer):
     labels = serializers.SerializerMethodField()
     label_en = serializers.SerializerMethodField()
     value = serializers.SerializerMethodField()
-    admin = serializers.CharField(default=None)
     list_name = serializers.CharField(default=None)
 
     def get_labels(self, obj: Any) -> Any:
@@ -125,6 +124,7 @@ class FieldAttributeSimpleSerializer(serializers.Serializer):
     label_en = serializers.SerializerMethodField()
     associated_with = serializers.SerializerMethodField()
     is_flex_field = serializers.SerializerMethodField()
+    choices = CoreFieldChoiceSerializer(many=True)
 
     def get_label_en(self, obj: Any) -> Optional[str]:
         if data := _custom_dict_or_attr_resolver("label", None, obj):

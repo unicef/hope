@@ -58,7 +58,13 @@ export const DeleteTargetPopulation = ({
       showMessage(t('Target Population Deleted'));
       navigate(`/${baseUrl}/payment-module/payment-plans`);
     } catch (e) {
-      showMessage(e.message);
+      // Ignore empty response error
+      if (e.message && e.message.includes('Unexpected end of JSON input')) {
+        showMessage(t('Target Population Deleted'));
+        navigate(`/${baseUrl}/payment-module/payment-plans`);
+      } else {
+        showMessage(e.message);
+      }
     }
   };
 

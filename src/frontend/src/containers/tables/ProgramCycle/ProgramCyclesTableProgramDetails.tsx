@@ -39,11 +39,11 @@ const ProgramCyclesTableProgramDetails = ({
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['programCycles', businessAreaSlug, programSlug, queryVariables],
+    queryKey: ['programCycles', businessAreaSlug, program.slug, queryVariables],
     queryFn: async () => {
       return RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug,
-        programSlug,
+        programSlug: program.slug,
       });
     },
   });

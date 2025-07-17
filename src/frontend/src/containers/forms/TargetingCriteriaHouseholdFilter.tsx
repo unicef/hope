@@ -47,12 +47,17 @@ export function TargetingCriteriaHouseholdFilter({
   choicesDict;
 }): ReactElement {
   const { t } = useTranslation();
+
+  if (!data || !data.length) {
+    return <div>{t('No data available')}</div>;
+  }
+
   const shouldShowDivider = index + 1 < values.householdsFiltersBlocks.length;
   return (
     <div>
       <FieldChooser
         index={index}
-        choices={data.allFieldsAttributes}
+        choices={data}
         fieldName={each.fieldName}
         onChange={onChange}
         showDelete

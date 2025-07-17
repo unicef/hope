@@ -29,15 +29,6 @@ const EditTargetPopulationPage = (): ReactElement => {
         id: id,
         programSlug,
       }),
-    refetchInterval: () => {
-      const { backgroundActionStatus } = paymentPlan;
-      if (['BUILDING', 'PENDING'].includes(backgroundActionStatus)) {
-        return 3000;
-      }
-
-      return false;
-    },
-    refetchIntervalInBackground: true,
   });
 
 

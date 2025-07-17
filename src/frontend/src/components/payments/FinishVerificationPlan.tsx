@@ -13,7 +13,7 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { getPercentage } from '@utils/utils';
+import { getPercentage, showApiErrorMessages } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
@@ -53,7 +53,7 @@ export function FinishVerificationPlan({
       setFinishDialogOpen(false);
       showMessage(t('Verification plan has been finished'));
     } catch (error) {
-      showMessage(error?.message || t('Error while submitting'));
+      showApiErrorMessages(error, showMessage);
     }
   };
 

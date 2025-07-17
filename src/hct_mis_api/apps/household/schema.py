@@ -239,7 +239,7 @@ class Query(graphene.ObjectType):
         filter_q = Q()
         for program_id in programs_for_business_area:
             program_q = Q(program_id=program_id)
-            areas_null_and_program_q = program_q & Q(admin_area__isnull=True)
+            areas_null_and_program_q = program_q & Q(admin1__isnull=True)
             # apply admin area limits if partner has restrictions
             area_limits = user.partner.get_area_limits_for_program(program_id)
             areas_query = (
@@ -251,10 +251,6 @@ class Query(graphene.ObjectType):
             filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
 
         queryset = queryset.filter(filter_q)
-
-        if does_path_exist_in_query("edges.node.admin2", info):
-            queryset = queryset.select_related("admin_area")
-            queryset = queryset.select_related("admin_area__area_type")
 
         if does_path_exist_in_query("edges.node.headOfHousehold", info):
             queryset = queryset.select_related("head_of_household")

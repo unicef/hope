@@ -234,9 +234,7 @@ class IndividualDocumentSerializer(serializers.Serializer):
 
 
 class EditIndividualDocumentSerializer(serializers.Serializer):
-    id = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Document.objects.all()), required=False
-    )
+    id = serializers.PrimaryKeyRelatedField(queryset=Document.objects.all())
     country = serializers.CharField()
     key = serializers.CharField()
     number = serializers.CharField()
@@ -277,9 +275,9 @@ class EditBankTransferSerializer(serializers.Serializer):
 class HouseholdUpdateDataSerializer(serializers.Serializer):
     admin_area_title = serializers.CharField(required=False)
     status = serializers.CharField(required=False)
-    consent = serializers.BooleanField(required=False)
+    consent = serializers.BooleanField(required=False, allow_null=True)
     consent_sharing = serializers.ListField(child=serializers.CharField(), required=False)
-    residence_status = serializers.CharField(required=False)
+    residence_status = serializers.CharField(required=False, allow_blank=True)
     country_origin = serializers.CharField(required=False)
     country = serializers.CharField(required=False)
     size = serializers.IntegerField(required=False)
@@ -305,7 +303,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     male_age_group_12_17_disabled_count = serializers.IntegerField(required=False)
     male_age_group_18_59_disabled_count = serializers.IntegerField(required=False)
     male_age_group_60_disabled_count = serializers.IntegerField(required=False)
-    returnee = serializers.BooleanField(required=False)
+    returnee = serializers.BooleanField(required=False, allow_null=True)
     fchild_hoh = serializers.BooleanField(required=False)
     child_hoh = serializers.BooleanField(required=False)
     start = serializers.DateTimeField(required=False)
@@ -313,7 +311,7 @@ class HouseholdUpdateDataSerializer(serializers.Serializer):
     org_enumerator = serializers.CharField(required=False)
     org_name_enumerator = serializers.CharField(required=False)
     village = serializers.CharField(required=False)
-    registration_method = serializers.CharField(required=False)
+    registration_method = serializers.CharField(required=False, allow_blank=True)
     currency = serializers.CharField(required=False)
     unhcr_id = serializers.CharField(required=False)
     flex_fields = serializers.JSONField(required=False)
@@ -367,22 +365,22 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     sex = serializers.CharField(required=False)
     birth_date = serializers.DateField(required=False)
     estimated_birth_date = serializers.BooleanField(required=False)
-    marital_status = serializers.CharField(required=False)
+    marital_status = serializers.CharField(required=False, allow_null=True)
     phone_no = serializers.CharField(required=False)
     phone_no_alternative = serializers.CharField(required=False)
     email = serializers.CharField(required=False)
     relationship = serializers.CharField(required=False)
     disability = serializers.CharField(required=False)
-    work_status = serializers.CharField(required=False)
+    work_status = serializers.CharField(required=False, allow_blank=True)
     enrolled_in_nutrition_programme = serializers.BooleanField(required=False)
-    pregnant = serializers.BooleanField(required=False)
+    pregnant = serializers.BooleanField(required=False, allow_null=True)
     observed_disability = serializers.ListField(child=serializers.CharField(), required=False)
-    seeing_disability = serializers.CharField(required=False)
-    hearing_disability = serializers.CharField(required=False)
-    physical_disability = serializers.CharField(required=False)
-    memory_disability = serializers.CharField(required=False)
-    selfcare_disability = serializers.CharField(required=False)
-    comms_disability = serializers.CharField(required=False)
+    seeing_disability = serializers.CharField(required=False, allow_blank=True)
+    hearing_disability = serializers.CharField(required=False, allow_blank=True)
+    physical_disability = serializers.CharField(required=False, allow_blank=True)
+    memory_disability = serializers.CharField(required=False, allow_blank=True)
+    selfcare_disability = serializers.CharField(required=False, allow_blank=True)
+    comms_disability = serializers.CharField(required=False, allow_blank=True)
     who_answers_phone = serializers.CharField(required=False)
     who_answers_alt_phone = serializers.CharField(required=False)
     role = serializers.CharField(required=False)
@@ -409,8 +407,8 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     wallet_address = serializers.CharField(required=False)
     wallet_name = serializers.CharField(required=False)
     # people fields
-    consent = serializers.CharField(required=False, help_text="People update")
-    residence_status = serializers.CharField(required=False, help_text="People update")
+    consent = serializers.CharField(required=False, allow_null=True, help_text="People update")
+    residence_status = serializers.CharField(required=False, allow_blank=True, help_text="People update")
     country_origin = serializers.CharField(required=False, help_text="People update")
     country = serializers.CharField(required=False, help_text="People update")
     address = serializers.CharField(required=False, help_text="People update")
@@ -435,8 +433,8 @@ class NegativeFeedbackTicketExtras(serializers.Serializer):
 
 
 class GrievanceComplaintTicketExtras(serializers.Serializer):
-    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
-    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
+    household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all(), allow_null=True)
+    individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all(), allow_null=True)
     payment_record = serializers.ListField(child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()))
 
 
@@ -452,7 +450,9 @@ class ReferralTicketExtras(serializers.Serializer):
 class SensitiveGrievanceTicketExtras(serializers.Serializer):
     household = serializers.PrimaryKeyRelatedField(required=False, queryset=Household.objects.all())
     individual = serializers.PrimaryKeyRelatedField(required=False, queryset=Individual.objects.all())
-    payment_record = serializers.ListField(child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()))
+    payment_record = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Payment.objects.all()), required=False
+    )
 
 
 class AddIndividualIssueTypeExtras(serializers.Serializer):
@@ -535,7 +535,7 @@ class CreateGrievanceTicketSerializer(serializers.Serializer):
         required=False,
         allow_empty=True,
     )
-    extras = CreateGrievanceTicketExtrasSerializer()
+    extras = CreateGrievanceTicketExtrasSerializer(allow_null=True, required=False)
     priority = serializers.IntegerField(required=False)
     urgency = serializers.IntegerField(required=False)
     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all(), required=False, allow_null=True)
@@ -574,8 +574,7 @@ class UpdateGrievanceDocumentSerializer(serializers.Serializer):
 
 class UpdateGrievanceTicketSerializer(serializers.Serializer):
     version = serializers.IntegerField(required=False)
-    description = serializers.CharField()
-    assigned_to = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
+    assigned_to = serializers.PrimaryKeyRelatedField(allow_null=True, queryset=User.objects.all())
     admin = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Area.objects.all())
     area = serializers.CharField(required=False, allow_blank=True)
     language = serializers.CharField(allow_blank=True)
@@ -645,7 +644,9 @@ class GrievanceDeleteHouseholdApproveStatusSerializer(serializers.Serializer):
 
 
 class GrievanceNeedsAdjudicationApproveSerializer(serializers.Serializer):
-    selected_individual_id = serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all(), required=False)
+    selected_individual_id = serializers.PrimaryKeyRelatedField(
+        queryset=Individual.objects.all(), required=False, allow_null=True
+    )
     duplicate_individual_ids = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=Individual.objects.all()), required=False
     )

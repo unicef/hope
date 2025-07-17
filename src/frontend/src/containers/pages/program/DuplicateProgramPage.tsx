@@ -27,6 +27,7 @@ import {
   decodeIdString,
   isPartnerVisible,
   mapPartnerChoicesWithoutUnicef,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
@@ -94,6 +95,8 @@ const DuplicateProgramPage = (): ReactElement => {
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
     });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -190,7 +193,10 @@ const DuplicateProgramPage = (): ReactElement => {
         dataCollectingType: requestValues.dataCollectingTypeCode,
         beneficiaryGroup: requestValues.beneficiaryGroup,
         startDate: requestValues.startDate,
-        endDate: requestValues.endDate,
+        endDate:
+          requestValues.endDate === '' || requestValues.endDate === undefined
+            ? null
+            : requestValues.endDate,
         pduFields: pduFieldsToSend,
         partners: partnersToSet.map(({ partner, areas }) => ({
           partner,
@@ -203,9 +209,11 @@ const DuplicateProgramPage = (): ReactElement => {
       showMessage('Programme created.');
       navigate(`/${baseUrl}/list`);
     } catch (e: any) {
-      const errorMessage =
-        e?.message || 'An error occurred while copying the program';
-      showMessage(errorMessage);
+      showApiErrorMessages(
+        e,
+        showMessage,
+        t('Programme create action failed.'),
+      );
     }
   };
 
@@ -239,12 +247,12 @@ const DuplicateProgramPage = (): ReactElement => {
   const initialValues = {
     editMode: true,
     name: `Copy of Programme: (${name})`,
-    programmeCode: '',
+    programmeCode: null,
     startDate,
     endDate,
     sector,
     dataCollectingTypeCode: dataCollectingType?.code,
-    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
+    beneficiaryGroup: beneficiaryGroup?.id,
     description,
     budget,
     administrativeAreasOfImplementation: administrativeAreasOfImplementation,

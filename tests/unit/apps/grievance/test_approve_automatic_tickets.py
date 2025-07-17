@@ -1,15 +1,16 @@
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from django.core.files.base import ContentFile
 from django.core.management import call_command
+from django.urls import reverse
 from django.utils import timezone
 
-from parameterized import parameterized
+import pytest
+from rest_framework import status
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -24,132 +25,19 @@ from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFact
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
+pytestmark = pytest.mark.django_db()
 
-class TestGrievanceApproveAutomaticMutation(APITestCase):
-    APPROVE_SYSTEM_FLAGGING_MUTATION = """
-    mutation ApproveSystemFlagging($grievanceTicketId: ID!, $approveStatus: Boolean!) {
-      approveSystemFlagging(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
-        grievanceTicket {
-          description
-          systemFlaggingTicketDetails {
-            approveStatus
-          }
-        }
-      }
-    }
-    """
-    APPROVE_NEEDS_ADJUDICATION_MUTATION = """
-    mutation ApproveNeedsAdjudicationTicket(
-    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID], $clearIndividualIds: [ID]
-    ) {
-      approveNeedsAdjudication(
-      grievanceTicketId: $grievanceTicketId,
-      selectedIndividualId: $selectedIndividualId,
-      duplicateIndividualIds: $duplicateIndividualIds,
-      distinctIndividualIds: $distinctIndividualIds,
-      clearIndividualIds: $clearIndividualIds,
-      ) {
-        grievanceTicket {
-          description
-          needsAdjudicationTicketDetails {
-            selectedIndividual {
-              unicefId
-            }
-          }
-        }
-      }
-    }
-    """
-    APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION = """
-    mutation ApproveNeedsAdjudicationTicket(
-    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID]
-    ) {
-      approveNeedsAdjudication(
-      grievanceTicketId: $grievanceTicketId,
-      selectedIndividualId: $selectedIndividualId,
-      duplicateIndividualIds: $duplicateIndividualIds
-      ) {
-        grievanceTicket {
-          description
-          needsAdjudicationTicketDetails {
-            possibleDuplicates {
-              unicefId
-            }
-          }
-        }
-      }
-    }
-    """
-    APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION_WITH_ID = """
-        mutation ApproveNeedsAdjudicationTicket(
-        $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID]
-        ) {
-          approveNeedsAdjudication(
-          grievanceTicketId: $grievanceTicketId,
-          selectedIndividualId: $selectedIndividualId,
-          duplicateIndividualIds: $duplicateIndividualIds
-          ) {
-            grievanceTicket {
-              id
-              needsAdjudicationTicketDetails {
-                possibleDuplicates {
-                  id
-                }
-              }
-            }
-          }
-        }
-        """
-    APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS = """
-        mutation ApproveNeedsAdjudicationTicket(
-        $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID], $clearIndividualIds: [ID]
-        ) {
-          approveNeedsAdjudication(
-          grievanceTicketId: $grievanceTicketId,
-          selectedIndividualId: $selectedIndividualId,
-          duplicateIndividualIds: $duplicateIndividualIds,
-          distinctIndividualIds: $distinctIndividualIds,
-          clearIndividualIds: $clearIndividualIds,
-          ) {
-            grievanceTicket {
-              description
-              needsAdjudicationTicketDetails {
-                selectedIndividual {
-                  unicefId
-                }
-                selectedDistinct {
-                  unicefId
-                }
-                selectedDuplicates {
-                  unicefId
-                }
-                extraData{
-                    dedupEngineSimilarityPair {
-                      individual1 {
-                        fullName
-                      }
-                      individual2 {
-                        fullName
-                      }
-                      similarityScore
-                    }
-                }
-              }
-            }
-          }
-        }
-        """
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        create_afghanistan()
+class TestGrievanceApproveAutomaticTickets:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
         call_command("loadcountries")
-        cls.generate_document_types_for_all_countries()
-        cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.business_area.biometric_deduplication_threshold = 33.33
-        cls.business_area.save()
+        self.business_area = create_afghanistan()
+        self.business_area.biometric_deduplication_threshold = 33.33
+        self.business_area.save()
+        call_command("generatedocumenttypes")
+        self.user = UserFactory.create()
+        self.api_client = api_client(self.user)
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -157,24 +45,24 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             country=country,
             area_level=2,
         )
-        cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sdfghjuytre2")
-        cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="dfghgf3456")
+        self.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sdfghjuytre2")
+        self.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="dfghgf3456")
 
-        program_one = ProgramFactory(
+        self.program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
         partner = PartnerFactory()
         household_one = HouseholdFactory.build(
             registration_data_import__imported_by__partner=partner,
-            program=program_one,
+            program=self.program_one,
         )
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = household_one.program
         household_one.registration_data_import.save()
 
-        cls.individuals_to_create = [
+        self.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
@@ -195,22 +83,22 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             },
         ]
 
-        cls.individuals = [
-            IndividualFactory(household=household_one, program=program_one, **individual)
-            for individual in cls.individuals_to_create
+        self.individuals = [
+            IndividualFactory(household=household_one, program=self.program_one, **individual)
+            for individual in self.individuals_to_create
         ]
-        first_individual = cls.individuals[0]
-        second_individual = cls.individuals[1]
-        ind1, ind2 = sorted(cls.individuals, key=lambda x: x.id)
+        first_individual = self.individuals[0]
+        second_individual = self.individuals[1]
+        ind1, ind2 = sorted(self.individuals, key=lambda x: x.id)
 
         household_one.head_of_household = first_individual
         household_one.save()
-        cls.household_one = household_one
+        self.household_one = household_one
 
-        from test_utils.factories.sanction_list import SanctionListFactory
+        # from test_utils.factories.sanction_list import SanctionListFactory
 
         sanction_list_individual_data = {
-            "sanction_list": SanctionListFactory(),
+            # "sanction_list": SanctionListFactory(),
             "data_id": 112138,
             "version_num": 1,
             "first_name": "DAWOOD",
@@ -235,214 +123,227 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             "address_note": "White House, Near Saudi Mosque, Clifton",
             "country_of_birth": geo_models.Country.objects.get(iso_code2="IN"),
         }
-        cls.sanction_list_individual = SanctionListIndividual.objects.create(**sanction_list_individual_data)
+        self.sanction_list_individual = SanctionListIndividual.objects.create(**sanction_list_individual_data)
 
-        cls.system_flagging_grievance_ticket = GrievanceTicketFactory(
+        self.system_flagging_grievance_ticket = GrievanceTicketFactory(
             description="system_flagging_grievance_ticket",
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-            admin2=cls.admin_area_1,
-            business_area=cls.business_area,
+            admin2=self.admin_area_1,
+            business_area=self.business_area,
+            created_by=self.user,
         )
+        self.system_flagging_grievance_ticket.programs.set([self.program_one])
 
         TicketSystemFlaggingDetailsFactory(
-            ticket=cls.system_flagging_grievance_ticket,
+            ticket=self.system_flagging_grievance_ticket,
             golden_records_individual=first_individual,
-            sanction_list_individual=cls.sanction_list_individual,
+            sanction_list_individual=self.sanction_list_individual,
             approve_status=True,
         )
 
-        cls.needs_adjudication_grievance_ticket = GrievanceTicketFactory(
+        self.needs_adjudication_grievance_ticket = GrievanceTicketFactory(
             description="needs_adjudication_grievance_ticket",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            admin2=cls.admin_area_1,
-            business_area=cls.business_area,
+            admin2=self.admin_area_1,
+            business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
+            created_by=self.user,
         )
+        self.needs_adjudication_grievance_ticket.programs.set([self.program_one])
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
-            ticket=cls.needs_adjudication_grievance_ticket,
+            ticket=self.needs_adjudication_grievance_ticket,
             golden_records_individual=first_individual,
             possible_duplicate=second_individual,
             selected_individual=None,
         )
         ticket_details.possible_duplicates.add(first_individual, second_individual)
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
-            ),
-            ("without_permission", []),
-        ]
-    )
-    def test_approve_system_flagging(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_SYSTEM_FLAGGING_MUTATION,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(self.system_flagging_grievance_ticket.id, "GrievanceTicketNode"),
-                "approveStatus": False,
-            },
+    def test_approve_system_flagging(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR], self.business_area, self.program_one
         )
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-status-update",
+                kwargs={
+                    "business_area_slug": self.business_area.slug,
+                    "pk": str(self.system_flagging_grievance_ticket.id),
+                },
             ),
-            ("without_permission", []),
-        ]
-    )
-    def test_approve_needs_adjudication(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+            {"approve_status": False, "version": self.system_flagging_grievance_ticket.version},
+            format="json",
+        )
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+        assert resp_data["ticket_details"]["approve_status"] is False
 
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
-                ),
-                "selectedIndividualId": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
-            },
+    def test_approve_needs_adjudication(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area, self.program_one
         )
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+                kwargs={
+                    "business_area_slug": self.business_area.slug,
+                    "pk": str(self.needs_adjudication_grievance_ticket.id),
+                },
             ),
-            ("without_permission", []),
-        ]
-    )
+            {
+                "selected_individual_id": str(self.individuals[1].id),
+                "version": self.needs_adjudication_grievance_ticket.version,
+            },
+            format="json",
+        )
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+        assert resp_data["ticket_details"]["selected_individual"]["unicef_id"] == self.individuals[1].unicef_id
+
     def test_approve_needs_adjudication_should_allow_uncheck_selected_individual(
-        self, _: Any, permissions: List[Permissions]
+        self, create_user_role_with_permissions: Any
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area, self.program_one
+        )
 
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
-                ),
-                "selectedIndividualId": None,
+        response = self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+                kwargs={
+                    "business_area_slug": self.business_area.slug,
+                    "pk": str(self.needs_adjudication_grievance_ticket.id),
+                },
+            ),
+            {"selected_individual_id": None, "version": self.needs_adjudication_grievance_ticket.version},
+            format="json",
+        )
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_data
+        assert resp_data["ticket_details"]["selected_individual"] is None
+
+    def approve_multiple_needs_adjudication_ticket(self, grievance_ticket: GrievanceTicket) -> Any:
+        return self.api_client.post(
+            reverse(
+                "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+                kwargs={"business_area_slug": self.business_area.slug, "pk": str(grievance_ticket.id)},
+            ),
+            {
+                "duplicate_individual_ids": [
+                    str(self.individuals[0].id),
+                    str(self.individuals[1].id),
+                ],
+                "version": grievance_ticket.version,
             },
+            format="json",
         )
 
     def test_approve_needs_adjudication_allows_multiple_selected_individuals_without_permission(self) -> None:
-        self.create_user_role_with_permissions(self.user, [], self.business_area)
+        response = self.approve_multiple_needs_adjudication_ticket(self.needs_adjudication_grievance_ticket)
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert "You do not have permission to perform this action." == resp_data["detail"]
 
-        grievance_ticket_id = self.id_to_base64(self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode")
-        response = self.approve_multiple_needs_adjudication_ticket(grievance_ticket_id)
-
-        self.assertIn("Permission Denied", response["errors"][0]["message"])
-
-    def test_approve_needs_adjudication_allows_multiple_selected_individuals_with_permission(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area
+    def test_approve_needs_adjudication_allows_multiple_selected_individuals_with_permission(
+        self, create_user_role_with_permissions: Any
+    ) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area, self.program_one
         )
 
-        grievance_ticket_id = self.id_to_base64(self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode")
-        response = self.approve_multiple_needs_adjudication_ticket(grievance_ticket_id)
-
-        response_data = response["data"]["approveNeedsAdjudication"]["grievanceTicket"]
-        selected_individuals = response_data["needsAdjudicationTicketDetails"]["possibleDuplicates"]
+        response = self.approve_multiple_needs_adjudication_ticket(self.needs_adjudication_grievance_ticket)
+        resp_data = response.json()
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert len(resp_data["ticket_details"]["possible_duplicates"]) == 2
+        selected_individuals = resp_data["ticket_details"]["possible_duplicates"]
         selected_individuals_ids = list(map(lambda d: d["id"], selected_individuals))
+        assert str(self.individuals[0].id) in selected_individuals_ids
+        assert str(self.individuals[1].id) in selected_individuals_ids
 
-        self.assertEqual(grievance_ticket_id, response_data["id"])
-        self.assertIn(self.id_to_base64(self.individuals[0].id, "IndividualNode"), selected_individuals_ids)
-        self.assertIn(self.id_to_base64(self.individuals[1].id, "IndividualNode"), selected_individuals_ids)
-
-    def approve_multiple_needs_adjudication_ticket(self, grievance_ticket_id: str) -> Dict:
-        return self.graphql_request(
-            request_string=self.APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION_WITH_ID,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": grievance_ticket_id,
-                "duplicateIndividualIds": [
-                    self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-                    self.id_to_base64(self.individuals[1].id, "IndividualNode"),
-                ],
-            },
+    def test_approve_needs_adjudication_new_input_fields(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area, self.program_one
         )
 
-    def test_approve_needs_adjudication_new_input_fields(self) -> None:
-        self.create_user_role_with_permissions(
-            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area
+        url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-approve-needs-adjudication",
+            kwargs={
+                "business_area_slug": self.business_area.slug,
+                "pk": str(self.needs_adjudication_grievance_ticket.id),
+            },
         )
 
         self.needs_adjudication_grievance_ticket.refresh_from_db()
-        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 0)
-        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 0)
+        assert self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count() == 0
+        assert self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count() == 0
 
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
-                ),
-                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
-                "distinctIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+        resp_1 = self.api_client.post(
+            url,
+            {
+                "duplicate_individual_ids": [str(self.individuals[1].id)],
+                "distinct_individual_ids": [str(self.individuals[0].id)],
+                "version": self.needs_adjudication_grievance_ticket.version,
             },
+            format="json",
         )
+        assert resp_1.status_code == status.HTTP_400_BAD_REQUEST
+        assert "Only one option for duplicate or distinct or clear individuals is available" in resp_1.json()
 
         # wrong grievance ticket status
         self.needs_adjudication_grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
         self.needs_adjudication_grievance_ticket.save()
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
-                ),
-                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+        resp_2 = self.api_client.post(
+            url,
+            {
+                "duplicate_individual_ids": [str(self.individuals[1].id)],
+                "version": self.needs_adjudication_grievance_ticket.version,
             },
+            format="json",
         )
+        assert resp_2.status_code == status.HTTP_400_BAD_REQUEST
+        assert "A user can not flag individuals when a ticket is not in the 'For Approval' status" in resp_2.json()
+
         self.needs_adjudication_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
         self.needs_adjudication_grievance_ticket.save()
-
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
-                ),
-                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+        resp_3 = self.api_client.post(
+            url,
+            {
+                "duplicate_individual_ids": [str(self.individuals[1].id)],
+                "version": self.needs_adjudication_grievance_ticket.version,
             },
+            format="json",
         )
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
-                ),
-                "distinctIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+        assert resp_3.status_code == status.HTTP_202_ACCEPTED
+        resp_data = resp_3.json()
+        assert "id" in resp_data
+        assert resp_data["ticket_details"]["selected_duplicates"][0]["unicef_id"] == self.individuals[1].unicef_id
+
+        resp_4 = self.api_client.post(
+            url,
+            {
+                "distinct_individual_ids": [str(self.individuals[0].id)],
+                "version": self.needs_adjudication_grievance_ticket.version,
             },
+            format="json",
         )
+        assert resp_4.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_4.json()
+        assert self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count() == 1
+        assert self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count() == 1
 
-        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 1)
-        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 1)
-
-        self.snapshot_graphql_request(
-            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
-            context={"user": self.user},
-            variables={
-                "grievanceTicketId": self.id_to_base64(
-                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
-                ),
-                "clearIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+        resp_5 = self.api_client.post(
+            url,
+            {
+                "clear_individual_ids": [str(self.individuals[0].id)],
+                "version": self.needs_adjudication_grievance_ticket.version,
             },
+            format="json",
         )
-
-        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 0)
-        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 1)
+        assert resp_5.status_code == status.HTTP_202_ACCEPTED
+        assert "id" in resp_5.json()
+        assert self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count() == 0
+        assert self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count() == 1

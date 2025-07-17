@@ -23,7 +23,6 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import (
-    decode_id_string,
     encode_id_base64,
     encode_id_base64_required,
     serialize_flex_attributes,
@@ -181,7 +180,7 @@ def handle_edit_document(document_data: Dict) -> Document:
     if photo:
         photo = photoraw
 
-    document = get_object_or_404(Document.objects.select_for_update(), id=(decode_id_string(document_data.get("id"))))
+    document = get_object_or_404(Document.objects.select_for_update(), id=(document_data.get("id")))
     document_type = DocumentType.objects.get(key=document_key)
 
     if (
@@ -237,7 +236,7 @@ def handle_add_payment_channel(payment_channel: Dict, individual: Individual) ->
 
 def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccountInfo]:
     payment_channel_type = payment_channel.get("type")
-    payment_channel_id = decode_id_string(payment_channel.get("id"))
+    payment_channel_id = payment_channel.get("id")
 
     if payment_channel_type == "BANK_TRANSFER":
         bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
@@ -274,7 +273,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
     country_code = updated_identity.get("country")
 
     country = geo_models.Country.objects.get(iso_code3=country_code)
-    identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
+    identity = get_object_or_404(IndividualIdentity, id=identity_id)
     partner, _ = Partner.objects.get_or_create(name=partner_name)
 
     identity_already_exists = (
@@ -292,7 +291,7 @@ def handle_edit_identity(identity_data: Dict) -> IndividualIdentity:
 def prepare_previous_documents(documents_to_remove_with_approve_status: List[Dict]) -> Dict[str, Dict]:
     previous_documents: Dict[str, Any] = {}
     for document_data in documents_to_remove_with_approve_status:
-        document_id = decode_id_string(document_data.get("value"))
+        document_id = document_data.get("value")
         document: Document = get_object_or_404(Document, id=document_id)
         previous_documents[encode_id_base64_required(document.id, "Document")] = {
             "id": encode_id_base64(document.id, "Document"),
@@ -309,7 +308,7 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
     edited_documents = []
 
     for document_to_edit in documents_to_edit:
-        encoded_id = document_to_edit.get("id")
+        document = document_to_edit.get("id")
         document_key = document_to_edit.get("key")
         country = document_to_edit.get("country")
         document_number = document_to_edit.get("number")
@@ -318,14 +317,13 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
 
         document_photo = handle_photo(document_photo, document_photoraw)
 
-        document_id = decode_id_string(encoded_id)
-        document = get_object_or_404(Document, id=document_id)
+        document_id = str(document.id)
 
         edited_documents.append(
             {
                 "approve_status": False,
                 "value": {
-                    "id": encoded_id,
+                    "id": document_id,
                     "key": document_key,
                     "country": country,
                     "number": document_number,
@@ -333,7 +331,7 @@ def prepare_edit_documents(documents_to_edit: List[Document]) -> List[Dict]:
                     "photoraw": document_photo,
                 },
                 "previous_value": {
-                    "id": encoded_id,
+                    "id": document_id,
                     "key": document.type.key,
                     "country": document.country.iso_code3,
                     "number": document.document_number,
@@ -350,7 +348,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status: List[D
     previous_identities: Dict[str, Any] = {}
     for identity_data in identities_to_remove_with_approve_status:
         identity_id = identity_data.get("value")
-        identity = get_object_or_404(IndividualIdentity, id=decode_id_string(identity_id))
+        identity = get_object_or_404(IndividualIdentity, id=identity_id)
         encoded_identity = encode_id_base64_required(identity.id, "IndividualIdentity")
         previous_identities[encoded_identity] = {
             "id": encoded_identity,  # TODO: can be removed maybe
@@ -367,7 +365,7 @@ def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_st
     previous_payment_channels = {}
     for payment_channel_data in payment_channels_to_remove_with_approve_status:
         payment_channel_id: str = payment_channel_data.get("value", "")
-        bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(payment_channel_id))
+        bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
         previous_payment_channels[payment_channel_id] = {
             "id": payment_channel_id,
             "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
@@ -384,29 +382,28 @@ def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_st
 def prepare_edit_identities(identities: List[Dict]) -> List[Dict]:
     edited_identities = []
     for identity_data in identities:
-        encoded_id = identity_data.get("id")
+        identity = identity_data.get("id")
         number = identity_data.get("number")
         partner = identity_data.get("partner")
         country = identity_data.get("country")
 
-        identity_id = decode_id_string(encoded_id)
-        identity = get_object_or_404(IndividualIdentity, id=identity_id)
+        identity_id = str(identity.id)
 
         edited_identities.append(
             {
                 "approve_status": False,
                 "value": {
-                    "id": encoded_id,
+                    "id": identity_id,
                     "country": country,
                     "partner": partner,
-                    "individual": encode_id_base64(identity.individual.id, "Individual"),
+                    "individual": str(identity.individual.id),
                     "number": number,
                 },
                 "previous_value": {
-                    "id": encoded_id,
+                    "id": identity_id,
                     "country": identity.country.iso_code3,
                     "partner": identity.partner.name,
-                    "individual": encode_id_base64(identity.individual.id, "Individual"),
+                    "individual": str(identity.individual.id),
                     "number": identity.number,
                 },
             }
@@ -433,7 +430,7 @@ def handle_bank_transfer_payment_method(pc: Dict) -> Dict:
     bank_name = pc.get("bank_name")
     encoded_id = pc.get("id")
     payment_channel_type = pc.get("type")
-    bank_account_info = get_object_or_404(BankAccountInfo, id=decode_id_string(encoded_id))
+    bank_account_info = get_object_or_404(BankAccountInfo, id=encoded_id)
     return {
         "approve_status": False,
         "value": {
@@ -515,8 +512,8 @@ def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_re
 def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
     role_name = role_data.get("role")
 
-    individual_id = decode_id_string(role_data.get("individual"))
-    household_id = decode_id_string(role_data.get("household"))
+    individual_id = role_data.get("individual")
+    household_id = role_data.get("household")
 
     old_individual = get_object_or_404(Individual, id=individual_id)
     new_individual = get_object_or_404(Individual, id=individual_id)
@@ -527,7 +524,7 @@ def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual,
 
 def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
     role_name, old_individual, _, household = get_data_from_role_data(role_data)
-    new_individual_id = decode_id_string(role_data.get("new_individual"))
+    new_individual_id = role_data.get("new_individual")
     new_individual = get_object_or_404(Individual, id=new_individual_id)
 
     return role_name, old_individual, new_individual, household

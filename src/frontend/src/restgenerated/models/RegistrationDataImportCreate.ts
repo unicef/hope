@@ -10,5 +10,6 @@ export type RegistrationDataImportCreate = {
     importFromIds: string;
     name: string;
     screenBeneficiary: boolean;
+    excludeExternalCollectors?: boolean;
 };
 

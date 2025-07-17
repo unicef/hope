@@ -33,6 +33,7 @@ import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationD
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { PaymentPlanBackgroundActionStatusEnum } from '@restgenerated/models/PaymentPlanBackgroundActionStatusEnum';
+import { showApiErrorMessages } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -274,7 +275,7 @@ function Entitlement({
                         t('Formula is executing, please wait until completed'),
                       );
                     } catch (e) {
-                      showMessage(e.message);
+                      showApiErrorMessages(e, showMessage);
                     }
                   }}
                 >

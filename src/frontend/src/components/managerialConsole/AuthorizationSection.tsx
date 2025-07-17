@@ -20,6 +20,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
@@ -157,7 +158,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
             showMessage(t('Payment Plan(s) Authorized'));
             setSelectedAuthorized([]);
           } catch (e) {
-            showMessage(e.message);
+            showApiErrorMessages(e, showMessage);
           }
         }}
       />

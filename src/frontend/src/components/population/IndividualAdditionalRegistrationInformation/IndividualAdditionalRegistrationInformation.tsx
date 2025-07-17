@@ -31,6 +31,17 @@ export const IndividualAdditionalRegistrationInformation = ({
     'name',
     '*',
   );
+  if (!flexAttributesDict || Object.keys(flexAttributesDict).length === 0) {
+    return (
+      <Overview>
+        <Title>
+          <Typography variant="h6">
+            {t('No additional registration information available')}
+          </Typography>
+        </Title>
+      </Overview>
+    );
+  }
 
   const fields = Object.entries(individual?.flexFields || {})
     .filter(([key]) => {

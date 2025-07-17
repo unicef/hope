@@ -12,6 +12,7 @@ import { BiometricsResults } from './BiometricsResults';
 import { useMutation } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface NeedsAdjudicationActionsProps {
   ticket: GrievanceTicketDetail;
@@ -116,10 +117,8 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
                     await approve({
                       distinctIndividualIds: selectedIndividualIds,
                     });
-                  } catch (e: any) {
-                    showMessage(
-                      e?.body?.errors || e?.message || 'An error occurred',
-                    );
+                  } catch (error) {
+                    showApiErrorMessages(error, showMessage);
                   }
                   setIsEditMode(false);
                 })
@@ -142,10 +141,8 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
                     await approve({
                       duplicateIndividualIds: selectedIndividualIds,
                     });
-                  } catch (e: any) {
-                    showMessage(
-                      e?.body?.errors || e?.message || 'An error occurred',
-                    );
+                  } catch (error) {
+                    showApiErrorMessages(error, showMessage);
                   }
                   setIsEditMode(false);
                 })

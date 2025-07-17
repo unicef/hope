@@ -144,9 +144,6 @@ class HouseholdDataUpdateService(DataChangeService):
             household_data["country"]["value"] = geo_models.Country.objects.filter(
                 iso_code3=country.get("value")
             ).first()
-        if admin_area_title.get("value") is not None:
-            household_data["admin_area"] = admin_area_title.copy()
-            household_data["admin_area"]["value"] = Area.objects.filter(p_code=admin_area_title.get("value")).first()
         only_approved_data = {
             field: value_and_approve_status.get("value")
             for field, value_and_approve_status in household_data.items()
@@ -160,7 +157,10 @@ class HouseholdDataUpdateService(DataChangeService):
 
         Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
         updated_household = Household.objects.get(id=household.id)
-        updated_household.set_admin_areas()
+
+        if admin_area_title.get("value") is not None and is_approved(admin_area_title):
+            area = Area.objects.filter(p_code=admin_area_title.get("value")).first()
+            updated_household.set_admin_areas(area)
 
         new_household = Household.objects.select_for_update().get(id=household.id)
         recalculate_data(new_household)

@@ -17,7 +17,6 @@ from hct_mis_api.apps.account.models import AdminAreaLimitedTo
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.models import FlexibleAttribute as Core_FlexibleAttribute
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
@@ -126,11 +125,10 @@ class TestGrievanceUtils(TestCase):
         business_area = BusinessAreaFactory(name="Afghanistan")
         individual = IndividualFactory(household=None, business_area=business_area)
         bank_info = BankAccountInfoFactory(individual=individual)
-        id_str = encode_id_base64_required(str(bank_info.pk), "BankAccountInfo")
 
         payment_channel_dict = {
             "type": "BANK_TRANSFER",
-            "id": id_str,
+            "id": str(bank_info.pk),
             "bank_name": "BankName",
             "bank_account_number": "1234321",
         }

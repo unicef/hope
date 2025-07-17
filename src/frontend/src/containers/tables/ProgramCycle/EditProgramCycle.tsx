@@ -1,7 +1,7 @@
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { decodeIdString, today } from '@utils/utils';
+import { showApiErrorMessages, today } from '@utils/utils';
 import moment from 'moment';
 import {
   Button,
@@ -9,7 +9,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormHelperText,
   Grid2 as Grid,
   IconButton,
 } from '@mui/material';
@@ -24,22 +23,13 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { LoadingButton } from '@core/LoadingButton';
-import {
-  ProgramCycleUpdate,
-  ProgramCycleUpdateResponse,
-  updateProgramCycle,
-} from '@api/programCycleApi';
+import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
-
-interface MutationError extends DefaultError {
-  data: any;
-}
 
 interface EditProgramCycleProps {
   programCycle: ProgramCycleList;
@@ -56,22 +46,22 @@ const EditProgramCycle = ({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { mutateAsync, isPending, error } = useMutation<
-    ProgramCycleUpdateResponse,
-    MutationError,
-    ProgramCycleUpdate
+  const { mutateAsync, isPending } = useMutation<
+    any,
+    any,
+    { title: string; startDate: string; endDate?: string }
   >({
     mutationFn: async (body) => {
-      return updateProgramCycle(
-        businessArea,
-        program.id,
-        decodeIdString(programCycle.id),
-        body,
-      );
+      return RestService.restBusinessAreasProgramsCyclesPartialUpdate({
+        businessAreaSlug: businessArea,
+        id: programCycle.id,
+        programSlug: program.slug ?? program.id,
+        requestBody: body,
+      });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.id],
+        queryKey: ['programCycles', businessArea, program.slug],
       });
       setOpen(false);
     },
@@ -81,10 +71,14 @@ const EditProgramCycle = ({
 
   const handleUpdate = async (values: any): Promise<void> => {
     try {
-      await mutateAsync(values);
+      await mutateAsync({
+        title: values.title,
+        startDate: values.startDate,
+        endDate: values.endDate,
+      });
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
-      /* empty */
+      showApiErrorMessages(e, showMessage, t('Error updating Programme Cycle'));
     }
   };
 
@@ -177,9 +171,6 @@ const EditProgramCycle = ({
                       component={FormikTextField}
                       required
                     />
-                    {error?.data?.title && (
-                      <FormHelperText error>{error.data.title}</FormHelperText>
-                    )}
                   </Grid>
                   <Grid size={{ xs: 6 }} data-cy="start-date-cycle">
                     <Field
@@ -192,11 +183,6 @@ const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
-                    {error?.data?.startDate && (
-                      <FormHelperText error>
-                        {error.data.startDate}
-                      </FormHelperText>
-                    )}
                   </Grid>
                   <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
                     <Field
@@ -209,11 +195,6 @@ const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
-                    {error?.data?.endDate && (
-                      <FormHelperText error>
-                        {error.data.endDate}
-                      </FormHelperText>
-                    )}
                   </Grid>
                 </Grid>
               </DialogContent>

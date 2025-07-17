@@ -13,6 +13,7 @@ import { handleSelected } from '../utils/helpers';
 import { individualDataRow } from './individualDataRow';
 import { ReactElement } from 'react';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -28,6 +29,7 @@ export interface EntriesTableProps {
   entries;
   entriesFlexFields;
   setFieldValue;
+  individual: IndividualDetail;
 }
 
 export function EntriesTable({
@@ -39,6 +41,7 @@ export function EntriesTable({
   entries,
   entriesFlexFields,
   setFieldValue,
+  individual,
 }: EntriesTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedFlexFields } = values;
@@ -89,6 +92,7 @@ export function EntriesTable({
             countriesDict,
             isEdit,
             handleSelectBioData,
+            individual,
           ),
         )}
         {entriesFlexFields?.map((row, index) =>
@@ -101,6 +105,7 @@ export function EntriesTable({
             countriesDict,
             isEdit,
             handleFlexFields,
+            individual,
           ),
         )}
       </TableBody>

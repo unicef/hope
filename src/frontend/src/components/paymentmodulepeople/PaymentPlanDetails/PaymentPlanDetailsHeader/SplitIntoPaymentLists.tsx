@@ -19,6 +19,7 @@ import { RestService } from '@restgenerated/services/RestService';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -106,7 +107,7 @@ export const SplitIntoPaymentLists = ({
       setDialogOpen(false);
       showMessage(t('Split was successful!'));
     } catch (e) {
-      showMessage(e);
+      showApiErrorMessages(e, showMessage);
     }
   };
 

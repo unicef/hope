@@ -47,8 +47,9 @@ const PaymentVerificationFilters = ({
   };
 
   const { data: statusChoicesData } = useQuery<Array<Choice>>({
-    queryKey: ['choicesPaymentVerificationPlanStatusList'],
-    queryFn: () => RestService.restChoicesPaymentVerificationPlanStatusList(),
+    queryKey: ['choicesPaymentVerificationSummaryStatusList'],
+    queryFn: () =>
+      RestService.restChoicesPaymentVerificationSummaryStatusList(),
   });
   const { data: deliveryTypeChoicesData } = useQuery<Array<Choice>>({
     queryKey: ['choicesPaymentRecordDeliveryTypeList'],

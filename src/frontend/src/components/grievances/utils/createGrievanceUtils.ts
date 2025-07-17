@@ -227,6 +227,24 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
   };
 }
 
+export function customSnakeCase(str: string): string {
+  return (
+    str
+      // Insert _ between lowercase and uppercase
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      // Insert _ between letter and number
+      .replace(/([a-zA-Z])([0-9])/g, '$1_$2')
+      // Insert _ between number and letter
+      .replace(/([0-9])([a-zA-Z])/g, '$1_$2')
+      // Replace age group numbers like 05, 611, 1217, 1859, 60 with correct underscores
+      .replace(/_0(\d)(_|$)/g, '_0_$1$2') // 05 -> 0_5
+      .replace(/_6(\d{2})(_|$)/g, '_6_$1$2') // 611 -> 6_11
+      .replace(/_1(\d{2})(_|$)/g, '_1_$1$2') // 1217, 1859 -> 12_17, 18_59
+      .replace(/_6_0(_|$)/g, '_60$1') // 60 stays as 60 (optional, if you want _60 not _6_0)
+      .toLowerCase()
+  );
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareDeleteHouseholdVariables(requiredVariables, values) {
   return {
@@ -533,6 +551,7 @@ export function prepareRestVariables(
           prev[camelCase(current.fieldName)] = current.fieldValue;
           return prev;
         }, {});
+
       const flexFields = values.individualDataUpdateFields
         .filter((item) => item.fieldName && item.isFlexField)
         .reduce((prev, current) => {
@@ -673,3 +692,66 @@ export const categoriesAndColors = [
   { category: 'Sensitive Grievance', color: '#7FCB28' },
   { category: 'System Flagging', color: '#00867B' },
 ];
+
+/**
+ * Converts a nested object into FormData, recursively flattening keys using bracket notation and snake_case.
+ * - Files are appended directly.
+ * - Booleans are serialized as 'true'/'false'.
+ * - Arrays: Non-empty arrays are expanded with indexed keys; empty arrays are omitted (not sent).
+ * - Objects: Empty objects are always sent as '{}'.
+ * - All keys are snake_cased and use bracket notation for nesting.
+ *
+ * This utility is robust to OpenAPI codegen overwrites and backend requirements.
+ *
+ * Example:
+ *   { fooBar: [ { nestedKey: true } ], emptyArr: [], emptyObj: {} }
+ *   =>
+ *   foo_bar[0][nested_key]=true
+ *   empty_obj={}
+ *   (empty_arr is omitted)
+ */
+
+export function grievanceRequestToFormData(
+  obj: any,
+  form?: FormData,
+  parentKey?: string,
+): FormData {
+  const formData = form || new FormData();
+  for (const key in obj) {
+    if (obj[key] === undefined || obj[key] === null) continue;
+    const value = obj[key];
+    const snakeKey = customSnakeCase(key);
+    let formKey;
+    if (Array.isArray(obj)) {
+      // Array: use bracket notation for index
+      formKey = parentKey ? `${parentKey}[${key}]` : key;
+    } else {
+      // Object: use dot notation for nesting
+      formKey = parentKey ? `${parentKey}.${snakeKey}` : snakeKey;
+    }
+
+    if (value instanceof File) {
+      formData.append(formKey, value);
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) {
+        continue;
+      } else {
+        value.forEach((item, idx) => {
+          grievanceRequestToFormData(item, formData, `${formKey}[${idx}]`);
+        });
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      if (Object.keys(value).length === 0) {
+        // Do not send empty objects at all
+        continue;
+      } else {
+        grievanceRequestToFormData(value, formData, formKey);
+      }
+    } else if (typeof value === 'boolean') {
+      formData.append(formKey, value ? 'true' : 'false');
+    } else {
+      formData.append(formKey, value);
+    }
+  }
+  return formData;
+}

@@ -63,7 +63,6 @@ export function AdminAreaAutocompleteMultipleRestFilter({
     queryKey: ['areas', businessArea, queryVariables],
     queryFn: async () => {
       try {
-        console.log('Fetching areas with params:', queryVariables);
         const result = await RestService.restAreasList({
           ...queryVariables,
           limit: queryVariables.limit || 100,
@@ -103,7 +102,6 @@ export function AdminAreaAutocompleteMultipleRestFilter({
               : { name: id, value: id };
           });
 
-          console.log('Formatted value:', formattedValue);
           setNewValue(formattedValue);
         } else {
           const placeholders = value.map((id) => {
@@ -195,7 +193,6 @@ export function AdminAreaAutocompleteMultipleRestFilter({
         </li>
       )}
       renderInput={(params) => {
-        console.log('Autocomplete params:', params);
         return (
           <StyledTextField
             {...params}

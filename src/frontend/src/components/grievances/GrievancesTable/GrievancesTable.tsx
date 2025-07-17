@@ -175,7 +175,10 @@ export const GrievancesTable = ({
     queryFn: () =>
       RestService.restBusinessAreasGrievanceTicketsList(
         createApiParams(
-          { businessAreaSlug: businessArea, program: programId },
+          {
+            businessAreaSlug: businessArea,
+            program: programId === 'all' ? undefined : programId,
+          },
           queryVariables,
           {
             withPagination: true,
@@ -419,7 +422,6 @@ export const GrievancesTable = ({
             gap={4}
             component="div"
           >
-            {' '}
             <BulkAssignModal
               selectedTickets={selectedTickets}
               setSelected={setSelectedTickets}

@@ -65,7 +65,13 @@ export function DeletePaymentPlan({
       showMessage(t('Payment Plan Deleted'));
       navigate(`/${baseUrl}/payment-module/payment-plans`);
     } catch (e) {
-      showMessage(e);
+      // Ignore empty response error
+      if (e.message && e.message.includes('Unexpected end of JSON input')) {
+        showMessage(t('Payment Plan Deleted'));
+        navigate(`/${baseUrl}/payment-module/payment-plans`);
+      } else {
+        showMessage(e.message);
+      }
     }
   };
 

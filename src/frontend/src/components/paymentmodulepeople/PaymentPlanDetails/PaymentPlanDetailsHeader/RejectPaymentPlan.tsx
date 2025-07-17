@@ -18,7 +18,7 @@ import {
 import { AcceptanceProcess } from '@restgenerated/models/AcceptanceProcess';
 import { RestService } from '@restgenerated/services/RestService';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Field, Form, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +37,7 @@ export function RejectPaymentPlan({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: reject, isPending: loadingReject } = useMutation({
     mutationFn: ({
@@ -59,6 +60,9 @@ export function RejectPaymentPlan({
     onSuccess: () => {
       showMessage(t('Payment Plan has been rejected.'));
       setRejectDialogOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlanId, programId],
+      });
     },
   });
 

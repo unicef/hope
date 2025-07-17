@@ -43,11 +43,11 @@ export const ProgramCyclesTableProgramDetails = ({
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
   const { data, error, isLoading } = useQuery<PaginatedProgramCycleListList>({
-    queryKey: ['programCycles', businessArea, program.id, queryVariables],
+    queryKey: ['programCycles', businessArea, program.slug, queryVariables],
     queryFn: () => {
       return RestService.restBusinessAreasProgramsCyclesList({
         businessAreaSlug: businessArea,
-        programSlug: program.id,
+        programSlug: program.slug,
         limit: queryVariables.limit,
         offset: queryVariables.offset,
         ordering: queryVariables.ordering,

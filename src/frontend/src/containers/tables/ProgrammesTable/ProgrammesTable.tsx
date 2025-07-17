@@ -43,7 +43,6 @@ function ProgrammesTable({
       budgetMax: filter.budgetMax,
       budgetMin: filter.budgetMin,
       dataCollectingType: filter.dataCollectingType,
-      ordering: 'startDate',
     }),
     [
       businessArea,
@@ -103,7 +102,6 @@ function ProgrammesTable({
           headCells={headCells}
           queryVariables={queryVariables}
           setQueryVariables={setQueryVariables}
-          defaultOrderBy="startDate"
           data={dataPrograms}
           isLoading={isLoadingPrograms}
           error={errorPrograms}

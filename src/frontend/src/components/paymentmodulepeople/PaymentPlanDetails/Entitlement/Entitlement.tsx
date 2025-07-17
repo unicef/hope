@@ -32,6 +32,7 @@ import { useProgramContext } from '../../../../programContext';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { ApplyEngineFormula } from '@restgenerated/models/ApplyEngineFormula';
+import { showApiErrorMessages } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -273,7 +274,7 @@ export function Entitlement({
                         t('Formula is executing, please wait until completed'),
                       );
                     } catch (e) {
-                      showMessage(e.message);
+                      showApiErrorMessages(e, showMessage);
                     }
                   }}
                 >

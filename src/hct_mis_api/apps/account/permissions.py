@@ -383,6 +383,24 @@ def check_creator_or_owner_permission(
         raise PermissionDenied("Permission Denied")
 
 
+def has_creator_or_owner_permission(
+    user: Union["User", "AnonymousUser", "AbstractBaseUser"],
+    general_permission: Permissions,
+    is_creator: bool,
+    creator_permission: Permissions,
+    is_owner: bool,
+    owner_permission: Permissions,
+    business_area: "BusinessArea",
+    program: Optional["Program"],
+) -> bool:
+    scope = program or business_area
+    return user.is_authenticated and (
+        user.has_perm(general_permission.value, scope)
+        or (is_creator and user.has_perm(creator_permission.value, scope))
+        or (is_owner and user.has_perm(owner_permission.value, scope))
+    )
+
+
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
     class XDPerm(BasePermission):
         @classmethod

@@ -46,6 +46,8 @@ function ProgramsPage(): ReactElement {
       RestService.restBusinessAreasProgramsChoicesRetrieve({
         businessAreaSlug: businessArea,
       }),
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
   });
   const { t } = useTranslation();
 

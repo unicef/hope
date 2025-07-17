@@ -8,7 +8,7 @@ import { useProgramContext } from '../../../../../programContext';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -25,6 +25,7 @@ export function LockedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: unlock, isPending: loadingUnlock } = useMutation({
     mutationFn: () =>
@@ -33,8 +34,12 @@ export function LockedPaymentPlanHeaderButtons({
         programSlug: programId,
         id: paymentPlan.id,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       showMessage(t('Payment Plan has been unlocked.'));
+      await queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        exact: false,
+      });
     },
     onError: (error) => {
       showMessage(
