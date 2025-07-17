@@ -530,7 +530,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                         combined_fields = self.COMBINED_FIELDS
                         current_field = combined_fields.get(header, {})
-
                         if not current_field and header not in complex_fields[sheet_title]:
                             continue
                         is_not_image = current_field.get("type") != "IMAGE"
@@ -614,6 +613,21 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     combined_fields[header]["name"],
                                     value,
                                 )
+                        elif (
+                            hasattr(
+                                obj_to_create,
+                                combined_fields[header]["lookup"],
+                            )
+                            and header != "household_id"
+                        ):
+                            value = self._cast_value(cell_value, header)
+                            if value in (None, ""):
+                                continue
+                            setattr(
+                                obj_to_create,
+                                combined_fields[header]["lookup"],
+                                value,
+                            )
                         elif header in self.FLEX_FIELDS[sheet_title]:
                             value = self._cast_value(cell_value, header)
                             type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
