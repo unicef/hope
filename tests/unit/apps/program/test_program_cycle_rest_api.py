@@ -430,6 +430,8 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         cycle_2 = ProgramCycleFactory(
             program=self.program, title="Cycle 2222", start_date="2023-12-20", end_date="2023-12-25"
         )
+        cycle_2.save()
+        cycle_2.refresh_from_db()
         data = {"start_date": parse_date("2023-12-20"), "end_date": parse_date("2023-12-19")}
         serializer = ProgramCycleUpdateSerializer(instance=cycle_2, data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
@@ -443,7 +445,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         self.assertIn(
             "Programme Cycles' timeframes must not overlap with the provided start date.", str(error.exception)
         )
-        # before program start date
+        # before program start date (program with end_date)
         serializer = ProgramCycleUpdateSerializer(
             instance=cycle_2, data={"start_date": parse_date("1999-12-10")}, context=self.get_serializer_context()
         )
@@ -464,12 +466,23 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         # before program start date
         self.program.end_date = None
         self.program.save()
+        cycle_2.refresh_from_db()
         serializer = ProgramCycleUpdateSerializer(
             instance=cycle_2, data={"start_date": parse_date("2022-01-01")}, context=self.get_serializer_context()
         )
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn("Programme Cycle start date must be after the programme start date.", str(error.exception))
+        # start date after existing end date
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"start_date": parse_date("2023-12-26")}, context=self.get_serializer_context()
+        )
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Programme Cycle start date must be before the end date.",
+            str(error.exception),
+        )
         # no error
         serializer = ProgramCycleUpdateSerializer(
             instance=cycle_2, data={"start_date": parse_date("2023-12-24")}, context=self.get_serializer_context()
@@ -479,14 +492,6 @@ class ProgramCycleUpdateSerializerTest(TestCase):
     def test_validate_end_date(self) -> None:
         self.cycle.end_date = datetime.strptime("2023-02-03", "%Y-%m-%d").date()
         self.cycle.save()
-        data = {"start_date": parse_date("2023-02-02"), "end_date": None}
-        serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
-        with self.assertRaises(ValidationError) as error:
-            serializer.is_valid(raise_exception=True)
-        self.assertIn(
-            "This field may not be null.",
-            str(error.exception),
-        )
         # end date before program start date
         serializer = ProgramCycleUpdateSerializer(
             instance=self.cycle, data={"end_date": parse_date("1999-10-10")}, context=self.get_serializer_context()
@@ -507,6 +512,34 @@ class ProgramCycleUpdateSerializerTest(TestCase):
             "Programme Cycle end date must be within the programme's start and end dates.",
             str(error.exception),
         )
+        # clearing end date
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"end_date": None}, context=self.get_serializer_context()
+        )
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Cannot clear the Programme Cycle end date if it was previously set.",
+            str(error.exception),
+        )
+        # end date before existing start date
+        self.program.end_date = None
+        self.program.save()
+        self.cycle.start_date = datetime.strptime("2023-02-02", "%Y-%m-%d").date()
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"end_date": parse_date("2023-02-01")}, context=self.get_serializer_context()
+        )
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn(
+            "Programme Cycle end date must be after the start date.",
+            str(error.exception),
+        )
+        # no errors
+        serializer = ProgramCycleUpdateSerializer(
+            instance=self.cycle, data={"end_date": parse_date("2023-12-24")}, context=self.get_serializer_context()
+        )
+        self.assertTrue(serializer.is_valid())
 
 
 class ProgramCycleViewSetTestCase(TestCase):

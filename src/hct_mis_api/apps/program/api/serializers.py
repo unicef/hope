@@ -223,8 +223,8 @@ class ProgramCycleCreateSerializer(serializers.ModelSerializer):
 
 class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=False)
-    start_date = serializers.DateField(required=False)
-    end_date = serializers.DateField(required=False)
+    start_date = serializers.DateField(required=False, allow_null=True)
+    end_date = serializers.DateField(required=False, allow_null=True)
 
     class Meta:
         model = ProgramCycle
@@ -262,7 +262,6 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"end_date": "Cannot clear the Programme Cycle end date if it was previously set."}
             )
-
         if start_date:
             if program_end_date:
                 if not (program_start_date <= start_date <= program_end_date):
@@ -273,6 +272,10 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"start_date": "Programme Cycle start date must be after the programme start date."}
                 )
+            elif self.instance.end_date and start_date > self.instance.end_date:
+                raise serializers.ValidationError(
+                    {"start_date": "Programme Cycle start date must be before the end date."}
+                )
 
         if end_date:
             if program_end_date:
@@ -280,9 +283,12 @@ class ProgramCycleUpdateSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {"end_date": "Programme Cycle end date must be within the programme's start and end dates."}
                     )
-
             if start_date and end_date < start_date:
                 raise serializers.ValidationError({"end_date": "End date cannot be earlier than the start date."})
+            elif end_date < self.instance.start_date:
+                raise serializers.ValidationError(
+                    {"start_date": "Programme Cycle end date must be after the start date."}
+                )
 
         validate_cycle_timeframes_overlapping(program, start_date, end_date, str(self.instance.pk))
         return data
