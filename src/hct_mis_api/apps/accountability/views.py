@@ -5,12 +5,11 @@ from django.shortcuts import get_object_or_404, redirect
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import SampleFileExpiredException, Survey
-from hct_mis_api.apps.core.utils import decode_id_string
 
 
 @login_required
 def download_cash_plan_payment_verification(request: HttpRequest, survey_id: str) -> HttpResponse:
-    survey = get_object_or_404(Survey, id=decode_id_string(survey_id))
+    survey = get_object_or_404(Survey, id=survey_id)
 
     if not request.user.has_perm(Permissions.ACCOUNTABILITY_SURVEY_VIEW_DETAILS.name, survey.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")

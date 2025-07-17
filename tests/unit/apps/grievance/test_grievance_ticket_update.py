@@ -1029,9 +1029,8 @@ class TestGrievanceTicketApprove:
             "approved_identities_to_create": [],
             "approved_identities_to_edit": [],
             "approved_identities_to_remove": [],
-            "approved_payment_channels_to_create": [],
-            "approved_payment_channels_to_edit": [],
-            "approved_payment_channels_to_remove": [],
+            "approved_accounts_to_create": [],
+            "approved_accounts_to_edit": [],
             "flex_fields_approve_data": {"flex_aaa": False},
         }
         response = self.api_client.post(
