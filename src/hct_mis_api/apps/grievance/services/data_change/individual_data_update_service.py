@@ -12,7 +12,7 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.utils import to_snake_case
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.celery_tasks import (
-    deduplicate_and_check_against_sanctions_list_task_single_individual,
+    deduplicate_and_check_against_sanctions_list_task,
 )
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -381,7 +381,7 @@ class IndividualDataUpdateService(DataChangeService):
 
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(
-                lambda: deduplicate_and_check_against_sanctions_list_task_single_individual.delay(
+                lambda: deduplicate_and_check_against_sanctions_list_task.delay(
                     should_populate_index=True,
                     individuals_ids=[str(new_individual.id)],
                 )

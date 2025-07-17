@@ -136,6 +136,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         default=5,
         help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted",
     )
+    screen_beneficiary = models.BooleanField(default=False, help_text="Enable screen beneficiary against sanction list")
     deduplication_ignore_withdraw = models.BooleanField(default=False)
     biometric_deduplication_threshold = models.FloatField(
         default=0.0,
@@ -178,6 +179,9 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
             for business_area in cls.objects.all()
         ]
+
+    def should_check_against_sanction_list(self) -> bool:
+        return self.screen_beneficiary
 
     def get_sys_option(self, key: str, default: None = None) -> Any:
         if "hope" in self.custom_fields:

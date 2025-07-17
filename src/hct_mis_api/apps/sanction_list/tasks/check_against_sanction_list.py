@@ -27,8 +27,6 @@ class CheckAgainstSanctionListTask:
     def execute(self, uploaded_file_id: "UUID", original_file_name: str) -> None:
         today = timezone.now()
         uploaded_file = UploadedXLSXFile.objects.get(id=uploaded_file_id)
-        selected_list_ids = uploaded_file.selected_lists.values_list("id", flat=True)
-
         wb = load_workbook(uploaded_file.file, data_only=True)
         sheet = wb.worksheets[0]
         headers = {cell.value: cell.column for cell in sheet[1] if cell.value}
@@ -85,11 +83,7 @@ class CheckAgainstSanctionListTask:
                     Q(full_name__icontains=names[0]) & Q(full_name__icontains=names[1])
                 )
 
-            qs = (
-                SanctionListIndividual.objects.filter(sanction_list__id__in=selected_list_ids)
-                .filter(name_query & dob_query)
-                .first()
-            )
+            qs = SanctionListIndividual.objects.filter(name_query & dob_query).first()
 
             if qs:
                 results_dict[row_number] = qs

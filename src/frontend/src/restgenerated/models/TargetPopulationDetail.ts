@@ -276,6 +276,5 @@ export type TargetPopulationDetail = {
      */
     version?: number;
     readonly adminUrl: string;
-    readonly screenBeneficiary: boolean;
 };
 

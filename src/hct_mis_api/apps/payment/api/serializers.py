@@ -311,7 +311,6 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
     status = serializers.SerializerMethodField()
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program_cycle.program.name")
-    screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
     program_id = serializers.UUIDField(source="program_cycle.program.id", read_only=True)
     program_cycle_id = serializers.UUIDField(source="program_cycle.id", read_only=True)
     last_approval_process_by = serializers.SerializerMethodField()
@@ -339,7 +338,6 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "last_approval_process_date",
             "last_approval_process_by",
             "admin_url",
-            "screen_beneficiary",
         )
 
     @staticmethod
@@ -904,7 +902,6 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
     failed_wallet_validation_collectors_ids = serializers.SerializerMethodField()
-    screen_beneficiary = serializers.BooleanField(source="program_cycle.program.screen_beneficiary", read_only=True)
 
     class Meta(PaymentPlanListSerializer.Meta):
         fields = PaymentPlanListSerializer.Meta.fields + (  # type: ignore
@@ -927,7 +924,6 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "failed_wallet_validation_collectors_ids",
             "version",
             "admin_url",
-            "screen_beneficiary",
         )
 
     @staticmethod

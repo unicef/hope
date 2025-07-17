@@ -11,10 +11,10 @@ export type { AccountabilityRandomSamplingArguments as AccountabilityRandomSampl
 export { ActionEnum as ActionEnumCamelCase } from './models/ActionEnum';
 export type { AddIndividualData as AddIndividualDataCamelCase } from './models/AddIndividualData';
 export type { AddIndividualIssueTypeExtras as AddIndividualIssueTypeExtrasCamelCase } from './models/AddIndividualIssueTypeExtras';
-export type { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
-export type { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
-export type { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
-export type { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
+export { Admin1Enum as Admin1EnumCamelCase } from './models/Admin1Enum';
+export { Admin2Enum as Admin2EnumCamelCase } from './models/Admin2Enum';
+export { Admin3Enum as Admin3EnumCamelCase } from './models/Admin3Enum';
+export { Admin4Enum as Admin4EnumCamelCase } from './models/Admin4Enum';
 export type { Age as AgeCamelCase } from './models/Age';
 export type { ApplyEngineFormula as ApplyEngineFormulaCamelCase } from './models/ApplyEngineFormula';
 export type { ApprovalProcess as ApprovalProcessCamelCase } from './models/ApprovalProcess';
@@ -48,6 +48,7 @@ export { ConsentSharingEnum as ConsentSharingEnumCamelCase } from './models/Cons
 export type { ContentType as ContentTypeCamelCase } from './models/ContentType';
 export type { CoreFieldChoice as CoreFieldChoiceCamelCase } from './models/CoreFieldChoice';
 export type { CountResponse as CountResponseCamelCase } from './models/CountResponse';
+export { CountriesEnum as CountriesEnumCamelCase } from './models/CountriesEnum';
 export type { Country as CountryCamelCase } from './models/Country';
 export { CountryEnum as CountryEnumCamelCase } from './models/CountryEnum';
 export { CountryOriginEnum as CountryOriginEnumCamelCase } from './models/CountryOriginEnum';
@@ -219,6 +220,7 @@ export type { PaymentPlanImportFile as PaymentPlanImportFileCamelCase } from './
 export type { PaymentPlanList as PaymentPlanListCamelCase } from './models/PaymentPlanList';
 export { PaymentPlanStatusEnum as PaymentPlanStatusEnumCamelCase } from './models/PaymentPlanStatusEnum';
 export type { PaymentPlanSupportingDocument as PaymentPlanSupportingDocumentCamelCase } from './models/PaymentPlanSupportingDocument';
+export { PaymentRecordDeliveryTypeEnum as PaymentRecordDeliveryTypeEnumCamelCase } from './models/PaymentRecordDeliveryTypeEnum';
 export type { PaymentVerificationPlan as PaymentVerificationPlanCamelCase } from './models/PaymentVerificationPlan';
 export type { PaymentVerificationPlanActivate as PaymentVerificationPlanActivateCamelCase } from './models/PaymentVerificationPlanActivate';
 export type { PaymentVerificationPlanCreate as PaymentVerificationPlanCreateCamelCase } from './models/PaymentVerificationPlanCreate';
@@ -229,7 +231,7 @@ export { PaymentVerificationPlanSamplingEnum as PaymentVerificationPlanSamplingE
 export { PaymentVerificationPlanStatusEnum as PaymentVerificationPlanStatusEnumCamelCase } from './models/PaymentVerificationPlanStatusEnum';
 export type { PaymentVerificationSummary as PaymentVerificationSummaryCamelCase } from './models/PaymentVerificationSummary';
 export { PaymentVerificationSummaryStatusEnum as PaymentVerificationSummaryStatusEnumCamelCase } from './models/PaymentVerificationSummaryStatusEnum';
-export type { PDUDataCreate as PDUDataCreateCamelCase } from './models/PDUDataCreate';
+export type { PDUData as PDUDataCamelCase } from './models/PDUData';
 export type { PDUFieldsCreate as PDUFieldsCreateCamelCase } from './models/PDUFieldsCreate';
 export type { PDUFieldsUpdate as PDUFieldsUpdateCamelCase } from './models/PDUFieldsUpdate';
 export type { PeriodicDataUpdateTemplateCreate as PeriodicDataUpdateTemplateCreateCamelCase } from './models/PeriodicDataUpdateTemplateCreate';

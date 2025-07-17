@@ -10,10 +10,12 @@ omit =
         */apps.py
         */admin/*.py
         */admin.py
-        */**/fixtures.py
-        */**/migrations/*.py
+        **/fixtures.py
         hct_mis_api/one_time_scripts/*
         hct_mis_api/libs/*
+        hct_mis_api/settings/*
+        hct_mis_api/settings.py
+        hct_mis_api/conftest.py
         hct_mis_api/config/settings.py
         hct_mis_api/apps/core/management/commands/*
         hct_mis_api/apps/payment/models/cash_assist.py
@@ -32,12 +34,11 @@ exclude_lines =
     raise NotImplementedError
     except ImportError
     # Don't complain if non-runnable code isn't run:
-    if 0:
+    #if 0:
     if __name__ == .__main__.:
     if TYPE_CHECKING
     ^\s*(import\s.+|from\s+.+import\s+.+) # skip imports
     logger.exception(e)
-    raise NotImplementedError()
 
 fail_under = 15
 

@@ -2,12 +2,7 @@ from typing import Any, Dict, Tuple
 
 from django.db import models
 
-from strategy_field.fields import StrategyField
-
-from hct_mis_api.apps.utils.models import TimeStampedModel, TimeStampedUUIDModel
-
-from .strategies import registry
-from .strategies._base import BaseSanctionList
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):
@@ -38,24 +33,6 @@ class ActiveIndividualsManager(models.Manager):
         return self.get_queryset().hard_delete()
 
 
-class SanctionList(TimeStampedModel):
-    strategy: "BaseSanctionList"
-    name = models.CharField(max_length=255)
-    config = models.JSONField(default=dict, blank=True)
-    strategy = StrategyField(registry=registry, unique=True)
-
-    # enabled = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self) -> str:
-        return self.name
-
-    def refresh(self) -> None:
-        self.strategy.refresh()
-
-
 class SanctionListIndividual(TimeStampedUUIDModel):
     first_name = models.CharField(max_length=85)
     second_name = models.CharField(max_length=85, blank=True, default="")
@@ -65,8 +42,8 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     name_original_script = models.CharField(max_length=255, blank=True, default="")
     list_type = models.CharField(max_length=50)
     un_list_type = models.CharField(max_length=100, blank=True, default="")
-    reference_number = models.CharField(max_length=50)
-    listed_on = models.DateTimeField(null=True, blank=True)
+    reference_number = models.CharField(max_length=50, unique=True)
+    listed_on = models.DateTimeField()
     comments = models.TextField(blank=True, default="")
     designation = models.TextField(blank=True, default="")
     street = models.CharField(max_length=255, blank=True, default="")
@@ -78,18 +55,11 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     country_of_birth = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
 
-    sanction_list = models.ForeignKey(SanctionList, on_delete=models.CASCADE, related_name="entries")
     objects = ActiveIndividualsManager()
     all_objects = ActiveIndividualsManager(active_only=False)
 
     class Meta:
         ordering = ["-listed_on"]
-        verbose_name = "Individual"
-        verbose_name_plural = "Individuals"
-        unique_together = ("sanction_list", "reference_number")
-
-    def __str__(self) -> str:
-        return self.full_name
 
 
 class SanctionListIndividualDocument(TimeStampedUUIDModel):
@@ -104,10 +74,6 @@ class SanctionListIndividualDocument(TimeStampedUUIDModel):
     issuing_country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     note = models.CharField(max_length=255, blank=True, default="")
 
-    class Meta:
-        verbose_name = "Document"
-        verbose_name_plural = "Documents"
-
 
 class SanctionListIndividualNationalities(TimeStampedUUIDModel):
     nationality = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
@@ -116,11 +82,6 @@ class SanctionListIndividualNationalities(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="nationalities",
     )
-
-    class Meta:
-        verbose_name = "Nationality"
-        verbose_name_plural = "Nationalities"
-        unique_together = ("individual", "nationality")
 
 
 class SanctionListIndividualCountries(TimeStampedUUIDModel):
@@ -131,10 +92,6 @@ class SanctionListIndividualCountries(TimeStampedUUIDModel):
         related_name="countries",
     )
 
-    class Meta:
-        verbose_name = "Country"
-        verbose_name_plural = "Countries"
-
 
 class SanctionListIndividualAliasName(TimeStampedUUIDModel):
     name = models.CharField(max_length=255)
@@ -143,11 +100,6 @@ class SanctionListIndividualAliasName(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="alias_names",
     )
-
-    class Meta:
-        unique_together = ("individual", "name")
-        verbose_name = "Alias"
-        verbose_name_plural = "Aliases"
 
 
 class SanctionListIndividualDateOfBirth(TimeStampedUUIDModel):
@@ -158,12 +110,7 @@ class SanctionListIndividualDateOfBirth(TimeStampedUUIDModel):
         related_name="dates_of_birth",
     )
 
-    class Meta:
-        verbose_name = "Birthday"
-        unique_together = ("individual", "date")
-
 
 class UploadedXLSXFile(TimeStampedUUIDModel):
-    selected_lists = models.ManyToManyField(SanctionList)
     file = models.FileField()
     associated_email = models.EmailField()

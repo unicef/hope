@@ -37,40 +37,10 @@
                 <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
                 <DATE>1955-03-13</DATE>
             </INDIVIDUAL_DATE_OF_BIRTH>
-            <INDIVIDUAL_DATE_OF_BIRTH>
-                <TYPE_OF_DATE>APPROXIMATELY</TYPE_OF_DATE>
-                <YEAR>1955</YEAR>
-                <NOTES>Year of birth is approximate</NOTES>
-            </INDIVIDUAL_DATE_OF_BIRTH>
-            <INDIVIDUAL_DATE_OF_BIRTH>
-                <TYPE_OF_DATE>APPROXIMATELY</TYPE_OF_DATE>
-                <YEAR>1955</YEAR>
-                <NOTES>Year of birth is approximate</NOTES>
-            </INDIVIDUAL_DATE_OF_BIRTH>
-            <INDIVIDUAL_DATE_OF_BIRTH>
-                <TYPE_OF_DATE>BETWEEN</TYPE_OF_DATE>
-                <FROM_YEAR>1955</FROM_YEAR>
-                <TO_YEAR>1956</TO_YEAR>
-                <NOTES>Year of birth is approximate</NOTES>
-            </INDIVIDUAL_DATE_OF_BIRTH>
-
-            <INDIVIDUAL_DATE_OF_BIRTH>
-                <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
-                <DATE>1955-03-13</DATE>
-                <YEAR>1955</YEAR>
-                <NOTES>Year of birth is approximate</NOTES>
-            </INDIVIDUAL_DATE_OF_BIRTH>
             <INDIVIDUAL_PLACE_OF_BIRTH/>
             <INDIVIDUAL_DOCUMENT>
                 <TYPE_OF_DOCUMENT>Passport</TYPE_OF_DOCUMENT>
                 <NUMBER>111222333</NUMBER>
-            </INDIVIDUAL_DOCUMENT>
-
-            <INDIVIDUAL_DOCUMENT>
-                <TYPE_OF_DOCUMENT>Passport</TYPE_OF_DOCUMENT>
-                <NUMBER>1112223334</NUMBER>
-                <ISSUING_COUNTRY>PL</ISSUING_COUNTRY>
-                <NOTE>Test</NOTE>
             </INDIVIDUAL_DOCUMENT>
             <SORT_KEY/>
             <SORT_KEY_LAST_MOD/>

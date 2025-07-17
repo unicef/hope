@@ -5,7 +5,7 @@
 export type HouseholdUpdateData = {
     adminAreaTitle?: string;
     status?: string;
-    consent?: boolean | null;
+    consent?: boolean;
     consentSharing?: Array<string>;
     residenceStatus?: string;
     countryOrigin?: string;
@@ -33,7 +33,7 @@ export type HouseholdUpdateData = {
     maleAgeGroup1217DisabledCount?: number;
     maleAgeGroup1859DisabledCount?: number;
     maleAgeGroup60DisabledCount?: number;
-    returnee?: boolean | null;
+    returnee?: boolean;
     fchildHoh?: boolean;
     childHoh?: boolean;
     start?: string;

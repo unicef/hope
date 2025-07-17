@@ -25,6 +25,7 @@ class BusinessAreaSerializer(serializers.ModelSerializer):
             "parent",
             "is_split",
             "active",
+            "screen_beneficiary",
             "is_accountability_applicable",
         )
 

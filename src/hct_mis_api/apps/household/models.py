@@ -1337,8 +1337,7 @@ class Individual(
 
     @property
     def sanction_list_last_check(self) -> Optional[datetime]:
-        # TODO: SANCTION LIST CHECK PER LIST
-        if self.program.sanction_lists.exists():
+        if self.business_area.should_check_against_sanction_list():
             return cache.get("sanction_list_last_check")
         return None
 

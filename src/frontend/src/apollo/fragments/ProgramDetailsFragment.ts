@@ -12,7 +12,6 @@ export const programDetails = gql`
     description
     budget
     frequencyOfPayments
-    screenBeneficiary
     cashPlus
     populationGoal
     scope

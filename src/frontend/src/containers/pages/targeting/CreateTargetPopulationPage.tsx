@@ -26,16 +26,15 @@ import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
-  const { programSlug, businessAreaSlug, baseUrl } = useBaseUrl();
+  const { programId } = useBaseUrl();
   const { isSocialDctType, isStandardDctType } = useProgramContext();
   const initialValues = {
     name: '',
     criterias: [],
-    program: programSlug,
+    program: programId,
     programCycleId: {
       value: '',
       name: '',
@@ -52,6 +51,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
   const { mutateAsync: createTargetPopulation, isPending: loadingCreate } =
     useMutation({
       mutationFn: ({
+        businessAreaSlug,
+        programSlug,
         requestBody,
       }: {
         businessAreaSlug: string;
@@ -65,31 +66,24 @@ const CreateTargetPopulationPage = (): ReactElement => {
         }),
     });
   const { showMessage } = useSnackbar();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const navigate = useNavigate();
 
   const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessAreaSlug],
+    queryKey: ['businessArea', businessArea],
     queryFn: () =>
       RestService.restBusinessAreasRetrieve({
-        slug: businessAreaSlug,
-      }),
-  });
-  const { data: program } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessAreaSlug, programSlug],
-    queryFn: () =>
-      RestService.restBusinessAreasProgramsRetrieve({
-        businessAreaSlug,
-        slug: programSlug,
+        slug: businessArea,
       }),
   });
 
   if (permissions === null) return null;
   if (!businessAreaData) return null;
-  if (!program) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
-  const screenBeneficiary = program?.screenBeneficiary;
+
+  const screenBeneficiary = businessAreaData?.screenBeneficiary;
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required(t('Targeting Name is required'))
@@ -117,8 +111,8 @@ const CreateTargetPopulationPage = (): ReactElement => {
 
     try {
       const res = await createTargetPopulation({
-        businessAreaSlug,
-        programSlug,
+        businessAreaSlug: businessArea,
+        programSlug: programId,
         requestBody,
       });
       showMessage(t('Target Population Created'));

@@ -4,13 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
-        ("sanction_list", "0001_migration"),
+        ('sanction_list', '0001_migration'),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name="sanctionlistindividual",
-            options={"ordering": ["-listed_on"]},
+            name='sanctionlistindividual',
+            options={'ordering': ['-listed_on']},
         ),
     ]

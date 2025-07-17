@@ -2,7 +2,6 @@ import logging
 import os
 import re
 import sys
-from pathlib import Path
 from time import sleep
 from typing import Any
 
@@ -35,7 +34,7 @@ def create_unicef_partner_session(django_db_setup: Any, django_db_blocker: Any) 
 
 
 @pytest.fixture(autouse=True)
-def create_role_with_all_permissions(db: Any) -> None:
+def create_role_with_all_permissions() -> None:
     yield Role.objects.get_or_create(name="Role with all permissions")
 
 
@@ -63,9 +62,6 @@ def clear_default_cache() -> None:
 
 def pytest_configure(config: Config) -> None:
     pytest.localhost = True if config.getoption("--localhost") else False
-    here = Path(__file__).parent
-    utils = here.parent / "extras"
-    sys.path.append(str(utils))
 
     sys._called_from_pytest = True
     from django.conf import settings

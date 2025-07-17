@@ -543,6 +543,7 @@ def business_area(create_unicef_partner: Any, create_role_with_all_permissions: 
             "region_code": "64",
             "region_name": "SAR",
             "slug": "afghanistan",
+            "screen_beneficiary": True,
             "has_data_sharing_agreement": True,
             "is_accountability_applicable": True,
             "kobo_token": "XXX",

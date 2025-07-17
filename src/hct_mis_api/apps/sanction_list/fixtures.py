@@ -2,20 +2,12 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hct_mis_api.apps.sanction_list.models import SanctionList, SanctionListIndividual
-
-
-class SanctionListFactory(DjangoModelFactory):
-    name = factory.Sequence(lambda n: f"Sanction List {n}")
-    strategy = "hct_mis_api.apps.sanction_list.strategies.un.UNSanctionList"
-
-    class Meta:
-        model = SanctionList
-        django_get_or_create = ("name",)
+from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 
 class SanctionListIndividualFactory(DjangoModelFactory):
-    sanction_list = factory.SubFactory(SanctionListFactory)
+    class Meta:
+        model = SanctionListIndividual
 
     data_id = factory.Faker("random_int")
     version_num = 1
@@ -31,6 +23,3 @@ class SanctionListIndividualFactory(DjangoModelFactory):
     state_province = factory.Faker("sentence", nb_words=2)
     address_note = factory.Faker("sentence", nb_words=2)
     country_of_birth = None
-
-    class Meta:
-        model = SanctionListIndividual

@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PDUDataCreate } from './PDUDataCreate';
+import type { PDUData } from './PDUData';
 export type PDUFieldsCreate = {
     label: string;
-    pduData: PDUDataCreate;
+    pduData: PDUData;
 };
 

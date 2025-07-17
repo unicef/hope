@@ -28,8 +28,6 @@ exclude =
 ignore =
     # black formatting related
     # whitespace before ':'
-    ABS101,
-    # relative import
     E203,
     # line too long
     E501,

@@ -3,25 +3,21 @@ import { Field } from 'formik';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
-import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 
 export function ScreenBeneficiaryField(): ReactElement {
   const { t } = useTranslation();
-  const { programSlug, businessAreaSlug } = useBaseUrl();
-  const { data: program, isLoading } = useQuery<ProgramDetail>({
-    queryKey: ['program', businessAreaSlug, programSlug],
+  const { businessArea } = useBaseUrl();
+  const { data: businessAreaData } = useQuery<BusinessArea>({
+    queryKey: ['businessArea', businessArea],
     queryFn: () =>
-      RestService.restBusinessAreasProgramsRetrieve({
-        businessAreaSlug: businessAreaSlug,
-        slug: programSlug,
+      RestService.restBusinessAreasRetrieve({
+        slug: businessArea,
       }),
   });
-  if (isLoading) {
-    return null;
-  }
-  if (!program?.screenBeneficiary) {
+  if (!businessAreaData?.screenBeneficiary) {
     return null;
   }
   return (
