@@ -273,11 +273,13 @@ class TestSmokePaymentVerification:
         assert "List of Payment Plans" in pagePaymentVerification.getTableTitle().text
         assert "Payment Plan ID" in pagePaymentVerification.getUnicefid().text
         assert "Verification Status" in pagePaymentVerification.getVerificationstatus().text
-        assert "Cash Amount" in pagePaymentVerification.getTotaldeliveredquantity().text
-        assert "Timeframe" in pagePaymentVerification.getStartdate().text
+        assert "Total Amount" in pagePaymentVerification.getTotaldeliveredquantity().text
+        assert "Payment Disbursement Dates" in pagePaymentVerification.getStartdate().text
+        assert "Programme Cycle Title" in pagePaymentVerification.getCycleTitleHeader().text
         assert "Last Modified Date" in pagePaymentVerification.getUpdatedat().text
         assert "PP-0000-00-1122334" in pagePaymentVerification.getCashPlanTableRow().text
         assert "PENDING" in pagePaymentVerification.getStatusContainer().text
+        assert active_program.cycles.first().title == pagePaymentVerification.getCycleTitle().text
         assert "Rows per page: 5 1–1 of 1" in pagePaymentVerification.getTablePagination().text.replace("\n", " ")
 
     @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
@@ -339,7 +341,7 @@ class TestSmokePaymentVerification:
         assert (datetime.now() + relativedelta(months=1)).strftime(
             "%-d %b %Y"
         ) in pagePaymentVerificationDetails.getLabelEndDate().text
-        assert "Bank reconciliation" in pagePaymentVerificationDetails.getTableLabel().text
+        assert "Reconciliation Summary" in pagePaymentVerificationDetails.getTableLabel().text
         payment_verification = add_payment_verification.payment_verification_plan
         assert (
             payment_verification.sampling.lower().replace("_", " ")

@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List
 
 from django.core.exceptions import ValidationError
 from django.forms import modelform_factory
@@ -10,11 +10,7 @@ from hct_mis_api.apps.core.utils import (
     build_flex_arg_dict_from_list_if_exists,
 )
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.forms import (
-    BankAccountInfoForm,
-    DocumentForm,
-    IndividualForm,
-)
+from hct_mis_api.apps.household.forms import DocumentForm, IndividualForm
 from hct_mis_api.apps.household.models import (
     BLANK,
     DISABLED,
@@ -29,7 +25,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -130,9 +125,6 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 individual.detail_id = record.source_id
                 individual.save()
 
-                bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
-                if bank_account_data:
-                    self._create_object_and_validate(bank_account_data, PendingBankAccountInfo, BankAccountInfoForm)
                 self._create_role(role, individual, household)
                 individuals.append(individual)
 
@@ -276,28 +268,6 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             documents.append(document)
 
         return documents
-
-    def _prepare_bank_account_info(
-        self, individual_dict: Dict, individual: PendingIndividual
-    ) -> Optional[Dict[str, Any]]:
-        if individual_dict.get("bank_account_h_f", "n") != "y":
-            return None
-        if not individual_dict.get("bank_account_number") or not individual_dict.get("bank_account"):
-            return None
-        bank_name = individual_dict.get("bank_name_h_f", "")
-        # AB#154910 default bank name for Ukraine is 'Private Bank'
-        other_bank_name = individual_dict.get("other_bank_name", "Private Bank")
-        # bank_name is required
-        bank_name = bank_name or other_bank_name
-        bank_account_info_data = {
-            "bank_account_number": str(individual_dict.get("bank_account", "")).replace(" ", ""),
-            "bank_name": bank_name,
-            "debit_card_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
-            "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
-            "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
-            "individual": str(individual.pk),
-        }
-        return bank_account_info_data
 
     def validate_household(self, individuals_array: List[PendingIndividual]) -> None:
         if not individuals_array:

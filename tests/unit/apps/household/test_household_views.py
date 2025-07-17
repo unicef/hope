@@ -24,7 +24,6 @@ from hct_mis_api.apps.core.utils import resolve_flex_fields_choices_to_string
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
     IndividualRoleInHouseholdFactory,
@@ -1458,8 +1457,8 @@ class TestHouseholdFilter:
             },
             individuals_data=[{}, {}],
         )
-        BankAccountInfoFactory(bank_account_number="123456789", individual=individuals1[0])
-        BankAccountInfoFactory(bank_account_number="987654321", individual=individuals2[0])
+        # BankAccountInfoFactory(bank_account_number="123456789", individual=individuals1[0])
+        # BankAccountInfoFactory(bank_account_number="987654321", individual=individuals2[0])
         rebuild_search_index()
         response = self.api_client.get(self.list_url, {"search": "123456789"})
         assert response.status_code == status.HTTP_200_OK, response.json()

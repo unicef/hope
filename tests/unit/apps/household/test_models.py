@@ -6,10 +6,11 @@ from django.test import TestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
+    DocumentFactory,
+    DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
     create_household,
@@ -373,28 +374,39 @@ class TestIndividualModel(TestCase):
         business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=business_area)
 
-    def test_bank_name(self) -> None:
-        individual = create_household({"size": 1})[1][0]
-        bank_account_info = BankAccountInfoFactory(individual=individual)
-        self.assertEqual(individual.bank_name, bank_account_info.bank_name)
-
-    def test_bank_account_number(self) -> None:
-        individual = create_household({"size": 1})[1][0]
-        bank_account_info = BankAccountInfoFactory(individual=individual)
-        self.assertEqual(individual.bank_account_number, bank_account_info.bank_account_number)
-
-    def test_account_holder_name(self) -> None:
-        individual = create_household({"size": 1})[1][0]
-        bank_account_info = BankAccountInfoFactory(individual=individual)
-        self.assertEqual(individual.account_holder_name, bank_account_info.account_holder_name)
-
-    def test_bank_branch_name(self) -> None:
-        individual = create_household({"size": 1})[1][0]
-        bank_account_info = BankAccountInfoFactory(individual=individual)
-        self.assertEqual(individual.bank_branch_name, bank_account_info.bank_branch_name)
-
     def test_unique_unicef_id_per_program_constraint(self) -> None:
         IndividualFactory(unicef_id="IND-123", program=self.program)
         IndividualFactory(unicef_id="IND-000", program=self.program)
         with self.assertRaises(IntegrityError):
             IndividualFactory(unicef_id="IND-123", program=self.program)
+
+    def test_mark_as_distinct_raise_errors(self) -> None:
+        ind = IndividualFactory(unicef_id="IND-333", program=self.program)
+        doc_type = DocumentTypeFactory(key="registration_token")
+        country = CountryFactory()
+        DocumentFactory(
+            status=Document.STATUS_VALID,
+            program=self.program,
+            type=doc_type,
+            document_number="123456ABC",
+            individual=ind,
+            country=country,
+        )
+        doc_2 = DocumentFactory(
+            status=Document.STATUS_INVALID,
+            program=self.program,
+            type=doc_type,
+            document_number="aaa",
+            individual=ind,
+            country=country,
+        )
+        doc_2.document_number = "123456ABC"
+        doc_2.save()
+
+        with self.assertRaises(Exception) as error:
+            ind.mark_as_distinct()
+
+        self.assertEqual(
+            str(error.exception),
+            "IND-333: Valid Document already exists: 123456ABC.",
+        )

@@ -52,8 +52,11 @@ export function PaymentVerificationTableRow({
         {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
-        <UniversalMoment>{plan.endDate}</UniversalMoment>
+        <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment> -{' '}
+        <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
+      </TableCell>
+      <TableCell align="left" data-cy="cycle-title">
+        {plan.programCycle.title}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{plan.updatedAt}</UniversalMoment>

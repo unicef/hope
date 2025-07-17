@@ -15,11 +15,11 @@ import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
-import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
-import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
 import { useProgramContext } from 'src/programContext';
+import { ExistingAccountsFieldArray } from './ExistingAccountsFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { IndividualList } from '@restgenerated/models/IndividualList';
+import { NewAccountFieldArray } from '@components/grievances/EditIndividualDataChange/NewAccountFieldArray';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -224,17 +224,18 @@ function EditIndividualDataChange({
           )}
         </Box>
       </BoxWithBorders>
-      <BoxWithBorders>
+       <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant="h6">{t('Payment Channels')}</Typography>
+            <Typography variant="h6">{t('Accounts')}</Typography>
           </Title>
-          <ExistingPaymentChannelFieldArray
+          <ExistingAccountsFieldArray
             values={values}
             setFieldValue={setFieldValue}
             individual={fullIndividual}
+            addIndividualFieldsData={addIndividualFieldsData}
           />
-          {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
+           {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={addIndividualFieldsData}/>}
         </Box>
       </BoxWithBorders>
     </>

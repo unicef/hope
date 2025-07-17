@@ -13,7 +13,6 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -91,20 +90,16 @@ class TestSriLankaRegistrationService(TestCase):
 
         collector_info = [
             {
-                "bank_name": "7472",
                 "gender_i_c": " male",
                 "phone_no_i_c": "+94788908046",
                 "email": "email999@mail.com",
                 "full_name_i_c": "Dome",
                 "birth_date_i_c": "1980-01-04",
-                "bank_description": "Axis Bank",
                 "relationship_i_c": "brother_sister",
                 "confirm_nic_number": "123456789V",
                 "national_id_no_i_c": "123456789V",
                 "branch_or_branch_code": "7472_002",
                 "account_holder_name_i_c": "Test Holder Name 123",
-                "bank_branch_name_i_c": "Branch Name 123",
-                "confirm_bank_account_number": "0082785064",
                 "who_answers_this_phone": "alternate collector",
                 "confirm_alternate_collector_phone_number": "+94788908046",
                 "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "n",
@@ -161,14 +156,8 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(PendingHousehold.objects.count(), 1)
         self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
         self.assertEqual(PendingIndividualRoleInHousehold.objects.count(), 1)
-        self.assertEqual(PendingBankAccountInfo.objects.count(), 1)
         self.assertEqual(PendingDocument.objects.count(), 1)
         self.assertEqual(PendingDocument.objects.filter(program=rdi.program).count(), 1)
-
-        bank_acc_info = PendingBankAccountInfo.objects.first()
-        self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 123")
-        self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 123")
-        self.assertEqual(bank_acc_info.rdi_merge_status, "PENDING")
 
         household = PendingHousehold.objects.first()
         self.assertEqual(household.admin1.p_code, "LK1")

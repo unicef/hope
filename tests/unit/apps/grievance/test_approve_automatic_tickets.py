@@ -97,8 +97,10 @@ class TestGrievanceApproveAutomaticTickets:
 
         # from test_utils.factories.sanction_list import SanctionListFactory
 
+        from test_utils.factories.sanction_list import SanctionListFactory
+
         sanction_list_individual_data = {
-            # "sanction_list": SanctionListFactory(),
+            "sanction_list": SanctionListFactory(),
             "data_id": 112138,
             "version_num": 1,
             "first_name": "DAWOOD",

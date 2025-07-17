@@ -151,7 +151,7 @@ class TestNigeriaPeopleRegistrationService(TestCase):
 
         account = PendingAccount.objects.first()
         self.assertEqual(
-            account.data,
+            account.account_data,
             {
                 "number": "2087008012",
                 "name": "United Bank for Africa",

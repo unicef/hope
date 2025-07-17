@@ -16,6 +16,12 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
+import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
+import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { ExistingAccountsFieldArray } from '../EditIndividualDataChange/ExistingAccountsFieldArray';
+import { NewAccountFieldArray } from '../EditIndividualDataChange/NewAccountFieldArray';
+
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -194,14 +200,15 @@ function EditPeopleDataChange({
       {/* <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant="h6">{t('Payment Channels')}</Typography>
+            <Typography variant="h6">{t('Accounts')}</Typography>
           </Title>
-          <ExistingPaymentChannelFieldArray
+          <ExistingAccountsFieldArray
             values={values}
             setFieldValue={setFieldValue}
-            individual={fullIndividual}
+            individual={fullIndividual.individual}
+            addIndividualFieldsData={editPeopleFieldsData}
           />
-          {!isEditTicket && <NewPaymentChannelFieldArray values={values} />}
+          {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={editPeopleFieldsData}/>}
         </Box>
       </BoxWithBorders> */}
     </>

@@ -936,7 +936,7 @@ def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) ->
     from hct_mis_api.apps.core.kobo.common import reduce_assets_list
 
     try:
-        assets = KoboAPI(business_area_slug).get_all_projects_data()
+        assets = KoboAPI(business_area_slug).get_all_projects_data()  # type: ignore
     except ObjectDoesNotExist as e:
         logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
         raise ValidationError("Provided business area does not exist.") from e

@@ -50,26 +50,26 @@ export function RequestedIndividualDataChange({
   const documentsToRemove = individualData.documentsToRemove || [];
   const documentsToEdit = individualData.documentsToEdit || [];
   const identities = individualData?.identities || [];
-  const identitiesToRemove = individualData.identitiesToRemove || [];
-  const identitiesToEdit = individualData.identitiesToEdit || [];
-  const paymentChannels = individualData?.paymentChannels || [];
-  const paymentChannelsToRemove = individualData.paymentChannelsToRemove || [];
-  const paymentChannelsToEdit = individualData.paymentChannelsToEdit || [];
-  const flexFields = individualData.flexFields || {};
+  const identitiesToRemove = individualData.identities_to_remove || [];
+  const identitiesToEdit = individualData.identities_to_edit || [];
+  const accounts = individualData.accounts || [];
+  const accountsToEdit = individualData.accounts_to_edit || [];
+  const flexFields = individualData.flex_fields || {};
 
   delete individualData.flexFields;
   delete individualData.documents;
+  delete individualData.documents_to_edit;
+  delete individualData.documents_to_remove;
+  delete individualData.previous_documents;
+
   delete individualData.identities;
-  delete individualData.documentsToRemove;
-  delete individualData.documentsToEdit;
-  delete individualData.paymentChannels;
-  delete individualData.paymentChannelsToRemove;
-  delete individualData.paymentChannelsToEdit;
-  delete individualData.identitiesToRemove;
-  delete individualData.identitiesToEdit;
-  delete individualData.previousDocuments;
-  delete individualData.previousIdentities;
-  delete individualData.previousPaymentChannels;
+  delete individualData.identities_to_edit;
+  delete individualData.identities_to_remove;
+  delete individualData.previous_identities;
+
+  delete individualData.accounts;
+  delete individualData.accounts_to_edit;
+
 
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
@@ -80,16 +80,13 @@ export function RequestedIndividualDataChange({
   allApprovedCount += identitiesToRemove.filter(
     (el) => el.approveStatus,
   ).length;
-  allApprovedCount += identitiesToEdit.filter((el) => el.approveStatus).length;
-  allApprovedCount += paymentChannels.filter((el) => el.approveStatus).length;
-  allApprovedCount += paymentChannelsToRemove.filter(
-    (el) => el.approveStatus,
-  ).length;
-  allApprovedCount += paymentChannelsToEdit.filter(
-    (el) => el.approveStatus,
-  ).length;
+  allApprovedCount += identitiesToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += entries.filter(
-    ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+  ).length;
+  allApprovedCount += accounts.filter((el) => el.approve_status).length;
+  allApprovedCount += accountsToEdit.filter(
+    (el) => el.approve_status,
   ).length;
   allApprovedCount += entriesFlexFields.filter(
     ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
@@ -210,25 +207,18 @@ export function RequestedIndividualDataChange({
     }
   }
 
-  const selectedPaymentChannels = [];
-  const selectedPaymentChannelsToRemove = [];
-  const selectedPaymentChannelsToEdit = [];
+  const selectedAccounts = [];
   // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < paymentChannels?.length; i++) {
-    if (paymentChannels[i]?.approveStatus) {
-      selectedPaymentChannels.push(i);
+  for (let i = 0; i < accounts?.length; i++) {
+    if (accounts[i]?.approve_status) {
+      selectedAccounts.push(i);
     }
   }
+  const selectedAccountsToEdit = [];
   // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < paymentChannelsToRemove?.length; i++) {
-    if (paymentChannelsToRemove[i]?.approveStatus) {
-      selectedPaymentChannelsToRemove.push(i);
-    }
-  }
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < paymentChannelsToEdit?.length; i++) {
-    if (paymentChannelsToEdit[i]?.approveStatus) {
-      selectedPaymentChannelsToEdit.push(i);
+  for (let i = 0; i < accountsToEdit?.length; i++) {
+    if (accountsToEdit[i]?.approve_status) {
+      selectedAccountsToEdit.push(i);
     }
   }
 
@@ -265,10 +255,9 @@ export function RequestedIndividualDataChange({
       documentsToEdit.length +
       identities.length +
       identitiesToRemove.length +
-      identitiesToEdit.length +
-      paymentChannels.length +
-      paymentChannelsToRemove.length +
-      paymentChannelsToEdit.length;
+      accounts.length +
+      accountsToEdit.length +
+      identitiesToEdit.length;
 
     return allSelected === countAll;
   };
@@ -334,9 +323,9 @@ export function RequestedIndividualDataChange({
         selectedIdentities,
         selectedIdentitiesToEdit,
         selectedIdentitiesToRemove,
-        selectedPaymentChannels,
-        selectedPaymentChannelsToEdit,
-        selectedPaymentChannelsToRemove,
+        selectedAccounts,
+        selectedAccountsToEdit,
+
       }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
@@ -350,12 +339,8 @@ export function RequestedIndividualDataChange({
         const approvedIdentitiesToCreate = values.selectedIdentities;
         const approvedIdentitiesToRemove = values.selectedIdentitiesToRemove;
         const approvedIdentitiesToEdit = values.selectedIdentitiesToEdit;
-        const approvedPaymentChannelsToCreate = values.selectedPaymentChannels;
-        const approvedPaymentChannelsToRemove =
-          values.selectedPaymentChannelsToRemove;
-        const approvedPaymentChannelsToEdit =
-          values.selectedPaymentChannelsToEdit;
-
+        const approvedAccountsToCreate = values.selectedAccounts;
+        const approvedAccountsToEdit = values.selectedAccountsToEdit;
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -366,17 +351,19 @@ export function RequestedIndividualDataChange({
         );
         try {
           await mutate({
-            individualApproveData,
-            approvedDocumentsToCreate,
-            approvedDocumentsToRemove,
-            approvedDocumentsToEdit,
-            approvedIdentitiesToCreate,
-            approvedIdentitiesToRemove,
-            approvedIdentitiesToEdit,
-            approvedPaymentChannelsToCreate,
-            approvedPaymentChannelsToRemove,
-            approvedPaymentChannelsToEdit,
-            flexFieldsApproveData,
+            variables: {
+              grievanceTicketId: ticket.id,
+              individualApproveData: JSON.stringify(individualApproveData),
+              approvedDocumentsToCreate,
+              approvedDocumentsToRemove,
+              approvedDocumentsToEdit,
+              approvedIdentitiesToCreate,
+              approvedIdentitiesToRemove,
+              approvedIdentitiesToEdit,
+              approvedAccountsToCreate,
+              approvedAccountsToEdit,
+              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
+            },
           });
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);

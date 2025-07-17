@@ -17,7 +17,6 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -341,47 +340,47 @@ class TestGrievanceCreateDataChangeAction:
         assert response.status_code == status.HTTP_201_CREATED
         assert "id" in response.data[0]
 
-    def test_edit_payment_channel_for_individual(self, create_user_role_with_permissions: Any) -> None:
-        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
-        bank_account = BankAccountInfoFactory(
-            id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
-            individual=self.individuals[0],
-            bank_name="privatbank",
-            bank_account_number=2356789789789789,
-            account_holder_name="Old Holder Name",
-            bank_branch_name="BranchSantander",
-        )
-        input_data = {
-            "description": "Test",
-            "businessArea": "afghanistan",
-            "assigned_to": str(self.user.id),
-            "issue_type": 14,
-            "category": 2,
-            "consent": True,
-            "language": "PL",
-            "extras": {
-                "issue_type": {
-                    "individual_data_update_issue_type_extras": {
-                        "individual": str(self.individuals[0].id),
-                        "individual_data": {
-                            "paymentChannelsToEdit": [
-                                {
-                                    "id": str(bank_account.id),
-                                    "type": "BANK_TRANSFER",
-                                    "bankName": "privatbank",
-                                    "bankAccountNumber": 1111222233334444,
-                                    "accountHolderName": "Holder Name NEW 2",
-                                    "bankBranchName": "New Name NEW 2",
-                                },
-                            ],
-                        },
-                    }
-                }
-            },
-        }
-        response = self.api_client.post(self.list_url, input_data, format="json")
-        assert response.status_code == status.HTTP_201_CREATED
-        assert "id" in response.data[0]
+    # def test_edit_payment_channel_for_individual(self, create_user_role_with_permissions: Any) -> None:
+    #     create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)
+    #     # bank_account = BankAccountInfoFactory(
+    #     #     id="413b2a07-4bc1-43a7-80e6-91abb486aa9d",
+    #     #     individual=self.individuals[0],
+    #     #     bank_name="privatbank",
+    #     #     bank_account_number=2356789789789789,
+    #     #     account_holder_name="Old Holder Name",
+    #     #     bank_branch_name="BranchSantander",
+    #     # )
+    #     input_data = {
+    #         "description": "Test",
+    #         "businessArea": "afghanistan",
+    #         "assigned_to": str(self.user.id),
+    #         "issue_type": 14,
+    #         "category": 2,
+    #         "consent": True,
+    #         "language": "PL",
+    #         "extras": {
+    #             "issue_type": {
+    #                 "individual_data_update_issue_type_extras": {
+    #                     "individual": str(self.individuals[0].id),
+    #                     "individual_data": {
+    #                         "paymentChannelsToEdit": [
+    #                             {
+    #                                 "id": str(bank_account.id),
+    #                                 "type": "BANK_TRANSFER",
+    #                                 "bankName": "privatbank",
+    #                                 "bankAccountNumber": 1111222233334444,
+    #                                 "accountHolderName": "Holder Name NEW 2",
+    #                                 "bankBranchName": "New Name NEW 2",
+    #                             },
+    #                         ],
+    #                     },
+    #                 }
+    #             }
+    #         },
+    #     }
+    #     response = self.api_client.post(self.list_url, input_data, format="json")
+    #     assert response.status_code == status.HTTP_201_CREATED
+    #     assert "id" in response.data[0]
 
     def test_grievance_delete_individual_data_change(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.afghanistan, self.program)

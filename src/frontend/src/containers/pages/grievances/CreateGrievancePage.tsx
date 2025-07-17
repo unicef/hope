@@ -273,6 +273,7 @@ const CreateGrievancePage = (): ReactElement => {
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
       'individualDataUpdateFieldsIdentities',
+      'individualDataUpdateFieldsAccounts',
       'verificationRequired',
     ].map((fieldname) => (
       <FormHelperText key={fieldname} error>

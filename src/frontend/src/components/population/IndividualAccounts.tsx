@@ -33,26 +33,22 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  if (!individual?.accounts?.length || !canViewDeliveryMechanisms) {
+  if (!individual?.accounts?.edges?.length || !canViewDeliveryMechanisms) {
     return null;
   }
   return (
     <Overview>
       <Title>
         <Typography variant="h6">
-          {t(`${beneficiaryGroup?.memberLabel} Delivery Mechanisms`)}
+          {t(`${beneficiaryGroup?.memberLabel} Accounts`)}
         </Typography>
       </Title>
       <Grid container spacing={6}>
-        {individual.accounts.map((mechanism, index) => {
-          const tabData =
-            typeof mechanism.individualTabData === 'string'
-              ? JSON.parse(mechanism.individualTabData)
-              : mechanism.individualTabData;
-
+        {individual.accounts.edges.map((mechanism, index) => {
+          const tabData = JSON.parse(mechanism.node.dataFields);
           return (
             <Grid size={{ xs: 12 }} key={index}>
-              <Typography variant="h6">{mechanism.name}</Typography>
+              <Typography variant="h6">{mechanism.node.name}</Typography>
               <Grid container spacing={3}>
                 {Object.entries(tabData).map(([key, value], idx) => (
                   <Grid key={idx} size={{ xs: 3 }}>
@@ -62,7 +58,7 @@ export const IndividualAccounts: FC<IndividualAccountsProps> = ({
                   </Grid>
                 ))}
               </Grid>
-              {index < individual.accounts.length - 1 && <DividerLine />}
+              {index < individual.accounts.edges.length - 1 && <DividerLine />}
             </Grid>
           );
         })}

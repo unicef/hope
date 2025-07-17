@@ -8,6 +8,9 @@ import { EntriesTable } from './EntriesTable';
 import { IdentitiesTable } from './IdentitiesTable';
 import { IdentitiesToEditTable } from './IdentitiesToEditTable';
 import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
+import { AccountToEditTable } from './AccountToEditTable';
+import { AccountTable } from './AccountTable';
+
 import { PaymentChannelsTable } from './PaymentChannelsTable';
 import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
 import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
@@ -70,17 +73,15 @@ export function RequestedIndividualDataChangeTable({
   const {
     documents,
     identities,
-    previousDocuments,
-    documentsToRemove,
-    documentsToEdit,
-    previousIdentities,
-    identitiesToRemove,
-    identitiesToEdit,
-    paymentChannels,
-    paymentChannelsToRemove,
-    paymentChannelsToEdit,
-    previousPaymentChannels,
-    flexFields,
+    previous_documents: previousDocuments,
+    documents_to_remove: documentsToRemove,
+    documents_to_edit: documentsToEdit,
+    previous_identities: previousIdentities,
+    identities_to_remove: identitiesToRemove,
+    identities_to_edit: identitiesToEdit,
+    accounts: accounts,
+    accounts_to_edit: accountsToEdit,
+    flex_fields: flexFields,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
@@ -180,25 +181,27 @@ export function RequestedIndividualDataChangeTable({
             />
           ))
         : null}
-      {paymentChannels?.length ? (
-        <PaymentChannelsTable
+      {accounts?.length ? accounts.map((account, index) => (
+        <AccountTable
+          key={account.id}
           values={values}
           isEdit={isEdit}
           ticket={ticket}
           setFieldValue={setFieldValue}
-          paymentChannels={paymentChannels}
+          index={index}
+          account={account}
         />
-      ) : null}
-      {paymentChannelsToEdit?.length
-        ? paymentChannelsToEdit.map((paymentChannel, index) => (
-            <PaymentChannelsToEditTable
-              key={paymentChannel.previous_value.bankAccountNumber}
+      )) : null}
+      {accountsToEdit?.length
+        ? accountsToEdit.map((account, index) => (
+            <AccountToEditTable
+              key={account.id}
               values={values}
               isEdit={isEdit}
               ticket={ticket}
               setFieldValue={setFieldValue}
               index={index}
-              paymentChannel={paymentChannel}
+              account={account}
             />
           ))
         : null}
@@ -222,16 +225,6 @@ export function RequestedIndividualDataChangeTable({
           countriesDict={countriesDict}
           identitiesToRemove={identitiesToRemove}
           previousIdentities={previousIdentities}
-        />
-      ) : null}
-      {paymentChannelsToRemove?.length ? (
-        <PaymentChannelsToRemoveTable
-          values={values}
-          isEdit={isEdit}
-          ticket={ticket}
-          setFieldValue={setFieldValue}
-          paymentChannelsToRemove={paymentChannelsToRemove}
-          previousPaymentChannels={previousPaymentChannels}
         />
       ) : null}
     </div>

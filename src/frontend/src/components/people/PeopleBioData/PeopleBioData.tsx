@@ -86,39 +86,6 @@ export const PeopleBioData = ({
     </Grid>
   ));
 
-  const renderBankAccountInfo = (): ReactNode => {
-    if (!individual?.bankAccountInfo) {
-      return null;
-    }
-    return (
-      <>
-        <Grid size={{ xs: 12 }}>
-          <BorderBox />
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Bank name')}>
-            {individual?.bankAccountInfo?.bankName}
-          </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Bank account number')}>
-            {individual?.bankAccountInfo?.bankAccountNumber}
-          </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Account holder name')}>
-            {individual?.bankAccountInfo?.accountHolderName}
-          </LabelizedField>
-        </Grid>
-        <Grid size={{ xs: 3 }}>
-          <LabelizedField label={t('Bank branch name')}>
-            {individual?.bankAccountInfo?.bankBranchName}
-          </LabelizedField>
-        </Grid>
-      </>
-    );
-  };
-
   const renderDigitalWalletInfo = (): ReactNode => {
     return (
       <>
@@ -383,7 +350,6 @@ export const PeopleBioData = ({
             />
           )}
         </Grid>
-        {renderBankAccountInfo()}
         {renderDigitalWalletInfo()}
       </Grid>
     </Overview>

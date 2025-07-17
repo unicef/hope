@@ -448,7 +448,7 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(50):
+        with self.assertNumQueries(45):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
@@ -1093,10 +1093,11 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(payment_plan.dispersion_end_date, timezone.now().date() + timedelta(days=3))
 
     def test_update_pp_dm_fsp(self) -> None:
+        # allow changing dm/dsp on a TP PP stage
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle,
             created_by=self.user,
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentPlan.Status.TP_OPEN,
             currency="AMD",
             delivery_mechanism=None,
             financial_service_provider=None,
@@ -1105,6 +1106,30 @@ class TestPaymentPlanServices(APITestCase):
             {
                 "fsp_id": str(self.fsp.id),
                 "delivery_mechanism_code": self.dm_transfer_to_account.code,
+            }
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.delivery_mechanism, self.dm_transfer_to_account)
+        self.assertEqual(payment_plan.financial_service_provider, self.fsp)
+
+        # do not allow changing dm/dsp on a promoted PP stage
+        payment_plan.status = PaymentPlan.Status.OPEN
+        payment_plan.save()
+
+        PaymentPlanService(payment_plan).update(
+            {
+                "fsp_id": self.fsp.id,
+                "delivery_mechanism_code": self.dm_transfer_to_digital_wallet.code,
+            }
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.delivery_mechanism, self.dm_transfer_to_account)
+        self.assertEqual(payment_plan.financial_service_provider, self.fsp)
+
+        PaymentPlanService(payment_plan).update(
+            {
+                "fsp_id": None,
+                "delivery_mechanism_code": None,
             }
         )
         payment_plan.refresh_from_db()

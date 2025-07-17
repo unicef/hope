@@ -25,7 +25,6 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
-    PendingBankAccountInfoFactory,
     PendingHouseholdFactory,
     PendingIndividualFactory,
 )
@@ -39,7 +38,6 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     SON_DAUGHTER,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -118,11 +116,6 @@ SRI_LANKA_FIELDS: Dict = {
     ],
     "collector-info": [
         {
-            "account_number": "179200100062564",
-            "bank_description": "People's Bank",
-            "bank_name": "7135",
-            "branch_or_branch_code": "7135_179",
-            "confirm_bank_account_number": "179200100062564",
             "does_the_mothercaretaker_have_her_own_active_bank_account_not_samurdhi": "y",
         }
     ],
@@ -170,13 +163,6 @@ UKRAINE_FIELDS: Dict = {
             "birth_certificate_no_i_c": "",
             "residence_permit_no_i_c": "",
             "role_i_c": "y",
-            "bank_account_h_f": "y",
-            "bank_name_h_f": "privatbank",
-            "other_bank_name": "",
-            "bank_account": 2356789789789789,
-            "bank_account_number": "879789789",
-            "debit_card_number_h_f": 9978967867666,
-            "debit_card_number": "87987979789789",
         }
     ],
 }
@@ -199,15 +185,12 @@ UKRAINE_NEW_FORM_FIELDS: Dict = {
             "birth_date": "1990-11-11",
             "gender_i_c": "male",
             "patronymic": "Viktorovich",
-            "bank_account": "IBAN 1236 5498 7999 8999",
             "phone_no_i_c": "+380952025248",
             "tax_id_no_i_c": "123465432321321",
             "disability_i_c": "n",
             "given_name_i_c": "Pavlo",
             "family_name_i_c": "Mok",
-            "bank_account_h_f": "y",
             "relationship_i_c": "head",
-            "bank_account_number": "1236 5498 7999 1999",
         },
         {
             "birth_date": "2023-03-06",
@@ -271,9 +254,6 @@ VALID_JSON = [
                 "individual_questions/arm_picture_i_f": "signature-17_32_52.png",
                 "individual_questions/identification/tax_id_no_i_c": "45638193",
                 "individual_questions/identification/tax_id_issuer_i_c": "UKR",
-                "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
-                "individual_questions/identification/bank_name_i_c": "Privat",
-                "individual_questions/identification/account_holder_name_i_c": "Name 123",
             }
         ],
         "wash_questions/score_bed": "5",
@@ -392,9 +372,6 @@ VALID_JSON = [
                 "individual_questions/arm_picture_i_f": "signature-17_32_52.png",
                 "individual_questions/identification/tax_id_no_i_c": "45638193",
                 "individual_questions/identification/tax_id_issuer_i_c": "UKR",
-                "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
-                "individual_questions/identification/bank_name_i_c": "Privat",
-                "individual_questions/identification/account_holder_name_i_c": "Name 123",
             }
         ],
         "wash_questions/score_bed": "5",
@@ -818,7 +795,6 @@ class TestAutomatingRDICreationTask(TestCase):
         ind_2 = PendingIndividual.objects.filter(full_name="Stefania Petrovich Bandera").first()
         doc_ind_1 = PendingDocument.objects.filter(individual=ind_1).first()
         doc_ind_2 = PendingDocument.objects.filter(individual=ind_2).first()
-        bank_acc_info = PendingBankAccountInfo.objects.filter(individual=ind_1).first()
 
         assert hh.head_of_household == ind_1
         assert hh.admin1 == "UA14"
@@ -841,10 +817,6 @@ class TestAutomatingRDICreationTask(TestCase):
         assert doc_ind_1.type.key == IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
         assert doc_ind_2.document_number == "І-ASD-454511"
         assert doc_ind_2.type.key == IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
-
-        assert bank_acc_info.bank_account_number == "IBAN1236549879998999"
-        assert bank_acc_info.debit_card_number == "1236549879991999"
-        assert bank_acc_info.bank_name == "Private Bank"
 
     def test_create_task_for_processing_records_not_implemented_error(
         self, mock_validate_data_collection_type: Any
@@ -904,20 +876,15 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
             rdi_merge_status=MergeStatusModel.PENDING,
         )
 
-        PendingBankAccountInfoFactory(individual=imported_individual_1)
-        PendingBankAccountInfoFactory(individual=imported_individual_2)
-
         self.assertEqual(PendingHousehold.objects.count(), 3)
         self.assertEqual(PendingIndividual.objects.count(), 3)
         self.assertEqual(PendingDocument.objects.count(), 3)
-        self.assertEqual(PendingBankAccountInfo.objects.count(), 2)
 
         remove_old_rdi_links_task.__wrapped__()
 
         self.assertEqual(PendingHousehold.objects.count(), 1)
         self.assertEqual(PendingIndividual.objects.count(), 1)
         self.assertEqual(PendingDocument.objects.count(), 1)
-        self.assertEqual(PendingBankAccountInfo.objects.count(), 0)
 
         self.rdi_1.refresh_from_db()
         self.rdi_2.refresh_from_db()
