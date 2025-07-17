@@ -20,6 +20,11 @@ export type Household = {
     countryOrigin?: CountryOriginEnum;
     size?: number | null;
     consentSharing?: Array<ConsentSharingEnum>;
+    village?: string | null;
+    admin1?: string | null;
+    admin2?: string | null;
+    admin3?: string | null;
+    admin4?: string | null;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;
@@ -183,10 +188,6 @@ export type Household = {
      * Child headed household flag
      */
     childHoh?: boolean | null;
-    /**
-     * Household village
-     */
-    village?: string;
     /**
      * Household currency
      *
@@ -466,22 +467,6 @@ export type Household = {
      * If this household was copied from another household, this field will contain the household it was copied from.
      */
     copiedFrom?: string | null;
-    /**
-     * Household administrative area level 1
-     */
-    admin1?: string | null;
-    /**
-     * Household administrative area level 2
-     */
-    admin2?: string | null;
-    /**
-     * Household administrative area level 3
-     */
-    admin3?: string | null;
-    /**
-     * Household administrative area level 4
-     */
-    admin4?: string | null;
     /**
      * This is only used to track collector (primary or secondary) of a household.
      * They may still be a HOH of this household or any other household.

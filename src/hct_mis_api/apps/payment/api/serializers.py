@@ -1087,8 +1087,8 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     snapshot_collector_debit_card_number = serializers.SerializerMethodField()
     snapshot_collector_bank_account_number = serializers.SerializerMethodField()
     snapshot_collector_bank_name = serializers.SerializerMethodField()
-    debit_card_number = serializers.SerializerMethodField()
-    debit_card_issuer = serializers.SerializerMethodField()
+    # debit_card_number = serializers.SerializerMethodField()
+    # debit_card_issuer = serializers.SerializerMethodField()
 
     class Meta(PaymentListSerializer.Meta):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore

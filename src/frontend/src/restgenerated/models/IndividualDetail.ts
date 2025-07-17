@@ -204,7 +204,6 @@ export type IndividualDetail = {
     disability?: DisabilityEnum;
     readonly documents: Record<string, any>;
     readonly identities: Record<string, any>;
-    readonly bankAccountInfo: Record<string, any>;
     readonly accounts: Record<string, any>;
     /**
      * Beneficiary email address
