@@ -79,13 +79,13 @@ export const TargetPopulationCore = ({
 
   return (
     <>
-      {targetPopulation.targetingCriteria ? (
+      {targetPopulation.rules?.length ? (
         <PaperContainer>
           <Box pt={3} pb={3}>
             <Typography variant="h6">{t('Targeting Criteria')}</Typography>
           </Box>
           <AddFilterTargetingCriteriaDisplay
-            rules={targetPopulation.targetingCriteria?.rules || []}
+            rules={targetPopulation.rules || []}
             targetPopulation={targetPopulation}
             screenBeneficiary={screenBeneficiary}
             isStandardDctType={isStandardDctType}

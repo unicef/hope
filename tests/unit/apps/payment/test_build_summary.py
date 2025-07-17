@@ -14,7 +14,6 @@ from hct_mis_api.apps.payment.models import (
     build_summary,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 
 class TestBuildSummary(TestCase):
@@ -30,7 +29,6 @@ class TestBuildSummary(TestCase):
             name="TEST",
             program_cycle=cls.program.cycles.first(),
             business_area=cls.business_area,
-            targeting_criteria=TargetingCriteriaFactory(),
             created_by=cls.user,
         )
         PaymentVerificationSummaryFactory(payment_plan=cls.payment_plan)
