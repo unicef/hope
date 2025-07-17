@@ -503,7 +503,12 @@ class PaymentPlanService:
                 payment_plan.delivery_mechanism = delivery_mechanism
                 payment_plan.save(update_fields=["financial_service_provider", "delivery_mechanism"])
 
-            PaymentPlanService(payment_plan).create_targeting_criteria(input_data["rules"], program)
+            targeting_criteria_data = {
+                "rules": input_data["rules"],
+                "flag_exclude_if_on_sanction_list": input_data["flag_exclude_if_on_sanction_list"],
+                "flag_exclude_if_active_adjudication_ticket": input_data["flag_exclude_if_active_adjudication_ticket"],
+            }
+            PaymentPlanService(payment_plan).create_targeting_criteria(targeting_criteria_data, program)
 
             transaction.on_commit(lambda: prepare_payment_plan_task.delay(str(payment_plan.id)))
 

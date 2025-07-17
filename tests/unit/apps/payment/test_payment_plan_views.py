@@ -1213,10 +1213,7 @@ class TestTargetPopulationCreateUpdate:
             },
         )
         self.client = api_client(self.user)
-        self.targeting_criteria = {
-            "flag_exclude_if_active_adjudication_ticket": False,
-            "flag_exclude_if_on_sanction_list": False,
-            "rules": [
+        self.rules = [
                 {
                     "individua_ids": "",
                     "household_ids": "",
@@ -1231,8 +1228,7 @@ class TestTargetPopulationCreateUpdate:
                     "individuals_filters_blocks": [],
                     "collectors_filters_blocks": [],
                 }
-            ],
-        }
+            ]
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1248,21 +1244,24 @@ class TestTargetPopulationCreateUpdate:
         data = {
             "name": "New Payment Plan",
             "program_cycle_id": self.cycle.id,
-            "targeting_criteria": self.targeting_criteria,
+            "rules": self.rules,
             "excluded_ids": "IND-123",
             "exclusion_reason": "Just MMM Qwool Test",
+            "flag_exclude_if_on_sanction_list": True,
+            "flag_exclude_if_active_adjudication_ticket": False,
         }
 
         response = self.client.post(self.create_url, data, format="json")
-
         assert response.status_code == expected_status
         if response.status_code == status.HTTP_201_CREATED:
             assert response.data["name"] == data["name"]
             assert (
-                response.data["targeting_criteria"]["rules"][0]["households_filters_blocks"][0]["field_name"] == "size"
+                response.data["rules"][0]["households_filters_blocks"][0]["field_name"] == "size"
             )
             assert response.data["exclusion_reason"] == data["exclusion_reason"]
             assert response.data["excluded_ids"] == data["excluded_ids"]
+            assert response.data["flag_exclude_if_on_sanction_list"] is True
+            assert response.data["flag_exclude_if_active_adjudication_ticket"] is False
 
     def test_create_payment_plan_invalid_data(self, create_user_role_with_permissions: Any) -> None:
         create_user_role_with_permissions(
@@ -1271,7 +1270,7 @@ class TestTargetPopulationCreateUpdate:
         invalid_data = {
             "name": "",
             "program_cycle_id": None,
-            "targeting_criteria": {},
+            "rules": [],
         }
         response = self.client.post(self.create_url, invalid_data, format="json")
 

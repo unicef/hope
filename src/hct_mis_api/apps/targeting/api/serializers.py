@@ -106,7 +106,7 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance: TargetingCriteriaRule) -> Dict:
         data = super().to_representation(instance)
-        filters_data = instance.filters
+        filters_data = instance.filters if hasattr(instance, "filters") else {}
         if filters_data:
             data["households_filters_blocks"] = TargetingCriteriaRuleFilterSerializer(filters_data, many=True).data
 
