@@ -52,7 +52,6 @@ class APIBusinessAreaTests(HOPEApiTestCase):
                 "parent": None,
                 "is_split": self.business_area.is_split,
                 "active": self.business_area.active,
-                "screen_beneficiary": self.business_area.screen_beneficiary,
                 "is_accountability_applicable": self.business_area.is_accountability_applicable,
             },
             response.json()["results"],

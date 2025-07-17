@@ -41,6 +41,7 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hct_mis_api.apps.sanction_list.fixtures import SanctionListFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -322,9 +323,7 @@ class TestRdiMergeTask(TestCase):
         self.assertEqual(household_data, expected)
 
     @freeze_time("2022-01-01")
-    @patch(
-        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
-    )
+    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -338,13 +337,16 @@ class TestRdiMergeTask(TestCase):
             kobo_submission_time="2022-02-22T12:22:22",
             flex_fields={"enumerator_id": 1234567890},
         )
+        sanction_list = SanctionListFactory()
         dct = self.rdi.program.data_collecting_type
         dct.recalculate_composition = True
         dct.save()
-        self.business_area.screen_beneficiary = True
         self.business_area.save()
         self.rdi.screen_beneficiary = True
         self.rdi.save()
+        program = self.rdi.program
+        program.sanction_lists.add(sanction_list)
+        program.refresh_from_db()
         self.set_imported_individuals(household)
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
@@ -352,9 +354,7 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.reset_mock()
 
     @freeze_time("2022-01-01")
-    @patch(
-        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
-    )
+    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -372,8 +372,6 @@ class TestRdiMergeTask(TestCase):
         dct.recalculate_composition = True
         dct.save()
 
-        # when business_area.screen_beneficiary is False
-        self.business_area.screen_beneficiary = False
         self.business_area.save()
         self.rdi.screen_beneficiary = True
         self.rdi.save()
@@ -383,9 +381,7 @@ class TestRdiMergeTask(TestCase):
         sanction_execute_mock.assert_not_called()
 
     @freeze_time("2022-01-01")
-    @patch(
-        "hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions.CheckAgainstSanctionListPreMergeTask.execute"
-    )
+    @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.check_against_sanction_list_pre_merge")
     def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
@@ -399,9 +395,6 @@ class TestRdiMergeTask(TestCase):
             kobo_submission_time="2022-02-22T12:22:22",
             flex_fields={"enumerator_id": 1234567890},
         )
-
-        # when rdi.screen_beneficiary is False
-        self.business_area.screen_beneficiary = True
         self.business_area.save()
         self.rdi.screen_beneficiary = False
         self.rdi.save()
@@ -531,7 +524,21 @@ class TestRdiMergeTask(TestCase):
         program = self.rdi.program
         program.biometric_deduplication_enabled = True
         program.save()
+        household = PendingHouseholdFactory(
+            registration_data_import=self.rdi,
+            admin_area=self.area4,
+            admin4=self.area4,
+            zip_code="00-123",
+        )
+        self.set_imported_individuals(household)
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
         create_grievance_tickets_for_duplicates_mock.assert_called_once_with(self.rdi)
         update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=self.rdi)
+
+    def test_merge_empty_rdi(self) -> None:
+        rdi = self.rdi
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(rdi.pk)
+        rdi.refresh_from_db()
+        self.assertEqual(rdi.status, RegistrationDataImport.MERGED)
