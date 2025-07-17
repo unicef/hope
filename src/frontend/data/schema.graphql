@@ -838,7 +838,6 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   steficonRule: RuleCommitNode
   steficonRuleTargeting: RuleCommitNode
   createdBy: UserNode!
-  targetingCriteria: TargetingCriteriaNode!
   sourcePaymentPlan: PaymentPlanNode
   name: String
   startDate: DateTime
@@ -876,12 +875,15 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   excludeHouseholdError: String
   statusDate: DateTime!
   isCashAssist: Boolean!
+  flagExcludeIfActiveAdjudicationTicket: Boolean!
+  flagExcludeIfOnSanctionList: Boolean!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
   paymentVerificationSummary: PaymentVerificationSummaryNode
+  rules: [TargetingCriteriaRuleNode!]!
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   fundsCommitments(offset: Int, before: String, after: String, first: Int, last: Int): FundsCommitmentItemNodeConnection!
@@ -2665,7 +2667,6 @@ type PaymentPlanNode implements Node {
   steficonRule: RuleCommitNode
   steficonRuleTargeting: RuleCommitNode
   createdBy: UserNode!
-  targetingCriteria: TargetingCriteriaNode!
   sourcePaymentPlan: PaymentPlanNode
   name: String
   startDate: Date
@@ -2703,12 +2704,15 @@ type PaymentPlanNode implements Node {
   excludeHouseholdError: String
   statusDate: DateTime!
   isCashAssist: Boolean!
+  flagExcludeIfActiveAdjudicationTicket: Boolean!
+  flagExcludeIfOnSanctionList: Boolean!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
   paymentVerificationSummary: PaymentVerificationSummaryNode
+  rules: [TargetingCriteriaRuleNode]
   messages(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   fundsCommitments: FundsCommitmentNode
@@ -2743,6 +2747,8 @@ type PaymentPlanNode implements Node {
   canSendXlsxPassword: Boolean
   failedWalletValidationCollectorsIds: [String]
   availableFundsCommitments: [FundsCommitmentNode]
+  householdIds: String
+  individualIds: String
 }
 
 type PaymentPlanNodeConnection {
@@ -3947,18 +3953,6 @@ input TargetingCollectorRuleFilterBlockObjectType {
   collectorBlockFilters: [TargetingCriteriaRuleFilterObjectType]
 }
 
-type TargetingCriteriaNode {
-  id: UUID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  flagExcludeIfActiveAdjudicationTicket: Boolean!
-  flagExcludeIfOnSanctionList: Boolean!
-  paymentPlan: PaymentPlanNode
-  rules: [TargetingCriteriaRuleNode]
-  householdIds: String
-  individualIds: String
-}
-
 input TargetingCriteriaObjectType {
   rules: [TargetingCriteriaRuleObjectType]
   flagExcludeIfActiveAdjudicationTicket: Boolean
@@ -4008,7 +4002,7 @@ type TargetingCriteriaRuleNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  targetingCriteria: TargetingCriteriaNode!
+  paymentPlan: PaymentPlanNode!
   householdIds: String!
   individualIds: String!
   individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockNode]

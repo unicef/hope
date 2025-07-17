@@ -17,7 +17,6 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,
@@ -197,12 +196,10 @@ def create_custom_household() -> Household:
 
 @pytest.fixture
 def create_payment_plan(standard_program: Program) -> PaymentPlan:
-    targeting_criteria = TargetingCriteriaFactory()
     cycle = standard_program.cycles.first()
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=BusinessArea.objects.get(slug="afghanistan"),
-        targeting_criteria=targeting_criteria,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency="USD",
