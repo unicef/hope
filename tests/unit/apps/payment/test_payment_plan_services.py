@@ -166,19 +166,17 @@ class TestPaymentPlanServices(APITestCase):
         create_input_data = dict(
             program_cycle_id=str(program_cycle.id),
             name="TEST_123",
-            targeting_criteria={
-                "flag_exclude_if_active_adjudication_ticket": False,
-                "flag_exclude_if_on_sanction_list": False,
-                "rules": [
-                    {
-                        "collectors_filters_blocks": [],
-                        "household_filters_blocks": [],
-                        "household_ids": f"{household.unicef_id}",
-                        "individual_ids": "",
-                        "individuals_filters_blocks": [],
-                    }
-                ],
-            },
+            flag_exclude_if_active_adjudication_ticket=False,
+            flag_exclude_if_on_sanction_list=False,
+            rules=[
+                {
+                    "collectors_filters_blocks": [],
+                    "household_filters_blocks": [],
+                    "household_ids": f"{household.unicef_id}",
+                    "individual_ids": "",
+                    "individuals_filters_blocks": [],
+                }
+            ],
         )
 
         with self.assertRaisesMessage(
@@ -277,19 +275,17 @@ class TestPaymentPlanServices(APITestCase):
             business_area_slug="afghanistan",
             name="paymentPlanName",
             program_cycle_id=program_cycle.id,
-            targeting_criteria={
-                "flag_exclude_if_active_adjudication_ticket": False,
-                "flag_exclude_if_on_sanction_list": False,
-                "rules": [
-                    {
-                        "collectors_filters_blocks": [],
-                        "household_filters_blocks": [],
-                        "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
-                        "individual_ids": "",
-                        "individuals_filters_blocks": [],
-                    }
-                ],
-            },
+            flag_exclude_if_active_adjudication_ticket=False,
+            flag_exclude_if_on_sanction_list=False,
+            rules=[
+                {
+                    "collectors_filters_blocks": [],
+                    "household_filters_blocks": [],
+                    "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
+                    "individual_ids": "",
+                    "individuals_filters_blocks": [],
+                }
+            ],
             fsp_id=self.fsp.id,
             delivery_mechanism_code=self.dm_transfer_to_account.code,
         )
@@ -660,26 +656,24 @@ class TestPaymentPlanServices(APITestCase):
             currency="USD",
             name="TestName123",
             program_cycle_id=str(cycle.id),
-            targeting_criteria={
-                "flag_exclude_if_active_adjudication_ticket": False,
-                "flag_exclude_if_on_sanction_list": False,
-                "rules": [
-                    {
-                        "collectors_filters_blocks": [
-                            {
-                                "comparison_method": "EQUALS",
-                                "arguments": ["No"],
-                                "field_name": "mobile_phone_number__cash_over_the_counter",
-                                "flex_field_classification": "NOT_FLEX_FIELD",
-                            },
-                        ],
-                        "household_filters_blocks": [],
-                        "household_ids": "",
-                        "individual_ids": "",
-                        "individuals_filters_blocks": [],
-                    }
-                ],
-            },
+            flag_exclude_if_active_adjudication_ticket=False,
+            flag_exclude_if_on_sanction_list=False,
+            rules=[
+                {
+                    "collectors_filters_blocks": [
+                        {
+                            "comparison_method": "EQUALS",
+                            "arguments": ["No"],
+                            "field_name": "mobile_phone_number__cash_over_the_counter",
+                            "flex_field_classification": "NOT_FLEX_FIELD",
+                        },
+                    ],
+                    "household_filters_blocks": [],
+                    "household_ids": "",
+                    "individual_ids": "",
+                    "individuals_filters_blocks": [],
+                }
+            ],
         )
 
         with self.assertRaisesMessage(
@@ -720,19 +714,17 @@ class TestPaymentPlanServices(APITestCase):
             business_area_slug="afghanistan",
             name="paymentPlanName",
             program_cycle_id=program_cycle.id,
-            targeting_criteria={
-                "flag_exclude_if_active_adjudication_ticket": False,
-                "flag_exclude_if_on_sanction_list": False,
-                "rules": [
-                    {
-                        "collectors_filters_blocks": [],
-                        "household_filters_blocks": [],
-                        "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
-                        "individual_ids": "",
-                        "individuals_filters_blocks": [],
-                    }
-                ],
-            },
+            flag_exclude_if_active_adjudication_ticket=False,
+            flag_exclude_if_on_sanction_list=False,
+            rules=[
+                {
+                    "collectors_filters_blocks": [],
+                    "household_filters_blocks": [],
+                    "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
+                    "individual_ids": "",
+                    "individuals_filters_blocks": [],
+                }
+            ],
         )
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
