@@ -72,8 +72,9 @@ class RdiMergeTask:
                     households = PendingHousehold.objects.filter(id__in=ids)
                     for household in households:
                         collided_id = obj_hct.program.collision_detector.detect_collision(household)
-                        if collided_id:
-                            household_ids_to_exclude.append(household.id)
+                        if not collided_id:
+                            continue
+                        household_ids_to_exclude.append(household.id)
                         obj_hct.program.collision_detector.update_household(household)
                         updated_household = Household.objects.get(id=collided_id)
                         updated_household.extra_rdis.add(obj_hct)

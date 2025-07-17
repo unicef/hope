@@ -95,6 +95,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     continue
 
                 header = header_cell.value
+                if header.startswith("pp_identification_key"):
+                    obj_to_create.identification_key = cell.value
+                    continue
                 combined_fields = self.COMBINED_FIELDS
                 current_field = combined_fields.get(header, {})
                 if not current_field and header not in complex_fields[sheet_title]:
