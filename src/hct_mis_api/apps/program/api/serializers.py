@@ -354,6 +354,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
     partners = serializers.SerializerMethodField()
     registration_imports_total_count = serializers.SerializerMethodField()
     target_populations_count = serializers.SerializerMethodField()
+    screen_beneficiary = serializers.BooleanField(read_only=True)
     pdu_fields = PeriodicFieldSerializer(many=True)  # type: ignore
 
     class Meta(ProgramListSerializer.Meta):
@@ -368,6 +369,7 @@ class ProgramDetailSerializer(AdminUrlSerializerMixin, ProgramListSerializer):
             "target_populations_count",
             "population_goal",
             "version",
+            "screen_beneficiary",
         )
 
     def get_registration_imports_total_count(self, obj: Program) -> int:
