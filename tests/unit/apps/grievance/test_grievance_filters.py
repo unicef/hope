@@ -121,7 +121,6 @@ class TestGrievanceTicketFilters:
         self.household2, self.individuals2 = create_household_and_individuals(
             household_data={
                 "id": "7e6a41c1-0fbd-4f91-98ba-2c6a7da8dbe1",
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2_2,
                 "country": self.country,
