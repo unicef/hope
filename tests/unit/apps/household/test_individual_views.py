@@ -26,7 +26,6 @@ from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
     IndividualIdentityFactory,
@@ -625,11 +624,11 @@ class TestIndividualDetail:
             country=self.country,
         )
 
-        self.bank_account_info = BankAccountInfoFactory(
-            individual=self.individual1,
-            bank_name="ING",
-            bank_account_number=11110000222255558888999925,
-        )
+        # self.bank_account_info = BankAccountInfoFactory(
+        #     individual=self.individual1,
+        #     bank_name="ING",
+        #     bank_account_number=11110000222255558888999925,
+        # )
 
         self.identity = IndividualIdentityFactory(
             country=self.country,
@@ -1630,8 +1629,8 @@ class TestIndividualFilter:
             },
             individuals_data=[{}, {}],
         )
-        BankAccountInfoFactory(bank_account_number="123456789", individual=individual1)
-        BankAccountInfoFactory(bank_account_number="987654321", individual=individual2)
+        # BankAccountInfoFactory(bank_account_number="123456789", individual=individual1)
+        # BankAccountInfoFactory(bank_account_number="987654321", individual=individual2)
         rebuild_search_index()
         response = self.api_client.get(self.list_url, {"search": "987654321"})
         assert response.status_code == status.HTTP_200_OK, response.json()

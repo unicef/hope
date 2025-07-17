@@ -13,10 +13,6 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.api.mixins import AdminUrlSerializerMixin
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.field_attributes.lookup_functions import (
-    get_debit_card_issuer,
-    get_debit_card_number,
-)
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     to_choice_object,
@@ -1110,15 +1106,15 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "snapshot_collector_bank_account_number",
             "snapshot_collector_bank_name",
             "snapshot_collector_debit_card_number",
-            "debit_card_number",
-            "debit_card_issuer",
+            # "debit_card_number",
+            # "debit_card_issuer",
         )
 
-    def get_debit_card_number(self, obj: Payment) -> str:
-        return get_debit_card_number(obj.collector)
-
-    def get_debit_card_issuer(self, obj: Payment) -> str:
-        return get_debit_card_issuer(obj.collector)
+    # def get_debit_card_number(self, obj: Payment) -> str:
+    #     return get_debit_card_number(obj.collector)
+    #
+    # def get_debit_card_issuer(self, obj: Payment) -> str:
+    #     return get_debit_card_issuer(obj.collector)
 
     def get_snapshot_collector_bank_name(self, obj: Payment) -> Optional[str]:
         if bank_account_info := self.collector_field(obj, "bank_account_info"):

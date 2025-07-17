@@ -291,9 +291,42 @@ function prepareEditIndividualVariables(requiredVariables, values) {
     values.individualDataUpdateFieldsIdentities,
   );
 
-  const newlyAddedPaymentChannelsWithoutIds = removeIdPropertyFromObjects(
-    values.individualDataUpdateFieldsPaymentChannels,
+  const newlyAddedAccountsWithoutIds = removeIdPropertyFromObjects(
+    values.individualDataUpdateFieldsAccounts,
+  )?.map(account => {
+      const { name, ...dataFields } = account;
+      const { dynamicFields, ...restDataFields } = dataFields;
+      const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
+        if (curr.key) acc[curr.key] = curr.value;
+        return acc;
+      }, {});
+
+      return {
+        name,
+        dataFields: {
+          ...restDataFields,
+          ...mappedDynamicFields,
+        },
+      };
+    },
   );
+
+  const accountsToEdit = values.individualDataUpdateAccountsToEdit?.map(account => {
+    const { id, name, ...dataFields } = account;
+     const { dynamicFields, ...restDataFields } = dataFields;
+    const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
+    if (curr.key) acc[curr.key] = curr.value;
+    return acc;
+        }, {});
+    return {
+      id,
+      name,
+      dataFields: {
+          ...restDataFields,
+          ...mappedDynamicFields,
+        },
+    };
+  });
 
   return {
     variables: {
@@ -314,11 +347,8 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 identitiesToRemove:
                   values.individualDataUpdateIdentitiesToRemove,
                 identitiesToEdit: values.individualDataUpdateIdentitiesToEdit,
-                paymentChannels: newlyAddedPaymentChannelsWithoutIds,
-                paymentChannelsToRemove:
-                  values.individualDataUpdatePaymentChannelsToRemove,
-                paymentChannelsToEdit:
-                  values.individualDataUpdatePaymentChannelsToEdit,
+                accounts: newlyAddedAccountsWithoutIds,
+                accountsToEdit: accountsToEdit,
               },
             },
           },

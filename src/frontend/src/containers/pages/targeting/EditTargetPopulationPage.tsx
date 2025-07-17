@@ -1,3 +1,10 @@
+import { ReactElement, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import {
+  PaymentPlanBuildStatus,
+  useBusinessAreaDataQuery,
+  usePaymentPlanQuery,
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -44,13 +51,13 @@ const EditTargetPopulationPage = (): ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!paymentPlan || permissions === null || !businessAreaData) return null;
+  if (!paymentPlan || permissions === null) return null;
 
 
   return (
     <EditTargetPopulation
       paymentPlan={paymentPlan}
-      screenBeneficiary={paymentPlan?.screenBeneficiary}
+      screenBeneficiary={paymentPlan?.program?.screenBeneficiary}
     />
   );
 };

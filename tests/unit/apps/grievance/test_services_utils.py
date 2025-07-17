@@ -27,9 +27,7 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
     convert_to_empty_string_if_null,
     handle_add_document,
-    handle_add_payment_channel,
     handle_role,
-    handle_update_payment_channel,
     to_phone_number_str,
     verify_flex_fields,
 )
@@ -42,7 +40,6 @@ from hct_mis_api.apps.grievance.utils import (
     validate_individual_for_need_adjudication,
 )
 from hct_mis_api.apps.household.fixtures import (
-    BankAccountInfoFactory,
     DocumentFactory,
     DocumentTypeFactory,
     IndividualFactory,
@@ -53,7 +50,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    BankAccountInfo,
     Document,
     IndividualRoleInHousehold,
 )
@@ -104,40 +100,6 @@ class TestGrievanceUtils(TestCase):
         self.assertEqual(flex_fields["string_field"], "some_string")
         self.assertEqual(flex_fields["integer_field"], 123)
         self.assertEqual(flex_fields["decimal_field"], 321.11)
-
-    def test_handle_add_payment_channel(self) -> None:
-        business_area = BusinessAreaFactory(name="Afghanistan")
-        payment_channel = {
-            "type": "BANK_TRANSFER",
-            "bank_name": "BankName",
-            "bank_account_number": "12345678910",
-        }
-        individual = IndividualFactory(household=None, business_area=business_area)
-        obj = handle_add_payment_channel(payment_channel, individual)
-
-        self.assertIsInstance(obj, BankAccountInfo)
-
-        payment_channel["type"] = "OTHER"
-        resp_none = handle_add_payment_channel(payment_channel, individual)
-        self.assertIsNone(resp_none)
-
-    def test_handle_update_payment_channel(self) -> None:
-        business_area = BusinessAreaFactory(name="Afghanistan")
-        individual = IndividualFactory(household=None, business_area=business_area)
-        bank_info = BankAccountInfoFactory(individual=individual)
-
-        payment_channel_dict = {
-            "type": "BANK_TRANSFER",
-            "id": str(bank_info.pk),
-            "bank_name": "BankName",
-            "bank_account_number": "1234321",
-        }
-
-        obj = handle_update_payment_channel(payment_channel_dict)
-        self.assertIsInstance(obj, BankAccountInfo)
-        payment_channel_dict["type"] = "OTHER"
-        resp_none = handle_update_payment_channel(payment_channel_dict)
-        self.assertIsNone(resp_none)
 
     def test_verify_flex_fields(self) -> None:
         with pytest.raises(ValueError) as e:

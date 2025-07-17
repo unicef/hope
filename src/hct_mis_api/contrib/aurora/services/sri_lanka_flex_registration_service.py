@@ -13,7 +13,6 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     ROLE_PRIMARY,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -185,9 +184,6 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
         self._prepare_national_id(head_of_household_dict, head_of_household)
 
-        # TODO: check if this is correct
-        bank_name = f"{collector_dict.get('bank_description')} [{collector_dict.get('bank_name')} - {collector_dict.get('branch_or_branch_code')}]"
-        bank_account_number = collector_dict.get("confirm_bank_account_number")
         if should_use_hoh_as_collector:
             primary_collector = head_of_household
         else:
@@ -200,14 +196,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         PendingIndividualRoleInHousehold.objects.create(
             household=household, individual=primary_collector, role=ROLE_PRIMARY
         )
-        if bank_name and bank_account_number:
-            PendingBankAccountInfo.objects.create(
-                bank_name=bank_name,
-                bank_account_number=bank_account_number,
-                account_holder_name=collector_dict.get("account_holder_name_i_c", ""),
-                bank_branch_name=collector_dict.get("bank_branch_name_i_c", ""),
-                individual=primary_collector,
-            )
+
         individuals_to_create = []
         for individual_data_dict in individuals_list:
             if not bool(individual_data_dict):

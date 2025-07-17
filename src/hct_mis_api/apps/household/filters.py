@@ -192,11 +192,6 @@ class HouseholdFilter(UpdatedAtFilter):
                         {"match_phrase_prefix": {"head_of_household.full_name": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.phone_no_text": {"query": search}}},
                         {"match_phrase_prefix": {"head_of_household.phone_no_alternative_text": {"query": search}}},
-                        {
-                            "match_phrase_prefix": {
-                                "head_of_household.bank_account_info.bank_account_number": {"query": search}
-                            }
-                        },
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
                         {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
                     ],
@@ -248,8 +243,6 @@ class HouseholdFilter(UpdatedAtFilter):
                 else:
                     inner_query = Q(kobo_asset_id__endswith=search)
             return qs.filter(inner_query)
-        if search_type == "bank_account_number":
-            return qs.filter(head_of_household__bank_account_info__bank_account_number__icontains=search)
         if DocumentType.objects.filter(key=search_type).exists():
             return qs.filter(
                 head_of_household__documents__type__key=search_type,
@@ -412,7 +405,6 @@ class IndividualFilter(UpdatedAtFilter):
                         {"match_phrase_prefix": {"phone_no_alternative_text": {"query": search}}},
                         {"match_phrase_prefix": {"detail_id": {"query": search}}},
                         {"match_phrase_prefix": {"program_registration_id": {"query": search}}},
-                        {"match_phrase_prefix": {"bank_account_info.bank_account_number": {"query": search}}},
                     ],
                 }
             },
@@ -444,8 +436,6 @@ class IndividualFilter(UpdatedAtFilter):
             except ValueError:
                 raise SearchException("The search value for a given search type should be a number")
             return qs.filter(detail_id__icontains=search)
-        if search_type == "bank_account_number":
-            return qs.filter(bank_account_info__bank_account_number__icontains=search)
         if DocumentType.objects.filter(key=search_type).exists():
             return qs.filter(documents__type__key=search_type, documents__document_number__icontains=search)
         raise SearchException(f"Invalid search key '{search_type}'")

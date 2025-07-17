@@ -26,7 +26,6 @@ from hct_mis_api.apps.household.api.serializers.individual import (
     IndividualSimpleSerializer,
 )
 from hct_mis_api.apps.household.models import (
-    BankAccountInfo,
     Document,
     DocumentType,
     Household,
@@ -263,13 +262,13 @@ class BankTransferSerializer(serializers.Serializer):
     account_holder_name = serializers.CharField()
 
 
-class EditBankTransferSerializer(serializers.Serializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=BankAccountInfo.objects.all())
-    type = serializers.CharField()
-    bank_name = serializers.CharField()
-    bank_account_number = serializers.CharField()
-    bank_branch_name = serializers.CharField(required=False, allow_null=True)
-    account_holder_name = serializers.CharField()
+# class EditBankTransferSerializer(serializers.Serializer):
+#     id = serializers.PrimaryKeyRelatedField(queryset=BankAccountInfo.objects.all())
+#     type = serializers.CharField()
+#     bank_name = serializers.CharField()
+#     bank_account_number = serializers.CharField()
+#     bank_branch_name = serializers.CharField(required=False, allow_null=True)
+#     account_holder_name = serializers.CharField()
 
 
 class HouseholdUpdateDataSerializer(serializers.Serializer):
@@ -396,10 +395,10 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
     )
     identities_to_edit = EditIndividualIdentitySerializer(many=True, required=False)
     payment_channels = BankTransferSerializer(many=True, required=False)
-    payment_channels_to_edit = EditBankTransferSerializer(many=True, required=False)
-    payment_channels_to_remove = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=BankAccountInfo.objects.all()), required=False
-    )
+    # payment_channels_to_edit = EditBankTransferSerializer(many=True, required=False)
+    # payment_channels_to_remove = serializers.ListField(
+    #     child=serializers.PrimaryKeyRelatedField(queryset=BankAccountInfo.objects.all()), required=False
+    # )
     preferred_language = serializers.CharField(required=False)
     flex_fields = serializers.JSONField(required=False)
     payment_delivery_phone_no = serializers.CharField(required=False)

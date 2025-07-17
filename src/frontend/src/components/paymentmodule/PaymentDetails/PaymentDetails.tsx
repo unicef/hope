@@ -48,6 +48,10 @@ function PaymentDetails({
     'TRANSACTION_ERRONEOUS',
   ].includes(payment.status);
 
+  const collectorAccountData = payment?.snapshotCollectorAccountData
+  ? JSON.parse(payment.snapshotCollectorAccountData)
+  : {};
+
   return (
     <>
       <ContainerColumnWithBorder>
@@ -216,34 +220,14 @@ function PaymentDetails({
         </Grid>
         <DividerLine />
         <Grid container spacing={3}>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Bank Name')}
-              value={payment.snapshotCollectorBankName}
-            />
-          </Grid>
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Bank Account Number')}
-              value={payment.snapshotCollectorBankAccountNumber}
-            />
-          </Grid>
-          {payment.deliveryMechanism?.name === 'Deposit to Card' && (
-            <>
-              <Grid size={{ xs: 3 }}>
+           {Object.entries(collectorAccountData).map(([key, value]) => (
+              <Grid key={key} size={{ xs: 3 }}>
                 <LabelizedField
-                  label={t('Debit Card Issuer')}
-                  value={payment.debitCardIssuer}
+                  label={t(`Account ${key}`)}
+                  value={String(value)}
                 />
               </Grid>
-              <Grid size={{ xs: 3 }}>
-                <LabelizedField
-                  label={t('Debit Card Number')}
-                  value={payment.debitCardNumber}
-                />
-              </Grid>
-            </>
-          )}
+            ))}
         </Grid>
       </Overview>
       <Overview>
@@ -280,12 +264,6 @@ function PaymentDetails({
               />
             </Grid>
           )}
-          <Grid size={{ xs: 3 }}>
-            <LabelizedField
-              label={t('Bank Account Number')}
-              value={payment.snapshotCollectorBankAccountNumber}
-            />
-          </Grid>
         </Grid>
       </Overview>
       {canViewActivityLog && (

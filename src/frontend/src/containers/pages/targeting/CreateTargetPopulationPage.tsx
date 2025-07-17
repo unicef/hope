@@ -5,6 +5,11 @@ import CreateTargetPopulationHeader from '@components/targeting/CreateTargetPopu
 import Exclusions from '@components/targeting/CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import AddFilterTargetingCriteriaDisplay from '@components/targeting/TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
+import {
+  useBusinessAreaDataQuery,
+  useCreateTpMutation,
+  useProgramQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -82,6 +87,9 @@ const CreateTargetPopulationPage = (): ReactElement => {
         businessAreaSlug,
         slug: programSlug,
       }),
+
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
   });
 
   if (permissions === null) return null;
@@ -89,6 +97,7 @@ const CreateTargetPopulationPage = (): ReactElement => {
   if (!program) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
     return <PermissionDenied />;
+
   const screenBeneficiary = program?.screenBeneficiary;
   const validationSchema = Yup.object().shape({
     name: Yup.string()

@@ -1,4 +1,5 @@
 import graphene
+from graphene.types.generic import GenericScalar
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.schema import PartnerType, UserNode
@@ -126,21 +127,17 @@ class EditIndividualIdentityObjectType(graphene.InputObjectType):
     number = graphene.String(required=True)
 
 
-class BankTransferObjectType(graphene.InputObjectType):
-    type = graphene.String(required=True)
-    bank_name = graphene.String(required=True)
-    bank_account_number = graphene.String(required=True)
-    bank_branch_name = graphene.String(required=False)
-    account_holder_name = graphene.String(required=True)
+class AccountObjectType(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    approve_status = graphene.Boolean(required=False)
+    data_fields = GenericScalar()
 
 
-class EditBankTransferObjectType(graphene.InputObjectType):
-    id = graphene.Field(graphene.ID, required=True)
-    type = graphene.String(required=True)
-    bank_name = graphene.String(required=True)
-    bank_account_number = graphene.String(required=True)
-    bank_branch_name = graphene.String(required=False)
-    account_holder_name = graphene.String(required=True)
+class EditAccountObjectType(graphene.InputObjectType):
+    name = graphene.String(required=False)
+    approve_status = graphene.Boolean(required=False)
+    id = graphene.ID(required=True)
+    data_fields = GenericScalar()
 
 
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
@@ -177,9 +174,8 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     identities = graphene.List(IndividualIdentityObjectType)
     identities_to_remove = graphene.List(graphene.ID)
     identities_to_edit = graphene.List(EditIndividualIdentityObjectType)
-    payment_channels = graphene.List(BankTransferObjectType)
-    payment_channels_to_edit = graphene.List(EditBankTransferObjectType)
-    payment_channels_to_remove = graphene.List(graphene.ID)
+    accounts = graphene.List(AccountObjectType)
+    accounts_to_edit = graphene.List(EditAccountObjectType)
     preferred_language = graphene.String()
     flex_fields = Arg()
     payment_delivery_phone_no = graphene.String()
@@ -231,7 +227,6 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     role = graphene.String(required=True)
     documents = graphene.List(IndividualDocumentObjectType)
     identities = graphene.List(IndividualIdentityObjectType)
-    payment_channels = graphene.List(BankTransferObjectType)
     business_area = graphene.String()
     preferred_language = graphene.String()
     flex_fields = Arg()

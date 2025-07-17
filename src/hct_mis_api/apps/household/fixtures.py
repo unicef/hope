@@ -23,7 +23,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SEX_CHOICE,
     UNICEF,
-    BankAccountInfo,
     Document,
     DocumentType,
     EntitlementCard,
@@ -33,7 +32,6 @@ from hct_mis_api.apps.household.models import (
     IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -246,25 +244,6 @@ class PendingIndividualFactory(IndividualFactory):
 
     class Meta:
         model = PendingIndividual
-
-
-class BankAccountInfoFactory(DjangoModelFactory):
-    class Meta:
-        model = BankAccountInfo
-
-    individual = factory.SubFactory(IndividualFactory)
-    bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
-    bank_account_number = factory.LazyAttribute(lambda x: random.randint(10**26, 10**27 - 1))
-    bank_branch_name = random.choice(["BranchCityBank", "BranchSantander", "BranchJPMorgan"])
-    account_holder_name = factory.Faker("last_name")
-    rdi_merge_status = MergeStatusModel.MERGED
-
-
-class PendingBankAccountInfoFactory(BankAccountInfoFactory):
-    rdi_merge_status = PendingIndividual.PENDING
-
-    class Meta:
-        model = PendingBankAccountInfo
 
 
 class DocumentTypeFactory(DjangoModelFactory):

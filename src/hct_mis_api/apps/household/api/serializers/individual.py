@@ -27,7 +27,6 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     ROLE_NO_ROLE,
-    BankAccountInfo,
     Document,
     DocumentType,
     Individual,
@@ -103,16 +102,16 @@ class IndividualIdentitySerializer(serializers.ModelSerializer):
         )
 
 
-class BankAccountInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BankAccountInfo
-        fields = (
-            "id",
-            "bank_name",
-            "bank_account_number",
-            "account_holder_name",
-            "bank_branch_name",
-        )
+# class BankAccountInfoSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = BankAccountInfo
+#         fields = (
+#             "id",
+#             "bank_name",
+#             "bank_account_number",
+#             "account_holder_name",
+#             "bank_branch_name",
+#         )
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -367,7 +366,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "disability",
             "documents",
             "identities",
-            "bank_account_info",
+            # "bank_account_info",
             "accounts",
             "email",
             "phone_no",
@@ -401,10 +400,10 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     def get_identities(self, obj: Individual) -> Dict:
         return IndividualIdentitySerializer(obj.identities(manager="all_merge_status_objects").all(), many=True).data
 
-    def get_bank_account_info(self, obj: Individual) -> Dict:
-        return BankAccountInfoSerializer(
-            obj.bank_account_info(manager="all_merge_status_objects").all(), many=True
-        ).data
+    # def get_bank_account_info(self, obj: Individual) -> Dict:
+    #     return BankAccountInfoSerializer(
+    #         obj.bank_account_info(manager="all_merge_status_objects").all(), many=True
+    #     ).data
 
     def get_accounts(self, obj: Individual) -> Dict:
         if self.context["request"].user.has_perm(

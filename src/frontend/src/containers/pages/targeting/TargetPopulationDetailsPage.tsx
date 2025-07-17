@@ -20,14 +20,15 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { isStandardDctType, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
-  const { programId } = useBaseUrl();
+  const { data, loading, error, startPolling, stopPolling } =
+    useTargetPopulationQuery({
+      variables: { id },
+      fetchPolicy: 'cache-and-network',
+    });
+
   const { businessArea } = useBaseUrl();
-  const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessArea],
-    queryFn: () =>
-      RestService.restBusinessAreasRetrieve({
-        slug: businessArea,
-      }),
+  const { data: businessAreaData } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
   });
 
   const {
@@ -57,7 +58,12 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!paymentPlan || permissions === null || !businessAreaData) return null;
+  if (!data || permissions === null || !businessAreaData) return null;
+
+  const { paymentPlan } = data;
+    const { data: programData } = useProgramQuery({
+    variables: { id: programId },
+  });
 
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
@@ -81,7 +87,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
         permissions={permissions}
-        screenBeneficiary={paymentPlan.screenBeneficiary}
+        screenBeneficiary={programData?.program?.screenBeneficiary}
       />
     </>
   );

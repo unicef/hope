@@ -3,40 +3,46 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { PaymentChannelField } from '../PaymentChannelField';
+import { AccountField } from '../AccountField';
 import { removeItemById } from '../utils/helpers';
 import { ReactElement } from 'react';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 
-export interface NewPaymentChannelFieldArrayProps {
+export interface NewAccountFieldArrayProps {
   values;
+ addIndividualFieldsData: AllAddIndividualFieldsQuery;
 }
 
-export function NewPaymentChannelFieldArray({
+export function NewAccountFieldArray({
   values,
-}: NewPaymentChannelFieldArrayProps): ReactElement {
+  addIndividualFieldsData,
+}: NewAccountFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name="individualDataUpdateFieldsPaymentChannels"
+        name="individualDataUpdateFieldsAccounts"
         render={(arrayHelpers) => (
           <>
-            {values.individualDataUpdateFieldsPaymentChannels?.map((item) => {
+            {values.individualDataUpdateFieldsAccounts?.map((item) => {
+              const existingOrNewId = item.node?.id || item.id;
               return (
-                <PaymentChannelField
-                  id={item?.id}
-                  key={item?.id}
+                <AccountField
+                  id={existingOrNewId}
+                  key={existingOrNewId}
                   onDelete={() =>
                     removeItemById(
-                      values.individualDataUpdateFieldsPaymentChannels,
-                      item?.id,
+                      values.individualDataUpdateFieldsAccounts,
+                      existingOrNewId,
                       arrayHelpers,
                     )
                   }
-                  baseName="individualDataUpdateFieldsPaymentChannels"
+                  baseName="individualDataUpdateFieldsAccounts"
                   values={values}
+                  accountTypeChoices={addIndividualFieldsData.accountTypeChoices}
+                  accountFinancialInstitutionChoices={addIndividualFieldsData.accountFinancialInstitutionChoices}
                 />
               );
             })}
@@ -47,15 +53,12 @@ export function NewPaymentChannelFieldArray({
                 onClick={() => {
                   arrayHelpers.push({
                     id: crypto.randomUUID(),
-                    bankName: null,
-                    bankAccountNumber: null,
-                    type: 'BANK_TRANSFER',
                   });
                 }}
                 disabled={isEditTicket}
                 startIcon={<AddCircleOutline />}
               >
-                {t('Add Payment Channel')}
+                {t('Add Account')}
               </Button>
             </Grid>
           </>

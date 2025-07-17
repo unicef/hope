@@ -13,7 +13,6 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     DocumentType,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -36,7 +35,6 @@ class BaseTestUkrainianRegistrationService(TestCase):
     def individual_with_bank_account_and_tax_and_disability(cls) -> Dict:
         return {
             "tax_id_no_i_c": "123123123",
-            "bank_account_h_f": "y",
             "relationship_i_c": "head",
             "given_name_i_c": "Jan",
             "family_name_i_c": "Romaniak",
@@ -45,10 +43,6 @@ class BaseTestUkrainianRegistrationService(TestCase):
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
             "email": "email123@mail.com",
-            "bank_account_number": "123 123 321 321",
-            "bank_account": "111 123 321 321",
-            "account_holder_name_i_c": "Test Holder Name 111",
-            "bank_branch_name_i_c": "Branch Name 111",
         }
 
     @classmethod
@@ -85,7 +79,6 @@ class BaseTestUkrainianRegistrationService(TestCase):
 
         individual_wit_bank_account_and_tax = {
             "tax_id_no_i_c": "123123123",
-            "bank_account_h_f": "y",
             "relationship_i_c": "head",
             "given_name_i_c": "Wiktor",
             "family_name_i_c": "Lamiący",
@@ -94,14 +87,9 @@ class BaseTestUkrainianRegistrationService(TestCase):
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
             "email": "email321@mail.com",
-            "bank_account_number": "111 222 000 333",
-            "bank_account": "222 123 321 321",
-            "account_holder_name_i_c": "Test Holder Name 222",
-            "bank_branch_name_i_c": "Branch Name 222",
         }
         individual_with_no_tax = {
             "tax_id_no_i_c": "",
-            "bank_account_h_f": "y",
             "relationship_i_c": "head",
             "given_name_i_c": "Michał",
             "family_name_i_c": "Brzęczący",
@@ -110,14 +98,9 @@ class BaseTestUkrainianRegistrationService(TestCase):
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
             "email": "email111@mail.com",
-            "bank_account_number": "111 222 222 111",
-            "bank_account": "333 123 321 321",
-            "account_holder_name_i_c": "Test Holder Name 333",
-            "bank_branch_name_i_c": "Branch Name 333",
         }
         individual_without_bank_account = {
             "tax_id_no_i_c": "TESTID",
-            "bank_account_h_f": "",
             "relationship_i_c": "head",
             "given_name_i_c": "Aleksiej",
             "family_name_i_c": "Prysznicow",
@@ -129,7 +112,6 @@ class BaseTestUkrainianRegistrationService(TestCase):
         }
         individual_with_tax_id_which_is_too_long = {
             "tax_id_no_i_c": "x" * 300,
-            "bank_account_h_f": "",
             "relationship_i_c": "head",
             "given_name_i_c": "Aleksiej",
             "family_name_i_c": "Prysznicow",
@@ -209,10 +191,6 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(PendingHousehold.objects.count(), 4)
         self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 4)
-        self.assertEqual(PendingBankAccountInfo.pending_objects.count(), 3)
-        bank_acc_info = PendingBankAccountInfo.pending_objects.get(bank_account_number="333123321321")
-        self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 333")
-        self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 333")
         self.assertEqual(
             PendingDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
