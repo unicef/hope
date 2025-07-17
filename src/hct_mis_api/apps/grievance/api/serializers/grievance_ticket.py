@@ -40,8 +40,8 @@ from hct_mis_api.apps.program.models import Program
 
 class CreateAccountSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
-    data_fields = serializers.JSONField(required=True)
     approve_status = serializers.BooleanField()
+    value = serializers.JSONField(required=True)
 
 
 class EditAccountSerializer(serializers.Serializer):
