@@ -713,7 +713,7 @@ class Household(
         help_text="This relation is filed when collision of Household happens.",
     )
     identification_key = models.CharField(
-        null=True, blank=True, max_length=255, help_text="Key used to identify Collisions in the system"
+        null=True, blank=True, max_length=255, db_index=True, help_text="Key used to identify Collisions in the system"
     )
     collision_flag = models.BooleanField(
         default=False, help_text="Flag used to identify if the household is in collision state"
@@ -1292,7 +1292,7 @@ class Individual(
     is_migration_handled = models.BooleanField(default=False, help_text="Migration status [sys]")
     migrated_at = models.DateTimeField(null=True, blank=True, help_text="Migrated at [sys]")
     identification_key = models.CharField(
-        null=True, blank=True, max_length=255, help_text="Key used to identify Collisions in the system"
+        null=True, blank=True, max_length=255, db_index=True, help_text="Key used to identify Collisions in the system"
     )
     vector_column = SearchVectorField(null=True, help_text="Database vector column for search [sys]")
 
