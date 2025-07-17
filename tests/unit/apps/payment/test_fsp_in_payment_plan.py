@@ -22,7 +22,6 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 
 def base_setup(cls: Any) -> None:
@@ -95,7 +94,6 @@ def base_setup(cls: Any) -> None:
 
 
 def payment_plan_setup(cls: Any) -> None:
-    targeting_criteria = TargetingCriteriaFactory()
     cls.santander_fsp = FinancialServiceProviderFactory(
         name="Santander",
         distribution_limit=None,
@@ -111,7 +109,6 @@ def payment_plan_setup(cls: Any) -> None:
 
     cls.payment_plan = PaymentPlanFactory(
         total_households_count=4,
-        targeting_criteria=targeting_criteria,
         status=PaymentPlan.Status.LOCKED,
         program_cycle=cls.program.cycles.first(),
         created_by=cls.user,

@@ -40,10 +40,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from hct_mis_api.contrib.vision.fixtures import FundsCommitmentFactory
 from hct_mis_api.contrib.vision.models import FundsCommitmentItem
 
@@ -312,12 +309,10 @@ class TestPaymentPlanQueries(APITestCase):
       paymentPlan(id: $id) {
         name
         status
-        targetingCriteria {
-          householdIds
-          individualIds
-          flagExcludeIfOnSanctionList
-          flagExcludeIfActiveAdjudicationTicket
-        }
+        householdIds
+        individualIds
+        flagExcludeIfOnSanctionList
+        flagExcludeIfActiveAdjudicationTicket
       }
     }
     """
@@ -1046,14 +1041,11 @@ class TestPaymentPlanQueries(APITestCase):
             created_by=self.user,
             currency="PLN",
         )
-        targeting_criteria = TargetingCriteriaFactory()
         TargetingCriteriaRuleFactory(
-            targeting_criteria=targeting_criteria,
+            payment_plan=payment_plan,
             household_ids="HH-1, HH-2",
             individual_ids="IND-01, IND-02",
         )
-        payment_plan.targeting_criteria = targeting_criteria
-        payment_plan.save()
 
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA,
