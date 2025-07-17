@@ -223,7 +223,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         x = values_as_list[0].strip()
         y = values_as_list[1].strip()
 
-        return x, y
+        return float(x), float(y)
 
     def _handle_string_field(
         self,
