@@ -1458,4 +1458,3 @@ class TestHouseholdFilter:
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(household1.id)
         return response_data
-

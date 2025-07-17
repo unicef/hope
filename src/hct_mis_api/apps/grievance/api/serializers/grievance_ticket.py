@@ -38,6 +38,19 @@ from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 from hct_mis_api.apps.program.models import Program
 
 
+class CreateAccountSerializer(serializers.Serializer):
+    name = serializers.CharField(required=True)
+    data_fields = serializers.JSONField(required=True)
+    approve_status = serializers.BooleanField()
+
+
+class EditAccountSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField(required=True)
+    data_fields = serializers.JSONField(required=True)
+    approve_status = serializers.BooleanField()
+
+
 class GrievanceTicketSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrievanceTicket
@@ -254,23 +267,6 @@ class EditIndividualIdentitySerializer(serializers.Serializer):
     number = serializers.CharField()
 
 
-class BankTransferSerializer(serializers.Serializer):
-    type = serializers.CharField()
-    bank_name = serializers.CharField()
-    bank_account_number = serializers.CharField()
-    bank_branch_name = serializers.CharField()
-    account_holder_name = serializers.CharField()
-
-
-# class EditBankTransferSerializer(serializers.Serializer):
-#     id = serializers.PrimaryKeyRelatedField(queryset=BankAccountInfo.objects.all())
-#     type = serializers.CharField()
-#     bank_name = serializers.CharField()
-#     bank_account_number = serializers.CharField()
-#     bank_branch_name = serializers.CharField(required=False, allow_null=True)
-#     account_holder_name = serializers.CharField()
-
-
 class HouseholdUpdateDataSerializer(serializers.Serializer):
     admin_area_title = serializers.CharField(required=False)
     status = serializers.CharField(required=False)
@@ -346,7 +342,7 @@ class AddIndividualDataSerializer(serializers.Serializer):
     business_area = serializers.CharField(required=False)
     documents = IndividualDocumentSerializer(many=True, required=False)
     identities = IndividualIdentitySerializer(many=True, required=False)
-    payment_channels = BankTransferSerializer(many=True, required=False)
+    accounts = CreateAccountSerializer(many=True, required=False)
     preferred_language = serializers.CharField(required=False)
     flex_fields = serializers.JSONField(required=False)
     payment_delivery_phone_no = serializers.CharField(required=False)
@@ -394,11 +390,8 @@ class IndividualUpdateDataSerializer(serializers.Serializer):
         required=False,
     )
     identities_to_edit = EditIndividualIdentitySerializer(many=True, required=False)
-    payment_channels = BankTransferSerializer(many=True, required=False)
-    # payment_channels_to_edit = EditBankTransferSerializer(many=True, required=False)
-    # payment_channels_to_remove = serializers.ListField(
-    #     child=serializers.PrimaryKeyRelatedField(queryset=BankAccountInfo.objects.all()), required=False
-    # )
+    accounts = CreateAccountSerializer(many=True, required=False)
+    accounts_to_edit = EditAccountSerializer(many=True, required=False)
     preferred_language = serializers.CharField(required=False)
     flex_fields = serializers.JSONField(required=False)
     payment_delivery_phone_no = serializers.CharField(required=False)
