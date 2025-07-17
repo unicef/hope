@@ -119,6 +119,7 @@ class TestProgramDetail:
         assert response_data["sector"] == self.program.sector
         assert response_data["cash_plus"] == self.program.cash_plus
         assert response_data["population_goal"] == self.program.population_goal
+        assert response_data["screen_beneficiary"] == self.program.screen_beneficiary
         assert response_data["data_collecting_type"] == {
             "id": self.program.data_collecting_type.id,
             "label": self.program.data_collecting_type.label,
