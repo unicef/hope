@@ -13,10 +13,7 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import AccountType, PaymentPlan
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
     XlsxExportTargetingService,
 )
@@ -72,12 +69,11 @@ class TestXlsxExportTargetingService(APITestCase):
             vulnerability_score=99,
             household=hh2,
         )
-        targeting_criteria = TargetingCriteriaFactory()
         TargetingCriteriaRuleFactory(
-            targeting_criteria=targeting_criteria, household_ids=f"{p1.household.unicef_id}, {p2.household.unicef_id}"
+            household_ids=f"{p1.household.unicef_id}, {p2.household.unicef_id}",
+            payment_plan=self.payment_plan,
         )
-        self.payment_plan.targeting_criteria = targeting_criteria
-        self.payment_plan.save()
+
         service = XlsxExportTargetingService(self.payment_plan)
         self.assertEqual(len(service.households), 2)
 

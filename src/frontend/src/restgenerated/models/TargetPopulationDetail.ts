@@ -10,7 +10,7 @@ import type { PaymentPlanBackgroundActionStatusEnum } from './PaymentPlanBackgro
 import type { ProgramCycleSmall } from './ProgramCycleSmall';
 import type { ProgramSmall } from './ProgramSmall';
 import type { RuleCommit } from './RuleCommit';
-import type { TargetingCriteria } from './TargetingCriteria';
+import type { TargetingCriteriaRule } from './TargetingCriteriaRule';
 export type TargetPopulationDetail = {
     readonly id: string;
     unicefId?: string | null;
@@ -258,7 +258,7 @@ export type TargetPopulationDetail = {
      * Female Adults Count [sys]
      */
     femaleAdultsCount?: number;
-    readonly targetingCriteria: TargetingCriteria;
+    readonly rules: Array<TargetingCriteriaRule>;
     readonly steficonRuleTargeting: RuleCommit;
     /**
      * Written by a tool such as Engine Formula

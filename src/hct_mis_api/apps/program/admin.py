@@ -24,7 +24,6 @@ from hct_mis_api.apps.registration_datahub.services.biometric_deduplication impo
     BiometricDeduplicationService,
 )
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
-from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
@@ -152,10 +151,11 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             return HttpResponseRedirect(url)
 
         else:
-            targeting_criteria = TargetingCriteria()
-            targeting_criteria.save()
             form = CreateTargetPopulationTextForm(
-                initial={"action": "create_tp_from_list", "targeting_criteria": targeting_criteria}, program=program
+                initial={
+                    "action": "create_tp_from_list",
+                },
+                program=program,
             )
 
         context["form"] = form

@@ -63,8 +63,6 @@ export type PaymentDetail = {
      */
     additionalCollectorName?: string | null;
     transactionReferenceId?: string | null;
-    readonly snapshotCollectorBankAccountNumber: string | null;
-    readonly snapshotCollectorBankName: string | null;
-    readonly snapshotCollectorDebitCardNumber: string | null;
+    readonly snapshotCollectorAccountData: any;
 };
 

@@ -56,12 +56,10 @@ from hct_mis_api.apps.program.fixtures import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
@@ -262,7 +260,6 @@ class PaymentPlanFactory(DjangoModelFactory):
     created_by = factory.SubFactory(UserFactory)
     unicef_id = factory.Faker("uuid4")
     program_cycle = factory.SubFactory(ProgramCycleFactory)
-    targeting_criteria = factory.SubFactory(TargetingCriteriaFactory)
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker("date_this_year", before_today=True, after_today=False)
@@ -447,7 +444,6 @@ def generate_reconciled_payment_plan() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
-    targeting_criteria: TargetingCriteria = TargetingCriteriaFactory()
     program = Program.objects.filter(business_area=afghanistan, name="Test Program").first()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
     fsp_1 = FinancialServiceProviderFactory()
@@ -457,7 +453,6 @@ def generate_reconciled_payment_plan() -> None:
         name="Reconciled Payment Plan",
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
-        targeting_criteria=targeting_criteria,
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
@@ -597,25 +592,6 @@ def generate_payment_plan() -> None:
     individual_2.household = household_2
     individual_2.save()
 
-    targeting_criteria_pk = UUID("00000000-0000-0000-0000-feedb00c0000")
-    targeting_criteria = TargetingCriteria.objects.update_or_create(
-        pk=targeting_criteria_pk,
-    )[0]
-
-    targeting_criteria_rule_pk = UUID("00000000-0000-0000-0000-feedb00c0009")
-    targeting_criteria_rule = TargetingCriteriaRule.objects.update_or_create(
-        pk=targeting_criteria_rule_pk,
-        targeting_criteria=targeting_criteria,
-    )[0]
-
-    targeting_criteria_rule_condition_pk = UUID("00000000-0000-0000-0000-feedb00c0008")
-    TargetingCriteriaRuleFilter.objects.update_or_create(
-        pk=targeting_criteria_rule_condition_pk,
-        targeting_criteria_rule=targeting_criteria_rule,
-        comparison_method="CONTAINS",
-        field_name="registration_data_import",
-        arguments=["4d100000-0000-0000-0000-000000000000"],
-    )
     delivery_mechanism_cash = DeliveryMechanism.objects.get(code="cash")
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
@@ -643,7 +619,6 @@ def generate_payment_plan() -> None:
         name="Test Payment Plan",
         pk=payment_plan_pk,
         business_area=afghanistan,
-        targeting_criteria=targeting_criteria,
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
@@ -653,9 +628,23 @@ def generate_payment_plan() -> None:
         financial_service_provider=fsp_1,
         delivery_mechanism=delivery_mechanism_cash,
     )[0]
-    tc2 = TargetingCriteriaFactory()
+
+    targeting_criteria_rule_pk = UUID("00000000-0000-0000-0000-feedb00c0009")
+    targeting_criteria_rule = TargetingCriteriaRule.objects.update_or_create(
+        pk=targeting_criteria_rule_pk,
+        payment_plan=payment_plan,
+    )[0]
+
+    targeting_criteria_rule_condition_pk = UUID("00000000-0000-0000-0000-feedb00c0008")
+    TargetingCriteriaRuleFilter.objects.update_or_create(
+        pk=targeting_criteria_rule_condition_pk,
+        targeting_criteria_rule=targeting_criteria_rule,
+        comparison_method="CONTAINS",
+        field_name="registration_data_import",
+        arguments=["4d100000-0000-0000-0000-000000000000"],
+    )
     tcr2 = TargetingCriteriaRuleFactory(
-        targeting_criteria=tc2,
+        payment_plan=payment_plan,
     )
     TargetingCriteriaRuleFilterFactory(
         targeting_criteria_rule=tcr2,
@@ -700,7 +689,6 @@ def generate_payment_plan() -> None:
     # add one more PP
     pp2 = PaymentPlan.objects.update_or_create(
         name="Test TP for PM (just click rebuild)",
-        targeting_criteria=tc2,
         status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
         currency="USD",

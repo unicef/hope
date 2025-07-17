@@ -33,7 +33,6 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
 )
@@ -111,17 +110,16 @@ class Command(BaseCommand):
         business_area = BusinessArea.objects.all()[business_area_index]
 
         program = ProgramFactory(business_area=business_area)
-        targeting_criteria = TargetingCriteriaFactory()
-        rules = TargetingCriteriaRuleFactory.create_batch(random.randint(1, 3), targeting_criteria=targeting_criteria)
-
-        for rule in rules:
-            TargetingCriteriaRuleFilterFactory.create_batch(random.randint(1, 5), targeting_criteria_rule=rule)
 
         for _ in range(cash_plans_amount):
             payment_plan = PaymentPlanFactory(
                 program=program,
                 business_area=business_area,
             )
+            rules = TargetingCriteriaRuleFactory.create_batch(random.randint(1, 3), payment_plan=payment_plan)
+
+            for rule in rules:
+                TargetingCriteriaRuleFilterFactory.create_batch(random.randint(1, 5), targeting_criteria_rule=rule)
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
                 household, individuals = create_household_for_fixtures(

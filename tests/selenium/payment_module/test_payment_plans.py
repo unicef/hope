@@ -26,15 +26,11 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from src.hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from src.hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from tests.selenium.helpers.date_time_format import FormatTime
@@ -109,13 +105,11 @@ def create_targeting(create_test_program: Program) -> None:
     ]
     hh_ids_str = ", ".join([hh.unicef_id for hh in households])
 
-    targeting_criteria = TargetingCriteriaFactory()
-    TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", targeting_criteria=targeting_criteria)
-    PaymentPlanFactory(
+    payment_plan = PaymentPlanFactory(
         program_cycle=program_cycle,
         status=PaymentPlan.Status.DRAFT,
-        targeting_criteria=targeting_criteria,
     )
+    TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", payment_plan=payment_plan)
     rule = RuleFactory(
         name="Test Rule",
         type=Rule.TYPE_PAYMENT_PLAN,
@@ -146,8 +140,6 @@ def create_targeting(create_test_program: Program) -> None:
 def create_payment_plan(create_targeting: None) -> PaymentPlan:
     pp = PaymentPlan.objects.get(program_cycle__program__name="Test Program")
     program = pp.program_cycle.program
-    new_targeting_criteria = PaymentPlanService.copy_target_criteria(pp.targeting_criteria)
-
     cycle = ProgramCycleFactory(
         program=program,
         title="Cycle for PaymentPlan",
@@ -161,7 +153,6 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
     payment_plan, _ = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=program.business_area,
-        targeting_criteria=new_targeting_criteria,
         program_cycle=cycle,
         currency="USD",
         dispersion_start_date=datetime.now() + relativedelta(days=10),

@@ -6,7 +6,6 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
@@ -112,15 +111,3 @@ class TargetingCriteriaRuleSerializer(serializers.ModelSerializer):
             data["households_filters_blocks"] = TargetingCriteriaRuleFilterSerializer(filters_data, many=True).data
 
         return data
-
-
-class TargetingCriteriaSerializer(serializers.ModelSerializer):
-    rules = TargetingCriteriaRuleSerializer(many=True)
-
-    class Meta:
-        model = TargetingCriteria
-        fields = (
-            "flag_exclude_if_active_adjudication_ticket",
-            "flag_exclude_if_on_sanction_list",
-            "rules",
-        )

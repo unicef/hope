@@ -309,7 +309,6 @@ export { SurveySampleSizeSamplingTypeEnum as SurveySampleSizeSamplingTypeEnumCam
 export type { TargetingCollectorBlockRuleFilter as TargetingCollectorBlockRuleFilterCamelCase } from './models/TargetingCollectorBlockRuleFilter';
 export { TargetingCollectorBlockRuleFilterComparisonMethodEnum as TargetingCollectorBlockRuleFilterComparisonMethodEnumCamelCase } from './models/TargetingCollectorBlockRuleFilterComparisonMethodEnum';
 export type { TargetingCollectorRuleFilterBlock as TargetingCollectorRuleFilterBlockCamelCase } from './models/TargetingCollectorRuleFilterBlock';
-export type { TargetingCriteria as TargetingCriteriaCamelCase } from './models/TargetingCriteria';
 export type { TargetingCriteriaRule as TargetingCriteriaRuleCamelCase } from './models/TargetingCriteriaRule';
 export type { TargetingCriteriaRuleFilter as TargetingCriteriaRuleFilterCamelCase } from './models/TargetingCriteriaRuleFilter';
 export type { TargetingIndividualBlockRuleFilter as TargetingIndividualBlockRuleFilterCamelCase } from './models/TargetingIndividualBlockRuleFilter';
