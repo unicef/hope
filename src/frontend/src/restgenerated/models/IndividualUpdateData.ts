@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BankTransfer } from './BankTransfer';
-import type { EditBankTransfer } from './EditBankTransfer';
 import type { EditIndividualDocument } from './EditIndividualDocument';
 import type { EditIndividualIdentity } from './EditIndividualIdentity';
 import type { IndividualDocument } from './IndividualDocument';
@@ -43,8 +42,6 @@ export type IndividualUpdateData = {
     identitiesToRemove?: Array<number>;
     identitiesToEdit?: Array<EditIndividualIdentity>;
     paymentChannels?: Array<BankTransfer>;
-    paymentChannelsToEdit?: Array<EditBankTransfer>;
-    paymentChannelsToRemove?: Array<string>;
     preferredLanguage?: string;
     flexFields?: any;
     paymentDeliveryPhoneNo?: string;

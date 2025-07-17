@@ -37,7 +37,7 @@ class BaseSampling(abc.ABC):
 class FullListSampling(BaseSampling):
     def sampling(self, households: QuerySet[Household]) -> None:
         self.households = households.exclude(
-            Q(head_of_household__phone_no__isnull=False)
+            Q(head_of_household__phone_no__isnull=True)
             | Q(admin1__id__in=self.excluded_admin_areas)
             | Q(admin2__id__in=self.excluded_admin_areas)
             | Q(admin3__id__in=self.excluded_admin_areas)
@@ -67,7 +67,7 @@ class RandomSampling(BaseSampling):
                 self.age.get("max"),
             )
         self.households = households.exclude(
-            Q(head_of_household__phone_no__isnull=False)
+            Q(head_of_household__phone_no__isnull=True)
             | Q(admin1__id__in=self.excluded_admin_areas)
             | Q(admin2__id__in=self.excluded_admin_areas)
             | Q(admin3__id__in=self.excluded_admin_areas)

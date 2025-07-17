@@ -326,7 +326,7 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     import_id = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
     identities = serializers.SerializerMethodField()
-    bank_account_info = serializers.SerializerMethodField()
+    # bank_account_info = serializers.SerializerMethodField()
     accounts = serializers.SerializerMethodField()
     roles_in_households = serializers.SerializerMethodField()
     flex_fields = serializers.SerializerMethodField()

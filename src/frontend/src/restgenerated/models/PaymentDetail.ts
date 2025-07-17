@@ -66,7 +66,5 @@ export type PaymentDetail = {
     readonly snapshotCollectorBankAccountNumber: string | null;
     readonly snapshotCollectorBankName: string | null;
     readonly snapshotCollectorDebitCardNumber: string | null;
-    readonly debitCardNumber: string;
-    readonly debitCardIssuer: string;
 };
 

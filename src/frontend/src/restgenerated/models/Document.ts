@@ -12,6 +12,8 @@ export type Document = {
     country: CountryEnum;
     image?: string;
     documentNumber: string;
+    issuanceDate?: string;
+    expiryDate?: string;
     rdiMergeStatus?: RdiMergeStatusEnum;
     isRemoved?: boolean;
     removedDate?: string | null;
@@ -21,8 +23,6 @@ export type Document = {
     status?: DocumentStatusEnum;
     cleared?: boolean;
     clearedDate?: string;
-    issuanceDate?: string | null;
-    expiryDate?: string | null;
     clearedBy?: string | null;
     /**
      * If this object was copied from another, this field will contain the object it was copied from.

@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Account } from './Account';
 import type { Admin1Enum } from './Admin1Enum';
 import type { Admin2Enum } from './Admin2Enum';
 import type { Admin3Enum } from './Admin3Enum';
@@ -33,6 +34,7 @@ export type PushPeople = {
     observedDisability?: string;
     maritalStatus?: string;
     documents?: Array<Document>;
+    accounts?: Array<Account>;
     birthDate: string;
     photo?: string;
     type: PushPeopleTypeEnum;
