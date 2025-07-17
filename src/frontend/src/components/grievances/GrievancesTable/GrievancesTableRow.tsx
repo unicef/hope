@@ -71,7 +71,7 @@ export function GrievancesTableRow({
       return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
         {
           businessAreaSlug: businessArea,
-          requestBody: params,
+          formData: params,
         },
       );
     },

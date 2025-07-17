@@ -137,20 +137,20 @@ const EditGrievancePage = (): ReactElement => {
 
   const { mutateAsync: updateGrievanceTicket, isPending: loading } =
     useMutation({
-      mutationFn: (data: { id: string; requestBody: any }) =>
+      mutationFn: (data: { id: string; formData: any }) =>
         RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
           businessAreaSlug,
           id: data.id,
-          requestBody: data.requestBody,
+          formData: data.formData,
         }),
     });
 
   const { mutateAsync: changeTicketStatus } = useMutation({
-    mutationFn: (data: { id: string; requestBody: any }) =>
+    mutationFn: (data: { id: string; formData: any }) =>
       RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
         businessAreaSlug,
         id: data.id,
-        requestBody: data.requestBody,
+        formData: data.formData,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -274,7 +274,7 @@ const EditGrievancePage = (): ReactElement => {
     try {
       await changeTicketStatus({
         id: ticket.id,
-        requestBody: {
+        formData: {
           status,
         },
       });
@@ -346,10 +346,10 @@ const EditGrievancePage = (): ReactElement => {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          const requestBody = prepareRestUpdateVariables(values, ticket);
+          const formData = prepareRestUpdateVariables(values, ticket);
           await updateGrievanceTicket({
             id: ticket.id,
-            requestBody,
+            formData,
           });
           showMessage(t('Grievance Ticket edited.'));
           navigate(grievanceDetailsPath);

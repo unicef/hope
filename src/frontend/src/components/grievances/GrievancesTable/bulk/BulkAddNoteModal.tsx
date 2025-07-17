@@ -38,7 +38,7 @@ export function BulkAddNoteModal({
     mutationFn: (params: BulkGrievanceTicketsAddNote) => {
       return RestService.restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
         businessAreaSlug,
-        requestBody: params,
+        formData: params,
       });
     },
     onSuccess: () => {

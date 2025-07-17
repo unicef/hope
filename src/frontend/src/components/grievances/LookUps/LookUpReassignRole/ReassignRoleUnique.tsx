@@ -46,11 +46,11 @@ export function ReassignRoleUnique({
 
   const { mutateAsync: reassignRoleMutation, isPending: isReassigningRole } =
     useMutation({
-      mutationFn: (requestBody: GrievanceReassignRole) =>
+      mutationFn: (formData: GrievanceReassignRole) =>
         RestService.restBusinessAreasGrievanceTicketsReassignRoleCreate({
           businessAreaSlug: businessArea,
           id: id,
-          requestBody,
+          formData,
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({

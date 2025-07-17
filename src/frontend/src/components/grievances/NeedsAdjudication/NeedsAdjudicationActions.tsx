@@ -44,12 +44,12 @@ export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   const { dedupEngineSimilarityPair } = ticket.ticketDetails.extraData;
 
   const { mutateAsync: approve, isPending: isApproving } = useMutation({
-    mutationFn: async (body: Record<string, any>) => {
+    mutationFn: async (formData: Record<string, any>) => {
       return RestService.restBusinessAreasGrievanceTicketsApproveNeedsAdjudicationCreate(
         {
           businessAreaSlug: businessArea,
           id: ticket.id,
-          requestBody: body,
+          formData,
         },
       );
     },

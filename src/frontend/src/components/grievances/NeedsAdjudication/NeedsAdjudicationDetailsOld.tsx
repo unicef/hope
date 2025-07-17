@@ -54,7 +54,7 @@ export const NeedsAdjudicationDetailsOld = ({
       RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
         businessAreaSlug: businessArea,
         id: grievanceTicketId,
-        requestBody: {
+        formData: {
           approveStatus,
         },
       }),

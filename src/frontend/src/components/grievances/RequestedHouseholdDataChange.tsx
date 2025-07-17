@@ -47,7 +47,7 @@ export function RequestedHouseholdDataChange({
       householdApproveData: any;
       flexFieldsApproveData?: any;
     }) => {
-      const requestBody: GrievanceHouseholdDataChangeApprove = {
+      const formData: GrievanceHouseholdDataChangeApprove = {
         householdApproveData,
         flexFieldsApproveData,
       };
@@ -56,7 +56,7 @@ export function RequestedHouseholdDataChange({
         {
           businessAreaSlug: businessArea,
           id: ticket.id,
-          requestBody,
+          formData,
         },
       );
     },

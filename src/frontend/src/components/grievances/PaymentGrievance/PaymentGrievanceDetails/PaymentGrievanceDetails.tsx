@@ -67,7 +67,7 @@ export function PaymentGrievanceDetails({
         {
           businessAreaSlug: businessArea,
           id: grievanceTicketId,
-          requestBody,
+          formData: requestBody,
         },
       );
     },

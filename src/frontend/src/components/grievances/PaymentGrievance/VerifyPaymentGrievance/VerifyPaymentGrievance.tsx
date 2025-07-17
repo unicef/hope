@@ -50,7 +50,7 @@ export function VerifyPaymentGrievance({
       return RestService.restBusinessAreasGrievanceTicketsPartialUpdate({
         businessAreaSlug: businessArea,
         id: ticket.id,
-        requestBody,
+        formData: requestBody,
       });
     },
     onSuccess: () => {

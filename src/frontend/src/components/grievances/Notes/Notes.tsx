@@ -68,7 +68,7 @@ export function Notes({
       return RestService.restBusinessAreasGrievanceTicketsCreateNoteCreate({
         businessAreaSlug,
         id: id,
-        requestBody: params,
+        formData: params,
       });
     },
     onSuccess: () => {
