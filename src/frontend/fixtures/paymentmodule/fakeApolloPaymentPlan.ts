@@ -286,15 +286,11 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   },
   unsuccessfulPaymentsCount: 0,
   supportingDocuments: [],
-  targetingCriteria: {
-    __typename: 'TargetingCriteriaNode',
-    id: 'ef403820-8654-4791-b8e4-2f0ae95a7b2c',
-    flagExcludeIfActiveAdjudicationTicket: false,
-    flagExcludeIfOnSanctionList: false,
-    householdIds: '',
-    individualIds: '',
-    rules: [],
-  },
+  flagExcludeIfActiveAdjudicationTicket: false,
+  flagExcludeIfOnSanctionList: false,
+  householdIds: '',
+  individualIds: '',
+  rules: [],
   __typename: 'PaymentPlanNode',
 } as PaymentPlanQuery['paymentPlan'];
 

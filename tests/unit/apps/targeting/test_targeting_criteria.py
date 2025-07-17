@@ -15,12 +15,9 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
@@ -30,14 +27,12 @@ from hct_mis_api.apps.targeting.models import (
 
 class TestTargetingCriteriaQuery(APITestCase):
     @staticmethod
-    def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
-        targeting_criteria = TargetingCriteria()
-        targeting_criteria.save()
-        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
+    def get_targeting_criteria_for_rule(rule_filter: Dict, payment_plan: PaymentPlan) -> PaymentPlan:
+        rule = TargetingCriteriaRule(payment_plan=payment_plan)
         rule.save()
         rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
-        return targeting_criteria
+        return payment_plan
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -57,15 +52,15 @@ class TestTargetingCriteriaQuery(APITestCase):
         assert Household.objects.all().distinct().count() == 2
 
     @classmethod
-    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetingCriteria:
-        criteria = cls.get_targeting_criteria_for_rule(*args, **kwargs)
-        PaymentPlanFactory(
+    def create_criteria(cls, *args: Any, **kwargs: Any) -> PaymentPlan:
+        payment_plan = PaymentPlanFactory(
             name="tp",
             created_by=cls.user,
             business_area=cls.business_area,
-            targeting_criteria=criteria,
         )
-        return criteria
+        payment_plan = cls.get_targeting_criteria_for_rule(*args, payment_plan=payment_plan, **kwargs)
+
+        return payment_plan
 
     def test_size(self) -> None:
         assert (
@@ -138,28 +133,23 @@ class TestTargetingCriteriaQuery(APITestCase):
 
 class TestTargetingCriteriaIndividualRules(APITestCase):
     @staticmethod
-    def get_targeting_criteria_for_filters(filters: List[Dict]) -> TargetingCriteria:
-        targeting_criteria = TargetingCriteria()
-        targeting_criteria.save()
-        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
-        rule.save()
-        filter_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=rule)
-        filter_block.save()
-        for filter in filters:
-            block_filter = TargetingIndividualBlockRuleFilter(**filter, individuals_filters_block=filter_block)
+    def get_targeting_criteria_for_filters(filters: List[Dict], payment_plan: PaymentPlan) -> PaymentPlan:
+        rule = TargetingCriteriaRule.objects.create(payment_plan=payment_plan)
+        filter_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=rule)
+        for _filter in filters:
+            block_filter = TargetingIndividualBlockRuleFilter(**_filter, individuals_filters_block=filter_block)
             block_filter.save()
-        return targeting_criteria
+        return payment_plan
 
     @classmethod
-    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetingCriteria:
-        criteria = cls.get_targeting_criteria_for_filters(*args, **kwargs)
-        PaymentPlanFactory(
+    def create_criteria(cls, filters: List[Dict]) -> PaymentPlan:
+        payment_plan = PaymentPlanFactory(
             name="tp",
             created_by=cls.user,
             business_area=cls.business_area,
-            targeting_criteria=criteria,
         )
-        return criteria
+
+        return cls.get_targeting_criteria_for_filters(filters, payment_plan)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -365,98 +355,76 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
 
         assert Household.objects.all().distinct().count() == 3
 
-    @classmethod
-    def create_criteria(cls, targeting_criteria_data: Dict) -> TargetingCriteria:
-        criteria = TargetingCriteria(**targeting_criteria_data)
-        criteria.save()
-        PaymentPlanFactory(
-            name="tp",
-            created_by=cls.user,
-            business_area=cls.business_area,
-            targeting_criteria=criteria,
-        )
-        return criteria
-
     def test_household_ids(self) -> None:
-        t_criteria = TargetingCriteriaFactory()
-        PaymentPlanFactory(
+        payment_plan = PaymentPlanFactory(
             name="tp",
             created_by=self.user,
             business_area=self.business_area,
-            targeting_criteria=t_criteria,
         )
         TargetingCriteriaRuleFactory(
-            targeting_criteria=t_criteria,
+            payment_plan=payment_plan,
             **{
                 "household_ids": f"{self.hh_1.unicef_id}",
                 "individual_ids": "",
             },
         )
 
-        assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 1
-        t_criteria2 = TargetingCriteriaFactory()
-        PaymentPlanFactory(
+        assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 1
+        payment_plan2 = PaymentPlanFactory(
             name="tp",
             created_by=self.user,
             business_area=self.business_area,
-            targeting_criteria=t_criteria2,
         )
         TargetingCriteriaRuleFactory(
-            targeting_criteria=t_criteria2,
+            payment_plan=payment_plan2,
             **{
                 "household_ids": f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
                 "individual_ids": "",
             },
         )
-        assert Household.objects.filter(t_criteria2.get_query()).distinct().count() == 2
+        assert Household.objects.filter(payment_plan2.get_query()).distinct().count() == 2
 
     def test_individual_ids(self) -> None:
-        t_criteria = TargetingCriteriaFactory()
-        PaymentPlanFactory(
+        payment_plan = PaymentPlanFactory(
             name="tp",
             created_by=self.user,
             business_area=self.business_area,
-            targeting_criteria=t_criteria,
         )
         TargetingCriteriaRuleFactory(
-            targeting_criteria=t_criteria,
+            payment_plan=payment_plan,
             **{
                 "household_ids": "",
                 "individual_ids": f"{self.hh_1.individuals.first().unicef_id}",
             },
         )
-        assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 1
-        t_criteria2 = TargetingCriteriaFactory()
-        PaymentPlanFactory(
+        assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 1
+        payment_plan2 = PaymentPlanFactory(
             name="tp",
             created_by=self.user,
             business_area=self.business_area,
-            targeting_criteria=t_criteria2,
         )
         TargetingCriteriaRuleFactory(
-            targeting_criteria=t_criteria2,
+            payment_plan=payment_plan2,
             **{
                 "household_ids": "",
                 "individual_ids": f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
             },
         )
 
-        assert Household.objects.filter(t_criteria2.get_query()).distinct().count() == 2
+        assert Household.objects.filter(payment_plan2.get_query()).distinct().count() == 2
 
     def test_household_and_individual_ids(self) -> None:
-        t_criteria = TargetingCriteriaFactory()
-        PaymentPlanFactory(
+        payment_plan = PaymentPlanFactory(
             name="tp",
             created_by=self.user,
             business_area=self.business_area,
-            targeting_criteria=t_criteria,
         )
         TargetingCriteriaRuleFactory(
-            targeting_criteria=t_criteria,
+            payment_plan=payment_plan,
             **{
                 "household_ids": f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
                 "individual_ids": f"{self.hh_3.individuals.first().unicef_id}",
             },
         )
 
-        assert Household.objects.filter(t_criteria.get_query()).distinct().count() == 3
+        assert Household.objects.filter(payment_plan.get_query()).distinct().count() == 3
