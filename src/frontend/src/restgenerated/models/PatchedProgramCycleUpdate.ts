@@ -4,7 +4,7 @@
 /* eslint-disable */
 export type PatchedProgramCycleUpdate = {
     title?: string;
-    startDate?: string;
-    endDate?: string;
+    startDate?: string | null;
+    endDate?: string | null;
 };
 
