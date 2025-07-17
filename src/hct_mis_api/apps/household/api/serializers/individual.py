@@ -102,35 +102,23 @@ class IndividualIdentitySerializer(serializers.ModelSerializer):
         )
 
 
-# class BankAccountInfoSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = BankAccountInfo
-#         fields = (
-#             "id",
-#             "bank_name",
-#             "bank_account_number",
-#             "account_holder_name",
-#             "bank_branch_name",
-#         )
-
-
 class AccountSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
-    individual_tab_data = serializers.SerializerMethodField()
+    data_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
         fields = (
             "id",
             "name",
-            "individual_tab_data",
+            "data_fields",
         )
 
     def get_name(self, obj: Account) -> str:
         return obj.account_type.label
 
-    def get_individual_tab_data(self, obj: Account) -> Dict:
-        return dict(sorted(obj.data.items()))
+    def get_data_fields(self, obj: Account) -> Dict:
+        return dict(sorted(obj.account_data.items()))
 
 
 class IndividualSimpleSerializer(serializers.ModelSerializer):
@@ -326,7 +314,6 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
     import_id = serializers.SerializerMethodField()
     documents = serializers.SerializerMethodField()
     identities = serializers.SerializerMethodField()
-    # bank_account_info = serializers.SerializerMethodField()
     accounts = serializers.SerializerMethodField()
     roles_in_households = serializers.SerializerMethodField()
     flex_fields = serializers.SerializerMethodField()
@@ -366,7 +353,6 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
             "disability",
             "documents",
             "identities",
-            # "bank_account_info",
             "accounts",
             "email",
             "phone_no",
@@ -399,11 +385,6 @@ class IndividualDetailSerializer(AdminUrlSerializerMixin, serializers.ModelSeria
 
     def get_identities(self, obj: Individual) -> Dict:
         return IndividualIdentitySerializer(obj.identities(manager="all_merge_status_objects").all(), many=True).data
-
-    # def get_bank_account_info(self, obj: Individual) -> Dict:
-    #     return BankAccountInfoSerializer(
-    #         obj.bank_account_info(manager="all_merge_status_objects").all(), many=True
-    #     ).data
 
     def get_accounts(self, obj: Individual) -> Dict:
         if self.context["request"].user.has_perm(

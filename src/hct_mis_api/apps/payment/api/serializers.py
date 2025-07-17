@@ -1084,11 +1084,7 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
     household = HouseholdDetailSerializer()
     delivery_mechanism = DeliveryMechanismSerializer(source="parent.delivery_mechanism")
     collector = IndividualDetailSerializer()
-    snapshot_collector_debit_card_number = serializers.SerializerMethodField()
-    snapshot_collector_bank_account_number = serializers.SerializerMethodField()
-    snapshot_collector_bank_name = serializers.SerializerMethodField()
-    # debit_card_number = serializers.SerializerMethodField()
-    # debit_card_issuer = serializers.SerializerMethodField()
+    snapshot_collector_account_data = serializers.SerializerMethodField()
 
     class Meta(PaymentListSerializer.Meta):
         fields = PaymentListSerializer.Meta.fields + (  # type: ignore
@@ -1103,33 +1099,8 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             "additional_document_type",
             "additional_collector_name",
             "transaction_reference_id",
-            "snapshot_collector_bank_account_number",
-            "snapshot_collector_bank_name",
-            "snapshot_collector_debit_card_number",
-            # "debit_card_number",
-            # "debit_card_issuer",
+            "snapshot_collector_account_data",
         )
-
-    # def get_debit_card_number(self, obj: Payment) -> str:
-    #     return get_debit_card_number(obj.collector)
-    #
-    # def get_debit_card_issuer(self, obj: Payment) -> str:
-    #     return get_debit_card_issuer(obj.collector)
-
-    def get_snapshot_collector_bank_name(self, obj: Payment) -> Optional[str]:
-        if bank_account_info := self.collector_field(obj, "bank_account_info"):
-            return bank_account_info.get("bank_name")
-        return None
-
-    def get_snapshot_collector_bank_account_number(self, obj: Payment) -> Optional[str]:
-        if bank_account_info := self.collector_field(obj, "bank_account_info"):
-            return bank_account_info.get("bank_account_number")
-        return None
-
-    def get_snapshot_collector_debit_card_number(self, obj: Payment) -> Optional[str]:
-        if bank_account_info := self.collector_field(obj, "bank_account_info"):
-            return bank_account_info.get("debit_card_number")
-        return None
 
     @staticmethod
     def collector_field(payment: "Payment", field_name: str) -> Union[None, str, Dict]:
@@ -1143,6 +1114,9 @@ class PaymentDetailSerializer(AdminUrlSerializerMixin, PaymentListSerializer):
             )
             return collector_data.get(field_name)
         return None
+
+    def get_snapshot_collector_account_data(self, obj: Payment) -> Any:
+        return PaymentListSerializer.get_collector_field(obj, "account_data")
 
 
 class PaymentSmallSerializer(serializers.ModelSerializer):

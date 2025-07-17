@@ -618,9 +618,8 @@ class GrievanceTicketGlobalViewSet(
             "identities": input_data.get("approved_identities_to_create", []),
             "identities_to_remove": input_data.get("approved_identities_to_remove", []),
             "identities_to_edit": input_data.get("approved_identities_to_edit", []),
-            "payment_channels": input_data.get("approved_payment_channels_to_create", []),
-            "payment_channels_to_remove": input_data.get("approved_payment_channels_to_remove", []),
-            "payment_channels_to_edit": input_data.get("approved_payment_channels_to_edit", []),
+            "accounts": input_data.get("approved_accounts_to_create", []),
+            "accounts_to_edit": input_data.get("approved_accounts_to_edit", []),
         }
 
         for field_name, item in individual_data.items():

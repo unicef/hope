@@ -36,6 +36,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
+from hct_mis_api.apps.payment.models import AccountType, FinancialInstitution
 from hct_mis_api.apps.program.api.serializers import ProgramSmallSerializer
 
 
@@ -369,6 +370,8 @@ class IndividualChoicesSerializer(serializers.Serializer):
     observed_disability_choices = serializers.SerializerMethodField()
     severity_of_disability_choices = serializers.SerializerMethodField()
     work_status_choices = serializers.SerializerMethodField()
+    account_type_choices = serializers.SerializerMethodField()
+    account_financial_institution_choices = serializers.SerializerMethodField()
 
     def get_document_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return [{"name": x.label, "value": x.key} for x in DocumentType.objects.order_by("key")]
@@ -408,6 +411,12 @@ class IndividualChoicesSerializer(serializers.Serializer):
 
     def get_work_status_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(WORK_STATUS_CHOICE)
+
+    def get_account_type_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.label, "value": x.key} for x in AccountType.objects.all()]
+
+    def get_account_financial_institution_choices(self, *args: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"name": x.name, "value": x.id} for x in FinancialInstitution.objects.all()]
 
 
 class HouseholdSmallSerializer(serializers.ModelSerializer):

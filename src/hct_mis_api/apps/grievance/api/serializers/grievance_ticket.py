@@ -618,9 +618,8 @@ class GrievanceIndividualDataChangeApproveSerializer(serializers.Serializer):
     approved_identities_to_create = serializers.ListField(child=serializers.IntegerField(), required=False)
     approved_identities_to_edit = serializers.ListField(child=serializers.IntegerField(), required=False)
     approved_identities_to_remove = serializers.ListField(child=serializers.IntegerField(), required=False)
-    approved_payment_channels_to_create = serializers.ListField(child=serializers.IntegerField(), required=False)
-    approved_payment_channels_to_edit = serializers.ListField(child=serializers.IntegerField(), required=False)
-    approved_payment_channels_to_remove = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_accounts_to_create = serializers.ListField(child=serializers.IntegerField(), required=False)
+    approved_accounts_to_edit = serializers.ListField(child=serializers.IntegerField(), required=False)
     flex_fields_approve_data = serializers.JSONField(required=False)
     version = serializers.IntegerField(required=False)
 
