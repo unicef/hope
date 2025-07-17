@@ -87,7 +87,7 @@ const EditProgramCycle = ({
   } = {
     title: programCycle.title,
     startDate: programCycle.startDate,
-    end_date: programCycle.endDate ?? undefined,
+    endDate: programCycle.endDate ?? undefined,
   };
 
   const endDateValidationSchema = () => {
