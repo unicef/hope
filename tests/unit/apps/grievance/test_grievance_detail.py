@@ -655,8 +655,12 @@ class TestGrievanceTicketDetail:
                 },
                 "admin3": None,
                 "admin4": None,
-                "first_registration_date": "2025-07-10T03:09:32Z",
-                "last_registration_date": "2025-01-25T19:02:59Z",
+                "first_registration_date": ticket_details.reason_household.first_registration_date.strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                ),
+                "last_registration_date": ticket_details.reason_household.last_registration_date.strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                ),
                 "total_cash_received": None,
                 "total_cash_received_usd": None,
                 "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
