@@ -17,7 +17,7 @@ export type IndividualUpdateData = {
     sex?: string;
     birthDate?: string;
     estimatedBirthDate?: boolean;
-    maritalStatus?: string;
+    maritalStatus?: string | null;
     phoneNo?: string;
     phoneNoAlternative?: string;
     email?: string;
@@ -25,7 +25,7 @@ export type IndividualUpdateData = {
     disability?: string;
     workStatus?: string;
     enrolledInNutritionProgramme?: boolean;
-    pregnant?: boolean;
+    pregnant?: boolean | null;
     observedDisability?: Array<string>;
     seeingDisability?: string;
     hearingDisability?: string;
@@ -54,7 +54,7 @@ export type IndividualUpdateData = {
     /**
      * People update
      */
-    consent?: string;
+    consent?: string | null;
     /**
      * People update
      */

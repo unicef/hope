@@ -467,10 +467,6 @@ export type Household = {
      */
     copiedFrom?: string | null;
     /**
-     * Household lowest administrative area
-     */
-    adminArea?: string | null;
-    /**
      * Household administrative area level 1
      */
     admin1?: string | null;

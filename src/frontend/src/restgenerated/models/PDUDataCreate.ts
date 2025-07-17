@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { SubtypeEnum } from './SubtypeEnum';
-export type PDUData = {
+export type PDUDataCreate = {
     subtype: SubtypeEnum;
     numberOfRounds: number;
     roundsNames: Array<string>;
