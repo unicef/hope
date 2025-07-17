@@ -1390,7 +1390,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsCreate({
         businessAreaSlug,
-        requestBody,
+        formData,
         admin1,
         admin2,
         area,
@@ -1430,7 +1430,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
-        requestBody: CreateGrievanceTicket,
+        formData: CreateGrievanceTicket,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -1614,8 +1614,8 @@ export class RestService {
                 'status': status,
                 'urgency': urgency,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1648,14 +1648,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsPartialUpdate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody?: PatchedUpdateGrievanceTicket,
+        formData?: PatchedUpdateGrievanceTicket,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'PATCH',
@@ -1664,8 +1664,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1675,14 +1675,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsApproveDeleteHouseholdCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody: GrievanceDeleteHouseholdApproveStatus,
+        formData: GrievanceDeleteHouseholdApproveStatus,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1691,8 +1691,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1702,14 +1702,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsApproveHouseholdDataChangeCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody: GrievanceHouseholdDataChangeApprove,
+        formData: GrievanceHouseholdDataChangeApprove,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1718,8 +1718,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1729,14 +1729,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsApproveIndividualDataChangeCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody: GrievanceIndividualDataChangeApprove,
+        formData: GrievanceIndividualDataChangeApprove,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1745,8 +1745,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1756,14 +1756,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsApproveNeedsAdjudicationCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody?: GrievanceNeedsAdjudicationApprove,
+        formData?: GrievanceNeedsAdjudicationApprove,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1772,8 +1772,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1783,14 +1783,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsApprovePaymentDetailsCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody: GrievanceUpdateApproveStatus,
+        formData: GrievanceUpdateApproveStatus,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1799,8 +1799,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1811,14 +1811,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody: GrievanceUpdateApproveStatus,
+        formData: GrievanceUpdateApproveStatus,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1827,8 +1827,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1838,14 +1838,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsCreateNoteCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody: GrievanceCreateNote,
+        formData: GrievanceCreateNote,
     }): CancelablePromise<TicketNote> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1854,8 +1854,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1865,14 +1865,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsReassignRoleCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody: GrievanceReassignRole,
+        formData: GrievanceReassignRole,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1881,8 +1881,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -1892,14 +1892,14 @@ export class RestService {
     public static restBusinessAreasGrievanceTicketsStatusChangeCreate({
         businessAreaSlug,
         id,
-        requestBody,
+        formData,
     }: {
         businessAreaSlug: string,
         /**
          * A UUID string identifying this Grievance Ticket.
          */
         id: string,
-        requestBody: GrievanceStatusChange,
+        formData: GrievanceStatusChange,
     }): CancelablePromise<GrievanceTicketDetail> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -1908,8 +1908,8 @@ export class RestService {
                 'business_area_slug': businessAreaSlug,
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -2608,7 +2608,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsBulkAddNoteCreate({
         businessAreaSlug,
-        requestBody,
+        formData,
         admin1,
         admin2,
         area,
@@ -2648,7 +2648,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
-        requestBody: BulkGrievanceTicketsAddNote,
+        formData: BulkGrievanceTicketsAddNote,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -2832,8 +2832,8 @@ export class RestService {
                 'status': status,
                 'urgency': urgency,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -2842,7 +2842,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate({
         businessAreaSlug,
-        requestBody,
+        formData,
         admin1,
         admin2,
         area,
@@ -2882,7 +2882,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
-        requestBody: BulkUpdateGrievanceTicketsAssignees,
+        formData: BulkUpdateGrievanceTicketsAssignees,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -3066,8 +3066,8 @@ export class RestService {
                 'status': status,
                 'urgency': urgency,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -3076,7 +3076,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsBulkUpdatePriorityCreate({
         businessAreaSlug,
-        requestBody,
+        formData,
         admin1,
         admin2,
         area,
@@ -3116,7 +3116,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
-        requestBody: BulkUpdateGrievanceTicketsPriority,
+        formData: BulkUpdateGrievanceTicketsPriority,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -3300,8 +3300,8 @@ export class RestService {
                 'status': status,
                 'urgency': urgency,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -3310,7 +3310,7 @@ export class RestService {
      */
     public static restBusinessAreasGrievanceTicketsBulkUpdateUrgencyCreate({
         businessAreaSlug,
-        requestBody,
+        formData,
         admin1,
         admin2,
         area,
@@ -3350,7 +3350,7 @@ export class RestService {
         urgency,
     }: {
         businessAreaSlug: string,
-        requestBody: BulkUpdateGrievanceTicketsUrgency,
+        formData: BulkUpdateGrievanceTicketsUrgency,
         admin1?: string,
         admin2?: string,
         area?: string,
@@ -3534,8 +3534,8 @@ export class RestService {
                 'status': status,
                 'urgency': urgency,
             },
-            body: requestBody,
-            mediaType: 'application/json',
+            formData: formData,
+            mediaType: 'multipart/form-data',
         });
     }
     /**
@@ -3858,8 +3858,6 @@ export class RestService {
          * * `-status_label` - Status label (descending)
          * * `head_of_household__full_name` - Head of household  full name
          * * `-head_of_household__full_name` - Head of household  full name (descending)
-         * * `admin_area__name` - Admin area  name
-         * * `-admin_area__name` - Admin area  name (descending)
          * * `residence_status` - Residence status
          * * `-residence_status` - Residence status (descending)
          * * `registration_data_import__name` - Registration data import  name
@@ -3871,7 +3869,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -4057,8 +4055,6 @@ export class RestService {
          * * `-status_label` - Status label (descending)
          * * `head_of_household__full_name` - Head of household  full name
          * * `-head_of_household__full_name` - Head of household  full name (descending)
-         * * `admin_area__name` - Admin area  name
-         * * `-admin_area__name` - Admin area  name (descending)
          * * `residence_status` - Residence status
          * * `-residence_status` - Residence status (descending)
          * * `registration_data_import__name` - Registration data import  name
@@ -4070,7 +4066,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -4178,7 +4174,6 @@ export class RestService {
         excludedId,
         flags,
         fullName,
-        householdAdminArea,
         householdId,
         isActiveProgram,
         lastRegistrationDateAfter,
@@ -4214,7 +4209,6 @@ export class RestService {
          */
         flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
         fullName?: string,
-        householdAdminArea?: string,
         householdId?: string,
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
@@ -4246,14 +4240,12 @@ export class RestService {
          * * `-sex` - Sex (descending)
          * * `relationship` - Relationship
          * * `-relationship` - Relationship (descending)
-         * * `household__admin_area__name` - Household  admin area  name
-         * * `-household__admin_area__name` - Household  admin area  name (descending)
          * * `last_registration_date` - Last registration date
          * * `-last_registration_date` - Last registration date (descending)
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -4303,7 +4295,6 @@ export class RestService {
                 'excluded_id': excludedId,
                 'flags': flags,
                 'full_name': fullName,
-                'household__admin_area': householdAdminArea,
                 'household__id': householdId,
                 'is_active_program': isActiveProgram,
                 'last_registration_date_after': lastRegistrationDateAfter,
@@ -4357,7 +4348,6 @@ export class RestService {
         excludedId,
         flags,
         fullName,
-        householdAdminArea,
         householdId,
         isActiveProgram,
         lastRegistrationDateAfter,
@@ -4391,7 +4381,6 @@ export class RestService {
          */
         flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
         fullName?: string,
-        householdAdminArea?: string,
         householdId?: string,
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
@@ -4415,14 +4404,12 @@ export class RestService {
          * * `-sex` - Sex (descending)
          * * `relationship` - Relationship
          * * `-relationship` - Relationship (descending)
-         * * `household__admin_area__name` - Household  admin area  name
-         * * `-household__admin_area__name` - Household  admin area  name (descending)
          * * `last_registration_date` - Last registration date
          * * `-last_registration_date` - Last registration date (descending)
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -4472,7 +4459,6 @@ export class RestService {
                 'excluded_id': excludedId,
                 'flags': flags,
                 'full_name': fullName,
-                'household__admin_area': householdAdminArea,
                 'household__id': householdId,
                 'is_active_program': isActiveProgram,
                 'last_registration_date_after': lastRegistrationDateAfter,
@@ -6099,8 +6085,6 @@ export class RestService {
          * * `-status_label` - Status label (descending)
          * * `head_of_household__full_name` - Head of household  full name
          * * `-head_of_household__full_name` - Head of household  full name (descending)
-         * * `admin_area__name` - Admin area  name
-         * * `-admin_area__name` - Admin area  name (descending)
          * * `residence_status` - Residence status
          * * `-residence_status` - Residence status (descending)
          * * `registration_data_import__name` - Registration data import  name
@@ -6112,7 +6096,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -6365,8 +6349,6 @@ export class RestService {
          * * `-status_label` - Status label (descending)
          * * `head_of_household__full_name` - Head of household  full name
          * * `-head_of_household__full_name` - Head of household  full name (descending)
-         * * `admin_area__name` - Admin area  name
-         * * `-admin_area__name` - Admin area  name (descending)
          * * `residence_status` - Residence status
          * * `-residence_status` - Residence status (descending)
          * * `registration_data_import__name` - Registration data import  name
@@ -6378,7 +6360,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -6587,8 +6569,6 @@ export class RestService {
          * * `-status_label` - Status label (descending)
          * * `head_of_household__full_name` - Head of household  full name
          * * `-head_of_household__full_name` - Head of household  full name (descending)
-         * * `admin_area__name` - Admin area  name
-         * * `-admin_area__name` - Admin area  name (descending)
          * * `residence_status` - Residence status
          * * `-residence_status` - Residence status (descending)
          * * `registration_data_import__name` - Registration data import  name
@@ -6600,7 +6580,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -6782,8 +6762,6 @@ export class RestService {
          * * `-status_label` - Status label (descending)
          * * `head_of_household__full_name` - Head of household  full name
          * * `-head_of_household__full_name` - Head of household  full name (descending)
-         * * `admin_area__name` - Admin area  name
-         * * `-admin_area__name` - Admin area  name (descending)
          * * `residence_status` - Residence status
          * * `-residence_status` - Residence status (descending)
          * * `registration_data_import__name` - Registration data import  name
@@ -6795,7 +6773,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -6967,8 +6945,6 @@ export class RestService {
          * * `-status_label` - Status label (descending)
          * * `head_of_household__full_name` - Head of household  full name
          * * `-head_of_household__full_name` - Head of household  full name (descending)
-         * * `admin_area__name` - Admin area  name
-         * * `-admin_area__name` - Admin area  name (descending)
          * * `residence_status` - Residence status
          * * `-residence_status` - Residence status (descending)
          * * `registration_data_import__name` - Registration data import  name
@@ -6980,7 +6956,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -7160,8 +7136,6 @@ export class RestService {
          * * `-status_label` - Status label (descending)
          * * `head_of_household__full_name` - Head of household  full name
          * * `-head_of_household__full_name` - Head of household  full name (descending)
-         * * `admin_area__name` - Admin area  name
-         * * `-admin_area__name` - Admin area  name (descending)
          * * `residence_status` - Residence status
          * * `-residence_status` - Residence status (descending)
          * * `registration_data_import__name` - Registration data import  name
@@ -7173,7 +7147,7 @@ export class RestService {
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-admin_area__name' | '-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'admin_area__name' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
+        orderBy?: Array<'-age' | '-first_registration_date' | '-head_of_household__full_name' | '-household__id' | '-id' | '-last_registration_date' | '-registration_data_import__name' | '-residence_status' | '-sex' | '-size' | '-status_label' | '-total_cash_received' | '-unicef_id' | 'age' | 'first_registration_date' | 'head_of_household__full_name' | 'household__id' | 'id' | 'last_registration_date' | 'registration_data_import__name' | 'residence_status' | 'sex' | 'size' | 'status_label' | 'total_cash_received' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -7285,7 +7259,6 @@ export class RestService {
         excludedId,
         flags,
         fullName,
-        householdAdminArea,
         householdId,
         isActiveProgram,
         lastRegistrationDateAfter,
@@ -7322,7 +7295,6 @@ export class RestService {
          */
         flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
         fullName?: string,
-        householdAdminArea?: string,
         householdId?: string,
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
@@ -7354,14 +7326,12 @@ export class RestService {
          * * `-sex` - Sex (descending)
          * * `relationship` - Relationship
          * * `-relationship` - Relationship (descending)
-         * * `household__admin_area__name` - Household  admin area  name
-         * * `-household__admin_area__name` - Household  admin area  name (descending)
          * * `last_registration_date` - Last registration date
          * * `-last_registration_date` - Last registration date (descending)
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -7412,7 +7382,6 @@ export class RestService {
                 'excluded_id': excludedId,
                 'flags': flags,
                 'full_name': fullName,
-                'household__admin_area': householdAdminArea,
                 'household__id': householdId,
                 'is_active_program': isActiveProgram,
                 'last_registration_date_after': lastRegistrationDateAfter,
@@ -7502,7 +7471,6 @@ export class RestService {
         excludedId,
         flags,
         fullName,
-        householdAdminArea,
         householdId,
         isActiveProgram,
         lastRegistrationDateAfter,
@@ -7539,7 +7507,6 @@ export class RestService {
          */
         flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
         fullName?: string,
-        householdAdminArea?: string,
         householdId?: string,
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
@@ -7571,14 +7538,12 @@ export class RestService {
          * * `-sex` - Sex (descending)
          * * `relationship` - Relationship
          * * `-relationship` - Relationship (descending)
-         * * `household__admin_area__name` - Household  admin area  name
-         * * `-household__admin_area__name` - Household  admin area  name (descending)
          * * `last_registration_date` - Last registration date
          * * `-last_registration_date` - Last registration date (descending)
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -7629,7 +7594,6 @@ export class RestService {
                 'excluded_id': excludedId,
                 'flags': flags,
                 'full_name': fullName,
-                'household__admin_area': householdAdminArea,
                 'household__id': householdId,
                 'is_active_program': isActiveProgram,
                 'last_registration_date_after': lastRegistrationDateAfter,
@@ -7667,7 +7631,6 @@ export class RestService {
         excludedId,
         flags,
         fullName,
-        householdAdminArea,
         householdId,
         isActiveProgram,
         lastRegistrationDateAfter,
@@ -7702,7 +7665,6 @@ export class RestService {
          */
         flags?: Array<'DUPLICATE' | 'NEEDS_ADJUDICATION' | 'SANCTION_LIST_CONFIRMED_MATCH' | 'SANCTION_LIST_POSSIBLE_MATCH'>,
         fullName?: string,
-        householdAdminArea?: string,
         householdId?: string,
         isActiveProgram?: boolean,
         lastRegistrationDateAfter?: string,
@@ -7726,14 +7688,12 @@ export class RestService {
          * * `-sex` - Sex (descending)
          * * `relationship` - Relationship
          * * `-relationship` - Relationship (descending)
-         * * `household__admin_area__name` - Household  admin area  name
-         * * `-household__admin_area__name` - Household  admin area  name (descending)
          * * `last_registration_date` - Last registration date
          * * `-last_registration_date` - Last registration date (descending)
          * * `first_registration_date` - First registration date
          * * `-first_registration_date` - First registration date (descending)
          */
-        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__admin_area__name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__admin_area__name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
+        orderBy?: Array<'-birth_date' | '-first_registration_date' | '-full_name' | '-household__id' | '-household__unicef_id' | '-id' | '-last_registration_date' | '-relationship' | '-sex' | '-unicef_id' | 'birth_date' | 'first_registration_date' | 'full_name' | 'household__id' | 'household__unicef_id' | 'id' | 'last_registration_date' | 'relationship' | 'sex' | 'unicef_id'>,
         /**
          * Which field to use when ordering the results.
          */
@@ -7784,7 +7744,6 @@ export class RestService {
                 'excluded_id': excludedId,
                 'flags': flags,
                 'full_name': fullName,
-                'household__admin_area': householdAdminArea,
                 'household__id': householdId,
                 'is_active_program': isActiveProgram,
                 'last_registration_date_after': lastRegistrationDateAfter,
