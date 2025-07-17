@@ -3,7 +3,6 @@ from decimal import Decimal
 from typing import Any, Callable, Dict, Optional
 from uuid import UUID
 
-from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
 
 from phonenumber_field.phonenumber import PhoneNumber
@@ -33,7 +32,6 @@ encode_typedict: Dict[type, Callable[[Any], Any]] = {
     datetime.datetime: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
     datetime.date: lambda x: x.strftime("%Y-%m-%d"),
     Country: lambda x: x.iso_code3,
-    Point: lambda x: str(x),
     Decimal: lambda x: str(x),
 }
 
