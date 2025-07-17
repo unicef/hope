@@ -19,7 +19,11 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
 )
 from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.payment.fixtures import FinancialInstitutionFactory, AccountFactory, generate_delivery_mechanisms
+from hct_mis_api.apps.payment.fixtures import (
+    AccountFactory,
+    FinancialInstitutionFactory,
+    generate_delivery_mechanisms,
+)
 from hct_mis_api.apps.payment.models import AccountType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
@@ -339,34 +343,34 @@ class TestUpdateIndividualDataService(TestCase):
         )
 
         self.ticket.individual_data_update_ticket_details.individual_data["accounts"] = [
-                    {
-                        "approve_status": True,
-                        "value": {
-                            "data_fields": {
-                                "financial_institution": str(fi1.id),
-                                "new_field": "new_value",
-                                "number": "2222",
-                            },
-                            "name": "mobile",
-                        },
-                    }
+            {
+                "approve_status": True,
+                "value": {
+                    "data_fields": {
+                        "financial_institution": str(fi1.id),
+                        "new_field": "new_value",
+                        "number": "2222",
+                    },
+                    "name": "mobile",
+                },
+            }
         ]
         self.ticket.individual_data_update_ticket_details.individual_data["accounts_to_edit"] = [
-                {
-                    "approve_status": True,
-                    "data_fields": [
-                        {"name": "field", "previous_value": "value", "value": "updated_value"},
-                        {"name": "new_field", "previous_value": None, "value": "new_value"},
-                        {"name": "number", "previous_value": "123", "value": "123123"},
-                        {
-                            "name": "financial_institution",
-                            "previous_value": str(fi1.id),
-                            "value": str(fi2.id),
-                        },
-                    ],
-                    "id": "e0a7605f-62f4-4280-99f6-b7a2c4001680",
-                    "name": "mobile",
-                }
+            {
+                "approve_status": True,
+                "data_fields": [
+                    {"name": "field", "previous_value": "value", "value": "updated_value"},
+                    {"name": "new_field", "previous_value": None, "value": "new_value"},
+                    {"name": "number", "previous_value": "123", "value": "123123"},
+                    {
+                        "name": "financial_institution",
+                        "previous_value": str(fi1.id),
+                        "value": str(fi2.id),
+                    },
+                ],
+                "id": "e0a7605f-62f4-4280-99f6-b7a2c4001680",
+                "name": "mobile",
+            }
         ]
         self.ticket.individual_data_update_ticket_details.save()
 
