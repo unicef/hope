@@ -20,7 +20,6 @@ from hct_mis_api.apps.household.models import (
     HouseholdCollection,
     Individual,
     IndividualCollection,
-    PendingBankAccountInfo,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -122,9 +121,6 @@ class RdiMergeTask:
                     PendingIndividualRoleInHousehold.objects.filter(
                         household_id__in=household_ids, individual_id__in=individual_ids
                     ).update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingBankAccountInfo.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
                     PendingDocument.objects.filter(individual_id__in=individual_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
                     )

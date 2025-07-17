@@ -18,17 +18,24 @@ export const headCells: HeadCell<PaymentPlanNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Cash Amount',
+    label: 'Total Amount',
     id: 'totalDeliveredQuantity',
     numeric: true,
     dataCy: 'totalDeliveredQuantity',
   },
   {
     disablePadding: false,
-    label: 'Timeframe',
+    label: 'Payment Disbursement Dates',
     id: 'timeframe',
     numeric: false,
     dataCy: 'startDate',
+  },
+  {
+    disablePadding: false,
+    label: 'Programme Cycle Title',
+    id: 'cycleTitle',
+    numeric: false,
+    dataCy: 'cycleTitle',
   },
   {
     disablePadding: false,
