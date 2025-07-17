@@ -7,7 +7,6 @@ import { AssignedToDropdown } from '../AssignedToDropdown';
 import { BulkBaseModal } from './BulkBaseModal';
 import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
 import { User } from '@restgenerated/models/User';
-import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BulkUpdateGrievanceTicketsAssignees } from '@restgenerated/models/BulkUpdateGrievanceTicketsAssignees';
@@ -79,7 +78,7 @@ export function BulkAssignModal({
       }),
   });
 
-  const optionsData: PaginatedUserList = usersData || { results: [] };
+  const optionsData: User[] = usersData?.results || [];
 
   const onFilterChange = (data: User | null): void => {
     setValue(data);

@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type EditIndividualDocument = {
-    id?: Array<string>;
+    id: string;
     country: string;
     key: string;
     number: string;

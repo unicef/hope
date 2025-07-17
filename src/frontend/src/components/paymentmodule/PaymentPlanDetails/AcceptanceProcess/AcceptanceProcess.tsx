@@ -18,6 +18,7 @@ import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
@@ -60,7 +61,7 @@ function AcceptanceProcess({
       await exportPdfMutation.mutateAsync();
       showMessage(t('PDF generated. Please check your email.'));
     } catch (e) {
-      showMessage(e.message || t('Failed to export PDF'));
+      showApiErrorMessages(e, showMessage, t('Failed to generate PDF.'));
     }
   };
 

@@ -14,6 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import { ErrorButton } from '@core/ErrorButton';
 import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -49,7 +50,7 @@ export function DeleteVerificationPlan({
       setDeleteDialogOpen(false);
       showMessage(t('Verification plan has been deleted.'));
     } catch (error) {
-      showMessage(error?.message || t('Error while submitting'));
+      showApiErrorMessages(error, showMessage);
     }
   };
   return (

@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from 'react';
 import { TextField, Autocomplete } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useProgramContext } from '../../../programContext';
-import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
 import { User } from '@restgenerated/models/User';
 import styled from 'styled-components';
 
@@ -27,7 +26,7 @@ interface AssignedToDropdownProps {
   fullWidth?: boolean;
   onFilterChange?: (selectedValue: User | null, ids?: any) => void;
   value?: User | null;
-  optionsData: PaginatedUserList;
+  optionsData: User[];
   setInputValue: (value: string) => void;
   ids?: any;
   label?: string;
@@ -53,8 +52,8 @@ export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
     setInputValue(debouncedInputText);
   }, [debouncedInputText, setInputValue]);
 
-  const sortedOptions = Array.isArray(optionsData?.results)
-    ? [...optionsData.results].sort((a, b) => {
+  const sortedOptions = Array.isArray(optionsData)
+    ? [...optionsData].sort((a, b) => {
         const emailA = a?.email?.toLowerCase();
         const emailB = b?.email?.toLowerCase();
         return emailA.localeCompare(emailB);

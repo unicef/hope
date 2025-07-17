@@ -49,6 +49,7 @@ import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
 import { RapidPro } from '@restgenerated/models/RapidPro';
 import { Age } from '@restgenerated/models/Age';
 import { PatchedPaymentVerificationPlanCreate } from '@restgenerated/models/PatchedPaymentVerificationPlanCreate';
+import { showApiErrorMessages } from '@utils/utils';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -274,9 +275,16 @@ export const EditVerificationPlan = ({
         },
       });
     } catch (error) {
-      console.error('Error loading sample size data:', error);
+      showApiErrorMessages(error, showMessage);
     }
-  }, [businessArea, programSlug, selectedTab, formValues, cashOrPaymentPlanId]);
+  }, [
+    businessArea,
+    programSlug,
+    selectedTab,
+    formValues,
+    cashOrPaymentPlanId,
+    showMessage,
+  ]);
 
   useEffect(() => {
     if (open) {
@@ -296,7 +304,7 @@ export const EditVerificationPlan = ({
 
       // TODO: Implement proper React Query cache invalidation if needed
     } catch (error) {
-      showMessage(error?.message || t('Error while submitting'));
+      showApiErrorMessages(error, showMessage);
     }
   };
 

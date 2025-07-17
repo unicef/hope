@@ -156,11 +156,6 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         if admin2 and Area.objects.filter(p_code=admin2).exists():
             household_data["admin2"] = Area.objects.get(p_code=admin2).p_code
 
-        if admin2 and Area.objects.filter(p_code=admin2).exists():
-            household_data["admin_area"] = Area.objects.get(p_code=admin2).p_code
-        elif admin1 and Area.objects.filter(p_code=admin1).exists():
-            household_data["admin_area"] = Area.objects.get(p_code=admin1).p_code
-
         return household_data
 
     def _prepare_individual_data(
@@ -306,7 +301,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         household.set_admin_areas()
 
         household.detail_id = record.source_id
-        household.save(update_fields=("detail_id", "admin_area", "admin1", "admin2", "admin3", "admin4"))
+        household.save(update_fields=("detail_id", "admin1", "admin2", "admin3", "admin4"))
 
         individuals: List[PendingIndividual] = []
         documents: List[PendingDocument] = []

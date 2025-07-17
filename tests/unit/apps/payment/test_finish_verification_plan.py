@@ -65,7 +65,7 @@ class TestFinishVerificationPlan(TestCase):
             household, _ = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": afghanistan_areas_qs.order_by("?").first(),
+                    "admin2": afghanistan_areas_qs.order_by("?").first(),
                     "program": cls.program,
                 },
                 {

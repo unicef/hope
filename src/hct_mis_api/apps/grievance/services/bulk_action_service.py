@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.utils import clear_cache_for_key
@@ -32,7 +33,7 @@ class BulkActionService:
         new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
         new_tickets_ids = list(map(str, new_tickets.values_list("id", flat=True)))
 
-        updated_count = queryset.update(assigned_to=user)
+        updated_count = queryset.update(assigned_to=user, updated_at=timezone.now())
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
 

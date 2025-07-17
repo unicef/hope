@@ -312,10 +312,14 @@ class IndividualDataUpdateService(DataChangeService):
                 hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
             if hh_country := hh_approved_data.get("country"):
                 hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
-            if admin_area_title := hh_approved_data.pop("admin_area_title", None):
-                hh_approved_data["admin_area"] = Area.objects.filter(p_code=admin_area_title).first()
+            admin_area_title = hh_approved_data.pop("admin_area_title", None)
             # people update HH
             Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
+            updated_household = Household.objects.get(id=household.id)
+            if admin_area_title:
+                area = Area.objects.filter(p_code=admin_area_title).first()
+                updated_household.set_admin_areas(area)
+
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(
             flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()

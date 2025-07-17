@@ -22,6 +22,7 @@ import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { PatchedUpdateGrievanceTicket } from '@restgenerated/models/PatchedUpdateGrievanceTicket';
 import { RestService } from '@restgenerated/services/RestService';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface VerifyPaymentGrievanceProps {
   ticket: GrievanceTicketDetail;
@@ -60,15 +61,7 @@ export function VerifyPaymentGrievance({
       });
     },
     onError: (error: any) => {
-      if (error?.body?.errors) {
-        Object.values(error.body.errors)
-          .flat()
-          .forEach((msg: string) => {
-            showMessage(msg);
-          });
-      } else {
-        showMessage('An error occurred while verifying payment');
-      }
+      showApiErrorMessages(error, showMessage);
     },
   });
 

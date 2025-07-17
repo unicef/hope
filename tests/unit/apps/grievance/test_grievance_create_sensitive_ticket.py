@@ -1,0 +1,247 @@
+from typing import Any
+
+from django.core.management import call_command
+from django.urls import reverse
+
+import pytest
+from rest_framework import status
+
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo import models as geo_models
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
+
+pytestmark = pytest.mark.django_db()
+
+
+class TestGrievanceCreateSensitiveTicket:
+    @pytest.fixture(autouse=True)
+    def setup(self, api_client: Any) -> None:
+        self.business_area = create_afghanistan()
+        call_command("loadcountries")
+        partner = PartnerFactory(name="Partner")
+        self.user = UserFactory.create(partner=partner)
+        self.api_client = api_client(self.user)
+        country = geo_models.Country.objects.get(name="Afghanistan")
+        area_type = AreaTypeFactory(
+            name="Admin type one",
+            country=country,
+            area_level=2,
+        )
+        self.admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asfdsfg")
+
+        self.household1, self.individuals1 = create_household(
+            {"size": 1, "business_area": self.business_area},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+        )
+        self.household2, self.individuals2 = create_household(
+            {"size": 1, "business_area": self.business_area},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe Second Individual"},
+        )
+        self.program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
+        payment_plan = PaymentPlanFactory(program_cycle=self.program.cycles.first(), business_area=self.business_area)
+        self.payment = PaymentFactory(
+            household=self.household1,
+            collector=self.individuals1[0],
+            business_area=self.business_area,
+            parent=payment_plan,
+            currency="PLN",
+        )
+        self.second_payment = PaymentFactory(
+            household=self.household2,
+            collector=self.individuals2[0],
+            business_area=self.business_area,
+            parent=payment_plan,
+            currency="PLN",
+        )
+        self.list_url = reverse(
+            "api:grievance-tickets:grievance-tickets-global-list",
+            kwargs={"business_area_slug": self.business_area.slug},
+        )
+
+    def test_create_sensitive_ticket(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+        input_data = {
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {
+                "category": {
+                    "sensitive_grievance_ticket_extras": {
+                        "household": str(self.household1.id),
+                        "individual": str(self.individuals1[0].id),
+                    }
+                }
+            },
+        }
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data[0]["payment_record"] is None
+
+    def test_create_sensitive_ticket_wrong_extras(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+        input_data = {
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {
+                "category": {
+                    "grievance_complaint_ticket_extras": {
+                        "household": str(self.household1.id),
+                        "individual": str(self.individuals1[0].id),
+                    }
+                }
+            },
+        }
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert (
+            response.json()["extras"]["category"]["grievance_complaint_ticket_extras"]["payment_record"][0]
+            == "This field is required."
+        )
+
+    def test_create_sensitive_ticket_without_issue_type(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+        input_data = {
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {
+                "category": {
+                    "sensitive_grievance_ticket_extras": {
+                        "household": str(self.household1.id),
+                        "individual": str(self.individuals1[0].id),
+                        "payment_record": [str(self.payment.id)],
+                    }
+                }
+            },
+        }
+
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "You have to provide issue_type in 3" in response.json()
+
+    def test_create_sensitive_ticket_with_two_payment_records(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+        input_data = {
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {
+                "category": {
+                    "sensitive_grievance_ticket_extras": {
+                        "household": str(self.household1.id),
+                        "individual": str(self.individuals1[0].id),
+                        "payment_record": [
+                            str(self.payment.id),
+                            str(self.second_payment.id),
+                        ],
+                    }
+                }
+            },
+        }
+
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.json()[0]["payment_record"] is not None
+
+    def test_create_sensitive_ticket_without_payment_record(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+
+        input_data = {
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {
+                "category": {
+                    "sensitive_grievance_ticket_extras": {
+                        "household": str(self.household1.id),
+                        "individual": str(self.individuals1[0].id),
+                    }
+                }
+            },
+        }
+
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data[0]["payment_record"] is None
+
+    def test_create_sensitive_ticket_without_household(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+        input_data = {
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {"category": {"sensitive_grievance_ticket_extras": {"individual": str(self.individuals1[0].id)}}},
+        }
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data[0]["payment_record"] is None
+        assert response.data[0]["household"] is None
+        assert response.data[0]["individual"] is not None
+
+    def test_create_sensitive_ticket_without_individual(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+
+        input_data = {
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+            "extras": {"category": {"sensitive_grievance_ticket_extras": {"household": str(self.household1.id)}}},
+        }
+
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data[0]["individual"] is None
+        assert response.data[0]["payment_record"] is None
+        assert response.data[0]["household"] is not None
+
+    def test_create_sensitive_ticket_without_extras(self, create_user_role_with_permissions: Any) -> None:
+        create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area, self.program)
+        input_data = {
+            "description": "Test Feedback",
+            "assigned_to": str(self.user.id),
+            "category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS,
+            "admin": str(self.admin_area.id),
+            "language": "Polish, English",
+            "consent": True,
+        }
+        response = self.api_client.post(self.list_url, input_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data[0]["individual"] is None
+        assert response.data[0]["payment_record"] is None
+        assert response.data[0]["household"] is None

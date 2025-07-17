@@ -558,7 +558,6 @@ export function prepareRestUpdateVariables(
   ticket: GrievanceTicketDetail,
 ): PatchedUpdateGrievanceTicket {
   const baseUpdate: PatchedUpdateGrievanceTicket = {
-    description: values.description,
     assignedTo: values.assignedTo,
     language: values.language,
     admin: values?.admin,

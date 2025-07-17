@@ -5,7 +5,8 @@ import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
 import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../../programContext';
@@ -26,6 +27,7 @@ export const ActivateProgram = ({
   const { showMessage } = useSnackbar();
   const { businessArea } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: activateProgram, isPending: loading } = useMutation({
     mutationFn: () =>
@@ -33,21 +35,28 @@ export const ActivateProgram = ({
         businessAreaSlug: businessArea,
         slug: program.slug,
       }),
-  });
-
-  const handleActivateProgram = async (): Promise<void> => {
-    try {
-      await activateProgram();
+    onSuccess: () => {
       setSelectedProgram({
         ...selectedProgram,
         status: ProgramStatus.ACTIVE,
       });
-
       showMessage(t('Programme activated.'));
+      queryClient.invalidateQueries({
+        queryKey: ['program', businessArea, program.slug],
+      });
       setOpen(false);
-    } catch (error) {
-      showMessage(t('Programme activate action failed.'));
-    }
+    },
+    onError: (error) => {
+      showApiErrorMessages(
+        error,
+        showMessage,
+        t('Programme activate action failed.'),
+      );
+    },
+  });
+
+  const handleActivateProgram = async (): Promise<void> => {
+    await activateProgram();
   };
   return (
     <span>

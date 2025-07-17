@@ -14,6 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import { ErrorButton } from '@core/ErrorButton';
 import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
+import { showApiErrorMessages } from '@utils/utils';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -48,7 +49,7 @@ export function DiscardVerificationPlan({
       setDiscardDialogOpen(false);
       showMessage(t('Verification plan has been discarded.'));
     } catch (error) {
-      showMessage(error?.message || t('Error while submitting'));
+      showApiErrorMessages(error, showMessage);
     }
   };
   return (

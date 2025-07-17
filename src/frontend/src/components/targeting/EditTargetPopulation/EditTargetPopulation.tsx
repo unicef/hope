@@ -14,7 +14,7 @@ import {
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import Exclusions from '../CreateTargetPopulation/Exclusions';
@@ -26,6 +26,7 @@ import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDe
 import { useMutation } from '@tanstack/react-query';
 import { PatchedTargetPopulationCreate } from '@restgenerated/models/PatchedTargetPopulationCreate';
 import { RestService } from '@restgenerated/services/RestService';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface EditTargetPopulationProps {
   paymentPlan: TargetPopulationDetail;
@@ -38,6 +39,12 @@ const EditTargetPopulation = ({
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showMessage } = useSnackbar();
+  const { id } = useParams();
+  const { baseUrl, programSlug, businessArea } = useBaseUrl();
+  const { selectedProgram, isSocialDctType, isStandardDctType } =
+    useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const targetingCriteriaCopy =
     paymentPlan.targetingCriteria?.rules.map((rule) => ({
@@ -74,27 +81,22 @@ const EditTargetPopulation = ({
     useMutation({
       mutationFn: ({
         businessAreaSlug,
-        id,
-        programSlug,
+        tpId,
+        slug,
         requestBody,
       }: {
         businessAreaSlug: string;
-        id: string;
-        programSlug: string;
+        tpId: string;
+        slug: string;
         requestBody?: PatchedTargetPopulationCreate;
       }) =>
         RestService.restBusinessAreasProgramsTargetPopulationsPartialUpdate({
           businessAreaSlug,
-          id,
-          programSlug,
+          id: tpId,
+          programSlug: slug,
           requestBody,
         }),
     });
-  const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
-  const { selectedProgram, isSocialDctType, isStandardDctType } =
-    useProgramContext();
-  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria, householdIds, individualIds } = values;
@@ -124,9 +126,9 @@ const EditTargetPopulation = ({
     try {
       await updateTargetPopulation(
         {
-          businessAreaSlug: values.businessAreaSlug,
-          id: values.id,
-          programSlug: values.programSlug,
+          businessAreaSlug: businessArea,
+          tpId: id,
+          slug: programSlug,
           requestBody: {
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
@@ -150,7 +152,7 @@ const EditTargetPopulation = ({
         },
       );
     } catch (e) {
-      console.error(e);
+      showApiErrorMessages(e, showMessage);
     }
   };
 

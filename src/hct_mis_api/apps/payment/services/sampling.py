@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.core.filters import filter_age
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
@@ -69,7 +68,6 @@ class BaseSampling(abc.ABC):
         self.sex = self.arguments.get("sex")
         self.age = self.arguments.get("age")
         self.excluded_admin_areas = self.arguments.get("excluded_admin_areas", [])
-        self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas]
         self.sample_size = 0
         self.payment_records: Any = None
 
@@ -97,15 +95,21 @@ class RandomSampling(BaseSampling):
                 self.age.get("max"),
             )
 
-        self.payment_records = payment_records.filter(
-            ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
+        self.payment_records = payment_records.exclude(
+            Q(household__admin1__id__in=self.excluded_admin_areas)
+            | Q(household__admin2__id__in=self.excluded_admin_areas)
+            | Q(household__admin3__id__in=self.excluded_admin_areas)
+            | Q(household__admin4__id__in=self.excluded_admin_areas)
         )
         self.sample_size = self.calc_sample_size(payment_records.count())
 
 
 class FullListSampling(BaseSampling):
     def sampling(self, payment_records: QuerySet["Payment"]) -> None:
-        self.payment_records = payment_records.filter(
-            ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
+        self.payment_records = payment_records.exclude(
+            Q(household__admin1__id__in=self.excluded_admin_areas)
+            | Q(household__admin2__id__in=self.excluded_admin_areas)
+            | Q(household__admin3__id__in=self.excluded_admin_areas)
+            | Q(household__admin4__id__in=self.excluded_admin_areas)
         )
         self.sample_size = self.calc_sample_size(payment_records.count())

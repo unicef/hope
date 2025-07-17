@@ -2,11 +2,10 @@ import abc
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple
 
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.filters import filter_age
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
@@ -19,7 +18,6 @@ class BaseSampling(abc.ABC):
         self.age = arguments.get("age")
         self.excluded_admin_areas = arguments.get("excluded_admin_areas", [])
         self.administrative_level = arguments.get("administrative_level")
-        self.excluded_admin_areas_decoded = [decode_id_string(x) for x in self.excluded_admin_areas if x and x.strip()]
         self.sample_size = 0
         self.households: QuerySet[Household] = Household.objects.none()
 
@@ -39,13 +37,17 @@ class BaseSampling(abc.ABC):
 class FullListSampling(BaseSampling):
     def sampling(self, households: QuerySet[Household]) -> None:
         self.households = households.exclude(
-            head_of_household__phone_no__isnull=False, admin_area__id__in=self.excluded_admin_areas_decoded
+            Q(head_of_household__phone_no__isnull=False)
+            | Q(admin1__id__in=self.excluded_admin_areas)
+            | Q(admin2__id__in=self.excluded_admin_areas)
+            | Q(admin3__id__in=self.excluded_admin_areas)
+            | Q(admin4__id__in=self.excluded_admin_areas)
         )
         self.sample_size = self.households.count()
 
     def get_full_list_arguments(self) -> Dict:
         return {
-            "excluded_admin_areas": self.excluded_admin_areas_decoded,
+            "excluded_admin_areas": self.excluded_admin_areas,
         }
 
     def get_random_sampling_arguments(self) -> None:
@@ -65,7 +67,11 @@ class RandomSampling(BaseSampling):
                 self.age.get("max"),
             )
         self.households = households.exclude(
-            head_of_household__phone_no__isnull=False, admin_area__id__in=self.excluded_admin_areas_decoded
+            Q(head_of_household__phone_no__isnull=False)
+            | Q(admin1__id__in=self.excluded_admin_areas)
+            | Q(admin2__id__in=self.excluded_admin_areas)
+            | Q(admin3__id__in=self.excluded_admin_areas)
+            | Q(admin4__id__in=self.excluded_admin_areas)
         )
         self.sample_size = get_number_of_samples(
             self.households.count(), self.confidence_interval, self.margin_of_error
@@ -76,7 +82,7 @@ class RandomSampling(BaseSampling):
 
     def get_random_sampling_arguments(self) -> Dict:
         return {
-            "excluded_admin_areas": self.excluded_admin_areas_decoded,
+            "excluded_admin_areas": self.excluded_admin_areas,
             "confidence_interval": self.confidence_interval,
             "margin_of_error": self.margin_of_error,
             "age": self.age,

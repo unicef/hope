@@ -138,8 +138,26 @@ class TestProgramDetail:
         }
         assert response_data["status"] == self.program.status
         assert response_data["pdu_fields"] == [
-            str(self.pdu_field1.id),
-            str(self.pdu_field2.id),
+            {
+                "id": str(self.pdu_field1.id),
+                "label": self.pdu_field1.label["English(EN)"],
+                "name": self.pdu_field1.name,
+                "pdu_data": {
+                    "subtype": self.pdu_field1.pdu_data.subtype,
+                    "number_of_rounds": self.pdu_field1.pdu_data.number_of_rounds,
+                    "rounds_names": self.pdu_field1.pdu_data.rounds_names,
+                },
+            },
+            {
+                "id": str(self.pdu_field2.id),
+                "label": self.pdu_field2.label["English(EN)"],
+                "name": self.pdu_field2.name,
+                "pdu_data": {
+                    "subtype": self.pdu_field2.pdu_data.subtype,
+                    "number_of_rounds": self.pdu_field2.pdu_data.number_of_rounds,
+                    "rounds_names": self.pdu_field2.pdu_data.rounds_names,
+                },
+            },
         ]
         assert response_data["household_count"] == self.program.household_count
 

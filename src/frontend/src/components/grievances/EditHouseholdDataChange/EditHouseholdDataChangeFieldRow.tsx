@@ -31,6 +31,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+
   const field = fields?.find((item) => item.name === itemValue.fieldName);
   const [, , helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,

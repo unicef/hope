@@ -1315,3 +1315,56 @@ export const fieldNameToLabel = (fieldName: string): string => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 };
+
+export function showApiErrorMessages(
+  error: any,
+  showMessage: (msg: string) => void,
+  fallbackMsg: string = 'An error occurred',
+): void {
+  // Handle array of errors in error.body
+  if (error && typeof error === 'object' && Array.isArray(error.body)) {
+    error.body.forEach((msg: string) => {
+      if (msg) showMessage(msg);
+    });
+    return;
+  }
+  // Handle string error in error.body
+  if (error && typeof error === 'object' && typeof error.body === 'string') {
+    showMessage(error.body);
+    return;
+  }
+  // Handle object of arrays in error.body (field errors)
+  if (
+    error &&
+    typeof error === 'object' &&
+    typeof error.body === 'object' &&
+    error.body !== null
+  ) {
+    Object.entries(error.body).forEach(([field, messages]) => {
+      if (Array.isArray(messages)) {
+        messages.forEach((msg: string) => {
+          if (msg) showMessage(`${field}: ${msg}`);
+        });
+      }
+    });
+    return;
+  }
+  // Handle top-level object of arrays (field errors)
+  if (error && typeof error === 'object' && error !== null) {
+    const entries = Object.entries(error);
+    if (entries.every(([, v]) => Array.isArray(v))) {
+      entries.forEach(([field, messages]) => {
+        (messages as string[]).forEach((msg) => {
+          if (msg) showMessage(`${field}: ${msg}`);
+        });
+      });
+      return;
+    }
+  }
+  // Handle string error in error.message
+  if (error && typeof error === 'object' && typeof error.message === 'string') {
+    showMessage(error.message);
+    return;
+  }
+  showMessage(fallbackMsg);
+}

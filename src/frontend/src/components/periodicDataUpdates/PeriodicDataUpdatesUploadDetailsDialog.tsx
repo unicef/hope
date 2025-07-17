@@ -1,17 +1,17 @@
-import React, { FC } from 'react';
-import { useTranslation } from 'react-i18next';
+import { RestService } from '@restgenerated/services/RestService';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
+  Typography,
 } from '@mui/material';
+import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useQuery } from '@tanstack/react-query';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { RestService } from '@restgenerated/services/RestService';
-import { PeriodicDataUpdateUploadDetail } from '@restgenerated/models/PeriodicDataUpdateUploadDetail';
 
 interface PeriodicDataUpdatesUploadDetailsDialogProps {
   open: boolean;
@@ -46,8 +46,8 @@ const FormErrorDisplay = ({ formErrors }) => {
     </div>
   );
 };
+
 const NonFormErrorDisplay = ({ nonFormErrors }) => {
-  // Attempt to parse the JSON if it's a string; otherwise assume it's already an array
   const errorMessages = nonFormErrors;
 
   if (!errorMessages || !errorMessages.length) {
@@ -64,35 +64,45 @@ const NonFormErrorDisplay = ({ nonFormErrors }) => {
     </div>
   );
 };
+
 export const PeriodicDataUpdatesUploadDetailsDialog: FC<
   PeriodicDataUpdatesUploadDetailsDialogProps
 > = ({ open, onClose, uploadId }) => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { data: uploadDetailsData, isLoading } =
-    useQuery<PeriodicDataUpdateUploadDetail>({
-      queryKey: [
-        'periodicDataUpdateUploadDetails',
-        businessArea,
-        programId,
-        uploadId,
-      ],
-      queryFn: () =>
-        RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
-          businessAreaSlug: businessArea,
-          id: uploadId,
-          programSlug: programId,
-        }),
-    });
+  const { data: uploadDetailsData, isLoading } = useQuery({
+    queryKey: [
+      'periodicDataUpdateUploadDetails',
+      businessArea,
+      programId,
+      uploadId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsPeriodicDataUpdateUploadsRetrieve({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: uploadId,
+      }),
+    enabled: !!uploadId,
+  });
 
   if (isLoading) return <LoadingComponent />;
   return (
     <Dialog open={open} onClose={onClose} scroll="paper">
       <DialogTitle>{t('Periodic Data Updates Errors')}</DialogTitle>
       <DialogContent>
-        {/* //TODO: check if it is just errorsInfo */}
-        <NonFormErrorDisplay nonFormErrors={uploadDetailsData?.errorsInfo} />
-        <FormErrorDisplay formErrors={uploadDetailsData?.errorsInfo} />
+        {!uploadDetailsData?.errorsInfo ? (
+          <Typography>No errors to display.</Typography>
+        ) : (
+          <>
+            <NonFormErrorDisplay
+              nonFormErrors={uploadDetailsData?.errorsInfo?.nonFormErrors}
+            />
+            <FormErrorDisplay
+              formErrors={uploadDetailsData?.errorsInfo?.formErrors}
+            />
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('Close')}</Button>

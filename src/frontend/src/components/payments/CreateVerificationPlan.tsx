@@ -31,7 +31,7 @@ import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { getPercentage } from '@utils/utils';
+import { getPercentage, showApiErrorMessages } from '@utils/utils';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { FormikEffect } from '@core/FormikEffect';
@@ -234,9 +234,16 @@ export const CreateVerificationPlan = ({
         },
       });
     } catch (error) {
-      console.error('Error loading sample size data:', error);
+      showApiErrorMessages(error, showMessage);
     }
-  }, [businessArea, programSlug, selectedTab, formValues, cashOrPaymentPlanId]);
+  }, [
+    businessArea,
+    programSlug,
+    selectedTab,
+    formValues,
+    cashOrPaymentPlanId,
+    showMessage,
+  ]);
 
   useEffect(() => {
     if (open) {
@@ -252,7 +259,7 @@ export const CreateVerificationPlan = ({
       setOpen(false);
       showMessage(t('New verification plan created.'));
     } catch (error) {
-      showMessage(error?.message || t('Error while submitting'));
+      showApiErrorMessages(error, showMessage);
     }
   };
 

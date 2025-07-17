@@ -31,6 +31,7 @@ import {
   decodeIdString,
   isPartnerVisible,
   mapPartnerChoicesWithoutUnicef,
+  showApiErrorMessages,
 } from '@utils/utils';
 import { Formik } from 'formik';
 import { omit } from 'lodash';
@@ -84,6 +85,8 @@ const EditProgramPage = (): ReactElement => {
         RestService.restBusinessAreasProgramsChoicesRetrieve({
           businessAreaSlug: businessArea,
         }),
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
     });
 
   const queryClient = useQueryClient();
@@ -172,39 +175,40 @@ const EditProgramPage = (): ReactElement => {
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
       : '0.00';
-    const populationGoalValue = parseInt(values.population_goal, 10) ?? 0;
+    const populationGoalValue = parseInt(values.populationGoal, 10) ?? 0;
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
 
     const pduFieldsToSend = values.pduFields
       .filter((item) => item.label !== '')
-      .map(({ pduData, ...rest }) => ({
-        ...rest,
-        pduData: pduData
-          ? {
-              ...Object.fromEntries(
-                Object.entries(pduData).filter(
-                  ([key]) => key !== '__typename' && key !== 'id',
-                ),
-              ),
-              roundsNames: (() => {
-                if (!pduData.roundsNames) {
-                  pduData.roundsNames = [];
-                }
-
-                if (
-                  pduData.numberOfRounds === 1 &&
-                  pduData.roundsNames.length === 0
-                ) {
-                  return [''];
-                }
-
-                return pduData.roundsNames.map((roundName) => roundName || '');
-              })(),
+      .map(({ pduData, ...rest }) => {
+        let newPduData = pduData;
+        if (pduData) {
+          const filteredPduData = Object.fromEntries(
+            Object.entries(pduData).filter(
+              ([key]) => key !== '__typename' && key !== 'id',
+            ),
+          );
+          filteredPduData.roundsNames = (() => {
+            if (!pduData.roundsNames) {
+              pduData.roundsNames = [];
             }
-          : pduData,
-      }));
+            if (
+              pduData.numberOfRounds === 1 &&
+              pduData.roundsNames.length === 0
+            ) {
+              return [''];
+            }
+            return pduData.roundsNames.map((roundName) => roundName || '');
+          })();
+          newPduData = filteredPduData;
+        }
+        return {
+          ...rest,
+          pduData: newPduData,
+        };
+      });
 
     try {
       const requestValuesDetails = omit(values, [
@@ -217,6 +221,7 @@ const EditProgramPage = (): ReactElement => {
         omit(pduField, ['__typename']),
       );
 
+      // Build the base programData object
       const programData: ProgramUpdate = {
         programmeCode: requestValuesDetails.programmeCode,
         name: requestValuesDetails.name,
@@ -229,10 +234,18 @@ const EditProgramPage = (): ReactElement => {
         populationGoal: populationGoalParsed,
         cashPlus: requestValuesDetails.cashPlus,
         frequencyOfPayments: requestValuesDetails.frequencyOfPayments,
-        dataCollectingType: requestValuesDetails.dataCollectingTypeCode,
+        // Always send dataCollectingType, but only update if Draft
+        dataCollectingType:
+          program.status === 'DRAFT'
+            ? requestValuesDetails.dataCollectingTypeCode
+            : program.dataCollectingType.code,
         beneficiaryGroup: requestValuesDetails.beneficiaryGroup,
         startDate: requestValuesDetails.startDate,
-        endDate: requestValuesDetails.endDate,
+        endDate:
+          requestValuesDetails.endDate === '' ||
+          requestValuesDetails.endDate === undefined
+            ? null
+            : requestValuesDetails.endDate,
         pduFields: pduFieldsToSendWithoutTypename,
         version,
         status: '', // readonly field, will be ignored by API
@@ -243,15 +256,13 @@ const EditProgramPage = (): ReactElement => {
       showMessage(t('Programme edited.'));
       navigate(`/${baseUrl}/details/${response.slug}`);
     } catch (e: any) {
-      const errorMessage =
-        e?.message || 'An error occurred while updating the program';
-      showMessage(errorMessage);
+      showApiErrorMessages(e, showMessage);
     }
   };
 
   const handleSubmitPartners = async (values): Promise<void> => {
     const partnersToSet =
-      values.partnerAccess === '"SELECTED_PARTNERS_ACCESS"'
+      values.partnerAccess === 'SELECTED_PARTNERS_ACCESS'
         ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
             partner: partnerId,
             areas: areaAccess === 'ADMIN_AREA' ? areas : [],
@@ -269,9 +280,7 @@ const EditProgramPage = (): ReactElement => {
       showMessage(t('Programme Partners updated.'));
       navigate(`/${baseUrl}/details/${id}`);
     } catch (e: any) {
-      const errorMessage =
-        e?.message || 'An error occurred while updating partners';
-      showMessage(errorMessage);
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -331,7 +340,6 @@ const EditProgramPage = (): ReactElement => {
     ['partnerAccess'],
   ];
 
-  const allAreasTree = treeData?.results || [];
   const { partnerChoicesTemp: userPartnerChoices } = userPartnerChoicesData;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -474,7 +482,7 @@ const EditProgramPage = (): ReactElement => {
                   <div>
                     <PartnersStep
                       values={values}
-                      allAreasTreeData={allAreasTree}
+                      allAreasTreeData={treeData || []}
                       partnerChoices={mappedPartnerChoices}
                       submitForm={submitForm}
                       setFieldValue={setFieldValue}

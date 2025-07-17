@@ -3,20 +3,20 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
+import RegistrationFilters from '@components/rdi/RegistrationFilters';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { getFilterFromQueryParams, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
-import RegistrationFilters from '@components/rdi/RegistrationFilters';
-import { RestService } from '@restgenerated/services/RestService';
 
 const initialFilter = {
   search: '',
@@ -62,7 +62,7 @@ function RegistrationDataImportPage(): ReactElement {
     try {
       await mutateAsync();
     } catch (error) {
-      showMessage(error.message);
+      showApiErrorMessages(error, showMessage);
     }
   };
 

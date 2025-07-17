@@ -20,9 +20,7 @@ import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
-import {
-  useExportPeriodicDataUpdateTemplate,
-} from './PeriodicDataUpdatesTemplatesListActions';
+import { useExportPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
 import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
@@ -103,8 +101,8 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const handleExportClick = (templateId: number) => {
     exportTemplate({
       businessAreaSlug,
-      programId,
-      templateId: templateId.toString(),
+      programSlug: programId,
+      templateId: templateId,
     });
   };
 
@@ -203,7 +201,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
                 color="primary"
                 startIcon={<GetAppIcon />}
                 data-cy={`download-btn-${row.id}`}
-                href={`/api/rest/${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${row.id}/download/`}
+                href={`/api/rest/business-areas/${businessAreaSlug}/programs/${programId}/periodic-data-update-templates/${row.id}/download/`}
                 disabled={
                   row?.numberOfRecords === 0 || !canExportOrDownloadTemplate
                 }

@@ -3,7 +3,7 @@ from typing import List
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Q
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -47,7 +47,7 @@ class HouseholdDeleteService(DataChangeService):
             .count()
         )
         if external_collectors_count:
-            raise GraphQLError(
+            raise ValidationError(
                 "One of the Household member is an external collector. This household cannot be withdrawn."
             )
 

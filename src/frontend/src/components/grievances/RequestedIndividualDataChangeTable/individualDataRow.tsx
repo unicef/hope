@@ -26,6 +26,7 @@ export const individualDataRow = (
   countriesDict,
   isEdit,
   handleSelectBioData,
+  individual,
 ): ReactElement => {
   const fieldName = camelCase(row[0]);
   const isItemSelected = isSelected(row[0]);
@@ -47,10 +48,10 @@ export const individualDataRow = (
     : valueDetails.previousValue;
 
   const individualValue = field?.isFlexField
-    ? ticket.ticketDetails?.individual?.flexFields[row[0]]
+    ? individual?.flexFields[row[0]]
     : isCountryFieldName
-      ? countriesDict[ticket.ticketDetails?.individual[camelCase(fieldName)]]
-      : ticket.ticketDetails?.individual[camelCase(fieldName)];
+      ? countriesDict[individual?.[camelCase(fieldName)]]
+      : individual?.[camelCase(fieldName)];
 
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
@@ -87,7 +88,7 @@ export const individualDataRow = (
         <Capitalize>
           {row[0] === 'sex'
             ? 'gender'
-            : row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
+            : snakeCase(row[0]).replaceAll('_i_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
       <TableCell align="left" data-cy="current-value">

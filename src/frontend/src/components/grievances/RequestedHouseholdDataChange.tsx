@@ -15,6 +15,7 @@ import { GrievanceHouseholdDataChangeApprove } from '@restgenerated/models/Griev
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { camelCase } from 'lodash';
+import { customSnakeCase } from '@components/grievances/utils/createGrievanceUtils';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -164,17 +165,18 @@ export function RequestedHouseholdDataChange({
       onSubmit={async (values) => {
         const householdApproveData = values.selected.reduce((prev, curr) => {
           // eslint-disable-next-line no-param-reassign
-          prev[curr] = true;
+          prev[customSnakeCase(curr)] = true;
           return prev;
         }, {});
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
-            prev[curr] = true;
+            prev[customSnakeCase(curr)] = true;
             return prev;
           },
           {},
         );
+
         try {
           await mutate({
             householdApproveData,

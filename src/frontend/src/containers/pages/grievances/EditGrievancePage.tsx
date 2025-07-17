@@ -59,6 +59,7 @@ import {
   choicesToDict,
   isInvalid,
   isPermissionDeniedError,
+  showApiErrorMessages,
   thingForSpecificGrievanceType,
 } from '@utils/utils';
 import { Field, Formik } from 'formik';
@@ -279,11 +280,11 @@ const EditGrievancePage = (): ReactElement => {
       });
       showMessage(t('Ticket status updated successfully.'));
     } catch (e) {
-      if (e?.response?.data?.message) {
-        showMessage(e.response.data.message);
-      } else {
-        showMessage(t('An error occurred while updating the ticket status.'));
-      }
+      showApiErrorMessages(
+        e,
+        showMessage,
+        'An error occurred while updating the grievance ticket',
+      );
     }
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -353,11 +354,7 @@ const EditGrievancePage = (): ReactElement => {
           showMessage(t('Grievance Ticket edited.'));
           navigate(grievanceDetailsPath);
         } catch (e) {
-          if (e?.response?.data?.message) {
-            showMessage(e.response.data.message);
-          } else {
-            showMessage(t('An error occurred while updating the ticket.'));
-          }
+          showApiErrorMessages(error, showMessage);
         }
         if (
           ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||

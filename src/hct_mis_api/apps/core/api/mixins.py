@@ -195,7 +195,11 @@ class BusinessAreaVisibilityMixin(BusinessAreaMixin):
                     areas_query |= Q(**{f"{field}__in": area_limits})
 
             filter_q |= Q(program_q & areas_null) | Q(program_q & areas_query)
-        return queryset.filter(filter_q) if filter_q else queryset.none()  # filter_q empty if no access to any program
+        return (
+            queryset.filter(Q(filter_q) | Q(**{f"{self.program_model_field}__isnull": True}))
+            if filter_q
+            else queryset.none()
+        )  # filter_q empty if no access to any program
 
 
 class PermissionActionMixin:

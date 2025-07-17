@@ -17,6 +17,7 @@ import { ReactElement } from 'react';
 import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
 import { Individual } from '@restgenerated/models/Individual';
 import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { showApiErrorMessages } from '@utils/utils';
 
 export type RoleReassignData = {
   role: string;
@@ -129,8 +130,6 @@ export function DeleteIndividualGrievanceDetails({
     Object.entries(ticket.individual || {})
       .filter(([key]) => {
         const snakeKey = snakeCase(key);
-        console.log('snakeKey', snakeKey);
-        console.log('fieldsDict', fieldsDict);
         const fieldAttribute = fieldsDict[snakeKey];
         return fieldAttribute && !excludedFields.includes(key);
       })
@@ -222,10 +221,8 @@ export function DeleteIndividualGrievanceDetails({
                     if (!ticket.ticketDetails.approveStatus) {
                       showMessage(t('Changes Approved'));
                     }
-                  } catch (e) {
-                    showMessage(
-                      t('An error occurred while updating the status'),
-                    );
+                  } catch (error) {
+                    showApiErrorMessages(error, showMessage);
                   }
                 })
               }

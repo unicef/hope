@@ -39,7 +39,7 @@ const countApprovedAndUnapproved = (
   let notApproved = 0;
   const flattenArray = data.flat(2);
   flattenArray.forEach((item) => {
-    if (item.approve_status === true) {
+    if (item.approveStatus === true) {
       approved += 1;
     } else {
       notApproved += 1;

@@ -16,6 +16,7 @@ import { useProgramContext } from '../../../programContext';
 import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
 import { useActionMutation } from '@hooks/useActionMutation';
 import { RestService } from '@restgenerated/services/RestService';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface RerunDedupeProps {
   registration: RegistrationDataImportDetail;
@@ -39,7 +40,7 @@ export const RerunDedupe = ({
       showMessage('Rerunning Deduplication started');
       setOpen(false);
     } catch (e) {
-      showMessage(e.message);
+      showApiErrorMessages(e, showMessage);
     }
   };
   return (

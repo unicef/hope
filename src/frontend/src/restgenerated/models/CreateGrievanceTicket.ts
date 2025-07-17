@@ -14,7 +14,7 @@ export type CreateGrievanceTicket = {
     language: string;
     consent: boolean;
     linkedTickets?: Array<string>;
-    extras: CreateGrievanceTicketExtras;
+    extras?: CreateGrievanceTicketExtras | null;
     priority?: number;
     urgency?: number;
     partner?: number | null;

@@ -19,6 +19,7 @@ from rest_framework.mixins import (
     RetrieveModelMixin,
     UpdateModelMixin,
 )
+from rest_framework.parsers import JSONParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_extensions.cache.decorators import cache_response
@@ -28,6 +29,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     check_creator_or_owner_permission,
     check_permissions,
+    has_creator_or_owner_permission,
 )
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.api.mixins import (
@@ -37,6 +39,7 @@ from hct_mis_api.apps.core.api.mixins import (
     ProgramVisibilityMixin,
     SerializerActionMixin,
 )
+from hct_mis_api.apps.core.api.parsers import DictDrfNestedParser
 from hct_mis_api.apps.core.api.serializers import FieldAttributeSerializer
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
@@ -225,11 +228,33 @@ class GrievanceTicketGlobalViewSet(
         ],
         "create": [Permissions.GRIEVANCES_CREATE],
         "partial_update": [
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+            Permissions.GRIEVANCES_UPDATE,
+            Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+            Permissions.GRIEVANCES_UPDATE_AS_OWNER,
         ],
-        "status_change": [Permissions.GRIEVANCES_UPDATE],
+        "status_change": [
+            Permissions.GRIEVANCES_UPDATE,
+            Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+            Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+            Permissions.GRIEVANCES_SET_IN_PROGRESS,
+            Permissions.GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR,
+            Permissions.GRIEVANCES_SET_IN_PROGRESS_AS_OWNER,
+            Permissions.GRIEVANCES_SET_IN_PROGRESS,
+            Permissions.GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR,
+            Permissions.GRIEVANCES_SET_IN_PROGRESS_AS_OWNER,
+            Permissions.GRIEVANCES_SEND_BACK,
+            Permissions.GRIEVANCES_SEND_BACK_AS_CREATOR,
+            Permissions.GRIEVANCES_SEND_BACK_AS_OWNER,
+            Permissions.GRIEVANCES_SET_ON_HOLD,
+            Permissions.GRIEVANCES_SET_ON_HOLD_AS_CREATOR,
+            Permissions.GRIEVANCES_SET_ON_HOLD_AS_OWNER,
+            Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+            Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        ],
         "create_note": [
             Permissions.GRIEVANCES_ADD_NOTE,
             Permissions.GRIEVANCES_ADD_NOTE_AS_CREATOR,
@@ -279,6 +304,7 @@ class GrievanceTicketGlobalViewSet(
     filterset_class = GrievanceTicketFilter
     admin_area_model_fields = ["admin2"]
     program_model_field = "programs"
+    parser_classes = (DictDrfNestedParser, JSONParser)
 
     def get_queryset(self) -> QuerySet:
         to_prefetch = []
@@ -319,7 +345,6 @@ class GrievanceTicketGlobalViewSet(
         serializer.is_valid(raise_exception=True)
         user: AbstractUser = request.user  # type: ignore
         input_data = serializer.validated_data
-
         # check if user has access to the program
         if program := input_data.get("program"):
             if not check_permissions(
@@ -335,7 +360,7 @@ class GrievanceTicketGlobalViewSet(
                 user,
                 [Permissions.GRIEVANCE_DOCUMENTS_UPLOAD],
                 business_area=self.business_area,
-                program=program.slug,
+                program=program.slug if program else None,
             ):
                 raise PermissionDenied
 
@@ -346,6 +371,7 @@ class GrievanceTicketGlobalViewSet(
             raise ValidationError("Feedback tickets are not allowed to be created through this mutation.")
 
         self.verify_required_arguments(input_data, "category", self.CREATE_CATEGORY_OPTIONS)
+
         if input_data.get("issue_type"):
             self.verify_required_arguments(input_data, "issue_type", self.CREATE_ISSUE_TYPE_OPTIONS)
 
@@ -362,16 +388,6 @@ class GrievanceTicketGlobalViewSet(
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         grievance_ticket = self.get_object()
         user = request.user
-        check_creator_or_owner_permission(
-            user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
-            grievance_ticket.created_by == user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
-            grievance_ticket.assigned_to == user,
-            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
-            self.business_area,
-            grievance_ticket.programs.first(),
-        )
         serializer = self.get_serializer(grievance_ticket, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
@@ -379,6 +395,16 @@ class GrievanceTicketGlobalViewSet(
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=str(grievance_ticket.id))
 
         check_concurrency_version_in_mutation(input_data.get("version"), grievance_ticket)
+        check_creator_or_owner_permission(
+            user,
+            Permissions.GRIEVANCES_UPDATE,
+            grievance_ticket.created_by == user,
+            Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+            grievance_ticket.assigned_to == user,
+            Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+            self.business_area,
+            grievance_ticket.programs.first(),
+        )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
             raise ValidationError("Grievance Ticket in status Closed is not editable")
@@ -395,9 +421,17 @@ class GrievanceTicketGlobalViewSet(
             GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: update_ticket_based_on_payment_record_service,
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: update_ticket_based_on_payment_record_service,
         }
-
-        update_extra_methods[GrievanceTicket.CATEGORY_DATA_CHANGE] = update_data_change_extras
-
+        if has_creator_or_owner_permission(
+            user,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+            grievance_ticket.created_by == user,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
+            grievance_ticket.assigned_to == user,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+            self.business_area,
+            grievance_ticket.programs.first(),
+        ):
+            update_extra_methods[GrievanceTicket.CATEGORY_DATA_CHANGE] = update_data_change_extras
         if update_extra_method := update_extra_methods.get(grievance_ticket.category):
             grievance_ticket = update_extra_method(grievance_ticket, extras, input_data)
         log_create(
@@ -433,7 +467,6 @@ class GrievanceTicketGlobalViewSet(
 
         if grievance_ticket.status == new_status:
             return Response(GrievanceTicketDetailSerializer(grievance_ticket).data, status=status.HTTP_202_ACCEPTED)
-
         if permissions_to_use := self.get_permissions_for_status_change(
             new_status, grievance_ticket.status, grievance_ticket.is_feedback
         ):

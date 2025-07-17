@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { showApiErrorMessages } from '@utils/utils';
 
 export const CreatePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       showMessage(t('Payment Plan Created'));
       navigate(`../${res.id}`);
     } catch (e) {
-      showMessage(e);
+      showApiErrorMessages(e, showMessage);
     }
   };
 

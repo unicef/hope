@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { today } from '@utils/utils';
+import { showApiErrorMessages, today } from '@utils/utils';
 import moment from 'moment/moment';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
@@ -21,16 +21,13 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  createProgramCycle,
-  ProgramCycleCreate,
-  ProgramCycleCreateResponse,
-} from '@api/programCycleApi';
+import { ProgramCycleCreate } from '@restgenerated/models/ProgramCycleCreate';
 import type { DefaultError } from '@tanstack/query-core';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface CreateProgramCycleProps {
   program: ProgramDetail;
@@ -83,7 +80,7 @@ const CreateProgramCycle = ({
         program.startDate,
         t('Start Date cannot be before Programme Start Date'),
       ),
-    end_date: endDate,
+    endDate: endDate,
   });
 
   const initialValues: {
@@ -91,20 +88,24 @@ const CreateProgramCycle = ({
   } = {
     title: '',
     startDate: undefined,
-    end_date: undefined,
+    endDate: undefined,
   };
 
   const { mutateAsync, isPending, error } = useMutation<
-    ProgramCycleCreateResponse,
+    ProgramCycleCreate,
     MutationError,
     ProgramCycleCreate
   >({
     mutationFn: async (body) => {
-      return createProgramCycle(businessArea, program.id, body);
+      return RestService.restBusinessAreasProgramsCyclesCreate({
+        businessAreaSlug: businessArea,
+        programSlug: program.slug,
+        requestBody: body,
+      });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: ['programCycles', businessArea, program.id],
+        queryKey: ['programCycles', businessArea, program.slug],
       });
       onSubmit();
     },
@@ -114,12 +115,12 @@ const CreateProgramCycle = ({
     try {
       await mutateAsync({
         title: values.title,
-        start_date: values.startDate,
-        end_date: values.endDate,
+        startDate: values.startDate,
+        endDate: values.endDate,
       });
       showMessage(t('Programme Cycle Created'));
     } catch (e) {
-      /* empty */
+      showApiErrorMessages(e, showMessage);
     }
   };
 
@@ -177,7 +178,7 @@ const CreateProgramCycle = ({
                 </Grid>
                 <Grid size={{ xs: 6 }} data-cy="end-date-cycle">
                   <Field
-                    name="end_date"
+                    name="endDate"
                     label={t('End Date')}
                     component={FormikDateField}
                     fullWidth

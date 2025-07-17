@@ -13,7 +13,7 @@ import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
 import { RestService } from '@restgenerated/services/RestService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createApiParams } from '@utils/apiUtils';
-import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
+import { programCycleStatusToColor, showApiErrorMessages } from '@utils/utils';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -94,7 +94,12 @@ export const ProgramCyclesTablePaymentModule = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.id],
+          queryKey: ['programCycles', businessArea, program.slug],
+          exact: false,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['programCycles', queryVariables, businessArea, programId],
+          exact: false,
         });
       },
       mutationKey: ['finishProgramCycle', businessArea, program.id],
@@ -118,7 +123,12 @@ export const ProgramCyclesTablePaymentModule = ({
         }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.id],
+          queryKey: ['programCycles', businessArea, program.slug],
+          exact: false,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['programCycles', queryVariables, businessArea, programId],
+          exact: false,
         });
       },
       mutationKey: ['reactivateProgramCycle', businessArea, program.id],
@@ -134,34 +144,27 @@ export const ProgramCyclesTablePaymentModule = ({
 
   const finishAction = async (programCycle: ProgramCycleList) => {
     try {
-      const decodedProgramCycleId = decodeIdString(programCycle.id);
       await finishMutation({
         businessAreaSlug: businessArea,
-        id: decodedProgramCycleId,
+        id: programCycle.id,
         programSlug: programId,
       });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 
   const reactivateAction = async (programCycle: ProgramCycleList) => {
-    const decodedProgramCycleId = decodeIdString(programCycle.id);
-
     try {
       await reactivateMutation({
         businessAreaSlug: businessArea,
-        id: decodedProgramCycleId,
+        id: programCycle.id,
         programSlug: programId,
       });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 

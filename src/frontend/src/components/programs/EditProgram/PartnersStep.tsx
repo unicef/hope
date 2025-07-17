@@ -5,7 +5,6 @@ import { DividerLine } from '@core/DividerLine';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Grid2 as Grid } from '@mui/material';
-import { AreaTree } from '@restgenerated/models/AreaTree';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { Field, FieldArray } from 'formik';
 import { FC, useEffect } from 'react';
@@ -15,7 +14,7 @@ import { ProgramPartnerCard } from '../CreateProgram/ProgramPartnerCard';
 
 interface PartnersStepProps {
   values;
-  allAreasTreeData: AreaTree[];
+  allAreasTreeData;
   partnerChoices;
   submitForm: () => void;
   setFieldValue;

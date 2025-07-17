@@ -4,8 +4,7 @@ from django.test import TestCase
 import pytest
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
 from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
@@ -203,13 +202,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_not_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
@@ -245,13 +244,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "22222",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
@@ -295,13 +294,13 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.individual_data["documents_to_edit"] = [
             {
                 "value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_unique_for_individual.key,
                     "country": "AFG",
                     "number": "123456",
                 },
                 "previous_value": {
-                    "id": encode_id_base64(document_to_edit.id, "DocumentNode"),
+                    "id": str(document_to_edit.id),
                     "key": self.document_type_not_unique_for_individual.key,
                     "country": "AFG",
                     "number": "111111",
@@ -325,7 +324,10 @@ class TestUpdateIndividualDataService(TestCase):
     def test_update_people_individual_hh_fields(self) -> None:
         pl = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
         CountryFactory(name="Other Country", short_name="Oth", iso_code2="O", iso_code3="OTH", iso_num="111")
-        AreaFactory(area_type__country=pl, p_code="PL22M33", name="Test Area M")
+        area_type_1 = AreaTypeFactory(area_level=1, country=pl)
+        area_type_2 = AreaTypeFactory(area_level=2, country=pl)
+        area1 = AreaFactory(area_type=area_type_1, p_code="PL22", name="Test Area Parent")
+        AreaFactory(area_type=area_type_2, p_code="PL22M33", name="Test Area M", parent=area1)
         hh_fields = [
             "consent",
             "residence_status",
@@ -383,3 +385,8 @@ class TestUpdateIndividualDataService(TestCase):
 
         self.assertEqual(hh.admin_area.p_code, "PL22M33")
         self.assertEqual(hh.admin_area.name, "Test Area M")
+        self.assertEqual(hh.admin2.p_code, "PL22M33")
+        self.assertEqual(hh.admin2.name, "Test Area M")
+        self.assertIsNone(hh.admin3)
+        self.assertIsNotNone(hh.admin1)
+        self.assertEqual(hh.admin2.parent, hh.admin1)

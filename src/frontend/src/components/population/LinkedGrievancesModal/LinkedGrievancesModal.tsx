@@ -82,23 +82,15 @@ export function LinkedGrievancesModal({
       };
 
       if (selectedProgram?.id && selectedProgram.id !== 'all') {
-        // Use program-specific endpoint
         return RestService.restBusinessAreasProgramsGrievanceTicketsList(
           createApiParams(
             {
               businessAreaSlug: businessArea,
-              programSlug: selectedProgram.id,
+              programSlug: selectedProgram.slug,
             },
             queryParams,
             { withPagination: true },
           ),
-        );
-      } else {
-        // Use general endpoint for all programs
-        return RestService.restBusinessAreasGrievanceTicketsList(
-          createApiParams({ businessAreaSlug: businessArea }, queryParams, {
-            withPagination: true,
-          }),
         );
       }
     },

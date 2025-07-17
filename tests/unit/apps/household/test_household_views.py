@@ -436,7 +436,6 @@ class TestHouseholdDetail:
         self.geopoint = [51.107883, 17.038538]
         self.household, self.individuals = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "admin3": self.area3,
@@ -916,7 +915,6 @@ class TestHouseholdGlobalViewSet:
 
         self.household_afghanistan1, _ = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "admin3": self.area3,
@@ -930,7 +928,6 @@ class TestHouseholdGlobalViewSet:
         )
         self.household_afghanistan2, _ = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "admin3": self.area3,
@@ -945,7 +942,6 @@ class TestHouseholdGlobalViewSet:
 
         self.household_ukraine, _ = create_household_and_individuals(
             household_data={
-                "admin_area": self.area1,
                 "admin1": self.area1,
                 "admin2": self.area2,
                 "admin3": self.area3,
@@ -1089,7 +1085,6 @@ class TestHouseholdGlobalViewSet:
         area_different = AreaFactory(parent=None, p_code="AF05", area_type=self.admin_type_1)
         household_afghanistan_different_areas, _ = create_household_and_individuals(
             household_data={
-                "admin_area": area_different,
                 "admin1": area_different,
                 "admin2": area_different,
                 "admin3": area_different,

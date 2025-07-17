@@ -216,7 +216,6 @@ class HouseholdAdmin(
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives",)
     raw_id_fields = (
-        "admin_area",
         "admin1",
         "admin2",
         "admin3",
@@ -280,7 +279,6 @@ class HouseholdAdmin(
             "head_of_household",
             "country",
             "country_origin",
-            "admin_area",
             "admin1",
             "admin2",
             "admin3",

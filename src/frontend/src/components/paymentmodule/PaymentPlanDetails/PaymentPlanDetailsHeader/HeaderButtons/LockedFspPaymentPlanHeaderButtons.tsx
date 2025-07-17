@@ -7,7 +7,7 @@ import { useProgramContext } from '../../../../../programContext';
 import { ReactElement } from 'react';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanDetail;
@@ -24,6 +24,7 @@ export function LockedFspPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: unlock, isPending: loadingUnlock } = useMutation({
     mutationFn: () =>
@@ -32,8 +33,12 @@ export function LockedFspPaymentPlanHeaderButtons({
         programSlug: programId,
         id: paymentPlan.id,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       showMessage(t('Payment Plan FSPs have been unlocked.'));
+      await queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        exact: false,
+      });
     },
     onError: (error) => {
       showMessage(error.message || t('An error occurred while unlocking FSP'));
@@ -50,8 +55,12 @@ export function LockedFspPaymentPlanHeaderButtons({
             id: paymentPlan.id,
           },
         ),
-      onSuccess: () => {
+      onSuccess: async () => {
         showMessage(t('Payment Plan has been sent for approval.'));
+        await queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+          exact: false,
+        });
       },
       onError: (error) => {
         showMessage(

@@ -15,6 +15,8 @@ import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDeta
 import { useQuery } from '@tanstack/react-query';
 import { RestService } from '@restgenerated/services/RestService';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useHopeDetailsQuery } from '@hooks/useHopeDetailsQuery';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketDetail;
@@ -55,23 +57,30 @@ export function RequestedIndividualDataChangeTable({
     queryFn: () => RestService.restChoicesCountriesList(),
   });
 
+  const { data: individual, isLoading: individualLoading } =
+    useHopeDetailsQuery<IndividualDetail>(
+      ticket.individual.id,
+      RestService.restBusinessAreasProgramsIndividualsRetrieve,
+      {},
+    );
+
   const individualData = {
     ...ticket.ticketDetails.individualData,
   };
   const {
     documents,
     identities,
-    previous_documents: previousDocuments,
-    documents_to_remove: documentsToRemove,
-    documents_to_edit: documentsToEdit,
-    previous_identities: previousIdentities,
-    identities_to_remove: identitiesToRemove,
-    identities_to_edit: identitiesToEdit,
-    payment_channels: paymentChannels,
-    payment_channels_to_remove: paymentChannelsToRemove,
-    payment_channels_to_edit: paymentChannelsToEdit,
-    previous_payment_channels: previousPaymentChannels,
-    flex_fields: flexFields,
+    previousDocuments,
+    documentsToRemove,
+    documentsToEdit,
+    previousIdentities,
+    identitiesToRemove,
+    identitiesToEdit,
+    paymentChannels,
+    paymentChannelsToRemove,
+    paymentChannelsToEdit,
+    previousPaymentChannels,
+    flexFields,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
@@ -97,7 +106,8 @@ export function RequestedIndividualDataChangeTable({
     !fieldsDict ||
     !countriesDict ||
     !documentTypeDict ||
-    !identityTypeDict
+    !identityTypeDict ||
+    individualLoading
   ) {
     return <LoadingComponent />;
   }
@@ -114,6 +124,7 @@ export function RequestedIndividualDataChangeTable({
           entries={entries}
           entriesFlexFields={entriesFlexFields}
           setFieldValue={setFieldValue}
+          individual={individual}
         />
       ) : null}
       {documents?.length ? (

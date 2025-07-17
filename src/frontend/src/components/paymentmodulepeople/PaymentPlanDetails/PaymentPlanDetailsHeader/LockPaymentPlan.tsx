@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { RestService } from '@restgenerated/services/RestService';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -30,6 +30,7 @@ export function LockPaymentPlan({
   const { showMessage } = useSnackbar();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
 
   const { mutateAsync: lock, isPending: loadingLock } = useMutation({
     mutationFn: ({
@@ -46,9 +47,13 @@ export function LockPaymentPlan({
         id,
         programSlug,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       showMessage(t('Payment Plan has been locked.'));
       setLockDialogOpen(false);
+      await queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        exact: false,
+      });
     },
   });
   return (
