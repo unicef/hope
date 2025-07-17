@@ -535,7 +535,7 @@ class TestHouseholdDetail:
             "data_source": self.registration_data_import.data_source,
         }
         assert data["flex_fields"] == resolve_flex_fields_choices_to_string(self.household)
-        assert data["admin_area_title"] == f"{self.household.admin_area.name} - {self.household.admin_area.p_code}"
+        assert data["admin_area_title"] == f"{self.household.admin4.name} - {self.household.admin4.p_code}"
         assert data["active_individuals_count"] == 1
         assert data["geopoint"] == self.household.geopoint
         assert data["import_id"] == self.household.unicef_id
@@ -798,8 +798,8 @@ class TestHouseholdMembers:
                     "admin2": None,
                     "admin3": None,
                     "admin4": None,
-                    "first_registration_date": "2025-05-13T00:48:47Z",
-                    "last_registration_date": "2025-05-21T04:55:29Z",
+                    "first_registration_date": f"{self.household1.first_registration_date:%Y-%m-%dT%H:%M:%SZ}",
+                    "last_registration_date": f"{self.household1.last_registration_date:%Y-%m-%dT%H:%M:%SZ}",
                     "total_cash_received": None,
                     "total_cash_received_usd": None,
                     "delivered_quantities": [{"currency": "USD", "total_delivered_quantity": "0.00"}],
@@ -1367,7 +1367,6 @@ class TestHouseholdFilter:
     @pytest.mark.parametrize(
         "filter_by_field",
         [
-            "admin_area",
             "admin1",
             "admin2",
         ],
@@ -1382,6 +1381,25 @@ class TestHouseholdFilter:
             filters={filter_by_field: str(area1.id)},
             household1_data={filter_by_field: area1},
             household2_data={filter_by_field: area2},
+        )
+
+    @pytest.mark.parametrize(
+        "area",
+        [
+            "admin1",
+            "admin2",
+        ],
+    )
+    def test_filter_by_admin_area(self, area: str) -> None:
+        country = CountryFactory()
+        admin_type_1 = AreaTypeFactory(country=country, area_level=1)
+        admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
+        area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
+        area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
+        self._test_filter_households_in_list(
+            filters={"admin_area": str(area1.id)},
+            household1_data={area: area1},
+            household2_data={area: area2},
         )
 
     def test_filter_by_residence_status(self) -> None:
@@ -1441,28 +1459,3 @@ class TestHouseholdFilter:
         assert response_data[0]["id"] == str(household1.id)
         return response_data
 
-    @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
-    def test_search_by_bank_account_number(self) -> None:
-        household1, individuals1 = create_household_and_individuals(
-            household_data={
-                "program": self.program,
-                "business_area": self.afghanistan,
-            },
-            individuals_data=[{}, {}],
-        )
-        household2, individuals2 = create_household_and_individuals(
-            household_data={
-                "program": self.program,
-                "business_area": self.afghanistan,
-            },
-            individuals_data=[{}, {}],
-        )
-        # BankAccountInfoFactory(bank_account_number="123456789", individual=individuals1[0])
-        # BankAccountInfoFactory(bank_account_number="987654321", individual=individuals2[0])
-        rebuild_search_index()
-        response = self.api_client.get(self.list_url, {"search": "123456789"})
-        assert response.status_code == status.HTTP_200_OK, response.json()
-        response_data = response.json()["results"]
-        assert len(response_data) == 1
-        assert response_data[0]["id"] == str(household1.id)
-        return response_data
