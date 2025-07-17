@@ -1,7 +1,6 @@
 import json
 from typing import Any, Dict, Optional
 
-from django.contrib.gis.db.models import GeometryField
 from django.forms import MultipleChoiceField
 
 import graphene
@@ -21,11 +20,6 @@ class GeoJSON(graphene.Scalar):
 @convert_form_field.register(MultipleChoiceField)
 def convert_form_field_to_string_list(field: graphene.Field) -> graphene.List:
     return graphene.List(graphene.String, description=field.help_text, required=field.required)
-
-
-@convert_django_field.register(GeometryField)
-def convert_field_to_geojson(field: graphene.Field, registry: Optional[Any] = None) -> graphene.Field:
-    return graphene.Field(GeoJSON, description=field.help_text, required=not field.null)
 
 
 @convert_django_field.register(IntegerVersionField)
