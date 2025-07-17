@@ -47,7 +47,7 @@ export const BulkSetPriorityModal = ({
       return RestService.restBusinessAreasGrievanceTicketsBulkUpdatePriorityCreate(
         {
           businessAreaSlug,
-          requestBody: params,
+          formData: params,
         },
       );
     },

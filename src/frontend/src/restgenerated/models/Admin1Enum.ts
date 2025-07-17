@@ -3,24 +3,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * * `UA76` - East Brady
- * * `HR46` - Lake Michael
- * * `UA40` - Melindaburgh
- * * `HR43` - New Gabriel
- * * `HR33` - New Robertborough
- * * `AF37` - South Brianchester
- * * `UA21` - South Scott
- * * `AF72` - Timothyburgh
- * * `AF93` - Timothyburgh
+ * * `UA32` - Barrettbury
+ * * `HR60` - East Markshire
+ * * `HR56` - Gomezstad
+ * * `HR79` - Jamesview
+ * * `UA10` - Lake Lynnborough
+ * * `AF71` - North Brendanstad
+ * * `AF60` - Port Wesleyville
+ * * `UA28` - South Timothyland
+ * * `AF56` - Weaverberg
  */
 export enum Admin1Enum {
-    UA76 = 'UA76',
-    HR46 = 'HR46',
-    UA40 = 'UA40',
-    HR43 = 'HR43',
-    HR33 = 'HR33',
-    AF37 = 'AF37',
-    UA21 = 'UA21',
-    AF72 = 'AF72',
-    AF93 = 'AF93',
+    UA32 = 'UA32',
+    HR60 = 'HR60',
+    HR56 = 'HR56',
+    HR79 = 'HR79',
+    UA10 = 'UA10',
+    AF71 = 'AF71',
+    AF60 = 'AF60',
+    UA28 = 'UA28',
+    AF56 = 'AF56',
 }

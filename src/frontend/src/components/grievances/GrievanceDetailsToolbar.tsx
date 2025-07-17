@@ -90,7 +90,7 @@ export const GrievanceDetailsToolbar = ({
       return RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
         businessAreaSlug: businessArea,
         id: ticket.id,
-        requestBody: { status },
+        formData: { status },
       });
     },
     onError: (error: any) => {

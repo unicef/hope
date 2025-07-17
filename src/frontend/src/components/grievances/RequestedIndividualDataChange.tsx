@@ -70,7 +70,6 @@ export function RequestedIndividualDataChange({
   delete individualData.accounts;
   delete individualData.accounts_to_edit;
 
-
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
   allApprovedCount += documents.filter((el) => el.approveStatus).length;
@@ -85,9 +84,7 @@ export function RequestedIndividualDataChange({
     ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
   allApprovedCount += accounts.filter((el) => el.approve_status).length;
-  allApprovedCount += accountsToEdit.filter(
-    (el) => el.approve_status,
-  ).length;
+  allApprovedCount += accountsToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += entriesFlexFields.filter(
     ([, value]: [string, { approveStatus: boolean }]) => value.approveStatus,
   ).length;
@@ -124,7 +121,7 @@ export function RequestedIndividualDataChange({
       approvedPaymentChannelsToEdit?: number[];
       flexFieldsApproveData?: any;
     }) => {
-      const requestBody: GrievanceIndividualDataChangeApprove = {
+      const formData: GrievanceIndividualDataChangeApprove = {
         individualApproveData,
         approvedDocumentsToCreate,
         approvedDocumentsToRemove,
@@ -142,7 +139,7 @@ export function RequestedIndividualDataChange({
         {
           businessAreaSlug: businessArea,
           id: ticket.id,
-          requestBody,
+          formData,
         },
       );
     },
@@ -325,7 +322,6 @@ export function RequestedIndividualDataChange({
         selectedIdentitiesToRemove,
         selectedAccounts,
         selectedAccountsToEdit,
-
       }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
@@ -339,8 +335,7 @@ export function RequestedIndividualDataChange({
         const approvedIdentitiesToCreate = values.selectedIdentities;
         const approvedIdentitiesToRemove = values.selectedIdentitiesToRemove;
         const approvedIdentitiesToEdit = values.selectedIdentitiesToEdit;
-        const approvedAccountsToCreate = values.selectedAccounts;
-        const approvedAccountsToEdit = values.selectedAccountsToEdit;
+        // Removed unused approvedAccountsToCreate and approvedAccountsToEdit
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -351,19 +346,16 @@ export function RequestedIndividualDataChange({
         );
         try {
           await mutate({
-            variables: {
-              grievanceTicketId: ticket.id,
-              individualApproveData: JSON.stringify(individualApproveData),
-              approvedDocumentsToCreate,
-              approvedDocumentsToRemove,
-              approvedDocumentsToEdit,
-              approvedIdentitiesToCreate,
-              approvedIdentitiesToRemove,
-              approvedIdentitiesToEdit,
-              approvedAccountsToCreate,
-              approvedAccountsToEdit,
-              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
-            },
+            individualApproveData: JSON.stringify(individualApproveData),
+            approvedDocumentsToCreate,
+            approvedDocumentsToRemove,
+            approvedDocumentsToEdit,
+            approvedIdentitiesToCreate,
+            approvedIdentitiesToRemove,
+            approvedIdentitiesToEdit,
+            approvedPaymentChannelsToCreate: values.selectedAccounts,
+            approvedPaymentChannelsToEdit: values.selectedAccountsToEdit,
+            flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
           });
           const sum = Object.values(values).flat().length;
           setEdit(sum === 0);

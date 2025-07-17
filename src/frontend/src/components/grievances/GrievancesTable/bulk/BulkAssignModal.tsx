@@ -41,7 +41,7 @@ export function BulkAssignModal({
       return RestService.restBusinessAreasGrievanceTicketsBulkUpdateAssigneeCreate(
         {
           businessAreaSlug,
-          requestBody: params,
+          formData: params,
         },
       );
     },

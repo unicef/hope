@@ -155,7 +155,7 @@ const CreateGrievancePage = (): ReactElement => {
 
       return RestService.restBusinessAreasGrievanceTicketsCreate({
         businessAreaSlug: businessArea,
-        requestBody: payload as any,
+        formData: payload as any,
       });
     },
   });

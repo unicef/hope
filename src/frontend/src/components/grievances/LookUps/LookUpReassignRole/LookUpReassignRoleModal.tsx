@@ -62,11 +62,11 @@ export function LookUpReassignRoleModal({
   const queryClient = useQueryClient();
 
   const { mutateAsync: reassignRole } = useMutation({
-    mutationFn: (requestBody: GrievanceReassignRole) => {
+    mutationFn: (formData: GrievanceReassignRole) => {
       return RestService.restBusinessAreasGrievanceTicketsReassignRoleCreate({
         businessAreaSlug: businessArea,
         id: id,
-        requestBody,
+        formData,
       });
     },
     onSuccess: () => {
