@@ -819,7 +819,13 @@ class Household(
     @geopoint.setter
     def geopoint(self, value: Optional[Tuple[float, float]]) -> None:
         if value:
-            self.longitude, self.latitude, = value[0], value[1]
+            (
+                self.longitude,
+                self.latitude,
+            ) = (
+                value[0],
+                value[1],
+            )
         else:
             self.latitude = None
             self.longitude = None
