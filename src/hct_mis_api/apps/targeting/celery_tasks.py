@@ -24,13 +24,11 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str
     program = Program.objects.get(pk=program_pk)
     form = CreateTargetPopulationTextForm(form_data, program=program)
     if form.is_valid():
-        # unicef_ids = form.cleaned_data["criteria"]  # filter by unicef_id ?
         set_sentry_business_area_tag(program.business_area.name)
         program_cycle = form.cleaned_data["program_cycle"]
         try:
             with atomic():
                 payment_plan = PaymentPlan.objects.create(
-                    targeting_criteria=form.cleaned_data["targeting_criteria"],
                     created_by_id=user_id,
                     name=form.cleaned_data["name"],
                     business_area=program_cycle.program.business_area,

@@ -16,5 +16,7 @@ export type IndividualChoices = {
     readonly observedDisabilityChoices: Array<Record<string, any>>;
     readonly severityOfDisabilityChoices: Array<Record<string, any>>;
     readonly workStatusChoices: Array<Record<string, any>>;
+    readonly accountTypeChoices: Array<Record<string, any>>;
+    readonly accountFinancialInstitutionChoices: Array<Record<string, any>>;
 };
 

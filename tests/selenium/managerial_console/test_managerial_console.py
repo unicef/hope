@@ -15,7 +15,6 @@ from hct_mis_api.apps.payment.fixtures import ApprovalProcessFactory, PaymentPla
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from tests.selenium.page_object.managerial_console.managerial_console import (
     ManagerialConsole,
 )
@@ -67,7 +66,6 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         business_area=ba,
-        targeting_criteria=TargetingCriteriaFactory(),
         currency="USD",
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),

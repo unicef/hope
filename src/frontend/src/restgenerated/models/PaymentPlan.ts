@@ -14,10 +14,6 @@ export type PaymentPlan = {
     name?: string | null;
     status: PaymentPlanStatusEnum;
     /**
-     * Target Criteria
-     */
-    targetingCriteria: string;
-    /**
      * Total Households Count [sys]
      */
     totalHouseholdsCount?: number;

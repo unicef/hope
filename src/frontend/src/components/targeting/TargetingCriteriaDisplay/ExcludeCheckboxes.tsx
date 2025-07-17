@@ -45,8 +45,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                       color="primary"
                       data-cy="checkbox-exclude-if-active-adjudication-ticket"
                       checked={Boolean(
-                        targetPopulation?.targetingCriteria
-                          ?.flagExcludeIfActiveAdjudicationTicket,
+                        targetPopulation?.flagExcludeIfActiveAdjudicationTicket,
                       )}
                     />
                   }
@@ -64,8 +63,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                       color="primary"
                       data-cy="checkbox-exclude-people-if-active-adjudication-ticket"
                       checked={Boolean(
-                        targetPopulation?.targetingCriteria
-                          ?.flagExcludeIfActiveAdjudicationTicket,
+                        targetPopulation?.flagExcludeIfActiveAdjudicationTicket,
                       )}
                     />
                   }
@@ -85,8 +83,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                     />
                   }
                   checked={Boolean(
-                    targetPopulation?.targetingCriteria
-                      ?.flagExcludeIfOnSanctionList,
+                    targetPopulation?.flagExcludeIfOnSanctionList,
                   )}
                   label={t(
                     `Exclude ${beneficiaryGroup?.memberLabelPlural} with an Active Sanction Screen Flag`,
@@ -104,8 +101,7 @@ const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
                     />
                   }
                   checked={Boolean(
-                    targetPopulation?.targetingCriteria
-                      ?.flagExcludeIfOnSanctionList,
+                    targetPopulation?.flagExcludeIfOnSanctionList,
                   )}
                   label={t(
                     `Exclude ${beneficiaryGroup?.groupLabelPlural} with an Active Sanction Screen Flag`,

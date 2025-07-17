@@ -1,8 +1,7 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
+from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
@@ -10,8 +9,7 @@ from hct_mis_api.apps.targeting.models import (
 
 class TargetingCriteriaSerializerTest(TestCase):
     def test_targeting_criteria_serializer(self) -> None:
-        targeting_criteria = TargetingCriteria.objects.create()
-        rule = TargetingCriteriaRule.objects.create(targeting_criteria=targeting_criteria)
+        rule = TargetingCriteriaRule.objects.create()
         hh_rule_data = {
             "comparison_method": "EQUALS",
             "arguments": [2],
@@ -21,7 +19,7 @@ class TargetingCriteriaSerializerTest(TestCase):
         # households_filters_blocks
         TargetingCriteriaRuleFilter.objects.create(**hh_rule_data, targeting_criteria_rule=rule)
 
-        data = TargetingCriteriaSerializer(instance=targeting_criteria).data
+        data = TargetingCriteriaRuleSerializer(instance=rule).data
 
         self.assertFalse(data["flag_exclude_if_active_adjudication_ticket"])
         self.assertFalse(data["flag_exclude_if_on_sanction_list"])

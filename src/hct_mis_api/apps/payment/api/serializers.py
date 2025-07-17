@@ -57,7 +57,7 @@ from hct_mis_api.apps.program.api.serializers import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.api.serializers import RuleCommitSerializer
-from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaSerializer
+from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hct_mis_api.contrib.api.serializers.vision import FundsCommitmentSerializer
 from hct_mis_api.contrib.vision.models import FundsCommitmentGroup, FundsCommitmentItem
 
@@ -319,7 +319,6 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "unicef_id",
             "name",
             "status",
-            "targeting_criteria",
             "total_households_count",
             "currency",
             "total_entitled_quantity",
@@ -895,7 +894,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
     background_action_status = serializers.CharField(source="get_background_action_status_display")
     program = ProgramSmallSerializer(read_only=True, source="program_cycle.program")
     program_cycle = ProgramCycleSmallSerializer()
-    targeting_criteria = TargetingCriteriaSerializer(read_only=True)
+    rules = TargetingCriteriaRuleSerializer(many=True, read_only=True)
     steficon_rule_targeting = RuleCommitSerializer(read_only=True)
     delivery_mechanism = DeliveryMechanismSerializer(read_only=True)
     financial_service_provider = FinancialServiceProviderSerializer(read_only=True)
@@ -914,7 +913,7 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "female_children_count",
             "male_adults_count",
             "female_adults_count",
-            "targeting_criteria",
+            "rules",
             "steficon_rule_targeting",
             "vulnerability_score_min",
             "vulnerability_score_max",
@@ -1265,7 +1264,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     name = serializers.CharField(required=True)
     program_cycle_id = serializers.UUIDField(required=True)
-    targeting_criteria = TargetingCriteriaSerializer(required=True)
+    rules = TargetingCriteriaRuleSerializer(required=True)
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
     fsp_id = serializers.UUIDField(required=False, allow_null=True)
@@ -1281,7 +1280,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
             "version",
             "name",
             "program_cycle_id",
-            "targeting_criteria",
+            "rules",
             "excluded_ids",
             "exclusion_reason",
             "fsp_id",

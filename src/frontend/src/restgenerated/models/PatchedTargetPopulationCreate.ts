@@ -2,13 +2,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TargetingCriteria } from './TargetingCriteria';
+import type { TargetingCriteriaRule } from './TargetingCriteriaRule';
 export type PatchedTargetPopulationCreate = {
     readonly id?: string;
     readonly version?: number;
     name?: string;
     programCycleId?: string;
-    targetingCriteria?: TargetingCriteria;
+    rules?: TargetingCriteriaRule;
     excludedIds?: string;
     exclusionReason?: string;
     fspId?: string | null;

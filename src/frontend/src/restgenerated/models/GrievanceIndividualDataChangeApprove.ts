@@ -10,9 +10,8 @@ export type GrievanceIndividualDataChangeApprove = {
     approvedIdentitiesToCreate?: Array<number>;
     approvedIdentitiesToEdit?: Array<number>;
     approvedIdentitiesToRemove?: Array<number>;
-    approvedPaymentChannelsToCreate?: Array<number>;
-    approvedPaymentChannelsToEdit?: Array<number>;
-    approvedPaymentChannelsToRemove?: Array<number>;
+    approvedAccountsToCreate?: Array<number>;
+    approvedAccountsToEdit?: Array<number>;
     flexFieldsApproveData?: any;
     version?: number;
 };

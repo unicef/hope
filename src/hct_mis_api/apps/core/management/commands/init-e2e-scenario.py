@@ -27,7 +27,6 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
@@ -114,11 +113,17 @@ def init_payment_plan(seed: str) -> None:
     program = ProgramFactory(
         name=f"PaymentPlanProgram-{seed}", status=Program.ACTIVE, start_date="2022-12-12", end_date="2042-12-12"
     )
+    payment_plan = PaymentPlan.objects.create(
+        name=f"PaymentPlanTargetPopulation-{seed}",
+        status=PaymentPlan.Status.TP_OPEN,
+        business_area=afghanistan,
+        program_cycle=program.cycles.first(),
+        created_by=root,
+    )
 
-    targeting_criteria = TargetingCriteria.objects.create()
     TargetingCriteriaRuleFilter.objects.create(
         targeting_criteria_rule=TargetingCriteriaRule.objects.create(
-            targeting_criteria=targeting_criteria,
+            payment_plan=payment_plan,
         ),
         comparison_method="EQUALS",
         field_name="address",
@@ -126,7 +131,7 @@ def init_payment_plan(seed: str) -> None:
     )
     TargetingCriteriaRuleFilter.objects.create(
         targeting_criteria_rule=TargetingCriteriaRule.objects.create(
-            targeting_criteria=targeting_criteria,
+            payment_plan=payment_plan,
         ),
         comparison_method="EQUALS",
         field_name="address",
@@ -134,20 +139,11 @@ def init_payment_plan(seed: str) -> None:
     )
     TargetingCriteriaRuleFilter.objects.create(
         targeting_criteria_rule=TargetingCriteriaRule.objects.create(
-            targeting_criteria=targeting_criteria,
+            payment_plan=payment_plan,
         ),
         comparison_method="EQUALS",
         field_name="address",
         arguments=[addresses[2]],
-    )
-
-    PaymentPlan.objects.create(
-        name=f"PaymentPlanTargetPopulation-{seed}",
-        targeting_criteria=targeting_criteria,
-        status=PaymentPlan.Status.TP_OPEN,
-        business_area=afghanistan,
-        program_cycle=program.cycles.first(),
-        created_by=root,
     )
 
     rule = RuleFactory(name=f"Rule-{seed}", type=Rule.TYPE_PAYMENT_PLAN)

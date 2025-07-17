@@ -47,7 +47,7 @@ const EditTargetPopulation = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const targetingCriteriaCopy =
-    paymentPlan.targetingCriteria?.rules.map((rule) => ({
+    paymentPlan.rules.map((rule) => ({
       ...rule,
       fsp: undefined,
       deliveryMechanism: undefined,
@@ -67,10 +67,10 @@ const EditTargetPopulation = ({
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      paymentPlan.targetingCriteria.flagExcludeIfActiveAdjudicationTicket ||
+      paymentPlan.flagExcludeIfActiveAdjudicationTicket ||
       false,
     flagExcludeIfOnSanctionList:
-      paymentPlan.targetingCriteria.flagExcludeIfOnSanctionList || false,
+      paymentPlan.flagExcludeIfOnSanctionList || false,
     programCycleId: {
       value: paymentPlan.programCycle.id,
       name: paymentPlan.programCycle.title,
