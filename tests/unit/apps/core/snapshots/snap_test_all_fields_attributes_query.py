@@ -46694,23 +46694,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'DECIMAL'
             },
             {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Payment delivery phone number',
-                'labels': [
-                    {
-                        'label': 'Payment delivery phone number',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'payment_delivery_phone_no',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
                 'associatedWith': 'Household',
                 'choices': [
                 ],

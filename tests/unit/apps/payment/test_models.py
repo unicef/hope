@@ -896,7 +896,7 @@ class TestAccountModel(TestCase):
         dmd = AccountFactory(data={"test": "test"}, individual=self.ind)
         self.assertEqual(
             PaymentDataCollector.get_associated_object(FspNameMapping.SourceModel.ACCOUNT.value, self.ind, dmd),
-            dmd.data,
+            dmd.account_data,
         )
         self.assertEqual(
             PaymentDataCollector.get_associated_object(
@@ -928,7 +928,7 @@ class TestAccountModel(TestCase):
         fsp2 = FinancialServiceProviderFactory()  # no dm config (no required fields), just unpack dmd.data
         self.assertEqual(
             PaymentDataCollector.delivery_data(fsp2, self.dm_atm_card, self.ind),
-            dmd.data,
+            dmd.account_data,
         )
 
         dm_config = DeliveryMechanismConfig.objects.get(fsp=self.fsp, delivery_mechanism=self.dm_atm_card)
@@ -980,6 +980,40 @@ class TestAccountModel(TestCase):
                 "custom_hh_address": f"{self.hh.address} Custom",
                 "address": self.hh.address,
                 "financial_institution": str(self.financial_institution.id),
+            },
+        )
+
+    def test_delivery_data_setter(self) -> None:
+        account = AccountFactory(
+            data={
+                "expiry_date": "12.12.2024",
+                "name_of_cardholder": "Marek",
+            },
+            individual=self.ind,
+            account_type=AccountType.objects.get(key="bank"),
+            number="123",
+            financial_institution=self.financial_institution,
+        )
+        financial_institution2 = FinancialInstitution.objects.create(
+            name="DEF", type=FinancialInstitution.FinancialInstitutionType.BANK
+        )
+
+        account.account_data = {
+            "number": "456",
+            "financial_institution": str(financial_institution2.id),
+            "expiry_date": "12.12.2025",
+            "new_field": "new_value",
+        }
+        account.save()
+
+        self.assertEqual(
+            account.account_data,
+            {
+                "number": "456",
+                "expiry_date": "12.12.2025",
+                "financial_institution": str(financial_institution2.id),
+                "new_field": "new_value",
+                "name_of_cardholder": "Marek",
             },
         )
 
