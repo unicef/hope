@@ -1214,21 +1214,21 @@ class TestTargetPopulationCreateUpdate:
         )
         self.client = api_client(self.user)
         self.rules = [
-                {
-                    "individua_ids": "",
-                    "household_ids": "",
-                    "households_filters_blocks": [
-                        {
-                            "comparison_method": "RANGE",
-                            "arguments": [1, 11],
-                            "field_name": "size",
-                            "flex_field_classification": "NOT_FLEX_FIELD",
-                        }
-                    ],
-                    "individuals_filters_blocks": [],
-                    "collectors_filters_blocks": [],
-                }
-            ]
+            {
+                "individua_ids": "",
+                "household_ids": "",
+                "households_filters_blocks": [
+                    {
+                        "comparison_method": "RANGE",
+                        "arguments": [1, 11],
+                        "field_name": "size",
+                        "flex_field_classification": "NOT_FLEX_FIELD",
+                    }
+                ],
+                "individuals_filters_blocks": [],
+                "collectors_filters_blocks": [],
+            }
+        ]
 
     @pytest.mark.parametrize(
         "permissions, expected_status",
@@ -1255,9 +1255,7 @@ class TestTargetPopulationCreateUpdate:
         assert response.status_code == expected_status
         if response.status_code == status.HTTP_201_CREATED:
             assert response.data["name"] == data["name"]
-            assert (
-                response.data["rules"][0]["households_filters_blocks"][0]["field_name"] == "size"
-            )
+            assert response.data["rules"][0]["households_filters_blocks"][0]["field_name"] == "size"
             assert response.data["exclusion_reason"] == data["exclusion_reason"]
             assert response.data["excluded_ids"] == data["excluded_ids"]
             assert response.data["flag_exclude_if_on_sanction_list"] is True
