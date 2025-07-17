@@ -51,7 +51,7 @@ class APICountriesTests(HOPEApiTestCase):
             short_name="Afghanistan",
             iso_code2="AF",
             iso_code3="AFG",
-            iso_num="0040",
+            iso_num="0004",
         )
         cls.country_afghanistan.valid_from = datetime(2019, 1, 1, tzinfo=pytz.UTC)
         cls.country_afghanistan.valid_until = datetime(2021, 12, 31, tzinfo=pytz.UTC)
@@ -131,7 +131,7 @@ class AreaListTests(HOPEApiTestCase):
         super().setUpTestData()
         cls.url = reverse("api:area-list")
         cls.country_poland = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
-        cls.country_afghanistan = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="040")
+        cls.country_afghanistan = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="0004")
         cls.area_type1 = AreaTypeFactory(name="areatype1", country=cls.country_poland, area_level=1)
         cls.area_type2 = AreaTypeFactory(name="areatype1", country=cls.country_afghanistan, area_level=2)
         cls.area1 = AreaFactory(
@@ -237,7 +237,7 @@ class AreaTypeListTests(HOPEApiTestCase):
         super().setUpTestData()
         cls.url = reverse("api:areatype-list")
         cls.country_poland = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
-        cls.country_afghanistan = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="040")
+        cls.country_afghanistan = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="0004")
         cls.area_type1 = AreaTypeFactory(name="areatype1", country=cls.country_poland, area_level=1)
         cls.area_type1.valid_until = datetime(2010, 12, 31, tzinfo=pytz.UTC)
         cls.area_type1.save(update_fields=["valid_until"])
@@ -326,7 +326,7 @@ class FinancialInstitutionListTests(HOPEApiTestCase):
         super().setUpTestData()
         cls.url = reverse("api:financial-institution-list")
         cls.country_poland = CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
-        cls.country_afghanistan = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="040")
+        cls.country_afghanistan = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="0004")
 
         cls.fi_bank = FinancialInstitutionFactory(
             name="Test Bank",
