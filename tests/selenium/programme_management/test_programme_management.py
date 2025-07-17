@@ -47,6 +47,7 @@ def create_unhcr_partner() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     partner_unhcr.role_assignments.all().delete()
     partner_unhcr.allowed_business_areas.add(afghanistan)
+    # TODO: below line can be removed after temporary solution is removed for partners. Only being allowed in BA is enough.
     RoleAssignmentFactory(
         partner=partner_unhcr,
         business_area=afghanistan,
