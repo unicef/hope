@@ -75,8 +75,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.collectors = defaultdict(list)
         self.program = None
         self.pdu_flexible_attributes: Optional[QuerySet[FlexibleAttribute]] = None
-        self.households_to_ignore = []  # household ids (excel ids) to ignore when creating individuals
-        self.colided_households_pks = []  # households pks to add extra_rdis
         super().__init__()
 
     @cached_property
@@ -449,17 +447,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 individual, flexible_attribute.name, 1, value, collection_date
             )
 
-    def _check_collision(self, identification_key: Optional[str]) -> bool:
-        if not self.program.collision_detection_enabled:
-            return False
-        if not identification_key:
-            return False
-        collided_household_id = self.program.collision_detector.detect_collision(identification_key)
-        if not collided_household_id:
-            return False
-        self.colided_households_pks.append(collided_household_id)
-        return True
-
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         complex_fields: Dict[str, Dict[str, Callable]] = {
             "individuals": {
@@ -532,7 +519,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 household_id = None
 
                 excluded = ("age",)
-                identification_key = None
                 for cell, header_cell in zip(row, first_row):
                     try:
                         header = header_cell.value
@@ -544,13 +530,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                         combined_fields = self.COMBINED_FIELDS
                         current_field = combined_fields.get(header, {})
-
                         if not current_field and header not in complex_fields[sheet_title]:
                             continue
-                        if header == "identification_key_h_c":
-                            identification_key = cell.value
-                            obj_to_create.identification_key = identification_key
-
                         is_not_image = current_field.get("type") != "IMAGE"
 
                         cell_value = cell.value
@@ -574,8 +555,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                 obj_to_create.household = self.households.get(household_id)
 
                         if header in complex_fields[sheet_title]:
-                            if household_id in self.households_to_ignore:
-                                continue
                             fn_complex: Callable = complex_fields[sheet_title][header]
                             value = fn_complex(
                                 value=cell_value,
@@ -634,6 +613,21 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                                     combined_fields[header]["name"],
                                     value,
                                 )
+                        elif (
+                            hasattr(
+                                obj_to_create,
+                                combined_fields[header]["lookup"],
+                            )
+                            and header != "household_id"
+                        ):
+                            value = self._cast_value(cell_value, header)
+                            if value in (None, ""):
+                                continue
+                            setattr(
+                                obj_to_create,
+                                combined_fields[header]["lookup"],
+                                value,
+                            )
                         elif header in self.FLEX_FIELDS[sheet_title]:
                             value = self._cast_value(cell_value, header)
                             type_name = self.FLEX_FIELDS[sheet_title][header]["type"]
@@ -658,15 +652,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 obj_to_create.detail_id = row[0].row
                 obj_to_create.business_area = rdi.business_area
                 if sheet_title == "households":
-                    if not self._check_collision(obj_to_create):  # Dont create household if collision
-                        self.households[household_id] = obj_to_create
-                    else:
-                        self.households_to_ignore.append(
-                            household_id
-                        )  # When collision add to ignore all individuals connected to this hh
+                    self.households[household_id] = obj_to_create
                 else:
-                    if household_id in self.households_to_ignore:
-                        continue
                     if household_id is None:
                         obj_to_create.relationship = NON_BENEFICIARY
                     obj_to_create = self._validate_birth_date(obj_to_create)
@@ -694,8 +681,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_collectors()
             self._create_accounts()
             rdi.bulk_update_household_size()
-            # Assign extra rdis for colided households which already exist inside system
-            self.registration_data_import.extra_hh_rdis.add(*self.colided_households_pks)
 
     def execute_individuals_additional_steps(self, individuals: list[PendingIndividual]) -> None:
         for individual in individuals:

@@ -612,7 +612,7 @@ class TestRdiKoboCreateTask(TestCase):
             p_code="CD8311ZS02AS04", name="CD8311ZS02AS04", area_type=admin4_type
         )
 
-        bank_accounts_to_create, households_to_create = [], []
+        households_to_create = []
         collectors_to_create, head_of_households_mapping, individuals_ids_hash_dict = dict(), dict(), dict()
         household = {
             "_id": 1111,
@@ -647,7 +647,6 @@ class TestRdiKoboCreateTask(TestCase):
 
         task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.handle_household(
-            bank_accounts_to_create,
             collectors_to_create,
             head_of_households_mapping,
             household,
