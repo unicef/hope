@@ -42,7 +42,7 @@ function AddIndividualGrievanceDetails({
       ),
   });
 
-  const { mutate } = useMutation({
+  const { mutateAsync } = useMutation({
     mutationFn: ({
       grievanceTicketId,
       approveStatus,
@@ -53,7 +53,7 @@ function AddIndividualGrievanceDetails({
       RestService.restBusinessAreasGrievanceTicketsApproveStatusUpdateCreate({
         businessAreaSlug: businessArea,
         id: grievanceTicketId,
-        requestBody: {
+        formData: {
           approveStatus,
         },
       }),
@@ -176,27 +176,26 @@ function AddIndividualGrievanceDetails({
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"
-              onClick={() =>
-                confirm({
-                  title: t('Warning'),
-                  content: dialogText,
-                }).then(() => {
-                  try {
-                    mutate({
-                      grievanceTicketId: ticket.id,
-                      approveStatus: !ticket.ticketDetails.approveStatus,
-                    });
-                    if (ticket.ticketDetails.approveStatus) {
-                      showMessage(t('Changes Disapproved'));
-                    }
-                    if (!ticket.ticketDetails.approveStatus) {
-                      showMessage(t('Changes Approved'));
-                    }
-                  } catch (e) {
-                    showApiErrorMessages(e, showMessage);
+              onClick={async () => {
+                try {
+                  await confirm({
+                    title: t('Warning'),
+                    content: dialogText,
+                  });
+                  await mutateAsync({
+                    grievanceTicketId: ticket.id,
+                    approveStatus: !ticket.ticketDetails.approveStatus,
+                  });
+                  if (ticket.ticketDetails.approveStatus) {
+                    showMessage(t('Changes Disapproved'));
                   }
-                })
-              }
+                  if (!ticket.ticketDetails.approveStatus) {
+                    showMessage(t('Changes Approved'));
+                  }
+                } catch (e) {
+                  showApiErrorMessages(e, showMessage);
+                }
+              }}
               variant={
                 ticket.ticketDetails?.approveStatus ? 'outlined' : 'contained'
               }
