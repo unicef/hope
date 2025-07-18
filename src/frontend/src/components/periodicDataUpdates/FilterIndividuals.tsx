@@ -128,29 +128,27 @@ export const FilterIndividuals: FC<FilterIndividualsProps> = ({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid p={3} container alignItems="flex-start" spacing={3}>
-          <Grid size={{ xs:6 }}>
-            <AdminAreaAutocompleteMultipleRest
-              value={filter.admin1}
-              onChange={(_, option) => {
-                handleStateFilterChange('admin1', option);
-              }}
-              level={1}
-              dataCy="filter-admin1"
-              disabled={filter.admin2.length > 0}
-            />
-          </Grid>
-          <Grid size={{ xs:6 }}>
-            <AdminAreaAutocompleteMultipleRest
-              value={filter.admin2}
-              onChange={(_, option) => {
-                handleStateFilterChange('admin2', option);
-              }}
-              level={2}
-              dataCy="filter-admin2"
-              disabled={filter.admin1.length > 0}
-            />
-          </Grid>
+        <Grid size={{ xs: 3 }}>
+          <AdminAreaAutocompleteMultipleRest
+            value={filter.admin1}
+            onChange={(_, option) => {
+              handleStateFilterChange('admin1', option);
+            }}
+            level={1}
+            dataCy="filter-admin1"
+            disabled={filter.admin2.length > 0}
+          />
+        </Grid>
+        <Grid size={{ xs: 3 }}>
+          <AdminAreaAutocompleteMultipleRest
+            value={filter.admin2}
+            onChange={(_, option) => {
+              handleStateFilterChange('admin2', option);
+            }}
+            level={2}
+            dataCy="filter-admin2"
+            disabled={filter.admin1.length > 0}
+          />
         </Grid>
         <Grid size={{ xs: 3 }}>
           <SelectFilter
