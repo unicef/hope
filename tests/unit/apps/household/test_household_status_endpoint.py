@@ -93,7 +93,7 @@ class TestDetails(TestCase):
     def test_getting_non_existent_individual(self) -> None:
         response = self.api_client.get("/api/hh-status?tax_id=non-existent")
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["status"], "not found")
+        self.assertEqual(response.json()["detail"], "Document with given tax_id: non-existent not found")
 
     def test_getting_individual_with_status_imported(self) -> None:
         pending_household = PendingHouseholdFactory()
@@ -206,7 +206,7 @@ class TestDetails(TestCase):
     def test_getting_non_existent_household(self) -> None:
         response = self.api_client.get("/api/hh-status?detail_id=non-existent")
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["status"], "not found")
+        self.assertEqual(response.json()["detail"], "Household with given detail_id: non-existent not found")
 
     def test_getting_household_with_status_imported(self) -> None:
         pending_household = PendingHouseholdFactory()
@@ -247,10 +247,10 @@ class TestDetails(TestCase):
 
     def test_query_params_validation(self) -> None:
         response = self.api_client.get("/api/hh-status?detail_id=xxx&tax_id=yyy")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
         response = self.api_client.get("/api/hh-status")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
     def test_households_count_gt_1(self) -> None:
         detail_id = "123"
@@ -258,9 +258,9 @@ class TestDetails(TestCase):
         PendingHouseholdFactory(detail_id=detail_id)
         PendingHouseholdFactory(detail_id=detail_id)
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
 
         HouseholdFactory(detail_id=detail_id)
         HouseholdFactory(detail_id=detail_id)
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
