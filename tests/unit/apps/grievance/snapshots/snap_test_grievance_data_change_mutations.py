@@ -27,8 +27,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_househol
                             },
                             'flex_fields': {
                             },
-                            'roles': [
-                            ]
                         }
                     },
                     'individualDataUpdateTicketDetails': None,
@@ -212,8 +210,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                             },
                             'flex_fields': {
                             },
-                            'roles': [
-                            ],
                             'size': {
                                 'approve_status': False,
                                 'previous_value': 3,

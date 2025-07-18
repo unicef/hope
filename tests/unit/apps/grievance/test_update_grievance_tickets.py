@@ -434,7 +434,6 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "sex": MALE,
                             "birthDate": date(year=1962, month=12, day=21).isoformat(),
                             "maritalStatus": SINGLE,
-                            # "role": ROLE_PRIMARY,
                             "documents": [
                                 {
                                     "country": "POL",
@@ -476,7 +475,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         if name == "with_permission":
             expected_result = {
                 "sex": {"value": "MALE", "approve_status": False, "previous_value": "FEMALE"},
-                # "role": {"value": "PRIMARY", "approve_status": False, "previous_value": "NO_ROLE"},
                 "documents": [
                     {
                         "value": {
@@ -590,7 +588,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
         expected_result = {
             "size": {"value": 3, "approve_status": False, "previous_value": 2},
-            "roles": [],
             "country": {
                 "value": "AFG",
                 "approve_status": False,

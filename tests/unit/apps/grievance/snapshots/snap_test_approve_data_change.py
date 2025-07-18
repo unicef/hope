@@ -97,8 +97,10 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_household
                         'roles': [
                             {
                                 'approve_status': True,
+                                'full_name': 'Benjamin Butler',
                                 'individual_id': 'SW5kaXZpZHVhbE5vZGU6ZGYxY2U2ZTgtMjg2NC00YzNmLTgwM2QtMTllYzZmNGM0OTk5',
                                 'previous_value': 'ALTERNATE',
+                                'unicef_id': 'IND-123-321-333',
                                 'value': 'PRIMARY'
                             }
                         ],

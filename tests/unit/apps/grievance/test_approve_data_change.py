@@ -142,6 +142,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         cls.individuals_to_create = [
             {
                 "pk": "df1ce6e8-2864-4c3f-803d-19ec6f4c4999",
+                "unicef_id": "IND-123-321-333",
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
                 "family_name": "Butler",
@@ -306,6 +307,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                     {
                         "value": "PRIMARY",
                         "individual_id": cls.id_to_base64(str(first_individual.id), "IndividualNode"),
+                        "full_name": first_individual.full_name,
+                        "unicef_id": first_individual.unicef_id,
                         "approve_status": False,
                         "previous_value": "ALTERNATE",
                     }
