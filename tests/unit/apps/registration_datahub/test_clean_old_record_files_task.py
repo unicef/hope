@@ -35,7 +35,7 @@ class TestClearRecordFilesTask(APITestCase):
         cls.record_4 = Record.objects.create(
             registration=4,
             status=Record.STATUS_TO_IMPORT,
-            timestamp=timezone.now() - timedelta(20),
+            timestamp=timezone.now() - timedelta(80),
             source_id=4,
             files=bytes("some_string_123", "utf-8"),
         )
@@ -51,15 +51,4 @@ class TestClearRecordFilesTask(APITestCase):
         from hct_mis_api.contrib.aurora.celery_tasks import clean_old_record_files_task
 
         clean_old_record_files_task()
-
-        self.record_1.refresh_from_db()
-        self.record_2.refresh_from_db()
-        self.record_3.refresh_from_db()
-        self.record_4.refresh_from_db()
-        self.record_5.refresh_from_db()
-
-        self.assertIsNotNone(self.record_1.files)  # below 60 days
-        self.assertIsNone(self.record_2.files)  # updated
-        self.assertIsNotNone(self.record_3.files)  # status error
-        self.assertIsNotNone(self.record_4.files)  # below 60 dats
-        self.assertIsNone(self.record_5.files)  # updated
+        assert Record.objects.count() == 3

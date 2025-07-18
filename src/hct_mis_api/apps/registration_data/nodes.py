@@ -41,9 +41,12 @@ class DeduplicationResultNode(graphene.ObjectType):
     def resolve_distinct(self, info: Any) -> bool:
         return self.get("distinct", False)
 
-    def resolve_unicef_id(self, info: Any) -> str:
-        individual = Individual.all_objects.get(id=decode_id_string(self.get("hit_id")))
-        return str(individual.unicef_id)
+    def resolve_unicef_id(self, info: Any) -> Optional[str]:
+        try:
+            individual = Individual.all_objects.get(id=decode_id_string(self.get("hit_id")))
+            return str(individual.unicef_id)
+        except Individual.DoesNotExist:
+            return None
 
 
 class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):

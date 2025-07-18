@@ -22614,7 +22614,24 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'identification_key',
+                'name': 'hh_identification_key',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': 'Field used to identify collisions',
+                'isFlexField': False,
+                'labelEn': 'Identification key',
+                'labels': [
+                    {
+                        'label': 'Identification key',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'ind_identification_key',
                 'required': False,
                 'type': 'STRING'
             },

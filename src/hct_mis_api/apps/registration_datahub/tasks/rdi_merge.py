@@ -6,6 +6,7 @@ from django.db import transaction
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
+from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
@@ -53,6 +54,7 @@ class RdiMergeTask:
         try:
             obj_hct = RegistrationDataImport.objects.get(id=registration_data_import_id)
             households = PendingHousehold.objects.filter(registration_data_import=obj_hct)
+
             individuals = PendingIndividual.objects.filter(registration_data_import=obj_hct).order_by(
                 "first_registration_date"
             )
@@ -64,23 +66,25 @@ class RdiMergeTask:
                 obj_hct.save()
                 return
 
-            household_ids_from_extra_rdis = list(
-                Household.extra_rdis.through.objects.filter(registrationdataimport=obj_hct).values_list(
-                    "household_id", flat=True
-                )
+            household_ids_to_exclude = []
+            if obj_hct.program.collision_detection_enabled:
+                for ids in chunks(household_ids, 1000):
+                    households = PendingHousehold.objects.filter(id__in=ids)
+                    for household in households:
+                        collided_id = obj_hct.program.collision_detector.detect_collision(household)
+                        if not collided_id:
+                            continue
+                        household_ids_to_exclude.append(household.id)
+                        obj_hct.program.collision_detector.update_household(household)
+                        updated_household = Household.objects.get(id=collided_id)
+                        updated_household.extra_rdis.add(obj_hct)
+            household_ids = list(set(household_ids) - set(household_ids_to_exclude))
+            individual_ids = list(
+                Individual.all_objects.filter(registration_data_import=obj_hct, id__in=individual_ids)
+                .exclude(household__in=household_ids_to_exclude)
+                .values_list("id", flat=True)
             )
-            household_ids_from_extra_rdis = list(
-                PendingHousehold.objects.filter(
-                    id__in=household_ids_from_extra_rdis, rdi_merge_status=PendingHousehold.PENDING
-                ).values_list("id", flat=True)
-            )
-            individuals_from_extra_rdis = list(
-                PendingIndividual.objects.filter(
-                    household__in=household_ids_from_extra_rdis, rdi_merge_status=PendingIndividual.PENDING
-                ).values_list("id", flat=True)
-            )
-            individual_ids.extend(individuals_from_extra_rdis)
-            household_ids.extend(household_ids_from_extra_rdis)
+
             try:
                 with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
@@ -130,9 +134,6 @@ class RdiMergeTask:
                     PendingIndividual.objects.filter(id__in=individual_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
-                    self._update_rdi_id_for_extra_rdi(
-                        obj_hct.id, household_ids_from_extra_rdis, individuals_from_extra_rdis
-                    )
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
                         get_individual_doc(obj_hct.business_area.slug),
@@ -145,7 +146,7 @@ class RdiMergeTask:
                         Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
                     )
 
-                    if not obj_hct.business_area.postpone_deduplication:
+                    if not obj_hct.business_area.postpone_deduplication and len(individuals):
                         # DEDUPLICATION
                         DeduplicateTask(
                             obj_hct.business_area.slug, obj_hct.program.id
@@ -299,28 +300,3 @@ class RdiMergeTask:
                     individuals_to_update.append(individual_from_collection)
                     individuals_to_update.append(individual)
         Individual.all_objects.bulk_update(individuals_to_update, ["individual_collection"])
-
-    def _update_rdi_id_for_extra_rdi(
-        self, rdi_id: str, household_ids_from_extra_rdis: list, individuals_from_extra_rdis: list
-    ) -> None:
-        """
-        This function replace registration_data_import_id for households that were created from extra RDI.
-        (if rdi with extra_rdi_was the one merged as first)
-        """
-        if not household_ids_from_extra_rdis:
-            return
-        old_rdi_ids = Household.all_objects.filter(id__in=household_ids_from_extra_rdis).values_list(
-            "id", "registration_data_import_id"
-        )
-        extra_rdis_to_create = []
-        for household_id, old_rdi_id in old_rdi_ids:
-            extra_rdis_to_create.append(
-                Household.extra_rdis.through(household_id=household_id, registrationdataimport_id=old_rdi_id)
-            )
-        Household.extra_rdis.through.objects.bulk_create(extra_rdis_to_create)
-        Household.all_objects.filter(id__in=household_ids_from_extra_rdis).update(registration_data_import_id=rdi_id)
-        Individual.all_objects.filter(id__in=individuals_from_extra_rdis).update(registration_data_import_id=rdi_id)
-
-        Household.extra_rdis.through.objects.filter(
-            registrationdataimport_id=rdi_id, household_id__in=household_ids_from_extra_rdis
-        ).delete()

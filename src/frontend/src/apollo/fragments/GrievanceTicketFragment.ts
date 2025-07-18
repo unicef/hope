@@ -164,7 +164,10 @@ export const grievanceTicketDetailed = gql`
         id
         fullName
         referenceNumber
-
+        sanctionList {
+            id
+            name
+        } 
         datesOfBirth {
           edges {
             node {
