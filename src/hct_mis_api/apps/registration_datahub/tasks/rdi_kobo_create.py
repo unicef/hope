@@ -393,7 +393,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_obj.registration_data_import = self.registration_data_import
         household_obj.program = self.registration_data_import.program
         household_obj.business_area = self.business_area
-        household_obj.set_admin_areas()
+        household_obj.set_admin_areas(save=False)
         households_to_create.append(household_obj)
         for ind in current_individuals:
             ind.first_registration_date = registration_date
