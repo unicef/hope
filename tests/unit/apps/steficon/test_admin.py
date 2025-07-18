@@ -1,11 +1,14 @@
 from uuid import uuid4
 
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.urls import reverse
 
 import pytest
 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.admin import AutocompleteWidget
+from hct_mis_api.apps.steficon.models import Rule
 
 
 @pytest.mark.django_db
@@ -42,3 +45,52 @@ class TestAutocompleteWidget:
 
         assert context["widget"]["query_string"] == f"business_area__exact={business_area_id}"
         assert context["widget"]["url"] == f"{reverse('admin:autocomplete')}?business_area={business_area_id}"
+
+
+@pytest.mark.django_db
+class TestTestRuleMixin(TestCase):
+    def setUp(self) -> None:
+        User = get_user_model()
+        self.admin_user = User.objects.create_superuser(username="root", email="root@root.com", password="password")
+        self.client.login(username=self.admin_user.username, password="password")
+        self.rule = Rule.objects.create(
+            name="Test Rule",
+            definition="result.value = 2 + 3",
+            language="python",
+            type=Rule.TYPE_PAYMENT_PLAN,
+        )
+
+    def test_test_button_with_raw_data(self) -> None:
+        url = reverse("admin:steficon_rule_test", args=[self.rule.pk])
+        raw_data = '{"a": 1, "b": 2}'
+        post_data = {
+            "opt": "optData",
+            "raw_data": raw_data,
+        }
+        response = self.client.post(url, post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("results", response.context)
+        results = response.context["results"]
+        self.assertEqual(len(results), 1)
+        self.assertTrue(results[0]["success"])
+        self.assertEqual(results[0]["result"].value, 5)
+        self.assertIsNone(results[0]["error"])
+
+    def test_test_button_with_failing_raw_data(self) -> None:
+        self.rule.definition = 'result.value = data["a"] + data["b"]'
+        self.rule.save()
+
+        url = reverse("admin:steficon_rule_test", args=[self.rule.pk])
+        raw_data = '{"a": 1}'  # missing "b"
+        post_data = {
+            "opt": "optData",
+            "raw_data": raw_data,
+        }
+
+        response = self.client.post(url, post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("results", response.context)
+        results = response.context["results"]
+        self.assertEqual(len(results), 1)
+        self.assertFalse(results[0]["success"])
+        self.assertIn("NameError", results[0]["error"])
