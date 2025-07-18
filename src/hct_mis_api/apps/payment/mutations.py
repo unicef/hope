@@ -491,7 +491,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         elif received_amount is not None and received_amount != 0 and not received:
             log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
         elif received and received_amount.is_nan():
-            log_and_raise("NaN is not allowed")
+            log_and_raise("Amount Received needs to be a number")
 
         payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_verification.status_date = timezone.now()

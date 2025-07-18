@@ -141,7 +141,7 @@ class TestPaymentVerificationMutations(APITestCase):
         self.assertIsNone(payment_verification.received_amount)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
-        with self.assertRaisesMessage(GraphQLError, "NaN is not allowed"):
+        with self.assertRaisesMessage(GraphQLError, "Amount Received needs to be a number"):
             UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
                 None, self.info, payment_verification_id, received_amount=Decimal("NaN"), received=True
             )
