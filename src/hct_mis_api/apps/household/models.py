@@ -4,15 +4,22 @@ from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
-from django.contrib.gis.db.models import Q, UniqueConstraint
-from django.contrib.gis.geos import Point
 from django.contrib.postgres.fields import ArrayField, CICharField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVectorField
 from django.core.cache import cache
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import IntegrityError, models
-from django.db.models import BooleanField, F, Func, JSONField, QuerySet, Value
+from django.db.models import (
+    BooleanField,
+    F,
+    Func,
+    JSONField,
+    Q,
+    QuerySet,
+    UniqueConstraint,
+    Value,
+)
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -806,9 +813,15 @@ class Household(
         return None
 
     @geopoint.setter
-    def geopoint(self, value: Optional[Point]) -> None:
+    def geopoint(self, value: Optional[Tuple[float, float]]) -> None:
         if value:
-            self.latitude, self.longitude = value.y, value.x
+            (
+                self.longitude,
+                self.latitude,
+            ) = (
+                value[0],
+                value[1],
+            )
         else:
             self.latitude = None
             self.longitude = None

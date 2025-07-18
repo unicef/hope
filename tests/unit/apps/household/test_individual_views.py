@@ -68,6 +68,7 @@ from hct_mis_api.apps.payment.fixtures import (
     AccountFactory,
     generate_delivery_mechanisms,
 )
+from hct_mis_api.apps.payment.models import AccountType, FinancialInstitution
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -339,7 +340,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 30
+            assert len(ctx.captured_queries) == 31
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -358,7 +359,7 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            assert len(ctx.captured_queries) == 25
+            assert len(ctx.captured_queries) == 26
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -368,7 +369,7 @@ class TestIndividualList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 25
+            assert len(ctx.captured_queries) == 26
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -378,7 +379,7 @@ class TestIndividualList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 3
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 22
+            assert len(ctx.captured_queries) == 23
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -967,16 +968,6 @@ class TestIndividualDetail:
                 "number": self.identity.number,
             }
         ]
-
-        assert data["bank_account_info"] == [
-            {
-                "id": str(self.bank_account_info.id),
-                "bank_name": self.bank_account_info.bank_name,
-                "bank_account_number": self.bank_account_info.bank_account_number,
-                "account_holder_name": self.bank_account_info.account_holder_name,
-                "bank_branch_name": self.bank_account_info.bank_branch_name,
-            }
-        ]
         assert len(data["accounts"]) == 2
         account_1 = data["accounts"][0]
         account_2 = data["accounts"][1]
@@ -984,12 +975,12 @@ class TestIndividualDetail:
             "card_expiry_date__bank": "2022-01-01",
             "card_number__bank": "123",
             "name_of_cardholder__bank": "Marek",
-        } == account_1["individual_tab_data"]
+        } == account_1["data_fields"]
         assert {
             "service_provider_code__mobile": "ABC",
             "delivery_phone_number__mobile": "123456789",
             "provider__mobile": "Provider",
-        } == account_2["individual_tab_data"]
+        } == account_2["data_fields"]
 
         assert data["linked_grievances"] == [
             {
@@ -1339,6 +1330,10 @@ class TestIndividualChoices:
             "observed_disability_choices": to_choice_object(OBSERVED_DISABILITY_CHOICE),
             "severity_of_disability_choices": to_choice_object(SEVERITY_OF_DISABILITY_CHOICES),
             "work_status_choices": to_choice_object(WORK_STATUS_CHOICE),
+            "account_type_choices": [{"name": x.label, "value": x.key} for x in AccountType.objects.all()],
+            "account_financial_institution_choices": [
+                {"name": x.name, "value": x.id} for x in FinancialInstitution.objects.all()
+            ],
         }
 
 
@@ -1612,32 +1607,6 @@ class TestIndividualFilter:
 
         assert len(response_data) == 1
         assert response_data[0]["id"] == str(individual2.id)
-
-    @override_config(USE_ELASTICSEARCH_FOR_INDIVIDUALS_SEARCH=True)
-    def test_search_by_bank_account_number(self) -> None:
-        _, (individual1, _) = create_household_and_individuals(
-            household_data={
-                "program": self.program,
-                "business_area": self.afghanistan,
-            },
-            individuals_data=[{}, {}],
-        )
-        _, (individual2, _) = create_household_and_individuals(
-            household_data={
-                "program": self.program,
-                "business_area": self.afghanistan,
-            },
-            individuals_data=[{}, {}],
-        )
-        # BankAccountInfoFactory(bank_account_number="123456789", individual=individual1)
-        # BankAccountInfoFactory(bank_account_number="987654321", individual=individual2)
-        rebuild_search_index()
-        response = self.api_client.get(self.list_url, {"search": "987654321"})
-        assert response.status_code == status.HTTP_200_OK, response.json()
-        response_data = response.json()["results"]
-        assert len(response_data) == 1
-        assert response_data[0]["id"] == str(individual2.id)
-        return response_data
 
     def test_filter_by_age(self) -> None:
         individual_age_5, individual_age_10 = self._create_test_individuals(

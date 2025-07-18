@@ -18,6 +18,8 @@ from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFa
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.sanction_list.fixtures import SanctionListFactory
+from hct_mis_api.apps.sanction_list.models import SanctionList
 from tests.unit.api.base import HOPEApiTestCase
 
 
@@ -425,15 +427,16 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         unicef_partner = PartnerFactory(name="UNICEF")
-        cls.business_area.screen_beneficiary = True
-        cls.business_area.save()
-
         unicef = PartnerFactory(name="UNICEF HQ", parent=unicef_partner)
         cls.user = UserFactory(username="Hope_Test_DRF", password="HopePass", partner=unicef, is_superuser=False)
         cls.program = ProgramFactory(
             name="Test Program",
             status=Program.ACTIVE,
         )
+
+        # program - screen beneficiary = True
+        cls.program.sanction_lists.add(SanctionListFactory(name="Test Sanction List"))
+
         cls.rdi = RegistrationDataImportFactory(
             business_area=cls.business_area,
             program=cls.program,
@@ -846,8 +849,8 @@ class RegistrationDataImportPermissionTest(HOPEApiTestCase):
         role, _ = Role.objects.update_or_create(
             name="TestPermissionCreateRole", defaults={"permissions": [Permissions.RDI_IMPORT_DATA.value]}
         )
-        self.business_area.screen_beneficiary = False
-        self.business_area.save()
+        SanctionList.objects.all().delete()  # screen_beneficiary=False
+        assert self.program.screen_beneficiary is False
         RoleAssignment.objects.get_or_create(user=self.user, role=role, business_area=self.business_area)
         import_from_program = ProgramFactory(
             name="Source Program",

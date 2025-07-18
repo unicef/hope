@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.targeting.api.serializers import TargetingCriteriaRuleSerializer
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
@@ -9,7 +11,8 @@ from hct_mis_api.apps.targeting.models import (
 
 class TargetingCriteriaSerializerTest(TestCase):
     def test_targeting_criteria_serializer(self) -> None:
-        rule = TargetingCriteriaRule.objects.create()
+        create_afghanistan()
+        rule = TargetingCriteriaRule.objects.create(payment_plan=PaymentPlanFactory())
         hh_rule_data = {
             "comparison_method": "EQUALS",
             "arguments": [2],
@@ -21,13 +24,10 @@ class TargetingCriteriaSerializerTest(TestCase):
 
         data = TargetingCriteriaRuleSerializer(instance=rule).data
 
-        self.assertFalse(data["flag_exclude_if_active_adjudication_ticket"])
-        self.assertFalse(data["flag_exclude_if_on_sanction_list"])
-        rule = data["rules"][0]
-        self.assertEqual(rule["household_ids"], "")
-        self.assertEqual(rule["individual_ids"], "")
-        self.assertEqual(rule["individuals_filters_blocks"], [])
-        self.assertEqual(rule["collectors_filters_blocks"], [])
-        self.assertEqual(rule["households_filters_blocks"][0]["comparison_method"], "EQUALS")
-        self.assertEqual(rule["households_filters_blocks"][0]["flex_field_classification"], "NOT_FLEX_FIELD")
-        self.assertEqual(rule["households_filters_blocks"][0]["field_name"], "size")
+        self.assertEqual(data["household_ids"], "")
+        self.assertEqual(data["individual_ids"], "")
+        self.assertEqual(data["individuals_filters_blocks"], [])
+        self.assertEqual(data["collectors_filters_blocks"], [])
+        self.assertEqual(data["households_filters_blocks"][0]["comparison_method"], "EQUALS")
+        self.assertEqual(data["households_filters_blocks"][0]["flex_field_classification"], "NOT_FLEX_FIELD")
+        self.assertEqual(data["households_filters_blocks"][0]["field_name"], "size")

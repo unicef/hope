@@ -142,25 +142,23 @@ class TestPaymentSignature(APITestCase):
 
         fsp = FinancialServiceProviderFactory()
 
-        targeting_criteria = {
-            "flag_exclude_if_active_adjudication_ticket": False,
-            "flag_exclude_if_on_sanction_list": False,
-            "rules": [
-                {
-                    "collectors_filters_blocks": [],
-                    "household_filters_blocks": [],
-                    "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
-                    "individual_ids": "",
-                    "individuals_filters_blocks": [],
-                }
-            ],
-        }
+        rules = [
+            {
+                "collectors_filters_blocks": [],
+                "household_filters_blocks": [],
+                "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
+                "individual_ids": "",
+                "individuals_filters_blocks": [],
+            }
+        ]
 
         input_data = dict(
             business_area_slug="afghanistan",
             name="paymentPlanName",
             program_cycle_id=str(program.cycles.first().id),
-            targeting_criteria=targeting_criteria,
+            rules=rules,
+            flag_exclude_if_active_adjudication_ticket=False,
+            flag_exclude_if_on_sanction_list=False,
             excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
             fsp_id=fsp.id,
             delivery_mechanism_code=dm_cash.code,

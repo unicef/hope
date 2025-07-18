@@ -8,6 +8,14 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.geo.models import Area, AreaType
 
 
+class AreaNode(DjangoObjectType):
+    class Meta:
+        model = Area
+        filter_fields = ["name"]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class AreaTypeNode(DjangoObjectType):
     class Meta:
         model = AreaType
