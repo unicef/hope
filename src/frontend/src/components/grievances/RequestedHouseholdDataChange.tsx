@@ -173,7 +173,7 @@ export function RequestedHouseholdDataChange({
       onSubmit={async (values) => {
         console.log('values1', values);
         // Build householdApproveData as a flat object
-        const householdApproveData: { [key: string]: boolean } = {};
+        const householdApproveData: { [key: string]: boolean | any } = {};
         // Top-level fields
         entries.forEach(([key]) => {
           if (key !== 'roles' && key !== 'flex_fields') {
@@ -183,16 +183,15 @@ export function RequestedHouseholdDataChange({
         // Flex fields
         const flexFieldsApproveData: { [key: string]: boolean } = {};
         flexFieldsEntries.forEach(([key]) => {
-          householdApproveData[key] = values.selectedFlexFields.includes(key);
           flexFieldsApproveData[key] = values.selectedFlexFields.includes(key);
         });
         // Roles
-        (
-          ticket.householdDataUpdateTicketDetails.householdData.roles || []
-        ).forEach((role) => {
-          householdApproveData[role.individual_id] =
-            values.selectedRoles.includes(role.individual_id);
-        });
+        const allRoles =
+          ticket.householdDataUpdateTicketDetails.householdData.roles || [];
+        householdApproveData.roles = allRoles.map((role) => ({
+          individual_id: role.individual_id,
+          approve_status: values.selectedRoles.includes(role.individual_id),
+        }));
 
         try {
           await mutate({
