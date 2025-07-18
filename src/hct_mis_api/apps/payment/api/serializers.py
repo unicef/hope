@@ -685,7 +685,8 @@ class PaymentPlanDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListSerial
     @staticmethod
     def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
         delivery_mechanism = getattr(payment_plan, "delivery_mechanism", None)
-        if not delivery_mechanism:
+        financial_service_provider = getattr(payment_plan, "financial_service_provider", None)
+        if not delivery_mechanism or not financial_service_provider:
             return False
         if not payment_plan.financial_service_provider.get_xlsx_template(payment_plan.delivery_mechanism):
             return False
@@ -923,6 +924,8 @@ class TargetPopulationDetailSerializer(AdminUrlSerializerMixin, PaymentPlanListS
             "version",
             "admin_url",
             "screen_beneficiary",
+            "flag_exclude_if_on_sanction_list",
+            "flag_exclude_if_active_adjudication_ticket",
         )
 
     @staticmethod
@@ -1264,7 +1267,7 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     name = serializers.CharField(required=True)
     program_cycle_id = serializers.UUIDField(required=True)
-    rules = TargetingCriteriaRuleSerializer(required=True)
+    rules = TargetingCriteriaRuleSerializer(many=True, required=True)
     excluded_ids = serializers.CharField(required=False, allow_blank=True)
     exclusion_reason = serializers.CharField(required=False, allow_blank=True)
     fsp_id = serializers.UUIDField(required=False, allow_null=True)
@@ -1272,6 +1275,8 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
     vulnerability_score_min = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
     vulnerability_score_max = serializers.DecimalField(required=False, max_digits=6, decimal_places=3)
     version = serializers.IntegerField(required=False, read_only=True)
+    flag_exclude_if_on_sanction_list = serializers.BooleanField()
+    flag_exclude_if_active_adjudication_ticket = serializers.BooleanField()
 
     class Meta:
         model = PaymentPlan
@@ -1287,6 +1292,8 @@ class TargetPopulationCreateSerializer(serializers.ModelSerializer):
             "delivery_mechanism_code",
             "vulnerability_score_min",
             "vulnerability_score_max",
+            "flag_exclude_if_on_sanction_list",
+            "flag_exclude_if_active_adjudication_ticket",
         )
 
     def get_program(self) -> Program:

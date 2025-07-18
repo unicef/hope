@@ -1394,8 +1394,7 @@ class TargetPopulationViewSet(
                 steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
                 program_cycle=program_cycle,
             )
-            if payment_plan.rules:
-                PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
+            PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
             payment_plan_copy.save()
             payment_plan_copy.refresh_from_db()
 

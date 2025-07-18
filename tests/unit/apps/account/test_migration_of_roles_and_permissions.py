@@ -50,7 +50,7 @@ class MigrateUserRolesTest(TestCase):
         cls.program_1_ukr = ProgramFactory(name="Program 1 UKR", business_area=cls.business_area_ukr)
         cls.program_2_ukr = ProgramFactory(name="Program 2 UKR", business_area=cls.business_area_ukr)
 
-        cls.country_afg = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="040")
+        cls.country_afg = CountryFactory(name="Afghanistan", iso_code3="AFG", iso_code2="AF", iso_num="0004")
         cls.country_afg.business_areas.set([cls.business_area_afg])
         cls.area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=cls.country_afg, area_level=1)
         cls.area_1_afg = AreaFactory(name="Area 1 Afg", area_type=cls.area_type_afg, p_code="AREA1-AFG")

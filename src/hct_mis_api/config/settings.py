@@ -209,7 +209,6 @@ DJANGO_APPS = [
     "django.contrib.sites",
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
-    "django.contrib.gis",
     "django.contrib.postgres",
 ]
 

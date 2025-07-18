@@ -526,7 +526,6 @@ class TestRdiMergeTask(TestCase):
         program.save()
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             zip_code="00-123",
         )
