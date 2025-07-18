@@ -327,6 +327,7 @@ class TestGrievanceTicketList:
                     "slug": grievance_ticket.programs.first().slug,
                     "name": grievance_ticket.programs.first().name,
                     "status": grievance_ticket.programs.first().status,
+                    "screen_beneficiary": grievance_ticket.programs.first().screen_beneficiary,
                 }
             ]
             household = getattr(getattr(grievance_ticket, "ticket_details", None), "household", None)
@@ -587,7 +588,7 @@ class TestGrievanceTicketList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 9
-            assert len(ctx.captured_queries) == 58
+            assert len(ctx.captured_queries) == 59
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -609,7 +610,7 @@ class TestGrievanceTicketList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 5 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 53
+            assert len(ctx.captured_queries) == 54
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -620,7 +621,7 @@ class TestGrievanceTicketList:
             assert len(response.json()["results"]) == 6
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 47
+            assert len(ctx.captured_queries) == 48
 
         ticket.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -630,7 +631,7 @@ class TestGrievanceTicketList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 5
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 37
+            assert len(ctx.captured_queries) == 38
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
