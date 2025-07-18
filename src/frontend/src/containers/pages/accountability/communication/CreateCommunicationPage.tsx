@@ -1,3 +1,19 @@
+import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { FormikEffect } from '@components/core/FormikEffect';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TabPanel } from '@components/core/TabPanel';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PaperContainer } from '@components/targeting/PaperContainer';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { MessageCreate } from '@restgenerated/models/MessageCreate';
+import { SamplingTypeE86Enum } from '@restgenerated/models/SamplingTypeE86Enum';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -11,6 +27,16 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
+import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { MessageSampleSize } from '@restgenerated/models/MessageSampleSize';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
+import { getPercentage } from '@utils/utils';
 import { Field, Form, Formik } from 'formik';
 import {
   ReactElement,
@@ -23,36 +49,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import {
-  AccountabilityCommunicationMessageSampleSizeQueryVariables,
-  CreateAccountabilityCommunicationMessageMutationVariables,
-  SamplingChoices,
-  useAccountabilityCommunicationMessageSampleSizeLazyQuery,
-  useAllAdminAreasQuery,
-  useCreateAccountabilityCommunicationMessageMutation,
-  useSurveyAvailableFlowsLazyQuery,
-} from '@generated/graphql';
-import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
-import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
-import { useConfirmation } from '@components/core/ConfirmationDialog';
-import { FormikEffect } from '@components/core/FormikEffect';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { PageHeader } from '@components/core/PageHeader';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { TabPanel } from '@components/core/TabPanel';
-import { PaperContainer } from '@components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { FormikSliderField } from '@shared/Formik/FormikSliderField';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
-import { getPercentage } from '@utils/utils';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -77,53 +74,62 @@ const initialValues = {
   sexCheckbox: false,
   title: '',
   body: '',
-  samplingType: SamplingChoices.FullList,
+  samplingType: SamplingTypeE86Enum.FULL_LIST,
 };
 
-function prepareVariables(
+function prepareSampleSizeRequest(
   selectedSampleSizeType,
   values,
-): AccountabilityCommunicationMessageSampleSizeQueryVariables {
+): MessageSampleSize {
+  const samplingType =
+    selectedSampleSizeType === 0
+      ? SamplingTypeE86Enum.FULL_LIST
+      : SamplingTypeE86Enum.RANDOM;
+
+  const fullListArguments = {
+    excludedAdminAreas: values.excludedAdminAreasFull || [],
+  };
+
+  const randomSamplingArguments = {
+    confidenceInterval: values.confidenceInterval * 0.01,
+    marginOfError: values.marginOfError * 0.01,
+    excludedAdminAreas: values.adminCheckbox
+      ? values.excludedAdminAreasRandom
+      : [],
+    age: values.ageCheckbox
+      ? { min: values.filterAgeMin, max: values.filterAgeMax }
+      : null,
+    sex: values.sexCheckbox ? values.filterSex : null,
+  };
+
   return {
-    input: {
-      households: values.households,
-      paymentPlan: values.targetPopulation,
-      registrationDataImport: values.registrationDataImport,
-      samplingType:
-        selectedSampleSizeType === 0
-          ? SamplingChoices.FullList
-          : SamplingChoices.Random,
-      fullListArguments:
-        selectedSampleSizeType === 0
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
-          : null,
-      randomSamplingArguments:
-        selectedSampleSizeType === 1
-          ? {
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              excludedAdminAreas: values.adminCheckbox
-                ? values.excludedAdminAreasRandom
-                : [],
-              age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
-          : null,
-    },
+    households: values.households,
+    paymentPlan: values.targetPopulation,
+    registrationDataImport: values.registrationDataImport,
+    samplingType,
+    // Always include both arguments but set them appropriately based on sampling type
+    fullListArguments:
+      samplingType === SamplingTypeE86Enum.FULL_LIST ? fullListArguments : null,
+    randomSamplingArguments:
+      samplingType === SamplingTypeE86Enum.RANDOM
+        ? randomSamplingArguments
+        : null,
   };
 }
 
 const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
-  const [mutate, { loading }] =
-    useCreateAccountabilityCommunicationMessageMutation();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: (data: MessageCreate) =>
+      RestService.restBusinessAreasProgramsMessagesCreate({
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        requestBody: data,
+      }),
+  });
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();
-  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
 
@@ -135,18 +141,60 @@ const CreateCommunicationPage = (): ReactElement => {
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
 
-  const { data } = useAllAdminAreasQuery({
-    variables: {
-      first: 100,
-      businessArea,
+  const [sampleSizesData, setSampleSizesData] = useState<any>(null);
+  const [sampleSizeLoading, setSampleSizeLoading] = useState<boolean>(false);
+  const [sampleSizeError, setSampleSizeError] = useState<Error | null>(null);
+
+  const { data: adminAreasData } = useQuery<PaginatedAreaList>({
+    queryKey: ['adminAreas', businessArea, { areaTypeAreaLevel: 2 }],
+    queryFn: async () => {
+      return RestService.restAreasList({
+        limit: 100,
+        areaTypeAreaLevel: 2,
+        search: undefined,
+      });
     },
+    enabled: !!businessArea,
   });
 
-  const [loadSampleSize, { data: sampleSizesData }] =
-    useAccountabilityCommunicationMessageSampleSizeLazyQuery({
-      variables: prepareVariables(selectedSampleSizeType, formValues),
-      fetchPolicy: 'network-only',
-    });
+  const loadSampleSize = useCallback(async () => {
+    if (!businessArea) return;
+
+    try {
+      setSampleSizeLoading(true);
+      setSampleSizeError(null);
+
+      const requestBody = prepareSampleSizeRequest(
+        selectedSampleSizeType,
+        formValues,
+      );
+      const result =
+        await RestService.restBusinessAreasProgramsMessagesSampleSizeCreate({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+          requestBody,
+        });
+
+      // The API response has a different shape than the request type
+      // Use type assertion to access the properties we need
+      const response = result as unknown as {
+        sampleSize?: number;
+        numberOfRecipients?: number;
+      };
+
+      setSampleSizesData({
+        accountabilityCommunicationMessageSampleSize: {
+          sampleSize: response.sampleSize || 0,
+          numberOfRecipients: response.numberOfRecipients || 0,
+        },
+      });
+    } catch (error) {
+      console.error('Error loading sample size data:', error);
+      setSampleSizeError(error as Error);
+    } finally {
+      setSampleSizeLoading(false);
+    }
+  }, [businessArea, selectedSampleSizeType, formValues, programId]);
 
   useEffect(() => {
     if (activeStep === CommunicationSteps.SampleSize) {
@@ -154,12 +202,28 @@ const CreateCommunicationPage = (): ReactElement => {
     }
   }, [activeStep, formValues, loadSampleSize]);
 
-  const [
-    loadAvailableFlows,
-    { data: flowsData, loading: flowsLoading, error: flowsError },
-  ] = useSurveyAvailableFlowsLazyQuery({
-    fetchPolicy: 'network-only',
-  });
+  const [flowsData, setFlowsData] = useState(null);
+  const [flowsLoading, setFlowsLoading] = useState(false);
+  const [flowsError, setFlowsError] = useState(null);
+
+  const loadAvailableFlows = useCallback(async () => {
+    if (!businessArea || !programId) return;
+
+    try {
+      setFlowsLoading(true);
+      const result =
+        await RestService.restBusinessAreasProgramsSurveysAvailableFlowsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        });
+      setFlowsData({ surveyAvailableFlows: result });
+    } catch (error) {
+      console.error('Error loading available flows:', error);
+      setFlowsError(error);
+    } finally {
+      setFlowsLoading(false);
+    }
+  }, [businessArea, programId]);
 
   useEffect(() => {
     loadAvailableFlows();
@@ -215,14 +279,15 @@ const CreateCommunicationPage = (): ReactElement => {
     return errors;
   };
 
-  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
-    ? data.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
+  const mappedAdminAreas = adminAreasData?.results?.length
+    ? adminAreasData.results.map((area) => ({
+        value: area.id,
+        name: area.name || '',
       }))
     : [];
 
-  if (permissions === null) return null;
+  if (permissions === null || permissions.length === 0) return null;
+
   if (
     !hasPermissions(
       PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
@@ -251,7 +316,6 @@ const CreateCommunicationPage = (): ReactElement => {
   };
 
   const handleBack = (values): void => {
-    // Skip sample-size step when households are chosen
     if (values.households.length && activeStep === 2) {
       setActiveStep(0);
     } else {
@@ -259,38 +323,34 @@ const CreateCommunicationPage = (): ReactElement => {
     }
   };
 
-  const prepareMutationVariables = (
-    values,
-  ): CreateAccountabilityCommunicationMessageMutationVariables => ({
-    input: {
-      households: values.households,
-      paymentPlan: values.targetPopulation,
-      registrationDataImport: values.registrationDataImport,
-      samplingType:
-        selectedSampleSizeType === 0
-          ? SamplingChoices.FullList
-          : SamplingChoices.Random,
-      fullListArguments:
-        selectedSampleSizeType === 0
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasFull,
-            }
-          : null,
-      randomSamplingArguments:
-        selectedSampleSizeType === 1
-          ? {
-              excludedAdminAreas: values.excludedAdminAreasRandom,
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
-          : null,
-      title: values.title,
-      body: values.body,
-    },
+  const prepareMutationVariables = (values): MessageCreate => ({
+    title: values.title,
+    body: values.body,
+    households: values.households,
+    paymentPlan: values.targetPopulation,
+    registrationDataImport: values.registrationDataImport,
+    samplingType:
+      selectedSampleSizeType === 0
+        ? SamplingTypeE86Enum.FULL_LIST
+        : SamplingTypeE86Enum.RANDOM,
+    fullListArguments:
+      selectedSampleSizeType === 0
+        ? {
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
+        : null,
+    randomSamplingArguments:
+      selectedSampleSizeType === 1
+        ? {
+            excludedAdminAreas: values.excludedAdminAreasRandom || [],
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            age: values.ageCheckbox
+              ? { min: values.filterAgeMin, max: values.filterAgeMax }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
+        : null,
   });
 
   const dataChangeErrors = (errors): ReactElement[] =>
@@ -314,15 +374,13 @@ const CreateCommunicationPage = (): ReactElement => {
             content: t('Are you sure you want to send this message?'),
           }).then(async () => {
             try {
-              const response = await mutate({
-                variables: prepareMutationVariables(values),
-              });
+              const response = await mutate(prepareMutationVariables(values));
               showMessage(t('Communication Ticket created.'));
               navigate(
-                `/${baseUrl}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
+                `/${baseUrl}/accountability/communication/${response.id}`,
               );
             } catch (e) {
-              e.graphQLErrors.map((x) => showMessage(x.message));
+              showMessage(e.message || t('An error occurred'));
             }
           });
         } else {
@@ -423,6 +481,14 @@ const CreateCommunicationPage = (): ReactElement => {
                       </RadioGroup>
                     </Box>
                     <TabPanel value={selectedSampleSizeType} index={0}>
+                      {sampleSizeError && (
+                        <Box mb={3}>
+                          <Typography color="error">
+                            {t('Error loading sample size data')}:{' '}
+                            {sampleSizeError.message}
+                          </Typography>
+                        </Box>
+                      )}
                       {mappedAdminAreas && (
                         <Field
                           name="excludedAdminAreasFull"
@@ -440,18 +506,24 @@ const CreateCommunicationPage = (): ReactElement => {
                           fontWeight="fontWeightBold"
                         >
                           Sample size:{' '}
-                          {
-                            sampleSizesData
-                              ?.accountabilityCommunicationMessageSampleSize
-                              ?.sampleSize
-                          }{' '}
-                          out of{' '}
-                          {
-                            sampleSizesData
-                              ?.accountabilityCommunicationMessageSampleSize
-                              ?.numberOfRecipients
-                          }{' '}
-                          {getSampleSizePercentage()}
+                          {sampleSizeLoading ? (
+                            <span>{t('Loading...')}</span>
+                          ) : (
+                            <>
+                              {
+                                sampleSizesData
+                                  ?.accountabilityCommunicationMessageSampleSize
+                                  ?.sampleSize
+                              }{' '}
+                              out of{' '}
+                              {
+                                sampleSizesData
+                                  ?.accountabilityCommunicationMessageSampleSize
+                                  ?.numberOfRecipients
+                              }{' '}
+                              {getSampleSizePercentage()}
+                            </>
+                          )}
                         </Box>
                       </Box>
                     </TabPanel>
@@ -561,18 +633,24 @@ const CreateCommunicationPage = (): ReactElement => {
                           fontWeight="fontWeightBold"
                         >
                           Sample size:{' '}
-                          {
-                            sampleSizesData
-                              ?.accountabilityCommunicationMessageSampleSize
-                              ?.sampleSize
-                          }{' '}
-                          out of{' '}
-                          {
-                            sampleSizesData
-                              ?.accountabilityCommunicationMessageSampleSize
-                              ?.numberOfRecipients
-                          }{' '}
-                          {getSampleSizePercentage()}
+                          {sampleSizeLoading ? (
+                            <span>{t('Loading...')}</span>
+                          ) : (
+                            <>
+                              {
+                                sampleSizesData
+                                  ?.accountabilityCommunicationMessageSampleSize
+                                  ?.sampleSize
+                              }{' '}
+                              out of{' '}
+                              {
+                                sampleSizesData
+                                  ?.accountabilityCommunicationMessageSampleSize
+                                  ?.numberOfRecipients
+                              }{' '}
+                              {getSampleSizePercentage()}
+                            </>
+                          )}
                         </Box>
                       </Box>
                     </TabPanel>

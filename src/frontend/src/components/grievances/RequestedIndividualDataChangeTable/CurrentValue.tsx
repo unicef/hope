@@ -1,9 +1,15 @@
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: {
+    name?: string;
+    type?: string;
+    choices?: Array<{
+      value: any;
+      labelEn?: string;
+    }>;
+  };
   value;
 }
 
@@ -40,7 +46,19 @@ export function CurrentValue({
       );
       break;
     default:
-      displayValue = value;
+      displayValue =
+        typeof value === 'object' && value !== null && 'value' in value
+          ? value.value
+          : value;
   }
-  return <>{displayValue || '-'}</>;
+  return (
+    <>
+      {displayValue === null ||
+      displayValue === 'null' ||
+      displayValue === undefined ||
+      displayValue === ''
+        ? '-'
+        : displayValue}
+    </>
+  );
 }

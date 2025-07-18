@@ -1,16 +1,17 @@
 import { LoadingComponent } from '@core/LoadingComponent';
 import { TabPanel } from '@core/TabPanel';
 import { Tab, Tabs } from '@core/Tabs';
-import {
-  useAllProgramsForChoicesQuery,
-  useHouseholdChoiceDataQuery,
-  useIndividualChoiceDataQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Box } from '@mui/material';
+import { HouseholdChoices } from '@restgenerated/models/HouseholdChoices';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
-import get from 'lodash/get';
 import { ChangeEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -39,7 +40,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   onValueChange;
   initialValues;
   selectedIndividual;
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   setSelectedIndividual;
   setSelectedHousehold;
   redirectedFromRelatedTicket?: boolean;
@@ -49,10 +50,25 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const [selectedTab, setSelectedTab] = useState(isSocialDctType ? 1 : 0);
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+
+  const { data: householdChoicesData, isLoading: householdChoicesLoading } =
+    useQuery<HouseholdChoices>({
+      queryKey: ['householdChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasHouseholdsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
+
   const initialFilterHH = {
     program: isAllPrograms ? '' : programId,
     search: '',
@@ -99,10 +115,18 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: programsData, loading: programsLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, first: 100 },
-      fetchPolicy: 'cache-first',
+  const { data: programsData, isLoading: programsLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: ['businessAreasProgramsList', { first: 100 }, businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, first: 100 },
+            {
+              withPagination: false,
+            },
+          ),
+        ),
     });
 
   if (householdChoicesLoading || individualChoicesLoading || programsLoading)
@@ -116,8 +140,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
     onValueChange(key, value);
   };
 
-  const allPrograms = get(programsData, 'allPrograms.edges', []);
-  const programs = allPrograms.map((edge) => edge.node);
+  const programs = programsData?.results;
 
   return (
     <>
@@ -196,7 +219,6 @@ export function LookUpHouseholdIndividualSelectionDetail({
           />
           <LookUpIndividualTable
             filter={appliedFilterIND}
-            businessArea={businessArea}
             setFieldValue={onSelect}
             valuesInner={initialValues}
             selectedHousehold={selectedHousehold}

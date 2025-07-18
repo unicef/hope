@@ -1,5 +1,4 @@
 import camelCase from 'lodash/camelCase';
-import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -15,7 +14,7 @@ export function isEmpty(value): boolean {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function validate(
   values,
-  allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
+  addIndividualFieldsData: Array<any> | null,
   individualFieldsDict,
   householdFieldsDict,
   beneficiaryGroup,
@@ -195,17 +194,19 @@ export function validate(
   ) {
     const individualDataErrors = {};
     const individualData = values.individualData || {};
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
-      }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
+    if (addIndividualFieldsData) {
+      for (const field of addIndividualFieldsData) {
+        const fieldName = camelCase(field.name);
+        if (
+          field.required &&
+          (individualData[fieldName] === null ||
+            individualData[fieldName] === undefined)
+        ) {
+          individualDataErrors[fieldName] = 'Field Required';
+        }
+        if (Object.keys(individualDataErrors).length > 0) {
+          errors.individualData = individualDataErrors;
+        }
       }
     }
   }
@@ -236,7 +237,7 @@ export function validate(
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function validateUsingSteps(
   values,
-  allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
+  addIndividualFieldsData: Array<any> | null,
   individualFieldsDict,
   householdFieldsDict,
   activeStep,
@@ -421,17 +422,19 @@ export function validateUsingSteps(
     const individualDataErrors = {};
     const individualData = values.individualData || {};
 
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
-      }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
+    if (addIndividualFieldsData) {
+      for (const field of addIndividualFieldsData) {
+        const fieldName = camelCase(field.name);
+        if (
+          field.required &&
+          (individualData[fieldName] === null ||
+            individualData[fieldName] === undefined)
+        ) {
+          individualDataErrors[fieldName] = 'Field Required';
+        }
+        if (Object.keys(individualDataErrors).length > 0) {
+          errors.individualData = individualDataErrors;
+        }
       }
     }
 

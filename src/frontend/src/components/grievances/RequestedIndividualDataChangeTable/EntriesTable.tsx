@@ -9,13 +9,15 @@ import camelCase from 'lodash/camelCase';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { handleSelected } from '../utils/helpers';
 import { individualDataRow } from './individualDataRow';
 import { ReactElement } from 'react';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
+  width: 100%;
 `;
 
 export interface EntriesTableProps {
@@ -23,10 +25,11 @@ export interface EntriesTableProps {
   isEdit;
   fieldsDict;
   countriesDict;
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   entries;
   entriesFlexFields;
   setFieldValue;
+  individual: IndividualDetail;
 }
 
 export function EntriesTable({
@@ -38,6 +41,7 @@ export function EntriesTable({
   entries,
   entriesFlexFields,
   setFieldValue,
+  individual,
 }: EntriesTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedFlexFields } = values;
@@ -78,7 +82,7 @@ export function EntriesTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) =>
+        {entries?.map((row, index) =>
           individualDataRow(
             row,
             isSelected,
@@ -88,9 +92,10 @@ export function EntriesTable({
             countriesDict,
             isEdit,
             handleSelectBioData,
+            individual,
           ),
         )}
-        {entriesFlexFields.map((row, index) =>
+        {entriesFlexFields?.map((row, index) =>
           individualDataRow(
             row,
             isSelectedFlexfields,
@@ -100,6 +105,7 @@ export function EntriesTable({
             countriesDict,
             isEdit,
             handleFlexFields,
+            individual,
           ),
         )}
       </TableBody>

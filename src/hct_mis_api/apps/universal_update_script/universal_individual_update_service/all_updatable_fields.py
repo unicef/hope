@@ -68,7 +68,6 @@ household_fields: Dict[str, Tuple[str, Any, Any]] = {
     # "country": ("country", validate_string, handle_simple_field), # TODO: Handle country
     "address": ("address", validate_string, handle_simple_field),
     "zip_code": ("zip_code", validate_string, handle_simple_field),
-    "admin_area": ("admin_area", validate_string, handle_simple_field),
     "admin1": ("admin1", validate_admin, handle_admin_field),
     "admin2": ("admin2", validate_string, handle_admin_field),
     "admin3": ("admin3", validate_string, handle_admin_field),

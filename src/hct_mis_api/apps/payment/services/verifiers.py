@@ -1,6 +1,6 @@
 from typing import Dict
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 
@@ -44,7 +44,7 @@ class PaymentVerificationArgumentVerifier:
                 continue
             for required in value.get("required"):
                 if self.input_data.get(required) is None:
-                    raise GraphQLError(f"You have to provide {required} in {key}")
+                    raise ValidationError(f"You have to provide {required} in {key}")
             for not_allowed in value.get("not_allowed"):
                 if self.input_data.get(not_allowed) is not None:
-                    raise GraphQLError(f"You can't provide {not_allowed} in {key}")
+                    raise ValidationError(f"You can't provide {not_allowed} in {key}")

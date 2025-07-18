@@ -1,29 +1,26 @@
-import { ReactElement, useEffect, useState } from 'react';
-import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import TableCell from '@mui/material/TableCell';
-import { StatusBox } from '@core/StatusBox';
-import {
-  decodeIdString,
-  formatCurrencyWithSymbol,
-  programCycleStatusToColor,
-} from '@utils/utils';
-import { UniversalMoment } from '@core/UniversalMoment';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  fetchProgramCycles,
-  finishProgramCycle,
-  ProgramCycle,
-  ProgramCyclesQuery,
-  reactivateProgramCycle,
-} from '@api/programCycleApi';
 import { BlackLink } from '@core/BlackLink';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@mui/material';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { Button } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import { PaginatedProgramCycleListList } from '@restgenerated/models/PaginatedProgramCycleListList';
+import { ProgramCycleList } from '@restgenerated/models/ProgramCycleList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import {
+  formatCurrencyWithSymbol,
+  programCycleStatusToColor,
+  showApiErrorMessages,
+} from '@utils/utils';
+import { ReactElement, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ProgramCyclesTablePaymentModuleProps {
   program;
@@ -35,44 +32,78 @@ const ProgramCyclesTablePaymentModule = ({
   filters,
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
-  const [queryVariables, setQueryVariables] = useState<ProgramCyclesQuery>({
+  const [queryVariables, setQueryVariables] = useState<ProgramCycleList>({
     offset: 0,
     limit: 5,
     ordering: 'created_at',
     ...filters,
   });
 
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { data, refetch, error, isLoading } = useQuery({
-    queryKey: ['programCycles', businessArea, program.id, queryVariables],
-    queryFn: async () => {
-      return fetchProgramCycles(businessArea, program.id, queryVariables);
-    },
-  });
+  const { data, refetch, error, isLoading } =
+    useQuery<PaginatedProgramCycleListList>({
+      queryKey: ['programCycles', businessArea, program.slug, queryVariables],
+      queryFn: () => {
+        return RestService.restBusinessAreasProgramsCyclesList(
+          createApiParams(
+            {
+              businessAreaSlug: businessArea,
+              programSlug: program.slug,
+            },
+            queryVariables,
+            { withPagination: true },
+          ),
+        );
+      },
+    });
 
   const { mutateAsync: finishMutation, isPending: isPendingFinishing } =
     useMutation({
-      mutationFn: async ({ programCycleId }: { programCycleId: string }) => {
-        return finishProgramCycle(businessArea, program.id, programCycleId);
-      },
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) =>
+        RestService.restBusinessAreasProgramsCyclesFinishCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+        }),
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.id],
+          queryKey: ['programCycles', businessArea, program.slug],
         });
       },
     });
 
   const { mutateAsync: reactivateMutation, isPending: isPendingReactivation } =
     useMutation({
-      mutationFn: async ({ programCycleId }: { programCycleId: string }) => {
-        return reactivateProgramCycle(businessArea, program.id, programCycleId);
+      mutationFn: ({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }: {
+        businessAreaSlug: string;
+        id: string;
+        programSlug: string;
+      }) => {
+        return RestService.restBusinessAreasProgramsCyclesReactivateCreate({
+          businessAreaSlug,
+          id,
+          programSlug,
+        });
       },
+
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['programCycles', businessArea, program.id],
+          queryKey: ['programCycles', businessArea, program.slug],
         });
       },
     });
@@ -85,31 +116,33 @@ const ProgramCyclesTablePaymentModule = ({
     void refetch();
   }, [queryVariables, refetch]);
 
-  const finishAction = async (programCycle: ProgramCycle) => {
+  const finishAction = async (programCycle: ProgramCycleList) => {
     try {
-      const decodedProgramCycleId = decodeIdString(programCycle.id);
-      await finishMutation({ programCycleId: decodedProgramCycleId });
+      await finishMutation({
+        businessAreaSlug: businessArea,
+        id: programCycle.id,
+        programSlug: programId,
+      });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage);
     }
   };
 
-  const reactivateAction = async (programCycle: ProgramCycle) => {
+  const reactivateAction = async (programCycle: ProgramCycleList) => {
     try {
-      const decodedProgramCycleId = decodeIdString(programCycle.id);
-      await reactivateMutation({ programCycleId: decodedProgramCycleId });
+      await reactivateMutation({
+        businessAreaSlug: businessArea,
+        id: programCycle.id,
+        programSlug: programId,
+      });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      if (e.data && Array.isArray(e.data)) {
-        e.data.forEach((message: string) => showMessage(message));
-      }
+      showApiErrorMessages(e, showMessage, t('Failed to  reactivate cycle.'));
     }
   };
 
-  const renderRow = (row: ProgramCycle): ReactElement => (
+  const renderRow = (row: ProgramCycleList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy="program-cycle-row">
       <TableCell data-cy="program-cycle-title">
         <BlackLink to={`./${row.id}`}>{row.title}</BlackLink>
@@ -124,13 +157,13 @@ const ProgramCyclesTablePaymentModule = ({
         align="right"
         data-cy="program-cycle-total-entitled-quantity-usd"
       >
-        {formatCurrencyWithSymbol(row.total_entitled_quantity_usd)}
+        {formatCurrencyWithSymbol(row.totalEntitledQuantityUsd)}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
-        <UniversalMoment>{row.start_date}</UniversalMoment>
+        <UniversalMoment>{row.startDate}</UniversalMoment>
       </TableCell>
       <TableCell data-cy="program-cycle-end-date">
-        <UniversalMoment>{row.end_date}</UniversalMoment>
+        <UniversalMoment>{row.endDate}</UniversalMoment>
       </TableCell>
       <TableCell data-cy="program-cycle-details-btn">
         {row.status === 'Finished' && (

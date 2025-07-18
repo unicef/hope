@@ -2,11 +2,6 @@ import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { BlackLink } from '@core/BlackLink';
-import {
-  DeduplicationEngineSimilarityPairIndividualNode,
-  DeduplicationResultNode,
-  IndividualDetailedFragment,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   Button,
@@ -26,6 +21,7 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import BiometricsResultsRdi from './BiometricsResultsRdi';
+import { IndividualList } from '@restgenerated/models/IndividualList';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
@@ -43,10 +39,10 @@ const StyledTable = styled(Table)`
 `;
 
 interface DedupeBiographicalBiometricResultsProps {
-  individual: IndividualDetailedFragment;
+  individual: IndividualList;
   status: string;
-  results: Array<DeduplicationResultNode>;
-  biometricResults: Array<DeduplicationEngineSimilarityPairIndividualNode>;
+  results: Array<any>;
+  biometricResults: Array<any>;
   isInBatch?: boolean;
 }
 

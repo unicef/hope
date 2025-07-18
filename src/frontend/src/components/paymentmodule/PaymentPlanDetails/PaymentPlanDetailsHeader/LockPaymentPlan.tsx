@@ -1,3 +1,10 @@
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,20 +13,15 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '@generated/graphql';
-import { GreyText } from '@core/GreyText';
-import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
 
 export interface LockPaymentPlanProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 export function LockPaymentPlan({
@@ -28,15 +30,35 @@ export function LockPaymentPlan({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
+  const { businessArea, programId } = useBaseUrl();
+  const queryClient = useQueryClient();
+
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
-  const { mutatePaymentPlanAction: lock, loading: loadingLock } =
-    usePaymentPlanAction(
-      Action.Lock,
-      paymentPlan.id,
-      () => showMessage(t('Payment Plan has been locked.')),
-      () => setLockDialogOpen(false),
-    );
+  const { mutateAsync: lock, isPending: loadingLock } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      id,
+      programSlug,
+    }: {
+      businessAreaSlug: string;
+      id: string;
+      programSlug: string;
+    }) =>
+      RestService.restBusinessAreasProgramsPaymentPlansLockRetrieve({
+        businessAreaSlug,
+        id,
+        programSlug,
+      }),
+    onSuccess: async () => {
+      showMessage(t('Payment Plan has been locked.'));
+      setLockDialogOpen(false);
+      await queryClient.invalidateQueries({
+        queryKey: ['paymentPlan', businessArea, paymentPlan.id, programId],
+        exact: false,
+      });
+    },
+  });
 
   return (
     <>
@@ -92,7 +114,13 @@ export function LockPaymentPlan({
               type="submit"
               color="primary"
               variant="contained"
-              onClick={() => lock()}
+              onClick={() =>
+                lock({
+                  businessAreaSlug: businessArea,
+                  id: paymentPlan.id,
+                  programSlug: programId,
+                })
+              }
               data-cy="button-submit"
             >
               {t('Lock')}

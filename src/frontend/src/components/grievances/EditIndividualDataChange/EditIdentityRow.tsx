@@ -6,10 +6,6 @@ import Edit from '@mui/icons-material/Edit';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllAddIndividualFieldsQuery,
-  AllIndividualsQuery,
-} from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '../utils/helpers';
@@ -21,12 +17,26 @@ interface DisabledDivProps {
 const DisabledDiv = styled.div<DisabledDivProps>`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
 `;
+
+interface Identity {
+  id: string;
+  number: string;
+  partner: string;
+  country: string;
+  countryIso3: string;
+}
+
+interface AddIndividualFieldsData {
+  countriesChoices: Array<{ value: any; labelEn?: string }>;
+  identityTypeChoices: Array<{ value: any; labelEn?: string }>;
+}
+
 export interface EditIdentityRowProps {
-  setFieldValue;
-  values;
-  identity: AllIndividualsQuery['allIndividuals']['edges'][number]['node']['identities']['edges'][number];
-  arrayHelpers;
-  addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  setFieldValue: (field: string, value: any) => void;
+  values: any;
+  identity: Identity;
+  arrayHelpers: any;
+  addIndividualFieldsData: AddIndividualFieldsData;
   id: string;
 }
 
@@ -44,16 +54,16 @@ export function EditIdentityRow({
   const [isEdited, setEdit] = useState(false);
   const identitiesToRemove =
     values?.individualDataUpdateIdentitiesToRemove || [];
-  const removed = identitiesToRemove.includes(identity.node.id);
+  const removed = identitiesToRemove.includes(identity.id);
   return isEdited ? (
     <Grid container alignItems="center" spacing={3}>
       <AgencyField
         id={id}
-        key={`${id}-${identity?.node?.number}-${identity?.node?.partner}`}
+        key={`${id}-${identity.number}-${identity.partner}`}
         onDelete={() =>
           removeItemById(
             values.individualDataUpdateDocumentsToEdit,
-            identity.node.id,
+            identity.id,
             arrayHelpers,
           )
         }
@@ -67,9 +77,9 @@ export function EditIdentityRow({
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
-              country: identity.node.countryIso3,
-              partner: identity.node.partner,
-              number: identity.node.number,
+              country: identity.countryIso3,
+              partner: identity.partner,
+              number: identity.number,
             });
             setEdit(false);
           }}
@@ -79,23 +89,20 @@ export function EditIdentityRow({
       </Box>
     </Grid>
   ) : (
-    <Grid container alignItems="center" spacing={3} key={identity.node.id}>
+    <Grid container alignItems="center" spacing={3} key={identity.id}>
       <Grid size={{ xs: 4 }}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField
-            label={t('ID AGENCY1')}
-            value={identity.node.partner}
-          />
+          <LabelizedField label={t('ID AGENCY1')} value={identity.partner} />
         </DisabledDiv>
       </Grid>
       <Grid size={{ xs: 4 }}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('Country')} value={identity.node.country} />
+          <LabelizedField label={t('Country')} value={identity.country} />
         </DisabledDiv>
       </Grid>
       <Grid size={{ xs: 3 }}>
         <DisabledDiv disabled={removed}>
-          <LabelizedField label={t('ID Number')} value={identity.node.number} />
+          <LabelizedField label={t('ID Number')} value={identity.number} />
         </DisabledDiv>
       </Grid>
       <Grid size={{ xs: 1 }}>
@@ -106,7 +113,7 @@ export function EditIdentityRow({
                 onClick={() => {
                   setFieldValue(
                     `individualDataUpdateIdentitiesToRemove[${identitiesToRemove.length}]`,
-                    identity.node.id,
+                    identity.id,
                   );
                 }}
               >
@@ -115,10 +122,10 @@ export function EditIdentityRow({
               <IconButton
                 onClick={() => {
                   arrayHelpers.push({
-                    id: identity.node.id,
-                    country: identity.node.countryIso3,
-                    partner: identity.node.partner,
-                    number: identity.node.number,
+                    id: identity.id,
+                    country: identity.countryIso3,
+                    partner: identity.partner,
+                    number: identity.number,
                   });
                   setEdit(true);
                 }}

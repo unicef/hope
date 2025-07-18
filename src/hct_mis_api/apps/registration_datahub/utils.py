@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.kobo.common import get_field_name
 from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
     Household,
     Individual,
     IndividualRoleInHousehold,
@@ -84,7 +85,10 @@ def calculate_hash_for_kobo_submission(submission: Dict) -> str:
 
 
 def get_rdi_program_population(
-    import_from_program_id: str, import_to_program_id: str, import_from_ids: Optional[str]
+    import_from_program_id: str,
+    import_to_program_id: str,
+    import_from_ids: Optional[str],
+    exclude_external_collectors: bool = False,
 ) -> Tuple[QuerySet[Household], QuerySet[Individual]]:
     program = get_object_or_404(Program, pk=import_to_program_id)
 
@@ -138,4 +142,12 @@ def get_rdi_program_population(
         .distinct()
         .order_by("first_registration_date")
     )
+    if (
+        exclude_external_collectors
+    ):  # exclude external collectors holding alternate role -> import only individuals that belong to households or hold the primary role
+        individuals = individuals.filter(
+            Q(household__program_id=import_from_program_id) | Q(households_and_roles__role=ROLE_PRIMARY)
+        )
+
+    individuals = individuals.order_by("first_registration_date")
     return households, individuals

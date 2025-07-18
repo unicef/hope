@@ -1,21 +1,20 @@
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  PaymentPlanBuildStatus,
-  PaymentPlanStatus,
-  useBusinessAreaDataQuery,
-} from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { StatusBox } from '@components/core/StatusBox';
+import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { paymentPlanBuildStatusToColor } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
-import { AdminButton } from '@core/AdminButton';
-import { ReactElement } from 'react';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -51,9 +50,13 @@ export function TargetPopulationPageHeader({
 }: TargetPopulationPageHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: businessAreaData, loading: businessAreaDataLoading } =
-    useBusinessAreaDataQuery({
-      variables: { businessAreaSlug: businessArea },
+  const { data: businessAreaData, isLoading: businessAreaDataLoading } =
+    useQuery<BusinessArea>({
+      queryKey: ['businessArea', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasRetrieve({
+          slug: businessArea,
+        }),
     });
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -68,7 +71,7 @@ export function TargetPopulationPageHeader({
   let buttons;
 
   switch (paymentPlan.status) {
-    case PaymentPlanStatus.TpOpen:
+    case PaymentPlanStatusEnum.OPEN:
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={paymentPlan}
@@ -79,10 +82,10 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case PaymentPlanStatus.TpLocked:
-    case PaymentPlanStatus.SteficonCompleted:
-    case PaymentPlanStatus.SteficonError:
-    case PaymentPlanStatus.SteficonRun:
+    case PaymentPlanStatusEnum.TP_LOCKED:
+    case PaymentPlanStatusEnum.STEFICON_COMPLETED:
+    case PaymentPlanStatusEnum.STEFICON_ERROR:
+    case PaymentPlanStatusEnum.STEFICON_RUN:
       buttons = (
         <LockedTargetPopulationHeaderButtons
           targetPopulation={paymentPlan}
@@ -108,7 +111,7 @@ export function TargetPopulationPageHeader({
       title={
         <HeaderWrapper>
           {t(`${paymentPlan.name}`)}
-          {paymentPlan.buildStatus !== PaymentPlanBuildStatus.Ok && (
+          {paymentPlan.buildStatus !== 'OK' && (
             <StatusWrapper>
               <StatusBox
                 status={paymentPlan.buildStatus}

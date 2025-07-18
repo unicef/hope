@@ -11,15 +11,15 @@ import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  RegistrationDetailedFragment,
-  useRerunDedupeMutation,
-} from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
+import { RegistrationDataImportDetail } from '@restgenerated/models/RegistrationDataImportDetail';
+import { useActionMutation } from '@hooks/useActionMutation';
+import { RestService } from '@restgenerated/services/RestService';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface RerunDedupeProps {
-  registration: RegistrationDetailedFragment;
+  registration: RegistrationDataImportDetail;
 }
 
 export const RerunDedupe = ({
@@ -29,16 +29,18 @@ export const RerunDedupe = ({
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const [mutate, { loading }] = useRerunDedupeMutation({
-    variables: { registrationDataImportId: registration.id },
-  });
+  const { mutateAsync: mutate, isPending: loading } = useActionMutation(
+    registration.id,
+    RestService.restBusinessAreasProgramsRegistrationDataImportsDeduplicateCreate,
+    [RestService.restBusinessAreasProgramsRegistrationDataImportsRetrieve.name],
+  );
   const rerunDedupe = async (): Promise<void> => {
     try {
       await mutate();
       showMessage('Rerunning Deduplication started');
       setOpen(false);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      showApiErrorMessages(e, showMessage);
     }
   };
   return (

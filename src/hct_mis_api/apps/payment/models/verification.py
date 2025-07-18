@@ -11,7 +11,7 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
@@ -119,13 +119,14 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         try:
             return FileTemp.objects.get(object_id=self.pk, content_type=get_content_type_for_model(self))
         except FileTemp.DoesNotExist:  # pragma: no cover
-            raise GraphQLError("Xlsx Verification File does not exist.")
+            raise ValidationError("Xlsx Verification File does not exist.")
         except FileTemp.MultipleObjectsReturned as e:  # pragma: no cover
             logger.warning(e)
-            raise GraphQLError("Query returned multiple Xlsx Verification Files when only one was expected.")
+            raise ValidationError("Query returned multiple Xlsx Verification Files when only one was expected.")
 
     @property
     def has_xlsx_payment_verification_plan_file(self) -> bool:
+        # TODO: what if we have two or more files here ?<?>?
         return all(
             [
                 self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,

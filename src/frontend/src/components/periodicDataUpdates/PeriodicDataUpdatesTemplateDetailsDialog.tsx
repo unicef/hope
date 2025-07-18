@@ -1,7 +1,3 @@
-import {
-  fetchPeriodicDataUpdateTemplateDetails,
-  fetchPeriodicFields,
-} from '@api/periodicDataUpdateApi';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useArrayToDict } from '@hooks/useArrayToDict';
@@ -18,7 +14,9 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
+import { PeriodicDataUpdateTemplateDetail } from '@restgenerated/models/PeriodicDataUpdateTemplateDetail';
 import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,24 +32,32 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
 > = ({ open, onClose, template }) => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { data: templateDetailsData, isLoading } = useQuery({
-    queryKey: [
-      'periodicDataUpdateTemplateDetails',
-      businessArea,
-      programId,
-      template.id,
-    ],
-    queryFn: () =>
-      fetchPeriodicDataUpdateTemplateDetails(
+  const { data: templateDetailsData, isLoading } =
+    useQuery<PeriodicDataUpdateTemplateDetail>({
+      queryKey: [
+        'periodicDataUpdateTemplateDetails',
         businessArea,
         programId,
         template.id,
-      ),
-  });
+      ],
+
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPeriodicDataUpdateTemplatesRetrieve(
+          {
+            businessAreaSlug: businessArea,
+            id: template.id,
+            programSlug: programId,
+          },
+        ),
+    });
   const { data: periodicFieldsData, isLoading: periodicFieldsLoading } =
     useQuery({
       queryKey: ['periodicFields', businessArea, programId],
-      queryFn: () => fetchPeriodicFields(businessArea, programId),
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsPeriodicFieldsList({
+          businessAreaSlug: businessArea,
+          programSlug: programId,
+        }),
     });
   const pduDataDict = useArrayToDict(periodicFieldsData?.results, 'name', '*');
   if (isLoading || periodicFieldsLoading || !pduDataDict)
@@ -77,21 +83,24 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
               </TableRow>
             </TableHead>
             <TableBody>
-              {templateDetailsData?.rounds_data?.map((roundData, index) => (
+              {templateDetailsData?.roundsData?.map((roundData, index) => (
                 <TableRow key={index}>
                   <TableCell data-cy={`template-field-${index}`}>
-                    {pduDataDict[roundData.field].label}
+                    {typeof pduDataDict[roundData.field]?.label === 'object'
+                      ? pduDataDict[roundData.field]?.label.englishEn ||
+                        roundData.field
+                      : pduDataDict[roundData.field]?.label || roundData.field}
                   </TableCell>
                   <TableCell data-cy={`template-round-number-${index}`}>
                     {roundData.round}
                   </TableCell>
                   <TableCell data-cy={`template-round-name-${index}`}>
-                    {roundData.round_name}
+                    {roundData.roundName}
                   </TableCell>
                   <TableCell
                     data-cy={`template-number-of-individuals-${index}`}
                   >
-                    {roundData.number_of_records}
+                    {roundData.numberOfRecords}
                   </TableCell>
                 </TableRow>
               ))}

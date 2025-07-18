@@ -1,16 +1,17 @@
-import { useTranslation } from 'react-i18next';
-import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { PageHeader } from '@components/core/PageHeader';
+import { AdminButton } from '@core/AdminButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
-import { AdminButton } from '@core/AdminButton';
-import { ReactElement } from 'react';
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
   canActivate: boolean;
   canEdit: boolean;
   canRemove: boolean;
@@ -30,7 +31,7 @@ export function ProgramDetailsPageHeader({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   switch (program.status) {
-    case ProgramStatus.Active:
+    case Status791Enum.ACTIVE:
       buttons = (
         <ActiveProgramDetailsPageHeaderButtons
           program={program}
@@ -40,7 +41,7 @@ export function ProgramDetailsPageHeader({
         />
       );
       break;
-    case ProgramStatus.Draft:
+    case Status791Enum.DRAFT:
       buttons = (
         <DraftProgramDetailsPageHeaderButtons
           program={program}

@@ -1,79 +1,99 @@
+import { LabelizedField } from '@components/core/LabelizedField';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { Title } from '@components/core/Title';
 import React, { useMemo, useState } from 'react';
 import {
   Autocomplete,
   TextField,
   Box,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Checkbox,
-  ListItemText,
-  SelectChangeEvent,
+  FormControl,
   IconButton,
   InputAdornment,
-  Tooltip,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   styled,
+  Tooltip,
+  Typography,
   Grid2 as Grid,
 } from '@mui/material';
-import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
-import { Title } from '@components/core/Title';
+import { PaymentPlanDetail } from '@restgenerated/models/PaymentPlanDetail';
 import { t } from 'i18next';
-import {
-  FundsCommitmentNode,
-  PaymentPlanDocument,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  useAssignFundsCommitmentsPaymentPlanMutation,
-} from '@generated/graphql';
-import { LoadingButton } from '@components/core/LoadingButton';
+import { PaymentPlanStatusEnum } from '@restgenerated/models/PaymentPlanStatusEnum';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { usePermissions } from '@hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import { Close } from '@mui/icons-material';
-import { LabelizedField } from '@components/core/LabelizedField';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { WarningTooltip } from '@core/WarningTooltip';
 
 const EndInputAdornment = styled(InputAdornment)`
   margin-right: 10px;
 `;
 
+import { Close } from '@mui/icons-material';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 const XIcon = styled(Close)`
   color: #707070;
 `;
 
 interface FundsCommitmentSectionProps {
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanDetail;
 }
 
 const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
   paymentPlan,
 }) => {
-  const initialFundsCommitment = paymentPlan?.fundsCommitments as FundsCommitmentNode | null;
+  const initialFundsCommitment = paymentPlan?.fundsCommitments || null;
   const initialFundsCommitmentItems =
     paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
       (el) => el.recSerialNumber,
     ) || [];
 
-  const [mutate, { loading: loadingAssign }] =
-    useAssignFundsCommitmentsPaymentPlanMutation();
+  const queryClient = useQueryClient();
+  const { showMessage } = useSnackbar();
+  const permissions = usePermissions();
+  const { businessArea } = useBaseUrl();
+  const { mutateAsync: assignFundsCommitment, isPending: loadingAssign } =
+    useMutation({
+      mutationFn: async ({
+        fundCommitmentItemsIds,
+      }: {
+        fundCommitmentItemsIds: string[];
+      }) => {
+        return RestService.restBusinessAreasProgramsPaymentPlansAssignFundsCommitmentsCreate(
+          {
+            businessAreaSlug: businessArea,
+            programSlug: paymentPlan.program.slug,
+            id: paymentPlan.id,
+            requestBody: { fundCommitmentItemsIds },
+          },
+        );
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['paymentPlan', paymentPlan.id],
+        });
+      },
+    });
 
-  const [selectedFundsCommitment, setSelectedFundsCommitment] =
-    useState<FundsCommitmentNode | null>(initialFundsCommitment ?? null);
+  const [selectedFundsCommitment, setSelectedFundsCommitment] = useState(
+    initialFundsCommitment,
+  );
   const [selectedItems, setSelectedItems] = useState<number[]>(
     initialFundsCommitmentItems,
   );
-
-  const { showMessage } = useSnackbar();
-  const permissions = usePermissions();
 
   const canAssignFunds = hasPermissions(
     PERMISSIONS.PM_ASSIGN_FUNDS_COMMITMENTS,
     permissions,
   );
 
-  const handleFundsCommitmentChange = (newValue: FundsCommitmentNode | null) => {
+  const handleFundsCommitmentChange = (newValue: any) => {
     setSelectedFundsCommitment(newValue);
     setSelectedItems([]);
   };
@@ -82,13 +102,12 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
     paymentPlan?.availableFundsCommitments || [];
   const selectedCommitment = availableFundsCommitments.find(
     (commitment) =>
-      commitment.fundsCommitmentNumber === selectedFundsCommitment?.fundsCommitmentNumber,
+      commitment.fundsCommitmentNumber ===
+      selectedFundsCommitment?.fundsCommitmentNumber,
   );
 
-  const [isSubmittingFC, setIsSubmitting] = useState(false);
-
   const handleItemsChange = (event: SelectChangeEvent<string[]>) => {
-  const value = event.target.value as string[];
+    const value = event.target.value as string[];
 
     if (value.includes('select-all')) {
       const allItems =
@@ -114,39 +133,27 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
 
   const handleSubmit = async () => {
     if (paymentPlan) {
-      setIsSubmitting(true);  // block button
       try {
-        await mutate({
-          variables: {
-            paymentPlanId: paymentPlan.id,
-            fundCommitmentItemsIds: selectedItems.map((number) =>
-              number.toString(),
-            ),
-          },
-          refetchQueries: () => [
-            {
-              query: PaymentPlanDocument,
-              variables: { id: paymentPlan.id },
-            },
-          ],
+        await assignFundsCommitment({
+          fundCommitmentItemsIds: selectedItems.map((number) =>
+            number.toString(),
+          ),
         });
         showMessage(t('Funds commitment items assigned successfully'));
       } catch (error: any) {
-        const errorMessages = error.graphQLErrors?.map(
+        const errorMessages = error?.graphQLErrors?.map(
           (x: any) => x.message,
         ) || [t('An error occurred while assigning funds commitments')];
         errorMessages.forEach((message) => showMessage(message));
-      } finally {
-    setIsSubmitting(false); // unblock button
-  }
+      }
     }
   };
 
   const isSameSelection = (a_set: number[], b_set: number[]) => {
-  if (a_set.length !== b_set.length) return false;
-  const setA = new Set(a_set);
-  return b_set.every((item) => setA.has(item));
-};
+    if (a_set.length !== b_set.length) return false;
+    const setA = new Set(a_set);
+    return b_set.every((item) => setA.has(item));
+  };
 
   const assignedFundsCommitmentItems = useMemo(
     () =>
@@ -172,24 +179,31 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
             <Typography variant="h6">{t('Funds Commitment')}</Typography>
           </Title>
         </Box>
-        {paymentPlan.status === PaymentPlanStatus.InReview && (
-          <>
+        {paymentPlan.status === PaymentPlanStatusEnum.IN_REVIEW && (
+          <React.Fragment>
             <Box mt={2}>
               <FormControl fullWidth size="small">
                 <Autocomplete
                   value={selectedFundsCommitment}
-                  onChange={(event, newValue) => handleFundsCommitmentChange(newValue as FundsCommitmentNode | null)}
+                  onChange={(_event, newValue) =>
+                    handleFundsCommitmentChange(newValue)
+                  }
                   options={availableFundsCommitments}
-                  getOptionLabel={(option) => option.fundsCommitmentNumber || ''}
+                  getOptionLabel={(option) =>
+                    option.fundsCommitmentNumber || ''
+                  }
                   renderInput={(params) => (
-                    <TextField {...params} label={t('Funds Commitment')} /> // The label is handled here
+                    <TextField {...params} label={t('Funds Commitment')} />
                   )}
                   renderOption={(props, option) => (
                     <MenuItem {...props} value={option.fundsCommitmentNumber}>
                       {option.fundsCommitmentNumber}
                     </MenuItem>
                   )}
-                  isOptionEqualToValue={(option, value) => option.fundsCommitmentNumber === value?.fundsCommitmentNumber}
+                  isOptionEqualToValue={(option, value) =>
+                    option.fundsCommitmentNumber ===
+                    value?.fundsCommitmentNumber
+                  }
                   noOptionsText={t('No options')}
                   clearOnEscape
                 />
@@ -270,11 +284,11 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                     color="primary"
                     onClick={handleSubmit}
                     disabled={
-                      isSubmittingFC ||
-                      !canAssignFunds || // Permission check
-                      (selectedFundsCommitment && selectedItems.length === 0) || // Items required if commitment is filled
-                      (!selectedFundsCommitment && selectedItems.length > 0) || // Commitment required if items are filled
-                      isAlreadyAssigned  // don't allow assigning the same
+                      loadingAssign ||
+                      !canAssignFunds ||
+                      (selectedFundsCommitment && selectedItems.length === 0) ||
+                      (!selectedFundsCommitment && selectedItems.length > 0) ||
+                      isAlreadyAssigned
                     }
                   >
                     {t('Assign Funds Commitments')}
@@ -282,19 +296,21 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                 </span>
               </Tooltip>
             </Box>
-          </>
+          </React.Fragment>
         )}
         {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.length > 0 && (
-          <>
+          <React.Fragment>
             <Box mt={2}>
               {paymentPlan?.fundsCommitments?.fundsCommitmentNumber && (
-                  <Typography variant="h6" fontWeight="bold" mb={2}>
-                    {t('Funds Commitment Number')}: {selectedCommitment?.fundsCommitmentNumber} {paymentPlan.fundsCommitments.insufficientAmount && <WarningTooltip
-                      message={t(
-                        'Insufficient Commitment Amount',
-                      )}
-                    />}
-                  </Typography>
+                <Typography variant="h6" fontWeight="bold" mb={2}>
+                  {t('Funds Commitment Number')}:{' '}
+                  {selectedCommitment.fundsCommitmentNumber}{' '}
+                  {paymentPlan.fundsCommitments.insufficientAmount && (
+                    <WarningTooltip
+                      message={t('Insufficient Commitment Amount')}
+                    />
+                  )}
+                </Typography>
               )}
               {paymentPlan?.fundsCommitments?.fundsCommitmentItems?.map(
                 (item, index) => (
@@ -375,7 +391,7 @@ const FundsCommitmentSection: React.FC<FundsCommitmentSectionProps> = ({
                 </Typography>
               )}
             </Box>
-          </>
+          </React.Fragment>
         )}
       </ContainerColumnWithBorder>
     </Box>

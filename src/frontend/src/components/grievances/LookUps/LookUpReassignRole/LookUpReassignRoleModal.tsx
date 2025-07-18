@@ -1,3 +1,9 @@
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Box,
   Button,
@@ -6,25 +12,19 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { GrievanceReassignRole } from '@restgenerated/models/GrievanceReassignRole';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { Field, Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
-import {
-  GrievanceTicketDocument,
-  useIndividualChoiceDataQuery,
-  useReassignRoleGrievanceMutation,
-} from '@generated/graphql';
-import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '@core/LoadingComponent';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
 
 export function LookUpReassignRoleModal({
   onValueChange,
@@ -46,7 +46,7 @@ export function LookUpReassignRoleModal({
   setLookUpDialogOpen;
   ticket;
   selectedIndividual;
-  selectedHousehold;
+  selectedHousehold: HouseholdDetail;
   setSelectedIndividual;
   setSelectedHousehold;
   shouldUseMultiple;
@@ -55,11 +55,41 @@ export function LookUpReassignRoleModal({
 }): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { businessArea } = useBaseUrl();
+
   const { id } = useParams();
   const { showMessage } = useSnackbar();
-  const [mutate] = useReassignRoleGrievanceMutation();
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: reassignRole } = useMutation({
+    mutationFn: (formData: GrievanceReassignRole) => {
+      return RestService.restBusinessAreasGrievanceTicketsReassignRoleCreate({
+        businessAreaSlug: businessArea,
+        id: id,
+        formData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasGrievanceTicketsRetrieve', businessArea, id],
+      });
+      showMessage(t('Role Reassigned'));
+    },
+    onError: (error: any) => {
+      const errorMessage =
+        error?.body?.errors || error?.message || 'An error occurred';
+      showMessage(errorMessage);
+    },
+  });
+
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const initialFilterIND = {
     search: '',
@@ -86,8 +116,6 @@ export function LookUpReassignRoleModal({
     getFilterFromQueryParams(location, initialFilterIND),
   );
 
-  const { businessArea } = useBaseUrl();
-
   if (individualChoicesLoading) return <LoadingComponent />;
 
   if (!individualChoicesData) {
@@ -105,38 +133,21 @@ export function LookUpReassignRoleModal({
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);
 
-        const multipleRolesVariables = {
-          grievanceTicketId: id,
+        const requestBody: GrievanceReassignRole = {
           householdId: household.id,
-          newIndividualId: values.selectedIndividual?.id,
-          individualId: individual.id,
+          individualId: shouldUseMultiple
+            ? individual.id
+            : values.selectedIndividual?.id,
+          newIndividualId: shouldUseMultiple
+            ? values.selectedIndividual?.id
+            : undefined,
           role: values.role,
         };
-
-        const singleRoleVariables = {
-          grievanceTicketId: id,
-          householdId: household.id,
-          individualId: values.selectedIndividual?.id,
-          role: values.role,
-        };
-
-        const variables = shouldUseMultiple
-          ? multipleRolesVariables
-          : singleRoleVariables;
 
         try {
-          await mutate({
-            variables,
-            refetchQueries: () => [
-              {
-                query: GrievanceTicketDocument,
-                variables: { id: ticket.id },
-              },
-            ],
-          });
-          showMessage(t('Role Reassigned'));
+          await reassignRole(requestBody);
         } catch (e) {
-          e.graphQLErrors.map((x) => showMessage(x.message));
+          // Error handled in onError callback
         }
       }}
     >
@@ -165,7 +176,6 @@ export function LookUpReassignRoleModal({
             />
             <LookUpIndividualTable
               filter={appliedFilterIND}
-              businessArea={businessArea}
               setFieldValue={setFieldValue}
               valuesInner={values}
               selectedHousehold={selectedHousehold}

@@ -1,3 +1,6 @@
+import { LoadingButton } from '@components/core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Button,
   Dialog,
@@ -5,16 +8,14 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useDeletePaymentPMutation } from '@generated/graphql';
+import { useNavigate } from 'react-router-dom';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate } from 'react-router-dom';
-import { ReactElement } from 'react';
 
 export interface DeleteTargetPopulationProps {
   open: boolean;
@@ -29,21 +30,41 @@ export const DeleteTargetPopulation = ({
 }: DeleteTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const [mutate, { loading: loadingDelete }] = useDeletePaymentPMutation();
-
+  const { mutateAsync: mutate, isPending: loadingDelete } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      programSlug,
+      id,
+    }: {
+      businessAreaSlug: string;
+      programSlug: string;
+      id: string;
+    }) =>
+      RestService.restBusinessAreasProgramsTargetPopulationsDestroy({
+        businessAreaSlug,
+        programSlug,
+        id,
+      }),
+  });
   const handleDelete = async (): Promise<void> => {
     try {
       await mutate({
-        variables: {
-          paymentPlanId: targetPopulationId,
-        },
+        businessAreaSlug: businessArea,
+        programSlug: programId,
+        id: targetPopulationId,
       });
       showMessage(t('Target Population Deleted'));
       navigate(`/${baseUrl}/payment-module/payment-plans`);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      // Ignore empty response error
+      if (e.message && e.message.includes('Unexpected end of JSON input')) {
+        showMessage(t('Target Population Deleted'));
+        navigate(`/${baseUrl}/payment-module/payment-plans`);
+      } else {
+        showMessage(e.message);
+      }
     }
   };
 

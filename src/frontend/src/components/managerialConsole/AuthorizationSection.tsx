@@ -20,6 +20,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
@@ -84,7 +85,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
 
   const selectedPlansUnicefIds = inAuthorizationData?.results
     .filter((plan) => selectedAuthorized.includes(plan.id))
-    .map((plan) => plan.unicef_id);
+    .map((plan) => plan.unicefId);
 
   const columns = [
     {
@@ -133,12 +134,14 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
           size="small"
           data-cy="search-authorization"
           onChange={(e) => setSearchText(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
           }}
         />
       )}
@@ -155,7 +158,7 @@ export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
             showMessage(t('Payment Plan(s) Authorized'));
             setSelectedAuthorized([]);
           } catch (e) {
-            showMessage(e.message);
+            showApiErrorMessages(e, showMessage);
           }
         }}
       />

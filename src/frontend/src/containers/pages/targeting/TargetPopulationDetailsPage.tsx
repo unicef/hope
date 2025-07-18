@@ -1,63 +1,53 @@
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore';
 import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
-import {
-  PaymentPlanBuildStatus,
-  useBusinessAreaDataQuery,
-  useProgramQuery,
-  useTargetPopulationQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
-import withErrorBoundary from '@components/core/withErrorBoundary';
 
 export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { isStandardDctType, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
-  const { data, loading, error, startPolling, stopPolling } =
-    useTargetPopulationQuery({
-      variables: { id },
-      fetchPolicy: 'cache-and-network',
-    });
 
-  const { businessArea, programId } = useBaseUrl();
-  const { data: programData } = useProgramQuery({
-    variables: { id: programId },
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const {
+    data: paymentPlan,
+    isLoading: loading,
+    error,
+  } = useQuery<TargetPopulationDetail>({
+    queryKey: ['targetPopulation', businessAreaSlug, id, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
+        businessAreaSlug: businessAreaSlug,
+        id: id,
+        programSlug,
+      }),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (['BUILDING', 'PENDING'].includes(data?.backgroundActionStatus)) {
+        return 3000;
+      }
+
+      return false;
+    },
+    refetchIntervalInBackground: true,
   });
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
 
-  const buildStatus = data?.paymentPlan?.buildStatus;
-  useEffect(() => {
-    if (
-      [
-        PaymentPlanBuildStatus.Building,
-        PaymentPlanBuildStatus.Pending,
-      ].includes(buildStatus)
-    ) {
-      startPolling(3000);
-    } else {
-      stopPolling();
-    }
-    return stopPolling;
-  }, [buildStatus, startPolling, stopPolling]);
-
-  if (loading && !data) return <LoadingComponent />;
+  if (loading && !paymentPlan) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null || !businessAreaData || !programData) return null;
-
-  const { paymentPlan } = data;
 
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
@@ -81,7 +71,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
         permissions={permissions}
-        screenBeneficiary={programData?.program?.screenBeneficiary}
+        screenBeneficiary={paymentPlan?.program?.screenBeneficiary}
       />
     </>
   );

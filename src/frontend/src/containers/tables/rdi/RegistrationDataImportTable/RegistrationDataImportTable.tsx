@@ -1,20 +1,16 @@
 import { TableWrapper } from '@components/core/TableWrapper';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import {
-  AllRegistrationDataImportsQueryVariables,
-  RegistrationDataImportNode,
-  useAllRegistrationDataImportsQuery,
-  useDeduplicationFlagsQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
-import { ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
+import { ReactElement, useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
-import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
+import { UniversalRestQueryTable } from '@components/rest/UniversalRestQueryTable/UniversalRestQueryTable';
+import { RestService } from '@restgenerated/services/RestService';
 
 interface RegistrationDataImportProps {
   filter;
@@ -46,24 +42,55 @@ function RegistrationDataImportTable({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  const { data: deduplicationFlags } = useDeduplicationFlagsQuery({
-    fetchPolicy: 'cache-and-network',
+  const { businessAreaSlug, programSlug, businessArea, programId } =
+    useBaseUrl();
+
+  const { data: deduplicationFlags } = useQuery({
+    queryKey: ['deduplicationFlags', businessAreaSlug, programSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsDeduplicationFlagsRetrieve({
+        businessAreaSlug,
+        slug: programSlug,
+      }),
   });
-  const { businessArea, programId } = useBaseUrl();
-  const initialVariables = {
-    search: filter.search,
-    importedBy: filter.importedBy
-      ? decodeIdString(filter.importedBy)
-      : undefined,
-    status: filter.status !== '' ? filter.status : undefined,
-    businessArea,
-    program: programId,
-    importDateRange: JSON.stringify({
-      min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
-      max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
+
+  const initialVariables = useMemo(
+    () => ({
+      search: filter.search,
+      importedBy: filter.importedBy || undefined,
+      status: filter.status !== '' ? filter.status : undefined,
+      businessArea,
+      program: programId,
+      importDateRange:
+        filter.importDateRangeMin || filter.importDateRangeMax
+          ? JSON.stringify({
+              min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
+              max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
+            })
+          : undefined,
+      size:
+        filter.sizeMin || filter.sizeMax
+          ? JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax })
+          : undefined,
     }),
-    size: JSON.stringify({ min: filter.sizeMin, max: filter.sizeMax }),
-  };
+    [
+      filter.importDateRangeMax,
+      filter.importDateRangeMin,
+      filter.importedBy,
+      filter.search,
+      filter.sizeMax,
+      filter.sizeMin,
+      filter.status,
+      businessArea,
+      programId,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialVariables);
+
+  useEffect(() => {
+    setQueryVariables(initialVariables);
+  }, [initialVariables]);
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
@@ -104,25 +131,7 @@ function RegistrationDataImportTable({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<
-        RegistrationDataImportNode,
-        AllRegistrationDataImportsQueryVariables
-      >
-        title={noTitle ? null : t('List of Imports')}
-        getTitle={(data) =>
-          noTitle
-            ? null
-            : `${t('List of Imports')} (${
-                data?.allRegistrationDataImports?.totalCount || 0
-              })`
-        }
-        headCells={prepareHeadCells()}
-        defaultOrderBy="importDate"
-        defaultOrderDirection="desc"
-        rowsPerPageOptions={[10, 15, 20]}
-        query={useAllRegistrationDataImportsQuery}
-        queriedObjectName="allRegistrationDataImports"
-        initialVariables={initialVariables}
+      <UniversalRestQueryTable
         renderRow={(row) => (
           <RegistrationDataImportTableRow
             key={row.id}
@@ -135,6 +144,11 @@ function RegistrationDataImportTable({
             }
           />
         )}
+        title={noTitle ? null : t('List of Imports')}
+        headCells={prepareHeadCells()}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        query={RestService.restBusinessAreasProgramsRegistrationDataImportsList}
       />
     </TableWrapper>
   );

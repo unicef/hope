@@ -1,29 +1,28 @@
-import { Box, Button } from '@mui/material';
-import EditIcon from '@mui/icons-material/EditRounded';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  GrievanceTicketQuery,
-  useGrievanceTicketStatusChangeMutation,
-} from '@generated/graphql';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { MiśTheme } from '../../theme';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_TICKET_STATES,
-} from '@utils/constants';
+import { AdminButton } from '@core/AdminButton';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { ButtonDialog } from '@core/ButtonDialog';
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useProgramContext } from '../../programContext';
-import { getGrievanceEditPath } from './utils/createGrievanceUtils';
-import { AdminButton } from '@core/AdminButton';
+import { useSnackbar } from '@hooks/useSnackBar';
+import EditIcon from '@mui/icons-material/EditRounded';
+import { Box, Button } from '@mui/material';
+import { GrievanceTicketDetail } from '@restgenerated/models/GrievanceTicketDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_TICKET_STATES,
+} from '@utils/constants';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { useProgramContext } from '../../programContext';
+import { MiśTheme } from '../../theme';
+import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 
 const Separator = styled.div`
   width: 1px;
@@ -40,7 +39,7 @@ const countApprovedAndUnapproved = (
   let notApproved = 0;
   const flattenArray = data.flat(2);
   flattenArray.forEach((item) => {
-    if (item.approve_status === true) {
+    if (item.approveStatus === true) {
       approved += 1;
     } else {
       notApproved += 1;
@@ -60,7 +59,7 @@ export const GrievanceDetailsToolbar = ({
   canClose,
   canAssign,
 }: {
-  ticket: GrievanceTicketQuery['grievanceTicket'];
+  ticket: GrievanceTicketDetail;
   canEdit: boolean;
   canSetInProgress: boolean;
   canSetOnHold: boolean;
@@ -71,7 +70,9 @@ export const GrievanceDetailsToolbar = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
+  const queryClient = useQueryClient();
+
   const confirm = useConfirmation();
   const navigate = useNavigate();
   const { isActiveProgram, selectedProgram } = useProgramContext();
@@ -83,7 +84,34 @@ export const GrievanceDetailsToolbar = ({
       to: `/${baseUrl}/grievance/tickets/user-generated`,
     },
   ];
-  const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
+
+  const { mutateAsync, isPending: loading } = useMutation({
+    mutationFn: ({ status }: { status: number }) => {
+      return RestService.restBusinessAreasGrievanceTicketsStatusChangeCreate({
+        businessAreaSlug: businessArea,
+        id: ticket.id,
+        formData: { status },
+      });
+    },
+    onError: (error: any) => {
+      if (error?.response?.data?.errors) {
+        Object.values(error.response.data.errors).forEach((errorMsg: any) => {
+          showMessage(errorMsg);
+        });
+      } else {
+        showMessage(error?.message || 'An error occurred');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'businessAreasGrievanceTicketsRetrieve',
+          businessArea,
+          ticket.id,
+        ],
+      });
+    },
+  });
 
   const isNew = ticket.status === GRIEVANCE_TICKET_STATES.NEW;
   const isAssigned = ticket.status === GRIEVANCE_TICKET_STATES.ASSIGNED;
@@ -100,16 +128,14 @@ export const GrievanceDetailsToolbar = ({
 
   const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
     (): string => {
-      const householdData =
-        ticket.householdDataUpdateTicketDetails?.householdData || {};
-      const individualData =
-        ticket.individualDataUpdateTicketDetails?.individualData || {};
+      const householdData = ticket.ticketDetails?.householdData || {};
+      const individualData = ticket.ticketDetails?.individualData || {};
 
       const allData = {
         ...householdData,
         ...individualData,
-        ...householdData?.flex_fields,
-        ...individualData?.flex_fields,
+        ...householdData?.flexFields,
+        ...individualData?.flexFields,
       };
       const filterData = (data: any) => {
         const excludedKeys = [
@@ -174,14 +200,11 @@ export const GrievanceDetailsToolbar = ({
       ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
 
     const notApprovedDeleteIndividualChanges =
-      isDeleteIndividualIssue &&
-      ticket.deleteIndividualTicketDetails?.approveStatus === false;
+      isDeleteIndividualIssue && ticket.ticketDetails?.approveStatus === false;
     const notApprovedAddIndividualChanges =
-      isAddIndividualIssue &&
-      ticket.addIndividualTicketDetails?.approveStatus === false;
+      isAddIndividualIssue && ticket.ticketDetails?.approveStatus === false;
     const notApprovedSystemFlaggingChanges =
-      isSystemFlaggingCategory &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+      isSystemFlaggingCategory && ticket.ticketDetails?.approveStatus === false;
 
     let confirmationMessage = '';
     if (notApprovedDeleteIndividualChanges) {
@@ -217,23 +240,14 @@ export const GrievanceDetailsToolbar = ({
   );
 
   const closingWarningText =
-    ticket?.businessArea.postponeDeduplication === true
+    ticket?.postponeDeduplication === true
       ? t(
           'This ticket will be closed without running the deduplication process.',
         )
       : null;
 
-  const changeState = async (status): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          grievanceTicketId: ticket.id,
-          status,
-        },
-      });
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-    }
+  const changeState = async (status: number): Promise<void> => {
+    await mutateAsync({ status });
   };
 
   const getClosingConfirmationText = (): string => {
@@ -244,8 +258,7 @@ export const GrievanceDetailsToolbar = ({
 
     let additionalContent = '';
     const notApprovedSystemFlaggingChanges =
-      isSystemFlaggingCategory &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+      isSystemFlaggingCategory && ticket.ticketDetails?.approveStatus === false;
 
     if (notApprovedSystemFlaggingChanges) {
       additionalContent = t(
@@ -273,14 +286,12 @@ export const GrievanceDetailsToolbar = ({
 
   const isDeduplicationCategory =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
-  const hasDuplicatedDocument =
-    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument;
+  const hasDuplicatedDocument = ticket?.ticketDetails?.hasDuplicatedDocument;
   const isMultipleDuplicatesVersion =
-    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
-  const selectedIndividual =
-    ticket?.needsAdjudicationTicketDetails?.selectedIndividual;
+    ticket?.ticketDetails?.isMultipleDuplicatesVersion;
+  const selectedIndividual = ticket?.ticketDetails?.selectedIndividual;
   const selectedIndividualsLength =
-    ticket?.needsAdjudicationTicketDetails?.selectedDuplicates.length;
+    ticket?.ticketDetails?.selectedDuplicates?.length;
 
   const shouldShowButtonDialog =
     isDeduplicationCategory &&
@@ -314,7 +325,7 @@ export const GrievanceDetailsToolbar = ({
           try {
             await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            // Error handling is done in the mutation onError callback
           }
         })
       }

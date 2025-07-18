@@ -1,15 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import {
-  useAllProgramsForChoicesQuery,
-  useCreateRegistrationProgramPopulationImportMutation,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
+import { PaginatedProgramListList } from '@restgenerated/models/PaginatedProgramListList';
+import { RestService } from '@restgenerated/services/RestService';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
+import { showApiErrorMessages } from '@utils/utils';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,11 +23,10 @@ export const CreateImportFromProgramPopulationForm = ({
   setSubmitForm,
   setSubmitDisabled,
 }): ReactElement => {
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [createImport] = useCreateRegistrationProgramPopulationImportMutation();
   const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const regex = isSocialDctType
@@ -56,36 +56,52 @@ export const CreateImportFromProgramPopulationForm = ({
     ),
   });
 
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
+  const queryVariables = {
+    businessAreaSlug: businessArea,
+    beneficiaryGroupMatch: programId,
+    compatibleDct: programId,
+    first: 100,
+  };
+
+  const { data: programsData, isLoading: programsDataLoading } =
+    useQuery<PaginatedProgramListList>({
+      queryKey: [
+        'businessAreasProgramsList',
+        queryVariables,
         businessArea,
-        compatibleDct: true,
-        beneficiaryGroupMatch: true,
-      },
-      fetchPolicy: 'network-only',
+        programId,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programSlug: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
+        ),
     });
 
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);
     try {
-      const data = await createImport({
-        variables: {
-          registrationDataImportData: {
-            name: values.name,
-            screenBeneficiary: values.screenBeneficiary,
-            importFromProgramId: values.importFromProgramId,
-            importFromIds: values.importFromIds,
+      const response =
+        await RestService.restBusinessAreasProgramsRegistrationDataImportsCreate(
+          {
             businessAreaSlug: businessArea,
+            programSlug: programId,
+            requestBody: {
+              name: values.name,
+              screenBeneficiary: values.screenBeneficiary,
+              importFromProgramId: values.importFromProgramId,
+              importFromIds: values.importFromIds,
+              excludeExternalCollectors:
+                values.importType === 'excludeAlternateCollectors',
+            },
           },
-        },
-      });
-      navigate(
-        `/${baseUrl}/registration-data-import/${data.data.registrationProgramPopulationImport.registrationDataImport.id}`,
-      );
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+        );
+      navigate(`/${baseUrl}/registration-data-import/${response.id}`);
+    } catch (e: any) {
+      showApiErrorMessages(e, showMessage);
       setSubmitDisabled(false);
     }
   };
@@ -117,9 +133,10 @@ export const CreateImportFromProgramPopulationForm = ({
   if (programsDataLoading) return <LoadingComponent />;
   if (!programsData) return null;
 
-  const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
-    (element) => ({ name: element.node.name, value: element.node.id }),
-  );
+  const mappedProgramChoices = programsData.results.map((element) => ({
+    name: element.name,
+    value: element.id,
+  }));
 
   return (
     <FormikProvider value={formik}>
@@ -153,6 +170,11 @@ export const CreateImportFromProgramPopulationForm = ({
               value: 'all',
               name: 'All Programme Population',
               dataCy: 'radio-all',
+            },
+            {
+              value: 'excludeAlternateCollectors',
+              name: 'Exclude Alternate Collectors',
+              dataCy: 'radio-exclude-alternate-collectors',
             },
             { value: 'usingIds', name: 'Using Ids', dataCy: 'radio-ids' },
           ]}

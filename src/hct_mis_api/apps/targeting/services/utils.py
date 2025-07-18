@@ -28,6 +28,7 @@ def get_existing_unicef_ids(ids_string: str, model: Union[Type[Household], Type[
 def from_input_to_targeting_criteria(
     targeting_criteria_input: Dict, program: "Program", payment_plan: PaymentPlan
 ) -> None:
+    # TODO: FIX ME PLEASE ["rules"] ????
     for rule in targeting_criteria_input.pop("rules", []):
         household_ids = rule.get("household_ids", "")
         individual_ids = rule.get("individual_ids", "")

@@ -1,16 +1,11 @@
 import { ReactElement, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievancesFilters } from '@components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '@components/grievances/GrievancesTable/GrievancesTable';
-import {
-  PERMISSIONS,
-  hasPermissionInModule,
-  hasPermissions,
-} from '../../../config/permissions';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import {
@@ -24,15 +19,23 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+
 export const GrievancesTablePage = (): ReactElement => {
-  const { baseUrl } = useBaseUrl();
+  const { businessArea, baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessArea],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug: businessArea,
+      }),
+  });
 
   const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 
@@ -42,8 +45,8 @@ export const GrievancesTablePage = (): ReactElement => {
     documentNumber: '',
     status: '',
     fsp: '',
-    createdAtRangeMin: '',
-    createdAtRangeMax: '',
+    createdAtBefore: '',
+    createdAtAfter: '',
     category: '',
     issueType: '',
     assignedTo: '',
@@ -54,7 +57,7 @@ export const GrievancesTablePage = (): ReactElement => {
     cashPlan: cashPlanId,
     scoreMin: '',
     scoreMax: '',
-    grievanceType: isUserGenerated ? GrievanceTypes[0] : GrievanceTypes[1],
+    grievanceType: isUserGenerated ? 'user' : 'system',
     grievanceStatus: GrievanceStatuses.Active,
     priority: '',
     urgency: '',
@@ -114,9 +117,17 @@ export const GrievancesTablePage = (): ReactElement => {
   );
 
   if (choicesLoading) return <LoadingComponent />;
-  if (permissions === null) return null;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
-    return <PermissionDenied />;
+  if (permissions === null || permissions.length === 0)
+    return <LoadingComponent />;
+
+  // Define the permission criteria for viewing grievances
+  const hasGrievancesViewPermission = permissions.some(
+    (perm) =>
+      perm.includes('GRIEVANCES_VIEW_LIST') ||
+      perm.includes('GRIEVANCES_VIEW_DETAILS'),
+  );
+
+  if (!hasGrievancesViewPermission) return <PermissionDenied />;
   if (!choicesData) return null;
 
   return (

@@ -8,8 +8,7 @@ from django.utils import timezone
 
 from constance import config
 
-from hct_mis_api.apps.account.models import User, UserRole
-from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.account.models import RoleAssignment, User
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 
@@ -45,7 +44,7 @@ class GrievanceNotification:
         context = {
             "first_name": user_recipient.first_name,
             "last_name": user_recipient.last_name,
-            "ticket_url": f'{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/programs/all/grievance/tickets/{self.grievance_ticket.grievance_type_to_string()}-generated/{encode_id_base64(self.grievance_ticket.id, "GrievanceTicket")}',
+            "ticket_url": f"{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/programs/all/grievance/tickets/{self.grievance_ticket.grievance_type_to_string()}-generated/{self.grievance_ticket.id}",
             "ticket_id": self.grievance_ticket.unicef_id,
             "ticket_category": self.grievance_ticket.get_category_display(),
             "title": "Grievance and feedback notification",
@@ -95,21 +94,21 @@ class GrievanceNotification:
             GrievanceNotification.ACTION_PAYMENT_VERIFICATION_CREATED: "Releaser",
             GrievanceNotification.ACTION_SENSITIVE_CREATED: "Senior Management",
         }
-        user_roles = UserRole.objects.filter(
+        user_roles = RoleAssignment.objects.filter(
             role__name=action_roles_dict[self.action],
             business_area=self.grievance_ticket.business_area,
         ).exclude(expiry_date__lt=timezone.now())
-        queryset = User.objects.filter(user_roles__in=user_roles).distinct()
+        queryset = User.objects.filter(role_assignments__in=user_roles).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
 
     def _prepare_for_approval_recipients(self) -> "QuerySet[User]":
-        user_roles = UserRole.objects.filter(
+        user_roles = RoleAssignment.objects.filter(
             role__name="Approver",
             business_area=self.grievance_ticket.business_area,
         ).exclude(expiry_date__lt=timezone.now())
-        queryset = User.objects.filter(user_roles__in=user_roles).distinct()
+        queryset = User.objects.filter(role_assignments__in=user_roles).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()

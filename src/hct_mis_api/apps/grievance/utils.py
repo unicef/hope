@@ -8,7 +8,8 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
-from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.account.models import Partner, User
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
@@ -98,7 +99,7 @@ def create_grievance_documents(user: AbstractUser, grievance_ticket: GrievanceTi
 
 def update_grievance_documents(documents: List[Dict]) -> None:
     for document in documents:
-        current_document = GrievanceDocument.objects.filter(id=decode_id_string(document["id"])).first()
+        current_document = GrievanceDocument.objects.filter(id=document["id"]).first()
         if current_document:
             os.remove(current_document.file.path)
 
@@ -112,10 +113,8 @@ def update_grievance_documents(documents: List[Dict]) -> None:
             current_document.save()
 
 
-def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None:
-    documents_to_delete = GrievanceDocument.objects.filter(
-        grievance_ticket_id=ticket_id, id__in=[decode_id_string(document_id) for document_id in ids_to_delete]
-    )
+def delete_grievance_documents(ticket_id: str, documents_to_delete: List[str]) -> None:
+    documents_to_delete = GrievanceDocument.objects.filter(grievance_ticket_id=ticket_id, id__in=documents_to_delete)
 
     for document in documents_to_delete:
         os.remove(document.file.path)
@@ -125,61 +124,70 @@ def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None
 
 def filter_grievance_tickets_based_on_partner_areas_2(
     queryset: QuerySet["GrievanceTicket"],
-    user_partner: Partner,
+    user: User,
     business_area_id: str,
     program_id: Optional[str],
+    permissions: List[Permissions],
 ) -> QuerySet["GrievanceTicket"]:
     return filter_based_on_partner_areas_2(
         queryset=queryset,
-        user_partner=user_partner,
+        user=user,
         business_area_id=business_area_id,
         program_id=program_id,
         lookup_id="programs__id__in",
         id_container=lambda program_id: [program_id],
+        permissions=permissions,
     )
 
 
 def filter_feedback_based_on_partner_areas_2(
     queryset: QuerySet["Feedback"],
-    user_partner: Partner,
+    user: User,
     business_area_id: str,
     program_id: Optional[str],
+    permissions: List[Permissions],
 ) -> QuerySet["Feedback"]:
     return filter_based_on_partner_areas_2(
         queryset=queryset,
-        user_partner=user_partner,
+        user=user,
         business_area_id=business_area_id,
         program_id=program_id,
         lookup_id="program__id__in",
         id_container=lambda program_id: [program_id],
+        permissions=permissions,
     )
 
 
 def filter_based_on_partner_areas_2(
     queryset: QuerySet["GrievanceTicket", "Feedback"],
-    user_partner: Partner,
+    user: User,
     business_area_id: str,
     program_id: Optional[str],
     lookup_id: str,
     id_container: Callable[[Any], List[Any]],
+    permissions: List[Permissions],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
     try:
         programs_for_business_area = []
         filter_q = Q()
-        if program_id and user_partner.has_program_access(program_id):
+        if program_id:  # and user.has_program_access(program_id):
             programs_for_business_area = [program_id]
-        elif not program_id:
-            programs_for_business_area = user_partner.get_program_ids_for_business_area(business_area_id)
+        else:
+            programs_for_business_area = user.get_program_ids_for_permissions_in_business_area(
+                business_area_id=business_area_id, permissions=permissions
+            )
         # if user does not have access to any program/selected program -> return empty queryset for program-related obj
         if not programs_for_business_area:
             return queryset.model.objects.none()
-        programs_permissions = [
-            (program_id, user_partner.get_program_areas(program_id)) for program_id in programs_for_business_area
-        ]
-        for perm_program_id, areas_ids in programs_permissions:
-            program_q = Q(**{lookup_id: id_container(perm_program_id)})
+
+        for program_id in programs_for_business_area:
+            program_q = Q(**{lookup_id: id_container(program_id)})
             areas_null_and_program_q = program_q & Q(admin2__isnull=True)
-            filter_q |= Q(areas_null_and_program_q | Q(program_q & Q(admin2__in=areas_ids)))
+            # apply admin area limits if partner has restrictions
+            area_limits = user.partner.get_area_limits_for_program(program_id)
+            areas_query = Q(admin2__in=area_limits) if area_limits.exists() else Q()
+
+            filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
 
         # add Feedbacks without program for "All Programmes" query
         if queryset.model is Feedback and not program_id:
@@ -195,9 +203,10 @@ def validate_individual_for_need_adjudication(
     partner: Partner, individual: Individual, ticket_details: TicketNeedsAdjudicationDetails
 ) -> None:
     # Validate partner's permission
-    if not partner.is_unicef:
-        if not partner.has_area_access(area_id=individual.household.admin2.id, program_id=individual.program.id):
-            raise PermissionDenied("Permission Denied: User does not have access to select individual")
+    if individual.household.admin2 and not partner.has_area_access(
+        area_id=individual.household.admin2.id, program_id=individual.program.id
+    ):
+        raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
     # validate Individual
     if individual not in list(ticket_details.possible_duplicates.all()) + [ticket_details.golden_records_individual] + [

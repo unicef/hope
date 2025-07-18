@@ -1,6 +1,6 @@
 import datetime
 
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -35,10 +35,9 @@ from hct_mis_api.contrib.aurora.services.czech_republic_flex_registration_servic
 
 
 class TestCzechRepublicRegistrationService(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUp(cls) -> None:
+        call_command("init-geo-fixtures")
         document_types_to_create = []
 
         DOCUMENT_MAPPING = {

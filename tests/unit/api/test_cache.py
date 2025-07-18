@@ -1,9 +1,12 @@
 from typing import Any
 
+import pytest
 from rest_framework import status
 from rest_framework.response import Response
 
 from hct_mis_api.api.caches import etag_decorator
+
+pytestmark = pytest.mark.django_db()
 
 
 class TestEtagDecorator:

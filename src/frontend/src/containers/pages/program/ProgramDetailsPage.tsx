@@ -3,14 +3,14 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
 import ProgramCyclesTableProgramDetails from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
-import {
-  ProgramStatus,
-  useBusinessAreaDataQuery,
-  useProgrammeChoiceDataQuery,
-  useProgramQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { BusinessArea } from '@restgenerated/models/BusinessArea';
+import { ProgramChoices } from '@restgenerated/models/ProgramChoices';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { Status791Enum } from '@restgenerated/models/Status791Enum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,17 +48,41 @@ const NoCashPlansTitle = styled.div`
 function ProgramDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { data, loading, error } = useProgramQuery({
-    variables: { id },
-    fetchPolicy: 'network-only',
-  });
   const { businessArea } = useBaseUrl();
-  const { data: businessAreaData, loading: businessAreaDataLoading } =
-    useBusinessAreaDataQuery({
-      variables: { businessAreaSlug: businessArea },
+
+  const {
+    data: program,
+    isLoading: loading,
+    error,
+  } = useQuery<ProgramDetail>({
+    queryKey: ['program', businessArea, id],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRetrieve({
+        businessAreaSlug: businessArea,
+        slug: id,
+      }),
+  });
+
+  const { data: businessAreaData, isLoading: businessAreaDataLoading } =
+    useQuery<BusinessArea>({
+      queryKey: ['businessArea', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasRetrieve({
+          slug: businessArea,
+        }),
     });
-  const { data: choices, loading: choicesLoading } =
-    useProgrammeChoiceDataQuery();
+
+  const { data: choices, isLoading: choicesLoading } = useQuery<ProgramChoices>(
+    {
+      queryKey: ['programChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 30,
+    },
+  );
   const permissions = usePermissions();
 
   if (loading || choicesLoading || businessAreaDataLoading)
@@ -66,10 +90,8 @@ function ProgramDetailsPage(): ReactElement {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!choices || !businessAreaData || permissions === null || !data)
-    return null;
+  if (!choices || !businessAreaData || permissions === null) return null;
 
-  const { program } = data;
   const canFinish = hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
   return (
     <>
@@ -89,7 +111,7 @@ function ProgramDetailsPage(): ReactElement {
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
-        {program.status === ProgramStatus.Draft ? (
+        {program?.status === Status791Enum.DRAFT ? (
           <NoCashPlansContainer>
             <NoCashPlansTitle>
               {t('Activate the Programme to create a Cycle')}

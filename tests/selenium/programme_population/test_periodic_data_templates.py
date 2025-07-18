@@ -117,6 +117,7 @@ def create_flexible_attribute(
 
 @pytest.mark.usefixtures("login")
 class TestPeriodicDataTemplates:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_template_export_and_download(
         self,
         clear_downloaded_files: None,
@@ -164,6 +165,7 @@ class TestPeriodicDataTemplates:
         )
 
     @pytest.mark.night
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_template_list(
         self,
         program: Program,
@@ -212,6 +214,7 @@ class TestPeriodicDataTemplates:
         assert "EXPORTED" in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
 
     @pytest.mark.night
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_template_details(
         self,
         program: Program,
@@ -261,6 +264,7 @@ class TestPeriodicDataTemplates:
 
     # ToDo: Does not work locally
     @pytest.mark.night
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,

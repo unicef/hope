@@ -8,6 +8,7 @@ from requests import Response, Session
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 
 
+@pytest.mark.django_db()
 class TestMixinBaseAPI:
     @pytest.fixture
     def api_class(self) -> Type[BaseAPI]:

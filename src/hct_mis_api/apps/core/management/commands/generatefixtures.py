@@ -8,8 +8,8 @@ from typing import Any, Callable, Dict
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import UserRole
+from hct_mis_api.apps.account.fixtures import UserFactory, create_superuser
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import (
@@ -126,7 +126,7 @@ class Command(BaseCommand):
                     {
                         "registration_data_import": registration_data_import,
                         "business_area": business_area,
-                        "admin_area": Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
+                        "admin1": Area.objects.filter(area_type__business_area=business_area).order_by("?").first(),
                         "program": program,
                     },
                     {"registration_data_import": registration_data_import},
@@ -134,8 +134,8 @@ class Command(BaseCommand):
                 for individual in individuals:
                     DocumentFactory(individual=individual)
 
-                if household.admin_area:
-                    program.admin_areas.add(household.admin_area)
+                if household.admin1:
+                    program.admin_areas.add(household.admin1)
 
                 payment = PaymentFactory(
                     parent=payment_plan,
@@ -185,11 +185,8 @@ class Command(BaseCommand):
         self.stdout.write("Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
-            call_command(
-                "loaddata",
-                "hct_mis_api/apps/account/fixtures/superuser.json",
-                verbosity=0,
-            )
+            create_superuser()
+
         start_time = time.time()
         programs_amount = options["programs_amount"]
         business_area_amount = options["business_area_amount"]
@@ -220,7 +217,7 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write("Generation canceled")
                     return
-        if not UserRole.objects.count():
+        if not RoleAssignment.objects.count():
             call_command("generateroles")
         for index in range(business_area_amount):
             for _ in range(programs_amount):

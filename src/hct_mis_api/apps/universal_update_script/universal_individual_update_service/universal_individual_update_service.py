@@ -107,9 +107,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_individual_fields(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
-    ) -> List[str]:
+    def validate_individual_fields(self, row: Tuple[Any, ...], headers: List[str], row_index: int) -> List[str]:
         errors = []
         for field, (name, validator, _handler) in self.individual_fields.items():
             value = row[headers.index(field)]
@@ -118,9 +116,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_individual_flex_fields(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
-    ) -> List[str]:
+    def validate_individual_flex_fields(self, row: Tuple[Any, ...], headers: List[str], row_index: int) -> List[str]:
         errors = []
         for field, (name, validator, _handler) in self.individual_flex_fields.items():
             value = row[headers.index(field)]
@@ -129,9 +125,7 @@ class UniversalIndividualUpdateService:
                 errors.append(f"Row: {row_index} - {error}")
         return errors
 
-    def validate_household_flex_fields(
-        self, row: Tuple[Any, ...], headers: List[str], individual: Individual, row_index: int
-    ) -> List[str]:
+    def validate_household_flex_fields(self, row: Tuple[Any, ...], headers: List[str], row_index: int) -> List[str]:
         errors = []
         for field, (name, validator, _handler) in self.household_flex_fields.items():
             value = row[headers.index(field)]
@@ -213,15 +207,15 @@ class UniversalIndividualUpdateService:
             if individuals_queryset.count() > 1:  # pragma: no cover
                 errors.append(f"Row: {row_index} - Multiple individuals with unicef_id {unicef_id} found")
                 continue
-            individual = individuals_queryset.first()
+            individual: Individual = individuals_queryset.first() or Individual()
             household = individual.household
             if household is None:  # pragma: no cover
                 errors.append(f"Row: {row_index} - Household not found for individual with unicef_id {unicef_id}")
                 continue
             errors.extend(self.validate_household_fields(row, headers, household, row_index))
-            errors.extend(self.validate_individual_fields(row, headers, individual, row_index))
-            errors.extend(self.validate_individual_flex_fields(row, headers, individual, row_index))
-            errors.extend(self.validate_household_flex_fields(row, headers, individual, row_index))
+            errors.extend(self.validate_individual_fields(row, headers, row_index))
+            errors.extend(self.validate_individual_flex_fields(row, headers, row_index))
+            errors.extend(self.validate_household_flex_fields(row, headers, row_index))
             errors.extend(self.validate_documents(row, headers, individual, row_index))
             errors.extend(self.validate_accounts(row, headers, individual, row_index))
         return errors

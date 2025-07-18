@@ -47,7 +47,7 @@ class TestCreateFinancialInstitutions(TestCase):
             ),
         )
         cls.nigeria = geo_models.Country.objects.create(name="Nigeria", iso_code2="NG", iso_code3="NG", iso_num="NG")
-        cls.afg = geo_models.Country.objects.create(name="Afghanistan", iso_code2="AF", iso_code3="AF", iso_num="AF")
+        cls.afg = geo_models.Country.objects.create(name="Afghanistan", iso_code2="AF", iso_code3="AF", iso_num="0004")
 
         # ng account
         collector1 = IndividualFactory(household=None, business_area=cls.ba_ng)

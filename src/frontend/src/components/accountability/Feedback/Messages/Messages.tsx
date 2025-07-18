@@ -1,23 +1,22 @@
-import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
-import { Field, Form, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import * as Yup from 'yup';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { renderUserName } from '@utils/utils';
-import {
-  FeedbackDocument,
-  FeedbackQuery,
-  useCreateFeedbackMsgMutation,
-  useMeQuery,
-} from '@generated/graphql';
+import withErrorBoundary from '@components/core/withErrorBoundary';
 import { LoadingButton } from '@core/LoadingButton';
 import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { ReactElement } from 'react';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Avatar, Box, Grid2 as Grid, Paper, Typography } from '@mui/material';
+import { FeedbackDetail } from '@restgenerated/models/FeedbackDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { renderUserName, showApiErrorMessages } from '@utils/utils';
+import { Field, Form, Formik } from 'formik';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import * as Yup from 'yup';
 
 const Name = styled.span`
   font-size: 16px;
@@ -37,18 +36,51 @@ const StyledBox = styled(Paper)`
 `;
 
 interface MessagesProps {
-  messages: FeedbackQuery['feedback']['feedbackMessages'];
+  messages: FeedbackDetail['feedbackMessages'];
   canAddMessage: boolean;
 }
 
 function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
   const { t } = useTranslation();
-  const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-and-network',
+  const { businessAreaSlug, programSlug } = useBaseUrl();
+  const { showMessage } = useSnackbar();
+  const { data: meData, isLoading: meLoading } = useQuery({
+    queryKey: ['profile', businessAreaSlug, programSlug],
+    queryFn: () => {
+      return RestService.restBusinessAreasUsersProfileRetrieve({
+        businessAreaSlug,
+        program: programSlug,
+      });
+    },
+    staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+    gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   const { id } = useParams();
-  const [mutate, { loading }] = useCreateFeedbackMsgMutation();
+  const [loading, setLoading] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+
+  const createFeedbackMessage = async (description: string) => {
+    if (!id || !businessAreaSlug) return;
+
+    try {
+      setLoading(true);
+      await RestService.restBusinessAreasFeedbacksMessageCreate({
+        businessAreaSlug,
+        id,
+        requestBody: { description },
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['businessAreasFeedbacksRetrieve', id],
+      });
+    } catch (error) {
+      showApiErrorMessages(error, showMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (meLoading) {
     return null;
@@ -82,13 +114,8 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
     </Grid>
   );
 
-  const mappedMessages = messages?.edges?.map((el) =>
-    note(
-      renderUserName(el.node.createdBy),
-      el.node.createdAt,
-      el.node.description,
-      el.node.id,
-    ),
+  const mappedMessages = messages?.map((el) =>
+    note(renderUserName(el.createdBy), el.createdAt, el.description, el.id),
   );
 
   const initialValues: { [key: string]: string } = {
@@ -99,22 +126,15 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
     newNote: Yup.string().required(t('Note cannot be empty')),
   });
 
-  const myName = `${meData.me.firstName || meData.me.email}`;
+  const myName = `${meData.firstName || meData.email}`;
 
   return (
     <Grid size={{ xs: 8 }}>
       <Box p={3}>
         <Formik
           initialValues={initialValues}
-          onSubmit={(values, { resetForm }) => {
-            mutate({
-              variables: {
-                input: { feedback: id, description: values.newNote },
-              },
-              refetchQueries: () => [
-                { query: FeedbackDocument, variables: { id } },
-              ],
-            });
+          onSubmit={async (values, { resetForm }) => {
+            await createFeedbackMessage(values.newNote);
             resetForm({});
           }}
           validationSchema={validationSchema}
@@ -134,7 +154,7 @@ function Messages({ messages, canAddMessage }: MessagesProps): ReactElement {
                     <Grid size={{ xs: 10 }}>
                       <Grid size={{ xs: 12 }}>
                         <Box display="flex" justifyContent="space-between">
-                          <Name>{renderUserName(meData.me)}</Name>
+                          <Name>{renderUserName(meData)}</Name>
                         </Box>
                       </Grid>
                       <Grid size={{ xs: 12 }}>

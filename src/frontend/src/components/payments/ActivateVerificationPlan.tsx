@@ -1,40 +1,55 @@
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useActivatePaymentVerificationPlanMutation } from '@generated/graphql';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProgramContext } from '../../programContext';
 
 export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
+  cashOrPaymentPlanId: string;
 }
 
 export function ActivateVerificationPlan({
   paymentVerificationPlanId,
+  cashOrPaymentPlanId,
 }: ActivateVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
   const { isActiveProgram } = useProgramContext();
-
+  const { businessArea, programId: programSlug } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const [mutate] = useActivatePaymentVerificationPlanMutation();
+
+  const activateVerificationPlanMutation = useMutation({
+    mutationFn: () =>
+      RestService.restBusinessAreasProgramsPaymentVerificationsActivateVerificationPlanCreate(
+        {
+          businessAreaSlug: businessArea,
+          id: cashOrPaymentPlanId,
+          programSlug: programSlug,
+          verificationPlanId: paymentVerificationPlanId,
+        },
+      ),
+  });
+
   const activate = async (): Promise<void> => {
     try {
-      await mutate({
-        variables: { paymentVerificationPlanId },
-        refetchQueries: ['AllPaymentVerifications'],
-        awaitRefetchQueries: true,
-      });
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      await activateVerificationPlanMutation.mutateAsync();
+      setActivateDialogOpen(false);
+      showMessage(t('Verification plan has been activated.'));
+
+      // TODO: Implement proper React Query cache invalidation if needed
+    } catch (error) {
+      showApiErrorMessages(error, showMessage);
     }
-    setActivateDialogOpen(false);
-    showMessage(t('Verification plan has been activated.'));
   };
   return (
     <>

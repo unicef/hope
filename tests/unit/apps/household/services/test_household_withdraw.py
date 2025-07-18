@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -12,11 +12,10 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestHouseholdWithdraw(TestCase):
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
         create_afghanistan()
 
     def test_withdraw(self) -> None:

@@ -5,7 +5,7 @@ import { Fragment, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
-import { AllCollectorFieldsAttributesQuery } from '@generated/graphql';
+import { PaginatedCollectorAttributeList } from '@restgenerated/models/PaginatedCollectorAttributeList';
 import TargetingCriteriaCollectorBlockFilter from './TargetingCriteriaCollectorBlockFilter';
 
 const Divider = styled.div`
@@ -76,7 +76,7 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
   onDelete,
 }: {
   blockIndex: number;
-  data: AllCollectorFieldsAttributesQuery;
+  data: PaginatedCollectorAttributeList;
   values;
   choicesToDict;
   onDelete: () => void;

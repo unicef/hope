@@ -11,10 +11,6 @@ import {
   registrationDataImportDeduplicationEngineStatusToColor,
   registrationDataImportStatusToColor,
 } from '@utils/utils';
-import {
-  RegistrationDataImportQuery,
-  RegistrationDataImportStatus,
-} from '@generated/graphql';
 import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
 import { useProgramContext } from 'src/programContext';
@@ -49,7 +45,7 @@ const BoldGrey = styled.span`
 `;
 
 interface RegistrationDetailsProps {
-  registration: RegistrationDataImportQuery['registrationDataImport'];
+  registration: any;
   isSocialWorkerProgram?: boolean;
 }
 
@@ -85,12 +81,6 @@ function RegistrationDetails({
       options: registration?.goldenRecordPossibleDuplicatesCountAndPercentage,
     },
   ];
-  const renderImportedBy = (): string => {
-    if (registration?.importedBy) {
-      return `${registration?.importedBy?.firstName} ${registration?.importedBy?.lastName}`;
-    }
-    return '-';
-  };
 
   let numbersComponent: ReactElement;
   if (isSocialWorkerProgram) {
@@ -198,10 +188,10 @@ function RegistrationDetails({
               <Grid size={{ xs: 6 }}>
                 <LabelizedField
                   label={t('Imported by')}
-                  value={renderImportedBy()}
+                  value={registration?.importedBy}
                 />
               </Grid>
-              {registration.status === RegistrationDataImportStatus.Refused &&
+              {registration.status === 'REFUSED' &&
               registration.refuseReason ? (
                 <Grid size={{ xs: 6 }}>
                   <LabelizedField

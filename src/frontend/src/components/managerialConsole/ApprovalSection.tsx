@@ -20,6 +20,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
+import { showApiErrorMessages } from '@utils/utils';
 
 interface ApprovalSectionProps {
   selectedApproved: any[];
@@ -84,7 +85,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
 
   const selectedPlansUnicefIds = inApprovalData?.results
     .filter((plan) => selectedApproved.includes(plan.id))
-    .map((plan) => plan.unicef_id);
+    .map((plan) => plan.unicefId);
 
   const columns = [
     {
@@ -133,12 +134,14 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
           data-cy="search-approval"
           size="small"
           onChange={(e) => setSearchText(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
           }}
         />
       )}
@@ -155,7 +158,7 @@ export const ApprovalSection: FC<ApprovalSectionProps> = ({
             showMessage(t('Payment Plan(s) Approved'));
             setSelectedApproved([]);
           } catch (e) {
-            showMessage(e.message);
+            showApiErrorMessages(e, showMessage);
           }
         }}
       />

@@ -25,6 +25,7 @@ from typing import (
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Func, Q, Value
 from django.http import Http404
@@ -35,6 +36,7 @@ import pytz
 from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
 from PIL import Image
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
@@ -46,6 +48,7 @@ if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
 
     from hct_mis_api.apps.account.models import User
+
 
 logger = logging.getLogger(__name__)
 
@@ -632,15 +635,14 @@ def chart_permission_decorator(
     @functools.wraps(chart_resolve)
     def resolve_f(*args: Any, **kwargs: Any) -> Any:
         from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.program.models import Program
 
         _, resolve_info = args
         if resolve_info.context.user.is_authenticated:
             business_area_slug = kwargs.get("business_area_slug", "global")
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-            program_id = get_program_id_from_headers(resolve_info.context.headers)
-            if any(
-                resolve_info.context.user.has_permission(per.name, business_area, program_id) for per in permissions
-            ):
+            program = Program.objects.filter(id=get_program_id_from_headers(resolve_info.context.headers)).first()
+            if any(resolve_info.context.user.has_perm(per.name, program or business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
             log_and_raise("Permission Denied")
 
@@ -664,7 +666,6 @@ def chart_create_filter_query(
         filter_query.update(
             {
                 f"{administrative_area_path}__id": administrative_area,
-                f"{administrative_area_path}__area_type__area_level": 2,
             }
         )
     return filter_query
@@ -928,3 +929,64 @@ class JSONBSet(Func):
     def __init__(self, expression: Any, path: Any, new_value: Any, create_missing: bool = True, **extra: Any) -> None:
         create_missing = Value("true") if create_missing else Value("false")  # type: ignore
         super().__init__(expression, path, new_value, create_missing, **extra)
+
+
+def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> List:
+    from hct_mis_api.apps.core.kobo.api import KoboAPI
+    from hct_mis_api.apps.core.kobo.common import reduce_assets_list
+
+    try:
+        assets = KoboAPI(business_area_slug).get_all_projects_data()  # type: ignore
+    except ObjectDoesNotExist as e:
+        logger.warning(f"Provided business area: {business_area_slug}, does not exist.")
+        raise ValidationError("Provided business area does not exist.") from e
+    except AttributeError as error:
+        logger.warning(error)
+        raise ValidationError(str(error)) from error
+
+    return reduce_assets_list(assets, only_deployed=only_deployed)
+
+
+def get_fields_attr_generators(
+    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
+) -> Generator:
+    from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
+        FieldFactory,
+    )
+    from hct_mis_api.apps.core.field_attributes.fields_types import (
+        FILTERABLE_TYPES,
+        Scope,
+    )
+    from hct_mis_api.apps.core.models import FlexibleAttribute
+    from hct_mis_api.apps.program.models import Program
+
+    if flex_field is not False:
+        yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
+            "created_at"
+        )
+    if flex_field is not True:
+        if program_id and Program.objects.get(id=program_id).is_social_worker_program:
+            yield from FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING]).filtered_by_types(
+                FILTERABLE_TYPES
+            ).apply_business_area(business_area_slug=business_area_slug, program_id=program_id)
+        else:
+            yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
+                business_area_slug=business_area_slug, program_id=program_id
+            )
+
+
+def safe_getattr(obj: Any, attr: str) -> Any:
+    if isinstance(obj, dict):
+        return obj.get(attr)
+    return getattr(obj, attr, None)
+
+
+def sort_by_attr(options: Iterable, attrs: str) -> List:
+    def key_extractor(obj: Union[dict, Any]) -> str:
+        for attr in attrs.split("."):
+            obj = safe_getattr(obj, attr)
+            if obj is None:
+                return ""
+        return str(obj) if not isinstance(obj, dict) else ""
+
+    return sorted(options, key=key_extractor)

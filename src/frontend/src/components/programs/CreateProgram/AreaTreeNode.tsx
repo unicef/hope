@@ -1,4 +1,4 @@
-import { AllAreasTreeQuery } from '@generated/graphql';
+import { AreaTree } from '@restgenerated/models/AreaTree';
 
 export class AreaTreeNode {
   id: string;
@@ -15,12 +15,11 @@ export class AreaTreeNode {
     this.id = id;
     this.name = name;
     this.children = [];
-    this.checked = false; // false, true, 'indeterminate'
+    this.checked = false; // false, true, or 'indeterminate'
   }
 
   addChild(child: AreaTreeNode): void {
     this.children.push(child);
-    // eslint-disable-next-line no-param-reassign
     child.parent = this;
   }
 
@@ -61,7 +60,7 @@ export class AreaTreeNode {
     }
   }
 
-  setChecked(newState): void {
+  setChecked(newState: boolean): void {
     this.checked = newState;
     this.children.forEach((child) => child.setChecked(newState));
     this.updateCheckStatusFromRoot();
@@ -85,19 +84,35 @@ export class AreaTreeNode {
     return selectedIds;
   }
 
-  // Private method to traverse the tree
+  clearChecks(): void {
+    this.checked = false;
+    this.children.forEach((node) => node.clearChecks());
+  }
+
   private traverse(callback: (node: AreaTreeNode) => void): void {
     callback(this);
     this.children.forEach((child) => child.traverse(callback));
   }
 
   static buildTree(
-    areas: AllAreasTreeQuery['allAreasTree'],
+    areas: AreaTree[],
     selectedIds: string[] = [],
   ): AreaTreeNode[] {
+    if (!Array.isArray(areas) || areas.length === 0) return [];
+
+    const normalizeToArray = (maybeArrayOrObject: unknown): AreaTree[] => {
+      if (Array.isArray(maybeArrayOrObject)) return maybeArrayOrObject;
+      if (
+        typeof maybeArrayOrObject === 'object' &&
+        maybeArrayOrObject !== null
+      ) {
+        return Object.values(maybeArrayOrObject) as AreaTree[];
+      }
+      return [];
+    };
+
     const createNode = (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      area: any,
+      area: AreaTree,
       parent: AreaTreeNode | null,
     ): AreaTreeNode => {
       const node = new AreaTreeNode(area.id, area.name);
@@ -106,23 +121,19 @@ export class AreaTreeNode {
       }
       node.parent = parent;
 
-      if (area.areas) {
-        area.areas.forEach((childArea) => {
-          const childNode = createNode(childArea, node);
-          node.addChild(childNode);
-        });
-      }
+      const childAreas = normalizeToArray(area.areas);
+      childAreas.forEach((childArea) => {
+        const childNode = createNode(childArea, node);
+        node.addChild(childNode);
+      });
 
-      node.updateCheckStatusFromRoot();
+      if (!parent) {
+        node.updateCheckStatusFromRoot();
+      }
 
       return node;
     };
 
     return areas.map((area) => createNode(area, null));
-  }
-
-  public clearChecks() {
-    this.checked = false;
-    this.children.forEach((node) => node.clearChecks());
   }
 }

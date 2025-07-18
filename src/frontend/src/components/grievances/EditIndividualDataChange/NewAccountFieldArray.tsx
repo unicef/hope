@@ -46,7 +46,7 @@ export function NewAccountFieldArray({
                 />
               );
             })}
-            <Grid size={{ xs:8 }} />
+            <Grid size={{ xs: 8 }} />
             <Grid size={{ xs: 12 }}>
               <Button
                 color="primary"

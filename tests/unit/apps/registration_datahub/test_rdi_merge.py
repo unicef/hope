@@ -1,9 +1,9 @@
 from contextlib import contextmanager
-from typing import Callable, Generator
+from typing import Callable, Dict, Generator
 from unittest import mock
 from unittest.mock import patch
 
-from django.conf import settings
+from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
@@ -71,17 +71,14 @@ def capture_on_commit_callbacks(
 
 @pytest.mark.elasticsearch
 class TestRdiMergeTask(TestCase):
-    fixtures = [
-        f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
-        f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
-    ]
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        call_command("init-geo-fixtures")
+        call_command("init-core-fixtures")
         cls.business_area = create_afghanistan()
         program = ProgramFactory()
-        cls.rdi = RegistrationDataImportFactory(program=program)
+        cls.rdi = RegistrationDataImportFactory(program=program, business_area=cls.business_area)
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
 
@@ -218,9 +215,8 @@ class TestRdiMergeTask(TestCase):
 
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
-        household = PendingHouseholdFactory(
+        hh = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -236,9 +232,9 @@ class TestRdiMergeTask(TestCase):
         dct.recalculate_composition = True
         dct.save()
 
-        self.set_imported_individuals(household)
-        household.head_of_household = PendingIndividual.objects.first()
-        household.save()
+        self.set_imported_individuals(hh)
+        hh.head_of_household = PendingIndividual.objects.first()
+        hh.save()
 
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
@@ -282,8 +278,8 @@ class TestRdiMergeTask(TestCase):
             Individual.objects.filter(full_name="Benjamin Butler").first().wallet_address, "Wallet Address 1"
         )
 
-        household_data = model_to_dict(
-            household,
+        household_data: Dict = model_to_dict(
+            household,  # type: ignore
             (
                 "female_age_group_0_5_count",
                 "female_age_group_6_11_count",
@@ -297,7 +293,6 @@ class TestRdiMergeTask(TestCase):
                 "male_age_group_60_count",
                 "children_count",
                 "size",
-                "admin_area",
                 "admin1",
                 "admin2",
                 "admin3",
@@ -319,7 +314,6 @@ class TestRdiMergeTask(TestCase):
             "male_age_group_60_count": 1,
             "children_count": 5,
             "size": 8,
-            "admin_area": self.area4.id,
             "admin1": self.area1.id,
             "admin2": self.area2.id,
             "admin3": self.area3.id,
@@ -333,7 +327,6 @@ class TestRdiMergeTask(TestCase):
     def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -365,7 +358,6 @@ class TestRdiMergeTask(TestCase):
     def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -380,8 +372,6 @@ class TestRdiMergeTask(TestCase):
         dct.recalculate_composition = True
         dct.save()
 
-        # when business_area.screen_beneficiary is False
-        self.business_area.screen_beneficiary = False
         self.business_area.save()
         self.rdi.screen_beneficiary = True
         self.rdi.save()
@@ -395,7 +385,6 @@ class TestRdiMergeTask(TestCase):
     def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             admin3=self.area3,
             admin2=self.area2,
@@ -406,9 +395,6 @@ class TestRdiMergeTask(TestCase):
             kobo_submission_time="2022-02-22T12:22:22",
             flex_fields={"enumerator_id": 1234567890},
         )
-
-        # when rdi.screen_beneficiary is False
-        self.business_area.screen_beneficiary = True
         self.business_area.save()
         self.rdi.screen_beneficiary = False
         self.rdi.save()
@@ -499,7 +485,6 @@ class TestRdiMergeTask(TestCase):
     def test_merging_external_collector(self) -> None:
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             zip_code="00-123",
         )
@@ -541,7 +526,6 @@ class TestRdiMergeTask(TestCase):
         program.save()
         household = PendingHouseholdFactory(
             registration_data_import=self.rdi,
-            admin_area=self.area4,
             admin4=self.area4,
             zip_code="00-123",
         )

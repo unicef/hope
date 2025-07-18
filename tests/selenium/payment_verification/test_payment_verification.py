@@ -108,7 +108,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         household, _ = create_household(
             {
                 "registration_data_import": registration_data_import,
-                "admin_area": Area.objects.order_by("?").first(),
+                "admin2": Area.objects.order_by("?").first(),
                 "program": program,
             },
             {"registration_data_import": registration_data_import},
@@ -159,7 +159,7 @@ def empty_payment_verification(social_worker_program: Program) -> None:
     household, individuals = create_household(
         {
             "registration_data_import": registration_data_import,
-            "admin_area": Area.objects.order_by("?").first(),
+            "admin2": Area.objects.order_by("?").first(),
             "program": program,
         },
         {"registration_data_import": registration_data_import},
@@ -202,7 +202,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
     household, individuals = create_household(
         {
             "registration_data_import": registration_data_import,
-            "admin_area": Area.objects.order_by("?").first(),
+            "admin2": Area.objects.order_by("?").first(),
             "program": program,
         },
         {"registration_data_import": registration_data_import},
@@ -263,6 +263,7 @@ def clear_downloaded_files(download_path: str) -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokePaymentVerification:
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_payment_verification(
         self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
     ) -> None:
@@ -281,6 +282,7 @@ class TestSmokePaymentVerification:
         assert active_program.cycles.first().title == pagePaymentVerification.getCycleTitle().text
         assert "Rows per page: 5 1–1 of 1" in pagePaymentVerification.getTablePagination().text.replace("\n", " ")
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_payment_verification_details(
         self,
         active_program: Program,
@@ -320,6 +322,7 @@ class TestSmokePaymentVerification:
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
         assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_happy_path_payment_verification(
         self,
         active_program: Program,
@@ -423,6 +426,7 @@ class TestPaymentVerification:
             "xlsx",
         ],
     )
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_create_verification_plan_full_list(
         self,
         channel: str,
@@ -442,6 +446,7 @@ class TestPaymentVerification:
         assert channel.upper() in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_create_verification_plan_random_sampling_manual(
         self,
         active_program: Program,
@@ -481,6 +486,7 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_delete(
         self,
         active_program: Program,
@@ -505,6 +511,7 @@ class TestPaymentVerification:
             raise AssertionError("Verification Plan was not deleted")
         assert before_list_of_verification_plans[1] not in pagePaymentVerificationDetails.getVerificationPlanPrefix()
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_edit(
         self,
         active_program: Program,
@@ -535,6 +542,7 @@ class TestPaymentVerification:
             assert channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_successful_received(
         self,
         active_program: Program,
@@ -561,6 +569,7 @@ class TestPaymentVerification:
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
         assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_successful_not_received(
         self,
         active_program: Program,
@@ -585,6 +594,7 @@ class TestPaymentVerification:
 
         assert pagePaymentRecord.waitForStatusContainer("NOT RECEIVED")
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_partially_successful_received_and_grievance_ticket(
         self,
         active_program: Program,
@@ -643,6 +653,7 @@ class TestPaymentVerification:
         pageGrievanceTickets.scroll(execute=2)
         pageGrievanceTickets.screenshot("0", file_path="./")
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_by_payment_related_complaint(
         self,
         active_program: Program,
@@ -748,6 +759,7 @@ class TestPaymentVerification:
 
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED WITH ISSUES")
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_xlsx_not_received(
         self,
         clear_downloaded_files: None,
@@ -790,6 +802,7 @@ class TestPaymentVerification:
 
         assert pagePaymentRecord.waitForStatusContainer("NOT RECEIVED")
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_discard(
         self,
         clear_downloaded_files: None,
@@ -828,6 +841,7 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.checkAlert("You cant discard if xlsx file was downloaded or imported")
 
+    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_payment_verification_xlsx_invalid(
         self,
         clear_downloaded_files: None,

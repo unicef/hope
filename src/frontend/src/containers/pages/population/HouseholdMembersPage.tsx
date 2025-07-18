@@ -1,24 +1,23 @@
-import { Box, Fade, Tooltip } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import {
-  useHouseholdChoiceDataQuery,
-  useIndividualChoiceDataQuery,
-} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import withErrorBoundary from '@components/core/withErrorBoundary';
+import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
 import { IndividualsFilter } from '@components/population/IndividualsFilter';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { Tab, Tabs } from '@core/Tabs';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Box, Fade, Tooltip } from '@mui/material';
+import { IndividualChoices } from '@restgenerated/models/IndividualChoices';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
-import { Tabs, Tab } from '@core/Tabs';
-import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
-import withErrorBoundary from '@components/core/withErrorBoundary';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -31,11 +30,15 @@ export const HouseholdMembersPage = (): ReactElement => {
     location.state?.isNewTemplateJustCreated || false;
 
   const permissions = usePermissions();
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
 
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, isLoading: individualChoicesLoading } =
+    useQuery<IndividualChoices>({
+      queryKey: ['individualChoices', businessArea],
+      queryFn: () =>
+        RestService.restBusinessAreasIndividualsChoicesRetrieve({
+          businessAreaSlug: businessArea,
+        }),
+    });
 
   const initialFilter = {
     search: '',
@@ -73,11 +76,9 @@ export const HouseholdMembersPage = (): ReactElement => {
     permissions,
   );
 
-  if (householdChoicesLoading || individualChoicesLoading)
-    return <LoadingComponent />;
+  if (individualChoicesLoading) return <LoadingComponent />;
 
-  if (!individualChoicesData || !householdChoicesData || permissions === null)
-    return null;
+  if (!individualChoicesData || permissions === null) return null;
 
   if (!canViewHouseholdMembersPage) return <PermissionDenied />;
 
@@ -151,7 +152,7 @@ export const HouseholdMembersPage = (): ReactElement => {
                 <IndividualsListTable
                   filter={appliedFilter}
                   businessArea={businessArea}
-                  choicesData={householdChoicesData}
+                  choicesData={individualChoicesData}
                   canViewDetails={hasPermissions(
                     PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
                     permissions,

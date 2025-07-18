@@ -147,8 +147,8 @@ class TestEnrolHouseholdToProgram(TestCase):
         self.assertEqual(ind_count, Individual.objects.count())
 
     def test_enroll_household_to_program(self) -> None:
-        hh_count = Household.original_and_repr_objects.count()
-        ind_count = Individual.original_and_repr_objects.count()
+        hh_count = Household.objects.count()
+        ind_count = Individual.objects.count()
         document_count = Document.objects.count()
         identities_count = IndividualIdentity.objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
@@ -160,9 +160,9 @@ class TestEnrolHouseholdToProgram(TestCase):
 
         self.individual_2_already_enrolled.refresh_from_db()
         # 1 new hh enrolled to program2
-        self.assertEqual(hh_count + 1, Household.original_and_repr_objects.count())
+        self.assertEqual(hh_count + 1, Household.objects.count())
         # 2 new individuals enrolled to program2, individual1 and individual_hoh, individual2 was already in program 2
-        self.assertEqual(ind_count + 2, Individual.original_and_repr_objects.count())
+        self.assertEqual(ind_count + 2, Individual.objects.count())
         # 1 new object related to individual1 enrolled to program2
         self.assertEqual(document_count + 1, Document.objects.count())
         self.assertEqual(identities_count + 1, IndividualIdentity.objects.count())
@@ -205,8 +205,8 @@ class TestEnrolHouseholdToProgram(TestCase):
         )
 
     def test_enroll_household_with_external_collector(self) -> None:
-        hh_count = Household.original_and_repr_objects.count()
-        ind_count = Individual.original_and_repr_objects.count()
+        hh_count = Household.objects.count()
+        ind_count = Individual.objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
 
         enroll_households_to_program(
@@ -215,9 +215,9 @@ class TestEnrolHouseholdToProgram(TestCase):
             self.str_user_id,
         )
         hh = Household.objects.order_by("created_at").last()
-        self.assertEqual(hh_count + 1, Household.original_and_repr_objects.count())
+        self.assertEqual(hh_count + 1, Household.objects.count())
         # 2 new individuals enrolled - individual_external and individual_hoh
-        self.assertEqual(ind_count + 2, Individual.original_and_repr_objects.count())
+        self.assertEqual(ind_count + 2, Individual.objects.count())
         self.assertEqual(roles_count + 1, IndividualRoleInHousehold.objects.count())
 
         self.assertEqual(

@@ -1,3 +1,6 @@
+import { LoadingButton } from '@components/core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Button,
   Dialog,
@@ -5,59 +8,55 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
+import { ProgramDetail } from '@restgenerated/models/ProgramDetail';
+import { Status791Enum as ProgramStatus } from '@restgenerated/models/Status791Enum';
+import { RestService } from '@restgenerated/services/RestService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ProgramQuery,
-  ProgramStatus,
-  useUpdateProgramMutation,
-} from '@generated/graphql';
-import { LoadingButton } from '@components/core/LoadingButton';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
+import { useProgramContext } from '../../../programContext';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useProgramContext } from '../../../programContext';
-import { useNavigate } from 'react-router-dom';
 
 interface ReactivateProgramProps {
-  program: ProgramQuery['program'];
+  program: ProgramDetail;
 }
 
 export function ReactivateProgram({
   program,
 }: ReactivateProgramProps): ReactElement {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { businessAreaSlug } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
+  const queryClient = useQueryClient();
 
-  const [mutate, { loading }] = useUpdateProgramMutation();
-  const reactivateProgram = async (): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          status: ProgramStatus.Active,
-        },
-        version: program.version,
-      },
-    });
-    if (!response.errors && response.data.updateProgram) {
+  const { mutate, isPending: loading } = useMutation({
+    mutationFn: async () =>
+      RestService.restBusinessAreasProgramsActivateCreate({
+        businessAreaSlug,
+        slug: program.slug,
+      }),
+    onSuccess: () => {
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Active,
+        status: ProgramStatus.ACTIVE,
       });
-
+      queryClient.invalidateQueries({
+        queryKey: ['program', businessAreaSlug, program.slug],
+      });
       showMessage(t('Programme reactivated.'));
-      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
       setOpen(false);
-    } else {
+    },
+    onError: () => {
       showMessage(t('Programme reactivate action failed.'));
-    }
+    },
+  });
+
+  const reactivateProgram = (): void => {
+    mutate();
   };
   return (
     <span>

@@ -1,21 +1,30 @@
-import { Button, DialogContent, DialogTitle, Grid2 as Grid } from '@mui/material';
-import { Field, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import {
+  Button,
+  DialogContent,
+  DialogTitle,
+  Grid2 as Grid,
+} from '@mui/material';
+import { TargetPopulationCopy } from '@restgenerated/models/TargetPopulationCopy';
+import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
+import { RestService } from '@restgenerated/services/RestService';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useMutation } from '@tanstack/react-query';
+import { showApiErrorMessages } from '@utils/utils';
+import { Field, Formik } from 'formik';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import * as Yup from 'yup';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate } from 'react-router-dom';
-import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
-import { ReactElement } from 'react';
-import { useCopyCriteriaMutation } from '@generated/graphql';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
@@ -37,9 +46,29 @@ export const DuplicateTargetPopulation = ({
 }: DuplicateTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [mutate, { loading }] = useCopyCriteriaMutation();
   const { showMessage } = useSnackbar();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
+
+  const { mutateAsync: mutate, isPending: loading } = useMutation({
+    mutationFn: ({
+      businessAreaSlug,
+      programSlug,
+      id,
+      requestBody,
+    }: {
+      businessAreaSlug: string;
+      programSlug: string;
+      id: string;
+      requestBody: TargetPopulationCopy;
+    }) =>
+      RestService.restBusinessAreasProgramsTargetPopulationsCopyCreate({
+        businessAreaSlug,
+        programSlug,
+        id,
+        requestBody,
+      }),
+  });
+
   const initialValues = {
     name: '',
     id: targetPopulationId,
@@ -62,20 +91,25 @@ export const DuplicateTargetPopulation = ({
         onSubmit={async (values) => {
           try {
             const programCycleId = values.programCycleId.value;
-            const res = await mutate({
-              variables: {
+            const res = (await mutate({
+              id: targetPopulationId,
+              businessAreaSlug: businessArea,
+              programSlug: programId,
+              requestBody: {
                 name: values.name,
-                paymentPlanId: targetPopulationId,
+                targetPopulationId,
                 programCycleId,
               },
-            });
+            })) as unknown as TargetPopulationDetail;
             setOpen(false);
             showMessage(t('Target Population Duplicated'));
-            navigate(
-              `/${baseUrl}/target-population/${res.data.copyTargetingCriteria.paymentPlan.id}`,
-            );
+            navigate(`/${baseUrl}/target-population/${res.id}`);
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            showApiErrorMessages(
+              e,
+              showMessage,
+              t('Failed to finish programme.'),
+            );
           }
         }}
       >

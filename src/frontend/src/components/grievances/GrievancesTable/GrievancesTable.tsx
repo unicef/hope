@@ -1,42 +1,40 @@
-import { UniversalTable } from '@containers/tables/UniversalTable';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { EnhancedTableToolbar } from '@core/Table/EnhancedTableToolbar';
 import { TableWrapper } from '@core/TableWrapper';
-import {
-  AllGrievanceTicketQuery,
-  AllGrievanceTicketQueryVariables,
-  useAllGrievanceTicketQuery,
-  useAllUsersForFiltersLazyQuery,
-  useGrievancesChoiceDataQuery,
-  useMeQuery,
-} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useDebounce } from '@hooks/useDebounce';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
+import { GrievanceTicketList } from '@restgenerated/models/GrievanceTicketList';
+import { PaginatedGrievanceTicketListList } from '@restgenerated/models/PaginatedGrievanceTicketListList';
+import { PaginatedUserList } from '@restgenerated/models/PaginatedUserList';
+import { RestService } from '@restgenerated/services/RestService';
+import { useQuery } from '@tanstack/react-query';
+import { createApiParams } from '@utils/apiUtils';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
-import get from 'lodash/get';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
 } from '../../../config/permissions';
 import {
-  headCellsStandardProgram,
   headCellsSocialProgram,
+  headCellsStandardProgram,
 } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
-import { useProgramContext } from 'src/programContext';
+import { CountResponse } from '@restgenerated/models/CountResponse';
 
 interface GrievancesTableProps {
   filter;
@@ -46,9 +44,11 @@ interface GrievancesTableProps {
 export const GrievancesTable = ({
   filter,
 }: GrievancesTableProps): ReactElement => {
-  const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { businessArea, businessAreaSlug, programSlug, isAllPrograms } =
+    useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { programId } = useBaseUrl();
   const { t } = useTranslation();
 
   const replacements = {
@@ -62,81 +62,229 @@ export const GrievancesTable = ({
     replacements,
   );
 
-  const initialVariables: AllGrievanceTicketQueryVariables = {
-    businessArea,
-    search: filter.search.trim(),
-    documentType: filter.documentType,
-    documentNumber: filter.documentNumber.trim(),
-    status: [filter.status],
-    fsp: filter.fsp,
-    createdAtRange: JSON.stringify({
-      min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-      max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+  const initialQueryVariables = useMemo(
+    () => ({
+      businessArea,
+      search: filter.search.trim(),
+      documentType: filter.documentType,
+      documentNumber: filter.documentNumber.trim(),
+      status: [filter.status],
+      fsp: filter.fsp,
+      createdAtBefore: dateToIsoString(filter.createdAtBefore, 'startOfDay'),
+      createdAtAfter: dateToIsoString(filter.createdAtAfter, 'endOfDay'),
+      category: filter.category,
+      issueType: filter.issueType,
+      assignedTo: filter.assignedTo,
+      createdBy: filter.createdBy,
+      admin1: filter.admin1,
+      admin2: filter.admin2,
+      registrationDataImport: filter.registrationDataImport,
+      cashPlan: filter.cashPlan,
+      scoreMin: filter.scoreMin,
+      scoreMax: filter.scoreMax,
+      grievanceType: filter.grievanceType,
+      grievanceStatus: filter.grievanceStatus,
+      priority: filter.priority === 'Not Set' ? 0 : filter.priority,
+      urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
+      preferredLanguage: filter.preferredLanguage,
+      programSlug: isAllPrograms ? filter.program : programSlug,
+      isActiveProgram: filter.programState === 'active' ? true : null,
+      isCrossArea: filter.areaScope === 'cross-area' ? true : null,
     }),
-    category: filter.category,
-    issueType: filter.issueType,
-    assignedTo: filter.assignedTo,
-    createdBy: filter.createdBy,
-    admin1: filter.admin1,
-    admin2: filter.admin2,
-    registrationDataImport: filter.registrationDataImport,
-    cashPlan: filter.cashPlan,
-    scoreMin: filter.scoreMin,
-    scoreMax: filter.scoreMax,
-    grievanceType: filter.grievanceType,
-    grievanceStatus: filter.grievanceStatus,
-    priority: filter.priority === 'Not Set' ? 0 : filter.priority,
-    urgency: filter.urgency === 'Not Set' ? 0 : filter.urgency,
-    preferredLanguage: filter.preferredLanguage,
-    program: isAllPrograms ? filter.program : programId,
-    isActiveProgram: filter.programState === 'active' ? true : null,
-    isCrossArea: filter.areaScope === 'cross-area' ? true : null,
-  };
+    [
+      businessArea,
+      filter.search,
+      filter.documentType,
+      filter.documentNumber,
+      filter.status,
+      filter.fsp,
+      filter.createdAtBefore,
+      filter.createdAtAfter,
+      filter.category,
+      filter.issueType,
+      filter.assignedTo,
+      filter.createdBy,
+      filter.admin1,
+      filter.admin2,
+      filter.registrationDataImport,
+      filter.cashPlan,
+      filter.scoreMin,
+      filter.scoreMax,
+      filter.grievanceType,
+      filter.grievanceStatus,
+      filter.priority,
+      filter.urgency,
+      filter.preferredLanguage,
+      filter.program,
+      filter.programState,
+      filter.areaScope,
+      isAllPrograms,
+      programSlug,
+    ],
+  );
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
 
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [page, setPage] = useState<number>(0);
-  const [loadData, { data }] = useAllUsersForFiltersLazyQuery({
-    variables: {
-      businessArea,
-      first: 20,
-      orderBy: 'first_name,last_name,email',
-      search: debouncedInputText,
+
+  const { data: usersListData } = useQuery<PaginatedUserList>({
+    queryKey: [
+      'businessAreasUsersList',
+      {
+        businessAreaSlug: businessArea,
+        limit: 20,
+        ordering: 'first_name,last_name,email',
+        search: debouncedInputText || undefined,
+      },
+    ],
+    queryFn: ({ queryKey }) => {
+      const [, params] = queryKey;
+      return RestService.restBusinessAreasUsersList(params as any);
     },
-    fetchPolicy: 'cache-and-network',
   });
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const usersData = useMemo(() => {
+    if (!usersListData?.results) return [];
 
-  const optionsData = get(data, 'allUsers.edges', []);
+    return usersListData.results.map((user) => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    }));
+  }, [usersListData]);
+
+  //ALL PROGRAMS
+  const {
+    data: allProgramsGrievanceTicketsData,
+    isLoading: isLoadingAll,
+    error: errorAll,
+  } = useQuery<PaginatedGrievanceTicketListList>({
+    queryKey: [
+      'businessAreasGrievanceTickets',
+      queryVariables,
+      businessArea,
+      filter.grievanceType,
+      programId,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsList(
+        createApiParams(
+          {
+            businessAreaSlug: businessArea,
+            program: programId === 'all' ? undefined : programId,
+          },
+          queryVariables,
+          {
+            withPagination: true,
+          },
+        ),
+      ),
+    enabled: isAllPrograms,
+  });
+
+  //ALL PROGRAMS COUNT
+  const { data: allProgramsGrievanceTicketsCount } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasGrievanceTicketsCount',
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsCountRetrieve(
+        createApiParams({ businessAreaSlug: businessArea }, queryVariables),
+      ),
+    enabled: isAllPrograms,
+  });
+
+  // SELECTED PROGRAM
+  const {
+    data: selectedProgramGrievanceTicketsData,
+    isLoading: isLoadingSelected,
+    error: errorSelected,
+  } = useQuery<PaginatedGrievanceTicketListList>({
+    queryKey: [
+      'businessAreasProgramsGrievanceTickets',
+      queryVariables,
+      programId,
+      businessArea,
+      filter.grievanceType,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsGrievanceTicketsList(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+          { withPagination: true },
+        ),
+      ),
+    enabled: !isAllPrograms,
+  });
+  //SELECTED PROGRAM COUNT
+  const { data: selectedProgramGrievanceTicketsCount } =
+    useQuery<CountResponse>({
+      queryKey: [
+        'businessAreasProgramsGrievanceTicketsCount',
+        businessArea,
+        programId,
+        queryVariables,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsGrievanceTicketsCountRetrieve(
+          createApiParams(
+            { businessAreaSlug: businessArea, programSlug: programId },
+            queryVariables,
+          ),
+        ),
+      enabled: !isAllPrograms,
+    });
+
+  const optionsData = usersData;
 
   const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
-    [
-      key: number
-    ]: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+    [key: number]: GrievanceTicketList[];
   }>({ 0: [] });
 
-  const selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][] =
-    [];
+  const selectedTickets: GrievanceTicketList[] = [];
   const currentSelectedTickets = selectedTicketsPerPage[page];
   for (const pageKey of Object.keys(selectedTicketsPerPage)) {
     selectedTickets.push(...selectedTicketsPerPage[pageKey]);
   }
 
-  const setSelectedTickets = (
-    tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
-  ): void => {
+  const setSelectedTickets = (tickets: GrievanceTicketList[]): void => {
     const newSelectedTicketsPerPage = { ...selectedTicketsPerPage };
     newSelectedTicketsPerPage[page] = tickets;
     setSelectedTicketsPerPage(newSelectedTicketsPerPage);
   };
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: choicesData, isLoading: choicesLoading } = useQuery({
+    queryKey: ['businessAreasGrievanceTicketsChoices', businessAreaSlug],
+    queryFn: () =>
+      RestService.restBusinessAreasGrievanceTicketsChoicesRetrieve({
+        businessAreaSlug,
+      }),
+  });
+
+  const { data: currentUserData, isLoading: currentUserDataLoading } = useQuery(
+    {
+      queryKey: ['profile', businessAreaSlug, programSlug],
+      queryFn: () => {
+        return RestService.restBusinessAreasUsersProfileRetrieve({
+          businessAreaSlug,
+          program: programSlug === 'all' ? undefined : programSlug,
+        });
+      },
+      staleTime: 5 * 60 * 1000, // Data is considered fresh for 5 minutes
+      gcTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    },
+  );
+
   const permissions = usePermissions();
 
   if (choicesLoading || currentUserDataLoading) return <LoadingComponent />;
@@ -153,11 +301,9 @@ export const GrievancesTable = ({
   const issueTypeChoicesData = choicesData.grievanceTicketIssueTypeChoices;
   const priorityChoicesData = choicesData.grievanceTicketPriorityChoices;
   const urgencyChoicesData = choicesData.grievanceTicketUrgencyChoices;
-  const currentUserId = currentUserData.me.id;
+  const currentUserId = currentUserData.id;
 
-  const getCanViewDetailsOfTicket = (
-    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-  ): boolean => {
+  const getCanViewDetailsOfTicket = (ticket: GrievanceTicketList): boolean => {
     const isTicketCreator = currentUserId === ticket.createdBy?.id;
     const isTicketOwner = currentUserId === ticket.assignedTo?.id;
     if (
@@ -182,9 +328,7 @@ export const GrievancesTable = ({
     );
   };
 
-  const handleCheckboxClick = (
-    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-  ): void => {
+  const handleCheckboxClick = (ticket: GrievanceTicketList): void => {
     const index =
       currentSelectedTickets?.findIndex(
         (ticketItem) => ticketItem.id === ticket.id,
@@ -278,44 +422,47 @@ export const GrievancesTable = ({
             gap={4}
             component="div"
           >
-            {' '}
             <BulkAssignModal
               selectedTickets={selectedTickets}
-              businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
             <BulkSetPriorityModal
               selectedTickets={selectedTickets}
-              businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
             <BulkSetUrgencyModal
               selectedTickets={selectedTickets}
-              businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
             <BulkAddNoteModal
               selectedTickets={selectedTickets}
-              businessArea={businessArea}
               setSelected={setSelectedTickets}
             />
           </Box>
-          <UniversalTable<
-            AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-            AllGrievanceTicketQueryVariables
-          >
+          <UniversalRestTable
             isOnPaper={false}
             headCells={headCells}
             rowsPerPageOptions={[10, 15, 20, 40]}
-            query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}
             numSelected={currentSelectedTickets?.length || 0}
-            queriedObjectName="allGrievanceTicket"
-            initialVariables={initialVariables}
+            data={
+              isAllPrograms
+                ? allProgramsGrievanceTicketsData
+                : selectedProgramGrievanceTicketsData
+            }
+            error={isAllPrograms ? errorAll : errorSelected}
+            isLoading={isAllPrograms ? isLoadingAll : isLoadingSelected}
+            queryVariables={queryVariables}
+            setQueryVariables={setQueryVariables}
             defaultOrderBy="created_at"
             defaultOrderDirection="desc"
             onPageChanged={setPage}
-            renderRow={(row) => (
+            itemsCount={
+              isAllPrograms
+                ? allProgramsGrievanceTicketsCount?.count
+                : selectedProgramGrievanceTicketsCount?.count
+            }
+            renderRow={(row: GrievanceTicketList) => (
               <GrievancesTableRow
                 key={row.id}
                 ticket={row}
@@ -331,7 +478,6 @@ export const GrievancesTable = ({
                 )}
                 optionsData={optionsData}
                 setInputValue={setInputValue}
-                initialVariables={initialVariables}
               />
             )}
           />

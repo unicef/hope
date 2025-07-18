@@ -5,10 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 
-from graphql import GraphQLError
+from rest_framework.exceptions import ValidationError
 
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
@@ -28,14 +27,13 @@ def download_payment_verification_plan(  # type: ignore
 ) -> Union[
     "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
 ]:
-    payment_verification_plan_id = decode_id_string(verification_id)
-    payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
-    if not request.user.has_permission(
+    payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=verification_id)
+    if not request.user.has_perm(
         Permissions.PAYMENT_VERIFICATION_EXPORT.value, payment_verification_plan.business_area
     ):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
     if payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX:
-        raise GraphQLError("You can only download verification file when XLSX channel is selected")
+        raise ValidationError("You can only download verification file when XLSX channel is selected")
 
     if payment_verification_plan.has_xlsx_payment_verification_plan_file:
         if not payment_verification_plan.xlsx_payment_verification_plan_file_was_downloaded:
@@ -55,14 +53,13 @@ def download_payment_plan_payment_list(  # type: ignore # missing return
 ) -> Union[
     "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
 ]:
-    payment_plan_id_str = decode_id_string(payment_plan_id)
-    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id_str)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
-    if not request.user.has_permission(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
+    if not request.user.has_perm(Permissions.PM_VIEW_LIST.value, payment_plan.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     if payment_plan.status not in (PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
-        raise GraphQLError("Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.")
+        raise ValidationError("Export XLSX is possible only for Payment Plan within status LOCK, ACCEPTED or FINISHED.")
 
     if payment_plan.has_export_file:
         return redirect(payment_plan.payment_list_export_file_link)  # type: ignore # FIXME
@@ -76,10 +73,9 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
 ) -> Union[
     "HttpResponseRedirect", "HttpResponseRedirect", "HttpResponsePermanentRedirect", "HttpResponsePermanentRedirect"
 ]:
-    payment_plan_id_str = decode_id_string(payment_plan_id)
-    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id_str)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
-    if not request.user.has_permission(Permissions.PM_EXPORT_PDF_SUMMARY.value, payment_plan.business_area):
+    if not request.user.has_perm(Permissions.PM_EXPORT_PDF_SUMMARY.value, payment_plan.business_area):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     if payment_plan.status not in (
@@ -87,7 +83,7 @@ def download_payment_plan_summary_pdf(  # type: ignore # missing return
         PaymentPlan.Status.ACCEPTED,
         PaymentPlan.Status.FINISHED,
     ):  # pragma: no cover
-        raise GraphQLError("Export PDF is possible only for Payment Plan within status IN_REVIEW/ACCEPTED/FINISHED.")
+        raise ValidationError("Export PDF is possible only for Payment Plan within status IN_REVIEW/ACCEPTED/FINISHED.")
 
     if payment_plan.export_pdf_file_summary and payment_plan.export_pdf_file_summary.file:
         return redirect(payment_plan.export_pdf_file_summary.file.url)

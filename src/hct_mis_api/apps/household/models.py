@@ -53,10 +53,8 @@ from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     InternalDataFieldModel,
     MergeStatusModel,
-    RepresentationManager,
-    SoftDeletableRepresentationMergeStatusModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
-    SoftDeletableRepresentationPendingManager,
+    PendingManager,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
@@ -339,7 +337,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
 class Household(
     InternalDataFieldModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
@@ -364,7 +362,6 @@ class Household(
             "zip_code",
             "size",
             "address",
-            "admin_area",
             "admin1",
             "admin2",
             "admin3",
@@ -479,10 +476,6 @@ class Household(
         on_delete=models.PROTECT,
         help_text="Household country",
     )
-    admin_area = models.ForeignKey(
-        "geo.Area", null=True, on_delete=models.SET_NULL, blank=True, help_text="Household lowest administrative area"
-    )
-    """location contains lowest administrative area info"""
     admin1 = models.ForeignKey(
         "geo.Area",
         null=True,
@@ -762,14 +755,17 @@ class Household(
         self.withdrawn_date = None
         self.save()
 
+    @property
+    def admin_area(self) -> Optional[Area]:
+        """Returns the lowest admin area of the household."""
+        return self.admin4 or self.admin3 or self.admin2 or self.admin1
+
     def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
         """Propagates admin1,2,3,4 based on admin_area parents"""
         admins = ["admin1", "admin2", "admin3", "admin4"]
 
         if not new_admin_area:
             new_admin_area = self.admin_area
-        else:
-            self.admin_area = new_admin_area
         if not new_admin_area:
             return
         for admin in admins:
@@ -782,7 +778,7 @@ class Household(
             new_admin_area = getattr(new_admin_area, "parent", None)
 
         if save:
-            self.save(update_fields=["admin_area"] + admins)
+            self.save(update_fields=admins)
 
     @property
     def sanction_list_possible_match(self) -> bool:
@@ -882,7 +878,7 @@ class DocumentType(TimeStampedUUIDModel):
         return list(cls.objects.all().only("key").values_list("key", flat=True))
 
 
-class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
+class Document(AbstractSyncable, SoftDeletableMergeStatusModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
     STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
@@ -906,8 +902,6 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
-
-    is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -928,8 +922,6 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
     class Meta:
         constraints = [
             # if document_type.unique_for_individual=True then document of this type must be unique for an individual
-            # is_original = True -> 1 original instance of document
-            # is_original = False -> 1 representation of document per program
             UniqueConstraint(
                 fields=["individual", "type", "country", "program"],
                 condition=Q(
@@ -946,7 +938,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
             ),
             # document_number must be unique across all documents of the same type
             UniqueConstraint(
-                fields=["document_number", "type", "country", "program", "is_original"],
+                fields=["document_number", "type", "country", "program"],
                 condition=Q(Q(is_removed=False) & Q(status="VALID") & Q(rdi_merge_status=MergeStatusModel.MERGED)),
                 name="unique_if_not_removed_and_valid_for_representations",
             ),
@@ -968,7 +960,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         self.save()
 
 
-class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
+class IndividualIdentity(SoftDeletableMergeStatusModel, TimeStampedModel):
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
     partner = models.ForeignKey(
         "account.Partner",
@@ -978,7 +970,6 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
     number = models.CharField(max_length=255)
-    is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -995,7 +986,7 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
         return f"{self.partner} {self.individual} {self.number}"
 
 
-class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
+class IndividualRoleInHousehold(SoftDeletableMergeStatusModel, TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
         "household.Individual",
         on_delete=models.CASCADE,
@@ -1011,8 +1002,6 @@ class IndividualRoleInHousehold(SoftDeletableRepresentationMergeStatusModel, Tim
         blank=True,
         choices=ROLE_CHOICE,
     )
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -1044,7 +1033,7 @@ class IndividualCollection(UnicefIdentifiedModel):
 
 class Individual(
     InternalDataFieldModel,
-    SoftDeletableRepresentationMergeStatusModelWithDate,
+    SoftDeletableMergeStatusModel,
     TimeStampedUUIDModel,
     AbstractSyncable,
     ConcurrencyModel,
@@ -1526,10 +1515,6 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    is_original = models.BooleanField(db_index=True, default=False)
-
-    objects = RepresentationManager()
-    original_and_repr_objects = models.Manager()
 
 
 class XlsxUpdateFile(TimeStampedUUIDModel):
@@ -1542,7 +1527,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
 
 
 class PendingHousehold(Household):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     @property
     def individuals(self) -> QuerySet:
@@ -1571,7 +1556,7 @@ class PendingHousehold(Household):
 
 
 class PendingIndividual(Individual):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     @property
     def households_and_roles(self) -> QuerySet:
@@ -1596,7 +1581,7 @@ class PendingIndividual(Individual):
 
 
 class PendingIndividualIdentity(IndividualIdentity):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True
@@ -1605,7 +1590,7 @@ class PendingIndividualIdentity(IndividualIdentity):
 
 
 class PendingDocument(Document):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True
@@ -1614,7 +1599,7 @@ class PendingDocument(Document):
 
 
 class PendingIndividualRoleInHousehold(IndividualRoleInHousehold):
-    objects = SoftDeletableRepresentationPendingManager()
+    objects = PendingManager()
 
     class Meta:
         proxy = True

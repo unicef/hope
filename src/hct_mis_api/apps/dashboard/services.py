@@ -103,7 +103,6 @@ class DashboardCacheBase(Protocol):
                 "business_area",
                 "household",
                 "household__admin1",
-                "household__admin_area",
                 "household__program",
                 "program",
                 "financial_service_provider",
@@ -160,9 +159,7 @@ class DashboardCacheBase(Protocol):
             business_area_name=Coalesce(F("business_area__name"), Value("Unknown Country")),
             region_name=Coalesce(F("business_area__region_name"), Value("Unknown Region")),
             currency_code=Coalesce(F("currency"), Value("UNK")),
-            admin1_name=Coalesce(
-                F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown Admin1")
-            ),
+            admin1_name=Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
             program_name=Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
             sector_name=Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
             fsp_name=Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),
@@ -207,10 +204,10 @@ class DashboardCacheBase(Protocol):
             households_qs = (
                 Household.objects.using("read_only")
                 .filter(id__in=batch_ids)
-                .select_related("admin1", "admin_area", "business_area")
+                .select_related("admin1", "business_area")
                 .annotate(
                     pwd_count_calc=get_pwd_count_expression(),
-                    admin1_name_hh=Coalesce(F("admin1__name"), F("admin_area__name"), Value("Unknown Admin1")),
+                    admin1_name_hh=Coalesce(F("admin1__name"), Value("Unknown Admin1")),
                     country_name_hh=Coalesce(F("business_area__name"), Value("Unknown Country")),
                 )
                 .values(
@@ -245,9 +242,7 @@ class DashboardCacheBase(Protocol):
             "business_area_name": Coalesce(F("business_area__name"), Value("Unknown Country")),
             "region_name": Coalesce(F("business_area__region_name"), Value("Unknown Region")),
             "currency_code": Coalesce(F("currency"), Value("UNK")),
-            "admin1_name": Coalesce(
-                F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown Admin1")
-            ),
+            "admin1_name": Coalesce(F("household__admin1__name"), Value("Unknown Admin1")),
             "program_name": Coalesce(F("program__name"), F("household__program__name"), Value("Unknown Program")),
             "sector_name": Coalesce(F("program__sector"), F("household__program__sector"), Value("Unknown Sector")),
             "fsp_name": Coalesce(F("financial_service_provider__name"), Value("Unknown FSP")),

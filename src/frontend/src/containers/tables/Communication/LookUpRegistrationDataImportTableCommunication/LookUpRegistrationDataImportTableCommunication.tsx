@@ -1,15 +1,16 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import styled from 'styled-components';
-import {
-  AllRegistrationDataImportsQueryVariables,
-  RegistrationDataImportNode,
-  useAllRegistrationDataImportsQuery,
-} from '@generated/graphql';
+import { RestService } from '@restgenerated/services/RestService';
+import type { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
+import type { PaginatedRegistrationDataImportListList } from '@restgenerated/models/PaginatedRegistrationDataImportListList';
+import type { CountResponse } from '@restgenerated/models/CountResponse';
 import { TableWrapper } from '@components/core/TableWrapper';
+import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { decodeIdString } from '@utils/utils';
-import { UniversalTable } from '../../UniversalTable';
+import { createApiParams } from '@utils/apiUtils';
 import { headCells } from './LookUpRegistrationDataImportTableHeadCellsCommunication';
 import { LookUpRegistrationDataImportTableRowCommunication } from './LookUpRegistrationDataImportTableRowCommunication';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -42,61 +43,108 @@ function LookUpRegistrationDataImportTableCommunication({
 }: LookUpRegistrationDataImportTableCommunicationProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables = {
-    search: filter.search,
-    program: programId,
-    importedBy: filter.importedBy
-      ? decodeIdString(filter.importedBy)
-      : undefined,
-    status: filter.status !== '' ? filter.status : undefined,
+
+  const initialQueryVariables = useMemo(() => {
+    return {
+      businessAreaSlug: businessArea,
+      programSlug: programId,
+      search: filter.search,
+      importedById: filter.importedBy
+        ? decodeIdString(filter.importedBy)
+        : undefined,
+      status: filter.status !== '' ? filter.status : undefined,
+      importDateRange: JSON.stringify({
+        min: filter.importDateRangeMin || null,
+        max: filter.importDateRangeMax || null,
+      }),
+      totalHouseholdsCountWithValidPhoneNoMin:
+        filter.totalHouseholdsCountWithValidPhoneNoMin || undefined,
+      totalHouseholdsCountWithValidPhoneNoMax:
+        filter.totalHouseholdsCountWithValidPhoneNoMax || undefined,
+    };
+  }, [
     businessArea,
-    importDateRange: JSON.stringify({
-      min: filter.importDateRangeMin || null,
-      max: filter.importDateRangeMax || null,
-    }),
-    totalHouseholdsCountWithValidPhoneNoMin:
-      filter.totalHouseholdsCountWithValidPhoneNoMin || null,
-    totalHouseholdsCountWithValidPhoneNoMax:
-      filter.totalHouseholdsCountWithValidPhoneNoMax || null,
-  };
+    programId,
+    filter.search,
+    filter.importedBy,
+    filter.status,
+    filter.importDateRangeMin,
+    filter.importDateRangeMax,
+    filter.totalHouseholdsCountWithValidPhoneNoMin,
+    filter.totalHouseholdsCountWithValidPhoneNoMax,
+  ]);
+
+  const [queryVariables, setQueryVariables] = useState(initialQueryVariables);
+  useEffect(() => {
+    setQueryVariables(initialQueryVariables);
+  }, [initialQueryVariables]);
+
+  const { data, isLoading, error } =
+    useQuery<PaginatedRegistrationDataImportListList>({
+      queryKey: [
+        'businessAreasProgramsRegistrationDataImportsList',
+        queryVariables,
+        programId,
+        businessArea,
+      ],
+      queryFn: () =>
+        RestService.restBusinessAreasProgramsRegistrationDataImportsList(
+          createApiParams(
+            { businessAreaSlug: businessArea, programSlug: programId },
+            queryVariables,
+            { withPagination: true },
+          ),
+        ),
+    });
+
+  const { data: countData } = useQuery<CountResponse>({
+    queryKey: [
+      'businessAreasProgramsRegistrationDataImportsCount',
+      programId,
+      businessArea,
+      queryVariables,
+    ],
+    queryFn: () =>
+      RestService.restBusinessAreasProgramsRegistrationDataImportsCountRetrieve(
+        createApiParams(
+          { businessAreaSlug: businessArea, programSlug: programId },
+          queryVariables,
+        ),
+      ),
+  });
 
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
 
+  const renderRow = (
+    registrationDataImport: RegistrationDataImportList,
+  ): ReactElement => (
+    <LookUpRegistrationDataImportTableRowCommunication
+      key={registrationDataImport.id}
+      radioChangeHandler={enableRadioButton && handleRadioChange}
+      selectedRDI={selectedRDI}
+      registrationDataImport={registrationDataImport}
+      canViewDetails={canViewDetails}
+    />
+  );
+
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<
-        RegistrationDataImportNode,
-        AllRegistrationDataImportsQueryVariables
-      >
+      <UniversalRestTable
         title={noTitle ? null : t('List of Imports')}
-        getTitle={(data) =>
-          noTitle
-            ? null
-            : `${t('List of Imports')} (${
-                data.allRegistrationDataImports.totalCount
-              })`
-        }
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
-        defaultOrderBy="importDate"
-        defaultOrderDirection="desc"
-        rowsPerPageOptions={[10, 15, 20]}
-        query={useAllRegistrationDataImportsQuery}
-        queriedObjectName="allRegistrationDataImports"
-        initialVariables={initialVariables}
-        renderRow={(row) => (
-          <LookUpRegistrationDataImportTableRowCommunication
-            key={row.id}
-            radioChangeHandler={enableRadioButton && handleRadioChange}
-            selectedRDI={selectedRDI}
-            registrationDataImport={row}
-            canViewDetails={canViewDetails}
-          />
-        )}
+        renderRow={renderRow}
+        data={data}
+        error={error}
+        isLoading={isLoading}
+        queryVariables={queryVariables}
+        setQueryVariables={setQueryVariables}
+        itemsCount={countData?.count}
       />
     </TableWrapper>
   );
+
   return noTableStyling ? (
     <NoTableStyling>{renderTable()}</NoTableStyling>
   ) : (
