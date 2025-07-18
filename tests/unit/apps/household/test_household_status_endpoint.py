@@ -264,3 +264,13 @@ class TestDetails(TestCase):
         HouseholdFactory(detail_id=detail_id)
         response = self.api_client.get(f"/api/hh-status?detail_id={detail_id}")
         self.assertEqual(response.status_code, 400)
+
+    def test_documents_count_gt_1(self) -> None:
+        household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
+        individual = individuals[0]
+        document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
+        PendingDocumentFactory(individual=individual, type=document_type, document_number="123")
+        PendingDocumentFactory(individual=individual, type=document_type, document_number="123")
+
+        response = self.api_client.get("/api/hh-status?tax_id=123")
+        self.assertEqual(response.status_code, 400)
