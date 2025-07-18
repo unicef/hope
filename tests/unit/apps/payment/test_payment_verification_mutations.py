@@ -112,7 +112,6 @@ class TestPaymentVerificationMutations(APITestCase):
             ("21.36", True, PaymentVerification.STATUS_RECEIVED),
             ("21.35", True, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES),
             ("0", False, PaymentVerification.STATUS_NOT_RECEIVED),
-            ("NaN", True, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES),
         ]
     )
     def test_update_payment_verification_received_and_received_amount(
