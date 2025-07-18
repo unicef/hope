@@ -132,6 +132,20 @@ class TestPaymentVerificationMutations(APITestCase):
         self.assertEqual(payment_verification.received_amount, Decimal(received_amount))
         self.assertEqual(payment_verification.status, status)
 
+    def test_update_payment_verification_with_decimal_NaN_validation(self) -> None:
+        from hct_mis_api.apps.payment.mutations import (
+            UpdatePaymentVerificationReceivedAndReceivedAmount,
+        )
+
+        payment_verification = self.verification.payment_record_verifications.first()
+        self.assertIsNone(payment_verification.received_amount)
+        self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
+        payment_verification_id = encode_id_base64_required(payment_verification.id, "PaymentVerification")
+        with self.assertRaisesMessage(GraphQLError, "NaN is not allowed"):
+            UpdatePaymentVerificationReceivedAndReceivedAmount().mutate(
+                None, self.info, payment_verification_id, received_amount=Decimal("NaN"), received=True
+            )
+
     def test_update_payment_verification_received_and_received_amount_update_time_restricted(self) -> None:
         from hct_mis_api.apps.payment.mutations import (
             UpdatePaymentVerificationReceivedAndReceivedAmount,
