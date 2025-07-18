@@ -929,9 +929,9 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, PermissionMutation
         for field_name, item in household_data.items():
             if field_name == "flex_fields":
                 for flex_field_name in item.keys():
-                    household_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
-                        flex_field_name
-                    )
+                    flex_field = household_data["flex_fields"][flex_field_name]
+                    if isinstance(flex_field, dict):
+                        flex_field["approve_status"] = flex_fields_approve_data.get(flex_field_name)
             if field_name == "roles":
                 role_lookup = {
                     role["individual_id"]: role["approve_status"] for role in household_approve_data.get("roles", [])

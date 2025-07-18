@@ -47,7 +47,9 @@ function RequestedHouseholdDataChangeTable(
   const entries = Object.entries(householdData).filter(
     ([key]) => key !== 'roles',
   );
-  const entriesFlexFields = Object.entries(flexFields);
+  const entriesFlexFields = Object.entries(flexFields).filter(
+    ([key]) => key !== 'approve_status',
+  );
   const fieldsDict = useArrayToDict(
     data?.allEditHouseholdFieldsAttributes,
     'name',
@@ -75,6 +77,7 @@ function RequestedHouseholdDataChangeTable(
   };
   const roles =
     ticket.householdDataUpdateTicketDetails.householdData.roles || [];
+
 
   return (
     <StyledTable>

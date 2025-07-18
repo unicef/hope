@@ -164,7 +164,7 @@ class HouseholdDataUpdateService(DataChangeService):
         flex_fields = {
             field: data.get("value")
             for field, data in flex_fields_with_additional_data.items()
-            if data.get("approve_status") is True
+            if isinstance(data, dict) and data.get("approve_status") is True
         }
         if country_origin.get("value") is not None:
             household_data["country_origin"]["value"] = geo_models.Country.objects.filter(

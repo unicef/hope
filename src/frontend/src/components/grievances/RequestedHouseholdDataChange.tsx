@@ -142,7 +142,10 @@ export function RequestedHouseholdDataChange({
         // Flex fields
         const flexFieldsApproveData: { [key: string]: boolean } = {};
         flexFieldsEntries.forEach(([key]) => {
-          flexFieldsApproveData[key] = values.selectedFlexFields.includes(key);
+          if (typeof flexFields[key] === 'object' && flexFields[key] !== null) {
+            flexFieldsApproveData[key] =
+              values.selectedFlexFields.includes(key);
+          }
         });
         // Roles
         const allRoles =
