@@ -66,16 +66,22 @@ function EditHouseholdDataChange({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { data: householdFieldsData, isLoading: householdFieldsLoading } =
-    useQuery({
-      queryKey: ['householdFieldsAttributes', businessArea],
-      queryFn: () =>
-        RestService.restBusinessAreasGrievanceTicketsAllEditHouseholdFieldsAttributesList(
-          {
-            businessAreaSlug: businessArea,
-          },
-        ),
-    });
+  useEffect(() => {
+    if (
+      fullHousehold?.household?.individualsAndRoles &&
+      (!values.roles ||
+        values.roles.length !==
+          fullHousehold.household.individualsAndRoles.length)
+    ) {
+      setFieldValue(
+        'roles',
+        fullHousehold.household.individualsAndRoles.map((roleItem) => ({
+          individual: roleItem.individual.id,
+          newRole: '',
+        })),
+      );
+    }
+  }, [fullHousehold, setFieldValue, values.roles]);
 
   const householdFieldsDict = householdFieldsData;
 
@@ -95,7 +101,6 @@ function EditHouseholdDataChange({
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
-  console.log('values.roles', values.roles);
 
   return (
     !isEditTicket && (
