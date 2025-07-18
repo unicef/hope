@@ -5,7 +5,6 @@ import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore
 import TargetPopulationDetails from '@components/targeting/TargetPopulationDetails';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { TargetPopulationDetail } from '@restgenerated/models/TargetPopulationDetail';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
@@ -20,28 +19,19 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { isStandardDctType, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
-  const { data, loading, error, startPolling, stopPolling } =
-    useTargetPopulationQuery({
-      variables: { id },
-      fetchPolicy: 'cache-and-network',
-    });
 
-  const { businessArea } = useBaseUrl();
-  const { data: businessAreaData } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
-
+  const { businessAreaSlug, programSlug } = useBaseUrl();
   const {
     data: paymentPlan,
     isLoading: loading,
     error,
   } = useQuery<TargetPopulationDetail>({
-    queryKey: ['targetPopulation', businessArea, id, programId],
+    queryKey: ['targetPopulation', businessAreaSlug, id, programSlug],
     queryFn: () =>
       RestService.restBusinessAreasProgramsTargetPopulationsRetrieve({
-        businessAreaSlug: businessArea,
+        businessAreaSlug: businessAreaSlug,
         id: id,
-        programSlug: programId,
+        programSlug,
       }),
     refetchInterval: (query) => {
       const data = query.state.data;
@@ -58,12 +48,6 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || permissions === null || !businessAreaData) return null;
-
-  const { paymentPlan } = data;
-    const { data: programData } = useProgramQuery({
-    variables: { id: programId },
-  });
 
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
@@ -87,7 +71,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
         permissions={permissions}
-        screenBeneficiary={programData?.program?.screenBeneficiary}
+        screenBeneficiary={paymentPlan?.program?.screenBeneficiary}
       />
     </>
   );

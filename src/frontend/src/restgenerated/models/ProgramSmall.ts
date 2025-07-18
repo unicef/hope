@@ -25,5 +25,6 @@ export type ProgramSmall = {
      * * `FINISHED` - Finished
      */
     status: Status791Enum;
+    readonly screenBeneficiary: boolean;
 };
 

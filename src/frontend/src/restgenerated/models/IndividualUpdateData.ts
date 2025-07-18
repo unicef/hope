@@ -2,7 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BankTransfer } from './BankTransfer';
+import type { CreateAccount } from './CreateAccount';
+import type { EditAccount } from './EditAccount';
 import type { EditIndividualDocument } from './EditIndividualDocument';
 import type { EditIndividualIdentity } from './EditIndividualIdentity';
 import type { IndividualDocument } from './IndividualDocument';
@@ -41,7 +42,8 @@ export type IndividualUpdateData = {
     identities?: Array<IndividualIdentity>;
     identitiesToRemove?: Array<number>;
     identitiesToEdit?: Array<EditIndividualIdentity>;
-    paymentChannels?: Array<BankTransfer>;
+    accounts?: Array<CreateAccount>;
+    accountsToEdit?: Array<EditAccount>;
     preferredLanguage?: string;
     flexFields?: any;
     paymentDeliveryPhoneNo?: string;
