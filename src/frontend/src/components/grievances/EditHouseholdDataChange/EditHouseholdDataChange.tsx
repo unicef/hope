@@ -1,8 +1,9 @@
+import React, { ReactElement, useEffect } from 'react';
 import { Button, Grid2 as Grid, Typography } from '@mui/material';
+import { Field, FieldArray } from 'formik';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { AddCircleOutline } from '@mui/icons-material';
-import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
-import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
@@ -18,6 +19,7 @@ export interface EditHouseholdDataChangeProps {
   values;
   setFieldValue;
 }
+
 function EditHouseholdDataChange({
   values,
   setFieldValue,
@@ -51,6 +53,7 @@ function EditHouseholdDataChange({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.selectedHousehold]);
+
   useEffect(() => {
     if (
       !values.householdDataUpdateFields ||
@@ -81,12 +84,19 @@ function EditHouseholdDataChange({
       <div>{`You have to select a ${beneficiaryGroup?.groupLabel} earlier`}</div>
     );
   }
-  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
+  if (
+    fullHouseholdLoading ||
+    householdFieldsLoading ||
+    !fullHousehold ||
+    householdsChoicesLoading
+  ) {
     return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
+  console.log('values.roles', values.roles);
+
   return (
     !isEditTicket && (
       <>
@@ -100,7 +110,6 @@ function EditHouseholdDataChange({
               <>
                 {(values.householdDataUpdateFields || []).map((item, index) => (
                   <EditHouseholdDataChangeFieldRow
-                    /* eslint-disable-next-line react/no-array-index-key */
                     key={`${index}-${item.fieldName}`}
                     itemValue={item}
                     index={index}
@@ -127,6 +136,39 @@ function EditHouseholdDataChange({
               </>
             )}
           />
+        </Grid>
+
+        {/* Roles in Household Section */}
+        <Title>
+          <Typography variant="h6">{t('Roles in Household')}</Typography>
+        </Title>
+        <Grid container spacing={2} alignItems="center">
+          <Grid size={{ xs: 4 }}>
+            <strong>{t('Full Name')}</strong>
+          </Grid>
+          <Grid size={{ xs: 4 }}>
+            <strong>{t('Current Role')}</strong>
+          </Grid>
+          <Grid size={{ xs: 4 }}>
+            <strong>{t('New Role')}</strong>
+          </Grid>
+          {fullHousehold.household.individualsAndRoles?.map(
+            (roleItem, index) => (
+              <React.Fragment key={roleItem.id}>
+                <Grid size={{ xs: 4 }}>{roleItem.individual.fullName}</Grid>
+                <Grid size={{ xs: 4 }}>{roleItem.role}</Grid>
+                <Grid size={{ xs: 4 }}>
+                  <Field
+                    name={`roles.${index}.newRole`}
+                    component={FormikSelectField}
+                    label={t('New Role')}
+                    choices={roleChoices}
+                    fullWidth
+                  />
+                </Grid>
+              </React.Fragment>
+            ),
+          )}
         </Grid>
       </>
     )
