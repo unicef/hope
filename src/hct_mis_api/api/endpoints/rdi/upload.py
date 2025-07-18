@@ -23,7 +23,6 @@ from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     HEAD,
     IDENTIFICATION_TYPE_CHOICE,
-    NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
@@ -219,19 +218,6 @@ class HouseholdSerializer(serializers.ModelSerializer):
         return ret
 
     def validate(self, attrs: Dict) -> Dict:
-        def get_related() -> int:
-            return len([m for m in attrs["members"] if m["relationship"] not in [NON_BENEFICIARY]])
-
-        # TODO  - 221086 how to check this? Data collecting type in the program does not store information if individual data is collected
-        # ctype = attrs.get("collect_individual_data", "")
-        # if ctype == COLLECT_TYPE_NONE:
-        #     if not attrs.get("size", 0) > 0:
-        #         raise ValidationError({"size": ["This field is required 2"]})
-        # elif ctype == COLLECT_TYPE_PARTIAL:
-        #     if not attrs.get("size", 0) > get_related():
-        #         raise ValidationError({"size": ["Households size must be greater than provided details"]})
-        # else:
-        #     attrs["size"] = get_related()
         return attrs
 
 

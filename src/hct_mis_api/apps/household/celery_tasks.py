@@ -117,13 +117,9 @@ def interval_recalculate_population_fields_task() -> None:
 def calculate_children_fields_for_not_collected_individual_data() -> int:
     from django.db.models.functions import Coalesce
 
-    from hct_mis_api.apps.household.models import (
-        COLLECT_TYPE_FULL,
-        COLLECT_TYPE_PARTIAL,
-        Household,
-    )
+    from hct_mis_api.apps.registration_data.models import Household
 
-    return Household.objects.exclude(collect_individual_data__in=[COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL]).update(
+    return Household.objects.filter(program__data_collecting_type__recalculate_composition=True).update(
         # TODO: count differently or add all the fields for the new gender options
         children_count=Coalesce("female_age_group_0_5_count", 0)
         + Coalesce("female_age_group_6_11_count", 0)
