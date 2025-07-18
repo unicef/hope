@@ -98,6 +98,7 @@ class TestHouseholdDataUpdateService(TestCase):
                 {
                     "value": "PRIMARY",
                     "individual_id": ind_id_decoded,
+                    "full_name": individual.full_name,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }
@@ -141,7 +142,7 @@ class TestHouseholdDataUpdateService(TestCase):
         ticket = service.save()[0]
         details = ticket.ticket_details
         expected_dict = {
-            "roles": [],
+            # "roles": [],
             "country": {"value": "AGO", "approve_status": False, "previous_value": None},
             "flex_fields": {},
         }
@@ -166,6 +167,7 @@ class TestHouseholdDataUpdateService(TestCase):
                 {  # type: ignore
                     "value": "ALTERNATE",
                     "individual_id": ind_id_decoded,
+                    "full_name": individual.full_name,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }
@@ -211,6 +213,7 @@ class TestHouseholdDataUpdateService(TestCase):
                 {
                     "value": "ALTERNATE",
                     "individual_id": ind_id_decoded,
+                    "full_name": individual.full_name,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }
@@ -239,6 +242,7 @@ class TestHouseholdDataUpdateService(TestCase):
                 {
                     "value": "PRIMARY",
                     "individual_id": ind_id_decoded,
+                    "full_name": individual.full_name,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }
@@ -284,6 +288,7 @@ class TestHouseholdDataUpdateService(TestCase):
                 {
                     "value": "PRIMARY",
                     "individual_id": ind_id_decoded,
+                    "full_name": individual.full_name,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }

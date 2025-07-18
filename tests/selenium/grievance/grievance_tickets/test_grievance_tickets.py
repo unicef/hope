@@ -823,10 +823,10 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getInputValue().send_keys("1")
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceDetailsPage.getCheckboxHouseholdData()
-        assert "Roles" in pageGrievanceDetailsPage.getRows()[0].text
-        assert "- -" in pageGrievanceDetailsPage.getRows()[0].text
-        assert "Female Age Group 12 17" in pageGrievanceDetailsPage.getRows()[1].text
-        assert "- 1" in pageGrievanceDetailsPage.getRows()[1].text
+        # assert "Roles" in pageGrievanceDetailsPage.getRows()[0].text
+        # assert "- -" in pageGrievanceDetailsPage.getRows()[0].text
+        assert "Female Age Group 12 17" in pageGrievanceDetailsPage.getRows()[0].text
+        assert "- 1" in pageGrievanceDetailsPage.getRows()[0].text
 
     @pytest.mark.parametrize(
         "test_data",

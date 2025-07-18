@@ -42,6 +42,7 @@ def _prepare_roles_with_approve_status(roles_data: List[Dict[Any, Any]]) -> List
                 "approve_status": False,
                 "previous_value": individual.role,
                 "individual_id": individual_id,
+                "full_name": individual.full_name,
             }
         )
     return roles_with_approve_status
@@ -87,7 +88,8 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
-        household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)  # type: ignore
+        if roles:
+            household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)  # type: ignore
 
         ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
             household_data=household_data_with_approve_status,
@@ -138,7 +140,8 @@ class HouseholdDataUpdateService(DataChangeService):
             for field, value in flex_fields.items()
         }
         household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
-        household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)  # type: ignore
+        if roles:
+            household_data_with_approve_status["roles"] = _prepare_roles_with_approve_status(roles)  # type: ignore
         ticket_details.household_data = household_data_with_approve_status
         ticket_details.save()
         self.grievance_ticket.refresh_from_db()
