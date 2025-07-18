@@ -257,6 +257,7 @@ class TestIndividualList:
                 "slug": individual.program.slug,
                 "programme_code": individual.program.programme_code,
                 "status": individual.program.status,
+                "screen_beneficiary": individual.program.screen_beneficiary,
             }
             assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 
@@ -340,7 +341,7 @@ class TestIndividualList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 4
-            assert len(ctx.captured_queries) == 31
+            assert len(ctx.captured_queries) == 32
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -359,7 +360,7 @@ class TestIndividualList:
             etag_third_call = response.headers["etag"]
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
-            assert len(ctx.captured_queries) == 26
+            assert len(ctx.captured_queries) == 27
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -369,7 +370,7 @@ class TestIndividualList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 26
+            assert len(ctx.captured_queries) == 27
 
         self.individual1_1.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -379,7 +380,7 @@ class TestIndividualList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 3
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 23
+            assert len(ctx.captured_queries) == 24
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.api_client.get(self.list_url)
@@ -1208,6 +1209,7 @@ class TestIndividualGlobalViewSet:
                 "slug": individual.program.slug,
                 "programme_code": individual.program.programme_code,
                 "status": individual.program.status,
+                "screen_beneficiary": individual.program.screen_beneficiary,
             }
             assert individual_result["last_registration_date"] == f"{individual.last_registration_date:%Y-%m-%d}"
 

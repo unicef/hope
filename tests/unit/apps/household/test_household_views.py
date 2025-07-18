@@ -143,6 +143,7 @@ class TestHouseholdList:
                 "slug": household.program.slug,
                 "programme_code": household.program.programme_code,
                 "status": household.program.status,
+                "screen_beneficiary": household.program.screen_beneficiary,
             }
             assert household_result["status"] == household.status
             assert household_result["size"] == household.size
@@ -272,7 +273,7 @@ class TestHouseholdList:
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(response.json()["results"]) == 2
-            assert len(ctx.captured_queries) == 24
+            assert len(ctx.captured_queries) == 25
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -293,7 +294,7 @@ class TestHouseholdList:
             assert json.loads(cache.get(etag_third_call)[0].decode("utf8")) == response.json()
             assert etag_third_call not in [etag, etag_second_call]
             # 4 queries are saved because of cached permissions calculations
-            assert len(ctx.captured_queries) == 19
+            assert len(ctx.captured_queries) == 20
 
         set_admin_area_limits_in_program(self.partner, self.program, [self.area1])
         with CaptureQueriesContext(connection) as ctx:
@@ -303,7 +304,7 @@ class TestHouseholdList:
             etag_changed_areas = response.headers["etag"]
             assert json.loads(cache.get(etag_changed_areas)[0].decode("utf8")) == response.json()
             assert etag_changed_areas not in [etag, etag_second_call, etag_third_call]
-            assert len(ctx.captured_queries) == 19
+            assert len(ctx.captured_queries) == 20
 
         self.household2.delete()
         with CaptureQueriesContext(connection) as ctx:
@@ -313,7 +314,7 @@ class TestHouseholdList:
             etag_fourth_call = response.headers["etag"]
             assert len(response.json()["results"]) == 1
             assert etag_fourth_call not in [etag, etag_second_call, etag_third_call, etag_changed_areas]
-            assert len(ctx.captured_queries) == 16
+            assert len(ctx.captured_queries) == 17
 
         # no change - use cache
         with CaptureQueriesContext(connection) as ctx:
@@ -1007,6 +1008,7 @@ class TestHouseholdGlobalViewSet:
                 "slug": household.program.slug,
                 "programme_code": household.program.programme_code,
                 "status": household.program.status,
+                "screen_beneficiary": household.program.screen_beneficiary,
             }
             assert household_result_first["status"] == household.status
             assert household_result_first["size"] == household.size
