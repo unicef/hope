@@ -1,6 +1,3 @@
-import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
-import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -19,8 +16,6 @@ import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/ExistingDocumentFieldArray';
 import { NewDocumentFieldArray } from '@components/grievances/EditIndividualDataChange/NewDocumentFieldArray';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { ExistingAccountsFieldArray } from '../EditIndividualDataChange/ExistingAccountsFieldArray';
-import { NewAccountFieldArray } from '../EditIndividualDataChange/NewAccountFieldArray';
 
 
 const BoxWithBorders = styled.div`

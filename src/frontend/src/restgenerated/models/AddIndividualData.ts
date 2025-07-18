@@ -2,7 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { BankTransfer } from './BankTransfer';
+import type { CreateAccount } from './CreateAccount';
 import type { IndividualDocument } from './IndividualDocument';
 import type { IndividualIdentity } from './IndividualIdentity';
 export type AddIndividualData = {
@@ -35,7 +35,7 @@ export type AddIndividualData = {
     businessArea?: string;
     documents?: Array<IndividualDocument>;
     identities?: Array<IndividualIdentity>;
-    paymentChannels?: Array<BankTransfer>;
+    accounts?: Array<CreateAccount>;
     preferredLanguage?: string;
     flexFields?: any;
     paymentDeliveryPhoneNo?: string;

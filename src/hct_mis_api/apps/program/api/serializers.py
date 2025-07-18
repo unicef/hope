@@ -769,6 +769,7 @@ class ProgramChoicesSerializer(serializers.Serializer):
 
 
 class ProgramSmallSerializer(serializers.ModelSerializer):
+    screen_beneficiary = serializers.BooleanField(read_only=True)
     class Meta:
         model = Program
         fields = (
@@ -777,6 +778,7 @@ class ProgramSmallSerializer(serializers.ModelSerializer):
             "slug",
             "name",
             "status",
+            "screen_beneficiary",
         )
 
 

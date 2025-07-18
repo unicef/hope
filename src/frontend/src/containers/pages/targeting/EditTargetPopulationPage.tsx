@@ -1,10 +1,4 @@
-import { ReactElement, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  PaymentPlanBuildStatus,
-  useBusinessAreaDataQuery,
-  usePaymentPlanQuery,
-} from '@generated/graphql';
+import { ReactElement } from 'react';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import withErrorBoundary from '@components/core/withErrorBoundary';
@@ -15,7 +9,6 @@ import { BusinessArea } from '@restgenerated/models/BusinessArea';
 import { RestService } from '@restgenerated/services/RestService';
 import { useQuery } from '@tanstack/react-query';
 import { isPermissionDeniedError } from '@utils/utils';
-import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
@@ -35,15 +28,6 @@ const EditTargetPopulationPage = (): ReactElement => {
         businessAreaSlug: businessArea,
         id: id,
         programSlug,
-      }),
-  });
-
-
-  const { data: businessAreaData } = useQuery<BusinessArea>({
-    queryKey: ['businessArea', businessArea],
-    queryFn: () =>
-      RestService.restBusinessAreasRetrieve({
-        slug: businessArea,
       }),
   });
 

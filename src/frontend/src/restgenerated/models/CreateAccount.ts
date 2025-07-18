@@ -2,9 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-/**
- * * `UA011603311` - TESTlevel4
- */
-export enum Admin4Enum {
-    UA011603311 = 'UA011603311',
-}
+export type CreateAccount = {
+    name: string;
+    dataFields: any;
+    approveStatus: boolean;
+};
+
