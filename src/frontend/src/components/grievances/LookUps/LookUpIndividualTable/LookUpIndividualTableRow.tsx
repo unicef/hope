@@ -63,7 +63,7 @@ export function LookUpIndividualTableRow({
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align="left">
-        {individual.household?.admin2?.id || '-'}
+        {individual.household?.admin2?.name || '-'}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
