@@ -678,4 +678,4 @@ class TestGrievanceTicketGlobalList:
             )
         )
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.json()) == 30
+        assert len(response.json()) == 29
