@@ -35,7 +35,6 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
             "unicef_id",
             "name",
             "status",
-            "targeting_criteria",
             "total_households_count",
             "currency",
             "total_entitled_quantity",

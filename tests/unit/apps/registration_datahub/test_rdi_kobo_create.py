@@ -6,7 +6,6 @@ from typing import Any, Dict
 from unittest import mock
 
 from django.conf import settings
-from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
@@ -285,7 +284,7 @@ class TestRdiKoboCreateTask(TestCase):
         geopoint = "51.107883 17.038538"
         task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
 
-        expected = Point(x=51.107883, y=17.038538, srid=4326)
+        expected = 51.107883, 17.038538
         result = task._handle_geopoint_field(geopoint, False)
         self.assertEqual(result, expected)
 

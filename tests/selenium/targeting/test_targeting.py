@@ -55,10 +55,7 @@ from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCy
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetingCriteriaRuleFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.targeting.targeting import Targeting
 from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
@@ -259,11 +256,9 @@ def create_targeting() -> PaymentPlan:
     fsp_1.delivery_mechanisms.set([dm_cash])
     fsp_1.allowed_business_areas.add(business_area)
 
-    targeting_criteria = TargetingCriteriaFactory()
     pp = PaymentPlanFactory(
         name="Test Target Population",
         status=PaymentPlan.Status.TP_OPEN,
-        targeting_criteria=targeting_criteria,
         program_cycle=test_program.cycles.first(),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
         created_by=User.objects.filter(email="test@example.com").first(),
@@ -378,7 +373,7 @@ def create_targeting() -> PaymentPlan:
     TargetingCriteriaRuleFactory(
         household_ids=f"{household_1.unicef_id}, {household_2.unicef_id}",
         individual_ids="",
-        targeting_criteria=targeting_criteria,
+        payment_plan=pp,
     )
     PaymentPlanService.create_payments(pp)
     pp.update_population_count_fields()

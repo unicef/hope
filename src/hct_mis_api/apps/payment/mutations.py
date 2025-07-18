@@ -1256,10 +1256,7 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
             steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
             program_cycle=program_cycle,
         )
-        if payment_plan.targeting_criteria:
-            payment_plan_copy.targeting_criteria = PaymentPlanService.copy_target_criteria(
-                payment_plan.targeting_criteria
-            )
+        PaymentPlanService.copy_target_criteria(payment_plan, payment_plan_copy)
 
         payment_plan_copy.save()
         payment_plan_copy.refresh_from_db()

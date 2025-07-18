@@ -93,12 +93,12 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_filter_beneficiary_grou
                 },
                 {
                     'node': {
-                        'name': 'Program with partner access'
+                        'name': 'Program without partner access'
                     }
                 },
                 {
                     'node': {
-                        'name': 'Program without partner access'
+                        'name': 'Program with partner access'
                     }
                 }
             ],
@@ -123,12 +123,12 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_filter_dct 1'] = {
                 },
                 {
                     'node': {
-                        'name': 'Program with partner access'
+                        'name': 'Program without partner access'
                     }
                 },
                 {
                     'node': {
-                        'name': 'Program without partner access'
+                        'name': 'Program with partner access'
                     }
                 }
             ],
@@ -153,12 +153,12 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_unicef_partner 1'] = {
                 },
                 {
                     'node': {
-                        'name': 'Program with partner access'
+                        'name': 'Program without partner access'
                     }
                 },
                 {
                     'node': {
-                        'name': 'Program without partner access'
+                        'name': 'Program with partner access'
                     }
                 }
             ],

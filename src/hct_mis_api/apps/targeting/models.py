@@ -14,12 +14,10 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCollectorRuleFilterBlockBase,
     TargetingCriteriaFilterBase,
-    TargetingCriteriaQueryingBase,
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualRuleFilterBlockBase,
 )
@@ -31,48 +29,13 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
-    """
-    Class with filtering criteria flags and a set of ORed Rules. Rules are either applied for a candidate list
-    (against Golden Record) or for a final list (against the approved candidate list).
-    If flag is applied, target population needs to be filtered by it as an AND condition to the existing set of rules.
-    """
-
-    flag_exclude_if_active_adjudication_ticket = models.BooleanField(
-        default=False,
-        help_text=_(
-            "Exclude households with individuals (members or collectors) that have active adjudication ticket(s)."
-        ),
-    )
-    flag_exclude_if_on_sanction_list = models.BooleanField(
-        default=False,
-        help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
-    )
-
-    def get_rules(self) -> "QuerySet":
-        return self.rules.all()
-
-    def get_excluded_household_ids(self) -> List[str]:
-        if not self.payment_plan.excluded_ids:
-            return []
-        hh_ids_list = []
-        hh_ids_list.extend(hh_id.strip() for hh_id in self.payment_plan.excluded_ids.split(",") if hh_id.strip())
-        return hh_ids_list
-
-    def get_query(self) -> Q:
-        query = super().get_query()
-        if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
-            query &= Q(size__gt=0)
-        return query
-
-
 class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingBase):
     """
     This is a set of ANDed Filters.
     """
 
-    targeting_criteria = models.ForeignKey(
-        "TargetingCriteria",
+    payment_plan = models.ForeignKey(
+        "payment.PaymentPlan",
         related_name="rules",
         on_delete=models.CASCADE,
     )
@@ -154,9 +117,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     @property
     def is_social_worker_program(self) -> bool:
         try:
-            return (
-                self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
-            )
+            return self.targeting_criteria_rule.payment_plan.program_cycle.program.is_social_worker_program
         except (
             AttributeError,
             TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,
@@ -247,9 +208,7 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     )
 
     def get_query(self) -> Q:
-        program = (
-            self.collector_block_filters.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
-        )
+        program = self.collector_block_filters.targeting_criteria_rule.payment_plan.program_cycle.program
         argument = self.arguments[0] if len(self.arguments) else None
         if argument is None:
             return Q()

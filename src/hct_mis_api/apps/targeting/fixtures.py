@@ -9,7 +9,6 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
 from hct_mis_api.apps.targeting.models import (
-    TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
 )
@@ -60,8 +59,3 @@ class TargetingCriteriaRuleFilterFactory(DjangoModelFactory):
 class TargetingCriteriaRuleFactory(DjangoModelFactory):
     class Meta:
         model = TargetingCriteriaRule
-
-
-class TargetingCriteriaFactory(DjangoModelFactory):
-    class Meta:
-        model = TargetingCriteria
