@@ -52,6 +52,11 @@ class TicketPaymentVerificationDetailsExtras(graphene.InputObjectType):
     new_status = graphene.String()
 
 
+class HouseholdUpdateRolesType(graphene.InputObjectType):
+    individual = graphene.GlobalID(node=IndividualNode, required=True)
+    new_role = graphene.String(reqquired=True)
+
+
 class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     admin_area_title = graphene.String()
     status = graphene.String()
@@ -96,6 +101,7 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     currency = graphene.String()
     unhcr_id = graphene.String()
     flex_fields = Arg()
+    roles = graphene.List(HouseholdUpdateRolesType, required=False)
 
 
 class IndividualDocumentObjectType(graphene.InputObjectType):
@@ -168,7 +174,6 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     comms_disability = graphene.String()
     who_answers_phone = graphene.String()
     who_answers_alt_phone = graphene.String()
-    role = graphene.String()
     documents = graphene.List(IndividualDocumentObjectType)
     documents_to_remove = graphene.List(graphene.ID)
     documents_to_edit = graphene.List(EditIndividualDocumentObjectType)

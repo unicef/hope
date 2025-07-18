@@ -19,7 +19,17 @@ class DataChangeValidator:
         if not isinstance(approve_data, dict):
             log_and_raise("Fields must be a dictionary with field name as key and boolean as a value")
 
-        if not all([isinstance(value, bool) for value in approve_data.values()]):
+        # valid roles
+        roles_data = approve_data.get("roles", [])
+        for role in roles_data:
+            if "individual_id" not in role.keys():
+                log_and_raise("Can't find individual_id in role")
+            if "approve_status" not in role.keys():
+                log_and_raise("Can't find approve_status in role")
+            if not isinstance(role["approve_status"], bool):
+                log_and_raise("Value for approve_status must be boolean")
+
+        if not all(isinstance(v, bool) for k, v in approve_data.items() if k != "roles"):
             log_and_raise("Values must be booleans")
 
     @classmethod

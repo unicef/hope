@@ -1664,6 +1664,12 @@ input HouseholdUpdateDataObjectType {
   currency: String
   unhcrId: String
   flexFields: Arg
+  roles: [HouseholdUpdateRolesType]
+}
+
+input HouseholdUpdateRolesType {
+  individual: ID!
+  newRole: String
 }
 
 enum ImportDataDataType {
@@ -2042,7 +2048,6 @@ input IndividualUpdateDataObjectType {
   commsDisability: String
   whoAnswersPhone: String
   whoAnswersAltPhone: String
-  role: String
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
   documentsToEdit: [EditIndividualDocumentObjectType]
