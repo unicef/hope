@@ -99,6 +99,7 @@ class TestHouseholdDataUpdateService(TestCase):
                     "value": "PRIMARY",
                     "individual_id": ind_id_decoded,
                     "full_name": individual.full_name,
+                    "unicef_id": individual.unicef_id,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }
@@ -142,7 +143,6 @@ class TestHouseholdDataUpdateService(TestCase):
         ticket = service.save()[0]
         details = ticket.ticket_details
         expected_dict = {
-            # "roles": [],
             "country": {"value": "AGO", "approve_status": False, "previous_value": None},
             "flex_fields": {},
         }
@@ -164,10 +164,11 @@ class TestHouseholdDataUpdateService(TestCase):
         details = ticket.ticket_details
         expected_dict = {
             "roles": [
-                {  # type: ignore
+                {
                     "value": "ALTERNATE",
                     "individual_id": ind_id_decoded,
                     "full_name": individual.full_name,
+                    "unicef_id": individual.unicef_id,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }
@@ -214,6 +215,7 @@ class TestHouseholdDataUpdateService(TestCase):
                     "value": "ALTERNATE",
                     "individual_id": ind_id_decoded,
                     "full_name": individual.full_name,
+                    "unicef_id": individual.unicef_id,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }
@@ -243,6 +245,7 @@ class TestHouseholdDataUpdateService(TestCase):
                     "value": "PRIMARY",
                     "individual_id": ind_id_decoded,
                     "full_name": individual.full_name,
+                    "unicef_id": individual.unicef_id,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }
@@ -289,6 +292,7 @@ class TestHouseholdDataUpdateService(TestCase):
                     "value": "PRIMARY",
                     "individual_id": ind_id_decoded,
                     "full_name": individual.full_name,
+                    "unicef_id": individual.unicef_id,
                     "approve_status": False,
                     "previous_value": "ALTERNATE",
                 }

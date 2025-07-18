@@ -43,6 +43,7 @@ def _prepare_roles_with_approve_status(roles_data: List[Dict[Any, Any]]) -> List
                 "previous_value": individual.role,
                 "individual_id": individual_id,
                 "full_name": individual.full_name,
+                "unicef_id": individual.unicef_id,
             }
         )
     return roles_with_approve_status
