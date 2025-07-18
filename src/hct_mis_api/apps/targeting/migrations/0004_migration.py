@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0015_migration'),
+        ('payment', '0016_migration'),
         ('targeting', '0003_migration'),
     ]
 
