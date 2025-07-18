@@ -62,10 +62,6 @@ function EditHouseholdDataChange({
         values.roles.length !==
           fullHousehold.household.individualsAndRoles.length)
     ) {
-      console.log(
-        'useefffect roles',
-        fullHousehold.household.individualsAndRoles,
-      );
       setFieldValue(
         'roles',
         fullHousehold.household.individualsAndRoles.map((roleItem) => ({
@@ -100,7 +96,6 @@ function EditHouseholdDataChange({
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
-  console.log('values.roles', values.roles);
 
   return (
     !isEditTicket && (

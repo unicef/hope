@@ -28,7 +28,9 @@ export function RequestedHouseholdDataChange({
 
   const getConfirmationText = (values): string => {
     const allSelected =
-      values.selected.length + values.selectedFlexFields.length || 0;
+      values.selectedRoles.length +
+        values.selected.length +
+        values.selectedFlexFields.length || 0;
     return `You approved ${allSelected} change${
       allSelected === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
@@ -57,7 +59,9 @@ export function RequestedHouseholdDataChange({
 
   const areAllApproved = (values): boolean => {
     const selectedCount =
-      values.selected.length + values.selectedFlexFields.length;
+      values.selected.length +
+      values.selectedFlexFields.length +
+      values.selectedRoles.length;
     const countAll = entries.length + flexFieldsEntries.length;
     return selectedCount === countAll;
   };
@@ -119,21 +123,36 @@ export function RequestedHouseholdDataChange({
               row[1].approve_status,
           )
           .map((row) => row[0]),
+        selectedRoles: (
+          ticket.householdDataUpdateTicketDetails.householdData.roles || []
+        )
+          .filter((role) => role.approve_status)
+          .map((role) => role.individual_id),
       }}
       onSubmit={async (values) => {
-        const householdApproveData = values.selected.reduce((prev, curr) => {
-          // eslint-disable-next-line no-param-reassign
-          prev[curr] = true;
-          return prev;
-        }, {});
-        const flexFieldsApproveData = values.selectedFlexFields.reduce(
-          (prev, curr) => {
-            // eslint-disable-next-line no-param-reassign
-            prev[curr] = true;
-            return prev;
-          },
-          {},
-        );
+        console.log('values1', values);
+        // Build householdApproveData as a flat object
+        const householdApproveData: { [key: string]: boolean } = {};
+        // Top-level fields
+        entries.forEach(([key]) => {
+          if (key !== 'roles' && key !== 'flex_fields') {
+            householdApproveData[key] = values.selected.includes(key);
+          }
+        });
+        // Flex fields
+        const flexFieldsApproveData: { [key: string]: boolean } = {};
+        flexFieldsEntries.forEach(([key]) => {
+          householdApproveData[key] = values.selectedFlexFields.includes(key);
+          flexFieldsApproveData[key] = values.selectedFlexFields.includes(key);
+        });
+        // Roles
+        (
+          ticket.householdDataUpdateTicketDetails.householdData.roles || []
+        ).forEach((role) => {
+          householdApproveData[role.individual_id] =
+            values.selectedRoles.includes(role.individual_id);
+        });
+
         try {
           await mutate({
             variables: {
