@@ -66,10 +66,9 @@ function RequestedHouseholdDataChangeTable({
   const handleSelectBioData = (name): void => {
     handleSelected(name, 'selected', selectedBioData, setFieldValue);
   };
+  const roles =
+    ticket.householdDataUpdateTicketDetails.householdData.roles || [];
 
-  const isSelected = (name: string): boolean => selectedBioData.includes(name);
-  const isSelectedFlexfields = (name: string): boolean =>
-    selectedFlexFields.includes(name);
   return (
     <StyledTable>
       <TableHead>
@@ -90,30 +89,70 @@ function RequestedHouseholdDataChangeTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) =>
-          householdDataRow(
-            row,
-            fieldsDict,
-            isSelected,
-            index,
-            countriesDict,
-            ticket,
-            isEdit,
-            handleSelectBioData,
-          ),
-        )}
-        {entriesFlexFields.map((row, index) =>
-          householdDataRow(
-            row,
-            fieldsDict,
-            isSelectedFlexfields,
-            index,
-            countriesDict,
-            ticket,
-            isEdit,
-            handleFlexFields,
-          ),
-        )}
+        {entries.length > 0 &&
+          entries.map((row, index) =>
+            householdDataRow(
+              row,
+              fieldsDict,
+              isSelected,
+              index,
+              countriesDict,
+              ticket,
+              isEdit,
+              handleSelectBioData,
+            ),
+          )}
+        {roles.length > 0 &&
+          roles.map((role, index) => {
+            const labelId = `enhanced-table-checkbox-role-${index}`;
+            const isRoleSelected = selectedRoles.includes(role.individual_id);
+            return (
+              <TableRow
+                key={`role-row-${role.individual_id}`}
+                role="checkbox"
+                aria-checked={isRoleSelected}
+              >
+                <TableCell>
+                  {isEdit ? (
+                    <Checkbox
+                      data-cy="checkbox-household-role"
+                      onChange={() => handleSelectRole(role.individual_id)}
+                      color="primary"
+                      disabled={
+                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                      }
+                      checked={isRoleSelected}
+                      inputProps={{ 'aria-labelledby': labelId }}
+                    />
+                  ) : (
+                    isRoleSelected && (
+                      <GreenIcon data-cy="green-tick-role">
+                        <CheckCircleIcon />
+                      </GreenIcon>
+                    )
+                  )}
+                </TableCell>
+                <TableCell id={labelId} scope="row" align="left">
+                  {`Roles (${role.full_name})`}
+                </TableCell>
+                <TableCell align="left">{role.previous_value}</TableCell>
+                <TableCell align="left">{role.value}</TableCell>
+              </TableRow>
+            );
+          })}
+        {entriesFlexFields.length > 0 &&
+          entriesFlexFields.map((row, index) =>
+            householdDataRow(
+              row,
+              fieldsDict,
+              isSelectedFlexfields,
+              index,
+              countriesDict,
+              ticket,
+              isEdit,
+              handleFlexFields,
+            ),
+          )}
       </TableBody>
     </StyledTable>
   );

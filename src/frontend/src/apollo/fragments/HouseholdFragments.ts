@@ -77,6 +77,16 @@ export const householdDetailed = gql`
     countryOrigin
     country
     zipCode
+    individualsAndRoles {
+      individual {
+        id
+        unicefId
+        fullName
+      }
+
+      id
+      role
+    }
     femaleAgeGroup05Count
     femaleAgeGroup611Count
     femaleAgeGroup1217Count

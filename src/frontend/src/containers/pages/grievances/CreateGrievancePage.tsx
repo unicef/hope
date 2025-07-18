@@ -130,6 +130,7 @@ const CreateGrievancePage = (): ReactElement => {
       : null,
     documentation: [],
     individualDataUpdateFields: [{ fieldName: null, fieldValue: null }],
+    roles: [],
   };
 
   const { data: choicesData, loading: choicesLoading } =

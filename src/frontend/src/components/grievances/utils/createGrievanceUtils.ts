@@ -238,15 +238,33 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 
   const newlyAddedAccountsWithoutIds = removeIdPropertyFromObjects(
     values.individualDataUpdateFieldsAccounts,
-  )?.map(account => {
-      const { name, ...dataFields } = account;
+  )?.map((account) => {
+    const { name, ...dataFields } = account;
+    const { dynamicFields, ...restDataFields } = dataFields;
+    const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
+      if (curr.key) acc[curr.key] = curr.value;
+      return acc;
+    }, {});
+
+    return {
+      name,
+      dataFields: {
+        ...restDataFields,
+        ...mappedDynamicFields,
+      },
+    };
+  });
+
+  const accountsToEdit = values.individualDataUpdateAccountsToEdit?.map(
+    (account) => {
+      const { id, name, ...dataFields } = account;
       const { dynamicFields, ...restDataFields } = dataFields;
       const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
         if (curr.key) acc[curr.key] = curr.value;
         return acc;
       }, {});
-
       return {
+        id,
         name,
         dataFields: {
           ...restDataFields,
@@ -255,23 +273,6 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       };
     },
   );
-
-  const accountsToEdit = values.individualDataUpdateAccountsToEdit?.map(account => {
-    const { id, name, ...dataFields } = account;
-     const { dynamicFields, ...restDataFields } = dataFields;
-    const mappedDynamicFields = dynamicFields?.reduce((acc, curr) => {
-    if (curr.key) acc[curr.key] = curr.value;
-    return acc;
-        }, {});
-    return {
-      id,
-      name,
-      dataFields: {
-          ...restDataFields,
-          ...mappedDynamicFields,
-        },
-    };
-  });
 
   return {
     variables: {
@@ -319,6 +320,18 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
       prev[current.fieldName] = current.fieldValue;
       return prev;
     }, {});
+  const householdDataUpdateIssueTypeExtras = {
+    household: values.selectedHousehold?.id,
+    householdData: { ...householdData, flexFields },
+  } as {
+    household: any;
+    householdData: any;
+    roles?: any;
+  };
+  console.log('values.roles', values.roles);
+  if (Array.isArray(values.roles) && values.roles.length > 0) {
+    householdDataUpdateIssueTypeExtras.householdData.roles = values.roles;
+  }
   return {
     variables: {
       input: {
@@ -327,10 +340,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
         linkedTickets: values.selectedLinkedTickets,
         extras: {
           issueType: {
-            householdDataUpdateIssueTypeExtras: {
-              household: values.selectedHousehold?.id,
-              householdData: { ...householdData, flexFields },
-            },
+            householdDataUpdateIssueTypeExtras,
           },
         },
       },
