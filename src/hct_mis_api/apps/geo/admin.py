@@ -144,7 +144,6 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdm
                 )
             },
         ),
-        # ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
@@ -195,7 +194,6 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                 )
             },
         ),
-        ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
