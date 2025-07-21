@@ -195,10 +195,9 @@ class DeduplicateTask:
         )
 
     def collided_individuals_ids_to_exclude(
-        self, individuals: [PendingIndividual], registration_data_import: RegistrationDataImport
-    ) -> [str]:
+        self, individuals: list[PendingIndividual], registration_data_import: RegistrationDataImport
+    ) -> list[str]:
         program = registration_data_import.program
-        print("xD1")
         if not program.collision_detection_enabled or not program.collision_detector:
             return []
         households = Household.all_objects.filter(registration_data_import=registration_data_import).iterator(1000)
