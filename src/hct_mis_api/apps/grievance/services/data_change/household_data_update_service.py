@@ -161,6 +161,7 @@ class HouseholdDataUpdateService(DataChangeService):
         admin_area_title = household_data.pop("admin_area_title", {})
         flex_fields_with_additional_data = household_data.pop("flex_fields", {})
         roles_data = household_data.pop("roles", [])
+        roles_data = sorted(roles_data, key=lambda x: x["value"] != "PRIMARY")
         flex_fields = {
             field: data.get("value")
             for field, data in flex_fields_with_additional_data.items()
