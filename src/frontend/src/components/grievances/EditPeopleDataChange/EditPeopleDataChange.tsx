@@ -2,6 +2,7 @@ import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
+
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -19,9 +20,8 @@ import withErrorBoundary from '@components/core/withErrorBoundary';
 import { ExistingAccountsFieldArray } from '../EditIndividualDataChange/ExistingAccountsFieldArray';
 import { NewAccountFieldArray } from '../EditIndividualDataChange/NewAccountFieldArray';
 
-
 const BoxWithBorders = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  border-bottom: 1px solid #d8d8d8;
   padding: 15px 0;
 `;
 
@@ -159,7 +159,12 @@ function EditPeopleDataChange({
             individual={fullIndividual.individual}
             addIndividualFieldsData={editPeopleFieldsData}
           />
-          {!isEditTicket && <NewAccountFieldArray values={values} addIndividualFieldsData={editPeopleFieldsData}/>}
+          {!isEditTicket && (
+            <NewAccountFieldArray
+              values={values}
+              addIndividualFieldsData={editPeopleFieldsData}
+            />
+          )}
         </Box>
       </BoxWithBorders>
     </>
