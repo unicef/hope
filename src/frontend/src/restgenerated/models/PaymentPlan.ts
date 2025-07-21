@@ -190,6 +190,10 @@ export type PaymentPlan = {
      */
     totalEntitledQuantity?: string | null;
     /**
+     * Total Entitled Quantity USD [sys]
+     */
+    totalEntitledQuantityUsd?: string | null;
+    /**
      * Total Delivered Quantity [sys]
      */
     totalDeliveredQuantity?: string | null;

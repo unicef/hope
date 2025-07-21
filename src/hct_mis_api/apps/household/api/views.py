@@ -110,6 +110,7 @@ class HouseholdViewSet(
             super()
             .get_queryset()
             .select_related("head_of_household", "program", "admin1", "admin2")
+            .prefetch_related("program__sanction_lists")
             .order_by("created_at")
         )
 
@@ -305,7 +306,7 @@ class IndividualViewSet(
                 "household__head_of_household",
                 "program",
             )
-            .prefetch_related("accounts")
+            .prefetch_related("accounts", "program__sanction_lists")
             .order_by("created_at")
         )
 
