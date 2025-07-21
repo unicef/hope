@@ -4,12 +4,14 @@ import { FieldArray } from 'formik';
 import { AllAddIndividualFieldsQuery, IndividualQuery } from '@generated/graphql';
 import { EditAccountRow } from './EditAccountRow';
 import { ReactElement } from 'react';
+import { IndividualDetail } from '@restgenerated/models/IndividualDetail';
+import type { PaginatedFieldAttributeList } from '@restgenerated/models/PaginatedFieldAttributeList';
 
 export interface ExistingAccountsFieldArrayProps {
   setFieldValue;
   values;
-  individual: IndividualQuery['individual'];
-  addIndividualFieldsData: AllAddIndividualFieldsQuery;
+  individual: IndividualDetail
+  addIndividualFieldsData: PaginatedFieldAttributeList;
 }
 
 export function ExistingAccountsFieldArray({

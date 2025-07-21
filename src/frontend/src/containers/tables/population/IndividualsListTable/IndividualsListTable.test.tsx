@@ -59,6 +59,7 @@ describe('IndividualsListTable', () => {
           name: 'Test Program',
           slug: 'test-program',
           status: Status791Enum.ACTIVE,
+          screenBeneficiary: true,
         },
         lastRegistrationDate: '2023-01-15T10:30:00Z',
       },
@@ -70,10 +71,6 @@ describe('IndividualsListTable', () => {
     documentTypeChoices: [
       { value: 'NATIONAL_ID', label: 'National ID' },
       { value: 'PASSPORT', label: 'Passport' },
-    ],
-    residenceStatusChoices: [
-      { value: 'RESIDENT', label: 'Resident' },
-      { value: 'REFUGEE', label: 'Refugee' },
     ],
     sexChoices: [],
     flagChoices: [],
@@ -91,6 +88,8 @@ describe('IndividualsListTable', () => {
     deduplicationGoldenRecordStatusChoices: [
       { value: 'SomeValue', label: 'SomeLabel' },
     ],
+    accountTypeChoices: [],
+    accountFinancialInstitutionChoices: [],
   };
 
   const defaultFilter = {

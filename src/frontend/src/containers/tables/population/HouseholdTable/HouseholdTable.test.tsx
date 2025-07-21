@@ -48,6 +48,7 @@ describe('HouseholdTable', () => {
           name: 'Test Program',
           slug: 'test-program',
           status: Status791Enum.ACTIVE,
+          screenBeneficiary: false,
         },
       },
     ],

@@ -277,5 +277,13 @@ export type TargetPopulationDetail = {
     version?: number;
     readonly adminUrl: string;
     readonly screenBeneficiary: boolean;
+    /**
+     * Exclude households with individuals (members or collectors) on sanction list.
+     */
+    flagExcludeIfOnSanctionList?: boolean;
+    /**
+     * Exclude households with individuals (members or collectors) that have active adjudication ticket(s).
+     */
+    flagExcludeIfActiveAdjudicationTicket?: boolean;
 };
 
