@@ -12,7 +12,7 @@ from tests.extras.test_utils.factories.household import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import Document
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.one_time_scripts.mass_withdraw_sudan_hhs import mass_withdraw_sudan_hhs
 
 

@@ -14,7 +14,7 @@ from tests.extras.test_utils.factories.household import (
     create_household,
 )
 from hct_mis_api.apps.household.models import DUPLICATE
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 

@@ -29,7 +29,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
+from tests.extras.test_utils.factories.fixtures import ProgramCycleFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 

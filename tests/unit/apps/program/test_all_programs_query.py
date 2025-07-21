@@ -14,7 +14,7 @@ from tests.extras.test_utils.factories.core import (
 )
 from hct_mis_api.apps.core.models import DataCollectingType
 from tests.extras.test_utils.factories.payment import PaymentPlanFactory
-from hct_mis_api.apps.program.fixtures import (
+from tests.extras.test_utils.factories.fixtures import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
     ProgramFactory,

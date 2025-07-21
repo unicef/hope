@@ -25,7 +25,7 @@ from hct_mis_api.apps.program.api.serializers import (
     ProgramCycleUpdateSerializer,
 )
 from hct_mis_api.apps.program.api.views import ProgramCycleViewSet
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from tests.unit.api.base import HOPEApiTestCase
 

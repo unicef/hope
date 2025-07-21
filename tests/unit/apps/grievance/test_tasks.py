@@ -10,7 +10,7 @@ from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
     deduplicate_and_check_against_sanctions_list_task_single_individual,
 )
 from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from tests.extras.test_utils.factories.sanction_list import SanctionListFactory
 
 

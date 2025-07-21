@@ -17,7 +17,7 @@ from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services impo
 )
 from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index

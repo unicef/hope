@@ -65,7 +65,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_service import (
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_import_service import (
     XlsxPaymentPlanImportService,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 def valid_file() -> File:

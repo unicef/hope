@@ -21,7 +21,7 @@ from tests.extras.test_utils.factories.core import (
     PeriodicFieldDataFactory,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 

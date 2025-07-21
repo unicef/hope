@@ -23,7 +23,7 @@ from tests.extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 class TestDashboardQueries(APITestCase):

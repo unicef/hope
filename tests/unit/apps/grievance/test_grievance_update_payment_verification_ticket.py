@@ -22,7 +22,7 @@ from tests.extras.test_utils.factories.payment import (
     PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 

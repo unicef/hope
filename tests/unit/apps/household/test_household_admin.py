@@ -18,7 +18,7 @@ from tests.extras.test_utils.factories.household import (
 )
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 class TestHouseholdWithdrawFromListMixin(TestCase):

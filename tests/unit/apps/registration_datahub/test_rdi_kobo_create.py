@@ -28,7 +28,7 @@ from hct_mis_api.apps.household.models import (
 )
 from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index

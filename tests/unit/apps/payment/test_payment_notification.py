@@ -19,7 +19,7 @@ from tests.extras.test_utils.factories.payment import (
 )
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
 from hct_mis_api.apps.payment.notifications import PaymentNotification
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 class TestPaymentNotification(APITestCase):

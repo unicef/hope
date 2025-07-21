@@ -32,7 +32,7 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
     create_payment_plan_snapshot_data,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 

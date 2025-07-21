@@ -27,7 +27,7 @@ from tests.extras.test_utils.factories.household import (
     create_household,
 )
 from hct_mis_api.apps.household.models import DocumentType
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtureses import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel

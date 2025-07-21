@@ -13,7 +13,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service impo
     check_if_token_or_order_number_exists_per_program,
     generate_token_and_order_numbers,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 class TestPaymentTokenAndOrderNumbers(TestCase):
