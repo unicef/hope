@@ -322,6 +322,7 @@ class PaymentPlanSerializer(AdminUrlSerializerMixin, serializers.ModelSerializer
             "total_households_count",
             "currency",
             "total_entitled_quantity",
+            "total_entitled_quantity_usd",
             "total_delivered_quantity",
             "total_undelivered_quantity",
             "dispersion_start_date",

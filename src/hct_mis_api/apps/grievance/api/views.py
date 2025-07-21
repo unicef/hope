@@ -146,7 +146,7 @@ class GrievanceTicketViewSet(
             .get_queryset()
             .filter(self.grievance_permissions_query)
             .select_related("admin2", "assigned_to", "created_by")
-            .prefetch_related("programs", *to_prefetch)
+            .prefetch_related("programs", "programs__sanction_lists", *to_prefetch)
             .annotate(
                 total=Case(
                     When(

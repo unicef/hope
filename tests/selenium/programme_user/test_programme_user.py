@@ -15,7 +15,6 @@ def test_program() -> Program:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeAccountabilitySurveys:
-    @pytest.mark.skip(reason="Unskip after REST refactoring is complete")
     def test_smoke_programme_users(
         self,
         test_program: Program,
