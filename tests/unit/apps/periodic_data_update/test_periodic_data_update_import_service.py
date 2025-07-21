@@ -10,12 +10,12 @@ from django.test import TestCase
 
 import openpyxl
 
-from hct_mis_api.apps.core.fixtures import (
+from tests.extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
@@ -27,7 +27,7 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_s
     PeriodicDataUpdateImportService,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 

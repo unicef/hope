@@ -8,19 +8,19 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from factory import Factory
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     encode_id_base64,
 )
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.grievance.fixtures import (
+from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory
+from tests.extras.test_utils.factories.grievance import (
     GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
     PositiveFeedbackTicketWithoutExtrasFactory,
@@ -30,7 +30,7 @@ from hct_mis_api.apps.grievance.fixtures import (
     TicketIndividualDataUpdateDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,

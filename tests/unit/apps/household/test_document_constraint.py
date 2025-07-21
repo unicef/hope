@@ -2,9 +2,9 @@ from django.conf import settings
 from django.db import IntegrityError
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import DocumentTypeFactory, create_household
+from tests.extras.test_utils.factories.household import DocumentTypeFactory, create_household
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel

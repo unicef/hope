@@ -8,7 +8,7 @@ from django.utils import timezone
 
 import pytest
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.dashboard.services import (
@@ -18,9 +18,9 @@ from hct_mis_api.apps.dashboard.services import (
     DashboardGlobalDataCache,
     get_pwd_count_expression,
 )
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, create_household
+from tests.extras.test_utils.factories.household import HouseholdFactory, create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     DeliveryMechanismFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
@@ -28,7 +28,7 @@ from hct_mis_api.apps.payment.fixtures import (
     create_payment_verification_plan_with_status,
 )
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 CACHE_CONFIG = [

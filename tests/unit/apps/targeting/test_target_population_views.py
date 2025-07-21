@@ -10,15 +10,15 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (
+from tests.extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 pytestmark = pytest.mark.django_db
 

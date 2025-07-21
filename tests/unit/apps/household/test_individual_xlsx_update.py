@@ -7,9 +7,9 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,

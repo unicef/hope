@@ -10,7 +10,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from hct_mis_api.apps.account.fixtures import (
+from tests.extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
@@ -18,7 +18,7 @@ from hct_mis_api.apps.account.fixtures import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.api.views import PaymentPlanManagerialViewSet
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     ApprovalFactory,
     ApprovalProcessFactory,
     PaymentPlanFactory,

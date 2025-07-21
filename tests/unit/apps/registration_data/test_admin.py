@@ -2,14 +2,14 @@ from django.test import TestCase
 
 import pytest
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_and_individuals,
 )
@@ -21,9 +21,9 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.admin import RegistrationDataImportAdmin
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport

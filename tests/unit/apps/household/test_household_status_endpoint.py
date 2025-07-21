@@ -5,10 +5,10 @@ from django.test import TestCase
 
 from rest_framework.test import APIClient
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.household import (
     DocumentTypeFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -23,7 +23,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 

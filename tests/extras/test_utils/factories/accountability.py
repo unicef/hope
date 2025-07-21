@@ -6,7 +6,7 @@ import factory.fuzzy
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.accountability.models import (
     Feedback,
     FeedbackMessage,

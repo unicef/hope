@@ -62,7 +62,7 @@ import elasticsearch
 
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
     generate_payment_plan,
     generate_reconciled_payment_plan,

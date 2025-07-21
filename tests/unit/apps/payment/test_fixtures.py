@@ -1,10 +1,10 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.fixtures import HouseholdFactory
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.household import HouseholdFactory
+from tests.extras.test_utils.factories.payment import (
     generate_delivery_mechanisms,
     generate_payment_plan,
     generate_reconciled_payment_plan,

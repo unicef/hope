@@ -9,10 +9,10 @@ from django_webtest import WebTest
 from factory.base import FactoryMetaClass
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 
 EXCLUDED_MODELS = []

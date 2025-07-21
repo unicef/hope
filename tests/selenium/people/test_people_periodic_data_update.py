@@ -5,18 +5,18 @@ from time import sleep
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.periodic_data_update.fixtures import (
+from tests.extras.test_utils.factories.periodic_data_update import (
     PeriodicDataUpdateTemplateFactory,
     PeriodicDataUpdateUploadFactory,
 )
@@ -28,7 +28,7 @@ from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.people.people import People

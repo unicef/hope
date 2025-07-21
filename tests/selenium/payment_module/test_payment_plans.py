@@ -12,10 +12,10 @@ from selenium.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.household import create_household
+from tests.extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
@@ -26,13 +26,13 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     PaymentPlan,
 )
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaRuleFactory
-from src.hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from src.hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from tests.selenium.page_object.payment_module.payment_module import PaymentModule

@@ -6,7 +6,7 @@ from django.utils import timezone
 
 import pytz
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.models import (

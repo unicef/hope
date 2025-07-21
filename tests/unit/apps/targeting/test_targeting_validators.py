@@ -1,9 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.fixtures import create_household
+from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program

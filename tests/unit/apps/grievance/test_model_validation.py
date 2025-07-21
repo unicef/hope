@@ -2,12 +2,12 @@ from django.core.exceptions import ValidationError
 from django.http import QueryDict
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.payment.admin import FspXlsxTemplatePerDeliveryMechanismForm
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     generate_delivery_mechanisms,

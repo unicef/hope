@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TransactionTestCase
 
-from hct_mis_api.apps.core.fixtures import (
+from tests.extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     create_afghanistan,
 )

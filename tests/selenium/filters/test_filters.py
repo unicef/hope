@@ -4,13 +4,13 @@ import pytest
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
+from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.household import create_household
+from tests.extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,
@@ -20,7 +20,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport

@@ -6,11 +6,11 @@ from django.utils import timezone
 from parameterized import parameterized
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,

@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from hct_mis_api.api.models import APIToken, Grant
-from hct_mis_api.apps.account.fixtures import (
+from tests.extras.test_utils.factories.account import (
     BusinessAreaFactory,
     RoleFactory,
     UserFactory,

@@ -5,12 +5,12 @@ from django.db import transaction
 import factory
 import pytest
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.household.fixtures import create_household
+from tests.extras.test_utils.factories.account import BusinessAreaFactory
+from tests.extras.test_utils.factories.geo import AreaFactory
+from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 class ModifiedPaymentFactory(PaymentFactory):

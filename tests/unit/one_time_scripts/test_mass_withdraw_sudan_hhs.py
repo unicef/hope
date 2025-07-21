@@ -1,13 +1,13 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.grievance import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketComplaintDetails,
     TicketIndividualDataUpdateDetails,
 )
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     create_household_and_individuals,
 )

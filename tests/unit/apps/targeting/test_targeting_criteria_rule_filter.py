@@ -9,14 +9,14 @@ from django.utils import timezone
 from freezegun import freeze_time
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import (
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
 from hct_mis_api.apps.core.models import PeriodicFieldData
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.household import (
     create_household,
     create_household_and_individuals,
 )
@@ -26,7 +26,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     AccountFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,

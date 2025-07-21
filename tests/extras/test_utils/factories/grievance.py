@@ -8,7 +8,7 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
@@ -29,8 +29,8 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentVerificationFactory
+from tests.extras.test_utils.factories.household import create_household
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentVerificationFactory
 from hct_mis_api.apps.payment.models import PaymentVerification
 
 

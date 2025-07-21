@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport

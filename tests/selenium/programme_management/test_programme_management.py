@@ -8,15 +8,15 @@ from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 
-from hct_mis_api.apps.account.fixtures import RoleFactory
+from tests.extras.test_utils.factories.account import RoleFactory
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     BusinessAreaPartnerThrough,
     DataCollectingType,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.helpers.date_time_format import FormatTime

@@ -6,13 +6,13 @@ from django.test import TestCase, override_settings
 
 from constance.test import override_config
 
-from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory, UserRoleFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.account import RoleFactory, UserFactory, UserRoleFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
+from tests.extras.test_utils.factories.household import EntitlementCardFactory, create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     PaymentFactory,
     PaymentPlanFactory,
     PaymentVerificationFactory,

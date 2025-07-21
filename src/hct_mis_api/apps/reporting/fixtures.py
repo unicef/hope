@@ -6,7 +6,7 @@ from factory import fuzzy
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.reporting.models import DashboardReport, Report
 

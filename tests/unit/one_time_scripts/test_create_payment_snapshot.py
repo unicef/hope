@@ -2,10 +2,10 @@ from django.test import TestCase
 
 from freezegun import freeze_time
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     AccountFactory,
     PaymentFactory,
     PaymentPlanFactory,

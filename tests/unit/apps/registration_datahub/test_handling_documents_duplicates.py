@@ -14,7 +14,7 @@ from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.household import (
     DocumentTypeFactory,
     create_household_and_individuals,
 )
@@ -27,7 +27,7 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,

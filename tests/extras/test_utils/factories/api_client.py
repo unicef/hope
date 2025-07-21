@@ -3,7 +3,7 @@ from typing import Callable, Optional
 import pytest
 from rest_framework.test import APIClient
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 
 
 @pytest.fixture()

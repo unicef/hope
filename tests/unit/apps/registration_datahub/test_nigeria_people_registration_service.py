@@ -5,7 +5,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.models import Area, AreaType
@@ -18,9 +18,9 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
+from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
 from hct_mis_api.apps.payment.models import PendingAccount
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,

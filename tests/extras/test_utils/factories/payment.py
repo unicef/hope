@@ -12,14 +12,14 @@ import factory
 from factory.django import DjangoModelFactory
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.geo.fixtures import CountryFactory
+from tests.extras.test_utils.factories.geo import CountryFactory
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.household import (
     EntitlementCardFactory,
     HouseholdCollectionFactory,
     HouseholdFactory,
@@ -49,7 +49,7 @@ from hct_mis_api.apps.payment.models import (
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
-from hct_mis_api.apps.program.fixtures import (
+from tests.extras.test_utils.factories.fixtures import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
 )

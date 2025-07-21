@@ -16,12 +16,12 @@ from django.utils import timezone
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.currencies import USDC
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
+from tests.extras.test_utils.factories.household import (
     DocumentFactory,
     HouseholdFactory,
     IndividualFactory,
@@ -33,7 +33,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     AccountFactory,
     ApprovalFactory,
     ApprovalProcessFactory,
@@ -59,7 +59,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
+from tests.extras.test_utils.factories.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory

@@ -11,7 +11,7 @@ import pytest
 from constance.test import override_config
 from openpyxl import Workbook
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 

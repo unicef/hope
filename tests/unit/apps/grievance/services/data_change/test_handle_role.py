@@ -1,8 +1,8 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.grievance.services.data_change.utils import handle_role
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_NO_ROLE,

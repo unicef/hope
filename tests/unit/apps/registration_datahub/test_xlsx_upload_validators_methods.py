@@ -9,15 +9,15 @@ import openpyxl
 from parameterized import parameterized
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import (
+from tests.extras.test_utils.factories.core import (
     create_afghanistan,
     create_pdu_flexible_attribute,
 )
 from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.core.utils import SheetImageLoader
-from hct_mis_api.apps.geo.fixtures import CountryFactory
-from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
-from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
+from tests.extras.test_utils.factories.geo import CountryFactory
+from tests.extras.test_utils.factories.payment import generate_delivery_mechanisms
+from tests.extras.test_utils.factories.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 

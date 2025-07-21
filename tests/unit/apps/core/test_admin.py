@@ -9,7 +9,7 @@ from hct_mis_api.apps.core.admin import (
     AcceptanceProcessThresholdFormset,
     DataCollectingTypeForm,
 )
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 
 

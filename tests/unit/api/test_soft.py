@@ -9,7 +9,7 @@ from rest_framework import status
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
@@ -20,7 +20,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.unit.api.base import HOPEApiTestCase

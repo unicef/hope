@@ -2,10 +2,10 @@ from django.urls import reverse
 
 from django_webtest import WebTest
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.household import HouseholdFactory, IndividualFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 

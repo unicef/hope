@@ -15,7 +15,7 @@ from django.utils import timezone
 
 import requests
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.admin import XLSXKoboTemplateAdmin
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import XLSXKoboTemplate

@@ -11,14 +11,14 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
 
-from hct_mis_api.apps.account.fixtures import (
+from tests.extras.test_utils.factories.account import (
     BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.serializers import (
     ProgramCycleCreateSerializer,

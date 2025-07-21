@@ -9,11 +9,11 @@ from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.household import create_household
+from tests.extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -25,7 +25,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.grievance.details_grievance_page import (

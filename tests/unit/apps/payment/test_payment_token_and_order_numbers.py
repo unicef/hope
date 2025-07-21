@@ -2,11 +2,11 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import create_household
+from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (

@@ -7,8 +7,8 @@ from django.test import TestCase
 
 from celery.exceptions import Retry
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -18,7 +18,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_payment_plan_task,
     send_payment_plan_payment_list_xlsx_per_fsp_password,
 )
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
@@ -31,7 +31,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.utils import generate_cache_key
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 

@@ -1,9 +1,9 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
+from tests.extras.test_utils.factories.account import PartnerFactory, RoleFactory
+from tests.extras.test_utils.factories.core import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 

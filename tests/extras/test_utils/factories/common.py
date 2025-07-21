@@ -3,7 +3,7 @@ from typing import Callable
 
 import pytest
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory
 
 
 @pytest.fixture()

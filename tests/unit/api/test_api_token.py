@@ -11,8 +11,8 @@ from constance.test import override_config
 
 from hct_mis_api.api.admin import TOKEN_INFO_EMAIL, APITokenAdmin
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from tests.unit.api.factories import APITokenFactory
 
 

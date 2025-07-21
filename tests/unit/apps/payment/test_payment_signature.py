@@ -8,19 +8,19 @@ from django.utils import timezone
 from freezegun import freeze_time
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     AccountFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,

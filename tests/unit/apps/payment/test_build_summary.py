@@ -1,9 +1,9 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     PaymentPlanFactory,
     PaymentVerificationSummaryFactory,
     create_payment_verification_plan_with_status,
@@ -13,7 +13,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
     build_summary,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 class TestBuildSummary(TestCase):

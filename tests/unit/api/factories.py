@@ -4,7 +4,7 @@ from factory import SubFactory
 from factory.django import DjangoModelFactory
 
 from hct_mis_api.api.models import APIToken, Grant
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 
 
 class APITokenFactory(DjangoModelFactory):

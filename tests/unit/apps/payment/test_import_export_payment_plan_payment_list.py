@@ -13,10 +13,10 @@ from django.urls import reverse
 
 from graphql import GraphQLError
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     DataCollectingType,
@@ -24,14 +24,14 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
 )
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
+from tests.extras.test_utils.factories.household import DocumentFactory, create_household
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Document,
     Household,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,

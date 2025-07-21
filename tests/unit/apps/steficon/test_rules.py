@@ -3,8 +3,8 @@ from unittest.mock import Mock
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory, UserFactory
+from tests.extras.test_utils.factories.household import HouseholdFactory
 from hct_mis_api.apps.steficon.admin import RuleAdmin, RuleCommitAdmin
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.config import settings

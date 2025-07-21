@@ -6,9 +6,9 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
     RegistrationDataImportDatahub,

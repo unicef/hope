@@ -4,7 +4,7 @@ from unittest.mock import Mock, call, patch
 
 import pytest
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from tests.extras.test_utils.factories.account import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import (
     generate_dash_report_task,

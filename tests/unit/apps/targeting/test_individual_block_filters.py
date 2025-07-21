@@ -1,14 +1,14 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.fixtures import (
+from tests.extras.test_utils.factories.account import UserFactory
+from tests.extras.test_utils.factories.core import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
     create_afghanistan,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     FEMALE,
     MALE,
@@ -16,13 +16,13 @@ from hct_mis_api.apps.household.models import (
     Household,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     AccountFactory,
     PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import AccountType
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,

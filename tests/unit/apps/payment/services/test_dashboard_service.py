@@ -3,13 +3,13 @@ from django.utils import timezone
 import pytest
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from tests.extras.test_utils.factories.account import PartnerFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.geo import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import create_household
+from tests.extras.test_utils.factories.household import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import (
+from tests.extras.test_utils.factories.payment import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,

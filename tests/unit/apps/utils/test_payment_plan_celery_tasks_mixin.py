@@ -6,13 +6,13 @@ from django.urls import reverse
 from parameterized import parameterized
 from rest_framework import status
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from tests.extras.test_utils.factories.account import UserFactory
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.payment import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.utils import generate_cache_key
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):

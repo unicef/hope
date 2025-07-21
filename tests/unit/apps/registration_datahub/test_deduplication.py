@@ -5,7 +5,7 @@ import pytest
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.documents import get_individual_doc
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
     FEMALE,
@@ -18,7 +18,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     PendingIndividual,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import (
     DUPLICATE_IN_BATCH,

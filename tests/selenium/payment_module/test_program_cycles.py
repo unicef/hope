@@ -5,10 +5,10 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from tests.extras.test_utils.factories.core import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.payment import PaymentPlanFactory
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
 from tests.selenium.page_object.payment_module.program_cycle_details import (

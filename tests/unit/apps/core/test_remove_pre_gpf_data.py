@@ -4,8 +4,8 @@ from unittest import mock
 from django.core.management import call_command
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.household.fixtures import (
+from tests.extras.test_utils.factories.account import BusinessAreaFactory
+from tests.extras.test_utils.factories.household import (
     HouseholdFactory,
     IndividualFactory,
     PendingHouseholdFactory,

@@ -1,9 +1,9 @@
 from django.core.management import call_command
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from tests.extras.test_utils.factories.account import PartnerFactory, UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from tests.extras.test_utils.factories.core import create_afghanistan
+from tests.extras.test_utils.factories.fixtures import ProgramFactory
 
 
 class TestIndividualsFlexFieldsAttributes(APITestCase):
