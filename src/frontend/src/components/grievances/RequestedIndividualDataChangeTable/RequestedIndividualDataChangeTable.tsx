@@ -10,7 +10,6 @@ import { IdentitiesToEditTable } from './IdentitiesToEditTable';
 import { IdentitiesToRemoveTable } from './IdentitiesToRemoveTable';
 import { AccountToEditTable } from './AccountToEditTable';
 import { AccountTable } from './AccountTable';
-
 import { PaymentChannelsTable } from './PaymentChannelsTable';
 import { PaymentChannelsToEditTable } from './PaymentChannelsToEditTable';
 import { PaymentChannelsToRemoveTable } from './PaymentChannelsToRemoveTable';
