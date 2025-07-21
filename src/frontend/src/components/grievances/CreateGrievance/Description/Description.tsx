@@ -249,7 +249,6 @@ function Description({
               name="language"
               multiline
               fullWidth
-              required
               variant="outlined"
               label={t('Languages Spoken')}
               component={FormikTextField}

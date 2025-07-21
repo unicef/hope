@@ -141,7 +141,7 @@ const EditFeedbackPage = (): ReactElement => {
     comments: values.comments,
     admin2: values.admin2,
     area: values.area,
-    language: values.language,
+    language: values.language || '',
     consent: values.consent,
     program: values.program,
   });
@@ -329,7 +329,6 @@ const EditFeedbackPage = (): ReactElement => {
                           variant="outlined"
                           label={t('Languages Spoken')}
                           component={FormikTextField}
-                          required
                         />
                       </Grid>
                       <Grid size={{ xs: 3 }}>
