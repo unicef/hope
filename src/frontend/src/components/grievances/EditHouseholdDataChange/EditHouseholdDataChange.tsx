@@ -69,9 +69,7 @@ function EditHouseholdDataChange({
   useEffect(() => {
     if (
       fullHousehold?.household?.individualsAndRoles &&
-      (!values.roles ||
-        values.roles.length !==
-          fullHousehold.household.individualsAndRoles.length)
+      (!values.roles || values.roles.length === 0)
     ) {
       setFieldValue(
         'roles',
@@ -157,11 +155,36 @@ function EditHouseholdDataChange({
           <Grid size={{ xs: 4 }}>
             <strong>{t('New Role')}</strong>
           </Grid>
-          {fullHousehold.household.individualsAndRoles?.map(
-            (roleItem, index) => (
-              <React.Fragment key={roleItem.id}>
-                <Grid size={{ xs: 4 }}>{roleItem.individual.fullName}</Grid>
-                <Grid size={{ xs: 4 }}>{roleItem.role}</Grid>
+          {/* Render all roles, including added ones */}
+          {(values.roles || []).map((roleItem, index) => {
+            // Find individual details from household
+            const individualObj =
+              fullHousehold.household.individuals.edges.find(
+                (ind) => ind.node.id === roleItem.individual,
+              );
+            const currentRoleObj =
+              fullHousehold.household.individualsAndRoles.find(
+                (r) => r.individual.id === roleItem.individual,
+              );
+            return (
+              <React.Fragment key={roleItem.individual + '-' + index}>
+                <Grid size={{ xs: 4 }}>
+                  <Field
+                    name={`roles.${index}.individual`}
+                    component={FormikSelectField}
+                    label={t('Individual')}
+                    choices={fullHousehold.household.individuals.edges.map(
+                      (ind) => ({
+                        value: ind.node.id,
+                        label: ind.node.fullName,
+                      }),
+                    )}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid size={{ xs: 4 }}>
+                  {currentRoleObj ? currentRoleObj.role : 'None'}
+                </Grid>
                 <Grid size={{ xs: 4 }}>
                   <Field
                     name={`roles.${index}.newRole`}
@@ -172,8 +195,37 @@ function EditHouseholdDataChange({
                   />
                 </Grid>
               </React.Fragment>
-            ),
-          )}
+            );
+          })}
+          {/* Add a New Role button */}
+          <Grid size={{ xs: 12 }} style={{ marginTop: 16 }}>
+            <Button
+              color="primary"
+              startIcon={<AddCircleOutline />}
+              onClick={() => {
+                // Find individuals not already assigned in roles
+                const usedIds = (values.roles || []).map((r) => r.individual);
+                const availableIndividuals =
+                  fullHousehold.household.individuals.edges
+                    .map((edge) => edge.node)
+                    .filter((ind) => !usedIds.includes(ind.id));
+                const defaultIndividual =
+                  availableIndividuals.length > 0
+                    ? availableIndividuals[0].id
+                    : '';
+                setFieldValue('roles', [
+                  ...(values.roles || []),
+                  {
+                    individual: defaultIndividual,
+                    newRole: '',
+                  },
+                ]);
+              }}
+              data-cy="button-add-new-role"
+            >
+              {t('Add a New Role')}
+            </Button>
+          </Grid>
         </Grid>
       </>
     )
