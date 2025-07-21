@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect } from 'react';
 import { Button, Grid2 as Grid, Typography } from '@mui/material';
 import { Field, FieldArray } from 'formik';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutline, Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -10,10 +10,7 @@ import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 import { useProgramContext } from 'src/programContext';
 import withErrorBoundary from '@components/core/withErrorBoundary';
-import { HouseholdDetail } from '@restgenerated/models/HouseholdDetail';
-import { RestService } from '@restgenerated/services/RestService';
-import { useQuery } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
+import { DarkGrey } from '@components/grievances/LookUps/LookUpStyles';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -152,9 +149,10 @@ function EditHouseholdDataChange({
           <Grid size={{ xs: 4 }}>
             <strong>{t('Current Role')}</strong>
           </Grid>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={{ xs: 3 }}>
             <strong>{t('New Role')}</strong>
           </Grid>
+          <Grid size={{ xs: 1 }}></Grid>
           {/* Render all roles, including added ones */}
           {(values.roles || []).map((roleItem, index) => {
             // Find individual details from household
@@ -166,6 +164,13 @@ function EditHouseholdDataChange({
               fullHousehold.household.individualsAndRoles.find(
                 (r) => r.individual.id === roleItem.individual,
               );
+            // Filter out individuals already assigned in other rows
+            const usedIds = (values.roles || []).map((r, i) =>
+              i !== index ? r.individual : null,
+            );
+            const availableChoices = fullHousehold.household.individuals.edges
+              .map((ind) => ({ value: ind.node.id, label: ind.node.fullName }))
+              .filter((choice) => !usedIds.includes(choice.value));
             return (
               <React.Fragment key={roleItem.individual + '-' + index}>
                 <Grid size={{ xs: 4 }}>
@@ -173,19 +178,14 @@ function EditHouseholdDataChange({
                     name={`roles.${index}.individual`}
                     component={FormikSelectField}
                     label={t('Individual')}
-                    choices={fullHousehold.household.individuals.edges.map(
-                      (ind) => ({
-                        value: ind.node.id,
-                        label: ind.node.fullName,
-                      }),
-                    )}
+                    choices={availableChoices}
                     fullWidth
                   />
                 </Grid>
                 <Grid size={{ xs: 4 }}>
                   {currentRoleObj ? currentRoleObj.role : 'None'}
                 </Grid>
-                <Grid size={{ xs: 4 }}>
+                <Grid size={{ xs: 3 }}>
                   <Field
                     name={`roles.${index}.newRole`}
                     component={FormikSelectField}
@@ -193,6 +193,21 @@ function EditHouseholdDataChange({
                     choices={roleChoices}
                     fullWidth
                   />
+                </Grid>
+                <Grid size={{ xs: 1 }}>
+                  <Button
+                    color="secondary"
+                    onClick={() => {
+                      const updatedRoles = [...(values.roles || [])];
+                      updatedRoles.splice(index, 1);
+                      setFieldValue('roles', updatedRoles);
+                    }}
+                    data-cy={`button-remove-role-${index}`}
+                  >
+                    <DarkGrey>
+                      <Delete />
+                    </DarkGrey>
+                  </Button>
                 </Grid>
               </React.Fragment>
             );
