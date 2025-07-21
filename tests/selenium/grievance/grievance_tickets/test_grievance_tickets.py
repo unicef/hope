@@ -26,7 +26,7 @@ from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPla
 from hct_mis_api.apps.payment.models import Payment
 from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from tests.selenium.drawer.test_drawer import get_program_with_dct_type_and_name
 from tests.selenium.filters.test_filters import create_grievance
 from tests.selenium.helpers.date_time_format import FormatTime

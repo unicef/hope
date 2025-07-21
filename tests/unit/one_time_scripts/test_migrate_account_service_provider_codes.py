@@ -14,7 +14,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialInstitutionMapping,
     FinancialServiceProvider,
 )
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.one_time_scripts.migrate_account_service_provider_codes import (
     migrate_account_service_provider_codes,
 )

@@ -29,7 +29,7 @@ from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_s
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 
 def add_pdu_data_to_xlsx(

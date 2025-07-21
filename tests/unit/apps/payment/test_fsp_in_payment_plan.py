@@ -21,7 +21,7 @@ from tests.extras.test_utils.factories.payment import (
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanism, Payment, PaymentPlan
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 
 def base_setup(cls: Any) -> None:

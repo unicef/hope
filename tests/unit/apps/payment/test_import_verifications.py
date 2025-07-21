@@ -37,7 +37,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 
 class TestXlsxVerificationImport(APITestCase):

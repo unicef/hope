@@ -11,7 +11,7 @@ from tests.extras.test_utils.factories.household import (
 from hct_mis_api.apps.household.models import FEMALE, MARRIED, Household
 from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from tests.selenium.page_object.programme_population.individuals import Individuals
 from tests.selenium.page_object.programme_population.individuals_details import (
     IndividualsDetails,

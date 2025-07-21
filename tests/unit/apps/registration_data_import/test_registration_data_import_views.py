@@ -17,7 +17,7 @@ from tests.extras.test_utils.factories.account import (
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 pytestmark = pytest.mark.django_db

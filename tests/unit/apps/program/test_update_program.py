@@ -31,7 +31,7 @@ from tests.extras.test_utils.factories.household import (
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 
 class TestUpdateProgram(APITestCase):

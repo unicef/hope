@@ -32,7 +32,7 @@ from hct_mis_api.apps.program.utils import (
     enroll_households_to_program,
     generate_rdi_unique_name,
 )
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 

@@ -30,7 +30,7 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from tests.selenium.page_object.people.people import People
 from tests.selenium.page_object.people.people_details import PeopleDetails
 from tests.selenium.page_object.programme_population.individuals import Individuals

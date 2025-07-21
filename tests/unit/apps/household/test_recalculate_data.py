@@ -25,7 +25,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 
 class TestRecalculateData(TestCase):

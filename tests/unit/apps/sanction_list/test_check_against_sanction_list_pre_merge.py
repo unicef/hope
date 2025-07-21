@@ -21,7 +21,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.sanction_list.models import SanctionList
 from hct_mis_api.apps.sanction_list.strategies.un import UNSanctionList
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (

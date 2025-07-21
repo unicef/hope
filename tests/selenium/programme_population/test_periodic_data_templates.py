@@ -18,7 +18,7 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 )
 from tests.extras.test_utils.factories.program import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.selenium.page_object.programme_population.individuals import Individuals
 from tests.selenium.page_object.programme_population.periodic_data_update_templates import (

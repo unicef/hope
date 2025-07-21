@@ -14,7 +14,7 @@ from hct_mis_api.apps.grievance.management.commands.fix_grievance_tickets import
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from tests.extras.test_utils.factories.household import create_household_and_individuals
 from hct_mis_api.apps.household.models import DISABLED, HEAD, MALE, NOT_DISABLED
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 
 class TestFixingGrievanceTickets(APITestCase):

@@ -11,7 +11,7 @@ from tests.extras.test_utils.factories.core import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64_required
 from tests.extras.test_utils.factories.household import create_household
 from tests.extras.test_utils.factories.program import ProgramFactory
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 
 class TestFilterHouseholdsByProgram(APITestCase):

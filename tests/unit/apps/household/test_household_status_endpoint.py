@@ -25,7 +25,7 @@ from hct_mis_api.apps.household.models import (
 )
 from tests.extras.test_utils.factories.payment import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 
 
 # used for ease of assertions, so it imitates serializer's behaviour

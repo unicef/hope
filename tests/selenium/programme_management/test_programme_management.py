@@ -18,7 +18,7 @@ from hct_mis_api.apps.core.models import (
 )
 from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.extras.test_utils.factories.registration_data import RegistrationDataImportFactory
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,

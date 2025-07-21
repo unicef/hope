@@ -16,7 +16,7 @@ from tests.extras.test_utils.factories.household import (
 from hct_mis_api.apps.household.models import Household, Individual, IndividualIdentity
 from tests.extras.test_utils.factories.program import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import (
+from tests.extras.test_utils.factories.registration_data import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
